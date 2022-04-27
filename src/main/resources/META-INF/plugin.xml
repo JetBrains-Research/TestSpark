@@ -9,6 +9,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyProjectService"/>
+        <toolWindow id="TestGenie" secondary="false"  anchor="right"
+                    factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/> <!-- icon="AllIcons.General.Modified"-->
     </extensions>
 
     <applicationListeners>
