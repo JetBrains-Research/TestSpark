@@ -6,39 +6,44 @@
 
     <depends>com.intellij.modules.platform</depends>
 
+    <description>
+        <![CDATA[
+            <p>A plugin that uses EvoSuite to generate tests. Developed by TU Delft students.
+        ]]>
+    </description>
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyProjectService"/>
         <toolWindow id="TestGenie" secondary="true" anchor="right"
-                    factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/> <!-- icon="AllIcons.General.Modified"-->
+                    factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/>
     </extensions>
 
     <actions>
-        <!-- TestGenie actions in the `Code` tab -->
+        <!-- A group of TestGenie actions in the `Code` tab -->
         <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true">
             <add-to-group group-id="CodeMenu" anchor="after" relative-to-action="Generate"/>
+
+           <!-- Actions in the corresponding this group -->
             <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsAction"
                     id="TestGenie.TestGenieActions.GenerateTestsAction"
                     text="Generate Tests"
                     description="Press to generate tests using the best test generating software TestGenie">
                 <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="T" keymap="$default"/>
             </action>
+            <!-- More actions... -->
         </group>
 
-        <group id="TestGenie.Actions.TestGenerateTestsForClassActionGroup"
-               text="Generate Tests for Class"
-               description="Generate tests for all methods in the selected class">
+        <!-- TestGenie action for generating tests for a class -->
+        <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsForClassAction"
+                id="TestGenie.Actions.GenerateTestsForClassAction"
+                text=">Generate Tests for Class"
+                description="Generate tests for all methods in the selected class">
+            <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="C" keymap="$default"/>
+            <add-to-group group-id="EditorPopupMenu1.FindRefactor" anchor="after" relative-to-action="RefactoringMenu"/>
+        </action>
+        <!-- Actions for generating tests for a method, lines... -->
 
-            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="RefactoringMenu"/>
-            <add-to-group group-id="EditorToggleActions" anchor="last"/>
-
-            <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsForClassAction"
-                    id="TestGenie.Actions.GenerateTestsForClassAction"
-                    text="Generate Tests for Class"
-                    description="Generate tests for all methods in the selected class">
-                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="C" keymap="$default"/>
-            </action>
-        </group>
     </actions>
 
     <applicationListeners>
