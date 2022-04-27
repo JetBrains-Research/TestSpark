@@ -8,10 +8,9 @@ import com.intellij.ui.content.ContentFactory
 
 class TestGenieToolWindowFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-
-        val testGenieToolWindow : TestGenieToolWindow = TestGenieToolWindow(toolWindow)
+        val testGeniePanelWrapper = TestGeniePanelWrapper()
         val contentFactory : ContentFactory = ContentFactory.SERVICE.getInstance()
-        val content : Content = contentFactory.createContent(testGenieToolWindow.getContent(), "Amogus", false)
+        val content : Content = contentFactory.createContent(testGeniePanelWrapper.getContent(), "TestGenie", false)
         toolWindow.contentManager.addContent(content)
     }
 }
