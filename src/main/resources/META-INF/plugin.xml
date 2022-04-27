@@ -14,7 +14,7 @@
     </extensions>
 
     <actions>
-        <group id="TestGenie.TestGenieActions" text="TestGenie" description="An action related to TestGenie" popup="true">
+        <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true">
             <add-to-group group-id="CodeMenu" anchor="after" relative-to-action="Generate"/>
             <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsAction"
                     id="TestGenie.TestGenieActions.GenerateTestsAction"
@@ -23,7 +23,6 @@
                 <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="T" keymap="$default"/>
             </action>
         </group>
-        
     </actions>
 
     <applicationListeners>
