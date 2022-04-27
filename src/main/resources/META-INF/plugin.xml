@@ -23,6 +23,21 @@
                 <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="T" keymap="$default"/>
             </action>
         </group>
+
+        <group id="TestGenie.Actions.TestGenerateTestsForClassActionGroup"
+               text="Generate Tests for Class"
+               description="Generate tests for all methods in the selected class">
+
+            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="RefactoringMenu"/>
+            <add-to-group group-id="EditorToggleActions" anchor="last"/>
+
+            <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsForClassAction"
+                    id="TestGenie.Actions.GenerateTestsForClassAction"
+                    text="Generate Tests for Class"
+                    description="Generate tests for all methods in the selected class">
+                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="C" keymap="$default"/>
+            </action>
+        </group>
     </actions>
 
     <applicationListeners>
