@@ -24,6 +24,7 @@ class TestGeniePanelWrapper : DialogWrapper(true) {
     private val globalTimeOutTextField : JTextField = JTextField()
     private val coverageTextField : JTextField = JTextField()
     private val toolWindowPanel : JPanel = JPanel(GridBagLayout())
+
     init {
         init();
         maxSizeTextField.text = "42";
@@ -54,11 +55,11 @@ class TestGeniePanelWrapper : DialogWrapper(true) {
         toolWindowPanel.preferredSize = Dimension(400, 200);
 
         // Set the elements into the grid. 20% of the horizontal space is the createLabel, 80% is the actual text field (vertically they have equal weights)
-        toolWindowPanel.add(createLabel("mode"), gb.nextLine().next().weightx(0.2))
+        toolWindowPanel.add(createLabel("max size"), gb.nextLine().next().weightx(0.2))
         toolWindowPanel.add(maxSizeTextField, gb.next().weightx(0.8))
-        toolWindowPanel.add(createLabel("username"), gb.nextLine().next().weightx(0.2))
+        toolWindowPanel.add(createLabel("global timeout"), gb.nextLine().next().weightx(0.2))
         toolWindowPanel.add(globalTimeOutTextField, gb.next().weightx(0.8))
-        toolWindowPanel.add(createLabel("password"), gb.nextLine().next().weightx(0.2))
+        toolWindowPanel.add(createLabel("coverage"), gb.nextLine().next().weightx(0.2))
         toolWindowPanel.add(coverageTextField, gb.next().weightx(0.8))
 
         return toolWindowPanel

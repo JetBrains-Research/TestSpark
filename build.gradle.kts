@@ -24,6 +24,11 @@ repositories {
     mavenCentral()
 }
 
+// include evo suite jar
+dependencies {
+    implementation(files("evo/evosuite.jar"))
+}
+
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
     pluginName.set(properties("pluginName"))
