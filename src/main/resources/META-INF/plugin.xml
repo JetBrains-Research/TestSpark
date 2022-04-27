@@ -9,9 +9,22 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyProjectService"/>
-        <toolWindow id="TestGenie" secondary="false"  anchor="right"
+        <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/> <!-- icon="AllIcons.General.Modified"-->
     </extensions>
+
+    <actions>
+        <group id="TestGenie.TestGenieActions" text="TestGenie" description="An action related to TestGenie" popup="true">
+            <add-to-group group-id="CodeMenu" anchor="after" relative-to-action="Generate"/>
+            <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsAction"
+                    id="TestGenie.TestGenieActions.GenerateTestsAction"
+                    text="Generate Tests"
+                    description="Press to generate tests using the best test generating software TestGenie">
+                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="T" keymap="$default"/>
+            </action>
+        </group>
+        
+    </actions>
 
     <applicationListeners>
         <listener class="com.github.mitchellolsthoorn.testgenie.listeners.MyProjectManagerListener"
