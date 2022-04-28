@@ -5,6 +5,8 @@
     <vendor>mitchellolsthoorn</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <!-- add java functionality. See https://blog.jetbrains.com/platform/2019/06/java-functionality-extracted-as-a-plugin/ for more information -->
+    <depends>com.intellij.modules.java</depends>
 
     <description>
         <![CDATA[
