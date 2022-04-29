@@ -9,11 +9,13 @@ import com.intellij.util.ui.FormBuilder
 import com.intellij.ui.components.JBCheckBox
 
 import com.intellij.ui.components.JBTextField
+import javax.swing.JCheckBox
+import javax.swing.JTextField
 
 class TestGenieAppSettingsComponent {
     var panel: JPanel? = null
-    private val myUserNameText = JBTextField()
-    private val myIdeaUserStatus = JBCheckBox("Is amogus bad? ")
+    var myUserNameText = JTextField()
+    var myIdeaUserStatus = JCheckBox("Is amogus bad? ")
 
     init {
         panel = FormBuilder.createFormBuilder()
