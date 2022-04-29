@@ -12,8 +12,8 @@ import com.intellij.ui.components.JBTextField
 
 class TestGenieAppSettingsComponent {
     var panel: JPanel? = null
-    val myUserNameText = JBTextField()
-    val myIdeaUserStatus = JBCheckBox("Is amogus bad? ")
+    private val myUserNameText = JBTextField()
+    private val myIdeaUserStatus = JBCheckBox("Is amogus bad? ")
 
     init {
         panel = FormBuilder.createFormBuilder()
@@ -23,14 +23,15 @@ class TestGenieAppSettingsComponent {
             .panel
     }
 
-//    var userNameText: String?
-//        get() = myUserNameText.text
-//        set(newText) {
-//            myUserNameText.text = newText
-//        }
-//    var ideaUserStatus: Boolean
-//        get() = myIdeaUserStatus.isSelected
-//        set(newStatus) {
-//            myIdeaUserStatus.isSelected = newStatus
-//        }
+    var userNameText: String?
+        get() = myUserNameText.text
+        set(newText) {
+            myUserNameText.text = newText
+        }
+
+    var ideaUserStatus: Boolean
+        get() = myIdeaUserStatus.isSelected
+        set(newStatus) {
+            myIdeaUserStatus.isSelected = newStatus
+        }
 }
