@@ -19,6 +19,13 @@
         <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyProjectService"/>
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/>
+        <applicationService
+                serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsService"/>
+        <applicationConfigurable
+                parentId="tools"
+                instance="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
+                id="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
+                displayName="AMOGUS"/>
     </extensions>
 
     <actions>
