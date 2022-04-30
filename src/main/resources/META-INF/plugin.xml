@@ -5,12 +5,16 @@
     <vendor>mitchellolsthoorn</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyProjectService"/>
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/> <!-- icon="AllIcons.General.Modified"-->
+
+        <projectConfigurable instance="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteConfigurable"
+                             id="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteConfigurable"/>
+        <projectService
+                serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteRuntimeConfiguration"/>
     </extensions>
 
     <actions>
@@ -24,9 +28,4 @@
             </action>
         </group>
     </actions>
-
-    <applicationListeners>
-        <listener class="com.github.mitchellolsthoorn.testgenie.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
 </idea-plugin>
