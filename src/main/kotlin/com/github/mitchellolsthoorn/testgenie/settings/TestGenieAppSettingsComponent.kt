@@ -12,13 +12,13 @@ import javax.swing.JTextField
  */
 class TestGenieAppSettingsComponent {
     var panel: JPanel? = null
-    var userNameTextField = JTextField()
-    var ideaUserStatusCheckBox = JCheckBox("Is amogus bad? ")
+    var globalTimeoutTextField = JTextField()
+    var showCoverageCheckBox = JCheckBox("Do you want visualised coverage? ")
 
     init {
         panel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(JBLabel("Enter user name: "), userNameTextField, 1, false)
-            .addComponent(ideaUserStatusCheckBox, 1)
+            .addLabeledComponent(JBLabel("Global timeout "), globalTimeoutTextField, 1, false)
+            .addComponent(showCoverageCheckBox, 1)
             .addComponentFillVertically(JPanel(), 0)
             .panel
     }
@@ -27,19 +27,19 @@ class TestGenieAppSettingsComponent {
      * Returns the UI component that should be focused when a user opens the TestGenie Settings page.
      */
     fun getPreferredFocusedComponent(): JComponent {
-        return userNameTextField
+        return globalTimeoutTextField
     }
 
 
-    var userNameText: String?
-        get() = userNameTextField.text
+    var globalTimeout: String?
+        get() = globalTimeoutTextField.text
         set(newText) {
-            userNameTextField.text = newText
+            globalTimeoutTextField.text = newText
         }
 
-    var ideaUserStatus: Boolean
-        get() = ideaUserStatusCheckBox.isSelected
+    var showCoverage: Boolean
+        get() = showCoverageCheckBox.isSelected
         set(newStatus) {
-            ideaUserStatusCheckBox.isSelected = newStatus
+            showCoverageCheckBox.isSelected = newStatus
         }
 }

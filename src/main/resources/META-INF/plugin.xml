@@ -25,7 +25,7 @@
                 parentId="tools"
                 instance="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
                 id="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
-                displayName="AMOGUS"/>
+                displayName="TestGenie"/>
     </extensions>
 
     <actions>
