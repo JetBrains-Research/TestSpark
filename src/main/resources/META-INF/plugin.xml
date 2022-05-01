@@ -29,26 +29,12 @@
     </extensions>
 
     <actions>
-        <!-- A group of TestGenie actions in the `Code` tab -->
-        <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true">
-            <add-to-group group-id="CodeMenu" anchor="after" relative-to-action="Generate"/>
-
-           <!-- Actions in the corresponding this group -->
-            <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsAction"
-                    id="TestGenie.TestGenieActions.GenerateTestsAction"
-                    text="Generate Tests"
-                    description="Press to generate tests using the best test generating software TestGenie">
-                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="T" keymap="$default"/>
-            </action>
-            <!-- More actions... -->
-        </group>
-
         <!-- TestGenie action for generating tests for a class -->
         <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsForClassAction"
                 id="TestGenie.Actions.GenerateTestsForClassAction"
                 text=">Generate Tests for Class"
                 description="Generate tests for all methods in the selected class">
-            <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="C" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="control alt shift T" second-keystroke="C" keymap="$default"/>
             <add-to-group group-id="EditorPopupMenu1.FindRefactor" anchor="after" relative-to-action="RefactoringMenu"/>
         </action>
         <!-- Actions for generating tests for a method, lines... -->
