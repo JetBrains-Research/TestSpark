@@ -11,12 +11,13 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-
+/**
+ * This class stores the UI of the TestGenie tool window.
+ */
 class TestGenieToolWindow(_toolWindow: ToolWindow) {
 
     private val toolWindow = _toolWindow
 
-    // max_size, global_timeout, coverage - some TestGenie parameters
     private var maxSizeTextField: JTextField? = null
     private var globalTimeOutTextField: JTextField? = null
     private var coverageCombobox: JComboBox<Boolean>? = null
@@ -28,11 +29,17 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
         saveButton?.addActionListener { addListenerForSaveButton(it) }
     }
 
+    /**
+     * Returns the panel that is the main wrapper component of the tool window.
+     */
     fun getContent(): JComponent? {
         return toolWindowPanel!!
     }
 
 
+    /**
+     * Adds a listener to the `Save` button to parse, validate and extract the entered values.
+     */
     private val addListenerForSaveButton : (ActionEvent) -> Unit = {
         if (maxSizeTextField?.text == null || globalTimeOutTextField?.text == null) {
             Messages.showErrorDialog("Please specify the value", "Empty Value Field")
@@ -47,15 +54,18 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
             } else {
                 Messages.showInfoMessage(
                     "Settings saved (not actually, still WIP)" +
-                            "\nmax_size: $maxSize" +
-                            "\nglobal_timeout: $globalTimeout" +
-                            "\ncoverage: $coverage",
+                            "\nMax size: $maxSize" +
+                            "\nGlobal timeout: $globalTimeout" +
+                            "\nCoverage: $coverage",
                     "Saved"
                 )
             }
         }
     }
 
+    /**
+     * Convert a string to an integer, or return null in case of an exception
+     */
     private fun toInt(str: String): Int? {
         return try {
             str.toInt()
