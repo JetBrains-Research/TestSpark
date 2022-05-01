@@ -1,6 +1,7 @@
 package com.github.mitchellolsthoorn.testgenie.settings
 
-class TestGenieSettingsState {
-    var userId = "Amogus"
-    var ideaStatus = false
-}
+/**
+ * This class is the actual data class that stores the values of the Settings entries.
+ */
+data class TestGenieSettingsState
+    constructor(var userId: String = "Amogus", var ideaStatus: Boolean = false)
