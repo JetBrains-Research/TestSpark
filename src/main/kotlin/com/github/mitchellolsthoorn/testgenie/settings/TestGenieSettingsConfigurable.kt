@@ -54,10 +54,10 @@ class TestGenieSettingsConfigurable : Configurable {
     }
 
     /**
-     * Returns the UI component that should be focused when the page is opened.
+     * Returns the UI component that should be focused when the TestGenie Settings page is opened.
      */
     override fun getPreferredFocusedComponent(): JComponent {
-        return settingsComponent!!.myUserNameText
+        return settingsComponent!!.getPreferredFocusedComponent()
     }
 
     /**
