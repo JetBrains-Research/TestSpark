@@ -8,13 +8,13 @@ import javax.swing.JComponent
  */
 class TestGenieSettingsConfigurable : Configurable {
 
-    private var settingsComponent: TestGenieAppSettingsComponent? = null
+    private var settingsComponent: TestGenieSettingsComponent? = null
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
      */
     override fun createComponent(): JComponent? {
-        settingsComponent = TestGenieAppSettingsComponent()
+        settingsComponent = TestGenieSettingsComponent()
         return settingsComponent!!.panel
     }
 

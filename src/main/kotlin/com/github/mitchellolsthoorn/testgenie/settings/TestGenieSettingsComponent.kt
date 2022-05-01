@@ -10,7 +10,7 @@ import javax.swing.JTextField
 /**
  * This class displays and captures changes to the values of the Settings entries.
  */
-class TestGenieAppSettingsComponent {
+class TestGenieSettingsComponent {
     var panel: JPanel? = null
     var globalTimeoutTextField = JTextField()
     var showCoverageCheckBox = JCheckBox("Do you want visualised coverage? ")
