@@ -1,39 +1,45 @@
 package com.github.mitchellolsthoorn.testgenie.settings
 
-import javax.swing.JPanel
-
 import com.intellij.ui.components.JBLabel
-
 import com.intellij.util.ui.FormBuilder
-
-import com.intellij.ui.components.JBCheckBox
-
-import com.intellij.ui.components.JBTextField
 import javax.swing.JCheckBox
+import javax.swing.JComponent
+import javax.swing.JPanel
 import javax.swing.JTextField
 
+/**
+ * This class displays and captures changes to the values of the Settings entries.
+ */
 class TestGenieAppSettingsComponent {
     var panel: JPanel? = null
-    var myUserNameText = JTextField()
-    var myIdeaUserStatus = JCheckBox("Is amogus bad? ")
+    var userNameTextField = JTextField()
+    var ideaUserStatusCheckBox = JCheckBox("Is amogus bad? ")
 
     init {
         panel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(JBLabel("Enter user name: "), myUserNameText, 1, false)
-            .addComponent(myIdeaUserStatus, 1)
+            .addLabeledComponent(JBLabel("Enter user name: "), userNameTextField, 1, false)
+            .addComponent(ideaUserStatusCheckBox, 1)
             .addComponentFillVertically(JPanel(), 0)
             .panel
     }
 
+    /**
+     * Returns the UI component that should be focused when a user opens the TestGenie Settings page.
+     */
+    fun getPreferredFocusedComponent(): JComponent {
+        return userNameTextField
+    }
+
+
     var userNameText: String?
-        get() = myUserNameText.text
+        get() = userNameTextField.text
         set(newText) {
-            myUserNameText.text = newText
+            userNameTextField.text = newText
         }
 
     var ideaUserStatus: Boolean
-        get() = myIdeaUserStatus.isSelected
+        get() = ideaUserStatusCheckBox.isSelected
         set(newStatus) {
-            myIdeaUserStatus.isSelected = newStatus
+            ideaUserStatusCheckBox.isSelected = newStatus
         }
 }
