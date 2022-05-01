@@ -23,8 +23,8 @@ class TestGenieSettingsConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        settingsComponent!!.userNameText = settingsState.userId
-        settingsComponent!!.ideaUserStatus = settingsState.ideaStatus
+        settingsComponent!!.globalTimeout = settingsState.globalTimeout
+        settingsComponent!!.showCoverage = settingsState.showCoverage
     }
 
     /**
@@ -32,8 +32,8 @@ class TestGenieSettingsConfigurable : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        var modified: Boolean = settingsComponent!!.userNameText != settingsState.userId
-        modified = modified or (settingsComponent!!.ideaUserStatus != settingsState.ideaStatus)
+        var modified: Boolean = settingsComponent!!.globalTimeout != settingsState.globalTimeout
+        modified = modified or (settingsComponent!!.showCoverage != settingsState.showCoverage)
         return modified
     }
 
@@ -42,15 +42,15 @@ class TestGenieSettingsConfigurable : Configurable {
      */
     override fun apply() {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        settingsState.userId = settingsComponent!!.userNameText!!
-        settingsState.ideaStatus = settingsComponent!!.ideaUserStatus
+        settingsState.globalTimeout = settingsComponent!!.globalTimeout!!
+        settingsState.showCoverage = settingsComponent!!.showCoverage
     }
 
     /**
      * Returns the displayed name of the Settings tab.
      */
     override fun getDisplayName(): String {
-        return "AMOGUS"
+        return "TestGenie"
     }
 
     /**
