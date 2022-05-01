@@ -5,11 +5,41 @@
     <vendor>mitchellolsthoorn</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <!-- add java functionality. See https://blog.jetbrains.com/platform/2019/06/java-functionality-extracted-as-a-plugin/ for more information -->
+    <depends>com.intellij.modules.java</depends>
+
+    <description>
+        <![CDATA[
+            <p>A plugin that uses EvoSuite to generate tests. Developed by TU Delft students.
+        ]]>
+    </description>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyProjectService"/>
+        <toolWindow id="TestGenie" secondary="true" anchor="right"
+                    factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/>
+        <applicationService
+                serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsService"/>
+        <applicationConfigurable
+                parentId="tools"
+                instance="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
+                id="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
+                displayName="TestGenie"/>
     </extensions>
+
+    <actions>
+        <!-- TestGenie action for generating tests for a class -->
+        <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsForClassAction"
+                id="TestGenie.Actions.GenerateTestsForClassAction"
+                text=">Generate Tests for Class"
+                description="Generate tests for all methods in the selected class">
+            <keyboard-shortcut first-keystroke="control alt shift T" second-keystroke="C" keymap="$default"/>
+            <add-to-group group-id="EditorPopupMenu1.FindRefactor" anchor="after" relative-to-action="RefactoringMenu"/>
+        </action>
+        <!-- Actions for generating tests for a method, lines... -->
+
+    </actions>
 
     <applicationListeners>
         <listener class="com.github.mitchellolsthoorn.testgenie.listeners.MyProjectManagerListener"
