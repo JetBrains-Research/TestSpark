@@ -1,13 +1,9 @@
 package com.github.mitchellolsthoorn.testgenie.actions
 
 import com.github.mitchellolsthoorn.testgenie.evo.EvoSuiteRunner
-import com.intellij.execution.configurations.ParametersList
-import com.intellij.ide.plugins.PluginManager
-import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager

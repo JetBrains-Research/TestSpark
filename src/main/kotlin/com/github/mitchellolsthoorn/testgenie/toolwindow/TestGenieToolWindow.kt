@@ -1,67 +1,64 @@
 package com.github.mitchellolsthoorn.testgenie.toolwindow
 
-import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.wm.ToolWindow
-import com.intellij.ui.components.DialogPanel
-import com.intellij.ui.components.JBLabel
-import com.intellij.uiDesigner.core.AbstractLayout
-import com.intellij.util.ui.GridBag
-import com.intellij.util.ui.JBUI
-import com.intellij.util.ui.UIUtil
 import java.awt.Dimension
-import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
-import java.awt.Insets
+import java.awt.event.ActionEvent
+import javax.swing.JButton
+import javax.swing.JComboBox
 import javax.swing.JComponent
+import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-
-class TestGeniePanelWrapper : DialogWrapper(true) {
+/**
+ * This class stores the UI of the TestGenie tool window.
+ */
+class TestGenieToolWindow {
 
     // max_size, global_timeout, coverage - some TestGenie parameters
-    private val maxSizeTextField : JTextField = JTextField()
-    private val globalTimeOutTextField : JTextField = JTextField()
-    private val coverageTextField : JTextField = JTextField()
-    private val toolWindowPanel : JPanel = JPanel(GridBagLayout())
+    private var maxSizeTextField: JTextField? = null
+    private var globalTimeOutTextField: JTextField? = null
+    private var coverageCombobox: JComboBox<Boolean>? = null
+    private var saveButton: JButton? = null
+    private var toolWindowPanel: JPanel? = null
 
     init {
-        init();
-        maxSizeTextField.text = "42";
-        globalTimeOutTextField.text = "69";
-        coverageTextField.text = "true";
+        saveButton?.addActionListener { addListenerForSaveButton(it) }
     }
 
-    // A helper method to create a createLabel
-    private fun createLabel(text: String): JComponent {
-        val createLabel = JBLabel(text)
-        createLabel.componentStyle = UIUtil.ComponentStyle.SMALL
-        createLabel.fontColor = UIUtil.FontColor.BRIGHTER
-        createLabel.border = JBUI.Borders.empty(0, 5, 2, 0)
-        return createLabel
-    }
-
+    /**
+     * Returns the panel that is the main wrapper component of the tool window.
+     */
     fun getContent(): JComponent {
-        return toolWindowPanel
+        return toolWindowPanel!!
     }
 
-    override fun createCenterPanel(): JComponent? {
-        // Create a grid bag
-        val gb = GridBag()
-            .setDefaultInsets(Insets(0, 0, AbstractLayout.DEFAULT_VGAP, AbstractLayout.DEFAULT_HGAP))
-            .setDefaultWeightX(1.0)
-            .setDefaultFill(GridBagConstraints.HORIZONTAL);
+    /**
+     * Adds a listener to the `Save` button to parse, validate and extract the entered values.
+     */
+    private val addListenerForSaveButton : (ActionEvent) -> Unit = {
+        // lets hope this works like C
+        if (maxSizeTextField?.text?.isEmpty() == true || globalTimeOutTextField?.text?.isEmpty() == true) {
+            Messages.showErrorDialog("Please specify the value", "Empty Value Field")
+        } else {
+            // Validate all the input values
+            val maxSize: Int? = try { maxSizeTextField?.text?.toInt() } catch (e: NumberFormatException) { null }
+            val globalTimeout: Int? = try { globalTimeOutTextField?.text?.toInt() } catch (e: NumberFormatException) { null }
+            val coverage : Boolean = coverageCombobox?.selectedItem?.toString().toBoolean()
 
-        toolWindowPanel.preferredSize = Dimension(400, 200);
-
-        // Set the elements into the grid. 20% of the horizontal space is the createLabel, 80% is the actual text field (vertically they have equal weights)
-        toolWindowPanel.add(createLabel("max size"), gb.nextLine().next().weightx(0.2))
-        toolWindowPanel.add(maxSizeTextField, gb.next().weightx(0.8))
-        toolWindowPanel.add(createLabel("global timeout"), gb.nextLine().next().weightx(0.2))
-        toolWindowPanel.add(globalTimeOutTextField, gb.next().weightx(0.8))
-        toolWindowPanel.add(createLabel("coverage"), gb.nextLine().next().weightx(0.2))
-        toolWindowPanel.add(coverageTextField, gb.next().weightx(0.8))
-
-        return toolWindowPanel
+            if (maxSize == null || globalTimeout == null) {
+                Messages.showErrorDialog("Please specify a number", "Invalid Input Value")
+            } else {
+                Messages.showInfoMessage(
+                    "Settings saved (not actually, still WIP)" +
+                            "\nMax size: $maxSize" +
+                            "\nGlobal timeout: $globalTimeout" +
+                            "\nCoverage: $coverage",
+                    "Saved"
+                )
+            }
+        }
     }
 }
