@@ -28,6 +28,7 @@ class TestGenieSettingsConfigurable : Configurable {
         settingsComponent!!.sandbox = settingsState.sandbox
         settingsComponent!!.assertions = settingsState.assertions
         settingsComponent!!.seed = settingsState.seed
+        settingsComponent!!.algorithm = settingsState.algorithm
     }
 
     /**
@@ -40,6 +41,7 @@ class TestGenieSettingsConfigurable : Configurable {
         modified = modified or (settingsComponent!!.sandbox != settingsState.sandbox)
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
         modified = modified or (settingsComponent!!.seed != settingsState.seed)
+        modified = modified or (settingsComponent!!.algorithm != settingsState.algorithm)
         return modified
     }
 
@@ -53,6 +55,7 @@ class TestGenieSettingsConfigurable : Configurable {
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions
         settingsState.seed = settingsComponent!!.seed
+        settingsState.algorithm =settingsComponent!!.algorithm
     }
 
     /**
