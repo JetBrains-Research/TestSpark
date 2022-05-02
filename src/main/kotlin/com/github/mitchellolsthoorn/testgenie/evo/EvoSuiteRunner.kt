@@ -25,6 +25,8 @@ class EvoSuiteRunner {
 
             val command = arrayOf(
                 "-generateSuite",
+                "-serializeResult",
+                "-serializeResultPath", "/tmp/mincho",
                 "-base_dir", projectPath, // Working directory for evosuite
                 "-class", classFQN, // class FQN inside the project classpath of the class we're generating tests for
                 "-projectCP", projectClassPath, // class path of the project we're generating tests for
@@ -51,8 +53,10 @@ class EvoSuiteRunner {
 
                 processHandler.startNotify()
 
-                val output = ScriptRunnerUtil.getProcessOutput(generalCommandLine,
-                    ScriptRunnerUtil.STDOUT_OR_STDERR_OUTPUT_KEY_FILTER,12000000)
+                val output = ScriptRunnerUtil.getProcessOutput(
+                    generalCommandLine,
+                    ScriptRunnerUtil.STDOUT_OR_STDERR_OUTPUT_KEY_FILTER, 12000000
+                )
                 println("Process output: $output")
 
             }.start()
