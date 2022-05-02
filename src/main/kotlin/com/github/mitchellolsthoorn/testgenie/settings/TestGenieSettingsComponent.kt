@@ -14,11 +14,17 @@ class TestGenieSettingsComponent {
     var panel: JPanel? = null
     var globalTimeoutTextField = JTextField()
     var showCoverageCheckBox = JCheckBox("Do you want visualised coverage? ")
+    private var sandboxCheckBox = JCheckBox("Execute tests in a sandbox environment")
+    private var assertionsCheckBox = JCheckBox("Create assertions")
+    private var seedTextField = JTextField()
 
     init {
         panel = FormBuilder.createFormBuilder()
             .addLabeledComponent(JBLabel("Global timeout "), globalTimeoutTextField, 1, false)
             .addComponent(showCoverageCheckBox, 1)
+            .addComponent(sandboxCheckBox, 1)
+            .addComponent(assertionsCheckBox, 1)
+            .addLabeledComponent(JBLabel("Seed(random if left empty) "), seedTextField, 1, false)
             .addComponentFillVertically(JPanel(), 0)
             .panel
     }
@@ -41,5 +47,23 @@ class TestGenieSettingsComponent {
         get() = showCoverageCheckBox.isSelected
         set(newStatus) {
             showCoverageCheckBox.isSelected = newStatus
+        }
+
+    var sandbox: Boolean
+        get() = sandboxCheckBox.isSelected
+        set(newStatus) {
+            sandboxCheckBox.isSelected = newStatus
+        }
+
+    var assertions: Boolean
+        get() = assertionsCheckBox.isSelected
+        set(newStatus) {
+            assertionsCheckBox.isSelected = newStatus
+        }
+
+    var seed: String
+        get() = seedTextField.text
+        set(newText) {
+            seedTextField.text = newText
         }
 }
