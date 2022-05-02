@@ -11,9 +11,9 @@
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/> <!-- icon="AllIcons.General.Modified"-->
 
-        <projectConfigurable instance="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteConfigurable"
+        <applicationConfigurable instance="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteConfigurable"
                              id="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteConfigurable"/>
-        <projectService
+        <applicationService
                 serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteRuntimeConfiguration"/>
     </extensions>
 

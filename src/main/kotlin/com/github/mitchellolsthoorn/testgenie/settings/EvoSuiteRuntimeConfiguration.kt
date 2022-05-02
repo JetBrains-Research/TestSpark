@@ -6,23 +6,30 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.XmlSerializerUtil
 
 @State(
-    name = "EvoSuite Configuration", storages = [Storage("EvoSuiteSettings.xml")]
+    name = "EvoSuite Configuration", storages = [Storage("evoSuiteSettings.xml")]
 )
-class EvoSuiteRuntimeConfiguration(internal val project: Project) :
-    SimplePersistentStateComponent<EvoSuiteRuntimeConfiguration.Config>(Config()) {
-
-    public var javaPath: String = ""
-    public var evoSuiteJarPath: String = ""
-
+class EvoSuiteRuntimeConfiguration : PersistentStateComponent<EvoSuiteRuntimeConfiguration.Config> {
 
     class Config : BaseState() {
-        var javaPath by string()
-        var evoSuiteJarPath by string()
+        var javaPath = ""
+        var evoSuiteJarPath = "/home/lyubentodorov/Projects/uni/TestGenie/evo/evosuite.jar"
     }
+
+    private var evoState = Config()
 
     companion object {
         @JvmStatic
-        fun getInstance(project: Project): EvoSuiteRuntimeConfiguration = project.service()
+        fun getInstance(): EvoSuiteRuntimeConfiguration =
+            ApplicationManager.getApplication().getService(EvoSuiteRuntimeConfiguration::class.java)
+    }
+
+    override fun getState(): Config {
+        return evoState
+    }
+
+    override fun loadState(state: Config) {
+        evoState = state
+        XmlSerializerUtil.copyBean(state, this);
     }
 
 }
