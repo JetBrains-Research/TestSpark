@@ -8,17 +8,12 @@
     <!-- add java functionality. See https://blog.jetbrains.com/platform/2019/06/java-functionality-extracted-as-a-plugin/ for more information -->
     <depends>com.intellij.modules.java</depends>
 
-    <description>
-            A plugin that uses EvoSuite to generate tests. Developed by TU Delft students.
-    </description>
-
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
         <applicationService
                 serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteRuntimeConfiguration"/>
-
         <applicationConfigurable instance="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteConfigurable"
                              id="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteConfigurable"/>
 
@@ -30,6 +25,13 @@
                 id="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
                 displayName="TestGenie"/>
     </extensions>
+
+    <projectListeners>
+        <listener
+                class="com.github.mitchellolsthoorn.testgenie.TestGenerationResultListenerImpl"
+                topic="com.github.mitchellolsthoorn.testgenie.evo.TestGenerationResultListener"/>
+    </projectListeners>
+
 
     <actions>
         <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true">

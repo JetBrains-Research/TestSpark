@@ -16,21 +16,26 @@ class EvoSuiteRunner {
     companion object {
         private val log = Logger.getInstance(Companion::class.java)
 
-        fun runEvoSuite(projectPath: String, projectClassPath: String, classFQN: String) {
+        fun runEvoSuite(projectPath: String, projectClassPath: String, classFQN: String): String {
 
             val evosuiteSettings = EvoSuiteRuntimeConfiguration.getInstance();
 
             val javaPath = "java";// TODO: Source from config
             val evoSuitePath = evosuiteSettings.state.evoSuiteJarPath;
 
+            val ts = System.currentTimeMillis();
+            val testResultDirectory = "/tmp/mincho/";
+            val testResultName = "test_gen_result_$ts"
+            val serializeResultPath = "$testResultDirectory$testResultName"
+
             val command = arrayOf(
                 "-generateSuite",
                 "-serializeResult",
-                "-serializeResultPath", "/tmp/mincho",
+                "-serializeResultPath", serializeResultPath,
                 "-base_dir", projectPath, // Working directory for evosuite
                 "-class", classFQN, // class FQN inside the project classpath of the class we're generating tests for
                 "-projectCP", projectClassPath, // class path of the project we're generating tests for
-                "-Djunit_tests=false", // disable writing to 'evosuite-tests' in working directory
+                "-Djunit_tests=true", // disable writing to 'evosuite-tests' in working directory
                 "-Dnew_statistics=false" //disable writing to 'evosuite-report' in working directory
             )
 
@@ -44,6 +49,7 @@ class EvoSuiteRunner {
                 val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
 
                 log.info("Starting EvoSuite with arguments: $cmdString")
+                log.info("Results will be saved to $serializeResultPath")
 
                 val generalCommandLine = GeneralCommandLine(cmd)
                 generalCommandLine.charset = Charset.forName("UTF-8")
@@ -57,9 +63,11 @@ class EvoSuiteRunner {
                     generalCommandLine,
                     ScriptRunnerUtil.STDOUT_OR_STDERR_OUTPUT_KEY_FILTER, 12000000
                 )
-                println("Process output: $output")
+                log.debug("Process output: $output")
 
             }.start()
+
+            return testResultName
         }
     }
 }
