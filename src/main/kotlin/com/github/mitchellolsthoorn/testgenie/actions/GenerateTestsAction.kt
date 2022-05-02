@@ -1,9 +1,13 @@
 package com.github.mitchellolsthoorn.testgenie.actions
 
 import com.github.mitchellolsthoorn.testgenie.evo.EvoSuiteRunner
+import com.intellij.execution.configurations.ParametersList
+import com.intellij.ide.plugins.PluginManager
+import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
@@ -13,6 +17,7 @@ import com.intellij.psi.util.PsiTreeUtil
 
 class GenerateTestsAction : AnAction() {
     private val log = Logger.getInstance(this.javaClass)
+
     override fun actionPerformed(e: AnActionEvent) {
         // determine class path
         val project: Project = e.project ?: return
@@ -30,7 +35,7 @@ class GenerateTestsAction : AnAction() {
 
         log.info("Selected class is $classFQN")
 
-        EvoSuiteRunner.runEvoSuite(project, projectPath, projectClassPath, classFQN)
+        EvoSuiteRunner.runEvoSuite(projectPath, projectClassPath, classFQN)
     }
 
 }

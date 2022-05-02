@@ -15,15 +15,17 @@ import java.awt.BorderLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-class EvoSuiteConfigurable(private val project: Project) :
+class EvoSuiteConfigurable :
     BoundSearchableConfigurable("EvoSuite Runtime Settings", "Evo Suite") {
     private val settings
-        get() = EvoSuiteRuntimeConfiguration.getInstance(project)
+        get() = EvoSuiteRuntimeConfiguration.getInstance()
 
-    private val pathToEvoSuiteJarField = pathToDirectoryTextField("Choose EvoSuite Jar")
+    private val pathToEvoSuiteJarField =  pathTextField(
+        FileChooserDescriptorFactory.createSingleFileDescriptor(),
+        "Choose EvoSuite Jar")
 
     override fun createPanel(): DialogPanel {
-        pathToEvoSuiteJarField.text = settings.evoSuiteJarPath
+        pathToEvoSuiteJarField.text = settings.state.evoSuiteJarPath
 
         return panel {
             row("EvoSuite Jar Location:") { wrapComponent(pathToEvoSuiteJarField)(CCFlags.growX, CCFlags.pushX) }
@@ -32,22 +34,15 @@ class EvoSuiteConfigurable(private val project: Project) :
     }
 
     override fun apply() {
-        settings.evoSuiteJarPath = pathToEvoSuiteJarField.text
+        settings.state.evoSuiteJarPath = pathToEvoSuiteJarField.text
         super.apply()
     }
 
     override fun isModified(): Boolean {
-        return settings.evoSuiteJarPath != pathToEvoSuiteJarField.text
+        return settings.state.evoSuiteJarPath != pathToEvoSuiteJarField.text
     }
 
 }
-
-fun pathToDirectoryTextField(
-    @Suppress("UnstableApiUsage") @NlsContexts.DialogTitle title: String,
-): TextFieldWithBrowseButton = pathTextField(
-    FileChooserDescriptorFactory.createSingleFileDescriptor(),
-    title,
-)
 
 
 fun pathTextField(
