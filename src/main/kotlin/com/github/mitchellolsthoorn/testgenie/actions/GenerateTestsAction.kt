@@ -1,5 +1,6 @@
 package com.github.mitchellolsthoorn.testgenie.actions
 
+import com.github.mitchellolsthoorn.testgenie.evo.EvoSuiteResultWatcher
 import com.github.mitchellolsthoorn.testgenie.evo.EvoSuiteRunner
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -9,6 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.util.concurrency.AppExecutorUtil
 
 
 class GenerateTestsAction : AnAction() {
@@ -31,7 +33,9 @@ class GenerateTestsAction : AnAction() {
 
         log.info("Selected class is $classFQN")
 
-        EvoSuiteRunner.runEvoSuite(projectPath, projectClassPath, classFQN)
+        val resultPath = EvoSuiteRunner.runEvoSuite(projectPath, projectClassPath, classFQN)
+
+        AppExecutorUtil.getAppScheduledExecutorService().execute(EvoSuiteResultWatcher(project, resultPath))
     }
 
 }
