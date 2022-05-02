@@ -22,10 +22,15 @@
         <applicationService
                 serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsService"/>
         <applicationConfigurable
-                parentId="tools"
+                parentId="Settings"
                 instance="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
                 id="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
                 displayName="TestGenie"/>
+        <applicationConfigurable
+                parentId="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
+                instance="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
+                id="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable2"
+                displayName="TestGenie2"/>
     </extensions>
 
     <actions>
