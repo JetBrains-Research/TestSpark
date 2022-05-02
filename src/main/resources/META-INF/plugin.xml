@@ -17,6 +17,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyProjectService"/>
+        <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService"/>
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/>
         <applicationService
