@@ -1,12 +1,12 @@
 package com.github.mitchellolsthoorn.testgenie.settings
 
-import com.intellij.ui.components.JBComboBoxLabel
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
+import org.jdesktop.swingx.JXTitledSeparator
 import javax.swing.JCheckBox
-import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.JPanel
+import javax.swing.JSeparator
 import javax.swing.JTextField
 
 /**
@@ -20,10 +20,11 @@ class TestGenieSettingsComponent {
     private var assertionsCheckBox = JCheckBox("Create assertions")
     private var seedTextField = JTextField()
     //DropDown menu
-    var algorithmSelector = com.intellij.openapi.ui.ComboBox(arrayOf<String>("RANDOM_SEARCH","STANDARD_GA", "MONOTONIC_GA", "STEADY_STATE_GA",
+    private var algorithmSelector = com.intellij.openapi.ui.ComboBox(arrayOf<String>("RANDOM_SEARCH","STANDARD_GA", "MONOTONIC_GA", "STEADY_STATE_GA",
             "BREEDER_GA", "CELLULAR_GA", "STANDARD_CHEMICAL_REACTION", "MAP_ELITES", "ONE_PLUS_LAMBDA_LAMBDA_GA", "ONE_PLUS_ONE_EA",
             "MU_PLUS_LAMBDA_EA", "MU_LAMBDA_EA", "MOSA", "DYNAMOSA", "LIPS", "MIO", "NSGAII", "SPEA2"))
-
+    private var configurationIdTextField = JTextField()
+    private var clientOnThreadCheckBox = JCheckBox("client on thread")
     init {
         panel = FormBuilder.createFormBuilder()
             .addLabeledComponent(JBLabel("Global timeout "), globalTimeoutTextField, 1, false)
@@ -32,9 +33,14 @@ class TestGenieSettingsComponent {
             .addComponent(assertionsCheckBox, 1)
             .addLabeledComponent(JBLabel("Seed(random if left empty) "), seedTextField, 1, false)
             .addLabeledComponent(JBLabel("select search algorithm"), algorithmSelector, 1, false)
+            .addLabeledComponent(JBLabel("Select configuration id (null if left empty) "), configurationIdTextField, 1, false)
+            .addComponent(clientOnThreadCheckBox, 1)
             .addComponentFillVertically(JPanel(), 0)
             .panel
+
         algorithmSelector.setMinimumAndPreferredWidth(300)
+        configurationIdTextField.toolTipText = "Label that identifies the used configuration of EvoSuite. This is only done when running experiments."
+        clientOnThreadCheckBox.toolTipText = "Run client process on same JVM of master in separate thread. To be used only for debugging purposes"
     }
 
     /**
@@ -79,5 +85,17 @@ class TestGenieSettingsComponent {
         get() = algorithmSelector.item
         set(newAlg) {
             algorithmSelector.item = newAlg
+        }
+
+    var configurationId: String
+        get() = configurationIdTextField.text
+        set(newConfig) {
+            configurationIdTextField.text = newConfig
+        }
+
+    var clientOnThread: Boolean
+        get() = clientOnThreadCheckBox.isSelected
+        set(newStatus) {
+            clientOnThreadCheckBox.isSelected = newStatus
         }
 }

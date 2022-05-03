@@ -10,7 +10,9 @@ data class TestGenieSettingsState(
         var sandbox : Boolean = true,
         var assertions : Boolean = true,
         var seed : String = "",
-        var algorithm: String = ContentDigestAlgorithm.RANDOM_SEARCH.toString()
+        var algorithm: String = ContentDigestAlgorithm.RANDOM_SEARCH.toString(),
+        var configurationId : String = "",
+        var clientOnThread : Boolean = false
 )
 
 enum class ContentDigestAlgorithm {

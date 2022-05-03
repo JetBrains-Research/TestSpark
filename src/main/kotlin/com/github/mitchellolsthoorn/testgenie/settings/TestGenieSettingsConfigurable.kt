@@ -29,6 +29,8 @@ class TestGenieSettingsConfigurable : Configurable {
         settingsComponent!!.assertions = settingsState.assertions
         settingsComponent!!.seed = settingsState.seed
         settingsComponent!!.algorithm = settingsState.algorithm
+        settingsComponent!!.configurationId = settingsState.configurationId
+        settingsComponent!!.clientOnThread = settingsState.clientOnThread
     }
 
     /**
@@ -42,6 +44,8 @@ class TestGenieSettingsConfigurable : Configurable {
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
         modified = modified or (settingsComponent!!.seed != settingsState.seed)
         modified = modified or (settingsComponent!!.algorithm != settingsState.algorithm)
+        modified = modified or (settingsComponent!!.configurationId != settingsState.configurationId)
+        modified = modified or (settingsComponent!!.clientOnThread != settingsState.clientOnThread)
         return modified
     }
 
@@ -55,7 +59,9 @@ class TestGenieSettingsConfigurable : Configurable {
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions
         settingsState.seed = settingsComponent!!.seed
-        settingsState.algorithm =settingsComponent!!.algorithm
+        settingsState.algorithm = settingsComponent!!.algorithm
+        settingsState.configurationId = settingsComponent!!.configurationId
+        settingsState.clientOnThread = settingsComponent!!.clientOnThread
     }
 
     /**
