@@ -68,6 +68,18 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
         return toolWindowPanel!!
     }
 
+    private fun isModified(): Boolean {
+        // TODO: Load state data and compare if it was modified.
+        if (searchBudget.value == null) Messages.showErrorDialog("Please specify the value of search budget", "Empty Value Field")
+        if (localSearchBudgetValue.value == null) Messages.showErrorDialog("Please specify the value of local search budget", "Empty Value Field")
+        if (initializationTimeout.value == null) Messages.showErrorDialog("Please specify the value of initialization timeout", "Empty Value Field")
+        if (minimisationTimeout.value == null) Messages.showErrorDialog("Please specify the value of minimization timeout", "Empty Value Field")
+        if (assertionTimeout.value == null) Messages.showErrorDialog("Please specify the value of assertion timeout", "Empty Value Field")
+        if (junitCheckTimeout.value == null) Messages.showErrorDialog("Please specify the value JUnit check timeout", "Empty Value Field")
+        if (population.value == null) Messages.showErrorDialog("Please specify the value of population", "Empty Value Field")
+        return true
+    }
+
 
     /**
      * Adds a listener to the `Save` button to parse, validate and extract the entered values.
