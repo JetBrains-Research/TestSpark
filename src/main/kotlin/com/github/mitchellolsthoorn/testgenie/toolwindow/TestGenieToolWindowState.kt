@@ -1,7 +1,7 @@
 package com.github.mitchellolsthoorn.testgenie.toolwindow
 
 /**
- * This class is responsible for persisting the values of the parameters in the Quick Access,
+ * This class is responsible for persisting the values of the parameters in the Quick Access (tool window),
  *   which are also present in the settings menu.
  */
 data class TestGenieToolWindowState
@@ -20,6 +20,8 @@ data class TestGenieToolWindowState
 
 /**
  * This enum contains the types for the search budget value parameter.
+ *
+ * @param display string representation of the enum value that is used in UI elements
  */
 enum class LocalSearchBudgetType(private val display: String) {
     TIME("Time"),
@@ -38,6 +40,8 @@ enum class LocalSearchBudgetType(private val display: String) {
 
 /**
  * This enum contains the type for the stopping condition of the algorithm.
+ *
+ * @param display string representation of the enum value that is used in UI elements
  */
 enum class StoppingCondition(private val display: String) {
     MAXTIME("Max time"),
@@ -57,6 +61,8 @@ enum class StoppingCondition(private val display: String) {
 
 /**
  * This enum contains the type for the limit for the population size.
+ *
+ * @param display string representation of the enum value that is used in UI elements
  */
 enum class PopulationLimit(private val display: String) {
     INDIVIDUALS("Individuals"),
