@@ -16,21 +16,28 @@ class TestGenieToolWindowService : PersistentStateComponent<TestGenieToolWindowS
 
     /**
      * Gets the currently persisted state. This method is called every time the save button is pressed in the menu.
+     *
+     * @return the current tool window state
      */
-    override fun getState(): TestGenieToolWindowState? = toolWindowState
+    override fun getState(): TestGenieToolWindowState = toolWindowState
 
     /**
      * Loads the state. Everytime we need to update the parameters in the GUI according to a new state we call this
      * method.
+     *
+     * @param state the new state
      */
     override fun loadState(state: TestGenieToolWindowState) {
         toolWindowState = state
     }
 
-    /**
-     * Returns the service object with a static call.
-     */
     companion object {
+
+        /**
+         * Returns the service object with a static call.
+         *
+         * @return the service that manages the state
+         */
         fun getInstance() : PersistentStateComponent<TestGenieToolWindowState> {
             return ApplicationManager.getApplication().getService(TestGenieToolWindowService::class.java)
         }

@@ -32,6 +32,8 @@ enum class LocalSearchBudgetType(private val display: String) {
 
     /**
      * Returns the display name of the given enum value that is shown in the UI elements.
+     *
+     * @return the display name of the given enum value
      */
     override fun toString(): String {
         return display
@@ -53,6 +55,8 @@ enum class StoppingCondition(private val display: String) {
 
     /**
      * Returns the display name of the given enum value that is shown in the UI elements.
+     *
+     * @return the display name of the given enum value
      */
     override fun toString(): String {
         return display
@@ -71,6 +75,8 @@ enum class PopulationLimit(private val display: String) {
 
     /**
      * Returns the display name of the given enum value that is shown in the UI elements.
+     *
+     * @return the display name of the given enum value
      */
     override fun toString(): String {
         return display
