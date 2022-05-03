@@ -21,8 +21,8 @@ data class TestGenieSettingsState(
         var criterionOutput : Boolean = true,
         var criterionMethod : Boolean = true,
         var criterionMethodNoException : Boolean = true,
-        var criterionCBranch : Boolean = true
-
+        var criterionCBranch : Boolean = true,
+        var minimize : Boolean = true
 )
 
 enum class ContentDigestAlgorithm {
