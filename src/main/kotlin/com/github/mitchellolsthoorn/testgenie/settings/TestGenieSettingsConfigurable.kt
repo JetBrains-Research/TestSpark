@@ -31,6 +31,7 @@ class TestGenieSettingsConfigurable : Configurable {
         settingsComponent!!.algorithm = settingsState.algorithm
         settingsComponent!!.configurationId = settingsState.configurationId
         settingsComponent!!.clientOnThread = settingsState.clientOnThread
+        settingsComponent!!.junitCheck = settingsState.junitCheck
         settingsComponent!!.criterionLine = settingsState.criterionLine
         settingsComponent!!.criterionBranch = settingsState.criterionBranch
         settingsComponent!!.criterionException = settingsState.criterionException
@@ -54,6 +55,7 @@ class TestGenieSettingsConfigurable : Configurable {
         modified = modified or (settingsComponent!!.algorithm != settingsState.algorithm)
         modified = modified or (settingsComponent!!.configurationId != settingsState.configurationId)
         modified = modified or (settingsComponent!!.clientOnThread != settingsState.clientOnThread)
+        modified = modified or (settingsComponent!!.junitCheck != settingsState.junitCheck)
         modified = modified or (settingsComponent!!.criterionLine != settingsState.criterionLine)
         modified = modified or (settingsComponent!!.criterionBranch != settingsState.criterionBranch)
         modified = modified or (settingsComponent!!.criterionException != settingsState.criterionException)
@@ -78,6 +80,7 @@ class TestGenieSettingsConfigurable : Configurable {
         settingsState.algorithm = settingsComponent!!.algorithm
         settingsState.configurationId = settingsComponent!!.configurationId
         settingsState.clientOnThread = settingsComponent!!.clientOnThread
+        settingsState.junitCheck = settingsState!!.junitCheck
         settingsState.criterionLine = settingsComponent!!.criterionLine
         settingsState.criterionBranch = settingsComponent!!.criterionBranch
         settingsState.criterionException = settingsComponent!!.criterionException
