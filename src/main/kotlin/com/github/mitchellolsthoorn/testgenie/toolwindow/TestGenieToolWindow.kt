@@ -31,11 +31,13 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
     private var junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(60,0,10000,1))
     private var population: JSpinner = JSpinner(SpinnerNumberModel(50,0,10000,1))
     private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
-    private var saveButton: JButton? = null
+    private var saveButton: JButton = JButton("Save")
 
-    private var toolWindowPanel: JPanel? = null
+    private var toolWindowPanel: JPanel = JPanel()
 
     init {
+        loadState()
+
         toolWindowPanel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(JBLabel("Search budget"), searchBudget, 1, false)
                 .addTooltip("Default 60 seconds")
@@ -57,16 +59,18 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
                 .addTooltip("Default 50")
                 .addLabeledComponent(JBLabel("Population limit"), populationLimit, 1, false)
                 .addTooltip("Default: Individuals")
+                .addComponent(saveButton)
                 .addComponentFillVertically(JPanel(), 0)
                 .panel
-        //saveButton?.addActionListener { addListenerForSaveButton(it) }
+
+                saveButton.addActionListener { addListenerForSaveButton(it) }
     }
 
     /**
      * Returns the panel that is the main wrapper component of the tool window.
      */
-    fun getContent(): JComponent? {
-        return toolWindowPanel!!
+    fun getContent(): JComponent {
+        return toolWindowPanel
     }
 
     private fun isModified(): Boolean {
@@ -85,7 +89,12 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
     /**
      * Adds a listener to the `Save` button to parse, validate and extract the entered values.
      */
-//    private val addListenerForSaveButton : (ActionEvent) -> Unit = {
+    private val addListenerForSaveButton : (ActionEvent) -> Unit = {
+
+        saveState()
+
+        Messages.showInfoMessage("Parameters have been saved successfully", "Saved Successfully")
+
 //        if (maxSizeTextField?.text == null || globalTimeOutTextField?.text == null) {
 //            Messages.showErrorDialog("Please specify the value", "Empty Value Field")
 //        } else {
@@ -97,16 +106,40 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
 //            if (maxSize == null || globalTimeout == null) {
 //                Messages.showErrorDialog("Please specify a number", "Invalid Input Value")
 //            } else {
-//                Messages.showInfoMessage(
-//                    "Settings saved (not actually, still WIP)" +
-//                            "\nMax size: $maxSize" +
-//                            "\nGlobal timeout: $globalTimeout" +
-//                            "\nCoverage: $coverage",
-//                    "Saved"
-//                )
+//                Messages.showInfoMessage("Parameters have been saved successfully", "Saved Successfully")
 //            }
 //        }
-//    }
+    }
+
+    private fun loadState() {
+        val state : TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+
+        searchBudget.value = state.searchBudget
+        localSearchBudgetType.item = state.localSearchBudgetType
+        localSearchBudgetValue.value = state.localSearchBudgetValue
+        stoppingCondition.item = state.stoppingCondition
+        initializationTimeout.value = state.initializationTimeout
+        minimisationTimeout.value = state.minimisationTimeout
+        assertionTimeout.value = state.assertionTimeout
+        junitCheckTimeout.value = state.junitCheckTimeout
+        population.value = state.population
+        populationLimit.item = state.populationLimit
+    }
+
+    private fun saveState() {
+        val state : TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+
+        state.searchBudget = searchBudget.value as Int
+        state.localSearchBudgetType = localSearchBudgetType.item
+        state.localSearchBudgetValue = localSearchBudgetValue.value as Int
+        state.stoppingCondition = stoppingCondition.item
+        state.initializationTimeout = initializationTimeout.value as Int
+        state.minimisationTimeout = minimisationTimeout.value as Int
+        state.assertionTimeout = assertionTimeout.value as Int
+        state.junitCheckTimeout = junitCheckTimeout.value as Int
+        state.population = population.value as Int
+        state.populationLimit = populationLimit.item
+    }
 
     /**
      * Convert a string to an integer, or return null in case of an exception
