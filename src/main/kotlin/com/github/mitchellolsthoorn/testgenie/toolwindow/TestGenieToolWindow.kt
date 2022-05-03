@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent
 import javax.swing.JButton
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
+import com.intellij.util.containers.toArray
 import com.intellij.util.ui.FormBuilder
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -39,11 +40,11 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
                 .addLabeledComponent(JBLabel("Search budget"), searchBudget, 1, false)
                 .addTooltip("Default 60 seconds")
                 .addLabeledComponent(JBLabel("Local search budget type"), localSearchBudgetType, 1, false)
-                .addTooltip("Default TIME")
+                .addTooltip("Default Time")
                 .addLabeledComponent(JBLabel("Local search budget value"), localSearchBudgetValue, 1, false)
                 .addTooltip("Default 5")
                 .addLabeledComponent(JBLabel("Stopping condition"), stoppingCondition, 1, false)
-                .addTooltip("Default MAXSTATEMENTS")
+                .addTooltip("Default: Max statements")
                 .addLabeledComponent(JBLabel("Initialization timeout"), initializationTimeout, 1, false)
                 .addTooltip("Default 120 seconds")
                 .addLabeledComponent(JBLabel("Minimisation timeout"), minimisationTimeout, 1, false)
@@ -55,7 +56,7 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
                 .addLabeledComponent(JBLabel("Population"), population, 1, false)
                 .addTooltip("Default 50")
                 .addLabeledComponent(JBLabel("Population limit"), populationLimit, 1, false)
-                .addTooltip("Default INDIVIDUALS")
+                .addTooltip("Default: Individuals")
                 .addComponentFillVertically(JPanel(), 0)
                 .panel
         //saveButton?.addActionListener { addListenerForSaveButton(it) }

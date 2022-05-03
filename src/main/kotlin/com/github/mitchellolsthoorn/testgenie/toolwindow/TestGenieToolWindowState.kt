@@ -21,20 +21,52 @@ data class TestGenieToolWindowState
 /**
  * This enum contains the types for the search budget value parameter.
  */
-enum class LocalSearchBudgetType {
-    TIME, STATEMENTS, TESTS, SUITES, FITNESS_EVALUATIONS
+enum class LocalSearchBudgetType(private val display: String) {
+    TIME("Time"),
+    STATEMENTS("Statements"),
+    TESTS("Tests"),
+    SUITES("Suites"),
+    FITNESS_EVALUATIONS("Fitness evaluations");
+
+    /**
+     * Returns the display name of the given enum value that is shown in the UI elements.
+     */
+    override fun toString(): String {
+        return display
+    }
 }
 
 /**
  * This enum contains the type for the stopping condition of the algorithm.
  */
-enum class StoppingCondition {
-    MAXSTATEMENTS, MAXTESTS, MAXTIME, MAXGENERATIONS, MAXFITNESSEVALUATIONS, TIMEDELTA
+enum class StoppingCondition(private val display: String) {
+    MAXSTATEMENTS("Max statements"),
+    MAXTESTS("Max tests"),
+    MAXTIME("Max time"),
+    MAXGENERATIONS("Max generations"),
+    MAXFITNESSEVALUATIONS("Max fitness evaluations"),
+    TIMEDELTA("Time delta");
+
+    /**
+     * Returns the display name of the given enum value that is shown in the UI elements.
+     */
+    override fun toString(): String {
+        return display
+    }
 }
 
 /**
  * This enum contains the type for the limit for the population size.
  */
-enum class PopulationLimit {
-    INDIVIDUALS, TESTS, STATEMENTS
+enum class PopulationLimit(private val display: String) {
+    INDIVIDUALS("Individuals"),
+    TESTS("Tests"),
+    STATEMENTS("Statements");
+
+    /**
+     * Returns the display name of the given enum value that is shown in the UI elements.
+     */
+    override fun toString(): String {
+        return display
+    }
 }
