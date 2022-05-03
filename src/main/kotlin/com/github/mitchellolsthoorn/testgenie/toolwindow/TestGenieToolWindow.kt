@@ -8,6 +8,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
+import com.intellij.uiDesigner.core.AbstractLayout
 import com.intellij.util.containers.toArray
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.GridBag
@@ -52,11 +53,21 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
         //saveButton.preferredSize = Dimension(40, 20)
         //resetButton.preferredSize = Dimension(40, 20)
 
-        val sus = JPanel(GridBagLayout())
-        sus.add(saveButton)
-        sus.add(resetButton)
+//        val gb = GridBag()
+//            .setDefaultInsets(Insets(0, 0, AbstractLayout.DEFAULT_VGAP, AbstractLayout.DEFAULT_HGAP))
+//            //.setDefaultWeightX(1.0)
+//            .setDefaultAnchor(GridBagConstraints.WEST);
 
-        sus.preferredSize = Dimension(50, 30)
+        val gbc = GridBagConstraints()
+        gbc.anchor = GridBagConstraints.FIRST_LINE_START
+        gbc.insets = Insets(10, 0, 10, 0)
+
+        val sus = JPanel(GridBagLayout())
+        sus.add(saveButton, gbc)
+        gbc.weightx = 1.0
+        sus.add(resetButton, gbc)
+
+        sus.preferredSize = Dimension(500, 30)
 
 
         toolWindowPanel = FormBuilder.createFormBuilder()
