@@ -33,7 +33,7 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
     private var population: JSpinner = JSpinner(SpinnerNumberModel(50,0,10000,1))
     private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
 
-    private val title = JLabel("Frequently Used Parameters")
+    private val panelTitle = JLabel("Frequently Used Parameters")
     private var saveButton: JButton = JButton("Save")
     private var resetButton: JButton = JButton("Reset")
 
@@ -42,11 +42,11 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
     init {
         loadState()
 
-        val buttons = createSaveAndResetButtons()
         toolWindowPanel = createToolWindowPanel()
 
-        title.font = Font("Monochrome", Font.BOLD, 20)
-        resetButton.toolTipText = "Reset all parameters to default."
+        panelTitle.font = Font("Monochrome", Font.BOLD, 20)
+        resetButton.toolTipText = "Reset all parameters to their default values"
+
         saveButton.addActionListener { addListenerForSaveButton(it) }
         resetButton.addActionListener { addListenerForResetButton(it) }
     }
@@ -57,7 +57,7 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
     private fun createToolWindowPanel() = FormBuilder.createFormBuilder()
             .setFormLeftIndent(30)
             .addVerticalGap(25)
-            .addComponent(title)
+            .addComponent(panelTitle)
             .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
             .addTooltip("Default: 60 seconds")
             .addLabeledComponent(customLabel("Local search budget type", "Interpretation of local search budget value."), localSearchBudgetType, 20, false)
@@ -78,22 +78,25 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
             .addTooltip("Default: 50")
             .addLabeledComponent(customLabel("Population limit", "What to use as limit for the population size."), populationLimit, 20, false)
             .addTooltip("Default: Individuals")
-            .addComponent(createSaveAndResetButtons())
-            //.addComponent(resetButton)
+            .addComponent(createSaveAndResetButtons(), 20)
             .addComponentFillVertically(JPanel(), 20)
             .panel
 
     /**
-     * Creates save and reset buttons and aligns them to the left of the tool window.
+     * Creates `Save` and `Reset` buttons and aligns them to the left of the tool window.
+     *
+     * @return the resulting pane with `Save` and `Reset` buttons next to each other
      */
     private fun createSaveAndResetButtons(): JPanel {
-        val gbc = GridBagConstraints()
-        gbc.anchor = GridBagConstraints.FIRST_LINE_START
-        gbc.insets = Insets(10, 0, 10, 0)
-
         val buttons = JPanel(GridBagLayout())
+
+        val gbc = GridBagConstraints()
+        gbc.anchor = GridBagConstraints.WEST
+        gbc.insets = Insets(10, 0, 10, 5)
         buttons.add(saveButton, gbc)
+
         gbc.weightx = 1.0
+        gbc.insets = Insets(10, 0, 10, 0)
         buttons.add(resetButton, gbc)
 
         buttons.preferredSize = Dimension(500, 30)
@@ -101,21 +104,31 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
     }
 
     /**
-     * Function that returns a JBLabel that can be customized to its own label text and tooltip text.
+     * Creates a label (JBLabel) that can be customised to its own label text and tooltip text.
+     *
+     * @return the created customised label
      */
     private fun customLabel(label: String, tooltip: String ) : JBLabel {
-        var labeled: JBLabel = JBLabel(label)
+        val labeled = JBLabel(label)
         labeled.toolTipText = tooltip
         return labeled
     }
 
     /**
-     * Returns the panel that is the main wrapper component of the tool window.
+     * Gets the panel that is the main wrapper component of the tool window.
+     * The panel is put into a scroll pane so that all the parameters can fit.
+     *
+     * @return the created tool window pane wrapped into a scroll pane
      */
     fun getContent(): JComponent {
         return JBScrollPane(toolWindowPanel)
     }
 
+    /**
+     * Creates a listener for the `Reset` button when the user clicks `Reset`.
+     *  It restores the state to the default values and also updates the UI elements.
+     *
+     */
     private val addListenerForResetButton : (ActionEvent) -> Unit = {
         val state : TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
         state.searchBudget = 60
@@ -131,20 +144,22 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
 
         loadState()
 
-        Messages.showInfoMessage("Parameters were restored to defaults", "Restored Successfully")
+        Messages.showInfoMessage("Parameters have been restored to defaults", "Restored Successfully")
     }
 
 
     /**
-     * Adds a listener to the `Save` button to parse, validate and extract the entered values.
+     * Creates a listener for the `Save` button when the user clicks 'Save'.
+     *  It parses, validates and extracts the entered values.
      */
     private val addListenerForSaveButton : (ActionEvent) -> Unit = {
-
         saveState()
-
         Messages.showInfoMessage("Parameters have been saved successfully", "Saved Successfully")
     }
 
+    /**
+     * Loads the persisted state and updates the UI elements with the corresponding values.
+     */
     private fun loadState() {
         val state : TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
 
@@ -160,6 +175,9 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
         populationLimit.item = state.populationLimit
     }
 
+    /**
+     * Persist the state by reading off the values from the UI elements.
+     */
     private fun saveState() {
         val state : TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
 
