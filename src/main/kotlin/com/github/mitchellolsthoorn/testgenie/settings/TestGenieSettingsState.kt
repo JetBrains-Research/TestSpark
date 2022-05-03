@@ -13,6 +13,7 @@ data class TestGenieSettingsState(
         var algorithm: String = ContentDigestAlgorithm.RANDOM_SEARCH.toString(),
         var configurationId : String = "",
         var clientOnThread : Boolean = false,
+        var junitCheck : Boolean = false,
         var criterionLine : Boolean = true,
         var criterionBranch : Boolean = true,
         var criterionException : Boolean = true,

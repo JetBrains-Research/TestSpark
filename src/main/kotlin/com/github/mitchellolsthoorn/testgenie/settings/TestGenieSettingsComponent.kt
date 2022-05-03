@@ -25,6 +25,7 @@ class TestGenieSettingsComponent {
             "MU_PLUS_LAMBDA_EA", "MU_LAMBDA_EA", "MOSA", "DYNAMOSA", "LIPS", "MIO", "NSGAII", "SPEA2"))
     private var configurationIdTextField = JTextField()
     private var clientOnThreadCheckBox = JCheckBox("client on thread")
+    private var junitCheckCheckBox = JCheckBox("Compile and run suite")
     //There is a limited amount of criteria, but multiple can be selected at once.
     //Effectively, this requires its own section (or a checkboxed combobox of sorts)
     private var criterionSeparator = JXTitledSeparator("criterion selection")
@@ -47,21 +48,23 @@ class TestGenieSettingsComponent {
             .addLabeledComponent(JBLabel("select search algorithm"), algorithmSelector, 1, false)
             .addLabeledComponent(JBLabel("Select configuration id (null if left empty) "), configurationIdTextField, 1, false)
             .addComponent(clientOnThreadCheckBox, 1)
+            .addComponent(junitCheckCheckBox, 1)
             .addComponent(criterionSeparator)
-            .addComponent(criterionLineCheckBox)
-            .addComponent(criterionBranchCheckBox)
-            .addComponent(criterionExceptionCheckBox)
-            .addComponent(criterionWeakMutationCheckBox)
-            .addComponent(criterionOutputCheckBox)
-            .addComponent(criterionMethodCheckBox)
-            .addComponent(criterionMethodNoExceptionCheckBox)
-            .addComponent(criterionCBranchCheckBox)
+            .addComponent(criterionLineCheckBox, 1)
+            .addComponent(criterionBranchCheckBox, 1)
+            .addComponent(criterionExceptionCheckBox, 1)
+            .addComponent(criterionWeakMutationCheckBox, 1)
+            .addComponent(criterionOutputCheckBox, 1)
+            .addComponent(criterionMethodCheckBox, 1)
+            .addComponent(criterionMethodNoExceptionCheckBox, 1)
+            .addComponent(criterionCBranchCheckBox, 1)
             .addComponentFillVertically(JPanel(), 0)
             .panel
 
         algorithmSelector.setMinimumAndPreferredWidth(300)
         configurationIdTextField.toolTipText = "Label that identifies the used configuration of EvoSuite. This is only done when running experiments."
         clientOnThreadCheckBox.toolTipText = "Run client process on same JVM of master in separate thread. To be used only for debugging purposes"
+        junitCheckCheckBox.toolTipText = "Compile and run resulting JUnit test suite (if any was created)"
         criterionSeparator.toolTipText = "Coverage criterion. Can define more than one criterion by checking multiple checkboxes. " +
                 "\n By default, all are used."
     }
@@ -120,6 +123,12 @@ class TestGenieSettingsComponent {
         get() = clientOnThreadCheckBox.isSelected
         set(newStatus) {
             clientOnThreadCheckBox.isSelected = newStatus
+        }
+
+    var junitCheck : Boolean
+        get() = junitCheckCheckBox.isSelected
+        set(newStatus) {
+            junitCheckCheckBox.isSelected = newStatus
         }
 
     var criterionLine : Boolean
