@@ -40,33 +40,42 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
         loadState()
 
         toolWindowPanel = FormBuilder.createFormBuilder()
-                .addLabeledComponent(JBLabel("Search budget"), searchBudget, 1, false)
+                .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 1, false)
                 .addTooltip("Default 60 seconds")
-                .addLabeledComponent(JBLabel("Local search budget type"), localSearchBudgetType, 1, false)
+                .addLabeledComponent(customLabel("Local search budget type", "Interpretation of local search budget value."), localSearchBudgetType, 1, false)
                 .addTooltip("Default Time")
-                .addLabeledComponent(JBLabel("Local search budget value"), localSearchBudgetValue, 1, false)
+                .addLabeledComponent(customLabel("Local search budget value", "Maximum budget usable for improving individuals per local search."), localSearchBudgetValue, 1, false)
                 .addTooltip("Default 5")
-                .addLabeledComponent(JBLabel("Stopping condition"), stoppingCondition, 1, false)
+                .addLabeledComponent(customLabel("Stopping condition", "What condition should be checked to end the search."), stoppingCondition, 1, false)
                 .addTooltip("Default: Max time")
-                .addLabeledComponent(JBLabel("Initialization timeout"), initializationTimeout, 1, false)
+                .addLabeledComponent(customLabel("Initialization timeout", "Seconds allowed for initializing the search."), initializationTimeout, 1, false)
                 .addTooltip("Default 120 seconds")
-                .addLabeledComponent(JBLabel("Minimisation timeout"), minimisationTimeout, 1, false)
+                .addLabeledComponent(customLabel("Minimisation timeout", "Seconds allowed for minimization at the end."), minimisationTimeout, 1, false)
                 .addTooltip("Default 60 seconds")
-                .addLabeledComponent(JBLabel("Assertion timeout"), assertionTimeout, 1, false)
+                .addLabeledComponent(customLabel("Assertion timeout", "Seconds allowed for assertion generation at the end."), assertionTimeout, 1, false)
                 .addTooltip("Default 60 seconds")
-                .addLabeledComponent(JBLabel("JUnit check timeout"), junitCheckTimeout, 1, false)
+                .addLabeledComponent(customLabel("JUnit check timeout", "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."), junitCheckTimeout, 1, false)
                 .addTooltip("Default 60 seconds")
-                .addLabeledComponent(JBLabel("Population"), population, 1, false)
+                .addLabeledComponent(customLabel("Population", "Population size of genetic algorithm."), population, 1, false)
                 .addTooltip("Default 50")
-                .addLabeledComponent(JBLabel("Population limit"), populationLimit, 1, false)
+                .addLabeledComponent(customLabel("Population limit", "What to use as limit for the population size."), populationLimit, 1, false)
                 .addTooltip("Default: Individuals")
                 .addComponent(saveButton)
                 .addComponentToRightColumn(resetButton)
                 .addComponentFillVertically(JPanel(), 0)
                 .panel
-
+                resetButton.toolTipText = "Reset all parameters to default."
                 saveButton.addActionListener { addListenerForSaveButton(it) }
                 resetButton.addActionListener { addListenerForResetButton(it) }
+    }
+
+    /**
+     * Function that returns a JBLabel that can be customized to its own label text and tooltip text.
+     */
+    private fun customLabel(label: String, tooltip: String ) : JBLabel {
+        var labeled: JBLabel = JBLabel(label)
+        labeled.toolTipText = tooltip
+        return labeled
     }
 
     /**
