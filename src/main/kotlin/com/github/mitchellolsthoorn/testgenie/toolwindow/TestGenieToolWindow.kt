@@ -32,6 +32,7 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
     private var population: JSpinner = JSpinner(SpinnerNumberModel(50,0,10000,1))
     private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
     private var saveButton: JButton = JButton("Save")
+    private var resetButton: JButton = JButton("Reset")
 
     private var toolWindowPanel: JPanel = JPanel()
 
@@ -46,7 +47,7 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
                 .addLabeledComponent(JBLabel("Local search budget value"), localSearchBudgetValue, 1, false)
                 .addTooltip("Default 5")
                 .addLabeledComponent(JBLabel("Stopping condition"), stoppingCondition, 1, false)
-                .addTooltip("Default: Max statements")
+                .addTooltip("Default: Max time")
                 .addLabeledComponent(JBLabel("Initialization timeout"), initializationTimeout, 1, false)
                 .addTooltip("Default 120 seconds")
                 .addLabeledComponent(JBLabel("Minimisation timeout"), minimisationTimeout, 1, false)
@@ -60,10 +61,12 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
                 .addLabeledComponent(JBLabel("Population limit"), populationLimit, 1, false)
                 .addTooltip("Default: Individuals")
                 .addComponent(saveButton)
+                .addComponentToRightColumn(resetButton)
                 .addComponentFillVertically(JPanel(), 0)
                 .panel
 
                 saveButton.addActionListener { addListenerForSaveButton(it) }
+                resetButton.addActionListener { addListenerForResetButton(it) }
     }
 
     /**
@@ -73,16 +76,22 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
         return toolWindowPanel
     }
 
-    private fun isModified(): Boolean {
-        // TODO: Load state data and compare if it was modified.
-        if (searchBudget.value == null) Messages.showErrorDialog("Please specify the value of search budget", "Empty Value Field")
-        if (localSearchBudgetValue.value == null) Messages.showErrorDialog("Please specify the value of local search budget", "Empty Value Field")
-        if (initializationTimeout.value == null) Messages.showErrorDialog("Please specify the value of initialization timeout", "Empty Value Field")
-        if (minimisationTimeout.value == null) Messages.showErrorDialog("Please specify the value of minimization timeout", "Empty Value Field")
-        if (assertionTimeout.value == null) Messages.showErrorDialog("Please specify the value of assertion timeout", "Empty Value Field")
-        if (junitCheckTimeout.value == null) Messages.showErrorDialog("Please specify the value JUnit check timeout", "Empty Value Field")
-        if (population.value == null) Messages.showErrorDialog("Please specify the value of population", "Empty Value Field")
-        return true
+    private val addListenerForResetButton : (ActionEvent) -> Unit = {
+        val state : TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+        state.searchBudget = 60
+        state.localSearchBudgetType = LocalSearchBudgetType.TIME
+        state.localSearchBudgetValue = 5
+        state.stoppingCondition = StoppingCondition.MAXTIME
+        state.initializationTimeout = 120
+        state.minimisationTimeout = 60
+        state.assertionTimeout = 60
+        state.junitCheckTimeout = 60
+        state.population = 50
+        state.populationLimit = PopulationLimit.INDIVIDUALS
+
+        loadState()
+
+        Messages.showInfoMessage("Parameters were restored to defaults", "Restored Successfully")
     }
 
 
@@ -94,21 +103,6 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
         saveState()
 
         Messages.showInfoMessage("Parameters have been saved successfully", "Saved Successfully")
-
-//        if (maxSizeTextField?.text == null || globalTimeOutTextField?.text == null) {
-//            Messages.showErrorDialog("Please specify the value", "Empty Value Field")
-//        } else {
-//            // Validate all the input values
-//            val maxSize: Int? = toInt(maxSizeTextField!!.text)
-//            val globalTimeout: Int? = toInt(globalTimeOutTextField!!.text)
-//            val coverage : Boolean = coverageCombobox?.selectedItem.toString().toBoolean()
-//
-//            if (maxSize == null || globalTimeout == null) {
-//                Messages.showErrorDialog("Please specify a number", "Invalid Input Value")
-//            } else {
-//                Messages.showInfoMessage("Parameters have been saved successfully", "Saved Successfully")
-//            }
-//        }
     }
 
     private fun loadState() {
