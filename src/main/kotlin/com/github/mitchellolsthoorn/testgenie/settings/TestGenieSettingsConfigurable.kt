@@ -80,7 +80,7 @@ class TestGenieSettingsConfigurable : Configurable {
         settingsState.algorithm = settingsComponent!!.algorithm
         settingsState.configurationId = settingsComponent!!.configurationId
         settingsState.clientOnThread = settingsComponent!!.clientOnThread
-        settingsState.junitCheck = settingsState!!.junitCheck
+        settingsState.junitCheck = settingsComponent!!.junitCheck
         settingsState.criterionLine = settingsComponent!!.criterionLine
         settingsState.criterionBranch = settingsComponent!!.criterionBranch
         settingsState.criterionException = settingsComponent!!.criterionException
