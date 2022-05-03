@@ -40,9 +40,9 @@ enum class LocalSearchBudgetType(private val display: String) {
  * This enum contains the type for the stopping condition of the algorithm.
  */
 enum class StoppingCondition(private val display: String) {
+    MAXTIME("Max time"),
     MAXSTATEMENTS("Max statements"),
     MAXTESTS("Max tests"),
-    MAXTIME("Max time"),
     MAXGENERATIONS("Max generations"),
     MAXFITNESSEVALUATIONS("Max fitness evaluations"),
     TIMEDELTA("Time delta");
