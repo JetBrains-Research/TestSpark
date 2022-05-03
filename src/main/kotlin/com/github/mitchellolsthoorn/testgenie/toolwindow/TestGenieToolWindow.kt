@@ -28,7 +28,7 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
     private var minimisationTimeout: JSpinner = JSpinner(SpinnerNumberModel(60,0,10000,1))
     private var assertionTimeout: JSpinner = JSpinner(SpinnerNumberModel(60,0,10000,1))
     private var junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(60,0,10000,1))
-    private var population: JSpinner = JSpinner(SpinnerNumberModel(5,0,10000,1))
+    private var population: JSpinner = JSpinner(SpinnerNumberModel(50,0,10000,1))
     private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
     private var saveButton: JButton? = null
 
@@ -37,15 +37,25 @@ class TestGenieToolWindow(_toolWindow: ToolWindow) {
     init {
         toolWindowPanel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(JBLabel("Search budget"), searchBudget, 1, false)
+                .addTooltip("Default 60 seconds")
                 .addLabeledComponent(JBLabel("Local search budget type"), localSearchBudgetType, 1, false)
+                .addTooltip("Default TIME")
                 .addLabeledComponent(JBLabel("Local search budget value"), localSearchBudgetValue, 1, false)
+                .addTooltip("Default 5")
                 .addLabeledComponent(JBLabel("Stopping condition"), stoppingCondition, 1, false)
+                .addTooltip("Default MAXSTATEMENTS")
                 .addLabeledComponent(JBLabel("Initialization timeout"), initializationTimeout, 1, false)
+                .addTooltip("Default 120 seconds")
                 .addLabeledComponent(JBLabel("Minimisation timeout"), minimisationTimeout, 1, false)
+                .addTooltip("Default 60 seconds")
                 .addLabeledComponent(JBLabel("Assertion timeout"), assertionTimeout, 1, false)
+                .addTooltip("Default 60 seconds")
                 .addLabeledComponent(JBLabel("JUnit check timeout"), junitCheckTimeout, 1, false)
+                .addTooltip("Default 60 seconds")
                 .addLabeledComponent(JBLabel("Population"), population, 1, false)
+                .addTooltip("Default 50")
                 .addLabeledComponent(JBLabel("Population limit"), populationLimit, 1, false)
+                .addTooltip("Default INDIVIDUALS")
                 .addComponentFillVertically(JPanel(), 0)
                 .panel
         //saveButton?.addActionListener { addListenerForSaveButton(it) }
