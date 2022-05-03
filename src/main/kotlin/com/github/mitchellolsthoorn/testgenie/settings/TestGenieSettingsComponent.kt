@@ -25,6 +25,18 @@ class TestGenieSettingsComponent {
             "MU_PLUS_LAMBDA_EA", "MU_LAMBDA_EA", "MOSA", "DYNAMOSA", "LIPS", "MIO", "NSGAII", "SPEA2"))
     private var configurationIdTextField = JTextField()
     private var clientOnThreadCheckBox = JCheckBox("client on thread")
+    //There is a limited amount of criteria, but multiple can be selected at once.
+    //Effectively, this requires its own section (or a checkboxed combobox of sorts)
+    private var criterionSeparator = JXTitledSeparator("criterion selection")
+    private var criterionLineCheckBox = JCheckBox("Line coverage")
+    private var criterionBranchCheckBox = JCheckBox("Branch coverage")
+    private var criterionExceptionCheckBox = JCheckBox("Exception coverage")
+    private var criterionWeakMutationCheckBox = JCheckBox("Mutation coverage")
+    private var criterionOutputCheckBox = JCheckBox("Output coverage")
+    private var criterionMethodCheckBox = JCheckBox("Method coverage")
+    private var criterionMethodNoExceptionCheckBox = JCheckBox("Method no exception coverage")
+    private var criterionCBranchCheckBox = JCheckBox("CBranch coverage")
+
     init {
         panel = FormBuilder.createFormBuilder()
             .addLabeledComponent(JBLabel("Global timeout "), globalTimeoutTextField, 1, false)
@@ -35,12 +47,23 @@ class TestGenieSettingsComponent {
             .addLabeledComponent(JBLabel("select search algorithm"), algorithmSelector, 1, false)
             .addLabeledComponent(JBLabel("Select configuration id (null if left empty) "), configurationIdTextField, 1, false)
             .addComponent(clientOnThreadCheckBox, 1)
+            .addComponent(criterionSeparator)
+            .addComponent(criterionLineCheckBox)
+            .addComponent(criterionBranchCheckBox)
+            .addComponent(criterionExceptionCheckBox)
+            .addComponent(criterionWeakMutationCheckBox)
+            .addComponent(criterionOutputCheckBox)
+            .addComponent(criterionMethodCheckBox)
+            .addComponent(criterionMethodNoExceptionCheckBox)
+            .addComponent(criterionCBranchCheckBox)
             .addComponentFillVertically(JPanel(), 0)
             .panel
 
         algorithmSelector.setMinimumAndPreferredWidth(300)
         configurationIdTextField.toolTipText = "Label that identifies the used configuration of EvoSuite. This is only done when running experiments."
         clientOnThreadCheckBox.toolTipText = "Run client process on same JVM of master in separate thread. To be used only for debugging purposes"
+        criterionSeparator.toolTipText = "Coverage criterion. Can define more than one criterion by checking multiple checkboxes. " +
+                "\n By default, all are used."
     }
 
     /**
@@ -97,5 +120,53 @@ class TestGenieSettingsComponent {
         get() = clientOnThreadCheckBox.isSelected
         set(newStatus) {
             clientOnThreadCheckBox.isSelected = newStatus
+        }
+
+    var criterionLine : Boolean
+        get() = criterionLineCheckBox.isSelected
+        set(newStatus) {
+            criterionLineCheckBox.isSelected = newStatus
+        }
+
+    var criterionBranch : Boolean
+        get() = criterionBranchCheckBox.isSelected
+        set(newStatus) {
+            criterionBranchCheckBox.isSelected = newStatus
+        }
+
+    var criterionException : Boolean
+        get() = criterionExceptionCheckBox.isSelected
+        set(newStatus) {
+            criterionExceptionCheckBox.isSelected = newStatus
+        }
+
+    var criterionWeakMutation : Boolean
+        get() = criterionWeakMutationCheckBox.isSelected
+        set(newStatus) {
+            criterionWeakMutationCheckBox.isSelected = newStatus
+        }
+
+    var criterionOutput : Boolean
+        get() = criterionOutputCheckBox.isSelected
+        set(newStatus) {
+            criterionOutputCheckBox.isSelected = newStatus
+        }
+
+    var criterionMethod : Boolean
+        get() = criterionMethodCheckBox.isSelected
+        set(newStatus) {
+            criterionMethodCheckBox.isSelected = newStatus
+        }
+
+    var criterionMethodNoException : Boolean
+        get() = criterionMethodNoExceptionCheckBox.isSelected
+        set(newStatus) {
+            criterionMethodNoExceptionCheckBox.isSelected = newStatus
+        }
+
+    var criterionCBranch : Boolean
+        get() = criterionCBranchCheckBox.isSelected
+        set(newStatus) {
+            criterionCBranchCheckBox.isSelected = newStatus
         }
 }

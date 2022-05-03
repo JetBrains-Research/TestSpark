@@ -12,7 +12,16 @@ data class TestGenieSettingsState(
         var seed : String = "",
         var algorithm: String = ContentDigestAlgorithm.RANDOM_SEARCH.toString(),
         var configurationId : String = "",
-        var clientOnThread : Boolean = false
+        var clientOnThread : Boolean = false,
+        var criterionLine : Boolean = true,
+        var criterionBranch : Boolean = true,
+        var criterionException : Boolean = true,
+        var criterionWeakMutation : Boolean = true,
+        var criterionOutput : Boolean = true,
+        var criterionMethod : Boolean = true,
+        var criterionMethodNoException : Boolean = true,
+        var criterionCBranch : Boolean = true
+
 )
 
 enum class ContentDigestAlgorithm {
