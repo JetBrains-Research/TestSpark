@@ -40,6 +40,7 @@ class TestGenieSettingsConfigurable : Configurable {
         settingsComponent!!.criterionMethod = settingsState.criterionMethod
         settingsComponent!!.criterionMethodNoException = settingsState.criterionMethodNoException
         settingsComponent!!.criterionCBranch = settingsState.criterionCBranch
+        settingsComponent!!.minimize = settingsState.minimize
     }
 
     /**
@@ -64,6 +65,7 @@ class TestGenieSettingsConfigurable : Configurable {
         modified = modified or (settingsComponent!!.criterionMethod != settingsState.criterionMethod)
         modified = modified or (settingsComponent!!.criterionMethodNoException != settingsState.criterionMethodNoException)
         modified = modified or (settingsComponent!!.criterionCBranch != settingsState.criterionCBranch)
+        modified = modified or (settingsComponent!!.minimize != settingsState.minimize)
         return modified
     }
 
@@ -89,6 +91,7 @@ class TestGenieSettingsConfigurable : Configurable {
         settingsState.criterionMethod = settingsComponent!!.criterionMethod
         settingsState.criterionMethodNoException = settingsComponent!!.criterionMethodNoException
         settingsState.criterionCBranch = settingsComponent!!.criterionCBranch
+        settingsState.minimize = settingsComponent!!.minimize
     }
 
     /**

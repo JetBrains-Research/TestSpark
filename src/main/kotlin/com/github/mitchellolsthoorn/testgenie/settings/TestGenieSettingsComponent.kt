@@ -37,6 +37,7 @@ class TestGenieSettingsComponent {
     private var criterionMethodCheckBox = JCheckBox("Method coverage")
     private var criterionMethodNoExceptionCheckBox = JCheckBox("Method no exception coverage")
     private var criterionCBranchCheckBox = JCheckBox("CBranch coverage")
+    private var minimizeCheckBox = JCheckBox("Minimize test suite after generation")
 
     init {
         panel = FormBuilder.createFormBuilder()
@@ -177,5 +178,11 @@ class TestGenieSettingsComponent {
         get() = criterionCBranchCheckBox.isSelected
         set(newStatus) {
             criterionCBranchCheckBox.isSelected = newStatus
+        }
+
+    var minimize : Boolean
+        get() = minimizeCheckBox.isSelected
+        set(newStatus) {
+            minimizeCheckBox.isSelected = newStatus
         }
 }
