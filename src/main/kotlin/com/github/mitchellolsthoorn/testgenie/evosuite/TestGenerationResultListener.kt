@@ -8,5 +8,5 @@ val TEST_GENERATION_RESULT_TOPIC: Topic<TestGenerationResultListener> = Topic.cr
 )
 
 interface TestGenerationResultListener {
-    fun testGenerationResult(test: CompactReport)
+    fun testGenerationResult(testReport: CompactReport)
 }
