@@ -1,12 +1,12 @@
 package com.github.mitchellolsthoorn.testgenie.settings
 
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JPanel
-import javax.swing.JSeparator
 import javax.swing.JTextField
 
 /**
@@ -14,15 +14,13 @@ import javax.swing.JTextField
  */
 class TestGenieSettingsComponent {
     var panel: JPanel? = null
-    var globalTimeoutTextField = JTextField()
-    var showCoverageCheckBox = JCheckBox("Do you want visualised coverage? ")
+    private var globalTimeoutTextField = JTextField()
+    private var showCoverageCheckBox = JCheckBox("Do you want visualised coverage? ")
     private var sandboxCheckBox = JCheckBox("Execute tests in a sandbox environment")
     private var assertionsCheckBox = JCheckBox("Create assertions")
     private var seedTextField = JTextField()
     //DropDown menu
-    private var algorithmSelector = com.intellij.openapi.ui.ComboBox(arrayOf<String>("RANDOM_SEARCH","STANDARD_GA", "MONOTONIC_GA", "STEADY_STATE_GA",
-            "BREEDER_GA", "CELLULAR_GA", "STANDARD_CHEMICAL_REACTION", "MAP_ELITES", "ONE_PLUS_LAMBDA_LAMBDA_GA", "ONE_PLUS_ONE_EA",
-            "MU_PLUS_LAMBDA_EA", "MU_LAMBDA_EA", "MOSA", "DYNAMOSA", "LIPS", "MIO", "NSGAII", "SPEA2"))
+    private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
     private var configurationIdTextField = JTextField()
     private var clientOnThreadCheckBox = JCheckBox("Client on thread")
     private var junitCheckCheckBox = JCheckBox("Compile and run suite")
@@ -110,7 +108,7 @@ class TestGenieSettingsComponent {
             seedTextField.text = newText
         }
 
-    var algorithm: String
+    var algorithm: ContentDigestAlgorithm
         get() = algorithmSelector.item
         set(newAlg) {
             algorithmSelector.item = newAlg

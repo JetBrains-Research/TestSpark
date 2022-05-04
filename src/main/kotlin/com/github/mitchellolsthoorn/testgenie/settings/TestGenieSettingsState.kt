@@ -10,7 +10,7 @@ data class TestGenieSettingsState(
         var sandbox : Boolean = true,
         var assertions : Boolean = true,
         var seed : String = "",
-        var algorithm: String = ContentDigestAlgorithm.RANDOM_SEARCH.toString(),
+        var algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.RANDOM_SEARCH,
         var configurationId : String = "",
         var clientOnThread : Boolean = false,
         var junitCheck : Boolean = false,
