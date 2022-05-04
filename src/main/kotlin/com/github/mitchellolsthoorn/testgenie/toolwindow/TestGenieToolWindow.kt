@@ -1,18 +1,12 @@
 package com.github.mitchellolsthoorn.testgenie.toolwindow
 
-import com.intellij.openapi.ui.Messages
-import java.awt.event.ActionEvent
-import javax.swing.JButton
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.Messages
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import java.awt.*
-import javax.swing.JComponent
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JSpinner
-import javax.swing.SpinnerNumberModel
+import java.awt.event.ActionEvent
 import javax.swing.*
 
 /**
