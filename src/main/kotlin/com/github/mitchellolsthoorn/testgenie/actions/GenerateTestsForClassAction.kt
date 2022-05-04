@@ -1,10 +1,8 @@
 package com.github.mitchellolsthoorn.testgenie.actions
 
-import com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.CaretModel
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.ui.Messages

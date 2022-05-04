@@ -16,9 +16,9 @@ class EvoSuiteRunner {
 
         fun runEvoSuite(projectPath: String, projectClassPath: String, classFQN: String): String {
 
-            val javaPath = "java";// TODO: Source from config
+            val javaPath = "java"// TODO: Source from config
 
-            val pluginsPath = System.getProperty("idea.plugins.path");
+            val pluginsPath = System.getProperty("idea.plugins.path")
             val evoSuitePath = "$pluginsPath/TestGenie/lib/evosuite.jar"
 
             val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
