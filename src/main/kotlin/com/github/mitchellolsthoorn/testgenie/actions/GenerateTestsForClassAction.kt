@@ -52,6 +52,96 @@ class GenerateTestsForClassAction : AnAction() {
                 """.trimIndent(),
                 """
                 @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
                 public void test2()  throws Throwable  {
                     int[] intArray0 = new int[5];
                     int int0 = ArrayUtils.indexOf(intArray0, 0, 0);

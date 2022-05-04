@@ -1,10 +1,9 @@
-package com.github.mitchellolsthoorn.testgenie.services;
+package com.github.mitchellolsthoorn.testgenie.services
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaCodeFragmentFactory
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiExpressionCodeFragment
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import java.awt.BorderLayout
@@ -43,7 +42,7 @@ class TestCaseDisplayService(private val project: Project) {
             val code = JavaCodeFragmentFactory.getInstance(project)
                 .createExpressionCodeFragment(it, null, null, true)
             val document = PsiDocumentManager.getInstance(project).getDocument(code)
-            val editor = EditorTextField(document, project, JavaFileType.INSTANCE);
+            val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
 
             editor.setOneLineMode(false)
             editor.isViewer = true
