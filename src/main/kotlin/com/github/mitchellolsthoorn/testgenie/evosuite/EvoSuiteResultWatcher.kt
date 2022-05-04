@@ -1,4 +1,4 @@
-package com.github.mitchellolsthoorn.testgenie.evo
+package com.github.mitchellolsthoorn.testgenie.evosuite
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader

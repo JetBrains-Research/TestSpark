@@ -1,12 +1,9 @@
-package com.github.mitchellolsthoorn.testgenie
+package com.github.mitchellolsthoorn.testgenie.listener
 
-import com.github.mitchellolsthoorn.testgenie.evo.TestGenerationResultListener
+import com.github.mitchellolsthoorn.testgenie.evosuite.TestGenerationResultListener
 import com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManagerListener
 import org.evosuite.utils.CompactReport
 
 class TestGenerationResultListenerImpl(val project: Project) : TestGenerationResultListener {

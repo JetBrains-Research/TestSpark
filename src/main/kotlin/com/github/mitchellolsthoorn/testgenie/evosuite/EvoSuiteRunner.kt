@@ -1,4 +1,4 @@
-package com.github.mitchellolsthoorn.testgenie.evo
+package com.github.mitchellolsthoorn.testgenie.evosuite
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.*

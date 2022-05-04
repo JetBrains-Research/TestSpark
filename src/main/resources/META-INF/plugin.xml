@@ -23,8 +23,8 @@
 
     <projectListeners>
         <listener
-                class="com.github.mitchellolsthoorn.testgenie.TestGenerationResultListenerImpl"
-                topic="com.github.mitchellolsthoorn.testgenie.evo.TestGenerationResultListener"/>
+                class="com.github.mitchellolsthoorn.testgenie.listener.TestGenerationResultListenerImpl"
+                topic="com.github.mitchellolsthoorn.testgenie.evosuite.TestGenerationResultListener"/>
     </projectListeners>
 
     <actions>
