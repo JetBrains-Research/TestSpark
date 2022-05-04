@@ -9,6 +9,8 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService"/>
+
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
