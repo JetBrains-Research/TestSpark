@@ -1,8 +1,10 @@
 package com.github.mitchellolsthoorn.testgenie.actions
 
+import com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.CaretModel
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.ui.Messages
@@ -24,6 +26,39 @@ class GenerateTestsForClassAction : AnAction() {
             e.project,
             "Generating tests for the class `${e.dataContext}`\nThe selected text is:\n$selectedText",
             "Generate Tests for Class"
+        )
+
+        val testCaseDisplayService = e.project!!.service<TestCaseDisplayService>()
+
+        // TODO: display the actual generated test cases
+        testCaseDisplayService.displayTestCases(
+            listOf(
+                """
+                @Test(timeout = 4000)
+                public void test0()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    int int0 = ArrayUtils.indexOf(intArray0, 522, 384);
+                    assertEquals((-1), int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test1()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    intArray0[3] = 1;
+                    int int0 = ArrayUtils.indexOf(intArray0, 1, (-3154));
+                    assertEquals(3, int0);
+                }
+                """.trimIndent(),
+                """
+                @Test(timeout = 4000)
+                public void test2()  throws Throwable  {
+                    int[] intArray0 = new int[5];
+                    int int0 = ArrayUtils.indexOf(intArray0, 0, 0);
+                    assertEquals(0, int0);
+                }
+                """.trimIndent()
+            )
         )
     }
 
