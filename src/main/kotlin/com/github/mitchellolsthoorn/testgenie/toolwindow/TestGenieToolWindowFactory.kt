@@ -9,7 +9,6 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import javax.swing.JScrollPane
 import javax.swing.JTextArea
-import javax.swing.JTextField
 
 /**
  * This class is responsible for creating the UI of the TestGenie tool window.

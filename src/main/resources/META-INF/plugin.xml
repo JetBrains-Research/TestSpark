@@ -16,6 +16,8 @@
 
         <applicationService
                 serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsService"/>
+        <applicationService
+                serviceImplementation="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowService"/>
         <applicationConfigurable
                 parentId="tools"
                 instance="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
