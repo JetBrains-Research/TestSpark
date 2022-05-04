@@ -1,14 +1,15 @@
 package com.github.mitchellolsthoorn.testgenie.evo
 
-import com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteRuntimeConfiguration
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ScriptRunnerUtil
 import com.intellij.openapi.diagnostic.Logger
-import java.io.FileInputStream
-import java.io.ObjectInputStream
+import com.intellij.openapi.util.io.FileUtilRt
+import java.io.File
 import java.nio.charset.Charset
+import java.nio.file.Path
+import java.nio.file.Paths
 
 
 class EvoSuiteRunner {
@@ -18,15 +19,17 @@ class EvoSuiteRunner {
 
         fun runEvoSuite(projectPath: String, projectClassPath: String, classFQN: String): String {
 
-            val evosuiteSettings = EvoSuiteRuntimeConfiguration.getInstance();
+            val pluginsPath = System.getProperty("idea.plugins.path");
 
             val javaPath = "java";// TODO: Source from config
-            val evoSuitePath = evosuiteSettings.state.evoSuiteJarPath;
+            val evoSuitePath = "$pluginsPath/TestGenie/lib/evosuite.jar"
 
-            val ts = System.currentTimeMillis();
-            val testResultDirectory = "/tmp/mincho/";
+            val ts = System.currentTimeMillis()
+            val sep = File.separatorChar
+            val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults${sep}"
+
             val testResultName = "test_gen_result_$ts"
-            val serializeResultPath = "$testResultDirectory$testResultName"
+            val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
             val command = arrayOf(
                 "-generateSuite",
@@ -59,11 +62,14 @@ class EvoSuiteRunner {
 
                 processHandler.startNotify()
 
-                val output = ScriptRunnerUtil.getProcessOutput(
+                val stderr = ScriptRunnerUtil.getProcessOutput(
                     generalCommandLine,
-                    ScriptRunnerUtil.STDOUT_OR_STDERR_OUTPUT_KEY_FILTER, 12000000
+                    ScriptRunnerUtil.STDERR_OUTPUT_KEY_FILTER, 12000000
                 )
-                log.debug("Process output: $output")
+
+                if (stderr.isNotEmpty()) {
+                    log.error("Process output: $stderr")
+                }
 
             }.start()
 
