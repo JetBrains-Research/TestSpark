@@ -7,6 +7,7 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
+import javax.swing.JScrollPane
 import javax.swing.JTextArea
 import javax.swing.JTextField
 
@@ -23,7 +24,7 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
 
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
         toolWindow.contentManager.addContent(
-            contentFactory.createContent(testCaseDisplayService.panel,
+            contentFactory.createContent(JScrollPane(testCaseDisplayService.panel),
                 "Generated Tests",
                 true)
         )
