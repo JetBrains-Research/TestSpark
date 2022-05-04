@@ -14,6 +14,8 @@ class EvoSuiteResultWatcher(private val project: Project, private val resultPath
     private val log = Logger.getInstance(EvoSuiteResultWatcher::class.java)
 
     override fun run() {
+        val watcherSleepDurationMillis: Long = 5000
+
         val sep = File.separatorChar
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults${sep}"
 
@@ -26,7 +28,7 @@ class EvoSuiteResultWatcher(private val project: Project, private val resultPath
         log.info("Started result listener thread for $resultPath")
 
         while (true) {
-            Thread.sleep(5000)
+            Thread.sleep(watcherSleepDurationMillis)
             log.info("Searching for $resultPath results in $testResultDirectory")
             val list = tmpDir.list()
             if (list == null) {
