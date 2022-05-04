@@ -1,6 +1,7 @@
 package com.github.mitchellolsthoorn.testgenie.services;
 
 import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaCodeFragmentFactory
 import com.intellij.psi.PsiDocumentManager
@@ -44,7 +45,6 @@ class TestCaseDisplayService(private val project: Project) {
                 .createExpressionCodeFragment(it, null, null, true)
             val document = PsiDocumentManager.getInstance(project).getDocument(code)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE);
-
             editor.setOneLineMode(false)
             editor.isViewer = true
             editor.preferredSize = Dimension(Short.MAX_VALUE.toInt(), 200)
