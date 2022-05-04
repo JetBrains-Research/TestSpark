@@ -1,5 +1,7 @@
 package com.github.mitchellolsthoorn.testgenie.toolwindow
 
+import com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
@@ -17,6 +19,14 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val testGeniePanelWrapper = TestGenieToolWindow()
         val contentFactory : ContentFactory = ContentFactory.SERVICE.getInstance()
+
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+        toolWindow.contentManager.addContent(
+            contentFactory.createContent(testCaseDisplayService.mainPanel,
+                "Generated Tests",
+                true)
+        )
+
         val content : Content = contentFactory.createContent(testGeniePanelWrapper.getContent(), "Parameters", false)
 
         toolWindow.contentManager.addContent(content)
