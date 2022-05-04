@@ -6,7 +6,6 @@ import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import javax.swing.JTextArea
-import javax.swing.JTextField
 
 /**
  * This class is responsible for creating the UI of the TestGenie tool window.
@@ -16,7 +15,7 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
      * Initialises the UI of the tool window.
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val testGeniePanelWrapper = TestGenieToolWindow(toolWindow)
+        val testGeniePanelWrapper = TestGenieToolWindow()
         val contentFactory : ContentFactory = ContentFactory.SERVICE.getInstance()
         val content : Content = contentFactory.createContent(testGeniePanelWrapper.getContent(), "Parameters", false)
 
