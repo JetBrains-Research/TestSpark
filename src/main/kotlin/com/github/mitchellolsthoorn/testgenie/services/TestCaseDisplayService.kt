@@ -31,7 +31,9 @@ class TestCaseDisplayService(project: Project) {
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
 
-            testCasePanel.add(JCheckBox(), BorderLayout.WEST)
+            val checkbox = JCheckBox()
+            checkbox.isSelected = true
+            testCasePanel.add(checkbox, BorderLayout.WEST)
 
             val editor = JTextArea(it)
             editor.isEditable = false
