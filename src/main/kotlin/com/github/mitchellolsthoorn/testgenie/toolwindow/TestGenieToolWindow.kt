@@ -1,22 +1,13 @@
 package com.github.mitchellolsthoorn.testgenie.toolwindow
 
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.wm.ToolWindow
-import java.awt.Dimension
 import java.awt.event.ActionEvent
-import javax.swing.JButton
-import javax.swing.JComboBox
-import javax.swing.JComponent
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JTextField
+import javax.swing.*
 
 /**
  * This class stores the UI of the TestGenie tool window.
  */
-class TestGenieToolWindow(_toolWindow: ToolWindow) {
-
-    private val toolWindow = _toolWindow
+class TestGenieToolWindow {
 
     private var maxSizeTextField: JTextField? = null
     private var globalTimeOutTextField: JTextField? = null
