@@ -36,7 +36,7 @@ class TestGenieToolWindow {
 
     private var toolWindowPanel: JPanel = JPanel()
 
-    private val DEFAULT_STR : String = "Default: %s"
+    private val defaultStr : String = "Default: %s"
 
     init {
         loadState()
@@ -129,21 +129,29 @@ class TestGenieToolWindow {
      *
      */
     private val addListenerForResetButton : (ActionEvent) -> Unit = {
-        val state : TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
-        state.searchBudget = 60
-        state.localSearchBudgetType = LocalSearchBudgetType.TIME
-        state.localSearchBudgetValue = 5
-        state.stoppingCondition = StoppingCondition.MAXTIME
-        state.initializationTimeout = 120
-        state.minimisationTimeout = 60
-        state.assertionTimeout = 60
-        state.junitCheckTimeout = 60
-        state.population = 50
-        state.populationLimit = PopulationLimit.INDIVIDUALS
+        val choice : Int = Messages.showYesNoCancelDialog(
+            "Are you sure you want to reset all the values to defaults?\nThis action cannot be undone",
+            "Are you sure?",
+            Messages.getQuestionIcon()
+        )
 
-        loadState()
+        if (choice == 0) {
+            val state: TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+            state.searchBudget = 60
+            state.localSearchBudgetType = LocalSearchBudgetType.TIME
+            state.localSearchBudgetValue = 5
+            state.stoppingCondition = StoppingCondition.MAXTIME
+            state.initializationTimeout = 120
+            state.minimisationTimeout = 60
+            state.assertionTimeout = 60
+            state.junitCheckTimeout = 60
+            state.population = 50
+            state.populationLimit = PopulationLimit.INDIVIDUALS
 
-        Messages.showInfoMessage("Parameters have been restored to defaults", "Restored Successfully")
+            loadState()
+
+            Messages.showInfoMessage("Parameters have been restored to defaults", "Restored Successfully")
+        }
     }
 
 
@@ -199,6 +207,6 @@ class TestGenieToolWindow {
      * @return a string with the provided default value in the specified format
      */
     private fun default(value: String) : String {
-        return String.format(DEFAULT_STR, value)
+        return String.format(defaultStr, value)
     }
 }
