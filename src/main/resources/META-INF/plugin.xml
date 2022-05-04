@@ -13,11 +13,6 @@
                     factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
         <applicationService
-                serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteRuntimeConfiguration"/>
-        <applicationConfigurable instance="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteConfigurable"
-                             id="com.github.mitchellolsthoorn.testgenie.settings.EvoSuiteConfigurable"/>
-
-        <applicationService
                 serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsService"/>
         <applicationConfigurable
                 parentId="tools"
@@ -31,7 +26,6 @@
                 class="com.github.mitchellolsthoorn.testgenie.TestGenerationResultListenerImpl"
                 topic="com.github.mitchellolsthoorn.testgenie.evo.TestGenerationResultListener"/>
     </projectListeners>
-
 
     <actions>
         <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true">
