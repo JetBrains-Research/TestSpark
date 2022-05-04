@@ -131,7 +131,7 @@ class TestGenieToolWindow {
     private val addListenerForResetButton : (ActionEvent) -> Unit = {
         val choice : Int = Messages.showYesNoCancelDialog(
             "Are you sure you want to reset all the values to defaults?\nThis action cannot be undone",
-            "Are you sure?",
+            "Are You Sure?",
             Messages.getQuestionIcon()
         )
 
