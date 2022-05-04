@@ -24,7 +24,7 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
 
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
         toolWindow.contentManager.addContent(
-            contentFactory.createContent(JScrollPane(testCaseDisplayService.panel),
+            contentFactory.createContent(testCaseDisplayService.mainPanel,
                 "Generated Tests",
                 true)
         )
