@@ -1,17 +1,23 @@
 package com.github.mitchellolsthoorn.testgenie.services;
 
 import com.intellij.openapi.project.Project
+import com.intellij.ui.components.JBScrollPane
 import java.awt.BorderLayout
 import java.awt.Dimension
-import java.awt.GridLayout
 import javax.swing.*
 
 class TestCaseDisplayService(project: Project) {
 
-    val panel: JPanel = JPanel()
+    val mainPanel: JPanel = JPanel()
+    private val applyButton: JButton = JButton("Apply")
+    private val allTestCasePanel: JPanel = JPanel()
+    private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
 
     init {
-        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+        allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
+        mainPanel.layout = BorderLayout()
+        mainPanel.add(applyButton, BorderLayout.SOUTH)
+        mainPanel.add(scrollPane, BorderLayout.CENTER)
     }
 
     /**
@@ -20,7 +26,7 @@ class TestCaseDisplayService(project: Project) {
      * @param testCases The test cases to display
      */
     fun displayTestCases(testCases: List<String>) {
-        panel.removeAll()
+        allTestCasePanel.removeAll()
         testCases.forEach {
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
@@ -32,9 +38,9 @@ class TestCaseDisplayService(project: Project) {
 
             testCasePanel.add(editor, BorderLayout.CENTER)
 
-            testCasePanel.maximumSize= Dimension(Short.MAX_VALUE.toInt(), testCasePanel.preferredSize.height)
-            panel.add(testCasePanel)
-            panel.add(Box.createRigidArea(Dimension(0, 5)))
+            testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), testCasePanel.preferredSize.height)
+            allTestCasePanel.add(testCasePanel)
+            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 5)))
         }
     }
 }
