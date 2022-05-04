@@ -1,7 +1,7 @@
 package com.github.mitchellolsthoorn.testgenie.actions
 
-import com.github.mitchellolsthoorn.testgenie.evo.EvoSuiteResultWatcher
-import com.github.mitchellolsthoorn.testgenie.evo.EvoSuiteRunner
+import com.github.mitchellolsthoorn.testgenie.evosuite.EvoSuiteResultWatcher
+import com.github.mitchellolsthoorn.testgenie.evosuite.EvoSuiteRunner
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
