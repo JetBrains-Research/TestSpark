@@ -36,10 +36,10 @@ class EvoSuiteResultWatcher(private val project: Project, private val resultPath
                     if (pathname == resultPath) {
                         log.info("Found file $pathname")
 
-                        val gson = Gson();
+                        val gson = Gson()
                         val reader = JsonReader(FileReader("$testResultDirectory$pathname"))
 
-                        val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java);
+                        val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
 
                         log.info("Publishing test generation result to ${TEST_GENERATION_RESULT_TOPIC.displayName}")
                         project.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC)
