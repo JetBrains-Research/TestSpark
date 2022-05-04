@@ -1,15 +1,12 @@
 package com.github.mitchellolsthoorn.testgenie.evo
 
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.process.OSProcessHandler
-import com.intellij.execution.process.ProcessHandler
-import com.intellij.execution.process.ScriptRunnerUtil
+import com.intellij.execution.process.*
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
 import java.io.File
 import java.nio.charset.Charset
-import java.nio.file.Path
-import java.nio.file.Paths
 
 
 class EvoSuiteRunner {
@@ -19,10 +16,12 @@ class EvoSuiteRunner {
 
         fun runEvoSuite(projectPath: String, projectClassPath: String, classFQN: String): String {
 
-            val pluginsPath = System.getProperty("idea.plugins.path");
-
             val javaPath = "java";// TODO: Source from config
+
+            val pluginsPath = System.getProperty("idea.plugins.path");
             val evoSuitePath = "$pluginsPath/TestGenie/lib/evosuite.jar"
+
+            val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
 
             val ts = System.currentTimeMillis()
             val sep = File.separatorChar
@@ -54,22 +53,33 @@ class EvoSuiteRunner {
                 log.info("Starting EvoSuite with arguments: $cmdString")
                 log.info("Results will be saved to $serializeResultPath")
 
-                val generalCommandLine = GeneralCommandLine(cmd)
-                generalCommandLine.charset = Charset.forName("UTF-8")
-                generalCommandLine.setWorkDirectory(projectPath)
+                val evoSuiteProcess = GeneralCommandLine(cmd)
+                evoSuiteProcess.charset = Charset.forName("UTF-8")
+                evoSuiteProcess.setWorkDirectory(projectPath)
 
-                val processHandler: ProcessHandler = OSProcessHandler(generalCommandLine)
+                val handler: ProcessHandler = OSProcessHandler(evoSuiteProcess)
 
-                processHandler.startNotify()
+                val outputBuilder = StringBuilder()
 
-                val stderr = ScriptRunnerUtil.getProcessOutput(
-                    generalCommandLine,
-                    ScriptRunnerUtil.STDERR_OUTPUT_KEY_FILTER, 12000000
-                )
+                // attach process listener for output
+                handler.addProcessListener(object : ProcessAdapter() {
+                    override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                        val text = event.text
+                        outputBuilder.append(text)
+                        log.info(text)
+                    }
+                })
 
-                if (stderr.isNotEmpty()) {
-                    log.error("Process output: $stderr")
+                handler.startNotify()
+
+                if (!handler.waitFor(evoSuiteProcessTimeout)) {
+                    log.error("EvoSuite process exceeded timeout - ${evoSuiteProcessTimeout}ms")
                 }
+
+                // TODO: handle stderr separately
+//                if (stderr.isNotEmpty()) {
+//                    log.error("EvoSuite process exited with error - $stderr")
+//                }
 
             }.start()
 
