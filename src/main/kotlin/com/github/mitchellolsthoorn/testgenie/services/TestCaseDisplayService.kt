@@ -47,7 +47,7 @@ class TestCaseDisplayService(private val project: Project) {
 
             editor.setOneLineMode(false)
             editor.isViewer = true
-            editor.preferredSize = Dimension(Short.MAX_VALUE.toInt(), 200)
+            editor.preferredSize = Dimension(0, 200)
             // TODO: add scroll bar
 
             testCasePanel.add(editor, BorderLayout.CENTER)
