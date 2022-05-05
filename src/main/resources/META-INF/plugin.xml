@@ -10,6 +10,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService"/>
+        <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.CoverageVisualisationService"/>
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/>

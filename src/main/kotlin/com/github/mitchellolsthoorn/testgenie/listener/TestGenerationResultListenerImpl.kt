@@ -1,6 +1,7 @@
 package com.github.mitchellolsthoorn.testgenie.listener
 
 import com.github.mitchellolsthoorn.testgenie.evosuite.TestGenerationResultListener
+import com.github.mitchellolsthoorn.testgenie.services.CoverageVisualisationService
 import com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
@@ -19,6 +20,12 @@ class TestGenerationResultListenerImpl(private val project: Project) : TestGener
         val tests = testReport.testCaseList.values.map { it.testCode }
         ApplicationManager.getApplication().invokeLater {
             testCaseDisplayService.displayTestCases(tests)
+        }
+
+        val coverageVisualisationService = project.service<CoverageVisualisationService>()
+
+        ApplicationManager.getApplication().invokeLater {
+            coverageVisualisationService.showCoverage(testReport)
         }
     }
 }
