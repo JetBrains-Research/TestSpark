@@ -19,10 +19,10 @@
         <applicationService
                 serviceImplementation="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowService"/>
         <applicationConfigurable
-                parentId="tools"
+                parentId="Settings"
                 instance="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
                 id="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
-                displayName="TestGenie"/>
+                displayName="TestGenie Advanced Settings"/>
     </extensions>
 
     <projectListeners>
