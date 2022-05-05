@@ -38,4 +38,9 @@ class GenerateTestsAction : AnAction() {
         AppExecutorUtil.getAppScheduledExecutorService().execute(EvoSuiteResultWatcher(project, resultPath))
     }
 
+    override fun update(e: AnActionEvent) {
+        val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
+        e.presentation.isVisible = psiElement is PsiClass
+    }
+
 }
