@@ -29,7 +29,12 @@ class GenerateTestsAction : AnAction() {
         psiFile ?: return
 
         val mainClass: PsiClass = PsiTreeUtil.findChildOfType(psiFile, PsiClass::class.java) ?: return
-        val classFQN = mainClass.qualifiedName ?: return
+        val classFileFQN = mainClass.qualifiedName ?: return
+
+        val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
+        val classFQN = classFileFQN.substring(0, classFileFQN.lastIndexOf(".") + 1)
+                            .plus(psiElement.toString().split(":")[1])
+        println(classFQN)
 
         log.info("Selected class is $classFQN")
 
@@ -40,6 +45,7 @@ class GenerateTestsAction : AnAction() {
 
     override fun update(e: AnActionEvent) {
         val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
+        println(psiElement)
         e.presentation.isVisible = psiElement is PsiClass
     }
 
