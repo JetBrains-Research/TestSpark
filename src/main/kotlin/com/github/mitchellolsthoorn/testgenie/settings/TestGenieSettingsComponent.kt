@@ -70,6 +70,8 @@ class TestGenieSettingsComponent {
 
     /**
      * Returns the UI component that should be focused when a user opens the TestGenie Settings page.
+     *
+     * @return preferred UI component
      */
     fun getPreferredFocusedComponent(): JComponent {
         return showCoverageCheckBox
