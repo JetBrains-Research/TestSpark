@@ -1,6 +1,7 @@
 package com.github.mitchellolsthoorn.testgenie.settings
 
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.ui.Messages
 import javax.swing.JComponent
 
 /**
@@ -73,6 +74,12 @@ class TestGenieSettingsConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
+        val seed = settingsComponent!!.seed.toLongOrNull()
+        if (settingsComponent!!.seed != "" && seed == null) {
+            Messages.showErrorDialog("Seed parameter is not of numeric type.", "Incorrect Numeric Type For Seed")
+            return
+        }
+
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
         settingsState.globalTimeout = settingsComponent!!.globalTimeout!!
         settingsState.showCoverage = settingsComponent!!.showCoverage
