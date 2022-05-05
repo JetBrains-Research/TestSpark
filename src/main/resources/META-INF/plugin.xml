@@ -33,12 +33,12 @@
 
     <actions>
         <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true">
-            <add-to-group group-id="CodeMenu" anchor="after" relative-to-action="Generate"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsAction"
-                    id="TestGenie.TestGenieActions.GenerateTestsAction"
-                    text="Generate Tests"
-                    description="Press to generate tests using the best test generating software TestGenie">
-                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="T" keymap="$default"/>
+                    id="TestGenie.TestGenieActions.GenerateTestsForClass"
+                    text="Generate Tests For Class"
+                    description="Generate tests for the selected class using TestGenie">
+                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="C" keymap="$default"/>
             </action>
         </group>
     </actions>
