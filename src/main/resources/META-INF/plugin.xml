@@ -8,18 +8,12 @@
     <!-- add java functionality. See https://blog.jetbrains.com/platform/2019/06/java-functionality-extracted-as-a-plugin/ for more information -->
     <depends>com.intellij.modules.java</depends>
 
-    <description>
-        <![CDATA[
-            <p>A plugin that uses EvoSuite to generate tests. Developed by TU Delft students.
-        ]]>
-    </description>
-
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.MyProjectService"/>
         <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService"/>
+
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/>
+
         <applicationService
                 serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsService"/>
         <applicationService
@@ -31,21 +25,21 @@
                 displayName="TestGenie"/>
     </extensions>
 
+    <projectListeners>
+        <listener
+                class="com.github.mitchellolsthoorn.testgenie.listener.TestGenerationResultListenerImpl"
+                topic="com.github.mitchellolsthoorn.testgenie.evosuite.TestGenerationResultListener"/>
+    </projectListeners>
+
     <actions>
-        <!-- TestGenie action for generating tests for a class -->
-        <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsForClassAction"
-                id="TestGenie.Actions.GenerateTestsForClassAction"
-                text=">Generate Tests for Class"
-                description="Generate tests for all methods in the selected class">
-            <keyboard-shortcut first-keystroke="control alt shift T" second-keystroke="C" keymap="$default"/>
-            <add-to-group group-id="EditorPopupMenu1.FindRefactor" anchor="after" relative-to-action="RefactoringMenu"/>
-        </action>
-        <!-- Actions for generating tests for a method, lines... -->
-
+        <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true">
+            <add-to-group group-id="CodeMenu" anchor="after" relative-to-action="Generate"/>
+            <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsAction"
+                    id="TestGenie.TestGenieActions.GenerateTestsAction"
+                    text="Generate Tests"
+                    description="Press to generate tests using the best test generating software TestGenie">
+                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="T" keymap="$default"/>
+            </action>
+        </group>
     </actions>
-
-    <applicationListeners>
-        <listener class="com.github.mitchellolsthoorn.testgenie.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
 </idea-plugin>

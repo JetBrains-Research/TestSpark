@@ -18,18 +18,22 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val testGeniePanelWrapper = TestGenieToolWindow()
-        val contentFactory : ContentFactory = ContentFactory.SERVICE.getInstance()
+        val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
 
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
         toolWindow.contentManager.addContent(
-            contentFactory.createContent(testCaseDisplayService.mainPanel,
-                "Generated Tests",
-                true)
+            contentFactory.createContent(
+                testCaseDisplayService.mainPanel, "Generated Tests", true
+            )
         )
 
-        val content : Content = contentFactory.createContent(testGeniePanelWrapper.getContent(), "Parameters", false)
+        val content: Content = contentFactory.createContent(testGeniePanelWrapper.getContent(), "Parameters", false)
 
         toolWindow.contentManager.addContent(content)
-        toolWindow.contentManager.addContent(contentFactory.createContent(JTextArea("Here is where the coverage visualisation will appear"), "Coverage Visualisation", false))
+        toolWindow.contentManager.addContent(
+            contentFactory.createContent(
+                JTextArea("Here is where the coverage visualisation will appear"), "Coverage Visualisation", false
+            )
+        )
     }
 }
