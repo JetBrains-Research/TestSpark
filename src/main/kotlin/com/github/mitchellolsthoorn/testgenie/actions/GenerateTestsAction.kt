@@ -28,13 +28,21 @@ class GenerateTestsAction : AnAction() {
         val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)
         psiFile ?: return
 
+        val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
+
+        //TODO: handle the element being a method
+        if (psiElement !is PsiClass) {
+            val surroundingClass = PsiTreeUtil.getParentOfType(psiElement, PsiElement::class.java)
+            println("selected ${psiElement.toString().split(":")[0].substring(3)}"
+                    + "${psiElement.toString().split(":")[1]} of class $surroundingClass")
+            return
+        }
+
         val mainClass: PsiClass = PsiTreeUtil.findChildOfType(psiFile, PsiClass::class.java) ?: return
         val classFileFQN = mainClass.qualifiedName ?: return
 
-        val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
         val classFQN = classFileFQN.substring(0, classFileFQN.lastIndexOf(".") + 1)
                             .plus(psiElement.toString().split(":")[1])
-        println(classFQN)
 
         log.info("Selected class is $classFQN")
 
