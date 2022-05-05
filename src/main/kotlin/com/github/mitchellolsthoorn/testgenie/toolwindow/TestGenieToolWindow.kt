@@ -1,12 +1,16 @@
 package com.github.mitchellolsthoorn.testgenie.toolwindow
 
-import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.Messages
+
+import java.awt.Dimension
+import java.awt.GridBagLayout
+import java.awt.event.ActionEvent
+import javax.swing.JButton
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import java.awt.*
-import java.awt.event.ActionEvent
 import javax.swing.*
 
 /**
@@ -14,15 +18,15 @@ import javax.swing.*
  */
 class TestGenieToolWindow {
 
-    private var searchBudget: JSpinner = JSpinner(SpinnerNumberModel(60,0,10000,1))
+    private var searchBudget: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
     private var localSearchBudgetType: ComboBox<LocalSearchBudgetType> = ComboBox(LocalSearchBudgetType.values())
-    private var localSearchBudgetValue: JSpinner = JSpinner(SpinnerNumberModel(5,0,10000,1))
+    private var localSearchBudgetValue: JSpinner = JSpinner(SpinnerNumberModel(5, 0, 10000, 1))
     private var stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
-    private var initializationTimeout: JSpinner = JSpinner(SpinnerNumberModel(120,0,10000,1))
-    private var minimisationTimeout: JSpinner = JSpinner(SpinnerNumberModel(60,0,10000,1))
-    private var assertionTimeout: JSpinner = JSpinner(SpinnerNumberModel(60,0,10000,1))
-    private var junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(60,0,10000,1))
-    private var population: JSpinner = JSpinner(SpinnerNumberModel(50,0,10000,1))
+    private var initializationTimeout: JSpinner = JSpinner(SpinnerNumberModel(120, 0, 10000, 1))
+    private var minimisationTimeout: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
+    private var assertionTimeout: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
+    private var junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
+    private var population: JSpinner = JSpinner(SpinnerNumberModel(50, 0, 10000, 1))
     private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
 
     private val panelTitle = JLabel("Frequently Used Parameters")
@@ -31,7 +35,7 @@ class TestGenieToolWindow {
 
     private var toolWindowPanel: JPanel = JPanel()
 
-    private val defaultStr : String = "Default: %s"
+    private val defaultStr: String = "Default: %s"
 
     init {
         loadState()
@@ -49,32 +53,72 @@ class TestGenieToolWindow {
      * Creates the entire tool window panel.
      */
     private fun createToolWindowPanel() = FormBuilder.createFormBuilder()
-            .setFormLeftIndent(30)
-            .addVerticalGap(25)
-            .addComponent(panelTitle)
-            .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
-            .addTooltip(default("60 seconds"))
-            .addLabeledComponent(customLabel("Local search budget type", "Interpretation of local search budget value."), localSearchBudgetType, 20, false)
-            .addTooltip(default("Time"))
-            .addLabeledComponent(customLabel("Local search budget value", "Maximum budget usable for improving individuals per local search."), localSearchBudgetValue, 20, false)
-            .addTooltip(default("5"))
-            .addLabeledComponent(customLabel("Stopping condition", "What condition should be checked to end the search."), stoppingCondition, 20, false)
-            .addTooltip(default("60 seconds"))
-            .addLabeledComponent(customLabel("Initialization timeout", "Seconds allowed for initializing the search."), initializationTimeout, 20, false)
-            .addTooltip(default("120 seconds"))
-            .addLabeledComponent(customLabel("Minimisation timeout", "Seconds allowed for minimization at the end."), minimisationTimeout, 20, false)
-            .addTooltip(default("60 seconds"))
-            .addLabeledComponent(customLabel("Assertion timeout", "Seconds allowed for assertion generation at the end."), assertionTimeout, 20, false)
-            .addTooltip(default("60 seconds"))
-            .addLabeledComponent(customLabel("JUnit check timeout", "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."), junitCheckTimeout, 20, false)
-            .addTooltip(default("60 seconds"))
-            .addLabeledComponent(customLabel("Population", "Population size of genetic algorithm."), population, 20, false)
-            .addTooltip(default("50"))
-            .addLabeledComponent(customLabel("Population limit", "What to use as limit for the population size."), populationLimit, 20, false)
-            .addTooltip(default("Individuals"))
-            .addComponent(createSaveAndResetButtons(), 20)
-            .addComponentFillVertically(JPanel(), 20)
-            .panel
+        .setFormLeftIndent(30)
+        .addVerticalGap(25)
+        .addComponent(panelTitle)
+        .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
+        .addTooltip(default("60 seconds"))
+        .addLabeledComponent(
+            customLabel("Local search budget type", "Interpretation of local search budget value."),
+            localSearchBudgetType,
+            20,
+            false
+        )
+        .addTooltip(default("Time"))
+        .addLabeledComponent(
+            customLabel(
+                "Local search budget value",
+                "Maximum budget usable for improving individuals per local search."
+            ), localSearchBudgetValue, 20, false
+        )
+        .addTooltip(default("5"))
+        .addLabeledComponent(
+            customLabel("Stopping condition", "What condition should be checked to end the search."),
+            stoppingCondition,
+            20,
+            false
+        )
+        .addTooltip(default("60 seconds"))
+        .addLabeledComponent(
+            customLabel("Initialization timeout", "Seconds allowed for initializing the search."),
+            initializationTimeout,
+            20,
+            false
+        )
+        .addTooltip(default("120 seconds"))
+        .addLabeledComponent(
+            customLabel("Minimisation timeout", "Seconds allowed for minimization at the end."),
+            minimisationTimeout,
+            20,
+            false
+        )
+        .addTooltip(default("60 seconds"))
+        .addLabeledComponent(
+            customLabel("Assertion timeout", "Seconds allowed for assertion generation at the end."),
+            assertionTimeout,
+            20,
+            false
+        )
+        .addTooltip(default("60 seconds"))
+        .addLabeledComponent(
+            customLabel(
+                "JUnit check timeout",
+                "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
+            ), junitCheckTimeout, 20, false
+        )
+        .addTooltip(default("60 seconds"))
+        .addLabeledComponent(customLabel("Population", "Population size of genetic algorithm."), population, 20, false)
+        .addTooltip(default("50"))
+        .addLabeledComponent(
+            customLabel("Population limit", "What to use as limit for the population size."),
+            populationLimit,
+            20,
+            false
+        )
+        .addTooltip(default("Individuals"))
+        .addComponent(createSaveAndResetButtons(), 20)
+        .addComponentFillVertically(JPanel(), 20)
+        .panel
 
     /**
      * Creates `Save` and `Reset` buttons and aligns them to the left of the tool window.
@@ -102,7 +146,7 @@ class TestGenieToolWindow {
      *
      * @return the created customised label
      */
-    private fun customLabel(label: String, tooltip: String ) : JBLabel {
+    private fun customLabel(label: String, tooltip: String): JBLabel {
         val labeled = JBLabel(label)
         labeled.toolTipText = tooltip
         return labeled
@@ -123,8 +167,8 @@ class TestGenieToolWindow {
      *  It restores the state to the default values and also updates the UI elements.
      *
      */
-    private val addListenerForResetButton : (ActionEvent) -> Unit = {
-        val choice : Int = Messages.showYesNoCancelDialog(
+    private val addListenerForResetButton: (ActionEvent) -> Unit = {
+        val choice: Int = Messages.showYesNoCancelDialog(
             "Are you sure you want to reset all the values to defaults?\nThis action cannot be undone",
             "Are You Sure?",
             Messages.getQuestionIcon()
@@ -149,12 +193,11 @@ class TestGenieToolWindow {
         }
     }
 
-
     /**
      * Creates a listener for the `Save` button when the user clicks 'Save'.
      *  It parses, validates and extracts the entered values.
      */
-    private val addListenerForSaveButton : (ActionEvent) -> Unit = {
+    private val addListenerForSaveButton: (ActionEvent) -> Unit = {
         saveState()
         Messages.showInfoMessage("Parameters have been saved successfully", "Saved Successfully")
     }
@@ -163,7 +206,7 @@ class TestGenieToolWindow {
      * Loads the persisted state and updates the UI elements with the corresponding values.
      */
     private fun loadState() {
-        val state : TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+        val state: TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
 
         searchBudget.value = state.searchBudget
         localSearchBudgetType.item = state.localSearchBudgetType
@@ -181,7 +224,7 @@ class TestGenieToolWindow {
      * Persist the state by reading off the values from the UI elements.
      */
     private fun saveState() {
-        val state : TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+        val state: TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
 
         state.searchBudget = searchBudget.value as Int
         state.localSearchBudgetType = localSearchBudgetType.item
@@ -201,7 +244,7 @@ class TestGenieToolWindow {
      * @param value the default value
      * @return a string with the provided default value in the specified format
      */
-    private fun default(value: String) : String {
+    private fun default(value: String): String {
         return String.format(defaultStr, value)
     }
 }
