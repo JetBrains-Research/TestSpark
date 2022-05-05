@@ -24,7 +24,6 @@ class TestGenieSettingsConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        settingsComponent!!.globalTimeout = settingsState.globalTimeout
         settingsComponent!!.showCoverage = settingsState.showCoverage
         settingsComponent!!.sandbox = settingsState.sandbox
         settingsComponent!!.assertions = settingsState.assertions
@@ -49,8 +48,7 @@ class TestGenieSettingsConfigurable : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        var modified: Boolean = settingsComponent!!.globalTimeout != settingsState.globalTimeout
-        modified = modified or (settingsComponent!!.showCoverage != settingsState.showCoverage)
+        var modified: Boolean = settingsComponent!!.showCoverage != settingsState.showCoverage
         modified = modified or (settingsComponent!!.sandbox != settingsState.sandbox)
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
         modified = modified or (settingsComponent!!.seed != settingsState.seed)
@@ -81,7 +79,6 @@ class TestGenieSettingsConfigurable : Configurable {
         }
 
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        settingsState.globalTimeout = settingsComponent!!.globalTimeout!!
         settingsState.showCoverage = settingsComponent!!.showCoverage
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions

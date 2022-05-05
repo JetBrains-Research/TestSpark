@@ -14,7 +14,6 @@ import javax.swing.JTextField
  */
 class TestGenieSettingsComponent {
     var panel: JPanel? = null
-    private var globalTimeoutTextField = JTextField()
     private var showCoverageCheckBox = JCheckBox("Do you want visualised coverage? ")
     private var sandboxCheckBox = JCheckBox("Execute tests in a sandbox environment")
     private var assertionsCheckBox = JCheckBox("Create assertions")
@@ -40,7 +39,6 @@ class TestGenieSettingsComponent {
     init {
         panel = FormBuilder.createFormBuilder()
             .addComponent(JXTitledSeparator("General settings"))
-            .addLabeledComponent(JBLabel("Global timeout "), globalTimeoutTextField, 5, false)
             .addComponent(showCoverageCheckBox, 10)
             .addComponent(sandboxCheckBox, 10)
             .addComponent(assertionsCheckBox, 10)
@@ -74,15 +72,9 @@ class TestGenieSettingsComponent {
      * Returns the UI component that should be focused when a user opens the TestGenie Settings page.
      */
     fun getPreferredFocusedComponent(): JComponent {
-        return globalTimeoutTextField
+        return showCoverageCheckBox
     }
 
-
-    var globalTimeout: String?
-        get() = globalTimeoutTextField.text
-        set(newText) {
-            globalTimeoutTextField.text = newText
-        }
 
     var showCoverage: Boolean
         get() = showCoverageCheckBox.isSelected
