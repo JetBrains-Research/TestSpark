@@ -8,14 +8,19 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.psi.*
+import com.intellij.psi.PsiClass
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.concurrency.AppExecutorUtil
 
 
-class GenerateTestsAction : AnAction() {
+class GenerateTestsActionClass : AnAction() {
     private val log = Logger.getInstance(this.javaClass)
 
+    /**
+     * Performs test generation for a class when the action is invoked.
+     *
+     * @param e AnActionEvent class that contains useful information about the action event
+     */
     override fun actionPerformed(e: AnActionEvent) {
         // determine class path
         val project: Project = e.project ?: return
@@ -30,17 +35,10 @@ class GenerateTestsAction : AnAction() {
 
         val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
 
-        //TODO: handle the element being a method
-        if (psiElement !is PsiClass) {
-            val surroundingClass = PsiTreeUtil.getParentOfType(psiElement, PsiElement::class.java)
-            println("selected ${psiElement.toString().split(":")[0].substring(3)}"
-                    + "${psiElement.toString().split(":")[1]} of class $surroundingClass")
-            return
-        }
-
         val mainClass: PsiClass = PsiTreeUtil.findChildOfType(psiFile, PsiClass::class.java) ?: return
         val classFileFQN = mainClass.qualifiedName ?: return
 
+        // Use FQN of the actually selected class (important in case of multiple classes in the same class file)
         val classFQN = classFileFQN.substring(0, classFileFQN.lastIndexOf(".") + 1)
                             .plus(psiElement.toString().split(":")[1])
 
@@ -51,9 +49,13 @@ class GenerateTestsAction : AnAction() {
         AppExecutorUtil.getAppScheduledExecutorService().execute(EvoSuiteResultWatcher(project, resultPath))
     }
 
+    /**
+     * Makes the action visible only if a class has been selected.
+     *
+     * @param e AnActionEvent class that contains useful information about the action event
+     */
     override fun update(e: AnActionEvent) {
         val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
-        println(psiElement)
         e.presentation.isVisible = psiElement is PsiClass
     }
 
