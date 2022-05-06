@@ -1,5 +1,8 @@
 package com.github.mitchellolsthoorn.testgenie.evosuite
 
+import com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsService
+import com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsState
+import com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowService
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.*
 import com.intellij.openapi.diagnostic.Logger
@@ -30,7 +33,10 @@ class EvoSuiteRunner {
             val testResultName = "test_gen_result_$ts"
             val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
-            val command = arrayOf(
+            val toolWindowState = TestGenieToolWindowService.getInstance().state
+            val settingsState = TestGenieSettingsService.getInstance().state
+
+            var command = arrayOf(
                 "-generateSuite",
                 "-serializeResult",
                 "-serializeResultPath", serializeResultPath,
@@ -38,8 +44,32 @@ class EvoSuiteRunner {
                 "-class", classFQN, // class FQN inside the project classpath of the class we're generating tests for
                 "-projectCP", projectClassPath, // class path of the project we're generating tests for
                 "-Djunit_tests=true", // disable writing to 'evosuite-tests' in working directory
-                "-Dnew_statistics=false" //disable writing to 'evosuite-report' in working directory
+                "-Dnew_statistics=false", //disable writing to 'evosuite-report' in working directory
+
+                // Parameters from tool window
+                "-Dsearch_budget=${toolWindowState!!.searchBudget}",
+                "-Dlocal_search_budget=${toolWindowState.localSearchBudgetValue}",
+                "-Dlocal_search_budget_type=${toolWindowState.localSearchBudgetType.name}",
+                "-Dstopping_condition=${toolWindowState.stoppingCondition.name}",
+                "-Dinitialization_timeout=${toolWindowState.initializationTimeout}",
+                "-Dminimization_timeout=${toolWindowState.minimisationTimeout}",
+                "-Dassertion_timeout=${toolWindowState.assertionTimeout}",
+                "-Djunit_check_timeout=${toolWindowState.junitCheckTimeout}",
+                "-Dpopulation=${toolWindowState.population}",
+                "-Dpopulation_limit=${toolWindowState.populationLimit.name}",
+
+                // Parameters from settings menu
+                "-Dsandbox=${settingsState!!.sandbox}",
+                "-Dassertions=${settingsState.assertions}",
+                "-Dalgorithm=${settingsState.algorithm}",
+                "-Dclient_on_thread=${settingsState.clientOnThread}",
+                "-Djunit_check=${settingsState.junitCheck}",
+                createCriterionString(settingsState),
+                "-Dminimize=${settingsState.minimize}",
+                "-Doutput_variables=TARGET_CLASS,criterion,configuration_id,algorithm,Total_Goals,Covered_Goals,Random_Seed,Generations,Total_Time,Size,Result_Size,Length,Result_Length,Total_Branches_Real,Coverage,BranchCoverage,LineCoverage,WeakMutationScore"
             )
+            if (settingsState.seed.isNotBlank()) command = command.plus("-seed=${settingsState.seed}")
+            if (settingsState.configurationId.isNotBlank()) command = command.plus("-Dconfiguration_id=${settingsState.configurationId}")
 
             Thread {
                 val cmd = ArrayList<String>()
@@ -84,6 +114,47 @@ class EvoSuiteRunner {
             }.start()
 
             return testResultName
+        }
+
+        /**
+         * Creates a string for the criterion parameter in the format required by EvoSuite.
+         *
+         * @param state the (settings) state that contains all the criteria
+         * @return the generated criteria string, in the required format
+         */
+        private fun createCriterionString(state: TestGenieSettingsState): String {
+            val sb = StringBuilder("-Dcriterion=")      // e.g "-Dcriterion=BRANCH:WEAKMUTATION",
+
+            if (state.criterionLine) {
+                sb.append("LINE:")
+            }
+            if (state.criterionBranch) {
+                sb.append("BRANCH:")
+            }
+            if (state.criterionException) {
+                sb.append("EXCEPTION:")
+            }
+            if (state.criterionWeakMutation) {
+                sb.append("WEAKMUTATION:")
+            }
+            if (state.criterionOutput) {
+                sb.append("OUTPUT:")
+            }
+            if (state.criterionMethod) {
+                sb.append("METHOD:")
+            }
+            if (state.criterionMethodNoException) {
+                sb.append("METHODNOEXCEPTION:")
+            }
+            if (state.criterionCBranch) {
+                sb.append("CBRANCH:")
+            }
+            if (sb.endsWith(':', true)) {
+                sb.deleteCharAt(sb.length - 1)
+            }
+
+            val command : String = sb.toString()
+            return if (command == "-Dcriterion=") "-Dcriterion=LINE" else command
         }
     }
 }
