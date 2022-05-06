@@ -36,7 +36,7 @@ class EvoSuiteRunner {
             val toolWindowState = TestGenieToolWindowService.getInstance().state
             val settingsState = TestGenieSettingsService.getInstance().state
 
-            val command = arrayOf(
+            var command = arrayOf(
                 "-generateSuite",
                 "-serializeResult",
                 "-serializeResultPath", serializeResultPath,
@@ -61,15 +61,15 @@ class EvoSuiteRunner {
                 // Parameters from settings menu
                 "-Dsandbox=${settingsState!!.sandbox}",
                 "-Dassertions=${settingsState.assertions}",
-                "-seed=${settingsState.seed}",
                 "-Dalgorithm=${settingsState.algorithm}",
-                "-Dconfiguration_id=${settingsState.configurationId}",
                 "-Dclient_on_thread=${settingsState.clientOnThread}",
                 "-Djunit_check=${settingsState.junitCheck}",
                 createCriterionString(settingsState),
                 "-Dminimize=${settingsState.minimize}",
                 "-Doutput_variables=TARGET_CLASS,criterion,configuration_id,algorithm,Total_Goals,Covered_Goals,Random_Seed,Generations,Total_Time,Size,Result_Size,Length,Result_Length,Total_Branches_Real,Coverage,BranchCoverage,LineCoverage,WeakMutationScore"
             )
+            if (settingsState.seed.isNotBlank()) command = command.plus("-seed ${settingsState.seed}")
+            if (settingsState.configurationId.isNotBlank()) command = command.plus("-Dconfiguration_id=${settingsState.configurationId}")
 
             Thread {
                 val cmd = ArrayList<String>()
@@ -153,7 +153,8 @@ class EvoSuiteRunner {
                 sb.deleteCharAt(sb.length - 1)
             }
 
-            return sb.toString()
+            val command : String = sb.toString()
+            return if (command == "-Dcriterion=") "-Dcriterion=LINE" else command
         }
     }
 }
