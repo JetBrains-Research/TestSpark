@@ -23,7 +23,9 @@ class CoverageToolWindowDisplayService(private val project: Project) {
     private var listLabels = listOf<JBLabel>(absoluteLines, absoluteBranch, absoluteMutant, relativeLines, relativeBranch, relativeMutant)
 
 
-
+    /**
+     * Show the labels for statistics on code coverage by tests in "coverage visualisation" tab
+     */
     init {
         panelTitleAbsolute.font = Font("Monochrome", Font.BOLD, 20)
         panelTitleRelative.font = Font("Monochrome", Font.BOLD, 20)
