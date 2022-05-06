@@ -16,6 +16,13 @@ import java.awt.Graphics
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
 
+/**
+ * This class extends the line marker and gutter editor to allow more functionality.
+ * 
+ * @param color color of marker
+ * @param lineNumber lineNumber to color
+ * @param tests list of tests that cover this line
+ */
 class TestGenieCoverageRenderer(private val color: Color, private val lineNumber : Int, private val tests : List<String>) : ActiveGutterRenderer,
     LineMarkerRendererEx {
 
