@@ -68,7 +68,7 @@ class EvoSuiteRunner {
                 "-Dminimize=${settingsState.minimize}",
                 "-Doutput_variables=TARGET_CLASS,criterion,configuration_id,algorithm,Total_Goals,Covered_Goals,Random_Seed,Generations,Total_Time,Size,Result_Size,Length,Result_Length,Total_Branches_Real,Coverage,BranchCoverage,LineCoverage,WeakMutationScore"
             )
-            if (settingsState.seed.isNotBlank()) command = command.plus("-seed ${settingsState.seed}")
+            if (settingsState.seed.isNotBlank()) command = command.plus("-seed=${settingsState.seed}")
             if (settingsState.configurationId.isNotBlank()) command = command.plus("-Dconfiguration_id=${settingsState.configurationId}")
 
             Thread {
