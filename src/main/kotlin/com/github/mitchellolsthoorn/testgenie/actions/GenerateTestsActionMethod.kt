@@ -1,24 +1,24 @@
 package com.github.mitchellolsthoorn.testgenie.actions
 
-import com.github.mitchellolsthoorn.testgenie.evosuite.EvoSuiteResultWatcher
-import com.github.mitchellolsthoorn.testgenie.evosuite.EvoSuiteRunner
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiClass
-import com.intellij.util.concurrency.AppExecutorUtil
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.util.PsiTreeUtil
 
 /**
- * This class generates tests for a class.
+ * This class generates tests for a method.
  */
-class GenerateTestsActionClass : AnAction() {
+class GenerateTestsActionMethod : AnAction() {
     private val log = Logger.getInstance(this.javaClass)
 
     /**
-     * Performs test generation for a class when the action is invoked.
+     * Performs test generation for a method when the action is invoked.
      *
      * @param e AnActionEvent class that contains useful information about the action event
      */
@@ -31,24 +31,26 @@ class GenerateTestsActionClass : AnAction() {
 
         log.info("Generating tests for project $projectPath with classpath $projectClassPath")
 
-        val psiClass = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT) as PsiClass  // Checked in update method
-        val classFQN = psiClass.qualifiedName ?: return
+        val psiMethod = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT) as PsiMethod  // Checked in update method
+        val surroundingClass : PsiClass = PsiTreeUtil.getParentOfType(psiMethod, PsiClass::class.java) as PsiClass
+        // TODO: remove this line
+        Messages.showInfoMessage("Called generate tests action on a method $psiMethod. Surrounding class is $surroundingClass", "GenerateTestsActionMethod")
+        val classFQN = surroundingClass.qualifiedName ?: return
 
         log.info("Selected class is $classFQN")
 
-        val resultPath = EvoSuiteRunner.runEvoSuite(projectPath, projectClassPath, classFQN)
+        //val resultPath = EvoSuiteRunner.runEvoSuite(projectPath, projectClassPath, classFQN)
 
-        AppExecutorUtil.getAppScheduledExecutorService().execute(EvoSuiteResultWatcher(project, resultPath))
+        //AppExecutorUtil.getAppScheduledExecutorService().execute(EvoSuiteResultWatcher(project, resultPath))
     }
 
     /**
-     * Makes the action visible only if a class has been selected.
+     * Makes the action visible only if a method has been selected.
      *
      * @param e AnActionEvent class that contains useful information about the action event
      */
     override fun update(e: AnActionEvent) {
         val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
-        e.presentation.isVisible = psiElement is PsiClass
+        e.presentation.isVisible = psiElement is PsiMethod
     }
-
 }
