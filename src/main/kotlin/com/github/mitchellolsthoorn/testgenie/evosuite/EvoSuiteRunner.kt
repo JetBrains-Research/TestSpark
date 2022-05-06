@@ -49,14 +49,14 @@ class EvoSuiteRunner {
                 // Parameters from tool window
                 "-Dsearch_budget=${toolWindowState!!.searchBudget}",
                 "-Dlocal_search_budget=${toolWindowState.localSearchBudgetValue}",
-                "-Dlocal_search_budget_type=${toolWindowState.localSearchBudgetType}",
-                "-Dstopping_condition=${toolWindowState.stoppingCondition}",
+                "-Dlocal_search_budget_type=${toolWindowState.localSearchBudgetType.name}",
+                "-Dstopping_condition=${toolWindowState.stoppingCondition.name}",
                 "-Dinitialization_timeout=${toolWindowState.initializationTimeout}",
                 "-Dminimization_timeout=${toolWindowState.minimisationTimeout}",
                 "-Dassertion_timeout=${toolWindowState.assertionTimeout}",
                 "-Djunit_check_timeout=${toolWindowState.junitCheckTimeout}",
                 "-Dpopulation=${toolWindowState.population}",
-                "-Dpopulation_limit=${toolWindowState.populationLimit}",
+                "-Dpopulation_limit=${toolWindowState.populationLimit.name}",
 
                 // Parameters from settings menu
                 "-Dsandbox=${settingsState!!.sandbox}",
