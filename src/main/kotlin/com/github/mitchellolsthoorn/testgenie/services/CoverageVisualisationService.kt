@@ -1,6 +1,10 @@
 package com.github.mitchellolsthoorn.testgenie.services
 
 import com.github.mitchellolsthoorn.testgenie.coverage.TestGenieCoverageRenderer
+import com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsComponent
+import com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsService
+import com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsState
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -16,6 +20,9 @@ class CoverageVisualisationService(private val project: Project) {
      * @param testReport the generated tests summary
      */
     fun showCoverage(testReport: CompactReport) {
+        // Show coverage only if enabled in settings
+        val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+        if(state.showCoverage) {
             val editor = FileEditorManager.getInstance(project).selectedTextEditor!!
 
             val color = Color(100, 150, 20)
@@ -26,6 +33,6 @@ class CoverageVisualisationService(private val project: Project) {
                 hl.lineMarkerRenderer = TestGenieCoverageRenderer(color, line, testReport.testCaseList
                         .filter { x -> i in x.value.coveredLines }.map{x -> x.key})
             }
-
+        }
     }
 }
