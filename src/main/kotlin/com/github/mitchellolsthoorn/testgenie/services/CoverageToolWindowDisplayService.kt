@@ -13,14 +13,14 @@ class CoverageToolWindowDisplayService(private val project: Project) {
     var mainPanel: JPanel ?= null
     private var panelTitleAbsolute = JLabel("Absolute Test Coverage")
     private var panelTitleRelative = JLabel("Relative Test Coverage")
-    private var absoluteLines = JBLabel("Amount of Lines covered: " + " Total: ")
-    private var absoluteBranch = JBLabel("Amount of Branches covered: " + " Total: ")
-    private var absoluteMutant = JBLabel("Amount of Mutants covered: "  + " Total: ")
-    private var relativeLines = JBLabel("Percentage of Lines covered: ")
-    private var relativeBranch = JBLabel("Percentage of Branches covered: ")
-    private var relativeMutant = JBLabel("Percentage of Mutants covered: ")
+    var absoluteLines = JBLabel("Amount of Lines covered: " + " Total: ")
+    var absoluteBranch = JBLabel("Amount of Branches covered: " + " Total: ")
+    var absoluteMutant = JBLabel("Amount of Mutants covered: "  + " Total: ")
+    var relativeLines = JBLabel("Percentage of Lines covered: ")
+    var relativeBranch = JBLabel("Percentage of Branches covered: ")
+    var relativeMutant = JBLabel("Percentage of Mutants covered: ")
 
-    private var listLabels = listOf<JBLabel>(absoluteLines, absoluteBranch, absoluteMutant, relativeLines, relativeBranch, relativeMutant)
+    var listLabels = listOf<JBLabel>(absoluteLines, absoluteBranch, absoluteMutant, relativeLines, relativeBranch, relativeMutant)
 
 
     /**
