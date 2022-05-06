@@ -1,5 +1,6 @@
 package com.github.mitchellolsthoorn.testgenie.toolwindow
 
+import com.github.mitchellolsthoorn.testgenie.services.CoverageToolWindowDisplayService
 import com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -29,10 +30,11 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
 
         val content: Content = contentFactory.createContent(testGeniePanelWrapper.getContent(), "Parameters", false)
 
+        val visualisationService = project.service<CoverageToolWindowDisplayService>()
         toolWindow.contentManager.addContent(content)
         toolWindow.contentManager.addContent(
             contentFactory.createContent(
-                JTextArea("Here is where the coverage visualisation will appear"), "Coverage Visualisation", false
+                visualisationService.mainPanel, "Coverage Visualisation", true
             )
         )
     }
