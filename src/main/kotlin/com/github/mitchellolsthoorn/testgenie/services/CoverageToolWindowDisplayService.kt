@@ -7,7 +7,7 @@ import java.awt.Font
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class CoverageToolWindowDisplayService(private val project: Project) {
+class CoverageToolWindowDisplayService() {
     var mainPanel: JPanel ?= null
     var panelTitleAbsolute = JLabel("Absolute Test Coverage")
     var panelTitleRelative = JLabel("Relative Test Coverage")
@@ -18,7 +18,7 @@ class CoverageToolWindowDisplayService(private val project: Project) {
     var relativeBranch = JBLabel("Percentage of Branches covered: ")
     var relativeMutant = JBLabel("Percentage of Mutants covered: ")
 
-    var listLabels = listOf<JBLabel>(absoluteLines, absoluteBranch, absoluteMutant, relativeLines, relativeBranch, relativeMutant)
+    private var listLabels = listOf(absoluteLines, absoluteBranch, absoluteMutant, relativeLines, relativeBranch, relativeMutant)
 
 
     /**
