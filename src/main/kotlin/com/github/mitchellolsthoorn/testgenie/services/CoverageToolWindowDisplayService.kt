@@ -1,13 +1,12 @@
 package com.github.mitchellolsthoorn.testgenie.services
 
-import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import java.awt.Font
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class CoverageToolWindowDisplayService() {
+class CoverageToolWindowDisplayService {
     var mainPanel: JPanel ?= null
     var panelTitleAbsolute = JLabel("Absolute Test Coverage")
     var panelTitleRelative = JLabel("Relative Test Coverage")
