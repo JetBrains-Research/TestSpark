@@ -32,7 +32,8 @@
     </projectListeners>
 
     <actions>
-        <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true">
+        <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true"
+               class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsActionGroup">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <!-- Generate tests for class -->
             <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsActionClass"
