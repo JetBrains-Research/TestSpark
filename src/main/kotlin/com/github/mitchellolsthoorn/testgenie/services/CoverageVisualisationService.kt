@@ -20,7 +20,10 @@ class CoverageVisualisationService(private val project: Project) {
      * @param testReport the generated tests summary
      */
     fun showCoverage(testReport: CompactReport) {
-        // Show coverage only if enabled in settings
+        // Show toolWindow statistics
+        fillToolWindowContents(testReport)
+
+        // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
         if(state.showCoverage) {
             val editor = FileEditorManager.getInstance(project).selectedTextEditor!!
@@ -33,8 +36,6 @@ class CoverageVisualisationService(private val project: Project) {
                 hl.lineMarkerRenderer = TestGenieCoverageRenderer(color, line, testReport.testCaseList
                         .filter { x -> i in x.value.coveredLines }.map{x -> x.key})
             }
-
-            fillToolWindowContents(testReport)
         }
     }
 
