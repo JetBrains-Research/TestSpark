@@ -33,14 +33,11 @@ class GenerateTestsActionClass : AnAction() {
         val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)
         psiFile ?: return
 
-        val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
-
-        val mainClass: PsiClass = PsiTreeUtil.findChildOfType(psiFile, PsiClass::class.java) ?: return
-        val classFileFQN = mainClass.qualifiedName ?: return
+        val psiClass = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT) as PsiClass  // Checked in update method
 
         // Use FQN of the actually selected class (important in case of multiple classes in the same class file)
-        val classFQN = classFileFQN.substring(0, classFileFQN.lastIndexOf(".") + 1)
-                            .plus(psiElement.toString().split(":")[1])
+        val classFQN = psiClass.qualifiedName
+        classFQN ?: return
 
         log.info("Selected class is $classFQN")
 
