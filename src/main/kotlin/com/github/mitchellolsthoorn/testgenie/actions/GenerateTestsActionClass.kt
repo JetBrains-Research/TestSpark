@@ -48,7 +48,7 @@ class GenerateTestsActionClass : AnAction() {
      */
     override fun update(e: AnActionEvent) {
         val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
-        e.presentation.isVisible = psiElement is PsiClass
+        e.presentation.isVisible = psiElement is PsiClass // TODO: check for declarations
     }
 
 }
