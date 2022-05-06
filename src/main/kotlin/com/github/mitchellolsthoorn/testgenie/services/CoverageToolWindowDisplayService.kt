@@ -2,17 +2,15 @@ package com.github.mitchellolsthoorn.testgenie.services
 
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
-import org.jdesktop.swingx.JXTitledSeparator
-import java.awt.BorderLayout
 import java.awt.Font
-import javax.swing.*
+import javax.swing.JLabel
+import javax.swing.JPanel
 
 class CoverageToolWindowDisplayService(private val project: Project) {
     var mainPanel: JPanel ?= null
-    private var panelTitleAbsolute = JLabel("Absolute Test Coverage")
-    private var panelTitleRelative = JLabel("Relative Test Coverage")
+    var panelTitleAbsolute = JLabel("Absolute Test Coverage")
+    var panelTitleRelative = JLabel("Relative Test Coverage")
     var absoluteLines = JBLabel("Amount of Lines covered: " + " Total: ")
     var absoluteBranch = JBLabel("Amount of Branches covered: " + " Total: ")
     var absoluteMutant = JBLabel("Amount of Mutants covered: "  + " Total: ")
