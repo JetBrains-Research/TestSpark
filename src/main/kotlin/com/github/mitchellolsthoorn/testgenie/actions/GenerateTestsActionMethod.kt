@@ -8,7 +8,6 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiSubstitutor
@@ -35,20 +34,16 @@ class GenerateTestsActionMethod : AnAction() {
 
         log.info("Generating tests for project $projectPath with classpath $projectClassPath")
 
-        val psiMethod = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT) as PsiMethod  // The type is checked in update method
-        val containingClass : PsiClass = psiMethod.containingClass ?: return
+        val psiMethod =
+            e.dataContext.getData(CommonDataKeys.PSI_ELEMENT) as PsiMethod  // The type is checked in update method
+        val containingClass: PsiClass = psiMethod.containingClass ?: return
 
         val method = psiMethod.name
         val classFQN = containingClass.qualifiedName ?: return
         println(psiMethod.returnType.toString())
 
-        val signature : Array<String> = psiMethod.getSignature(PsiSubstitutor.EMPTY).parameterTypes.map2Array { it.canonicalText }
-
-
-        // TODO: remove this line
-        Messages.showInfoMessage(
-            "Called generate tests action on a method $classFQN::$method${signature.contentToString()}",
-            "GenerateTestsActionMethod")
+        val signature: Array<String> =
+            psiMethod.getSignature(PsiSubstitutor.EMPTY).parameterTypes.map2Array { it.canonicalText }
 
         log.info("Selected method is $classFQN::$method${signature.contentToString()}")
 

@@ -31,7 +31,7 @@ class Runner {
 
             val settingsState = TestGenieSettingsService.getInstance().state
 
-            var command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).build()
+            val command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).build()
 
             if (!settingsState?.seed.isNullOrBlank()) command.add("-seed=${settingsState?.seed}")
             if (!settingsState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsState?.configurationId}")
@@ -54,10 +54,7 @@ class Runner {
         }
 
         fun runEvoSuiteForMethod(
-            projectPath: String,
-            projectClassPath: String,
-            classFQN: String,
-            method: String
+            projectPath: String, projectClassPath: String, classFQN: String, method: String
         ): String {
 
             val javaPath = "java"// TODO: Source from config
@@ -74,7 +71,7 @@ class Runner {
 
             val settingsState = TestGenieSettingsService.getInstance().state
 
-            var command =
+            val command =
                 SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethodPrefix(method)
                     .build()
 

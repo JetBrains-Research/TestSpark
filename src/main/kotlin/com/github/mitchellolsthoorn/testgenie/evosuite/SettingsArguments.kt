@@ -20,7 +20,7 @@ class SettingsArguments(
     private val serializeResultPath: String,
     private val classFQN: String
 ) {
-    var command: MutableList<String> = mutableListOf(
+    private var command: MutableList<String> = mutableListOf(
         "-generateSuite",
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
@@ -43,7 +43,7 @@ class SettingsArguments(
                 "-Dtarget_method_prefix=$methodPrefix"
             )
         )
-         return this
+        return this
     }
 
 
