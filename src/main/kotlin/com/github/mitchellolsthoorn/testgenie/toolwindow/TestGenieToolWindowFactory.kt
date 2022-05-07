@@ -1,5 +1,6 @@
 package com.github.mitchellolsthoorn.testgenie.toolwindow
 
+import com.github.mitchellolsthoorn.testgenie.services.CoverageToolWindowDisplayService
 import com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -7,7 +8,6 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
-import javax.swing.JTextArea
 
 /**
  * This class is responsible for creating the UI of the TestGenie tool window.
@@ -29,10 +29,11 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
 
         val content: Content = contentFactory.createContent(testGeniePanelWrapper.getContent(), "Parameters", false)
 
+        val visualisationService = project.service<CoverageToolWindowDisplayService>()
         toolWindow.contentManager.addContent(content)
         toolWindow.contentManager.addContent(
             contentFactory.createContent(
-                JTextArea("Here is where the coverage visualisation will appear"), "Coverage Visualisation", false
+                visualisationService.mainPanel, "Coverage Visualisation", true
             )
         )
     }
