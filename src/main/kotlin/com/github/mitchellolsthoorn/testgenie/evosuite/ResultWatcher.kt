@@ -10,8 +10,8 @@ import java.io.File
 import java.io.FileReader
 
 
-class EvoSuiteResultWatcher(private val project: Project, private val resultPath: String) : Runnable {
-    private val log = Logger.getInstance(EvoSuiteResultWatcher::class.java)
+class ResultWatcher(private val project: Project, private val resultPath: String) : Runnable {
+    private val log = Logger.getInstance(ResultWatcher::class.java)
 
     override fun run() {
         val watcherSleepDurationMillis: Long = 5000

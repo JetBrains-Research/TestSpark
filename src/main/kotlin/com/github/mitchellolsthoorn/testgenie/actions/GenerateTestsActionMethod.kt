@@ -1,5 +1,7 @@
 package com.github.mitchellolsthoorn.testgenie.actions
 
+import com.github.mitchellolsthoorn.testgenie.evosuite.ResultWatcher
+import com.github.mitchellolsthoorn.testgenie.evosuite.Runner
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -10,6 +12,7 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiSubstitutor
+import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.containers.map2Array
 
 /**
@@ -37,7 +40,10 @@ class GenerateTestsActionMethod : AnAction() {
 
         val method = psiMethod.name
         val classFQN = containingClass.qualifiedName ?: return
-        val signature : Array<String> = psiMethod.getSignature(PsiSubstitutor.EMPTY).parameterTypes.map2Array { it.presentableText }
+        println(psiMethod.returnType.toString())
+
+        val signature : Array<String> = psiMethod.getSignature(PsiSubstitutor.EMPTY).parameterTypes.map2Array { it.canonicalText }
+
 
         // TODO: remove this line
         Messages.showInfoMessage(
@@ -46,10 +52,9 @@ class GenerateTestsActionMethod : AnAction() {
 
         log.info("Selected method is $classFQN::$method${signature.contentToString()}")
 
-        // TODO: pass parameters to EvoSuite and call it
-        //val resultPath = EvoSuiteRunner.runEvoSuite(projectPath, projectClassPath, classFQN)
+        val resultPath = Runner.runEvoSuiteForMethod(projectPath, projectClassPath, classFQN, method)
 
-        //AppExecutorUtil.getAppScheduledExecutorService().execute(EvoSuiteResultWatcher(project, resultPath))
+        AppExecutorUtil.getAppScheduledExecutorService().execute(ResultWatcher(project, resultPath))
     }
 
     /**

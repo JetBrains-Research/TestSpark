@@ -1,7 +1,7 @@
 package com.github.mitchellolsthoorn.testgenie.actions
 
-import com.github.mitchellolsthoorn.testgenie.evosuite.EvoSuiteResultWatcher
-import com.github.mitchellolsthoorn.testgenie.evosuite.EvoSuiteRunner
+import com.github.mitchellolsthoorn.testgenie.evosuite.ResultWatcher
+import com.github.mitchellolsthoorn.testgenie.evosuite.Runner
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -36,9 +36,9 @@ class GenerateTestsActionClass : AnAction() {
 
         log.info("Selected class is $classFQN")
 
-        val resultPath = EvoSuiteRunner.runEvoSuite(projectPath, projectClassPath, classFQN)
+        val resultPath = Runner.runEvoSuiteForClass(projectPath, projectClassPath, classFQN)
 
-        AppExecutorUtil.getAppScheduledExecutorService().execute(EvoSuiteResultWatcher(project, resultPath))
+        AppExecutorUtil.getAppScheduledExecutorService().execute(ResultWatcher(project, resultPath))
     }
 
     /**
