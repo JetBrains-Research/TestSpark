@@ -181,7 +181,7 @@ class TestGenieToolWindow {
             state.localSearchBudgetValue = 5
             state.stoppingCondition = StoppingCondition.MAXTIME
             state.initializationTimeout = 120
-            state.minimisationTimeout = 60
+            state.minimizationTimeout = 60
             state.assertionTimeout = 60
             state.junitCheckTimeout = 60
             state.population = 50
@@ -213,7 +213,7 @@ class TestGenieToolWindow {
         localSearchBudgetValue.value = state.localSearchBudgetValue
         stoppingCondition.item = state.stoppingCondition
         initializationTimeout.value = state.initializationTimeout
-        minimisationTimeout.value = state.minimisationTimeout
+        minimisationTimeout.value = state.minimizationTimeout
         assertionTimeout.value = state.assertionTimeout
         junitCheckTimeout.value = state.junitCheckTimeout
         population.value = state.population
@@ -231,7 +231,7 @@ class TestGenieToolWindow {
         state.localSearchBudgetValue = localSearchBudgetValue.value as Int
         state.stoppingCondition = stoppingCondition.item
         state.initializationTimeout = initializationTimeout.value as Int
-        state.minimisationTimeout = minimisationTimeout.value as Int
+        state.minimizationTimeout = minimisationTimeout.value as Int
         state.assertionTimeout = assertionTimeout.value as Int
         state.junitCheckTimeout = junitCheckTimeout.value as Int
         state.population = population.value as Int
