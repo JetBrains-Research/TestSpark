@@ -1,9 +1,5 @@
 package com.github.mitchellolsthoorn.testgenie.settings
 
-import com.github.mitchellolsthoorn.testgenie.toolwindow.LocalSearchBudgetType
-import com.github.mitchellolsthoorn.testgenie.toolwindow.PopulationLimit
-import com.github.mitchellolsthoorn.testgenie.toolwindow.StoppingCondition
-
 /**
  * This class is the actual data class that stores the values of the Settings entries.
  */
