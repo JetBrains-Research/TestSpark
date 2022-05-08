@@ -20,7 +20,7 @@ class Runner {
             val javaPath = "java"// TODO: Source from config
 
             val pluginsPath = System.getProperty("idea.plugins.path")
-            val evoSuitePath = "$pluginsPath/TestGenie/lib/evosuite.jar"
+            val evoSuitePath = "$pluginsPath/TestGenie/lib/evosuite-1.0.2.jar"
 
             val ts = System.currentTimeMillis()
             val sep = File.separatorChar
