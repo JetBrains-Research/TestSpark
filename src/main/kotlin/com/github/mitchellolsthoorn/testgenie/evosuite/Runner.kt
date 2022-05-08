@@ -2,7 +2,10 @@ package com.github.mitchellolsthoorn.testgenie.evosuite
 
 import com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsService
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.process.*
+import com.intellij.execution.process.OSProcessHandler
+import com.intellij.execution.process.ProcessAdapter
+import com.intellij.execution.process.ProcessEvent
+import com.intellij.execution.process.ProcessHandler
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
@@ -22,16 +25,15 @@ class Runner(private val projectPath: String, private val projectClassPath: Stri
     private val log = Logger.getInstance(this::class.java)
 
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
-    private val javaPath = "java"// TODO: Source from config
+    private val javaPath = "java" // TODO: Source from config
     private val evosuiteVersion = "1.0.2" // TODO: Figure out a better way to source this
 
     private val pluginsPath = System.getProperty("idea.plugins.path")
     private var evoSuitePath = "$pluginsPath/TestGenie/lib/evosuite-$evosuiteVersion.jar"
 
-
     private val ts = System.currentTimeMillis()
     private val sep = File.separatorChar
-    private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults${sep}"
+    private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
     private val testResultName = "test_gen_result_$ts"
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
@@ -53,7 +55,7 @@ class Runner(private val projectPath: String, private val projectClassPath: Stri
      */
     fun forMethod(method: String): Runner {
         command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethodPrefix(method)
-                .build()
+            .build()
         return this
     }
 
@@ -99,10 +101,8 @@ class Runner(private val projectPath: String, private val projectClassPath: Stri
                 log.error("EvoSuite process exceeded timeout - ${evoSuiteProcessTimeout}ms")
             }
             // TODO: handle stderr separately
-
         }.start()
 
         return testResultName
     }
-
 }

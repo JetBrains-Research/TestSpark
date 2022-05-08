@@ -9,7 +9,6 @@ import org.evosuite.utils.CompactReport
 import java.io.File
 import java.io.FileReader
 
-
 class ResultWatcher(private val project: Project, private val resultPath: String) : Runnable {
     private val log = Logger.getInstance(ResultWatcher::class.java)
 
@@ -17,7 +16,7 @@ class ResultWatcher(private val project: Project, private val resultPath: String
         val watcherSleepDurationMillis: Long = 5000
 
         val sep = File.separatorChar
-        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults${sep}"
+        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
 
         val tmpDir = File(testResultDirectory)
 
