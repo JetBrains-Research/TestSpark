@@ -46,7 +46,6 @@ class SettingsArguments(
         return this
     }
 
-
     /**
      * Finalizes the parameter construction by applying the user runtime settings
      */
@@ -75,7 +74,7 @@ class SettingsArguments(
          * @return the generated criteria string, in the required format
          */
         private fun createCriterionString(state: TestGenieSettingsState): String {
-            val sb = StringBuilder("-Dcriterion=")      // e.g "-Dcriterion=BRANCH:WEAKMUTATION",
+            val sb = StringBuilder("-Dcriterion=") // e.g "-Dcriterion=BRANCH:WEAKMUTATION",
 
             if (state.criterionLine) {
                 sb.append("LINE:")
@@ -109,5 +108,4 @@ class SettingsArguments(
             return if (command == "-Dcriterion=") "-Dcriterion=LINE" else command
         }
     }
-
 }
