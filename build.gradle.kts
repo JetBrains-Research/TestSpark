@@ -1,7 +1,11 @@
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URL
+import java.util.zip.ZipInputStream
+import java.io.FileOutputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
+val thunderdomeVersion = File("evosuite-version").readText().trim()
 
 plugins {
     // Java support
@@ -26,7 +30,7 @@ repositories {
 
 // include evo suite jar
 dependencies {
-    implementation(files("evo/evosuite.jar"))
+    implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
 
 }
 
@@ -55,6 +59,9 @@ qodana {
 }
 
 tasks {
+    compileKotlin {
+        dependsOn("updateEvosuite")
+    }
     // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
@@ -119,4 +126,55 @@ tasks {
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
         channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
     }
+}
+
+abstract class UpdateEvoSuite : DefaultTask() {
+    @Input
+    var version: String = ""
+
+    @TaskAction
+    fun execute() {
+        val libDir = File("lib")
+        if (!libDir.exists()) {
+            libDir.mkdirs()
+        }
+
+        val jarName = "evosuite-$version.jar"
+
+        if (libDir.listFiles()?.any { it.name.matches(Regex(jarName)) } == true) {
+            logger.info("Specified evosuite jar found, skipping update")
+            return
+        }
+
+        logger.info("Specified evosuite jar not found, downloading release $jarName")
+
+        val downloadUrl =
+            "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$version/release.zip"
+        val stream = try {
+            URL(downloadUrl).openStream()
+        } catch (e: Exception) {
+            logger.error("Error fetching latest evosuite custom release - $e")
+            return
+        }
+
+        ZipInputStream(stream).use { zipInputStream ->
+            while (zipInputStream.nextEntry != null) {
+                val file = File("lib", jarName)
+                val outputStream = FileOutputStream(file)
+                outputStream.write(zipInputStream.readAllBytes())
+                outputStream.close()
+            }
+        }
+
+        logger.info("Latest evosuite jar successfully downloaded, cleaning up lib directory")
+        libDir.listFiles()?.filter { !it.name.matches(Regex(jarName)) }?.map {
+            if (it.delete()) {
+                logger.info("Deleted outdated release ${it.name}")
+            }
+        }
+    }
+}
+
+tasks.register<UpdateEvoSuite>("updateEvosuite") {
+    version = thunderdomeVersion
 }
