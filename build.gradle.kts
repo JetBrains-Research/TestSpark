@@ -5,7 +5,8 @@ import java.util.zip.ZipInputStream
 import java.io.FileOutputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
-val thunderdomeVersion = File("evosuite-version").readText().trim()
+
+val thunderdomeVersion = "1.0.2"
 
 plugins {
     // Java support
