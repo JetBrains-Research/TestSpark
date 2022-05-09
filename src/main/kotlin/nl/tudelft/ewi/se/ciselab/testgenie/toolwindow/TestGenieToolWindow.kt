@@ -35,8 +35,9 @@ class TestGenieToolWindow {
     private val panelTitle = JLabel("Quick Access Parameters")
     private var toolWindowPanel: JPanel = JPanel()
 
-    // The tooltip label for stopping condition (search budget type)
+    // The tooltip labels
     private var stoppingConditionToolTip = JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+    private var populationLimitToolTip = JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
 
     // Template strings for "default" tooltips
     private val defaultStr: String = "Default: %s"
@@ -56,6 +57,14 @@ class TestGenieToolWindow {
         }
         stoppingConditionToolTip.text = default("60 ${stoppingCondition.item.units()}")
 
+        populationLimitToolTip.border = JBUI.Borders.emptyLeft(10)
+        populationLimit.addActionListener {
+            populationLimitToolTip.text = default("60 ${populationLimit.item.toString().toLowerCase()}")
+        }
+        populationLimitToolTip.text = default("60 ${populationLimit.item.toString().toLowerCase()}")
+
+        populationLimit.item.toString().toLowerCase()
+
         saveButton.addActionListener { addListenerForSaveButton(it) }
         resetButton.addActionListener { addListenerForResetButton(it) }
     }
@@ -70,9 +79,9 @@ class TestGenieToolWindow {
         .addComponent(JXTitledSeparator("Search budget"), 35)
         .addLabeledComponent(customLabel("Search budget type",
             "What condition should be checked to end the search."), stoppingCondition, 25, false)
-        .addComponentToRightColumn(stoppingConditionToolTip, 1)
+        .addTooltip(default(StoppingCondition.MAXTIME.toString()))
         .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
-        .addTooltip(default("60 seconds"))
+        .addComponentToRightColumn(stoppingConditionToolTip, 1)
         .addComponent(JXTitledSeparator("Timeouts"), 35)
         .addLabeledComponent(customLabel("Initialization timeout",
                 "Seconds allowed for initializing the search."), initializationTimeout, 25, false)
@@ -92,7 +101,7 @@ class TestGenieToolWindow {
         .addTooltip(default("Individuals"))
         .addLabeledComponent(customLabel("Population",
             "Population size of genetic algorithm."), population, 20, false)
-        .addTooltip(default("50"))
+        .addComponentToRightColumn(populationLimitToolTip, 1)
         .addComponent(createSaveAndResetButtons(), 20)
         .addComponentFillVertically(JPanel(), 20)
         .panel
