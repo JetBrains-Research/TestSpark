@@ -28,7 +28,7 @@ data class TestGenieSettingsState(
         const val assertions: Boolean = true
         const val junitCheck: Boolean = false
         const val minimize: Boolean = true
-        val algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.RANDOM_SEARCH
+        val algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.DYNAMOSA
     }
 
     fun serializeChangesFromDefault(): List<String> {

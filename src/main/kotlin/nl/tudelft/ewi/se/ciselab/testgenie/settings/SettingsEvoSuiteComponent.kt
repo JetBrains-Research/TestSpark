@@ -20,8 +20,8 @@ class SettingsEvoSuiteComponent {
     //DropDown menu
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
     private var configurationIdTextField = JTextField()
-    private var clientOnThreadCheckBox = JCheckBox("Client on thread")
-    private var junitCheckCheckBox = JCheckBox("Compile and run suite")
+    private var clientOnThreadCheckBox = JCheckBox("Debug mode")
+    private var junitCheckCheckBox = JCheckBox("Flaky tests")
     //There is a limited amount of criteria, but multiple can be selected at once.
     //Effectively, this requires its own section (or a checkboxed combobox of sorts)
     private var criterionSeparator = JXTitledSeparator("Criterion selection")
@@ -38,11 +38,11 @@ class SettingsEvoSuiteComponent {
     init {
         panel = FormBuilder.createFormBuilder()
             .addComponent(JXTitledSeparator("General settings"))
+            .addLabeledComponent(JBLabel("Select search algorithm"), algorithmSelector, 10, false)
+            .addLabeledComponent(JBLabel("Seed(random if left empty) "), seedTextField, 10, false)
+            .addLabeledComponent(JBLabel("Select configuration id (null if left empty) "), configurationIdTextField, 5, false)
             .addComponent(sandboxCheckBox, 10)
             .addComponent(assertionsCheckBox, 10)
-            .addLabeledComponent(JBLabel("Seed(random if left empty) "), seedTextField, 10, false)
-            .addLabeledComponent(JBLabel("Select search algorithm"), algorithmSelector, 10, false)
-            .addLabeledComponent(JBLabel("Select configuration id (null if left empty) "), configurationIdTextField, 5, false)
             .addComponent(clientOnThreadCheckBox, 10)
             .addComponent(minimizeCheckBox, 10)
             .addComponent(junitCheckCheckBox, 10)
