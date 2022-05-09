@@ -61,6 +61,8 @@ class Runner(private val projectPath: String, private val projectClassPath: Stri
 
     /**
      * Performs final argument preparation and launches the evosuite process on a separate thread.
+     *
+     * @return the path to which results will be (eventually) saved
      */
     fun runEvoSuite(): String {
         if (!settingsState?.seed.isNullOrBlank()) command.add("-seed=${settingsState?.seed}")
