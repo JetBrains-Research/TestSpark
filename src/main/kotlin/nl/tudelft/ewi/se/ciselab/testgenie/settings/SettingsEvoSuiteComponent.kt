@@ -12,9 +12,8 @@ import javax.swing.JTextField
 /**
  * This class displays and captures changes to the values of the Settings entries.
  */
-class TestGenieSettingsComponent {
+class SettingsEvoSuiteComponent {
     var panel: JPanel? = null
-    private var showCoverageCheckBox = JCheckBox("Do you want visualised coverage? ")
     private var sandboxCheckBox = JCheckBox("Execute tests in a sandbox environment")
     private var assertionsCheckBox = JCheckBox("Create assertions")
     private var seedTextField = JTextField()
@@ -39,7 +38,6 @@ class TestGenieSettingsComponent {
     init {
         panel = FormBuilder.createFormBuilder()
             .addComponent(JXTitledSeparator("General settings"))
-            .addComponent(showCoverageCheckBox, 10)
             .addComponent(sandboxCheckBox, 10)
             .addComponent(assertionsCheckBox, 10)
             .addLabeledComponent(JBLabel("Seed(random if left empty) "), seedTextField, 10, false)
@@ -74,15 +72,8 @@ class TestGenieSettingsComponent {
      * @return preferred UI component
      */
     fun getPreferredFocusedComponent(): JComponent {
-        return showCoverageCheckBox
+        return algorithmSelector
     }
-
-
-    var showCoverage: Boolean
-        get() = showCoverageCheckBox.isSelected
-        set(newStatus) {
-            showCoverageCheckBox.isSelected = newStatus
-        }
 
     var sandbox: Boolean
         get() = sandboxCheckBox.isSelected

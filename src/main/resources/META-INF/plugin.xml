@@ -22,17 +22,12 @@
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowService"/>
         <applicationConfigurable
                 parentId="tools"
-                instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsConfigurable"
+                instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginConfigurable"
                 id="TestGenieSettings"
                 displayName="TestGenie"/>
         <applicationConfigurable
                 parentId="TestGenieSettings"
-                instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginConfigu"
-                id="TestGenieSettings.plugin"
-                displayName="Plugin Settings"/>
-        <applicationConfigurable
-                parentId="TestGenieSettings"
-                instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsConfigurable"
+                instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsEvoSuiteConfigurable"
                 id="TestGenieSettings.evosuite"
                 displayName="EvoSuite Settings"/>
     </extensions>
