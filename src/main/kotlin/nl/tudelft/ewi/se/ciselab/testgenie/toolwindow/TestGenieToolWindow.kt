@@ -10,6 +10,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.*
 import javax.swing.*
 
@@ -54,13 +55,15 @@ class TestGenieToolWindow {
         .setFormLeftIndent(30)
         .addVerticalGap(25)
         .addComponent(panelTitle)
+        .addComponent(JXTitledSeparator("Search budget"), 35)
         .addLabeledComponent(customLabel("Search budget type",
-            "What condition should be checked to end the search."), stoppingCondition, 20, false)
+            "What condition should be checked to end the search."), stoppingCondition, 25, false)
         .addTooltip(default("60 seconds")) //TODO Dynamic unit
         .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
         .addTooltip(default("60 seconds"))
+        .addComponent(JXTitledSeparator("Timeouts"), 35)
         .addLabeledComponent(customLabel("Initialization timeout",
-                "Seconds allowed for initializing the search."), initializationTimeout, 20, false)
+                "Seconds allowed for initializing the search."), initializationTimeout, 25, false)
         .addTooltip(default("120 seconds"))
         .addLabeledComponent(customLabel("Minimisation timeout",
             "Seconds allowed for minimization at the end."), minimisationTimeout, 20, false)
@@ -71,8 +74,9 @@ class TestGenieToolWindow {
         .addLabeledComponent(customLabel("JUnit check timeout",
             "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."), junitCheckTimeout, 20, false)
         .addTooltip(default("60 seconds"))
+        .addComponent(JXTitledSeparator("Genetic Algorithm"), 35)
         .addLabeledComponent(customLabel("Population limit",
-            "What to use as limit for the population size."), populationLimit, 20, false)
+            "What to use as limit for the population size."), populationLimit, 25, false)
         .addTooltip(default("Individuals"))
         .addLabeledComponent(customLabel("Population",
             "Population size of genetic algorithm."), population, 20, false)
