@@ -18,7 +18,6 @@ class SettingsPluginComponent {
 
     init {
         panel = FormBuilder.createFormBuilder()
-            .addComponent(JXTitledSeparator("General settings"))
             .addComponent(showCoverageCheckBox, 10)
             .addComponentFillVertically(JPanel(), 0)
             .panel
