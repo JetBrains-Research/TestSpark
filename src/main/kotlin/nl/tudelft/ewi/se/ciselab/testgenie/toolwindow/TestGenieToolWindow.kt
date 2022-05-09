@@ -27,7 +27,7 @@ class TestGenieToolWindow {
     private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
     private var population: JSpinner = JSpinner(SpinnerNumberModel(50, 0, 10000, 1))
 
-    private val panelTitle = JLabel("Frequently Used Parameters")
+    private val panelTitle = JLabel("Quick Access Parameters")
     private var saveButton: JButton = JButton("Save")
     private var resetButton: JButton = JButton("Reset")
 
