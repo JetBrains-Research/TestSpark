@@ -9,6 +9,12 @@ import org.evosuite.utils.CompactReport
 import java.io.File
 import java.io.FileReader
 
+/**
+ * Class used in conjuction with Runner
+ *
+ * @param project
+ * @param resultPath
+ */
 class ResultWatcher(private val project: Project, private val resultPath: String) : Runnable {
     private val log = Logger.getInstance(ResultWatcher::class.java)
 

@@ -40,14 +40,13 @@ class GenerateTestsActionMethod : AnAction() {
 
         val method = psiMethod.name
         val classFQN = containingClass.qualifiedName ?: return
-        println(psiMethod.returnType.toString())
 
         val signature: Array<String> =
             psiMethod.getSignature(PsiSubstitutor.EMPTY).parameterTypes.map2Array { it.canonicalText }
 
         log.info("Selected method is $classFQN::$method${signature.contentToString()}")
 
-        val resultPath = Runner(projectPath, projectClassPath, classFQN).forMethod(method).runEvoSuite()
+        val resultPath = Runner(project, projectPath, projectClassPath, classFQN).forMethod(method).runEvoSuite()
 
         AppExecutorUtil.getAppScheduledExecutorService().execute(ResultWatcher(project, resultPath))
     }

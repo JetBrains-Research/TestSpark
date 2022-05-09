@@ -36,7 +36,7 @@ class GenerateTestsActionClass : AnAction() {
 
         log.info("Selected class is $classFQN")
 
-        val resultPath = Runner(projectPath, projectClassPath, classFQN).forClass().runEvoSuite()
+        val resultPath = Runner(project, projectPath, projectClassPath, classFQN).forClass().runEvoSuite()
 
         AppExecutorUtil.getAppScheduledExecutorService().execute(ResultWatcher(project, resultPath))
     }
