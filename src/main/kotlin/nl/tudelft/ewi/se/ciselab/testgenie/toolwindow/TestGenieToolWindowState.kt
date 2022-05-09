@@ -62,11 +62,12 @@ constructor(
  * This enum contains the type for the stopping condition of the algorithm.
  *
  * @param display string representation of the enum value that is used in UI elements
+ * @param units the units of measurement (e.g. seconds, tests etc.) that are used when displaying the tooltip with the default value
  */
-enum class StoppingCondition(private val display: String) {
-    MAXTIME("Max time"), MAXSTATEMENTS("Max statements"), MAXTESTS("Max tests"),
-    MAXGENERATIONS("Max generations"), MAXFITNESSEVALUATIONS("Max fitness evaluations"),
-    TIMEDELTA("Time delta");
+enum class StoppingCondition(private val display: String, private val units: String) {
+    MAXTIME("Max time", "seconds"), MAXSTATEMENTS("Max statements", "statements"), MAXTESTS("Max tests", "tests"),
+    MAXGENERATIONS("Max generations", "generations"), MAXFITNESSEVALUATIONS("Max fitness evaluations", "evaluations"),
+    TIMEDELTA("Time delta", "");
 
     /**
      * Returns the display name of the given enum value that is shown in the UI elements.
@@ -76,6 +77,13 @@ enum class StoppingCondition(private val display: String) {
     override fun toString(): String {
         return display
     }
+
+    /**
+     * Gets the units of measurement (e.g. seconds, tests etc.).
+     *
+     * @return the units of measurement
+     */
+    fun units() : String = units
 }
 
 /**

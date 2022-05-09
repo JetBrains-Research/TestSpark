@@ -1,17 +1,15 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.toolwindow
 
-import com.intellij.openapi.ui.Messages
-
-import java.awt.Dimension
-import java.awt.GridBagLayout
-import java.awt.event.ActionEvent
-import javax.swing.JButton
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.Messages
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.*
+import java.awt.event.ActionEvent
 import javax.swing.*
 
 /**
@@ -19,6 +17,7 @@ import javax.swing.*
  */
 class TestGenieToolWindow {
 
+    // UI elements for EvoSuite parameters
     private var stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
     private var searchBudget: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
     private var initializationTimeout: JSpinner = JSpinner(SpinnerNumberModel(120, 0, 10000, 1))
@@ -28,21 +27,34 @@ class TestGenieToolWindow {
     private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
     private var population: JSpinner = JSpinner(SpinnerNumberModel(50, 0, 10000, 1))
 
-    private val panelTitle = JLabel("Quick Access Parameters")
+    // Save and Reset buttons
     private var saveButton: JButton = JButton("Save")
     private var resetButton: JButton = JButton("Reset")
 
+    // Tool Window panel
+    private val panelTitle = JLabel("Quick Access Parameters")
     private var toolWindowPanel: JPanel = JPanel()
 
+    // The tooltip label for stopping condition (search budget type)
+    private var stoppingConditionToolTip = JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+
+    // Template strings for "default" tooltips
     private val defaultStr: String = "Default: %s"
+
 
     init {
         loadState()
 
         toolWindowPanel = createToolWindowPanel()
-
         panelTitle.font = Font("Monochrome", Font.BOLD, 20)
+
         resetButton.toolTipText = "Reset all parameters to their default values"
+
+        stoppingConditionToolTip.border = JBUI.Borders.emptyLeft(10)
+        stoppingCondition.addActionListener {
+            stoppingConditionToolTip.text = default("60 ${stoppingCondition.item.units()}")
+        }
+        stoppingConditionToolTip.text = default("60 ${stoppingCondition.item.units()}")
 
         saveButton.addActionListener { addListenerForSaveButton(it) }
         resetButton.addActionListener { addListenerForResetButton(it) }
@@ -58,7 +70,7 @@ class TestGenieToolWindow {
         .addComponent(JXTitledSeparator("Search budget"), 35)
         .addLabeledComponent(customLabel("Search budget type",
             "What condition should be checked to end the search."), stoppingCondition, 25, false)
-        .addTooltip(default("60 seconds")) //TODO Dynamic unit
+        .addComponentToRightColumn(stoppingConditionToolTip, 1)
         .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
         .addTooltip(default("60 seconds"))
         .addComponent(JXTitledSeparator("Timeouts"), 35)
