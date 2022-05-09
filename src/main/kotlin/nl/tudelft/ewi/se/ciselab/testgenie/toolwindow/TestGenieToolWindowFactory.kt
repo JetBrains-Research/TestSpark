@@ -30,11 +30,11 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
         val content: Content = contentFactory.createContent(testGeniePanelWrapper.getContent(), "Parameters", false)
 
         val visualisationService = project.service<CoverageToolWindowDisplayService>()
-        toolWindow.contentManager.addContent(content)
         toolWindow.contentManager.addContent(
             contentFactory.createContent(
                 visualisationService.mainPanel, "Coverage Visualisation", true
             )
         )
+        toolWindow.contentManager.addContent(content)
     }
 }
