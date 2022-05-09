@@ -88,9 +88,9 @@ class Runner(private val project: Project, private val projectPath: String, priv
         ProgressManager.getInstance()
             .run(
                 object : Task.Backgroundable(project, "EvoSuite: Generating Tests...") {
+
                     override fun run(indicator: ProgressIndicator) {
                         indicator.isIndeterminate = false;
-
                         val evoSuiteProcess = GeneralCommandLine(cmd)
                         evoSuiteProcess.charset = Charset.forName("UTF-8")
                         evoSuiteProcess.setWorkDirectory(projectPath)
@@ -100,7 +100,7 @@ class Runner(private val project: Project, private val projectPath: String, priv
                         handler.addProcessListener(object : ProcessAdapter() {
                             override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                                 val text = event.text
-                                val matcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
+                                val matcher = Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
                                 log.info(text) // kept for debugging purposes
                                 if (matcher.find()) {
                                     val progress = matcher.group(1).toDouble() / 100
