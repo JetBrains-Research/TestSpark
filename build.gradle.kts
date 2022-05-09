@@ -129,6 +129,16 @@ tasks {
     }
 }
 
+/**
+ * Custom gradle task used to source the custom evosuite binary
+ * required for the build process. It functions as follows:
+ * 1. Read the version specified inside build.gradle
+ * 2. If the specified jar version is present for the build process, the
+ * task finishes successfully, otherwise:
+ * 3. Attempt to fetch the corresponding release from the supplied
+ * download url.
+ * 4. Unzips the release and places the raw jar inside the directory used by the build process
+ */
 abstract class UpdateEvoSuite : DefaultTask() {
     @Input
     var version: String = ""
