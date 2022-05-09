@@ -22,11 +22,21 @@ version = properties("pluginVersion")
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
 }
 
 // include evo suite jar
 dependencies {
     implementation(files("evo/evosuite.jar"))
+    // RemoteRobot library for UI testing
+    testImplementation("com.intellij.remoterobot:remote-robot:0.11.13")
+    // RemoteRobot fixtures library for common set of fixtures
+    testImplementation("com.intellij.remoterobot:remote-fixtures:0.11.13")
+    // Logging Network Calls
+    testImplementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    // JUnit
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
 }
 
@@ -103,6 +113,10 @@ tasks {
         systemProperty("ide.mac.message.dialogs.as.sheets", "false")
         systemProperty("jb.privacy.policy.text", "<!--999.999-->")
         systemProperty("jb.consents.confirmation.enabled", "false")
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
     signPlugin {
