@@ -2,23 +2,23 @@ package nl.tudelft.ewi.se.ciselab.testgenie.coverage
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.hint.HintManagerImpl
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ex.EditorGutterComponentEx
 import com.intellij.openapi.editor.markup.ActiveGutterRenderer
 import com.intellij.openapi.editor.markup.LineMarkerRendererEx
-import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.ui.HintHint
 import com.intellij.ui.LightweightHint
 import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
-import org.evosuite.utils.CompactReport
 import java.awt.Color
 import java.awt.Graphics
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
 import com.intellij.openapi.project.Project
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 
 /**
  * This class extends the line marker and gutter editor to allow more functionality.
@@ -26,8 +26,9 @@ import com.intellij.openapi.project.Project
  * @param color color of marker
  * @param lineNumber lineNumber to color
  * @param tests list of tests that cover this line
+ * @param project Project context variable which is required for message bus passing
  */
-class TestGenieCoverageRenderer(private val color: Color, private val lineNumber: Int, private val tests: List<String>, private val testReport: CompactReport, private val project : Project) : ActiveGutterRenderer,
+class TestGenieCoverageRenderer(private val color: Color, private val lineNumber: Int, private val tests: List<String>, private val project: Project) : ActiveGutterRenderer,
         LineMarkerRendererEx {
 
     /**
@@ -39,12 +40,12 @@ class TestGenieCoverageRenderer(private val color: Color, private val lineNumber
     override fun doAction(editor: Editor, e: MouseEvent) {
         e.consume()
         val prePanel = FormBuilder
-            .createFormBuilder()
-            .addComponent(JBLabel(" Covered by tests:"), 10)
+                .createFormBuilder()
+                .addComponent(JBLabel(" Covered by tests:"), 10)
 
         for (i in tests) {
             prePanel.addComponent(ActionLink(i) {
-                ShowSettingsUtil.getInstance().showSettingsDialog(project, "TestGenie")
+                highlightInToolwindow(i)
             })
         }
 
@@ -53,14 +54,25 @@ class TestGenieCoverageRenderer(private val color: Color, private val lineNumber
         val hint = LightweightHint(panel)
         val point = HintManagerImpl.getHintPosition(hint, editor, LogicalPosition(lineNumber, 0), HintManager.RIGHT)
         HintManagerImpl.getInstanceImpl().showEditorHint(
-            hint,
-            editor,
-            point,
-            HintManager.HIDE_BY_ANY_KEY or HintManager.HIDE_BY_TEXT_CHANGE or HintManager.HIDE_BY_OTHER_HINT or HintManager.HIDE_BY_SCROLLING,
-            -1,
-            false,
-            HintHint(editor, point)
+                hint,
+                editor,
+                point,
+                HintManager.HIDE_BY_ANY_KEY or HintManager.HIDE_BY_TEXT_CHANGE or HintManager.HIDE_BY_OTHER_HINT or HintManager.HIDE_BY_SCROLLING,
+                -1,
+                false,
+                HintHint(editor, point)
         )
+    }
+
+    /**
+     * Use Display service's mini-editor highlighter function
+     *
+     * @param name name of the test to highlight
+     */
+    fun highlightInToolwindow(name: String) {
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+
+        testCaseDisplayService.highlight(name)
     }
 
     /**
