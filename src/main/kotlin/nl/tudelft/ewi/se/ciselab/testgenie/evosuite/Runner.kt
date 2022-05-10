@@ -13,10 +13,8 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
-import org.jetbrains.annotations.NotNull
 import java.io.File
 import java.nio.charset.Charset
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 /**
@@ -92,7 +90,7 @@ class Runner(private val project: Project, private val projectPath: String, priv
                 object : Task.Backgroundable(project, "EvoSuite: Generating Tests...") {
 
                     override fun run(indicator: ProgressIndicator) {
-                        indicator.isIndeterminate = false;
+                        indicator.isIndeterminate = false
                         val evoSuiteProcess = GeneralCommandLine(cmd)
                         evoSuiteProcess.charset = Charset.forName("UTF-8")
                         evoSuiteProcess.setWorkDirectory(projectPath)
@@ -118,7 +116,7 @@ class Runner(private val project: Project, private val projectPath: String, priv
                         }
                         // TODO: handle stderr separately
 
-                        indicator.fraction = 1.0;
+                        indicator.fraction = 1.0
                         indicator.stop()
 
                     }
