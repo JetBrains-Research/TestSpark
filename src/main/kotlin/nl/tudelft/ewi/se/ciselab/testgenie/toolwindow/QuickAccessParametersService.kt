@@ -38,7 +38,7 @@ class QuickAccessParametersService : PersistentStateComponent<TestGenieToolWindo
          *
          * @return the service that manages the state
          */
-        fun getInstance() : PersistentStateComponent<TestGenieToolWindowState> {
+        fun getInstance(): PersistentStateComponent<TestGenieToolWindowState> {
             return ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java)
         }
     }

@@ -83,7 +83,7 @@ enum class StoppingCondition(private val display: String, private val units: Str
      *
      * @return the units of measurement
      */
-    fun units() : String = units
+    fun units(): String = units
 }
 
 /**
