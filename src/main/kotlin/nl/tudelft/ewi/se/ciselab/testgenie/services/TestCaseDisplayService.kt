@@ -18,7 +18,7 @@ class TestCaseDisplayService(private val project: Project) {
     private val applyButton: JButton = JButton("Apply")
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
-    private var editorList: List<Pair<String, EditorTextField>> = emptyList()
+    private var editorList: MutableList<Pair<String, EditorTextField>> = emptyList()
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -31,7 +31,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
      *
-     * @param testCases The test cases to display
+     * @param testReport The report from which each testcase should be displayed
      */
     fun displayTestCases(testReport: CompactReport) {
         allTestCasePanel.removeAll()
@@ -48,8 +48,8 @@ class TestCaseDisplayService(private val project: Project) {
             val code = JavaCodeFragmentFactory.getInstance(project)
                     .createExpressionCodeFragment(testCode, null, null, true)
             val document = PsiDocumentManager.getInstance(project).getDocument(code)
-            var editor = EditorTextField(document, project, JavaFileType.INSTANCE)
-            editorList += Pair(testName, editor)
+            val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
+            editorList.add(Pair(testName, editor))
 
             editor.setOneLineMode(false)
             editor.isViewer = true
@@ -69,9 +69,9 @@ class TestCaseDisplayService(private val project: Project) {
      */
     fun highlight(name: String) {
         for (i in editorList) {
-            var testCase = i.first
+            val testCase = i.first
             if (testCase == name) {
-                var editor = i.second
+                val editor = i.second
                 val backgroundDefault = editor.background
                 editor.background = Color(100, 150, 20, 30)
                 Thread {

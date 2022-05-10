@@ -69,7 +69,7 @@ class TestGenieCoverageRenderer(private val color: Color, private val lineNumber
      *
      * @param name name of the test to highlight
      */
-    fun highlightInToolwindow(name: String) {
+    private fun highlightInToolwindow(name: String) {
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
 
         testCaseDisplayService.highlight(name)
