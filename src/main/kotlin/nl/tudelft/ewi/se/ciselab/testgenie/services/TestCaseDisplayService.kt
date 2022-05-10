@@ -18,7 +18,7 @@ class TestCaseDisplayService(private val project: Project) {
     private val applyButton: JButton = JButton("Apply")
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
-    private var editorList: MutableList<Pair<String, EditorTextField>> = emptyList()
+    private var editorList: MutableList<Pair<String, EditorTextField>> = arrayListOf()
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
