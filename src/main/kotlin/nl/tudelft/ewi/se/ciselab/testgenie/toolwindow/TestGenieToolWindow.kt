@@ -49,7 +49,7 @@ class TestGenieToolWindow {
         toolWindowPanel = createToolWindowPanel()
         panelTitle.font = Font("Monochrome", Font.BOLD, 20)
 
-        resetButton.toolTipText = "Reset all parameters to their default values"
+        addTooltipsToUiElements()
 
         stoppingConditionToolTip.border = JBUI.Borders.emptyLeft(10)
         stoppingCondition.addActionListener {
@@ -62,8 +62,6 @@ class TestGenieToolWindow {
             populationLimitToolTip.text = default("60 ${populationLimit.item.toString().toLowerCase()}")
         }
         populationLimitToolTip.text = default("60 ${populationLimit.item.toString().toLowerCase()}")
-
-        populationLimit.item.toString().toLowerCase()
 
         saveButton.addActionListener { addListenerForSaveButton(it) }
         resetButton.addActionListener { addListenerForResetButton(it) }
@@ -216,6 +214,22 @@ class TestGenieToolWindow {
         state.junitCheckTimeout = junitCheckTimeout.value as Int
         state.populationLimit = populationLimit.item
         state.population = population.value as Int
+    }
+
+    /**
+     * Adds tooltips to the actual UI elements, not the labels for them.
+     */
+    private fun addTooltipsToUiElements() {
+        stoppingCondition.toolTipText = "What condition should be checked to end the search."
+        searchBudget.toolTipText = "Maximum search duration."
+        initializationTimeout.toolTipText = "Seconds allowed for initializing the search."
+        minimisationTimeout.toolTipText = "Seconds allowed for minimization at the end."
+        assertionTimeout.toolTipText = "Seconds allowed for assertion generation at the end."
+        junitCheckTimeout.toolTipText = "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
+        populationLimit.toolTipText = "What to use as limit for the population size."
+        population.toolTipText = "Population size of genetic algorithm."
+
+        resetButton.toolTipText = "Reset all parameters to their default values"
     }
 
     /**
