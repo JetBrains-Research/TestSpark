@@ -14,16 +14,20 @@ import javax.swing.JTextField
  */
 class SettingsEvoSuiteComponent {
     var panel: JPanel? = null
-    private var sandboxCheckBox = JCheckBox("Execute tests in a sandbox environment")
-    private var assertionsCheckBox = JCheckBox("Create assertions")
-    private var seedTextField = JTextField()
 
-    //DropDown menu
+    //EvoSuite "input" options (e.g. text, number)
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
     private var configurationIdTextField = JTextField()
+    private var seedTextField = JTextField()
+
+    //EvoSuite checkboxes options
+    private var sandboxCheckBox = JCheckBox("Execute tests in a sandbox environment")
+    private var assertionsCheckBox = JCheckBox("Create assertions")
     private var clientOnThreadCheckBox = JCheckBox("Debug mode")
     private var junitCheckCheckBox = JCheckBox("Flaky tests")
+    private var minimizeCheckBox = JCheckBox("Minimize test suite after generation")
 
+    //Criterion selection checkboxes
     //There is a limited amount of criteria, but multiple can be selected at once.
     //Effectively, this requires its own section (or a checkboxed combobox of sorts)
     private var criterionSeparator = JXTitledSeparator("Criterion selection")
@@ -35,19 +39,38 @@ class SettingsEvoSuiteComponent {
     private var criterionMethodCheckBox = JCheckBox("Method coverage")
     private var criterionMethodNoExceptionCheckBox = JCheckBox("Method no exception coverage")
     private var criterionCBranchCheckBox = JCheckBox("CBranch coverage")
-    private var minimizeCheckBox = JCheckBox("Minimize test suite after generation")
+
 
     init {
+
+        //Adds the panel components
+        createSettingsPanel()
+
+        //Adds additional style (width, tooltips)
+        stylizePanel()
+    }
+
+    /**
+     * Create the main panel for EvoSuite settings page
+     */
+    fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
                 .addComponent(JXTitledSeparator("General settings"))
+
+                //EvoSuite "input" options (e.g. text, number)
+                //Important settings like algorithm selection, seed selection
                 .addLabeledComponent(JBLabel("Select search algorithm"), algorithmSelector, 10, false)
                 .addLabeledComponent(JBLabel("Seed(random if left empty) "), seedTextField, 10, false)
                 .addLabeledComponent(JBLabel("Select configuration id (null if left empty) "), configurationIdTextField, 5, false)
+
+                //Checkboxes settings
                 .addComponent(sandboxCheckBox, 10)
                 .addComponent(assertionsCheckBox, 10)
                 .addComponent(clientOnThreadCheckBox, 10)
                 .addComponent(minimizeCheckBox, 10)
                 .addComponent(junitCheckCheckBox, 10)
+
+                //Criterion selection checkboxes
                 .addComponent(criterionSeparator, 15)
                 .addComponent(criterionLineCheckBox, 5)
                 .addComponent(criterionBranchCheckBox, 5)
@@ -59,14 +82,23 @@ class SettingsEvoSuiteComponent {
                 .addComponent(criterionCBranchCheckBox, 5)
                 .addComponentFillVertically(JPanel(), 0)
                 .panel
+    }
 
+    /**
+     * Add stylistic additions to elements of EvoSuite settings panel (e.g. tooltips)
+     */
+    fun stylizePanel() {
+        //Dimensions adjustments
         algorithmSelector.setMinimumAndPreferredWidth(300)
+
+        //Tooltips
         configurationIdTextField.toolTipText = "Label that identifies the used configuration of EvoSuite. This is only done when running experiments."
         clientOnThreadCheckBox.toolTipText = "Run client process on same JVM of master in separate thread. To be used only for debugging purposes"
         junitCheckCheckBox.toolTipText = "Compile and run resulting JUnit test suite (if any was created)"
         criterionSeparator.toolTipText = "Coverage criterion. Can define more than one criterion by checking multiple checkboxes. " +
                 "\n By default, all are used."
     }
+
 
     /**
      * Returns the UI component that should be focused when a user opens the TestGenie Settings page.
@@ -76,6 +108,9 @@ class SettingsEvoSuiteComponent {
     fun getPreferredFocusedComponent(): JComponent {
         return algorithmSelector
     }
+
+
+    //Settings "changers" (dials, basically)
 
     var sandbox: Boolean
         get() = sandboxCheckBox.isSelected
