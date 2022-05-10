@@ -1,6 +1,6 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
-import nl.tudelft.ewi.se.ciselab.testgenie.coverage.TestGenieCoverageRenderer
+import nl.tudelft.ewi.se.ciselab.testgenie.coverage.CoverageRenderer
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
@@ -25,7 +25,7 @@ class CoverageVisualisationService(private val project: Project) {
 
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
-        if(state.showCoverage) {
+        if (state.showCoverage) {
             val editor = FileEditorManager.getInstance(project).selectedTextEditor!!
 
             val color = Color(100, 150, 20)
@@ -33,8 +33,9 @@ class CoverageVisualisationService(private val project: Project) {
             for (i in testReport.allCoveredLines) {
                 val line = i - 1
                 val hl = editor.markupModel.addLineHighlighter(DiffColors.DIFF_INSERTED, line, HighlighterLayer.LAST)
-                hl.lineMarkerRenderer = TestGenieCoverageRenderer(color, line, testReport.testCaseList
-                        .filter { x -> i in x.value.coveredLines }.map{x -> x.key})
+                hl.lineMarkerRenderer = CoverageRenderer(color,
+                    line,
+                    testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key })
             }
         }
     }
@@ -71,15 +72,12 @@ class CoverageVisualisationService(private val project: Project) {
             relativeMutations = (coveredMutations.toDouble() / allMutations * 100).roundToInt()
         }
 
-        visualisationService.panelTitleAbsolute.text = "Absolute Test Coverage for ${testReport.UUT}"
-        visualisationService.panelTitleRelative.text = "Relative Test Coverage for ${testReport.UUT}"
+        // Change the values in the table
+        visualisationService.data[4] = testReport.UUT
+        visualisationService.data[5] = "$relativeLines% ($coveredLines/$allLines)"
+        visualisationService.data[6] = "$relativeBranch% ($coveredBranches/$allBranches)"
+        visualisationService.data[7] = "$relativeMutations% ($coveredMutations/ $allMutations)"
 
-        visualisationService.absoluteLines.text = "Amount of Lines covered: $coveredLines Total: $allLines"
-        visualisationService.absoluteBranch.text = "Amount of Branches covered: $coveredBranches Total: $allBranches"
-        visualisationService.absoluteMutant.text = "Amount of Mutants covered: $coveredMutations Total: $allMutations"
 
-        visualisationService.relativeLines.text = "Percentage of Lines covered: $relativeLines%"
-        visualisationService.relativeBranch.text = "Percentage of Branches covered: $relativeBranch%"
-        visualisationService.relativeMutant.text = "Percentage of Mutants covered: $relativeMutations%"
     }
 }
