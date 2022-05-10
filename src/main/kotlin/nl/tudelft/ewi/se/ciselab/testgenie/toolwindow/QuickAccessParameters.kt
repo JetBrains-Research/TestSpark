@@ -15,7 +15,7 @@ import javax.swing.*
 /**
  * This class stores the UI of the TestGenie tool window.
  */
-class TestGenieToolWindow {
+class QuickAccessParameters {
 
     // UI elements for EvoSuite parameters
     private var stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
@@ -44,25 +44,33 @@ class TestGenieToolWindow {
 
 
     init {
+        // Load the persisted state
         loadState()
 
+        // Create the main panel and set the font of the title
         toolWindowPanel = createToolWindowPanel()
         panelTitle.font = Font("Monochrome", Font.BOLD, 20)
 
+        // Add tooltips to the UI elements for parameters
         addTooltipsToUiElements()
 
-        stoppingConditionToolTip.border = JBUI.Borders.emptyLeft(10)
-        stoppingCondition.addActionListener {
+        // Add an action listener to stopping condition combo box to update the "default" tooltip
+        fun updateStoppingConditionTooltip() {
             stoppingConditionToolTip.text = default("60 ${stoppingCondition.item.units()}")
         }
-        stoppingConditionToolTip.text = default("60 ${stoppingCondition.item.units()}")
+        stoppingConditionToolTip.border = JBUI.Borders.emptyLeft(10)
+        stoppingCondition.addActionListener { updateStoppingConditionTooltip() }
+        updateStoppingConditionTooltip()
 
-        populationLimitToolTip.border = JBUI.Borders.emptyLeft(10)
-        populationLimit.addActionListener {
+        // Add an action listener to population limit combo box to update the "default" tooltip
+        fun updatePopulationLimitToolTip() {
             populationLimitToolTip.text = default("60 ${populationLimit.item.toString().toLowerCase()}")
         }
-        populationLimitToolTip.text = default("60 ${populationLimit.item.toString().toLowerCase()}")
+        populationLimitToolTip.border = JBUI.Borders.emptyLeft(10)
+        populationLimit.addActionListener { updatePopulationLimitToolTip() }
+        updatePopulationLimitToolTip()
 
+        // Add action listeners to Save and Reset buttons
         saveButton.addActionListener { addListenerForSaveButton(it) }
         resetButton.addActionListener { addListenerForResetButton(it) }
     }
@@ -71,15 +79,20 @@ class TestGenieToolWindow {
      * Creates the entire tool window panel.
      */
     private fun createToolWindowPanel() = FormBuilder.createFormBuilder()
+        // Add indentations from the left border and between the lines, and add title
         .setFormLeftIndent(30)
         .addVerticalGap(25)
         .addComponent(panelTitle)
+
+         // Add `Search Budget` category
         .addComponent(JXTitledSeparator("Search budget"), 35)
         .addLabeledComponent(customLabel("Search budget type",
             "What condition should be checked to end the search."), stoppingCondition, 25, false)
         .addTooltip(default(StoppingCondition.MAXTIME.toString()))
         .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
         .addComponentToRightColumn(stoppingConditionToolTip, 1)
+
+         // Add `Timeouts` category
         .addComponent(JXTitledSeparator("Timeouts"), 35)
         .addLabeledComponent(customLabel("Initialization timeout",
                 "Seconds allowed for initializing the search."), initializationTimeout, 25, false)
@@ -93,6 +106,8 @@ class TestGenieToolWindow {
         .addLabeledComponent(customLabel("JUnit check timeout",
             "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."), junitCheckTimeout, 20, false)
         .addTooltip(default("60 seconds"))
+
+        // Add `Genetic Algorithm` section
         .addComponent(JXTitledSeparator("Genetic Algorithm"), 35)
         .addLabeledComponent(customLabel("Population limit",
             "What to use as limit for the population size."), populationLimit, 25, false)
@@ -100,7 +115,11 @@ class TestGenieToolWindow {
         .addLabeledComponent(customLabel("Population",
             "Population size of genetic algorithm."), population, 20, false)
         .addComponentToRightColumn(populationLimitToolTip, 1)
+
+        // Add Save and Reset buttons
         .addComponent(createSaveAndResetButtons(), 20)
+
+        // Add the main panel
         .addComponentFillVertically(JPanel(), 20)
         .panel
 
@@ -159,7 +178,7 @@ class TestGenieToolWindow {
         )
 
         if (choice == 0) {
-            val state: TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+            val state: TestGenieToolWindowState = QuickAccessParametersService.getInstance().state!!
             state.stoppingCondition = StoppingCondition.MAXTIME
             state.searchBudget = 60
             state.initializationTimeout = 120
@@ -188,7 +207,7 @@ class TestGenieToolWindow {
      * Loads the persisted state and updates the UI elements with the corresponding values.
      */
     private fun loadState() {
-        val state: TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+        val state: TestGenieToolWindowState = QuickAccessParametersService.getInstance().state!!
 
         stoppingCondition.item = state.stoppingCondition
         searchBudget.value = state.searchBudget
@@ -204,7 +223,7 @@ class TestGenieToolWindow {
      * Persist the state by reading off the values from the UI elements.
      */
     private fun saveState() {
-        val state: TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+        val state: TestGenieToolWindowState = QuickAccessParametersService.getInstance().state!!
 
         state.stoppingCondition = stoppingCondition.item
         state.searchBudget = searchBudget.value as Int

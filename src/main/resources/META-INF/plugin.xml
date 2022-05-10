@@ -19,7 +19,7 @@
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService"/>
         <applicationService
-                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowService"/>
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.QuickAccessParametersService"/>
         <applicationConfigurable
                 parentId="Settings"
                 instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsConfigurable"
