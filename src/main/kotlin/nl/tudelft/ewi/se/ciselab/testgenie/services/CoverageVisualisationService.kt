@@ -8,6 +8,8 @@ import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.ui.content.ContentFactory
 import org.evosuite.utils.CompactReport
 import java.awt.Color
 import kotlin.math.roundToInt
@@ -22,6 +24,7 @@ class CoverageVisualisationService(private val project: Project) {
     fun showCoverage(testReport: CompactReport) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
+        createToolWindowTab()
 
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
@@ -77,7 +80,32 @@ class CoverageVisualisationService(private val project: Project) {
         visualisationService.data[5] = "$relativeLines% ($coveredLines/$allLines)"
         visualisationService.data[6] = "$relativeBranch% ($coveredBranches/$allBranches)"
         visualisationService.data[7] = "$relativeMutations% ($coveredMutations/ $allMutations)"
+    }
 
+    /**
+     * Creates a new toolWindow tab for the coverage visualisation.
+     */
+    private fun createToolWindowTab() {
+        val visualisationService = project.service<CoverageToolWindowDisplayService>()
 
+        // Remove coverage visualisation from content manager if necessary
+        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
+        val contentManager = toolWindowManager!!.contentManager
+        for (content in contentManager.contents) {
+            if (content.displayName.equals("Coverage Visualisation")) {
+                contentManager.removeContent(content, true)
+            }
+        }
+
+        // If there is no coverage visualisation tab, make it
+        val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
+        val content = contentFactory.createContent(
+            visualisationService.mainPanel, "Coverage Visualisation", true
+        )
+        contentManager.addContent(content)
+
+        // Focus on coverage tab and open toolWindow if not opened already
+        contentManager.setSelectedContent(content)
+        toolWindowManager.show()
     }
 }
