@@ -14,6 +14,7 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiSubstitutor
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.containers.map2Array
 
@@ -55,7 +56,6 @@ class GenerateTestsActionMethod : AnAction() {
             "Selected method is $classFQN::$method${signature.contentToString()}$returnType",
             "selected"
         )
-        return
 
         val resultPath = Runner(projectPath, projectClassPath, classFQN).forMethod(method).runEvoSuite()
 
@@ -75,8 +75,10 @@ class GenerateTestsActionMethod : AnAction() {
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
 
         val psiMethod: PsiMethod = GenerateTestsUtils.getSurroundingMethod(psiFile, caret) ?: return
+        val parentClass = PsiTreeUtil.getParentOfType(psiMethod, PsiClass::class.java) ?: return
 
         e.presentation.isEnabledAndVisible = true
-        e.presentation.text = "Generate Tests For Method ${psiMethod.name}"
+        val text = if (parentClass.constructors.contains(psiMethod)) "Constructor" else "Method ${psiMethod.name}"
+        e.presentation.text = "Generate Tests For $text"
     }
 }

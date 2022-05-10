@@ -22,8 +22,6 @@ object GenerateTestsUtils {
      * @return PsiClass element if it has been found, null otherwise
      */
     fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass? {
-        val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
-
         // Get the classes of the PSI file
         val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
 
@@ -32,7 +30,7 @@ object GenerateTestsUtils {
         for (psiClass: PsiClass in classElements) {
             if (withinElement(psiClass, caret)) {
                 // Check the constraints on a class
-                if (!validateClass(psiClass, doc)) continue
+                if (!validateClass(psiClass)) continue
                 surroundingClass = psiClass
             }
         }
@@ -47,7 +45,7 @@ object GenerateTestsUtils {
      * @return PsiMethod element if has been found, null otherwise
      */
     fun getSurroundingMethod(psiFile: PsiFile, caret: Caret): PsiMethod? {
-        val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
+        // Get the methods of the PSI file
         val methodElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiMethod::class.java)
 
         // Get the surrounding PSI method (i.e. the cursor has to be within that method)
@@ -56,7 +54,7 @@ object GenerateTestsUtils {
             if (withinElement(method, caret)) {
                 val surroundingClass: PsiClass = PsiTreeUtil.getParentOfType(method, PsiClass::class.java) ?: continue
                 // Check the constraints on the surrounding class
-                if (!validateClass(surroundingClass, doc)) continue
+                if (!validateClass(surroundingClass)) continue
                 surroundingMethod = method
             }
         }
@@ -68,31 +66,28 @@ object GenerateTestsUtils {
      * Namely, it is a concrete class (non-abstract, not an interface, not an enum, not an anonymous inner class).
      *
      * @param psiClass the selected PSI class (where the user makes the click)
-     * @param doc the current document (where the user makes the click)
      * @return true if the constraints are satisfied, false otherwise
      */
-    private fun validateClass(psiClass: PsiClass, doc: Document): Boolean {
+    private fun validateClass(psiClass: PsiClass): Boolean {
         // The class cannot be an enum, interface or anonymous class
         if (psiClass.isEnum || psiClass.isInterface || psiClass is PsiAnonymousClass) return false
 
         // The psiClass cannot be abstract
-        return checkNonAbstract(psiClass, doc)
+        return checkNonAbstract(psiClass)
     }
 
     /**
      * Checks that the element is non-abstract (class or method).
      *
      * @param psiElement the selected PSI element (where the user makes a click)
-     * @param doc the current document (where the user makes the click)
      * @return true if the element is abstract, false otherwise
      */
-    private fun checkNonAbstract(psiElement: PsiElement, doc: Document): Boolean {
+    private fun checkNonAbstract(psiElement: PsiElement): Boolean {
         if (psiElement !is PsiClass && psiElement !is PsiMethod) return false
 
-        val lineRange =
-            TextRange(psiElement.startOffset, doc.getLineEndOffset(doc.getLineNumber(psiElement.startOffset)))
-        val line: String = doc.getText(lineRange)
-        return !line.contains("abstract ")
+        val mark = psiElement.text.indexOf("(").coerceAtLeast(psiElement.text.indexOf("{"))
+        val text = psiElement.text.substring(0, mark)
+        return !text.contains("abstract ")
     }
 
     /**
@@ -104,5 +99,19 @@ object GenerateTestsUtils {
      */
     private fun withinElement(psiElement: PsiElement, caret: Caret): Boolean {
         return (psiElement.startOffset <= caret.offset) && (psiElement.endOffset >= caret.offset)
+    }
+
+    /**
+     * Gets the first (logical) line of the provided PSI element.
+     *
+     * @param psiElement the PSI element of interest
+     * @return the first (logical, i.e. until \n character) line of the given PSI element
+     */
+    private fun getFirstLine(psiElement: PsiElement): String {
+        val psiFile: PsiFile = psiElement.containingFile
+        val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return ""
+        val lineRange =
+            TextRange(psiElement.startOffset, doc.getLineEndOffset(doc.getLineNumber(psiElement.startOffset)))
+        return doc.getText(lineRange)
     }
 }

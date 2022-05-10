@@ -43,7 +43,6 @@ class GenerateTestsActionClass : AnAction() {
 
         //TODO: remove these lines
         Messages.showInfoMessage(classFQN, "selected")
-        return
 
         val resultPath = Runner(projectPath, projectClassPath, classFQN).forClass().runEvoSuite()
 
