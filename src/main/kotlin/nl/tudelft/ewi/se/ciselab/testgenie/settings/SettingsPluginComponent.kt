@@ -18,9 +18,9 @@ class SettingsPluginComponent {
 
     init {
         panel = FormBuilder.createFormBuilder()
-            .addComponent(showCoverageCheckBox, 10)
-            .addComponentFillVertically(JPanel(), 0)
-            .panel
+                .addComponent(showCoverageCheckBox, 10)
+                .addComponentFillVertically(JPanel(), 0)
+                .panel
     }
 
     /**
