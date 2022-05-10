@@ -1,10 +1,12 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.FormBuilder
 import java.awt.Font
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.table.AbstractTableModel
 
 class CoverageToolWindowDisplayService {
     var mainPanel: JPanel ?= null
@@ -16,9 +18,42 @@ class CoverageToolWindowDisplayService {
     var relativeLines = JBLabel("Percentage of Lines covered: ")
     var relativeBranch = JBLabel("Percentage of Branches covered: ")
     var relativeMutant = JBLabel("Percentage of Mutants covered: ")
+    var data: ArrayList<String> = arrayListOf("Coverage", "Lines", "Branches", "Mutants", "", "", "", "")
 
     private var listLabels = listOf(absoluteLines, absoluteBranch, absoluteMutant, relativeLines, relativeBranch, relativeMutant)
+    // Implementation of abstract table model
+    var tableModel = object : AbstractTableModel() {
+        /**
+         * Returns the number of rows.
+         *
+         * @return row count
+         */
+        override fun getRowCount(): Int {
+            return 2
+        }
 
+        /**
+         * Returns the number of columns.
+         *
+         * @return column count
+         */
+        override fun getColumnCount(): Int {
+            return 4
+        }
+
+        /**
+         * Returns the value at index.
+         *
+         * @param rowIndex index of row
+         * @param columnIndex index of column
+         * @return value at row
+         */
+        override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
+            return data[rowIndex * 4 + columnIndex]
+        }
+
+    }
+    var table = JBTable(tableModel)
 
     /**
      * Show the labels for statistics on code coverage by tests in "coverage visualisation" tab
