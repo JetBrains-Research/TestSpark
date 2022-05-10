@@ -10,7 +10,7 @@ class CoverageToolWindowDisplayService {
     var data: ArrayList<String> = arrayListOf("Coverage", "Lines", "Branches", "Mutants", "", "", "", "")
 
     // Implementation of abstract table model
-    var tableModel = object : AbstractTableModel() {
+    private var tableModel = object : AbstractTableModel() {
         /**
          * Returns the number of rows.
          *
@@ -41,7 +41,7 @@ class CoverageToolWindowDisplayService {
         }
 
     }
-    var table = JBTable(tableModel)
+    private var table = JBTable(tableModel)
 
     /**
      * Show the labels for statistics on code coverage by tests in "coverage visualisation" tab

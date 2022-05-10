@@ -18,13 +18,13 @@ import java.awt.event.MouseEvent
 
 /**
  * This class extends the line marker and gutter editor to allow more functionality.
- * 
+ *
  * @param color color of marker
  * @param lineNumber lineNumber to color
  * @param tests list of tests that cover this line
  */
-class CoverageRenderer(private val color: Color, private val lineNumber : Int, private val tests : List<String>) : ActiveGutterRenderer,
-    LineMarkerRendererEx {
+class CoverageRenderer(private val color: Color, private val lineNumber: Int, private val tests: List<String>) :
+    ActiveGutterRenderer, LineMarkerRendererEx {
 
     /**
      * Perform the action - show toolTip on mouse click.
@@ -34,11 +34,8 @@ class CoverageRenderer(private val color: Color, private val lineNumber : Int, p
      */
     override fun doAction(editor: Editor, e: MouseEvent) {
         e.consume()
-        val panel = FormBuilder
-            .createFormBuilder()
-            .addComponent(JBLabel(" Covered by tests: $tests "), 10)
-            .addVerticalGap(10)
-            .panel
+        val panel = FormBuilder.createFormBuilder().addComponent(JBLabel(" Covered by tests: $tests "), 10)
+            .addVerticalGap(10).panel
 
         val hint = LightweightHint(panel)
         val point = HintManagerImpl.getHintPosition(hint, editor, LogicalPosition(lineNumber, 0), HintManager.RIGHT)
