@@ -6,16 +6,15 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.elementsAroundOffsetUp
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.util.concurrency.AppExecutorUtil
@@ -32,16 +31,19 @@ class GenerateTestsActionClass : AnAction() {
      * @param e AnActionEvent class that contains useful information about the action event
      */
     override fun actionPerformed(e: AnActionEvent) {
-        // determine class path
         val project: Project = e.project ?: return
+
+        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+        val doc: Document = e.dataContext.getData(CommonDataKeys.EDITOR)?.document ?: return
+
+        val psiClass: PsiClass = getSurroundingClass(psiFile, doc, caret) ?: return
+        val classFQN = psiClass.qualifiedName ?: return
 
         val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val projectClassPath = "$projectPath/target/classes/"
 
         log.info("Generating tests for project $projectPath with classpath $projectClassPath")
-
-        val psiClass = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT) as PsiClass  // Checked in update method
-        val classFQN = psiClass.qualifiedName ?: return
 
         log.info("Selected class is $classFQN")
 
@@ -56,39 +58,60 @@ class GenerateTestsActionClass : AnAction() {
      * @param e AnActionEvent class that contains useful information about the action event
      */
     override fun update(e: AnActionEvent) {
-        val cursor = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-        val doc = e.dataContext.getData(CommonDataKeys.EDITOR)?.document ?: return
+        e.presentation.isEnabledAndVisible = false
+
+        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+        val doc: Document = e.dataContext.getData(CommonDataKeys.EDITOR)?.document ?: return
         val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
-        val clazz = getSurroundingClass(psiFile, cursor.offset) ?: return
+        val psiClass: PsiClass = getSurroundingClass(psiFile, doc, caret) ?: return
 
-        val lineRange: TextRange = TextRange(clazz.startOffset, doc.getLineEndOffset(doc.getLineNumber(clazz.startOffset)))
-        val line: String = doc.getText(lineRange) //cursor.visualLineStart, cursor.visualLineEnd))
-
-        Messages.showInfoMessage(line, "lololo")
-        if (line.contains("abstract ")) return
-        //e.presentation.isEnabledAndVisible = psiElement is PsiClass // TODO: check for the current project
+        e.presentation.text = "Generate Tests For Class ${psiClass.name}"
+        e.presentation.isEnabledAndVisible = true
     }
 
     /**
      * Gets the class on which the user has clicked (the click has to be inside the contents of the class).
+     * NB! This has to be a concrete class, so enums and abstract classes do not count.
      *
      * @param psiFile the current PSI file (where the user makes the click)
-     * @param offset the offset of the primary caret
-     * @return psiClass element if has been found, null otherwise
+     * @param doc the current document (where the user makes the click)
+     * @param caret the primary caret that did the click
+     * @return PsiClass element if has been found, null otherwise
      */
-    private fun getSurroundingClass(psiFile: PsiFile, offset: Int): PsiClass? {
+    private fun getSurroundingClass(psiFile: PsiFile, doc: Document, caret: Caret): PsiClass? {
+        // Get the classes of the PSI file
         val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
 
+        // Get the surrounding PSI class (i.e. the cursor has to be withing that class)
         var surroundingClass: PsiClass? = null
         for (clazz: PsiClass in classElements) {
-            if (clazz.startOffset <= offset && clazz.endOffset >= offset) {
+            if (clazz.startOffset <= caret.offset && clazz.endOffset >= caret.offset) {
+                // Check the constraints on a class
+                if (!validateClass(clazz, doc)) continue
                 surroundingClass = clazz
-                break
             }
         }
 
-        if (surroundingClass == null || surroundingClass.isEnum || surroundingClass.isInterface || surroundingClass is PsiAnonymousClass) return null
         return surroundingClass
+    }
+
+    /**
+     * Checks if the constraints on the selected class are satisfied, so that EvoSuite can generate tests for it.
+     * Namely, it is a concrete class (non-abstract, not an interface, not an enum, not an anonymous inner class).
+     *
+     * @param psiClass the selected PSI class (where the user makes the click)
+     * @param doc the current document (where the user makes the click)
+     * @return true if the constraints are satisfied, false otherwise
+     */
+    private fun validateClass(psiClass: PsiClass, doc: Document): Boolean {
+        // The class cannot be null, enum, interface or anonymous class
+        if (psiClass.isEnum || psiClass.isInterface || psiClass is PsiAnonymousClass) return false
+
+        // The psiClass cannot be abstract
+        val lineRange = TextRange(psiClass.startOffset, doc.getLineEndOffset(doc.getLineNumber(psiClass.startOffset)))
+        val line: String = doc.getText(lineRange)
+        if (line.contains("abstract ")) return false
+        return true
     }
 }
