@@ -23,7 +23,7 @@ import java.awt.event.MouseEvent
  * @param lineNumber lineNumber to color
  * @param tests list of tests that cover this line
  */
-class TestGenieCoverageRenderer(private val color: Color, private val lineNumber : Int, private val tests : List<String>) : ActiveGutterRenderer,
+class CoverageRenderer(private val color: Color, private val lineNumber : Int, private val tests : List<String>) : ActiveGutterRenderer,
     LineMarkerRendererEx {
 
     /**
