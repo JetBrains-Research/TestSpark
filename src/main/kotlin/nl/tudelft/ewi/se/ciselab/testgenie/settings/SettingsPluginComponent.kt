@@ -1,13 +1,9 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
-import com.intellij.openapi.ui.ComboBox
-import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
-import org.jdesktop.swingx.JXTitledSeparator
 import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JPanel
-import javax.swing.JTextField
 
 /**
  * This class displays and captures changes to the values of the Settings entries.

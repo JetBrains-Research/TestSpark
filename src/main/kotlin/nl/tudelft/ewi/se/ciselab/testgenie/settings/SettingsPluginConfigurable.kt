@@ -1,7 +1,6 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
 import com.intellij.openapi.options.Configurable
-import com.intellij.openapi.ui.Messages
 import javax.swing.JComponent
 
 /**
@@ -13,6 +12,8 @@ class SettingsPluginConfigurable : Configurable {
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
+     *
+     * @return the panel used for displaying settings
      */
     override fun createComponent(): JComponent? {
         settingsComponent = SettingsPluginComponent()
@@ -29,11 +30,12 @@ class SettingsPluginConfigurable : Configurable {
 
     /**
      * Checks if the values of the entries in the settings state are different from the persisted values of these entries.
+     *
+     * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        var modified: Boolean = settingsComponent!!.showCoverage != settingsState.showCoverage
-        return modified
+        return settingsComponent!!.showCoverage != settingsState.showCoverage
     }
 
     /**
@@ -46,6 +48,8 @@ class SettingsPluginConfigurable : Configurable {
 
     /**
      * Returns the displayed name of the Settings tab.
+     *
+     * @return the name displayed in the menu (settings)
      */
     override fun getDisplayName(): String {
         return "TestGenie"
@@ -53,6 +57,8 @@ class SettingsPluginConfigurable : Configurable {
 
     /**
      * Returns the UI component that should be focused when the TestGenie Settings page is opened.
+     *
+     *  @return preferred UI component
      */
     override fun getPreferredFocusedComponent(): JComponent {
         return settingsComponent!!.getPreferredFocusedComponent()
