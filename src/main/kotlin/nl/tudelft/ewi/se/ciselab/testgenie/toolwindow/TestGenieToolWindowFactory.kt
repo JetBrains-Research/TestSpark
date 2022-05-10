@@ -17,7 +17,7 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
      * Initialises the UI of the tool window.
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val testGeniePanelWrapper = TestGenieToolWindow()
+        val quickAccessParameters = QuickAccessParameters(project)
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
 
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
@@ -27,14 +27,14 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
             )
         )
 
-        val content: Content = contentFactory.createContent(testGeniePanelWrapper.getContent(), "Parameters", false)
+        val content: Content = contentFactory.createContent(quickAccessParameters.getContent(), "Parameters", false)
 
         val visualisationService = project.service<CoverageToolWindowDisplayService>()
-        toolWindow.contentManager.addContent(content)
         toolWindow.contentManager.addContent(
             contentFactory.createContent(
                 visualisationService.mainPanel, "Coverage Visualisation", true
             )
         )
+        toolWindow.contentManager.addContent(content)
     }
 }

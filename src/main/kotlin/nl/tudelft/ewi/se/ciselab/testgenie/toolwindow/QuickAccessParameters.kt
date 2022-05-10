@@ -1,50 +1,98 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.toolwindow
 
-import com.intellij.openapi.ui.Messages
-
-import java.awt.Dimension
-import java.awt.GridBagLayout
-import java.awt.event.ActionEvent
-import javax.swing.JButton
+import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.Messages
+import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
-import java.awt.*
-import javax.swing.*
+import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
+import org.jdesktop.swingx.JXTitledSeparator
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
+import java.awt.Insets
+import java.awt.event.ActionEvent
+import javax.swing.JButton
+import javax.swing.JComponent
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JSpinner
+import javax.swing.SpinnerNumberModel
 
 /**
  * This class stores the UI of the TestGenie tool window.
  */
-class TestGenieToolWindow {
+class QuickAccessParameters(_project: Project) {
 
-    private var searchBudget: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
-    private var localSearchBudgetType: ComboBox<LocalSearchBudgetType> = ComboBox(LocalSearchBudgetType.values())
-    private var localSearchBudgetValue: JSpinner = JSpinner(SpinnerNumberModel(5, 0, 10000, 1))
+    // Current Project
+    private var project: Project = _project
+
+    // UI elements for EvoSuite parameters
     private var stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
+    private var searchBudget: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
     private var initializationTimeout: JSpinner = JSpinner(SpinnerNumberModel(120, 0, 10000, 1))
     private var minimisationTimeout: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
     private var assertionTimeout: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
     private var junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
-    private var population: JSpinner = JSpinner(SpinnerNumberModel(50, 0, 10000, 1))
     private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
+    private var population: JSpinner = JSpinner(SpinnerNumberModel(50, 0, 10000, 1))
 
-    private val panelTitle = JLabel("Frequently Used Parameters")
+    // Save and Reset buttons
     private var saveButton: JButton = JButton("Save")
     private var resetButton: JButton = JButton("Reset")
 
+    // Link to open settings
+    private var settingsLink: ActionLink = ActionLink("Advanced Settings") {
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, "TestGenie")
+    }
+
+    // Tool Window panel
+    private val panelTitle = JLabel("Quick Access Parameters")
     private var toolWindowPanel: JPanel = JPanel()
 
+    // The tooltip labels
+    private var stoppingConditionToolTip =
+        JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+    private var populationLimitToolTip =
+        JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+
+    // Template strings for "default" tooltips
     private val defaultStr: String = "Default: %s"
 
+
     init {
+        // Load the persisted state
         loadState()
 
+        // Create the main panel and set the font of the title
         toolWindowPanel = createToolWindowPanel()
-
         panelTitle.font = Font("Monochrome", Font.BOLD, 20)
-        resetButton.toolTipText = "Reset all parameters to their default values"
 
+        // Add tooltips to the UI elements for parameters
+        addTooltipsToUiElements()
+
+        // Add an action listener to stopping condition combo box to update the "default" tooltip
+        fun updateStoppingConditionTooltip() {
+            stoppingConditionToolTip.text = default("60 ${stoppingCondition.item.units()}")
+        }
+        stoppingConditionToolTip.border = JBUI.Borders.emptyLeft(10)
+        stoppingCondition.addActionListener { updateStoppingConditionTooltip() }
+        updateStoppingConditionTooltip()
+
+        // Add an action listener to population limit combo box to update the "default" tooltip
+        fun updatePopulationLimitToolTip() {
+            populationLimitToolTip.text = default("60 ${populationLimit.item.toString().toLowerCase()}")
+        }
+        populationLimitToolTip.border = JBUI.Borders.emptyLeft(10)
+        populationLimit.addActionListener { updatePopulationLimitToolTip() }
+        updatePopulationLimitToolTip()
+
+        // Add action listeners to Save and Reset buttons
         saveButton.addActionListener { addListenerForSaveButton(it) }
         resetButton.addActionListener { addListenerForResetButton(it) }
     }
@@ -53,51 +101,44 @@ class TestGenieToolWindow {
      * Creates the entire tool window panel.
      */
     private fun createToolWindowPanel() = FormBuilder.createFormBuilder()
+        // Add indentations from the left border and between the lines, and add title
         .setFormLeftIndent(30)
         .addVerticalGap(25)
         .addComponent(panelTitle)
-        .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
-        .addTooltip(default("60 seconds"))
-        .addLabeledComponent(
-            customLabel("Local search budget type", "Interpretation of local search budget value."),
-            localSearchBudgetType,
-            20,
-            false
-        )
-        .addTooltip(default("Time"))
+
+        // Add `Search Budget` category
+        .addComponent(JXTitledSeparator("Search budget"), 35)
         .addLabeledComponent(
             customLabel(
-                "Local search budget value",
-                "Maximum budget usable for improving individuals per local search."
-            ), localSearchBudgetValue, 20, false
+                "Search budget type",
+                "What condition should be checked to end the search."
+            ), stoppingCondition, 25, false
         )
-        .addTooltip(default("5"))
+        .addTooltip(default(StoppingCondition.MAXTIME.toString()))
+        .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
+        .addComponentToRightColumn(stoppingConditionToolTip, 1)
+
+        // Add `Timeouts` category
+        .addComponent(JXTitledSeparator("Timeouts"), 35)
         .addLabeledComponent(
-            customLabel("Stopping condition", "What condition should be checked to end the search."),
-            stoppingCondition,
-            20,
-            false
-        )
-        .addTooltip(default("60 seconds"))
-        .addLabeledComponent(
-            customLabel("Initialization timeout", "Seconds allowed for initializing the search."),
-            initializationTimeout,
-            20,
-            false
+            customLabel(
+                "Initialization timeout",
+                "Seconds allowed for initializing the search."
+            ), initializationTimeout, 25, false
         )
         .addTooltip(default("120 seconds"))
         .addLabeledComponent(
-            customLabel("Minimisation timeout", "Seconds allowed for minimization at the end."),
-            minimisationTimeout,
-            20,
-            false
+            customLabel(
+                "Minimisation timeout",
+                "Seconds allowed for minimization at the end."
+            ), minimisationTimeout, 20, false
         )
         .addTooltip(default("60 seconds"))
         .addLabeledComponent(
-            customLabel("Assertion timeout", "Seconds allowed for assertion generation at the end."),
-            assertionTimeout,
-            20,
-            false
+            customLabel(
+                "Assertion timeout",
+                "Seconds allowed for assertion generation at the end."
+            ), assertionTimeout, 20, false
         )
         .addTooltip(default("60 seconds"))
         .addLabeledComponent(
@@ -107,16 +148,29 @@ class TestGenieToolWindow {
             ), junitCheckTimeout, 20, false
         )
         .addTooltip(default("60 seconds"))
-        .addLabeledComponent(customLabel("Population", "Population size of genetic algorithm."), population, 20, false)
-        .addTooltip(default("50"))
+
+        // Add `Genetic Algorithm` section
+        .addComponent(JXTitledSeparator("Genetic Algorithm"), 35)
         .addLabeledComponent(
-            customLabel("Population limit", "What to use as limit for the population size."),
-            populationLimit,
-            20,
-            false
+            customLabel(
+                "Population limit",
+                "What to use as limit for the population size."
+            ), populationLimit, 25, false
         )
         .addTooltip(default("Individuals"))
+        .addLabeledComponent(
+            customLabel(
+                "Population",
+                "Population size of genetic algorithm."
+            ), population, 20, false
+        )
+        .addComponentToRightColumn(populationLimitToolTip, 1)
+
+        // Add Save and Reset buttons and a link to open TestGenie settings
         .addComponent(createSaveAndResetButtons(), 20)
+        .addComponent(settingsLink, 20)
+
+        // Add the main panel
         .addComponentFillVertically(JPanel(), 20)
         .panel
 
@@ -175,17 +229,15 @@ class TestGenieToolWindow {
         )
 
         if (choice == 0) {
-            val state: TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
-            state.searchBudget = 60
-            state.localSearchBudgetType = LocalSearchBudgetType.TIME
-            state.localSearchBudgetValue = 5
+            val state: TestGenieToolWindowState = QuickAccessParametersService.getInstance().state!!
             state.stoppingCondition = StoppingCondition.MAXTIME
+            state.searchBudget = 60
             state.initializationTimeout = 120
             state.minimizationTimeout = 60
             state.assertionTimeout = 60
             state.junitCheckTimeout = 60
-            state.population = 50
             state.populationLimit = PopulationLimit.INDIVIDUALS
+            state.population = 50
 
             loadState()
 
@@ -206,36 +258,49 @@ class TestGenieToolWindow {
      * Loads the persisted state and updates the UI elements with the corresponding values.
      */
     private fun loadState() {
-        val state: TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+        val state: TestGenieToolWindowState = QuickAccessParametersService.getInstance().state!!
 
-        searchBudget.value = state.searchBudget
-        localSearchBudgetType.item = state.localSearchBudgetType
-        localSearchBudgetValue.value = state.localSearchBudgetValue
         stoppingCondition.item = state.stoppingCondition
+        searchBudget.value = state.searchBudget
         initializationTimeout.value = state.initializationTimeout
         minimisationTimeout.value = state.minimizationTimeout
         assertionTimeout.value = state.assertionTimeout
         junitCheckTimeout.value = state.junitCheckTimeout
-        population.value = state.population
         populationLimit.item = state.populationLimit
+        population.value = state.population
     }
 
     /**
      * Persist the state by reading off the values from the UI elements.
      */
     private fun saveState() {
-        val state: TestGenieToolWindowState = TestGenieToolWindowService.getInstance().state!!
+        val state: TestGenieToolWindowState = QuickAccessParametersService.getInstance().state!!
 
-        state.searchBudget = searchBudget.value as Int
-        state.localSearchBudgetType = localSearchBudgetType.item
-        state.localSearchBudgetValue = localSearchBudgetValue.value as Int
         state.stoppingCondition = stoppingCondition.item
+        state.searchBudget = searchBudget.value as Int
         state.initializationTimeout = initializationTimeout.value as Int
         state.minimizationTimeout = minimisationTimeout.value as Int
         state.assertionTimeout = assertionTimeout.value as Int
         state.junitCheckTimeout = junitCheckTimeout.value as Int
-        state.population = population.value as Int
         state.populationLimit = populationLimit.item
+        state.population = population.value as Int
+    }
+
+    /**
+     * Adds tooltips to the actual UI elements, not the labels for them.
+     */
+    private fun addTooltipsToUiElements() {
+        stoppingCondition.toolTipText = "What condition should be checked to end the search."
+        searchBudget.toolTipText = "Maximum search duration."
+        initializationTimeout.toolTipText = "Seconds allowed for initializing the search."
+        minimisationTimeout.toolTipText = "Seconds allowed for minimization at the end."
+        assertionTimeout.toolTipText = "Seconds allowed for assertion generation at the end."
+        junitCheckTimeout.toolTipText =
+            "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
+        populationLimit.toolTipText = "What to use as limit for the population size."
+        population.toolTipText = "Population size of genetic algorithm."
+
+        resetButton.toolTipText = "Reset all parameters to their default values"
     }
 
     /**
