@@ -17,7 +17,7 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
      * Initialises the UI of the tool window.
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val testGeniePanelWrapper = TestGenieToolWindow()
+        val testGeniePanelWrapper = QuickAccessParameters()
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
 
         val testCaseDisplayService = project.service<TestCaseDisplayService>()

@@ -10,7 +10,7 @@ import com.intellij.openapi.components.Storage
  * It provides ability to load state and get state.
  */
 @State(name = "TestGenieToolWindowState", storages = [Storage("testGenieToolWindowState.xml")])
-class TestGenieToolWindowService : PersistentStateComponent<TestGenieToolWindowState> {
+class QuickAccessParametersService : PersistentStateComponent<TestGenieToolWindowState> {
 
     private var toolWindowState: TestGenieToolWindowState = TestGenieToolWindowState()
 
@@ -39,7 +39,7 @@ class TestGenieToolWindowService : PersistentStateComponent<TestGenieToolWindowS
          * @return the service that manages the state
          */
         fun getInstance() : PersistentStateComponent<TestGenieToolWindowState> {
-            return ApplicationManager.getApplication().getService(TestGenieToolWindowService::class.java)
+            return ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java)
         }
     }
 }
