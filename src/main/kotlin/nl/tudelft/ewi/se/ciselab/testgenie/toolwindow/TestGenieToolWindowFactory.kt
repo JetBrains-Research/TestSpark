@@ -1,6 +1,5 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.toolwindow
 
-import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageToolWindowDisplayService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -17,7 +16,7 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
      * Initialises the UI of the tool window.
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val testGeniePanelWrapper = TestGenieToolWindow()
+        val quickAccessParameters = QuickAccessParameters(project)
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
 
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
@@ -27,7 +26,7 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
             )
         )
 
-        val content: Content = contentFactory.createContent(testGeniePanelWrapper.getContent(), "Parameters", false)
+        val content: Content = contentFactory.createContent(quickAccessParameters.getContent(), "Parameters", false)
         toolWindow.contentManager.addContent(content)
     }
 }
