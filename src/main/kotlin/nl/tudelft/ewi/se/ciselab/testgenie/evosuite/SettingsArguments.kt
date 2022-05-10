@@ -2,7 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.evosuite
 
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
-import nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowService
+import nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.QuickAccessParametersService
 
 /**
  * This class is used for constructing the necessary parameters for running evosuite
@@ -50,7 +50,7 @@ class SettingsArguments(
      * Finalizes the parameter construction by applying the user runtime settings
      */
     fun build(): MutableList<String> {
-        val toolWindowState = TestGenieToolWindowService.getInstance().state
+        val toolWindowState = QuickAccessParametersService.getInstance().state
         val settingsState = TestGenieSettingsService.getInstance().state
 
         if (toolWindowState != null) {
