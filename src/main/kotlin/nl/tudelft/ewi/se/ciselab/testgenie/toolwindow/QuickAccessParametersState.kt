@@ -6,44 +6,34 @@ package nl.tudelft.ewi.se.ciselab.testgenie.toolwindow
  */
 data class TestGenieToolWindowState
 constructor(
-    var searchBudget: Int = 60,
-    var localSearchBudgetType: LocalSearchBudgetType = LocalSearchBudgetType.TIME,
-    var localSearchBudgetValue: Int = 5,
     var stoppingCondition: StoppingCondition = StoppingCondition.MAXTIME,
+    var searchBudget: Int = 60,
     var initializationTimeout: Int = 120,
     var minimizationTimeout: Int = 60,
     var assertionTimeout: Int = 60,
     var junitCheckTimeout: Int = 60,
-    var population: Int = 50,
-    var populationLimit: PopulationLimit = PopulationLimit.INDIVIDUALS
+    var populationLimit: PopulationLimit = PopulationLimit.INDIVIDUALS,
+    var population: Int = 50
 ) {
     private object DefaultToolWindowState {
+        val stoppingCondition: StoppingCondition = StoppingCondition.MAXTIME
         const val searchBudget: Int = 60
-        const val localSearchBudgetValue: Int = 5
         const val initializationTimeout: Int = 120
         const val minimizationTimeout: Int = 60
         const val assertionTimeout: Int = 60
         const val junitCheckTimeout: Int = 60
-        const val population: Int = 50
-        val localSearchBudgetType: LocalSearchBudgetType = LocalSearchBudgetType.TIME
-        val stoppingCondition: StoppingCondition = StoppingCondition.MAXTIME
         val populationLimit: PopulationLimit = PopulationLimit.INDIVIDUALS
+        const val population: Int = 50
     }
 
     fun serializeChangesFromDefault(): List<String> {
 
         val params = mutableListOf<String>()
-        if (this.searchBudget != DefaultToolWindowState.searchBudget) {
-            params.add("-Dsearch_budget=${this.searchBudget}")
-        }
-        if (this.localSearchBudgetValue != DefaultToolWindowState.localSearchBudgetValue) {
-            params.add("-Dlocal_search_budget=${this.localSearchBudgetValue}")
-        }
-        if (this.localSearchBudgetType != DefaultToolWindowState.localSearchBudgetType) {
-            params.add("-Dlocal_search_budget_type=${this.localSearchBudgetType.name}")
-        }
         if (this.stoppingCondition != DefaultToolWindowState.stoppingCondition) {
             params.add("-Dstopping_condition=${this.stoppingCondition.name}")
+        }
+        if (this.searchBudget != DefaultToolWindowState.searchBudget) {
+            params.add("-Dsearch_budget=${this.searchBudget}")
         }
         if (this.initializationTimeout != DefaultToolWindowState.initializationTimeout) {
             params.add("-Dinitialization_timeout=${this.initializationTimeout}")
@@ -57,11 +47,11 @@ constructor(
         if (this.junitCheckTimeout != DefaultToolWindowState.junitCheckTimeout) {
             params.add("-Djunit_check_timeout=${this.junitCheckTimeout}")
         }
-        if (this.population != DefaultToolWindowState.population) {
-            params.add("-Dpopulation=${this.population}")
-        }
         if (this.populationLimit != DefaultToolWindowState.populationLimit) {
             params.add("-Dpopulation_limit=${this.populationLimit.name}")
+        }
+        if (this.population != DefaultToolWindowState.population) {
+            params.add("-Dpopulation=${this.population}")
         }
         return params
     }
@@ -69,33 +59,15 @@ constructor(
 }
 
 /**
- * This enum contains the types for the search budget value parameter.
- *
- * @param display string representation of the enum value that is used in UI elements
- */
-enum class LocalSearchBudgetType(private val display: String) {
-    TIME("Time"), STATEMENTS("Statements"), TESTS("Tests"), SUITES("Suites"), FITNESS_EVALUATIONS("Fitness evaluations");
-
-    /**
-     * Returns the display name of the given enum value that is shown in the UI elements.
-     *
-     * @return the display name of the given enum value
-     */
-    override fun toString(): String {
-        return display
-    }
-}
-
-/**
  * This enum contains the type for the stopping condition of the algorithm.
  *
  * @param display string representation of the enum value that is used in UI elements
+ * @param units the units of measurement (e.g. seconds, tests etc.) that are used when displaying the tooltip with the default value
  */
-enum class StoppingCondition(private val display: String) {
-    MAXTIME("Max time"), MAXSTATEMENTS("Max statements"), MAXTESTS("Max tests"), MAXGENERATIONS("Max generations"), MAXFITNESSEVALUATIONS(
-        "Max fitness evaluations"
-    ),
-    TIMEDELTA("Time delta");
+enum class StoppingCondition(private val display: String, private val units: String) {
+    MAXTIME("Max time", "seconds"), MAXSTATEMENTS("Max statements", "statements"), MAXTESTS("Max tests", "tests"),
+    MAXGENERATIONS("Max generations", "generations"), MAXFITNESSEVALUATIONS("Max fitness evaluations", "evaluations"),
+    TIMEDELTA("Time delta", "");
 
     /**
      * Returns the display name of the given enum value that is shown in the UI elements.
@@ -105,6 +77,13 @@ enum class StoppingCondition(private val display: String) {
     override fun toString(): String {
         return display
     }
+
+    /**
+     * Gets the units of measurement (e.g. seconds, tests etc.).
+     *
+     * @return the units of measurement
+     */
+    fun units(): String = units
 }
 
 /**
