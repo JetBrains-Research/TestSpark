@@ -25,7 +25,7 @@ class CoverageVisualisationService(private val project: Project) {
 
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
-        if(state.showCoverage) {
+        if (state.showCoverage) {
             val editor = FileEditorManager.getInstance(project).selectedTextEditor!!
 
             val color = Color(100, 150, 20)
@@ -34,7 +34,7 @@ class CoverageVisualisationService(private val project: Project) {
                 val line = i - 1
                 val hl = editor.markupModel.addLineHighlighter(DiffColors.DIFF_INSERTED, line, HighlighterLayer.LAST)
                 hl.lineMarkerRenderer = TestGenieCoverageRenderer(color, line, testReport.testCaseList
-                        .filter { x -> i in x.value.coveredLines }.map{x -> x.key}, testReport, project)
+                        .filter { x -> i in x.value.coveredLines }.map { x -> x.key }, project)
             }
         }
     }
