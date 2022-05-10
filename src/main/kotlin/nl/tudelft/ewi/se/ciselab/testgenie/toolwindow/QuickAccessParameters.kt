@@ -36,8 +36,10 @@ class QuickAccessParameters {
     private var toolWindowPanel: JPanel = JPanel()
 
     // The tooltip labels
-    private var stoppingConditionToolTip = JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
-    private var populationLimitToolTip = JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+    private var stoppingConditionToolTip =
+        JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+    private var populationLimitToolTip =
+        JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
 
     // Template strings for "default" tooltips
     private val defaultStr: String = "Default: %s"
@@ -84,36 +86,64 @@ class QuickAccessParameters {
         .addVerticalGap(25)
         .addComponent(panelTitle)
 
-         // Add `Search Budget` category
+        // Add `Search Budget` category
         .addComponent(JXTitledSeparator("Search budget"), 35)
-        .addLabeledComponent(customLabel("Search budget type",
-            "What condition should be checked to end the search."), stoppingCondition, 25, false)
+        .addLabeledComponent(
+            customLabel(
+                "Search budget type",
+                "What condition should be checked to end the search."
+            ), stoppingCondition, 25, false
+        )
         .addTooltip(default(StoppingCondition.MAXTIME.toString()))
         .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
         .addComponentToRightColumn(stoppingConditionToolTip, 1)
 
-         // Add `Timeouts` category
+        // Add `Timeouts` category
         .addComponent(JXTitledSeparator("Timeouts"), 35)
-        .addLabeledComponent(customLabel("Initialization timeout",
-                "Seconds allowed for initializing the search."), initializationTimeout, 25, false)
+        .addLabeledComponent(
+            customLabel(
+                "Initialization timeout",
+                "Seconds allowed for initializing the search."
+            ), initializationTimeout, 25, false
+        )
         .addTooltip(default("120 seconds"))
-        .addLabeledComponent(customLabel("Minimisation timeout",
-            "Seconds allowed for minimization at the end."), minimisationTimeout, 20, false)
+        .addLabeledComponent(
+            customLabel(
+                "Minimisation timeout",
+                "Seconds allowed for minimization at the end."
+            ), minimisationTimeout, 20, false
+        )
         .addTooltip(default("60 seconds"))
-        .addLabeledComponent(customLabel("Assertion timeout",
-            "Seconds allowed for assertion generation at the end."), assertionTimeout, 20, false)
+        .addLabeledComponent(
+            customLabel(
+                "Assertion timeout",
+                "Seconds allowed for assertion generation at the end."
+            ), assertionTimeout, 20, false
+        )
         .addTooltip(default("60 seconds"))
-        .addLabeledComponent(customLabel("JUnit check timeout",
-            "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."), junitCheckTimeout, 20, false)
+        .addLabeledComponent(
+            customLabel(
+                "JUnit check timeout",
+                "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
+            ), junitCheckTimeout, 20, false
+        )
         .addTooltip(default("60 seconds"))
 
         // Add `Genetic Algorithm` section
         .addComponent(JXTitledSeparator("Genetic Algorithm"), 35)
-        .addLabeledComponent(customLabel("Population limit",
-            "What to use as limit for the population size."), populationLimit, 25, false)
+        .addLabeledComponent(
+            customLabel(
+                "Population limit",
+                "What to use as limit for the population size."
+            ), populationLimit, 25, false
+        )
         .addTooltip(default("Individuals"))
-        .addLabeledComponent(customLabel("Population",
-            "Population size of genetic algorithm."), population, 20, false)
+        .addLabeledComponent(
+            customLabel(
+                "Population",
+                "Population size of genetic algorithm."
+            ), population, 20, false
+        )
         .addComponentToRightColumn(populationLimitToolTip, 1)
 
         // Add Save and Reset buttons
@@ -244,7 +274,8 @@ class QuickAccessParameters {
         initializationTimeout.toolTipText = "Seconds allowed for initializing the search."
         minimisationTimeout.toolTipText = "Seconds allowed for minimization at the end."
         assertionTimeout.toolTipText = "Seconds allowed for assertion generation at the end."
-        junitCheckTimeout.toolTipText = "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
+        junitCheckTimeout.toolTipText =
+            "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
         populationLimit.toolTipText = "What to use as limit for the population size."
         population.toolTipText = "Population size of genetic algorithm."
 
