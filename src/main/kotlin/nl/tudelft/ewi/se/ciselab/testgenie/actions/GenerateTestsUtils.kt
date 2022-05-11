@@ -59,7 +59,6 @@ object GenerateTestsUtils {
         return surroundingMethod
     }
 
-
     /**
      * Checks if a method is concrete (non-abstract in case of an abstract class and non-default in case of an interface).
      *
@@ -68,6 +67,17 @@ object GenerateTestsUtils {
      */
     private fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
         return psiMethod.body != null
+    }
+
+    /**
+     * Checks if the method is a default method of an interface.
+     *
+     * @param psiMethod the PSI method of interest
+     * @return true if the method is a default method of an interface, false otherwise
+     */
+    private fun isMethodDefault(psiMethod: PsiMethod): Boolean {
+        if (!isMethodConcrete(psiMethod)) return false
+        return psiMethod.containingClass?.isInterface ?: return false
     }
 
     /**
@@ -143,6 +153,7 @@ object GenerateTestsUtils {
     fun getMethodDisplayName(psiMethod: PsiMethod): String {
         return if (isDefaultConstructor(psiMethod)) "Default Constructor"
         else if (psiMethod.isConstructor) "Constructor"
+        else if (isMethodDefault(psiMethod)) "Default Method ${psiMethod.name}"
         else "Method ${psiMethod.name}"
     }
 }
