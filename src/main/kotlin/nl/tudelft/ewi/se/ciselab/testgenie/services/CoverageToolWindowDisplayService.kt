@@ -7,7 +7,7 @@ import javax.swing.table.AbstractTableModel
 
 class CoverageToolWindowDisplayService {
     var mainPanel: JPanel? = null
-    var data: ArrayList<String> = arrayListOf("Coverage", "Lines", "Branches", "Mutants", "", "", "", "")
+    var data: ArrayList<String> = arrayListOf("", "", "", "")
 
     // Implementation of abstract table model
     private var tableModel = object : AbstractTableModel() {
@@ -17,7 +17,7 @@ class CoverageToolWindowDisplayService {
          * @return row count
          */
         override fun getRowCount(): Int {
-            return 2
+            return 1
         }
 
         /**
