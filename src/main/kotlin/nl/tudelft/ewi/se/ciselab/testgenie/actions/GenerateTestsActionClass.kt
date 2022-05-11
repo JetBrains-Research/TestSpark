@@ -41,8 +41,8 @@ class GenerateTestsActionClass : AnAction() {
 
         log.info("Selected class is $classFQN")
 
-        //TODO: remove these lines
-        Messages.showInfoMessage(classFQN, "selected")
+        //TODO: remove this line
+        Messages.showInfoMessage(classFQN, "Selected")
 
         val resultPath = Runner(projectPath, projectClassPath, classFQN).forClass().runEvoSuite()
 
@@ -63,7 +63,7 @@ class GenerateTestsActionClass : AnAction() {
 
         val psiClass: PsiClass = GenerateTestsUtils.getSurroundingClass(psiFile, caret) ?: return
 
-        e.presentation.text = "Generate Tests For Class ${psiClass.name}"
         e.presentation.isEnabledAndVisible = true
+        e.presentation.text = "Generate Tests For ${GenerateTestsUtils.getClassDisplayName(psiClass)}"
     }
 }
