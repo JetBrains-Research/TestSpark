@@ -28,6 +28,7 @@ class SettingsArguments(
         "-projectCP", projectClassPath,
         "-Dnew_statistics=false",
         "-class", classFQN,
+        "-Dtest_naming_strategy=COVERAGE"
     )
 
     /**
