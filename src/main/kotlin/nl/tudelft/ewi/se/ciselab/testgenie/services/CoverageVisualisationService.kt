@@ -15,6 +15,11 @@ import org.evosuite.utils.CompactReport
 import java.awt.Color
 import kotlin.math.roundToInt
 
+/**
+ * Service used to visualise the coverage and inject data in the toolWindow tab.
+ *
+ * @param project the project
+ */
 class CoverageVisualisationService(private val project: Project) {
 
     // Variable to keep reference to the coverage visualisation content
@@ -80,10 +85,10 @@ class CoverageVisualisationService(private val project: Project) {
 
         // Change the values in the table
         val coverageToolWindowDisplayService = project.service<CoverageToolWindowDisplayService>()
-        coverageToolWindowDisplayService.data[4] = testReport.UUT
-        coverageToolWindowDisplayService.data[5] = "$relativeLines% ($coveredLines/$allLines)"
-        coverageToolWindowDisplayService.data[6] = "$relativeBranch% ($coveredBranches/$allBranches)"
-        coverageToolWindowDisplayService.data[7] = "$relativeMutations% ($coveredMutations/ $allMutations)"
+        coverageToolWindowDisplayService.data[0] = testReport.UUT
+        coverageToolWindowDisplayService.data[1] = "$relativeLines% ($coveredLines/$allLines)"
+        coverageToolWindowDisplayService.data[2] = "$relativeBranch% ($coveredBranches/$allBranches)"
+        coverageToolWindowDisplayService.data[3] = "$relativeMutations% ($coveredMutations/ $allMutations)"
     }
 
     /**
