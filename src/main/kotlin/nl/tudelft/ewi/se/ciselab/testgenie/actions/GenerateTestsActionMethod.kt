@@ -1,6 +1,5 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.actions
 
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ResultWatcher
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -14,7 +13,6 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiSubstitutor
-import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.containers.map2Array
 
 /**
@@ -58,9 +56,7 @@ class GenerateTestsActionMethod : AnAction() {
             "Selected"
         )
 
-        val resultPath = Runner(projectPath, projectClassPath, classFQN).forMethod(method).runEvoSuite()
-
-        AppExecutorUtil.getAppScheduledExecutorService().execute(ResultWatcher(project, resultPath))
+        Runner(project, projectPath, projectClassPath, classFQN).forMethod(method).runEvoSuite()
     }
 
     /**
