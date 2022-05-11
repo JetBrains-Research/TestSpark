@@ -48,7 +48,7 @@ class QuickAccessParameters(_project: Project) {
 
     // Link to open settings
     private var settingsLink: ActionLink = ActionLink("Advanced Settings") {
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, "TestGenie")
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, "EvoSuite")
     }
 
     // Tool Window panel
@@ -167,8 +167,8 @@ class QuickAccessParameters(_project: Project) {
         .addComponentToRightColumn(populationLimitToolTip, 1)
 
         // Add Save and Reset buttons and a link to open TestGenie settings
-        .addComponent(createSaveAndResetButtons(), 20)
         .addComponent(settingsLink, 20)
+        .addComponent(createSaveAndResetButtons(), 20)
 
         // Add the main panel
         .addComponentFillVertically(JPanel(), 20)
