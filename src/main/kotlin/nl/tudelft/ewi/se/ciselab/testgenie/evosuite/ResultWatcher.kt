@@ -36,10 +36,10 @@ class ResultWatcher(private val project: Project, private val resultPath: String
 
         log.info("Started result listener thread for $resultPath")
 
-        val startTime = System.currentTimeMillis();
+        val startTime = System.currentTimeMillis()
 
         while (true) {
-            val currentTime = System.currentTimeMillis();
+            val currentTime = System.currentTimeMillis()
 
             if (currentTime - startTime > maxWatchDurationMillis) {
                 log.info("Max watch duration exceeded, exiting Watcher thread for $resultPath")
