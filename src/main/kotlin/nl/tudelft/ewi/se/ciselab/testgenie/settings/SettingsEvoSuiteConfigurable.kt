@@ -7,15 +7,17 @@ import javax.swing.JComponent
 /**
  * This class interacts with the other two Settings classes. It provides controller functionality for the settingsState.
  */
-class TestGenieSettingsConfigurable : Configurable {
+class SettingsEvoSuiteConfigurable : Configurable {
 
-    private var settingsComponent: TestGenieSettingsComponent? = null
+    private var settingsComponent: SettingsEvoSuiteComponent? = null
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
+     *
+     * @return the panel used for displaying settings
      */
     override fun createComponent(): JComponent? {
-        settingsComponent = TestGenieSettingsComponent()
+        settingsComponent = SettingsEvoSuiteComponent()
         return settingsComponent!!.panel
     }
 
@@ -24,7 +26,6 @@ class TestGenieSettingsConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        settingsComponent!!.showCoverage = settingsState.showCoverage
         settingsComponent!!.sandbox = settingsState.sandbox
         settingsComponent!!.assertions = settingsState.assertions
         settingsComponent!!.seed = settingsState.seed
@@ -45,11 +46,12 @@ class TestGenieSettingsConfigurable : Configurable {
 
     /**
      * Checks if the values of the entries in the settings state are different from the persisted values of these entries.
+     *
+     * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        var modified: Boolean = settingsComponent!!.showCoverage != settingsState.showCoverage
-        modified = modified or (settingsComponent!!.sandbox != settingsState.sandbox)
+        var modified: Boolean = settingsComponent!!.sandbox != settingsState.sandbox
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
         modified = modified or (settingsComponent!!.seed != settingsState.seed)
         modified = modified or (settingsComponent!!.algorithm != settingsState.algorithm)
@@ -79,7 +81,6 @@ class TestGenieSettingsConfigurable : Configurable {
         }
 
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        settingsState.showCoverage = settingsComponent!!.showCoverage
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions
         settingsState.seed = settingsComponent!!.seed
@@ -100,6 +101,8 @@ class TestGenieSettingsConfigurable : Configurable {
 
     /**
      * Returns the displayed name of the Settings tab.
+     *
+     * @return the name displayed in the menu (settings)
      */
     override fun getDisplayName(): String {
         return "TestGenie"
@@ -107,6 +110,8 @@ class TestGenieSettingsConfigurable : Configurable {
 
     /**
      * Returns the UI component that should be focused when the TestGenie Settings page is opened.
+     *
+     *  @return preferred UI component
      */
     override fun getPreferredFocusedComponent(): JComponent {
         return settingsComponent!!.getPreferredFocusedComponent()
