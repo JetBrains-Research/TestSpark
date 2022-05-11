@@ -9,12 +9,16 @@ import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import org.evosuite.utils.CompactReport
 import java.awt.Color
 import kotlin.math.roundToInt
 
 class CoverageVisualisationService(private val project: Project) {
+
+    // Variable to keep reference to the coverage visualisation content
+    var content: Content? = null
 
     /**
      * Shows coverage on the gutter next to the covered lines.
@@ -91,21 +95,19 @@ class CoverageVisualisationService(private val project: Project) {
         // Remove coverage visualisation from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
         val contentManager = toolWindowManager!!.contentManager
-        for (content in contentManager.contents) {
-            if (content.displayName.equals("Coverage Visualisation")) {
-                contentManager.removeContent(content, true)
-            }
+        if (content != null) {
+            contentManager.removeContent(content!!, true)
         }
 
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
-        val content = contentFactory.createContent(
+        content = contentFactory.createContent(
             visualisationService.mainPanel, "Coverage Visualisation", true
         )
-        contentManager.addContent(content)
+        contentManager.addContent(content!!)
 
         // Focus on coverage tab and open toolWindow if not opened already
-        contentManager.setSelectedContent(content)
+        contentManager.setSelectedContent(content!!)
         toolWindowManager.show()
     }
 }
