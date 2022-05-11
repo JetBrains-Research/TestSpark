@@ -10,8 +10,10 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService"/>
-        <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
-        <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageToolWindowDisplayService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageToolWindowDisplayService"/>
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
@@ -21,10 +23,15 @@
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.QuickAccessParametersService"/>
         <applicationConfigurable
-                parentId="Settings"
-                instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsConfigurable"
-                id="nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsConfigurable"
+                parentId="tools"
+                instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginConfigurable"
+                id="TestGenieSettings"
                 displayName="TestGenie"/>
+        <applicationConfigurable
+                parentId="TestGenieSettings"
+                instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsEvoSuiteConfigurable"
+                id="TestGenieSettings.evosuite"
+                displayName="EvoSuite"/>
     </extensions>
 
     <projectListeners>
