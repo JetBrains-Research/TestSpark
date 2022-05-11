@@ -12,7 +12,7 @@ class SettingsPluginComponent {
     var panel: JPanel? = null
 
     //Checkbox options
-    private var showCoverageCheckBox = JCheckBox("Do you want visualised coverage? ")
+    private var showCoverageCheckBox = JCheckBox("Show visualised coverage")
 
     init {
         createSettingsPanel()
@@ -21,7 +21,7 @@ class SettingsPluginComponent {
     /**
      * Create the main panel for Plugin settings page
      */
-    fun createSettingsPanel() {
+    private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
 
                 //Add visual coverage checkbox
@@ -40,7 +40,7 @@ class SettingsPluginComponent {
     }
 
 
-    //Settings "changers" (dials, basically)
+    //Settings "changers"
 
     var showCoverage: Boolean
         get() = showCoverageCheckBox.isSelected

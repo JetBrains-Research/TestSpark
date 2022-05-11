@@ -53,7 +53,7 @@ class SettingsEvoSuiteComponent {
     /**
      * Create the main panel for EvoSuite settings page
      */
-    fun createSettingsPanel() {
+    private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
                 .addComponent(JXTitledSeparator("General settings"))
 
@@ -87,7 +87,7 @@ class SettingsEvoSuiteComponent {
     /**
      * Add stylistic additions to elements of EvoSuite settings panel (e.g. tooltips)
      */
-    fun stylizePanel() {
+    private fun stylizePanel() {
         //Dimensions adjustments
         algorithmSelector.setMinimumAndPreferredWidth(300)
 
@@ -110,7 +110,7 @@ class SettingsEvoSuiteComponent {
     }
 
 
-    //Settings "changers" (dials, basically)
+    //Settings "changers"
 
     var sandbox: Boolean
         get() = sandboxCheckBox.isSelected
