@@ -49,7 +49,6 @@ class CoverageVisualisationService(private val project: Project) {
      * @param testReport the generated tests summary
      */
     private fun fillToolWindowContents(testReport: CompactReport) {
-        val visualisationService = project.service<CoverageToolWindowDisplayService>()
 
         // Calculate line coverage
         val coveredLines = testReport.allCoveredLines.size
@@ -76,10 +75,11 @@ class CoverageVisualisationService(private val project: Project) {
         }
 
         // Change the values in the table
-        visualisationService.data[4] = testReport.UUT
-        visualisationService.data[5] = "$relativeLines% ($coveredLines/$allLines)"
-        visualisationService.data[6] = "$relativeBranch% ($coveredBranches/$allBranches)"
-        visualisationService.data[7] = "$relativeMutations% ($coveredMutations/ $allMutations)"
+        val coverageToolWindowDisplayService = project.service<CoverageToolWindowDisplayService>()
+        coverageToolWindowDisplayService.data[4] = testReport.UUT
+        coverageToolWindowDisplayService.data[5] = "$relativeLines% ($coveredLines/$allLines)"
+        coverageToolWindowDisplayService.data[6] = "$relativeBranch% ($coveredBranches/$allBranches)"
+        coverageToolWindowDisplayService.data[7] = "$relativeMutations% ($coveredMutations/ $allMutations)"
     }
 
     /**
