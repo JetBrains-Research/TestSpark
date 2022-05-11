@@ -18,7 +18,7 @@ import kotlin.math.roundToInt
 class CoverageVisualisationService(private val project: Project) {
 
     // Variable to keep reference to the coverage visualisation content
-    var content: Content? = null
+    private var content: Content? = null
 
     /**
      * Shows coverage on the gutter next to the covered lines.
