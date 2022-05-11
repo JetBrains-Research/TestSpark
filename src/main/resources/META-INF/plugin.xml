@@ -10,8 +10,10 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService"/>
-        <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
-        <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageToolWindowDisplayService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageToolWindowDisplayService"/>
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
@@ -29,7 +31,7 @@
                 parentId="TestGenieSettings"
                 instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsEvoSuiteConfigurable"
                 id="TestGenieSettings.evosuite"
-                displayName="EvoSuite Settings"/>
+                displayName="EvoSuite"/>
     </extensions>
 
     <projectListeners>
