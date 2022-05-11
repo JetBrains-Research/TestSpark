@@ -1,8 +1,6 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.actions
 
 import com.intellij.openapi.editor.Caret
-import com.intellij.openapi.editor.Document
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
@@ -51,7 +49,7 @@ object GenerateTestsUtils {
         // Get the surrounding PSI method (i.e. the cursor has to be within that method)
         var surroundingMethod: PsiMethod? = null
         for (method: PsiMethod in methodElements) {
-            if (withinElement(method, caret)) {
+            if (isMethodConcrete(method) && withinElement(method, caret)) {
                 val surroundingClass: PsiClass = PsiTreeUtil.getParentOfType(method, PsiClass::class.java) ?: continue
                 // Check the constraints on the surrounding class
                 if (!validateClass(surroundingClass)) continue
@@ -61,39 +59,60 @@ object GenerateTestsUtils {
         return surroundingMethod
     }
 
+
+    /**
+     * Checks if a method is concrete (non-abstract in case of an abstract class and non-default in case of an interface).
+     *
+     * @param psiMethod the PSI method to check
+     * @return true if the method has a body (thus, is concrete), false otherwise
+     */
+    private fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
+        return psiMethod.body != null
+    }
+
+    /**
+     * Checks if a PSI method is a default constructor.
+     *
+     * @param psiMethod the PSI method of interest
+     * @return true if the PSI method is a default constructor, false otherwise
+     */
+    private fun isDefaultConstructor(psiMethod: PsiMethod): Boolean {
+        return psiMethod.isConstructor && psiMethod.body?.isEmpty ?: false
+    }
+
+    /**
+     * Checks if a PSI class is an abstract class.
+     *
+     * @param psiClass the PSI class of interest
+     * @return true if the PSI class is an abstract class, false otherwise
+     */
+    private fun isAbstractClass(psiClass: PsiClass): Boolean {
+        if (psiClass.isInterface) return false
+
+        val methods = PsiTreeUtil.findChildrenOfType(psiClass, PsiMethod::class.java)
+        for (psiMethod: PsiMethod in methods) {
+            if (!isMethodConcrete(psiMethod)) {
+                return true
+            }
+        }
+        return false
+    }
+
     /**
      * Checks if the constraints on the selected class are satisfied, so that EvoSuite can generate tests for it.
-     * Namely, it is a concrete class (non-abstract, not an interface, not an enum, not an anonymous inner class).
+     * Namely, it is not an enum and not an anonymous inner class.
      *
-     * @param psiClass the selected PSI class (where the user makes the click)
+     * @param psiClass the PSI class of interest
      * @return true if the constraints are satisfied, false otherwise
      */
     private fun validateClass(psiClass: PsiClass): Boolean {
-        // The class cannot be an enum, interface or anonymous class
-        if (psiClass.isEnum || psiClass.isInterface || psiClass is PsiAnonymousClass) return false
-
-        // The psiClass cannot be abstract
-        return checkNonAbstract(psiClass)
+        return !psiClass.isEnum && psiClass !is PsiAnonymousClass
     }
 
     /**
-     * Checks that the element is non-abstract (class or method).
+     * Checks if the caret is within the given PsiElement.
      *
-     * @param psiElement the selected PSI element (where the user makes a click)
-     * @return true if the element is abstract, false otherwise
-     */
-    private fun checkNonAbstract(psiElement: PsiElement): Boolean {
-        if (psiElement !is PsiClass && psiElement !is PsiMethod) return false
-
-        val mark = psiElement.text.indexOf("(").coerceAtLeast(psiElement.text.indexOf("{"))
-        val text = psiElement.text.substring(0, mark)
-        return !text.contains("abstract ")
-    }
-
-    /**
-     * Checks that the caret is within the given PsiElement.
-     *
-     * @param psiElement PSI element that has to be checked
+     * @param psiElement PSI element of interest
      * @param caret the current (primary) caret that did the click
      * @return true if the caret is within the PSI element, false otherwise
      */
@@ -102,16 +121,28 @@ object GenerateTestsUtils {
     }
 
     /**
-     * Gets the first (logical) line of the provided PSI element.
+     * Gets the display name of a class, depending on if it is a normal class, an abstract class or an interface.
+     * This is used when displaying the name of a class in GenerateTestsActionClass menu entry.
      *
-     * @param psiElement the PSI element of interest
-     * @return the first (logical, i.e. until \n character) line of the given PSI element
+     * @param psiClass the PSI class of interest
+     * @return the display name of the PSI class
      */
-    private fun getFirstLine(psiElement: PsiElement): String {
-        val psiFile: PsiFile = psiElement.containingFile
-        val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return ""
-        val lineRange =
-            TextRange(psiElement.startOffset, doc.getLineEndOffset(doc.getLineNumber(psiElement.startOffset)))
-        return doc.getText(lineRange)
+    fun getClassDisplayName(psiClass: PsiClass): String {
+        return if (psiClass.isInterface) "Interface ${psiClass.qualifiedName}"
+        else if (isAbstractClass(psiClass)) "Abstract Class ${psiClass.qualifiedName}"
+        else "Class ${psiClass.qualifiedName}"
+    }
+
+    /**
+     * Gets the display name of a method, depending on if it is a (default) constructor or a normal method.
+     * This is used when displaying the name of a method in GenerateTestsActionMethod menu entry.
+     *
+     * @param psiMethod the PSI method of interest
+     * @return the display name of the PSI method
+     */
+    fun getMethodDisplayName(psiMethod: PsiMethod): String {
+        return if (isDefaultConstructor(psiMethod)) "Default Constructor"
+        else if (psiMethod.isConstructor) "Constructor"
+        else "Method ${psiMethod.name}"
     }
 }
