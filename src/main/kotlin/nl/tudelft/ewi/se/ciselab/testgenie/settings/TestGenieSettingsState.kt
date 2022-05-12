@@ -8,18 +8,18 @@ data class TestGenieSettingsState(
 
     var sandbox: Boolean = true,
     var assertions: Boolean = true,
-        var seed: String = "",
+    var seed: String = "",
     var algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.RANDOM_SEARCH,
-        var configurationId: String = "",
-        var clientOnThread: Boolean = false,
-        var junitCheck: Boolean = false,
-        var criterionLine: Boolean = true,
-        var criterionBranch: Boolean = true,
-        var criterionException: Boolean = true,
-        var criterionWeakMutation: Boolean = true,
-        var criterionOutput: Boolean = true,
-        var criterionMethod: Boolean = true,
-        var criterionMethodNoException: Boolean = true,
+    var configurationId: String = "",
+    var clientOnThread: Boolean = false,
+    var junitCheck: Boolean = false,
+    var criterionLine: Boolean = true,
+    var criterionBranch: Boolean = true,
+    var criterionException: Boolean = true,
+    var criterionWeakMutation: Boolean = true,
+    var criterionOutput: Boolean = true,
+    var criterionMethod: Boolean = true,
+    var criterionMethodNoException: Boolean = true,
     var criterionCBranch: Boolean = true,
     var minimize: Boolean = true
 ) {
@@ -51,7 +51,6 @@ data class TestGenieSettingsState(
         }
         return params
     }
-
 }
 
 enum class ContentDigestAlgorithm {
