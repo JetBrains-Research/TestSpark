@@ -1,4 +1,4 @@
-package com.github.mitchellolsthoorn.testgenie.uiTest.utils
+package nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils
 
 import com.intellij.remoterobot.stepsProcessing.StepLogger
 import com.intellij.remoterobot.stepsProcessing.StepWorker

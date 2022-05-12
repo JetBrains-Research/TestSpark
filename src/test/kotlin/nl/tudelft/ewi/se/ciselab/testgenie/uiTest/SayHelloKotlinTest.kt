@@ -1,4 +1,4 @@
-package com.github.mitchellolsthoorn.testgenie.uiTest
+package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.data.RemoteComponent

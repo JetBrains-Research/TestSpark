@@ -1,4 +1,4 @@
-package com.github.mitchellolsthoorn.testgenie.uiTest.utils
+package nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils
 
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.ContainerFixture
