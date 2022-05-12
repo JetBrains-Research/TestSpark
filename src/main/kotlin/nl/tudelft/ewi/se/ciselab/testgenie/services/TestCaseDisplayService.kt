@@ -35,6 +35,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     fun displayTestCases(testReport: CompactReport) {
         allTestCasePanel.removeAll()
+        editorList = arrayListOf()
         testReport.testCaseList.values.forEach {
             val testCode = it.testCode
             val testName = it.testName
