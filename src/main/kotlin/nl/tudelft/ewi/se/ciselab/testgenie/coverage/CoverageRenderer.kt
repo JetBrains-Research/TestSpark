@@ -2,15 +2,19 @@ package nl.tudelft.ewi.se.ciselab.testgenie.coverage
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.hint.HintManagerImpl
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ex.EditorGutterComponentEx
 import com.intellij.openapi.editor.markup.ActiveGutterRenderer
 import com.intellij.openapi.editor.markup.LineMarkerRendererEx
+import com.intellij.openapi.project.Project
 import com.intellij.ui.HintHint
 import com.intellij.ui.LightweightHint
+import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import java.awt.Color
 import java.awt.Graphics
 import java.awt.Rectangle
@@ -23,7 +27,7 @@ import java.awt.event.MouseEvent
  * @param lineNumber lineNumber to color
  * @param tests list of tests that cover this line
  */
-class CoverageRenderer(private val color: Color, private val lineNumber: Int, private val tests: List<String>) :
+class CoverageRenderer(private val color: Color, private val lineNumber: Int, private val tests: List<String>, private val project: Project) :
     ActiveGutterRenderer, LineMarkerRendererEx {
 
     /**
@@ -34,8 +38,17 @@ class CoverageRenderer(private val color: Color, private val lineNumber: Int, pr
      */
     override fun doAction(editor: Editor, e: MouseEvent) {
         e.consume()
-        val panel = FormBuilder.createFormBuilder().addComponent(JBLabel(" Covered by tests: $tests "), 10)
-            .addVerticalGap(10).panel
+        val prePanel = FormBuilder
+                .createFormBuilder()
+                .addComponent(JBLabel(" Covered by tests:"), 10)
+
+        for (i in tests) {
+            prePanel.addComponent(ActionLink(i) {
+                highlightInToolwindow(i)
+            })
+        }
+
+        val panel = prePanel.addVerticalGap(10).panel
 
         val hint = LightweightHint(panel)
         val point = HintManagerImpl.getHintPosition(hint, editor, LogicalPosition(lineNumber, 0), HintManager.RIGHT)
@@ -63,6 +76,17 @@ class CoverageRenderer(private val color: Color, private val lineNumber: Int, pr
             return e.x > component.lineMarkerAreaOffset && e.x < component.iconAreaOffset
         }
         return false
+    }
+
+    /**
+     * Use Display service's mini-editor highlighter function
+     *
+     * @param name name of the test to highlight
+     */
+    private fun highlightInToolwindow(name: String) {
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+
+        testCaseDisplayService.highlight(name)
     }
 
     /**
