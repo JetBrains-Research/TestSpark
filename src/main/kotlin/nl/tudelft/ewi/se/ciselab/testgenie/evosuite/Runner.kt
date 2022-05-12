@@ -1,6 +1,5 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.evosuite
 
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessAdapter
@@ -14,6 +13,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import java.io.File
 import java.nio.charset.Charset
 import java.util.regex.Pattern
@@ -91,7 +91,6 @@ class Runner(
         log.info("Starting EvoSuite with arguments: $cmdString")
         log.info("Results will be saved to $serializeResultPath")
 
-
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
@@ -129,8 +128,6 @@ class Runner(
                             } else if (coverage != null) {
                                 indicator.fraction = coverage
                             }
-
-
 
                             if (indicator.fraction == 1.0 && indicator.text != TestGenieBundle.message("evosuitePostProcessMessage")) {
                                 indicator.text = TestGenieBundle.message("evosuitePostProcessMessage")
