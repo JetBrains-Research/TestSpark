@@ -44,12 +44,6 @@ class GenerateTestsActionMethod : AnAction() {
 
         log.info("Selected class is $classFQN, method is $methodDescriptor")
 
-        //TODO: remove this line
-        Messages.showInfoMessage(
-            "Selected class is $classFQN, method is $methodDescriptor",
-            "Selected"
-        )
-
         Runner(project, projectPath, projectClassPath, classFQN).forMethod(methodDescriptor).runEvoSuite()
     }
 
