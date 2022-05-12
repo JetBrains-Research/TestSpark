@@ -39,13 +39,15 @@ class CoverageRenderer(private val color: Color, private val lineNumber: Int, pr
     override fun doAction(editor: Editor, e: MouseEvent) {
         e.consume()
         val prePanel = FormBuilder
-                .createFormBuilder()
-                .addComponent(JBLabel(" Covered by tests:"), 10)
+            .createFormBuilder()
+            .addComponent(JBLabel(" Covered by tests:"), 10)
 
         for (testName in tests) {
-            prePanel.addComponent(ActionLink(testName) {
-                highlightInToolwindow(testName)
-            })
+            prePanel.addComponent(
+                ActionLink(testName) {
+                    highlightInToolwindow(testName)
+                }
+            )
         }
 
         val panel = prePanel.addVerticalGap(10).panel
