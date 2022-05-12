@@ -36,7 +36,7 @@ class Runner(
     private val log = Logger.getInstance(this::class.java)
 
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
-    private val javaPath = "java" // TODO: Source from config
+    private val javaPath = "/usr/lib/jvm/java-1.11.0-openjdk-amd64/bin/java" // TODO: Source from config
     private val evosuiteVersion = "1.0.2" // TODO: Figure out a better way to source this
 
     private val pluginsPath = System.getProperty("idea.plugins.path")
@@ -61,12 +61,14 @@ class Runner(
     }
 
     /**
-     * Sets up evosuite to run for a target method of the target class. This attaches a method prefix argument
+     * Sets up evosuite to run for a target method of the target class. This attaches a method descriptor argument
      * to the evosuite process.
+     *
+     * @param methodDescriptor The method descriptor of the method under test
      */
-    fun forMethod(method: String): Runner {
+    fun forMethod(methodDescriptor: String): Runner {
         command =
-            SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethodPrefix(method)
+            SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethod(methodDescriptor)
                 .build()
         return this
     }
