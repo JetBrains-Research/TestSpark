@@ -33,8 +33,8 @@ jobs:
         continue-on-error: true
       - uses: yutailang0119/action-ktlint@v3
         with:
-          report-path: build/*.csv # Support glob patterns by https://www.npmjs.com/package/@actions/glob
-        continue-on-error: false # If annotations contain error of severity, action-ktlint exit 1.
+          report-path: build/*.csv
+        continue-on-error: true
       - uses: actions/upload-artifact@v3
         with:
           name: ktlint-report
