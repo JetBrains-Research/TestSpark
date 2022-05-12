@@ -4,6 +4,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import com.intellij.remoterobot.RemoteRobot
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.SettingsFrame
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -35,8 +36,12 @@ class SayHelloKotlinTest {
 
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(30)).apply {
-            close()
+        find(SettingsFrame::class.java).apply {
+            closeSettings()
+        }
+
+        find(IdeaFrame::class.java).apply {
+            closeProject()
         }
     }
 }
