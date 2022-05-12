@@ -1,7 +1,12 @@
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URL
+import java.util.zip.ZipInputStream
+import java.io.FileOutputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
+
+val thunderdomeVersion = "1.0.2"
 
 plugins {
     // Java support
@@ -37,6 +42,7 @@ dependencies {
     // JUnit
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
 
 }
 
@@ -65,6 +71,9 @@ qodana {
 }
 
 tasks {
+    compileKotlin {
+        dependsOn("updateEvosuite")
+    }
     // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
@@ -133,4 +142,65 @@ tasks {
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
         channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
     }
+}
+
+/**
+ * Custom gradle task used to source the custom evosuite binary
+ * required for the build process. It functions as follows:
+ * 1. Read the version specified inside build.gradle
+ * 2. If the specified jar version is present for the build process, the
+ * task finishes successfully, otherwise:
+ * 3. Attempt to fetch the corresponding release from the supplied
+ * download url.
+ * 4. Unzips the release and places the raw jar inside the directory used by the build process
+ */
+abstract class UpdateEvoSuite : DefaultTask() {
+    @Input
+    var version: String = ""
+
+    @TaskAction
+    fun execute() {
+        val libDir = File("lib")
+        if (!libDir.exists()) {
+            libDir.mkdirs()
+        }
+
+        val jarName = "evosuite-$version.jar"
+
+        if (libDir.listFiles()?.any { it.name.matches(Regex(jarName)) } == true) {
+            logger.info("Specified evosuite jar found, skipping update")
+            return
+        }
+
+        logger.info("Specified evosuite jar not found, downloading release $jarName")
+
+        val downloadUrl =
+            "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$version/release.zip"
+        val stream = try {
+            URL(downloadUrl).openStream()
+        } catch (e: Exception) {
+            logger.error("Error fetching latest evosuite custom release - $e")
+            return
+        }
+
+        ZipInputStream(stream).use { zipInputStream ->
+            while (zipInputStream.nextEntry != null) {
+                val file = File("lib", jarName)
+                val outputStream = FileOutputStream(file)
+                outputStream.write(zipInputStream.readAllBytes())
+                outputStream.close()
+            }
+        }
+
+        logger.info("Latest evosuite jar successfully downloaded, cleaning up lib directory")
+        libDir.listFiles()?.filter { !it.name.matches(Regex(jarName)) }?.map {
+            if (it.delete()) {
+                logger.info("Deleted outdated release ${it.name}")
+            }
+        }
+    }
+}
+
+tasks.register<UpdateEvoSuite>("updateEvosuite") {
+    version = thunderdomeVersion
 }

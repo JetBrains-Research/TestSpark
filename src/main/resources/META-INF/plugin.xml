@@ -1,44 +1,62 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.mitchellolsthoorn.testgenie</id>
+    <id>nl.tudelft.ewi.se.ciselab.testgenie</id>
     <name>TestGenie</name>
-    <vendor>mitchellolsthoorn</vendor>
+    <vendor>CISELab</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <!-- add java functionality. See https://blog.jetbrains.com/platform/2019/06/java-functionality-extracted-as-a-plugin/ for more information -->
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="com.github.mitchellolsthoorn.testgenie.services.TestCaseDisplayService"/>
+        <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageToolWindowDisplayService"/>
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
-                    factoryClass="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowFactory"/>
+                    factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
         <applicationService
-                serviceImplementation="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsService"/>
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService"/>
         <applicationService
-                serviceImplementation="com.github.mitchellolsthoorn.testgenie.toolwindow.TestGenieToolWindowService"/>
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.QuickAccessParametersService"/>
         <applicationConfigurable
-                parentId="Settings"
-                instance="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
-                id="com.github.mitchellolsthoorn.testgenie.settings.TestGenieSettingsConfigurable"
-                displayName="TestGenie Advanced Settings"/>
+                parentId="tools"
+                instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginConfigurable"
+                id="TestGenieSettings"
+                displayName="TestGenie"/>
+        <applicationConfigurable
+                parentId="TestGenieSettings"
+                instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsEvoSuiteConfigurable"
+                id="TestGenieSettings.evosuite"
+                displayName="EvoSuite"/>
     </extensions>
 
     <projectListeners>
         <listener
-                class="com.github.mitchellolsthoorn.testgenie.listener.TestGenerationResultListenerImpl"
-                topic="com.github.mitchellolsthoorn.testgenie.evosuite.TestGenerationResultListener"/>
+                class="nl.tudelft.ewi.se.ciselab.testgenie.listener.TestGenerationResultListenerImpl"
+                topic="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.TestGenerationResultListener"/>
     </projectListeners>
 
     <actions>
-        <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true">
-            <add-to-group group-id="CodeMenu" anchor="after" relative-to-action="Generate"/>
-            <action class="com.github.mitchellolsthoorn.testgenie.actions.GenerateTestsAction"
-                    id="TestGenie.TestGenieActions.GenerateTestsAction"
-                    text="Generate Tests"
-                    description="Press to generate tests using the best test generating software TestGenie">
-                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="T" keymap="$default"/>
+        <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true"
+               class="nl.tudelft.ewi.se.ciselab.testgenie.actions.GenerateTestsActionGroup">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <!-- Generate tests for class -->
+            <action class="nl.tudelft.ewi.se.ciselab.testgenie.actions.GenerateTestsActionClass"
+                    id="TestGenie.TestGenieActions.GenerateTestsForClass"
+                    text="Generate Tests For Class"
+                    description="Generate tests for the selected class using TestGenie">
+                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="C" keymap="$default"/>
+            </action>
+            <!-- Generate tests for method -->
+            <action class="nl.tudelft.ewi.se.ciselab.testgenie.actions.GenerateTestsActionMethod"
+                    id="TestGenie.TestGenieActions.GenerateTestsForMethod"
+                    text="Generate Tests For Method"
+                    description="Generate tests for the selected method using TestGenie">
+                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="M" keymap="$default"/>
             </action>
         </group>
     </actions>
