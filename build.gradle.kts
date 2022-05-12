@@ -78,6 +78,10 @@ tasks {
         gradleVersion = properties("gradleVersion")
     }
 
+    test {
+        useJUnitPlatform()
+    }
+
     patchPluginXml {
         version.set(properties("pluginVersion"))
         sinceBuild.set(properties("pluginSinceBuild"))
