@@ -1,21 +1,36 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.toolwindow
 
+import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.Messages
+import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import org.jdesktop.swingx.JXTitledSeparator
-import java.awt.*
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
+import java.awt.Insets
 import java.awt.event.ActionEvent
-import javax.swing.*
+import javax.swing.JButton
+import javax.swing.JComponent
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JSpinner
+import javax.swing.SpinnerNumberModel
 
 /**
  * This class stores the UI of the TestGenie tool window.
  */
-class QuickAccessParameters {
+class QuickAccessParameters(_project: Project) {
+
+    // Current Project
+    private var project: Project = _project
 
     // UI elements for EvoSuite parameters
     private var stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
@@ -30,6 +45,11 @@ class QuickAccessParameters {
     // Save and Reset buttons
     private var saveButton: JButton = JButton("Save")
     private var resetButton: JButton = JButton("Reset")
+
+    // Link to open settings
+    private var settingsLink: ActionLink = ActionLink("Advanced Settings") {
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, "EvoSuite")
+    }
 
     // Tool Window panel
     private val panelTitle = JLabel("Quick Access Parameters")
@@ -146,7 +166,8 @@ class QuickAccessParameters {
         )
         .addComponentToRightColumn(populationLimitToolTip, 1)
 
-        // Add Save and Reset buttons
+        // Add Save and Reset buttons and a link to open TestGenie settings
+        .addComponent(settingsLink, 20)
         .addComponent(createSaveAndResetButtons(), 20)
 
         // Add the main panel
