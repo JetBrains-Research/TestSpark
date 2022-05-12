@@ -1,22 +1,28 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import com.intellij.remoterobot.RemoteRobot
-import com.intellij.remoterobot.data.RemoteComponent
-import com.intellij.remoterobot.fixtures.ComponentFixture
-import com.intellij.remoterobot.fixtures.ContainerFixture
-import com.intellij.remoterobot.fixtures.DefaultXpath
-import com.intellij.remoterobot.search.locators.byXpath
-import com.github.mitchellolsthoorn.testgenie.uiTest.pages.WelcomeFrame
-import com.github.mitchellolsthoorn.testgenie.uiTest.utils.RemoteRobotExtension
-import com.github.mitchellolsthoorn.testgenie.uiTest.utils.StepsLogger
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Duration
+
 // The code here was copied from JetBrains/intellij-ui-test-robot library, in order to experiment with the UI testing.
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(RemoteRobotExtension::class)
 class SayHelloKotlinTest {
-    init {
-        StepsLogger.init()
+
+    @BeforeAll
+    fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        find(WelcomeFrame::class.java).apply {
+            open("untitled")
+            Thread.sleep(30000)
+        }
     }
 
     @Test
@@ -36,11 +42,10 @@ class SayHelloKotlinTest {
         helloDialog.ok.click()
     }
 
-    @DefaultXpath("title Hello", "//div[@title='Hello' and @class='MyDialog']")
-    class HelloWorldDialog(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) : ContainerFixture(remoteRobot, remoteComponent) {
-        val textPane: ComponentFixture
-            get() = find(byXpath("//div[@class='Wrapper']//div[@class='JEditorPane']"))
-        val ok: ComponentFixture
-            get() = find(byXpath("//div[@class='JButton' and @text='OK']"))
+    @AfterAll
+    fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(30)).apply {
+            close()
+        }
     }
 }
