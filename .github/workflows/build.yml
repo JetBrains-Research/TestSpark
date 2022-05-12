@@ -35,6 +35,10 @@ jobs:
         with:
           report-path: build/*.csv # Support glob patterns by https://www.npmjs.com/package/@actions/glob
         continue-on-error: false # If annotations contain error of severity, action-ktlint exit 1.
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ktlint-report
+          path: build/ktlint-report.csv
   
 # Run Gradle Wrapper Validation Action to verify the wrapper's checksum
   # Run verifyPlugin, IntelliJ Plugin Verifier, and test Gradle tasks
