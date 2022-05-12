@@ -52,7 +52,7 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
             val code = JavaCodeFragmentFactory.getInstance(project)
-                    .createExpressionCodeFragment(testCode, null, null, true)
+                .createExpressionCodeFragment(testCode, null, null, true)
             val document = PsiDocumentManager.getInstance(project).getDocument(code)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
             editorList.add(Pair(testName, editor))
