@@ -42,9 +42,9 @@ class CoverageRenderer(private val color: Color, private val lineNumber: Int, pr
                 .createFormBuilder()
                 .addComponent(JBLabel(" Covered by tests:"), 10)
 
-        for (i in tests) {
-            prePanel.addComponent(ActionLink(i) {
-                highlightInToolwindow(i)
+        for (testName in tests) {
+            prePanel.addComponent(ActionLink(testName) {
+                highlightInToolwindow(testName)
             })
         }
 

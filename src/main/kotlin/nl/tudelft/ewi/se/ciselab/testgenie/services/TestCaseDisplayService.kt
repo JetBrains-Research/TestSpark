@@ -19,6 +19,7 @@ class TestCaseDisplayService(private val project: Project) {
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
     private var editorList: MutableList<Pair<String, EditorTextField>> = arrayListOf()
+    private val highlightColor: Color = Color(100, 150, 20, 30)
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -74,7 +75,7 @@ class TestCaseDisplayService(private val project: Project) {
             if (testCase == name) {
                 val editor = i.second
                 val backgroundDefault = editor.background
-                editor.background = Color(100, 150, 20, 30)
+                editor.background = highlightColor
                 Thread {
                     Thread.sleep(10000)
                     editor.background = backgroundDefault
