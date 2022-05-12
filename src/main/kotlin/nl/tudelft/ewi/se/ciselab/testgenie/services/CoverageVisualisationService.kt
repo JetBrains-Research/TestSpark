@@ -42,14 +42,14 @@ class CoverageVisualisationService(private val project: Project) {
 
             val color = Color(100, 150, 20)
 
+            editor.markupModel.removeAllHighlighters()
+
             for (i in testReport.allCoveredLines) {
                 val line = i - 1
                 val hl = editor.markupModel.addLineHighlighter(DiffColors.DIFF_INSERTED, line, HighlighterLayer.LAST)
-                hl.lineMarkerRenderer = CoverageRenderer(
-                    color,
-                    line,
-                    testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }
-                )
+                hl.lineMarkerRenderer = CoverageRenderer(color,
+                        line,
+                        testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }, project)
             }
         }
     }
@@ -109,7 +109,7 @@ class CoverageVisualisationService(private val project: Project) {
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
         content = contentFactory.createContent(
-            visualisationService.mainPanel, "Coverage Visualisation", true
+                visualisationService.mainPanel, "Coverage Visualisation", true
         )
         contentManager.addContent(content!!)
 
