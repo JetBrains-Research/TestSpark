@@ -19,18 +19,30 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
 
     // Action to open file menu
-    private val fileMenu
+    private val openFileMenu
         get() = actionLink(byXpath("File", "//div[@class='ActionMenu' and @text='File']"))
 
     // Action to press "Close Projects"
     private val closeProjectAction
         get() = actionLink(byXpath("Close Project", "//div[@text='File']//div[@text='Close Project']"))
 
+    // Action to press "Settings..."
+    private val openSettingsAction
+        get() = actionLink(byXpath("Close Project", "//div[@text='File']//div[@text='Settings...']"))
+
     /**
      * Method to close the current project.
      */
-    fun close() {
-        fileMenu.click()
+    fun closeProject() {
+        openFileMenu.click()
         closeProjectAction.click()
+    }
+
+    /**
+     * Method to open the settings of IntelliJ.
+     */
+    fun openSettings() {
+        openFileMenu.click()
+        openSettingsAction.click()
     }
 }
