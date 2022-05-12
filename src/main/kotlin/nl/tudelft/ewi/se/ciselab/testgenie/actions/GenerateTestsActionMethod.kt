@@ -50,7 +50,7 @@ class GenerateTestsActionMethod : AnAction() {
             "Selected"
         )
 
-        Runner(project, projectPath, projectClassPath, classFQN).forMethod(method).runEvoSuite()
+        Runner(project, projectPath, projectClassPath, classFQN).forMethod(methodDescriptor).runEvoSuite()
     }
 
     /**
