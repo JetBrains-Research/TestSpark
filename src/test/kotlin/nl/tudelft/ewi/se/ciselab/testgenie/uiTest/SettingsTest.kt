@@ -15,7 +15,7 @@ import java.time.Duration
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(RemoteRobotExtension::class)
-class SayHelloKotlinTest {
+class SettingsTest {
 
     @BeforeAll
     fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
