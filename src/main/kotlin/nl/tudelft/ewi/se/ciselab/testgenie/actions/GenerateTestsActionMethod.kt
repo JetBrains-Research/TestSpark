@@ -12,8 +12,7 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
-import com.intellij.psi.PsiSubstitutor
-import com.intellij.util.containers.map2Array
+import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
 
 /**
  * This class generates tests for a method.
@@ -35,24 +34,19 @@ class GenerateTestsActionMethod : AnAction() {
         val psiMethod: PsiMethod = GenerateTestsUtils.getSurroundingMethod(psiFile, caret) ?: return
         val containingClass: PsiClass = psiMethod.containingClass ?: return
 
-        val method = psiMethod.name
-        val signature: Array<String> =
-            psiMethod.getSignature(PsiSubstitutor.EMPTY).parameterTypes.map2Array { it.canonicalText }
-        val returnType: String = psiMethod.returnType?.canonicalText ?: "void"
         val classFQN = containingClass.qualifiedName ?: return
+        val methodDescriptor = generateMethodDescriptor(psiMethod)
 
         val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val projectClassPath = "$projectPath/target/classes/"
 
         log.info("Generating tests for project $projectPath with classpath $projectClassPath")
 
-        log.info("Selected method is $classFQN::$method${signature.contentToString()}$returnType")
+        log.info("Selected class is $classFQN, method is $methodDescriptor")
 
         //TODO: remove this line
         Messages.showInfoMessage(
-            "Selected method is $classFQN::$method${
-                signature.contentToString().replace("[", "(").replace("]", ")")
-            }$returnType",
+            "Selected class is $classFQN, method is $methodDescriptor",
             "Selected"
         )
 
