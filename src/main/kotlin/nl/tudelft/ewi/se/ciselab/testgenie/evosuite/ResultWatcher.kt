@@ -22,7 +22,8 @@ class ResultWatcher(private val project: Project, private val resultPath: String
     private val log = Logger.getInstance(ResultWatcher::class.java)
 
     override fun run() {
-        val watcherSleepDurationMillis: Long = 5000
+        val sleepDurationMillis: Long = 2000
+        val maxWatchDurationMillis: Long = 10000
 
         val sep = File.separatorChar
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
@@ -35,10 +36,19 @@ class ResultWatcher(private val project: Project, private val resultPath: String
 
         log.info("Started result listener thread for $resultPath")
 
+        val startTime = System.currentTimeMillis()
+
         while (true) {
-            Thread.sleep(watcherSleepDurationMillis)
+            val currentTime = System.currentTimeMillis()
+
+            if (currentTime - startTime > maxWatchDurationMillis) {
+                log.info("Max watch duration exceeded, exiting Watcher thread for $resultPath")
+                return
+            }
+
             log.info("Searching for $resultPath results in $testResultDirectory")
             val list = tmpDir.list()
+
             if (list == null) {
                 log.info("Empty dir")
             } else {
@@ -54,11 +64,12 @@ class ResultWatcher(private val project: Project, private val resultPath: String
                         log.info("Publishing test generation result to ${TEST_GENERATION_RESULT_TOPIC.displayName}")
                         project.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC)
                             .testGenerationResult(testGenerationResult)
-                        log.info("Exiting Watcher thread for $pathname")
+                        log.info("Exiting Watcher thread for $resultPath")
                         return
                     }
                 }
             }
+            Thread.sleep(sleepDurationMillis)
         }
     }
 }
