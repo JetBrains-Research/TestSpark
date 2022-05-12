@@ -17,9 +17,8 @@ class TestGenerationResultListenerImpl(private val project: Project) : TestGener
 
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
 
-        val tests = testReport.testCaseList.values.map { it.testCode }
         ApplicationManager.getApplication().invokeLater {
-            testCaseDisplayService.displayTestCases(tests)
+            testCaseDisplayService.displayTestCases(testReport)
         }
 
         val coverageVisualisationService = project.service<CoverageVisualisationService>()

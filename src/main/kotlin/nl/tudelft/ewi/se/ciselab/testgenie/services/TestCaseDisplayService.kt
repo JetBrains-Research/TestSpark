@@ -6,7 +6,9 @@ import com.intellij.psi.JavaCodeFragmentFactory
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
+import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
+import java.awt.Color
 import java.awt.Dimension
 import javax.swing.*
 
@@ -16,6 +18,8 @@ class TestCaseDisplayService(private val project: Project) {
     private val applyButton: JButton = JButton("Apply")
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
+    private var editorList: MutableList<Pair<String, EditorTextField>> = arrayListOf()
+    private val highlightColor: Color = Color(100, 150, 20, 30)
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -26,12 +30,16 @@ class TestCaseDisplayService(private val project: Project) {
 
     /**
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
+     * Add Tests and their names to a List of pairs (used for highlighting)
      *
-     * @param testCases The test cases to display
+     * @param testReport The report from which each testcase should be displayed
      */
-    fun displayTestCases(testCases: List<String>) {
+    fun displayTestCases(testReport: CompactReport) {
         allTestCasePanel.removeAll()
-        testCases.forEach {
+        editorList = arrayListOf()
+        testReport.testCaseList.values.forEach {
+            val testCode = it.testCode
+            val testName = it.testName
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
 
@@ -40,9 +48,10 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
             val code = JavaCodeFragmentFactory.getInstance(project)
-                .createExpressionCodeFragment(it, null, null, true)
+                    .createExpressionCodeFragment(testCode, null, null, true)
             val document = PsiDocumentManager.getInstance(project).getDocument(code)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
+            editorList.add(Pair(testName, editor))
 
             editor.setOneLineMode(false)
             editor.isViewer = true
@@ -52,6 +61,27 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
             allTestCasePanel.add(Box.createRigidArea(Dimension(0, 5)))
+        }
+    }
+
+    /**
+     * Highlight the mini-editor in the toolwindow whose name corresponds with the name of the test provided
+     *
+     * @param name name of the test whose editor should be highlighted
+     */
+    fun highlight(name: String) {
+        for (i in editorList) {
+            val testCase = i.first
+            if (testCase == name) {
+                val editor = i.second
+                val backgroundDefault = editor.background
+                editor.background = highlightColor
+                Thread {
+                    Thread.sleep(10000)
+                    editor.background = backgroundDefault
+                }.start()
+                return
+            }
         }
     }
 }
