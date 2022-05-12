@@ -1,8 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.helpers
 
 import com.intellij.psi.impl.PsiJavaParserFacadeImpl
-
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -14,7 +13,7 @@ class MethodDescriptorHelperTest {
     @MethodSource("primitiveFieldTypeTestGenerator")
     fun primitiveFieldTypeTest(text: String, expected: String) {
         val psiType = PsiJavaParserFacadeImpl.getPrimitiveType(text)
-        assertThat(generateFieldType(psiType)).isEqualTo(expected);
+        assertThat(generateFieldType(psiType)).isEqualTo(expected)
     }
 
     companion object {
