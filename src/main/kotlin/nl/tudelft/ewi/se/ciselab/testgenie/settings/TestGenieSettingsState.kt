@@ -22,7 +22,7 @@ data class TestGenieSettingsState(
     var criterionMethodNoException: Boolean = true,
     var criterionCBranch: Boolean = true,
     var minimize: Boolean = true
-) { 
+) {
     private object DefaultSettingsState {
         const val sandbox: Boolean = true
         const val assertions: Boolean = true
