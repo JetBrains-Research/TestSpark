@@ -69,6 +69,10 @@ jobs:
 
           ./gradlew listProductsReleases # prepare list of IDEs for Plugin Verifier
 
+      # Code style & formatting
+      - name: Run Ktlint
+        uses: yutailang0119/action-ktlint@v3.0.0
+
       # Run tests
       - name: Run Tests
         run: ./gradlew test
