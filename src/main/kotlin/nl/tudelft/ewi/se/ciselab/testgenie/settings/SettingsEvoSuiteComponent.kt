@@ -55,23 +55,23 @@ class SettingsEvoSuiteComponent {
      */
     private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
-                .addComponent(JXTitledSeparator("General settings"))
+            .addComponent(JXTitledSeparator("General settings"))
 
                 //EvoSuite "input" options (e.g. text, number)
                 //Important settings like algorithm selection, seed selection
-                .addLabeledComponent(JBLabel("Select search algorithm"), algorithmSelector, 10, false)
+            .addLabeledComponent(JBLabel("Select search algorithm"), algorithmSelector, 10, false)
                 .addLabeledComponent(JBLabel("Seed(random if left empty) "), seedTextField, 10, false)
-                .addLabeledComponent(JBLabel("Select configuration id (null if left empty) "), configurationIdTextField, 5, false)
+            .addLabeledComponent(JBLabel("Select configuration id (null if left empty) "), configurationIdTextField, 5, false)
 
                 //Checkboxes settings
                 .addComponent(sandboxCheckBox, 10)
                 .addComponent(assertionsCheckBox, 10)
-                .addComponent(clientOnThreadCheckBox, 10)
-                .addComponent(minimizeCheckBox, 10)
-                .addComponent(junitCheckCheckBox, 10)
+            .addComponent(clientOnThreadCheckBox, 10)
+            .addComponent(minimizeCheckBox, 10)
+            .addComponent(junitCheckCheckBox, 10)
 
                 //Criterion selection checkboxes
-                .addComponent(criterionSeparator, 15)
+            .addComponent(criterionSeparator, 15)
                 .addComponent(criterionLineCheckBox, 5)
                 .addComponent(criterionBranchCheckBox, 5)
                 .addComponent(criterionExceptionCheckBox, 5)
