@@ -39,9 +39,6 @@ class GenerateTestsActionClass : AnAction() {
 
         log.info("Selected class is $classFQN")
 
-        //TODO: remove this line
-        Messages.showInfoMessage(classFQN, "Selected")
-
         Runner(project, projectPath, projectClassPath, classFQN).forClass().runEvoSuite()
     }
 
