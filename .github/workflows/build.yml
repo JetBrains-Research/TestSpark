@@ -41,7 +41,7 @@ jobs:
   # Build plugin and provide the artifact for the next workflow jobs
   build:
     name: Build
-	needs: ktlint
+    needs: ktlint
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.properties.outputs.version }}
