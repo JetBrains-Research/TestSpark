@@ -21,8 +21,22 @@ on:
   pull_request:
 
 jobs:
-
-  # Run Gradle Wrapper Validation Action to verify the wrapper's checksum
+  ktlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint && chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
+      - name: run ktlint
+        run: |
+          ktlint --reporter=checkstyle,output=build/ktlint-report.csv
+        continue-on-error: true
+      - uses: yutailang0119/action-ktlint@v3
+        with:
+          report-path: build/*.csv # Support glob patterns by https://www.npmjs.com/package/@actions/glob
+        continue-on-error: false # If annotations contain error of severity, action-ktlint exit 1.
+  
+# Run Gradle Wrapper Validation Action to verify the wrapper's checksum
   # Run verifyPlugin, IntelliJ Plugin Verifier, and test Gradle tasks
   # Build plugin and provide the artifact for the next workflow jobs
   build:
@@ -69,9 +83,6 @@ jobs:
 
           ./gradlew listProductsReleases # prepare list of IDEs for Plugin Verifier
 
-      # Code style & formatting
-      - name: Run Ktlint
-        uses: yutailang0119/action-ktlint@v3.0.0
 
       # Run tests
       - name: Run Tests
