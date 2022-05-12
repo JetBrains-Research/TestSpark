@@ -29,8 +29,10 @@ class SettingsTest {
     }
 
     @Test
-    fun checkHelloMessage(remoteRobot: RemoteRobot) = with(remoteRobot) {
-        assertTrue(true)
+    fun checkIntroLabelInSettings(remoteRobot: RemoteRobot) = with(remoteRobot) {
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        settingsFrame.findTestGenie()
+        assertTrue(settingsFrame.introLabel.isShowing)
     }
 
     @AfterAll
