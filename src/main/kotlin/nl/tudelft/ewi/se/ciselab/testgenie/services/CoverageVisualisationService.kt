@@ -45,11 +45,9 @@ class CoverageVisualisationService(private val project: Project) {
             for (i in testReport.allCoveredLines) {
                 val line = i - 1
                 val hl = editor.markupModel.addLineHighlighter(DiffColors.DIFF_INSERTED, line, HighlighterLayer.LAST)
-                hl.lineMarkerRenderer = TestGenieCoverageRenderer(color, line, testReport.testCaseList
-                        .filter { x -> i in x.value.coveredLines }.map { x -> x.key }, project)
                 hl.lineMarkerRenderer = CoverageRenderer(color,
                     line,
-                    testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key })
+                    testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }, project)
             }
         }
     }
