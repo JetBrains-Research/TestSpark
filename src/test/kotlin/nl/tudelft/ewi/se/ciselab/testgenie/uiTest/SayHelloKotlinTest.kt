@@ -21,7 +21,10 @@ class SayHelloKotlinTest {
     fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         find(WelcomeFrame::class.java).apply {
             open("untitled")
-            Thread.sleep(30000)
+        }
+
+        find(IdeaFrame::class.java).apply {
+            openSettings()
         }
     }
 
