@@ -33,6 +33,9 @@ repositories {
 dependencies {
     implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
 
+    // https://mvnrepository.com/artifact/org.assertj/assertj-core
+    testImplementation("org.assertj:assertj-core:3.22.0")
+
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
