@@ -29,16 +29,8 @@ jobs:
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint && chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
       - name: run ktlint
         run: |
-          ktlint --reporter=checkstyle,output=build/ktlint-report.csv
-        continue-on-error: true
-      - uses: yutailang0119/action-ktlint@v3
-        with:
-          report-path: build/*.csv
-        continue-on-error: true
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ktlint-report
-          path: build/ktlint-report.csv
+          ktlint 
+        continue-on-error: false
   
 # Run Gradle Wrapper Validation Action to verify the wrapper's checksum
   # Run verifyPlugin, IntelliJ Plugin Verifier, and test Gradle tasks
