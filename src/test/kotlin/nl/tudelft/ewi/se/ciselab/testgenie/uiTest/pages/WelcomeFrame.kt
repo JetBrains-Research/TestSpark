@@ -1,27 +1,66 @@
-package com.github.mitchellolsthoorn.testgenie.uiTest.pages
-
-// Copyright 2000-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+package nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages
 
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.data.RemoteComponent
-import com.intellij.remoterobot.fixtures.*
+import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.DefaultXpath
+import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.search.locators.byXpath
-import java.time.Duration
+import com.intellij.remoterobot.utils.waitFor
 
-fun RemoteRobot.welcomeFrame(function: WelcomeFrame.()-> Unit) {
-    find(WelcomeFrame::class.java, Duration.ofSeconds(10)).apply(function)
-}
-
-// The code here was copied from JetBrains/intellij-ui-test-robot library, in order to experiment with the UI testing.
-
+/**
+ * Class to hold the Welcome Idea frame.
+ *
+ * @param remoteRobot the robot used for actions
+ * @param remoteComponent the component associated with the class
+ */
 @FixtureName("Welcome Frame")
 @DefaultXpath("type", "//div[@class='FlatWelcomeFrame']")
-class WelcomeFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) : CommonContainerFixture(remoteRobot, remoteComponent) {
-    val createNewProjectLink
-        get() = actionLink(byXpath("New Project","//div[(@class='MainButton' and @text='New Project') or (@accessiblename='New Project' and @class='JButton')]"))
-    val moreActions
-        get() = button(byXpath("More Action", "//div[@accessiblename='More Actions']"))
+class WelcomeFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
+    CommonContainerFixture(remoteRobot, remoteComponent) {
 
-    val heavyWeightPopup
-        get() = remoteRobot.find(ComponentFixture::class.java, byXpath("//div[@class='HeavyWeightWindow']"))
+    // Action to press "Open project" button
+    private val openProject
+        get() = actionLink(
+            byXpath(
+                "Open Project",
+                "//div[(@accessibleName='Open or Import' and @class='JButton') or (@class='MainButton' and @text='Open')]"
+            )
+        )
+
+    // Press ok button to open file
+    private val ok
+        get() = button(byXpath("//div[@text='OK']"))
+
+    /**
+     * Verify that the selected project has appeared in the tab.
+     *
+     * @param projectName the name of the project
+     */
+    private fun verifyProjectTreeReady(projectName: String) {
+        val tree = actionLink(byXpath("//div[@class='Tree']"))
+
+        waitFor {
+            tree.data.hasText(projectName)
+        }
+    }
+
+    /**
+     * Method to open project based on provided project name
+     *
+     * @param projectName the name of the project
+     */
+    fun open(projectName: String) {
+        openProject.click()
+        val path = System.getProperty("user.dir") + "\\src\\test\\resources\\project\\$projectName"
+        textField(byXpath("//div[@class='BorderlessTextField']")).text = path
+
+        verifyProjectTreeReady(projectName)
+
+        waitFor {
+            ok.isEnabled()
+        }
+
+        ok.click()
+    }
 }
