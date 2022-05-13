@@ -98,6 +98,9 @@ tasks {
 
     test {
         useJUnitPlatform()
+        if (System.getProperty("test.profile") != "ui") {
+            exclude("**/*uiTest*")
+        }
     }
 
     patchPluginXml {
