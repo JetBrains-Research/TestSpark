@@ -23,8 +23,7 @@ class WelcomeFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     private val openProject
         get() = actionLink(
             byXpath(
-                "Open Project",
-                "//div[(@accessibleName='Open or Import' and @class='JButton') or (@class='MainButton' and @text='Open')]"
+                "//div[(@accessiblename='Open or Import' and @class='JButton') or (@class='MainButton' and @text='Open') or (@class='JButton' and @defaultIcon='open.svg')]"
             )
         )
 

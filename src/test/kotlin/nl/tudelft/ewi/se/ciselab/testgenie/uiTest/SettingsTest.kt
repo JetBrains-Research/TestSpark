@@ -27,6 +27,8 @@ class SettingsTest {
             open("untitled")
         }
 
+        Thread.sleep(10000)
+
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             waitForBackgroundTasks()
             openSettings()

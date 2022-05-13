@@ -125,6 +125,9 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
             }
             return@waitFor false
         }
+
+        Thread.sleep(2000)
+
         with(projectViewTree) {
             if (hasText("TestGenie")) {
                 findText("TestGenie").click()
@@ -143,6 +146,9 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
             }
             return@waitFor false
         }
+
+        Thread.sleep(2000)
+
         with(projectViewTree) {
             if (hasText("EvoSuite")) {
                 findText("EvoSuite").click()
