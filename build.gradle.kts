@@ -1,8 +1,8 @@
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.FileOutputStream
 import java.net.URL
 import java.util.zip.ZipInputStream
-import java.io.FileOutputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -32,7 +32,6 @@ repositories {
 // include evo suite jar
 dependencies {
     implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
-
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
@@ -97,11 +96,13 @@ tasks {
         )
 
         // Get the latest available change notes from the changelog file
-        changeNotes.set(provider {
-            changelog.run {
-                getOrNull(properties("pluginVersion")) ?: getLatest()
-            }.toHTML()
-        })
+        changeNotes.set(
+            provider {
+                changelog.run {
+                    getOrNull(properties("pluginVersion")) ?: getLatest()
+                }.toHTML()
+            }
+        )
     }
 
     // Configure UI tests plugin

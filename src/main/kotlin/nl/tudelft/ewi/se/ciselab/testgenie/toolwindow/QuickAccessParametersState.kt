@@ -55,7 +55,6 @@ constructor(
         }
         return params
     }
-
 }
 
 /**

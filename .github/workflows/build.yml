@@ -21,12 +21,23 @@ on:
   pull_request:
 
 jobs:
-
-  # Run Gradle Wrapper Validation Action to verify the wrapper's checksum
+  ktlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint && chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
+      - name: run ktlint
+        run: |
+          ktlint 
+        continue-on-error: false
+  
+# Run Gradle Wrapper Validation Action to verify the wrapper's checksum
   # Run verifyPlugin, IntelliJ Plugin Verifier, and test Gradle tasks
   # Build plugin and provide the artifact for the next workflow jobs
   build:
     name: Build
+    needs: ktlint
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.properties.outputs.version }}
@@ -68,6 +79,7 @@ jobs:
           echo "::set-output name=pluginVerifierHomeDir::~/.pluginVerifier"
 
           ./gradlew listProductsReleases # prepare list of IDEs for Plugin Verifier
+
 
       # Run tests
       - name: Run Tests
