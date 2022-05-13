@@ -40,7 +40,8 @@ class CoverageVisualisationService(private val project: Project) {
         if (state.showCoverage) {
             val editor = FileEditorManager.getInstance(project).selectedTextEditor!!
 
-            val color = Color(100, 150, 20)
+            val service = TestGenieSettingsService.getInstance().state
+            val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
 
             editor.markupModel.removeAllHighlighters()
 

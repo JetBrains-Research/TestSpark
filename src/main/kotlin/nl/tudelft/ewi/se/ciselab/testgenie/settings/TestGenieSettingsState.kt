@@ -21,7 +21,10 @@ data class TestGenieSettingsState(
     var criterionMethod: Boolean = true,
     var criterionMethodNoException: Boolean = true,
     var criterionCBranch: Boolean = true,
-    var minimize: Boolean = true
+    var minimize: Boolean = true,
+    var colorRed: Int = 100,
+    var colorGreen: Int = 150,
+    var colorBlue: Int = 20
 ) {
     private object DefaultSettingsState {
         const val sandbox: Boolean = true
