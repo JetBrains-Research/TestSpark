@@ -101,7 +101,7 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
                           baos.close();
                         }
                         pictureBytes;
-                        """,
+                    """,
                     true
                 )
             } catch (e: Throwable) {
