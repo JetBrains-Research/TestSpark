@@ -32,7 +32,7 @@ fun generateMethodDescriptor(psiMethod: PsiMethod): String {
  * @return The return descriptor.
  */
 fun generateReturnDescriptor(psiMethod: PsiMethod): String {
-    if (psiMethod.returnType == null) {
+    if (psiMethod.returnType == null || psiMethod.returnType!!.canonicalText == "void") {
         // void method
         return "V"
     }
