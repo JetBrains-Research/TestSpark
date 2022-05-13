@@ -27,11 +27,11 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
         get() = actionLink(byXpath("//div[@class='DialogHeader']//div[@class='JButton']"))
 
     // Action for search text filed in Settings menu
-    private val searchTextBox
+    val searchTextBox
         get() = textField(byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"))
 
     // Action to find Settings tree view
-    private val projectViewTree
+    val projectViewTree
         get() = find<ContainerFixture>(byXpath("//div[@class='SettingsTreeView']"))
 
     // Action for introduction label
@@ -50,7 +50,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     val searchAlgorithmLabel
         get() = jLabel(byXpath("//div[@text='Select search algorithm']"))
 
-    // Action for search algorithm combobox
+    // Action for search algorithm combo box
     val searchAlgorithmComboBox
         get() = comboBox(byXpath("//div[@class='ComboBox']"))
 
@@ -75,7 +75,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
         get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
 
     // Action for Flaky tests checkbox
-    val flakyTestcheckbox
+    val flakyTestCheckBox
         get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
 
     // Action for separator of coverage
