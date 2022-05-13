@@ -47,6 +47,17 @@ class QuickAccessParametersTest {
         toolWindowFrame.openQuickAccessParametersTab()
         // toolWindowFrame.quickAccessParametersContent.click()
         Assertions.assertTrue(toolWindowFrame.title.isVisible())
+        Assertions.assertTrue(toolWindowFrame.searchBudgetSeparator.isVisible())
+        Assertions.assertTrue(toolWindowFrame.searchBudgetType.isVisible())
+        Assertions.assertTrue(toolWindowFrame.searchBudgetValue.isVisible())
+        Assertions.assertTrue(toolWindowFrame.timeoutsSeparator.isVisible())
+        Assertions.assertTrue(toolWindowFrame.initializationTimeout.isVisible())
+        Assertions.assertTrue(toolWindowFrame.minimisationTimeout.isVisible())
+        Assertions.assertTrue(toolWindowFrame.assertionTimeout.isVisible())
+        Assertions.assertTrue(toolWindowFrame.jUnitCheckTimeout.isVisible())
+        Assertions.assertTrue(toolWindowFrame.geneticAlgorithmSeparator.isVisible())
+        Assertions.assertTrue(toolWindowFrame.populationLimit.isVisible())
+        Assertions.assertTrue(toolWindowFrame.populationValue.isVisible())
     }
 
     /**

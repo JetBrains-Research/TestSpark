@@ -26,6 +26,28 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
     // The title "Quick Access Parameters"
     val title
         get() = jLabel(byXpath("//div[@javaclass='javax.swing.JLabel']"))
+    val searchBudgetSeparator
+        get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JLabel' and @text='Search budget']"))
+    val searchBudgetType
+        get() = jLabel(byXpath("//div[@text='Search budget type']"))
+    val searchBudgetValue
+        get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JBLabel' and @text='Search budget']"))
+    val timeoutsSeparator
+        get() = jLabel(byXpath("//div[@text='Timeouts']"))
+    val initializationTimeout
+        get() = jLabel(byXpath("//div[@text='Initialization timeout']"))
+    val minimisationTimeout
+        get() = jLabel(byXpath("//div[@text='Minimisation timeout']"))
+    val assertionTimeout
+        get() = jLabel(byXpath("//div[@text='Assertion timeout']"))
+    val jUnitCheckTimeout
+        get() = jLabel(byXpath("//div[@text='JUnit check timeout']"))
+    val geneticAlgorithmSeparator
+        get() = jLabel(byXpath("//div[@text='Genetic Algorithm']"))
+    val populationLimit
+        get() = jLabel(byXpath("//div[@text='Population limit']"))
+    val populationValue
+        get() = jLabel(byXpath("//div[@text='Population']"))
     /**
      * Clicks on the "Parameters" tab to open the panel with parameters.
      */
