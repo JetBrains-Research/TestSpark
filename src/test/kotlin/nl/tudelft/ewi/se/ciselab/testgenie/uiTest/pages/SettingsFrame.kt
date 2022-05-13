@@ -24,7 +24,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action to close Settings menu
     private val closeSettingsAction
-        get() = actionLink(byXpath("//div[@class='DialogHeader']//div[@class='JButton']"))
+        get() = actionLink(byXpath("//div[@text='Cancel']"))
 
     // Action for search text filed in Settings menu
     val searchTextBox
@@ -126,11 +126,14 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
             return@waitFor false
         }
 
-        Thread.sleep(2000)
-
-        with(projectViewTree) {
-            if (hasText("TestGenie")) {
-                findText("TestGenie").click()
+        waitFor(Duration.ofSeconds(5)) {
+            with(projectViewTree) {
+                if (hasText("TestGenie")) {
+                    findText("TestGenie").click()
+                    return@waitFor true
+                } else {
+                    return@waitFor false
+                }
             }
         }
     }
@@ -147,11 +150,14 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
             return@waitFor false
         }
 
-        Thread.sleep(2000)
-
-        with(projectViewTree) {
-            if (hasText("EvoSuite")) {
-                findText("EvoSuite").click()
+        waitFor(Duration.ofSeconds(5)) {
+            with(projectViewTree) {
+                if (hasText("EvoSuite")) {
+                    findText("EvoSuite").click()
+                    return@waitFor true
+                } else {
+                    return@waitFor false
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.utils.waitFor
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.SettingsFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
@@ -41,9 +42,10 @@ class SettingsTest {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         settingsFrame.searchTextBox.text = "TestGenie"
 
-        Thread.sleep(2000)
-
         with(settingsFrame.projectViewTree) {
+            waitFor(Duration.ofSeconds(5)) {
+                hasText("TestGenie")
+            }
             assert(hasText("TestGenie"))
         }
     }
@@ -63,9 +65,10 @@ class SettingsTest {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         settingsFrame.searchTextBox.text = "EvoSuite"
 
-        Thread.sleep(2000)
-
         with(settingsFrame.projectViewTree) {
+            waitFor(Duration.ofSeconds(5)) {
+                hasText("EvoSuite")
+            }
             assert(hasText("EvoSuite"))
         }
     }
