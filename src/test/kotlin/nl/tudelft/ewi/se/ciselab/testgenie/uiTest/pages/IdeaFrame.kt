@@ -8,6 +8,7 @@ import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.waitFor
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.StripeButtonFixture
 import java.time.Duration
 
 /**
@@ -36,6 +37,9 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     private val inlineProgressPanel
         get() = find<ComponentFixture>(byXpath("//div[@class='InlineProgressPanel']"))
 
+    private val openToolWindow
+        get() = find<StripeButtonFixture>(byXpath("//div[@class='Stripe'][.//div[@text='TestGenie']]"))
+
     /**
      * Method to close the current project.
      */
@@ -50,6 +54,10 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     fun openSettings() {
         openFileMenu.click()
         openSettingsAction.click()
+    }
+
+    fun openToolWindow() {
+        openToolWindow.click()
     }
 
     /**
