@@ -35,6 +35,19 @@ class SettingsTest {
 
     @Order(1)
     @Test
+    fun checkTestGenieTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        settingsFrame.searchTextBox.text = "TestGenie"
+
+        Thread.sleep(2000)
+
+        with(settingsFrame.projectViewTree) {
+            assert(hasText("TestGenie"))
+        }
+    }
+
+    @Order(2)
+    @Test
     fun checkTestGenieInSettings(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         settingsFrame.findTestGenie()
@@ -42,7 +55,20 @@ class SettingsTest {
         assertTrue(settingsFrame.coverageCheckBox.isShowing)
     }
 
-    @Order(2)
+    @Order(3)
+    @Test
+    fun checkEvoSuiteTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        settingsFrame.searchTextBox.text = "EvoSuite"
+
+        Thread.sleep(2000)
+
+        with(settingsFrame.projectViewTree) {
+            assert(hasText("EvoSuite"))
+        }
+    }
+
+    @Order(4)
     @Test
     fun checkEvoSuiteInSettings(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
@@ -55,7 +81,7 @@ class SettingsTest {
         assertTrue(settingsFrame.executeTestsCheckbox.isShowing)
         assertTrue(settingsFrame.debugModeCheckbox.isShowing)
         assertTrue(settingsFrame.minimiseTestSuiteCheckBox.isShowing)
-        assertTrue(settingsFrame.flakyTestcheckbox.isShowing)
+        assertTrue(settingsFrame.flakyTestCheckBox.isShowing)
 
         assertTrue(settingsFrame.coverageSeparator.isShowing)
         assertTrue(settingsFrame.lineCoverageCheckBox.isShowing)
