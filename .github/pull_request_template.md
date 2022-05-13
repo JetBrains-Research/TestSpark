@@ -5,7 +5,8 @@
 *Please write why your merge request is needed*
 
 # Other notes
-*Please write if you have anything*
+Closes #*issue_number*
+*Please write if you have anything to add*
 
 # What is missing?
 *Please mention if anything is missing for this merge request, e.g you have decided to move something to the next merge request*
