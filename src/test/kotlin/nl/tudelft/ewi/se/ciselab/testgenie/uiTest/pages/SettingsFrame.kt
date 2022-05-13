@@ -3,6 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.data.RemoteComponent
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.ContainerFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.search.locators.byXpath
@@ -29,7 +30,43 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for introduction label
     val introLabel
-        get() = jLabel(byXpath("//div[@accessiblename='TestGenie is an external graphical IntelliJ plugin that integrates EvoSuite into the IDE. EvoSuite is a tool that automatically generates test cases with assertions for classes written in Java code. TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI.' and @class='JLabel' and @text='<html><body>TestGenie is an external graphical IntelliJ plugin that integrates EvoSuite into the IDE. EvoSuite is a tool that automatically generates test cases with assertions for classes written in Java code. TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI.']"))
+        get() = jLabel(byXpath("//div[@class='JLabel' and @text='<html><body>TestGenie is an external graphical IntelliJ plugin that integrates EvoSuite into the IDE. EvoSuite is a tool that automatically generates test cases with assertions for classes written in Java code. TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI.']"))
+
+    // Action for coverage checkbox
+    val coverageCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Show visualised coverage']"))
+
+    // Action for Line coverage checkbox
+    val lineCoverageCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+
+    // Action for Branch coverage checkbox
+    val branchCoverageCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Branch coverage']"))
+
+    // Action for Exception coverage checkbox
+    val exceptionCoverageCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Exception coverage']"))
+
+    // Action for Mutation coverage checkbox
+    val mutationCoverageCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Mutation coverage']"))
+
+    // Action for Output coverage checkbox
+    val outputCoverageCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Output coverage']"))
+
+    // Action for Method coverage checkbox
+    val methodCoverageCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Method coverage']"))
+
+    // Action for Method no exception coverage checkbox
+    val methodNoExcCoverageCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Method no exception coverage']"))
+
+    // Action for CBranch coverage checkbox
+    val cBranchCoverageCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='CBranch coverage']"))
 
     /**
      * Search for TestGenie in Settings.
