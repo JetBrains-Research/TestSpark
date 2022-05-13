@@ -8,11 +8,15 @@ import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Duration
 
+@TestMethodOrder(OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(RemoteRobotExtension::class)
 class SettingsTest {
@@ -24,15 +28,33 @@ class SettingsTest {
         }
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+            waitForBackgroundTasks()
             openSettings()
         }
     }
 
+    @Order(1)
     @Test
-    fun checkIntroLabelInSettings(remoteRobot: RemoteRobot) = with(remoteRobot) {
+    fun checkTestGenieInSettings(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         settingsFrame.findTestGenie()
         assertTrue(settingsFrame.introLabel.isShowing)
+        assertTrue(settingsFrame.coverageCheckBox.isShowing)
+    }
+
+    @Order(2)
+    @Test
+    fun checkEvoSuiteInSettings(remoteRobot: RemoteRobot) = with(remoteRobot) {
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        settingsFrame.findEvoSuite()
+        assertTrue(settingsFrame.lineCoverageCheckBox.isShowing)
+        assertTrue(settingsFrame.branchCoverageCheckBox.isShowing)
+        assertTrue(settingsFrame.exceptionCoverageCheckBox.isShowing)
+        assertTrue(settingsFrame.mutationCoverageCheckBox.isShowing)
+        assertTrue(settingsFrame.outputCoverageCheckBox.isShowing)
+        assertTrue(settingsFrame.methodCoverageCheckBox.isShowing)
+        assertTrue(settingsFrame.methodNoExcCoverageCheckBox.isShowing)
+        assertTrue(settingsFrame.cBranchCoverageCheckBox.isShowing)
     }
 
     @AfterAll
