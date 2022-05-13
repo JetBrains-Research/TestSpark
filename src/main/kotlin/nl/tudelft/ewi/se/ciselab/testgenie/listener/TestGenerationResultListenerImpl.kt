@@ -1,12 +1,12 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.listener
 
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.TestGenerationResultListener
-import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.TestGenerationResultListener
+import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import org.evosuite.utils.CompactReport
 
 class TestGenerationResultListenerImpl(private val project: Project) : TestGenerationResultListener {

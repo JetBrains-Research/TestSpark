@@ -4,24 +4,24 @@ package nl.tudelft.ewi.se.ciselab.testgenie.settings
  * This class is the actual data class that stores the values of the Settings entries.
  */
 data class TestGenieSettingsState(
-        var showCoverage: Boolean = false,
+    var showCoverage: Boolean = false,
 
-        var sandbox: Boolean = true,
-        var assertions: Boolean = true,
-        var seed: String = "",
-        var algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.RANDOM_SEARCH,
-        var configurationId: String = "",
-        var clientOnThread: Boolean = false,
-        var junitCheck: Boolean = false,
-        var criterionLine: Boolean = true,
-        var criterionBranch: Boolean = true,
-        var criterionException: Boolean = true,
-        var criterionWeakMutation: Boolean = true,
-        var criterionOutput: Boolean = true,
-        var criterionMethod: Boolean = true,
-        var criterionMethodNoException: Boolean = true,
-        var criterionCBranch: Boolean = true,
-        var minimize: Boolean = true
+    var sandbox: Boolean = true,
+    var assertions: Boolean = true,
+    var seed: String = "",
+    var algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.RANDOM_SEARCH,
+    var configurationId: String = "",
+    var clientOnThread: Boolean = false,
+    var junitCheck: Boolean = false,
+    var criterionLine: Boolean = true,
+    var criterionBranch: Boolean = true,
+    var criterionException: Boolean = true,
+    var criterionWeakMutation: Boolean = true,
+    var criterionOutput: Boolean = true,
+    var criterionMethod: Boolean = true,
+    var criterionMethodNoException: Boolean = true,
+    var criterionCBranch: Boolean = true,
+    var minimize: Boolean = true
 ) {
     private object DefaultSettingsState {
         const val sandbox: Boolean = true
@@ -51,7 +51,6 @@ data class TestGenieSettingsState(
         }
         return params
     }
-
 }
 
 enum class ContentDigestAlgorithm {

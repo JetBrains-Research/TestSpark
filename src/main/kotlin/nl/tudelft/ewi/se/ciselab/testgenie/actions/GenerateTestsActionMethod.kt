@@ -1,6 +1,5 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.actions
 
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -11,6 +10,7 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiSubstitutor
 import com.intellij.util.containers.map2Array
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
  * This class generates tests for a method.
@@ -33,7 +33,7 @@ class GenerateTestsActionMethod : AnAction() {
         log.info("Generating tests for project $projectPath with classpath $projectClassPath")
 
         val psiMethod =
-            e.dataContext.getData(CommonDataKeys.PSI_ELEMENT) as PsiMethod  // The type is checked in update method
+            e.dataContext.getData(CommonDataKeys.PSI_ELEMENT) as PsiMethod // The type is checked in update method
         val containingClass: PsiClass = psiMethod.containingClass ?: return
 
         val method = psiMethod.name
