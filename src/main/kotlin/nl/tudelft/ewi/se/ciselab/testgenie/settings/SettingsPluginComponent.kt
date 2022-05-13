@@ -71,6 +71,7 @@ class SettingsPluginComponent {
         colorPicker.removeChooserPanel(colorPicker.chooserPanels.component2())
         colorPicker.removeChooserPanel(colorPicker.chooserPanels.component2())
         colorPicker.removeChooserPanel(colorPicker.chooserPanels.component2())
+        colorPicker.chooserPanels.component1().isColorTransparencySelectionEnabled = false
 
         // Set description text to wrap around dimensions
         pluginDiscription.preferredSize = Dimension(width ?: 100, height ?: 100)
