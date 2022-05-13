@@ -4,6 +4,7 @@ on:
 jobs:
   build-for-ui-test-linux:
     runs-on: ubuntu-latest
+    container: fxnm/intellij.docker:0.0.8
     steps:
       - uses: actions/checkout@v2
       - name: Setup Java
