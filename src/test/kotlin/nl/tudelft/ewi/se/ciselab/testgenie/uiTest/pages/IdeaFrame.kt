@@ -3,9 +3,12 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.data.RemoteComponent
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.waitFor
+import java.time.Duration
 
 /**
  * Class to hold the Main Idea frame.
@@ -30,6 +33,9 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     private val openSettingsAction
         get() = actionLink(byXpath("Close Project", "//div[@text='File']//div[@text='Settings...']"))
 
+    private val inlineProgressPanel
+        get() = find<ComponentFixture>(byXpath("//div[@class='InlineProgressPanel']"))
+
     /**
      * Method to close the current project.
      */
@@ -44,5 +50,18 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     fun openSettings() {
         openFileMenu.click()
         openSettingsAction.click()
+    }
+
+    /**
+     * Method to make the tests wait for the background tasks to finish.
+     */
+    fun waitForBackgroundTasks() {
+        waitFor(Duration.ofMinutes(5), Duration.ofSeconds(10)) {
+            val inlineProgressContents = inlineProgressPanel.findAllText()
+            if (inlineProgressContents.isNotEmpty()) {
+                return@waitFor false
+            }
+            return@waitFor true
+        }
     }
 }
