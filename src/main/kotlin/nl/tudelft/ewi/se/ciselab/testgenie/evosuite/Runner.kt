@@ -1,6 +1,5 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.evosuite
 
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessAdapter
@@ -14,6 +13,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import java.io.File
 import java.nio.charset.Charset
 import java.util.regex.Pattern
@@ -61,12 +61,14 @@ class Runner(
     }
 
     /**
-     * Sets up evosuite to run for a target method of the target class. This attaches a method prefix argument
+     * Sets up evosuite to run for a target method of the target class. This attaches a method descriptor argument
      * to the evosuite process.
+     *
+     * @param methodDescriptor The method descriptor of the method under test
      */
-    fun forMethod(method: String): Runner {
+    fun forMethod(methodDescriptor: String): Runner {
         command =
-            SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethodPrefix(method)
+            SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethod(methodDescriptor)
                 .build()
         return this
     }
@@ -90,7 +92,6 @@ class Runner(
 
         log.info("Starting EvoSuite with arguments: $cmdString")
         log.info("Results will be saved to $serializeResultPath")
-
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
@@ -129,8 +130,6 @@ class Runner(
                             } else if (coverage != null) {
                                 indicator.fraction = coverage
                             }
-
-
 
                             if (indicator.fraction == 1.0 && indicator.text != TestGenieBundle.message("evosuitePostProcessMessage")) {
                                 indicator.text = TestGenieBundle.message("evosuitePostProcessMessage")
