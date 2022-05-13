@@ -13,19 +13,21 @@ import javax.swing.JPanel
 class SettingsPluginComponent {
     var panel: JPanel? = null
 
-    //Plugin description
-    private val pluginDiscription = JLabel("<html><body>TestGenie is an external graphical IntelliJ plugin that integrates EvoSuite into the IDE." +
+    // Plugin description
+    private val pluginDiscription = JLabel(
+        "<html><body>TestGenie is an external graphical IntelliJ plugin that integrates EvoSuite into the IDE." +
             " EvoSuite is a tool that automatically generates test cases with assertions for classes written in Java code." +
-            " TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI.")
+            " TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI."
+    )
 
-    //Checkbox options
+    // Checkbox options
     private var showCoverageCheckBox = JCheckBox("Show visualised coverage")
 
     init {
-        //Apply style to panel (must be first)
+        // Apply style to panel (must be first)
         stylizePanel()
 
-        //Create panel
+        // Create panel
         createSettingsPanel()
     }
 
@@ -34,13 +36,12 @@ class SettingsPluginComponent {
      */
     private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
-                //Add description of TestGenie
-                .addComponent(pluginDiscription)
-
-                //Add visual coverage checkbox
-                .addComponent(showCoverageCheckBox, 10)
-                .addComponentFillVertically(JPanel(), 0)
-                .panel
+            // Add description of TestGenie
+            .addComponent(pluginDiscription)
+            // Add visual coverage checkbox
+            .addComponent(showCoverageCheckBox, 10)
+            .addComponentFillVertically(JPanel(), 0)
+            .panel
     }
 
     /**
@@ -49,11 +50,11 @@ class SettingsPluginComponent {
      */
     private fun stylizePanel() {
 
-        //Get dimensions of visible rectangle
+        // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
         val height = panel?.visibleRect?.height
 
-        //Set description text to wrap around dimensions
+        // Set description text to wrap around dimensions
         pluginDiscription.preferredSize = Dimension(width ?: 100, height ?: 100)
     }
 
@@ -66,8 +67,7 @@ class SettingsPluginComponent {
         return showCoverageCheckBox
     }
 
-
-    //Settings "changers"
+    // Settings "changers"
 
     var showCoverage: Boolean
         get() = showCoverageCheckBox.isSelected

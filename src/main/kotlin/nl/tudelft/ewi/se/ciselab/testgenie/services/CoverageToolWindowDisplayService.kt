@@ -43,7 +43,6 @@ class CoverageToolWindowDisplayService {
         override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
             return data[rowIndex * 4 + columnIndex]
         }
-
     }
     private var table = JBTable(tableModel)
 

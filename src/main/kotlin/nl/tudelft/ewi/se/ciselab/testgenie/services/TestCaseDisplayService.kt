@@ -10,7 +10,11 @@ import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
-import javax.swing.*
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JPanel
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -48,7 +52,7 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
             val code = JavaCodeFragmentFactory.getInstance(project)
-                    .createExpressionCodeFragment(testCode, null, null, true)
+                .createExpressionCodeFragment(testCode, null, null, true)
             val document = PsiDocumentManager.getInstance(project).getDocument(code)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
             editorList.add(Pair(testName, editor))
