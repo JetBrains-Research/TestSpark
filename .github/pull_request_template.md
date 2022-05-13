@@ -6,6 +6,7 @@
 
 # Other notes
 Closes #*issue_number*
+
 *Please write if you have anything to add*
 
 # What is missing?
