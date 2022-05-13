@@ -32,7 +32,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action to find Settings tree view
     val projectViewTree
-        get() = find<ContainerFixture>(byXpath("//div[@class='SettingsTreeView']"))
+        get() = find<ContainerFixture>(byXpath("//div[@class='SettingsTreeView']"), Duration.ofSeconds(60))
 
     // Action for introduction label
     val introLabel
@@ -118,7 +118,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
      * Search for TestGenie in Settings.
      */
     fun findTestGenie() {
-        waitFor(Duration.ofSeconds(15)) {
+        waitFor(Duration.ofSeconds(60)) {
             searchTextBox.text = "TestGenie"
             if (searchTextBox.text == "TestGenie") {
                 return@waitFor true
@@ -142,7 +142,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
      * Search for EvoSuite in Settings.
      */
     fun findEvoSuite() {
-        waitFor(Duration.ofSeconds(15)) {
+        waitFor(Duration.ofSeconds(60)) {
             searchTextBox.text = "EvoSuite"
             if (searchTextBox.text == "EvoSuite") {
                 return@waitFor true
