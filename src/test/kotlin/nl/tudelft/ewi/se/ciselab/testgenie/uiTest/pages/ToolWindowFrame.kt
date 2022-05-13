@@ -9,8 +9,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 
 @FixtureName("Tool Window Frame")
 @DefaultXpath(
-    "type",
-    "//div[@accessiblename='Generated Tests Tool Window']"
+    "type", "//div[@accessiblename='Generated Tests Tool Window']"
 ) // TODO: rename to "Parameters Tool Window Frame" when we remove "Generated Tests" tab
 class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
@@ -48,6 +47,13 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
         get() = jLabel(byXpath("//div[@text='Population limit']"))
     val populationValue
         get() = jLabel(byXpath("//div[@text='Population']"))
+    val actionLink
+        get() = actionLink(byXpath("//div[@class='ActionLink']"))
+    val saveButton
+        get() = button(byXpath("//div[@text='Save']"))
+    val resetButton
+        get() = button(byXpath("//div[@text='Reset']"))
+
     /**
      * Clicks on the "Parameters" tab to open the panel with parameters.
      */
