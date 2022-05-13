@@ -9,6 +9,11 @@ import java.util.stream.Collectors
 
 // Grammar taken from: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.3
 
+/**
+ * Helper for generating method descriptors for methods.
+ * @param psiMethod The method to extract the descriptor from.
+ * @return The method descriptor.
+ */
 fun generateMethodDescriptor(psiMethod: PsiMethod): String {
     val parameterTypes = psiMethod.getSignature(PsiSubstitutor.EMPTY)
         .parameterTypes
@@ -21,6 +26,11 @@ fun generateMethodDescriptor(psiMethod: PsiMethod): String {
     return "${psiMethod.name}($parameterTypes)$returnType"
 }
 
+/**
+ * Generates the return descriptor for a method.
+ * @param psiMethod The method.
+ * @return The return descriptor.
+ */
 fun generateReturnDescriptor(psiMethod: PsiMethod): String {
     if (psiMethod.returnType == null) {
         // void method
@@ -30,6 +40,11 @@ fun generateReturnDescriptor(psiMethod: PsiMethod): String {
     return generateFieldType(psiMethod.returnType!!)
 }
 
+/**
+ * Generates the field descriptor for a type.
+ * @param psiType The type.
+ * @return The field descriptor.
+ */
 fun generateFieldType(psiType: PsiType): String {
     // arrays (ArrayType)
     if (psiType.arrayDimensions > 0) {
