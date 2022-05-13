@@ -32,16 +32,18 @@ class SettingsArguments(
     )
 
     /**
-     * Appends a method prefix parameter to the command.
+     * Appends a method parameter to the command.
      * This makes EvoSuite create goals only for a certain method
      * of the CUT.
      *
-     * @param methodPrefix Prefix of the name of the method we're generating tests for
+     * See https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.3
+     *
+     * @param method The descriptor of the method we're generating tests for
      */
-    fun forMethodPrefix(methodPrefix: String): SettingsArguments {
+    fun forMethod(method: String): SettingsArguments {
         command.addAll(
             listOf(
-                "-Dtarget_method_prefix=$methodPrefix"
+                "-Dtarget_method=$method"
             )
         )
         return this

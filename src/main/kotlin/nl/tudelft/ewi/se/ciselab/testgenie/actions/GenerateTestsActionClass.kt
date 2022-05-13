@@ -4,9 +4,11 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiFile
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
@@ -18,19 +20,21 @@ class GenerateTestsActionClass : AnAction() {
     /**
      * Performs test generation for a class when the action is invoked.
      *
-     * @param e AnActionEvent class that contains useful information about the action event
+     * @param e an action event that contains useful information
      */
     override fun actionPerformed(e: AnActionEvent) {
-        // determine class path
         val project: Project = e.project ?: return
+
+        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+
+        val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
+        val classFQN = psiClass.qualifiedName ?: return
 
         val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val projectClassPath = "$projectPath/target/classes/"
 
         log.info("Generating tests for project $projectPath with classpath $projectClassPath")
-
-        val psiClass = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT) as PsiClass // Checked in update method
-        val classFQN = psiClass.qualifiedName ?: return
 
         log.info("Selected class is $classFQN")
 
@@ -39,11 +43,19 @@ class GenerateTestsActionClass : AnAction() {
 
     /**
      * Makes the action visible only if a class has been selected.
+     * It also updates the action name depending on which class has been selected.
      *
-     * @param e AnActionEvent class that contains useful information about the action event
+     * @param e an action event that contains useful information
      */
     override fun update(e: AnActionEvent) {
-        val psiElement = e.dataContext.getData(CommonDataKeys.PSI_ELEMENT)
-        e.presentation.isEnabledAndVisible = psiElement is PsiClass // TODO: check for the current project
+        e.presentation.isEnabledAndVisible = false
+
+        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+
+        val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
+
+        e.presentation.isEnabledAndVisible = true
+        e.presentation.text = "Generate Tests For ${getClassDisplayName(psiClass)}"
     }
 }
