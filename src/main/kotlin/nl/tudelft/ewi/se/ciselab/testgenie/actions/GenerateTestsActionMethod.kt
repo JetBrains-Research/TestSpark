@@ -10,6 +10,8 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiSubstitutor
+import com.intellij.util.containers.map2Array
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
 
