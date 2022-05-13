@@ -24,15 +24,15 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action to close Settings menu
     private val closeSettingsAction
-        get() = actionLink(byXpath("//div[@class='DialogHeader']//div[@class='JButton']"))
+        get() = actionLink(byXpath("//div[@text='Cancel']"))
 
     // Action for search text filed in Settings menu
-    private val searchTextBox
+    val searchTextBox
         get() = textField(byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"))
 
     // Action to find Settings tree view
-    private val projectViewTree
-        get() = find<ContainerFixture>(byXpath("//div[@class='SettingsTreeView']"))
+    val projectViewTree
+        get() = find<ContainerFixture>(byXpath("//div[@class='SettingsTreeView']"), Duration.ofSeconds(60))
 
     // Action for introduction label
     val introLabel
@@ -50,7 +50,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     val searchAlgorithmLabel
         get() = jLabel(byXpath("//div[@text='Select search algorithm']"))
 
-    // Action for search algorithm combobox
+    // Action for search algorithm combo box
     val searchAlgorithmComboBox
         get() = comboBox(byXpath("//div[@class='ComboBox']"))
 
@@ -75,7 +75,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
         get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
 
     // Action for Flaky tests checkbox
-    val flakyTestcheckbox
+    val flakyTestCheckBox
         get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
 
     // Action for separator of coverage
@@ -118,16 +118,22 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
      * Search for TestGenie in Settings.
      */
     fun findTestGenie() {
-        waitFor(Duration.ofSeconds(15)) {
+        waitFor(Duration.ofSeconds(60)) {
             searchTextBox.text = "TestGenie"
             if (searchTextBox.text == "TestGenie") {
                 return@waitFor true
             }
             return@waitFor false
         }
-        with(projectViewTree) {
-            if (hasText("TestGenie")) {
-                findText("TestGenie").click()
+
+        waitFor(Duration.ofSeconds(5)) {
+            with(projectViewTree) {
+                if (hasText("TestGenie")) {
+                    findText("TestGenie").click()
+                    return@waitFor true
+                } else {
+                    return@waitFor false
+                }
             }
         }
     }
@@ -136,16 +142,22 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
      * Search for EvoSuite in Settings.
      */
     fun findEvoSuite() {
-        waitFor(Duration.ofSeconds(15)) {
+        waitFor(Duration.ofSeconds(60)) {
             searchTextBox.text = "EvoSuite"
             if (searchTextBox.text == "EvoSuite") {
                 return@waitFor true
             }
             return@waitFor false
         }
-        with(projectViewTree) {
-            if (hasText("EvoSuite")) {
-                findText("EvoSuite").click()
+
+        waitFor(Duration.ofSeconds(5)) {
+            with(projectViewTree) {
+                if (hasText("EvoSuite")) {
+                    findText("EvoSuite").click()
+                    return@waitFor true
+                } else {
+                    return@waitFor false
+                }
             }
         }
     }

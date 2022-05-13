@@ -16,7 +16,9 @@ import java.io.File
 import java.lang.IllegalStateException
 import java.lang.reflect.Method
 import javax.imageio.ImageIO
-// The code here was copied from JetBrains/intellij-ui-test-robot library, in order to experiment with the UI testing.
+
+// The code here was copied from JetBrains/intellij-ui-test-robot library to create UI testing for the plugin.
+// Link: https://github.com/JetBrains/intellij-ui-test-robot/blob/master/ui-test-example/src/test/kotlin/org/intellij/examples/simple/plugin/utils/RemoteRobotExtension.kt
 class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
     private val url: String = System.getProperty("remote-robot-url") ?: "http://127.0.0.1:8082"
     private val remoteRobot: RemoteRobot = if (System.getProperty("debug-retrofit")?.equals("enable") == true) {
@@ -56,8 +58,7 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
     }
 
     private fun saveHierarchy(testName: String) {
-        val hierarchySnapshot =
-            saveFile(url, "build/reports", "hierarchy-$testName.html")
+        val hierarchySnapshot = saveFile(url, "build/reports", "hierarchy-$testName.html")
         if (File("build/reports/styles.css").exists().not()) {
             saveFile("$url/styles.css", "build/reports", "styles.css")
         }
@@ -99,8 +100,9 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
                         } finally {
                           baos.close();
                         }
-                        pictureBytes;   
-            """, true
+                        pictureBytes;
+                    """,
+                    true
                 )
             } catch (e: Throwable) {
                 e.printStackTrace()
@@ -114,8 +116,7 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
 
     private fun fetchScreenShot(): BufferedImage {
         return remoteRobot.callJs<ByteArray>(
-            """
-            importPackage(java.io)
+            """importPackage(java.io)
             importPackage(javax.imageio)
             const screenShot = new java.awt.Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
             let pictureBytes;
@@ -127,7 +128,7 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
               baos.close();
             }
             pictureBytes;
-        """
+            """
         ).inputStream().use {
             ImageIO.read(it)
         }

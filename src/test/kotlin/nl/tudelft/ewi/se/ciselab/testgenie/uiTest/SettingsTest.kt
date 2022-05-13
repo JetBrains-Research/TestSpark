@@ -1,12 +1,14 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
+import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.utils.waitFor
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.SettingsFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
 import org.junit.jupiter.api.Order
@@ -23,11 +25,13 @@ class SettingsTest {
 
     @BeforeAll
     fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+        find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             open("untitled")
         }
 
-        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+        Thread.sleep(10000)
+
+        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             waitForBackgroundTasks()
             openSettings()
         }
@@ -35,46 +39,78 @@ class SettingsTest {
 
     @Order(1)
     @Test
-    fun checkTestGenieInSettings(remoteRobot: RemoteRobot) = with(remoteRobot) {
-        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
-        settingsFrame.findTestGenie()
-        assertTrue(settingsFrame.introLabel.isShowing)
-        assertTrue(settingsFrame.coverageCheckBox.isShowing)
+    @Video
+    fun checkTestGenieTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
+        settingsFrame.searchTextBox.text = "TestGenie"
+
+        with(settingsFrame.projectViewTree) {
+            waitFor(Duration.ofSeconds(5)) {
+                hasText("TestGenie")
+            }
+            assert(hasText("TestGenie"))
+        }
     }
 
     @Order(2)
     @Test
-    fun checkEvoSuiteInSettings(remoteRobot: RemoteRobot) = with(remoteRobot) {
-        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
-        settingsFrame.findEvoSuite()
-        assertTrue(settingsFrame.generalSettingsSeparator.isShowing)
-        assertTrue(settingsFrame.searchAlgorithmLabel.isShowing)
-        assertTrue(settingsFrame.searchAlgorithmComboBox.isShowing)
-        assertTrue(settingsFrame.seedLabel.isShowing)
-        assertTrue(settingsFrame.configurationIdLabel.isShowing)
-        assertTrue(settingsFrame.executeTestsCheckbox.isShowing)
-        assertTrue(settingsFrame.debugModeCheckbox.isShowing)
-        assertTrue(settingsFrame.minimiseTestSuiteCheckBox.isShowing)
-        assertTrue(settingsFrame.flakyTestcheckbox.isShowing)
+    @Video
+    fun checkTestGenieInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
+        settingsFrame.findTestGenie()
+        assertThat(settingsFrame.introLabel.isShowing).isTrue
+        assertThat(settingsFrame.coverageCheckBox.isShowing).isTrue
+    }
 
-        assertTrue(settingsFrame.coverageSeparator.isShowing)
-        assertTrue(settingsFrame.lineCoverageCheckBox.isShowing)
-        assertTrue(settingsFrame.branchCoverageCheckBox.isShowing)
-        assertTrue(settingsFrame.exceptionCoverageCheckBox.isShowing)
-        assertTrue(settingsFrame.mutationCoverageCheckBox.isShowing)
-        assertTrue(settingsFrame.outputCoverageCheckBox.isShowing)
-        assertTrue(settingsFrame.methodCoverageCheckBox.isShowing)
-        assertTrue(settingsFrame.methodNoExcCoverageCheckBox.isShowing)
-        assertTrue(settingsFrame.cBranchCoverageCheckBox.isShowing)
+    @Order(3)
+    @Test
+    @Video
+    fun checkEvoSuiteTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
+        settingsFrame.searchTextBox.text = "EvoSuite"
+
+        with(settingsFrame.projectViewTree) {
+            waitFor(Duration.ofSeconds(5)) {
+                hasText("EvoSuite")
+            }
+            assert(hasText("EvoSuite"))
+        }
+    }
+
+    @Order(4)
+    @Test
+    @Video
+    fun checkEvoSuiteInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
+        settingsFrame.findEvoSuite()
+        assertThat(settingsFrame.generalSettingsSeparator.isShowing).isTrue
+        assertThat(settingsFrame.searchAlgorithmLabel.isShowing).isTrue
+        assertThat(settingsFrame.searchAlgorithmComboBox.isShowing).isTrue
+        assertThat(settingsFrame.seedLabel.isShowing).isTrue
+        assertThat(settingsFrame.configurationIdLabel.isShowing).isTrue
+        assertThat(settingsFrame.executeTestsCheckbox.isShowing).isTrue
+        assertThat(settingsFrame.debugModeCheckbox.isShowing).isTrue
+        assertThat(settingsFrame.minimiseTestSuiteCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.flakyTestCheckBox.isShowing).isTrue
+
+        assertThat(settingsFrame.coverageSeparator.isShowing).isTrue
+        assertThat(settingsFrame.lineCoverageCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.branchCoverageCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.exceptionCoverageCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.mutationCoverageCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.outputCoverageCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.methodCoverageCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.methodNoExcCoverageCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.cBranchCoverageCheckBox.isShowing).isTrue
     }
 
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+        find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             closeSettings()
         }
 
-        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             closeProject()
         }
     }
