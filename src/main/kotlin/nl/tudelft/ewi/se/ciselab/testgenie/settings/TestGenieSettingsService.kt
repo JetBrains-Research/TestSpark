@@ -29,7 +29,6 @@ class TestGenieSettingsService : PersistentStateComponent<TestGenieSettingsState
         testGenieSettingsState = state
     }
 
-
     /**
      * Returns the service object with a static call.
      */

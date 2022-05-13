@@ -1,8 +1,8 @@
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.FileOutputStream
 import java.net.URL
 import java.util.zip.ZipInputStream
-import java.io.FileOutputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -32,18 +32,25 @@ repositories {
 
 // include evo suite jar
 dependencies {
-    implementation(files("evo/evosuite.jar"))
-    // RemoteRobot library for UI testing
-    testImplementation("com.intellij.remoterobot:remote-robot:0.11.13")
-    // RemoteRobot fixtures library for common set of fixtures
-    testImplementation("com.intellij.remoterobot:remote-fixtures:0.11.13")
-    // Logging Network Calls
-    testImplementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
-    // JUnit
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
 
+    // From the jetbrains repository
+    testImplementation("com.intellij.remoterobot:remote-robot:0.11.13")
+    testImplementation("com.intellij.remoterobot:remote-fixtures:0.11.13")
+
+    // https://mvnrepository.com/artifact/com.squareup.okhttp3/logging-interceptor
+    testImplementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+
+    // https://mvnrepository.com/artifact/org.assertj/assertj-core
+    testImplementation("org.assertj:assertj-core:3.22.0")
+
+    implementation("com.automation-remarks:video-recorder-junit5:2.0")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
@@ -89,6 +96,13 @@ tasks {
         gradleVersion = properties("gradleVersion")
     }
 
+    test {
+        useJUnitPlatform()
+        if (System.getProperty("test.profile") != "ui") {
+            exclude("**/*uiTest*")
+        }
+    }
+
     patchPluginXml {
         version.set(properties("pluginVersion"))
         sinceBuild.set(properties("pluginSinceBuild"))
@@ -108,11 +122,13 @@ tasks {
         )
 
         // Get the latest available change notes from the changelog file
-        changeNotes.set(provider {
-            changelog.run {
-                getOrNull(properties("pluginVersion")) ?: getLatest()
-            }.toHTML()
-        })
+        changeNotes.set(
+            provider {
+                changelog.run {
+                    getOrNull(properties("pluginVersion")) ?: getLatest()
+                }.toHTML()
+            }
+        )
     }
 
     // Configure UI tests plugin
@@ -122,10 +138,10 @@ tasks {
         systemProperty("ide.mac.message.dialogs.as.sheets", "false")
         systemProperty("jb.privacy.policy.text", "<!--999.999-->")
         systemProperty("jb.consents.confirmation.enabled", "false")
-    }
-
-    test {
-        useJUnitPlatform()
+        systemProperty("idea.trust.all.projects", "true")
+        systemProperty("ide.show.tips.on.startup.default.value", "false")
+        systemProperty("jb.consents.confirmation.enabled", "false")
+        systemProperty("ide.mac.file.chooser.native", "false")
     }
 
     signPlugin {

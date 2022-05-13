@@ -1,7 +1,5 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
-import nl.tudelft.ewi.se.ciselab.testgenie.coverage.CoverageRenderer
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
@@ -11,6 +9,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
+import nl.tudelft.ewi.se.ciselab.testgenie.coverage.CoverageRenderer
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import org.evosuite.utils.CompactReport
 import java.awt.Color
 import kotlin.math.roundToInt
@@ -47,9 +47,11 @@ class CoverageVisualisationService(private val project: Project) {
             for (i in testReport.allCoveredLines) {
                 val line = i - 1
                 val hl = editor.markupModel.addLineHighlighter(DiffColors.DIFF_INSERTED, line, HighlighterLayer.LAST)
-                hl.lineMarkerRenderer = CoverageRenderer(color,
-                        line,
-                        testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }, project)
+                hl.lineMarkerRenderer = CoverageRenderer(
+                    color,
+                    line,
+                    testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }, project
+                )
             }
         }
     }
@@ -109,7 +111,7 @@ class CoverageVisualisationService(private val project: Project) {
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
         content = contentFactory.createContent(
-                visualisationService.mainPanel, "Coverage Visualisation", true
+            visualisationService.mainPanel, "Coverage Visualisation", true
         )
         contentManager.addContent(content!!)
 
