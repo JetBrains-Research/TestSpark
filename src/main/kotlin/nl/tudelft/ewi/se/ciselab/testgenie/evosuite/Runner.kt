@@ -61,12 +61,14 @@ class Runner(
     }
 
     /**
-     * Sets up evosuite to run for a target method of the target class. This attaches a method prefix argument
+     * Sets up evosuite to run for a target method of the target class. This attaches a method descriptor argument
      * to the evosuite process.
+     *
+     * @param methodDescriptor The method descriptor of the method under test
      */
-    fun forMethod(method: String): Runner {
+    fun forMethod(methodDescriptor: String): Runner {
         command =
-            SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethodPrefix(method)
+            SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethod(methodDescriptor)
                 .build()
         return this
     }
