@@ -34,7 +34,7 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
         get() = actionLink(byXpath("Close Project", "//div[@text='File']//div[@text='Settings...']"))
 
     private val inlineProgressPanel
-        get() = find<ComponentFixture>(byXpath("//div[@class='InlineProgressPanel']"))
+        get() = find<ComponentFixture>(byXpath("//div[@class='InlineProgressPanel']"), Duration.ofSeconds(60))
 
     /**
      * Method to close the current project.
