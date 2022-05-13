@@ -27,14 +27,30 @@ version = properties("pluginVersion")
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
 }
 
 // include evo suite jar
 dependencies {
     implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
 
+    // From the jetbrains repository
+    testImplementation("com.intellij.remoterobot:remote-robot:0.11.13")
+    testImplementation("com.intellij.remoterobot:remote-fixtures:0.11.13")
+
+    // https://mvnrepository.com/artifact/com.squareup.okhttp3/logging-interceptor
+    testImplementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+
     // https://mvnrepository.com/artifact/org.assertj/assertj-core
     testImplementation("org.assertj:assertj-core:3.22.0")
+
+    implementation("com.automation-remarks:video-recorder-junit5:2.0")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
@@ -82,6 +98,9 @@ tasks {
 
     test {
         useJUnitPlatform()
+        if (System.getProperty("test.profile") != "ui") {
+            exclude("**/*uiTest*")
+        }
     }
 
     patchPluginXml {
@@ -119,6 +138,10 @@ tasks {
         systemProperty("ide.mac.message.dialogs.as.sheets", "false")
         systemProperty("jb.privacy.policy.text", "<!--999.999-->")
         systemProperty("jb.consents.confirmation.enabled", "false")
+        systemProperty("idea.trust.all.projects", "true")
+        systemProperty("ide.show.tips.on.startup.default.value", "false")
+        systemProperty("jb.consents.confirmation.enabled", "false")
+        systemProperty("ide.mac.file.chooser.native", "false")
     }
 
     signPlugin {
