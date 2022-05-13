@@ -7,6 +7,8 @@ import com.intellij.remoterobot.fixtures.ContainerFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.waitFor
+import java.time.Duration
 
 /**
  * Class to hold the Settings frame.
@@ -27,6 +29,10 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     // Action for search text filed in Settings menu
     private val searchTextBox
         get() = textField(byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"))
+
+    // Action to find Settings tree view
+    private val projectViewTree
+        get() = find<ContainerFixture>(byXpath("//div[@class='SettingsTreeView']"))
 
     // Action for introduction label
     val introLabel
@@ -72,7 +78,36 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
      * Search for TestGenie in Settings.
      */
     fun findTestGenie() {
-        searchTextBox.text = "TestGenie"
+        waitFor(Duration.ofSeconds(15)) {
+            searchTextBox.text = "TestGenie"
+            if (searchTextBox.text == "TestGenie") {
+                return@waitFor true
+            }
+            return@waitFor false
+        }
+        with(projectViewTree) {
+            if (hasText("TestGenie")) {
+                findText("TestGenie").click()
+            }
+        }
+    }
+
+    /**
+     * Search for EvoSuite in Settings.
+     */
+    fun findEvoSuite() {
+        waitFor(Duration.ofSeconds(15)) {
+            searchTextBox.text = "EvoSuite"
+            if (searchTextBox.text == "EvoSuite") {
+                return@waitFor true
+            }
+            return@waitFor false
+        }
+        with(projectViewTree) {
+            if (hasText("EvoSuite")) {
+                findText("EvoSuite").click()
+            }
+        }
     }
 
     /**
