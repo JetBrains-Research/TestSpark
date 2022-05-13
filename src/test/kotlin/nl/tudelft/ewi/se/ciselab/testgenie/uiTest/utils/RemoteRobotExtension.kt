@@ -16,7 +16,9 @@ import java.io.File
 import java.lang.IllegalStateException
 import java.lang.reflect.Method
 import javax.imageio.ImageIO
-// The code here was copied from JetBrains/intellij-ui-test-robot library, in order to experiment with the UI testing.
+
+// The code here was copied from JetBrains/intellij-ui-test-robot library to create UI testing for the plugin.
+// Link: https://github.com/JetBrains/intellij-ui-test-robot/blob/master/ui-test-example/src/test/kotlin/org/intellij/examples/simple/plugin/utils/RemoteRobotExtension.kt
 class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
     private val url: String = System.getProperty("remote-robot-url") ?: "http://127.0.0.1:8082"
     private val remoteRobot: RemoteRobot = if (System.getProperty("debug-retrofit")?.equals("enable") == true) {
@@ -100,7 +102,8 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
                           baos.close();
                         }
                         pictureBytes;   
-            """, true
+            """,
+                    true
                 )
             } catch (e: Throwable) {
                 e.printStackTrace()
