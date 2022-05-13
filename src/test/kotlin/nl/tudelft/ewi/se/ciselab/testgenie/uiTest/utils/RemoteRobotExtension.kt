@@ -58,8 +58,7 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
     }
 
     private fun saveHierarchy(testName: String) {
-        val hierarchySnapshot =
-            saveFile(url, "build/reports", "hierarchy-$testName.html")
+        val hierarchySnapshot = saveFile(url, "build/reports", "hierarchy-$testName.html")
         if (File("build/reports/styles.css").exists().not()) {
             saveFile("$url/styles.css", "build/reports", "styles.css")
         }
@@ -102,7 +101,7 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
                           baos.close();
                         }
                         pictureBytes;   
-            """,
+                        """,
                     true
                 )
             } catch (e: Throwable) {
@@ -117,8 +116,7 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
 
     private fun fetchScreenShot(): BufferedImage {
         return remoteRobot.callJs<ByteArray>(
-            """
-            importPackage(java.io)
+            """importPackage(java.io)
             importPackage(javax.imageio)
             const screenShot = new java.awt.Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
             let pictureBytes;
@@ -129,8 +127,7 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
             } finally {
               baos.close();
             }
-            pictureBytes;
-        """
+            pictureBytes;"""
         ).inputStream().use {
             ImageIO.read(it)
         }
