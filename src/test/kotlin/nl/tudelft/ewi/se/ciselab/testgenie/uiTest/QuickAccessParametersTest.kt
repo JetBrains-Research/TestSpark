@@ -5,8 +5,8 @@ import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.ToolWindowFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
@@ -40,24 +40,31 @@ class QuickAccessParametersTest {
 
     @Order(1)
     @Test
-    fun checkTestGenieToolWindowPanel(remoteRobot: RemoteRobot) = with(remoteRobot) {
+    fun checkTestGenieToolWindowPanel(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Open the tool window frame
         val toolWindowFrame = find(ToolWindowFrame::class.java, timeout = Duration.ofSeconds(15))
         // Open the "Quick Access Parameters" tab
         toolWindowFrame.openQuickAccessParametersTab()
         // toolWindowFrame.quickAccessParametersContent.click()
-        Assertions.assertTrue(toolWindowFrame.title.isVisible())
-        Assertions.assertTrue(toolWindowFrame.searchBudgetSeparator.isVisible())
-        Assertions.assertTrue(toolWindowFrame.searchBudgetType.isVisible())
-        Assertions.assertTrue(toolWindowFrame.searchBudgetValue.isVisible())
-        Assertions.assertTrue(toolWindowFrame.timeoutsSeparator.isVisible())
-        Assertions.assertTrue(toolWindowFrame.initializationTimeout.isVisible())
-        Assertions.assertTrue(toolWindowFrame.minimisationTimeout.isVisible())
-        Assertions.assertTrue(toolWindowFrame.assertionTimeout.isVisible())
-        Assertions.assertTrue(toolWindowFrame.jUnitCheckTimeout.isVisible())
-        Assertions.assertTrue(toolWindowFrame.geneticAlgorithmSeparator.isVisible())
-        Assertions.assertTrue(toolWindowFrame.populationLimit.isVisible())
-        Assertions.assertTrue(toolWindowFrame.populationValue.isVisible())
+
+        // Assert text is visible
+        Assertions.assertThat(toolWindowFrame.title.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.searchBudgetSeparator.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.searchBudgetType.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.searchBudgetValue.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.timeoutsSeparator.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.initializationTimeout.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.minimisationTimeout.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.assertionTimeout.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.jUnitCheckTimeout.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.geneticAlgorithmSeparator.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.populationLimit.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.populationValue.isVisible()).isTrue
+
+        // Assert buttons are visible
+        Assertions.assertThat(toolWindowFrame.actionLink.isShowing).isTrue
+        Assertions.assertThat(toolWindowFrame.saveButton.isShowing).isTrue
+        Assertions.assertThat(toolWindowFrame.resetButton.isShowing).isTrue
     }
 
     /**
