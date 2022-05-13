@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.intellij.remoterobot.RemoteRobot
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.ToolWindowFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import org.junit.jupiter.api.AfterAll
@@ -32,11 +33,16 @@ class QuickAccessParametersTest {
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             clickOnToolWindow()
         }
+
+        find(ToolWindowFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+            findQuickAccessParameters()
+        }
     }
 
     @Order(1)
     @Test
-    fun checkTestGenieToolWindowPanel(remoteRobot: RemoteRobot) = with(remoteRobot) {}
+    fun checkTestGenieToolWindowPanel(remoteRobot: RemoteRobot) = with(remoteRobot) {
+    }
 
     /**
      * First closes the TestGenie sidebar by clicking on the stripe button again.
