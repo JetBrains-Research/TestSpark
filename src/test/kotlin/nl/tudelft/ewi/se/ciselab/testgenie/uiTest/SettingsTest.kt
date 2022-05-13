@@ -47,6 +47,17 @@ class SettingsTest {
     fun checkEvoSuiteInSettings(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         settingsFrame.findEvoSuite()
+        assertTrue(settingsFrame.generalSettingsSeparator.isShowing)
+        assertTrue(settingsFrame.searchAlgorithmLabel.isShowing)
+        assertTrue(settingsFrame.searchAlgorithmComboBox.isShowing)
+        assertTrue(settingsFrame.seedLabel.isShowing)
+        assertTrue(settingsFrame.configurationIdLabel.isShowing)
+        assertTrue(settingsFrame.executeTestsCheckbox.isShowing)
+        assertTrue(settingsFrame.debugModeCheckbox.isShowing)
+        assertTrue(settingsFrame.minimiseTestSuiteCheckBox.isShowing)
+        assertTrue(settingsFrame.flakyTestcheckbox.isShowing)
+
+        assertTrue(settingsFrame.coverageSeparator.isShowing)
         assertTrue(settingsFrame.lineCoverageCheckBox.isShowing)
         assertTrue(settingsFrame.branchCoverageCheckBox.isShowing)
         assertTrue(settingsFrame.exceptionCoverageCheckBox.isShowing)

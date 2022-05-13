@@ -42,6 +42,46 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     val coverageCheckBox
         get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Show visualised coverage']"))
 
+    // Action for separator of coverage
+    val generalSettingsSeparator
+        get() = actionLink(byXpath("//div[@class='JXTitledSeparator'][.//div[@text='General settings']]"))
+
+    // Action for search algorithm label
+    val searchAlgorithmLabel
+        get() = jLabel(byXpath("//div[@text='Select search algorithm']"))
+
+    // Action for search algorithm combobox
+    val searchAlgorithmComboBox
+        get() = comboBox(byXpath("//div[@class='ComboBox']"))
+
+    // Action for seed label
+    val seedLabel
+        get() = jLabel(byXpath("//div[@text='Seed(random if left empty) ']"))
+
+    // Action for configuration id label
+    val configurationIdLabel
+        get() = jLabel(byXpath("//div[@text='Select configuration id (null if left empty) ']"))
+
+    // Action for Execute tests in a sandbox environment checkbox
+    val executeTestsCheckbox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+
+    // Action for Debug mode checkbox
+    val debugModeCheckbox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+
+    // Action for Minimize test suite after generation checkbox
+    val minimiseTestSuiteCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+
+    // Action for Flaky tests checkbox
+    val flakyTestcheckbox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+
+    // Action for separator of coverage
+    val coverageSeparator
+        get() = actionLink(byXpath("//div[@class='JXTitledSeparator'][.//div[@text='Criterion selection']]"))
+
     // Action for Line coverage checkbox
     val lineCoverageCheckBox
         get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
