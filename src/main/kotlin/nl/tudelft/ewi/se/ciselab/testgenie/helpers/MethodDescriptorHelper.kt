@@ -11,8 +11,9 @@ import java.util.stream.Collectors
 
 /**
  * Helper for generating method descriptors for methods.
- * @param psiMethod The method to extract the descriptor from.
- * @return The method descriptor.
+ *
+ * @param psiMethod the method to extract the descriptor from
+ * @return the method descriptor
  */
 fun generateMethodDescriptor(psiMethod: PsiMethod): String {
     val parameterTypes = psiMethod.getSignature(PsiSubstitutor.EMPTY)
@@ -28,8 +29,9 @@ fun generateMethodDescriptor(psiMethod: PsiMethod): String {
 
 /**
  * Generates the return descriptor for a method.
- * @param psiMethod The method.
- * @return The return descriptor.
+ *
+ * @param psiMethod the method
+ * @return the return descriptor
  */
 fun generateReturnDescriptor(psiMethod: PsiMethod): String {
     if (psiMethod.returnType == null || psiMethod.returnType!!.canonicalText == "void") {
@@ -42,8 +44,9 @@ fun generateReturnDescriptor(psiMethod: PsiMethod): String {
 
 /**
  * Generates the field descriptor for a type.
- * @param psiType The type.
- * @return The field descriptor.
+ *
+ * @param psiType the type to generate the descriptor for
+ * @return the field descriptor
  */
 fun generateFieldType(psiType: PsiType): String {
     // arrays (ArrayType)
