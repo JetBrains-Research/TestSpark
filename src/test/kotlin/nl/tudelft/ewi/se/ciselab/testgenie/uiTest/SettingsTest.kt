@@ -1,5 +1,6 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
+import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.SettingsFrame
@@ -23,13 +24,13 @@ class SettingsTest {
 
     @BeforeAll
     fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+        find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             open("untitled")
         }
 
         Thread.sleep(10000)
 
-        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             waitForBackgroundTasks()
             openSettings()
         }
@@ -37,8 +38,9 @@ class SettingsTest {
 
     @Order(1)
     @Test
+    @Video
     fun checkTestGenieTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
-        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.searchTextBox.text = "TestGenie"
 
         Thread.sleep(2000)
@@ -50,8 +52,9 @@ class SettingsTest {
 
     @Order(2)
     @Test
+    @Video
     fun checkTestGenieInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.findTestGenie()
         assertThat(settingsFrame.introLabel.isShowing).isTrue
         assertThat(settingsFrame.coverageCheckBox.isShowing).isTrue
@@ -59,8 +62,9 @@ class SettingsTest {
 
     @Order(3)
     @Test
+    @Video
     fun checkEvoSuiteTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
-        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.searchTextBox.text = "EvoSuite"
 
         Thread.sleep(2000)
@@ -72,8 +76,9 @@ class SettingsTest {
 
     @Order(4)
     @Test
+    @Video
     fun checkEvoSuiteInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.findEvoSuite()
         assertThat(settingsFrame.generalSettingsSeparator.isShowing).isTrue
         assertThat(settingsFrame.searchAlgorithmLabel.isShowing).isTrue
@@ -98,11 +103,11 @@ class SettingsTest {
 
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+        find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             closeSettings()
         }
 
-        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             closeProject()
         }
     }
