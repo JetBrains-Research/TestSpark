@@ -6,6 +6,7 @@ import com.intellij.psi.JavaCodeFragmentFactory
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
 import java.awt.Color
@@ -23,7 +24,6 @@ class TestCaseDisplayService(private val project: Project) {
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
     private var editorList: MutableList<Pair<String, EditorTextField>> = arrayListOf()
-    private val highlightColor: Color = Color(100, 150, 20, 30)
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -79,6 +79,8 @@ class TestCaseDisplayService(private val project: Project) {
             if (testCase == name) {
                 val editor = i.second
                 val backgroundDefault = editor.background
+                val service = TestGenieSettingsService.getInstance().state
+                val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
                 editor.background = highlightColor
                 Thread {
                     Thread.sleep(10000)
