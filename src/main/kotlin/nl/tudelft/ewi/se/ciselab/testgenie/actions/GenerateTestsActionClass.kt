@@ -28,7 +28,7 @@ class GenerateTestsActionClass : AnAction() {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
 
-        val psiClass: PsiClass = GenerateTestsUtils.getSurroundingClass(psiFile, caret) ?: return
+        val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
         val classFQN = psiClass.qualifiedName ?: return
 
         val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
@@ -53,9 +53,9 @@ class GenerateTestsActionClass : AnAction() {
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
-        val psiClass: PsiClass = GenerateTestsUtils.getSurroundingClass(psiFile, caret) ?: return
+        val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
 
         e.presentation.isEnabledAndVisible = true
-        e.presentation.text = "Generate Tests For ${GenerateTestsUtils.getClassDisplayName(psiClass)}"
+        e.presentation.text = "Generate Tests For ${getClassDisplayName(psiClass)}"
     }
 }
