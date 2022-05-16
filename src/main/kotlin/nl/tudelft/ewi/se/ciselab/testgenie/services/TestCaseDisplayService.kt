@@ -38,6 +38,11 @@ class TestCaseDisplayService(private val project: Project) {
         mainPanel.add(scrollPane, BorderLayout.CENTER)
     }
 
+    fun showGeneratedTests(testReport: CompactReport) {
+        displayTestCases(testReport)
+        createToolWindowTab()
+    }
+
     /**
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
