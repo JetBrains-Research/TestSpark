@@ -25,7 +25,7 @@ import javax.swing.JSpinner
 import javax.swing.SpinnerNumberModel
 
 /**
- * This class stores the UI of the TestGenie tool window.
+ * This class stores the main panel and the UI of the "Parameters" tool window tab.
  */
 class QuickAccessParameters(_project: Project) {
 
