@@ -136,7 +136,7 @@ class SettingsTest {
 
     @Order(6)
     @Test
-    fun changeEvoSuiteTabCheckBoxValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+    fun changeEvoSuiteTabCoverageSectionValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Get previous values
         var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         val prevLineCoverageCheckBoxValue = settingsFrame.lineCoverageCheckBox.isSelected()
@@ -186,6 +186,64 @@ class SettingsTest {
         settingsFrame.methodCoverageCheckBox.setValue(prevMethodCoverageCheckBoxValue)
         settingsFrame.methodNoExcCoverageCheckBox.setValue(prevMethodNoExcCoverageCheckBoxValue)
         settingsFrame.cBranchCoverageCheckBox.setValue(prevCBranchCoverageCheckBoxValue)
+        settingsFrame.okSettings()
+
+        // Open settings again
+        ideaFrame.openSettings()
+    }
+
+    @Order(7)
+    @Test
+    fun changeEvoSuiteTabGeneralSectionValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        // Get previous values
+        var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        val prevExecuteTestsCheckboxValue = settingsFrame.executeTestsCheckbox.isSelected()
+        val prevCreateAssertionsCheckBoxValue = settingsFrame.createAssertionsCheckBox.isSelected()
+        val prevDebugModeCheckboxValue = settingsFrame.debugModeCheckbox.isSelected()
+        val prevMinimiseTestSuiteCheckBoxValue = settingsFrame.minimiseTestSuiteCheckBox.isSelected()
+        val prevFlakyTestCheckBoxValue = settingsFrame.flakyTestCheckBox.isSelected()
+        val prevSearchAlgorithmComboBoxValue = settingsFrame.searchAlgorithmComboBox.selectedText()
+        val prevSeedTextFieldValue = settingsFrame.seedTextField.text
+        val prevConfigurationIdFieldValue = settingsFrame.configurationIdField.text
+
+        // Change values and apply the settings
+        settingsFrame.executeTestsCheckbox.setValue(!prevExecuteTestsCheckboxValue)
+        settingsFrame.createAssertionsCheckBox.setValue(!prevCreateAssertionsCheckBoxValue)
+        settingsFrame.debugModeCheckbox.setValue(!prevDebugModeCheckboxValue)
+        settingsFrame.minimiseTestSuiteCheckBox.setValue(!prevMinimiseTestSuiteCheckBoxValue)
+        settingsFrame.flakyTestCheckBox.setValue(!prevFlakyTestCheckBoxValue)
+        settingsFrame.searchAlgorithmComboBox.selectItem("BREEDER_GA")
+        settingsFrame.seedTextField.text = "3"
+        settingsFrame.configurationIdField.text = "configuration id here"
+        settingsFrame.okSettings()
+
+        // Open settings again
+        val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
+        ideaFrame.openSettings()
+
+        // Find again EvoSuite
+        settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        settingsFrame.findEvoSuite()
+
+        // Verify the values changed
+        assertThat(settingsFrame.executeTestsCheckbox.isSelected()).isNotEqualTo(prevExecuteTestsCheckboxValue)
+        assertThat(settingsFrame.createAssertionsCheckBox.isSelected()).isNotEqualTo(prevCreateAssertionsCheckBoxValue)
+        assertThat(settingsFrame.debugModeCheckbox.isSelected()).isNotEqualTo(prevDebugModeCheckboxValue)
+        assertThat(settingsFrame.minimiseTestSuiteCheckBox.isSelected()).isNotEqualTo(prevMinimiseTestSuiteCheckBoxValue)
+        assertThat(settingsFrame.flakyTestCheckBox.isSelected()).isNotEqualTo(prevFlakyTestCheckBoxValue)
+        assertThat(settingsFrame.searchAlgorithmComboBox.selectedText()).isEqualTo("BREEDER_GA")
+        assertThat(settingsFrame.seedTextField.text).isEqualTo("3")
+        assertThat(settingsFrame.configurationIdField.text).isEqualTo("configuration id here")
+
+        // Change the values to previous state and close settings
+        settingsFrame.executeTestsCheckbox.setValue(prevExecuteTestsCheckboxValue)
+        settingsFrame.createAssertionsCheckBox.setValue(prevCreateAssertionsCheckBoxValue)
+        settingsFrame.debugModeCheckbox.setValue(prevDebugModeCheckboxValue)
+        settingsFrame.minimiseTestSuiteCheckBox.setValue(prevMinimiseTestSuiteCheckBoxValue)
+        settingsFrame.flakyTestCheckBox.setValue(prevFlakyTestCheckBoxValue)
+        settingsFrame.searchAlgorithmComboBox.selectItem(prevSearchAlgorithmComboBoxValue)
+        settingsFrame.configurationIdField.text = prevConfigurationIdFieldValue
+        settingsFrame.seedTextField.text = prevSeedTextFieldValue
         settingsFrame.okSettings()
 
         // Open settings again
