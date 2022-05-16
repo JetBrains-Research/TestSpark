@@ -74,16 +74,9 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val seed = settingsComponent!!.seed.toLongOrNull()
-        if (settingsComponent!!.seed != "" && seed == null) {
-            Messages.showErrorDialog("Seed parameter is not of numeric type.", "Incorrect Numeric Type For Seed")
-            return
-        }
-
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions
-        settingsState.seed = settingsComponent!!.seed
         settingsState.algorithm = settingsComponent!!.algorithm
         settingsState.configurationId = settingsComponent!!.configurationId
         settingsState.clientOnThread = settingsComponent!!.clientOnThread
@@ -97,6 +90,16 @@ class SettingsEvoSuiteConfigurable : Configurable {
         settingsState.criterionMethodNoException = settingsComponent!!.criterionMethodNoException
         settingsState.criterionCBranch = settingsComponent!!.criterionCBranch
         settingsState.minimize = settingsComponent!!.minimize
+
+        val seed = settingsComponent!!.seed.toLongOrNull()
+        if (settingsComponent!!.seed != "" && seed == null) {
+            Messages.showErrorDialog(
+                "Seed parameter is not of numeric type. Therefore, it will not be saved. However, the rest of the parameters have been successfully saved.",
+                "Incorrect Numeric Type For Seed"
+            )
+            return
+        }
+        settingsState.seed = settingsComponent!!.seed
     }
 
     /**
