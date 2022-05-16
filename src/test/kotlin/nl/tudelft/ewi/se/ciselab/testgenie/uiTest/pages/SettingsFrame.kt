@@ -22,13 +22,21 @@ import java.time.Duration
 class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
 
+    // Locator to Dialog for wrong seed
+    val seedDialogLocator
+        get() = byXpath("//div[@accessiblename='Incorrect Numeric Type For Seed' and @class='MyDialog']")
+
     // Action to close Settings menu and save changes
     private val okSettingsAction
-        get() = actionLink(byXpath("//div[@text='OK']"))
+        get() = button(byXpath("//div[@text='OK']"))
 
-    // Action to close Settings menu
-    private val closeSettingsAction
-        get() = actionLink(byXpath("//div[@text='Cancel']"))
+    // Action to save Settings changes without closing
+    private val applySettingsAction
+        get() = button(byXpath("//div[@text='Apply']"))
+
+    // Action to cancel Settings menu changes
+    private val cancelSettingsAction
+        get() = button(byXpath("//div[@text='Cancel']"))
 
     // Action for search text filed in Settings menu
     val searchTextBox
@@ -187,9 +195,23 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     }
 
     /**
+     * Method to apply settings changes without closing the window.
+     */
+    fun applySettings() {
+        if (!applySettingsAction.isEnabled()) {
+            applySettingsAction.click()
+        }
+        // Wait for apply button to be available
+        waitFor(Duration.ofSeconds(10)) {
+            applySettingsAction.isEnabled()
+        }
+        applySettingsAction.click()
+    }
+
+    /**
      * Method to open the settings of IntelliJ.
      */
     fun closeSettings() {
-        closeSettingsAction.click()
+        cancelSettingsAction.click()
     }
 }
