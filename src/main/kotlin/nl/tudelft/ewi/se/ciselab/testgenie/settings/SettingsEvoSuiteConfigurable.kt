@@ -5,7 +5,10 @@ import com.intellij.openapi.ui.Messages
 import javax.swing.JComponent
 
 /**
- * This class interacts with the other two Settings classes. It provides controller functionality for the settingsState.
+ * This class allows to configure some EvoSuite settings via the EvoSuite page in the Settings dialog,
+ *   observes the changes and manages the UI and state.
+ * It interacts with the SettingsEvoSuiteComponent, TestGenieSettingsService and TestGenieSettingsState.
+ * It provides controller functionality for the TestGenieSettingsState.
  */
 class SettingsEvoSuiteConfigurable : Configurable {
 
