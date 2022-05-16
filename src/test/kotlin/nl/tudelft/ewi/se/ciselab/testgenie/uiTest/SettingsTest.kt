@@ -131,6 +131,64 @@ class SettingsTest {
         assertThat(settingsFrame.cBranchCoverageCheckBox.isShowing).isTrue
     }
 
+    @Order(6)
+    @Test
+    fun changeEvoSuiteTabCheckBoxValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        // Get previous values
+        var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        val prevLineCoverageCheckBoxValue = settingsFrame.lineCoverageCheckBox.isSelected()
+        val prevBranchCoverageCheckBoxValue = settingsFrame.branchCoverageCheckBox.isSelected()
+        val prevExceptionCoverageCheckBoxValue = settingsFrame.exceptionCoverageCheckBox.isSelected()
+        val prevMutationCoverageCheckBoxValue = settingsFrame.mutationCoverageCheckBox.isSelected()
+        val prevOutputCoverageCheckBoxValue = settingsFrame.outputCoverageCheckBox.isSelected()
+        val prevMethodCoverageCheckBoxValue = settingsFrame.methodCoverageCheckBox.isSelected()
+        val prevMethodNoExcCoverageCheckBoxValue = settingsFrame.methodNoExcCoverageCheckBox.isSelected()
+        val prevCBranchCoverageCheckBoxValue = settingsFrame.cBranchCoverageCheckBox.isSelected()
+
+        // Change checkbox values and apply the settings
+        settingsFrame.lineCoverageCheckBox.setValue(!prevLineCoverageCheckBoxValue)
+        settingsFrame.branchCoverageCheckBox.setValue(!prevBranchCoverageCheckBoxValue)
+        settingsFrame.exceptionCoverageCheckBox.setValue(!prevExceptionCoverageCheckBoxValue)
+        settingsFrame.mutationCoverageCheckBox.setValue(!prevMutationCoverageCheckBoxValue)
+        settingsFrame.outputCoverageCheckBox.setValue(!prevOutputCoverageCheckBoxValue)
+        settingsFrame.methodCoverageCheckBox.setValue(!prevMethodCoverageCheckBoxValue)
+        settingsFrame.methodNoExcCoverageCheckBox.setValue(!prevMethodNoExcCoverageCheckBoxValue)
+        settingsFrame.cBranchCoverageCheckBox.setValue(!prevCBranchCoverageCheckBoxValue)
+        settingsFrame.okSettings()
+
+        // Open settings again
+        val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
+        ideaFrame.openSettings()
+
+        // Find again EvoSuite
+        settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        settingsFrame.findEvoSuite()
+
+        // Verify the values changed
+        assertThat(settingsFrame.lineCoverageCheckBox.isSelected()).isNotEqualTo(prevLineCoverageCheckBoxValue)
+        assertThat(settingsFrame.branchCoverageCheckBox.isSelected()).isNotEqualTo(prevBranchCoverageCheckBoxValue)
+        assertThat(settingsFrame.exceptionCoverageCheckBox.isSelected()).isNotEqualTo(prevExceptionCoverageCheckBoxValue)
+        assertThat(settingsFrame.mutationCoverageCheckBox.isSelected()).isNotEqualTo(prevMutationCoverageCheckBoxValue)
+        assertThat(settingsFrame.outputCoverageCheckBox.isSelected()).isNotEqualTo(prevOutputCoverageCheckBoxValue)
+        assertThat(settingsFrame.methodCoverageCheckBox.isSelected()).isNotEqualTo(prevMethodCoverageCheckBoxValue)
+        assertThat(settingsFrame.methodNoExcCoverageCheckBox.isSelected()).isNotEqualTo(prevMethodNoExcCoverageCheckBoxValue)
+        assertThat(settingsFrame.cBranchCoverageCheckBox.isSelected()).isNotEqualTo(prevCBranchCoverageCheckBoxValue)
+
+        // Change the checkbox value to previous state and close settings
+        settingsFrame.lineCoverageCheckBox.setValue(prevLineCoverageCheckBoxValue)
+        settingsFrame.branchCoverageCheckBox.setValue(prevBranchCoverageCheckBoxValue)
+        settingsFrame.exceptionCoverageCheckBox.setValue(prevExceptionCoverageCheckBoxValue)
+        settingsFrame.mutationCoverageCheckBox.setValue(prevMutationCoverageCheckBoxValue)
+        settingsFrame.outputCoverageCheckBox.setValue(prevOutputCoverageCheckBoxValue)
+        settingsFrame.methodCoverageCheckBox.setValue(prevMethodCoverageCheckBoxValue)
+        settingsFrame.methodNoExcCoverageCheckBox.setValue(prevMethodNoExcCoverageCheckBoxValue)
+        settingsFrame.cBranchCoverageCheckBox.setValue(prevCBranchCoverageCheckBoxValue)
+        settingsFrame.okSettings()
+
+        // Open settings again
+        ideaFrame.openSettings()
+    }
+
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
