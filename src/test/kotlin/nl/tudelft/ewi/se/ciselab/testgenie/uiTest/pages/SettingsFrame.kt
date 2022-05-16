@@ -68,19 +68,23 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for Execute tests in a sandbox environment checkbox
     val executeTestsCheckbox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Execute tests in a sandbox environment']"))
+
+    // Action for Create assertions checkbox
+    val createAssertionsCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Create assertions']"))
 
     // Action for Debug mode checkbox
     val debugModeCheckbox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Debug mode']"))
 
     // Action for Minimize test suite after generation checkbox
     val minimiseTestSuiteCheckBox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Minimize test suite after generation']"))
 
     // Action for Flaky tests checkbox
     val flakyTestCheckBox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Flaky tests']"))
 
     // Action for separator of coverage
     val coverageSeparator

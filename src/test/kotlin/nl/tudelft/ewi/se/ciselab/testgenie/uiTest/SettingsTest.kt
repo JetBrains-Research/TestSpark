@@ -116,6 +116,7 @@ class SettingsTest {
         assertThat(settingsFrame.seedLabel.isShowing).isTrue
         assertThat(settingsFrame.configurationIdLabel.isShowing).isTrue
         assertThat(settingsFrame.executeTestsCheckbox.isShowing).isTrue
+        assertThat(settingsFrame.createAssertionsCheckBox.isShowing).isTrue
         assertThat(settingsFrame.debugModeCheckbox.isShowing).isTrue
         assertThat(settingsFrame.minimiseTestSuiteCheckBox.isShowing).isTrue
         assertThat(settingsFrame.flakyTestCheckBox.isShowing).isTrue
