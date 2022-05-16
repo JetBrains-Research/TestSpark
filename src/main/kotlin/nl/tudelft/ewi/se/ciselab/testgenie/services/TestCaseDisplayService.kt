@@ -38,6 +38,10 @@ class TestCaseDisplayService(private val project: Project) {
         mainPanel.add(scrollPane, BorderLayout.CENTER)
     }
 
+    /**
+     * Creates the complete panel in the "Generated Tests" tab,
+     * and adds the "Generated Tests" tab to the sidebar tool window.
+     */
     fun showGeneratedTests(testReport: CompactReport) {
         displayTestCases(testReport)
         createToolWindowTab()
@@ -105,21 +109,21 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun createToolWindowTab() {
 
-        // Remove coverage visualisation from content manager if necessary
+        // Remove generated tests tab from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
         val contentManager = toolWindowManager!!.contentManager
         if (content != null) {
             contentManager.removeContent(content!!, true)
         }
 
-        // If there is no coverage visualisation tab, make it
+        // If there is no generated tests tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
         content = contentFactory.createContent(
             mainPanel, "Generated Tests", true
         )
         contentManager.addContent(content!!)
 
-        // Focus on coverage tab and open toolWindow if not opened already
+        // Focus on generated tests tab and open toolWindow if not opened already
         contentManager.setSelectedContent(content!!)
         toolWindowManager.show()
     }
