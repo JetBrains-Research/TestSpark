@@ -114,7 +114,9 @@ class SettingsTest {
         assertThat(settingsFrame.searchAlgorithmLabel.isShowing).isTrue
         assertThat(settingsFrame.searchAlgorithmComboBox.isShowing).isTrue
         assertThat(settingsFrame.seedLabel.isShowing).isTrue
+        assertThat(settingsFrame.seedTextField.isShowing).isTrue
         assertThat(settingsFrame.configurationIdLabel.isShowing).isTrue
+        assertThat(settingsFrame.configurationIdField.isShowing).isTrue
         assertThat(settingsFrame.executeTestsCheckbox.isShowing).isTrue
         assertThat(settingsFrame.createAssertionsCheckBox.isShowing).isTrue
         assertThat(settingsFrame.debugModeCheckbox.isShowing).isTrue
