@@ -2,10 +2,13 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.JavaCodeFragmentFactory
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.content.Content
+import com.intellij.ui.content.ContentFactory
 import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
 import java.awt.Color
@@ -24,6 +27,9 @@ class TestCaseDisplayService(private val project: Project) {
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
     private var editorList: MutableList<Pair<String, EditorTextField>> = arrayListOf()
     private val highlightColor: Color = Color(100, 150, 20, 30)
+
+    // Variable to keep reference to the coverage visualisation content
+    private var content: Content? = null
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -51,8 +57,8 @@ class TestCaseDisplayService(private val project: Project) {
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val code = JavaCodeFragmentFactory.getInstance(project)
-                .createExpressionCodeFragment(testCode, null, null, true)
+            val code =
+                JavaCodeFragmentFactory.getInstance(project).createExpressionCodeFragment(testCode, null, null, true)
             val document = PsiDocumentManager.getInstance(project).getDocument(code)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
             editorList.add(Pair(testName, editor))
@@ -87,5 +93,29 @@ class TestCaseDisplayService(private val project: Project) {
                 return
             }
         }
+    }
+
+    /**
+     * Creates a new toolWindow tab for the coverage visualisation.
+     */
+    private fun createToolWindowTab() {
+
+        // Remove coverage visualisation from content manager if necessary
+        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
+        val contentManager = toolWindowManager!!.contentManager
+        if (content != null) {
+            contentManager.removeContent(content!!, true)
+        }
+
+        // If there is no coverage visualisation tab, make it
+        val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
+        content = contentFactory.createContent(
+            mainPanel, "Generated Tests", true
+        )
+        contentManager.addContent(content!!)
+
+        // Focus on coverage tab and open toolWindow if not opened already
+        contentManager.setSelectedContent(content!!)
+        toolWindowManager.show()
     }
 }
