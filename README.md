@@ -14,6 +14,29 @@ This specific section is a source for the [plugin.xml](/src/main/resources/META-
 To keep everything working, do not remove `<!-- ... -->` sections. 
 <!-- Plugin description end -->
 
+
+## Features
+<!-- What features are supported by the plugin? -->
+
+### Generating Tests for Classes
+
+### Generating Tests for Methods
+
+### Generating Tests for Lines
+*To be implemented. Currently, not supported*
+
+### Coverage Visualisation
+
+### Assertion Generation
+*To be implemented. Currently, not supported*
+
+### Interactive Learning
+*To be implemented. Currently, not supported*
+
+### Smart Variable Name Generation
+*To be implemented. Currently, not supported*
+
+
 ## Installation
 
 - Using IDE built-in plugin system:
@@ -26,11 +49,26 @@ To keep everything working, do not remove `<!-- ... -->` sections.
   Download the [latest release](https://github.com/ciselab/TestGenie/releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
+
 ## Usage
-<!-- How to use the plugin -->
+<!-- How to use the plugin? What are the limitations? Are there any shortcuts? -->
 
-<!-- How to use the plugin end -->
 
+## Configuration
+<!-- How can users configure the plugin to match their needs? -->
+
+### Quick Access Parameters
+<!-- How to use Quick Access Parameters tab? Where to find it? What can be changed? --> 
+
+### Advanced Parameters
+<!-- How to use Advanced Parameters Settings entry? Where to find it? What can be changed? --> 
+
+
+## Contribution
+<!-- How to contribute to the plugin -->
+
+## Licence
+<!-- Which licence does the plugin have -->
 
 ---
 Plugin based on the [IntelliJ Platform Plugin Template][template].
