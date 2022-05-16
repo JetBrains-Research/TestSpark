@@ -2,6 +2,8 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.waitFor
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.SettingsFrame
@@ -174,7 +176,9 @@ class SettingsTest {
         assertThat(settingsFrame.mutationCoverageCheckBox.isSelected()).isNotEqualTo(prevMutationCoverageCheckBoxValue)
         assertThat(settingsFrame.outputCoverageCheckBox.isSelected()).isNotEqualTo(prevOutputCoverageCheckBoxValue)
         assertThat(settingsFrame.methodCoverageCheckBox.isSelected()).isNotEqualTo(prevMethodCoverageCheckBoxValue)
-        assertThat(settingsFrame.methodNoExcCoverageCheckBox.isSelected()).isNotEqualTo(prevMethodNoExcCoverageCheckBoxValue)
+        assertThat(settingsFrame.methodNoExcCoverageCheckBox.isSelected()).isNotEqualTo(
+            prevMethodNoExcCoverageCheckBoxValue
+        )
         assertThat(settingsFrame.cBranchCoverageCheckBox.isSelected()).isNotEqualTo(prevCBranchCoverageCheckBoxValue)
 
         // Change the checkbox value to previous state and close settings
@@ -248,6 +252,23 @@ class SettingsTest {
 
         // Open settings again
         ideaFrame.openSettings()
+    }
+
+    @Order(8)
+    @Test
+    fun testIncorrectSeedDialog(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        settingsFrame.seedTextField.text = "text"
+        settingsFrame.applySettings()
+
+        val errorDialog: CommonContainerFixture =
+            find(settingsFrame.seedDialogLocator, timeout = Duration.ofSeconds(15))
+
+        assertThat(errorDialog.hasText("Incorrect Numeric Type For Seed")).isTrue
+
+        val okDialog =
+            errorDialog.button(byXpath("//div[@class='CustomFrameDialogContent'][.//div[@class='Container']]//div[@class='SouthPanel']//div[@class='JButton']"))
+        okDialog.click()
     }
 
     @AfterAll
