@@ -64,6 +64,33 @@ class SettingsTest {
 
     @Order(3)
     @Test
+    fun changeTestGenieTabValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        val prevCoverageCheckBoxValue = settingsFrame.coverageCheckBox.isSelected()
+
+        // Change checkbox value and apply the settings
+        settingsFrame.coverageCheckBox.setValue(!prevCoverageCheckBoxValue)
+        settingsFrame.okSettings()
+
+        // Open settings again
+        val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
+        ideaFrame.openSettings()
+
+        // Find again TestGenie
+        settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
+        settingsFrame.findTestGenie()
+
+        // Change the checkbox to previous state and close settings
+        assertThat(settingsFrame.coverageCheckBox.isSelected()).isNotEqualTo(prevCoverageCheckBoxValue)
+        settingsFrame.coverageCheckBox.setValue(prevCoverageCheckBoxValue)
+        settingsFrame.okSettings()
+
+        // Open settings again
+        ideaFrame.openSettings()
+    }
+
+    @Order(4)
+    @Test
     @Video
     fun checkEvoSuiteTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
@@ -77,7 +104,7 @@ class SettingsTest {
         }
     }
 
-    @Order(4)
+    @Order(5)
     @Test
     @Video
     fun checkEvoSuiteInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {

@@ -22,6 +22,10 @@ import java.time.Duration
 class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
 
+    // Action to close Settings menu and save changes
+    private val okSettingsAction
+        get() = actionLink(byXpath("//div[@text='OK']"))
+
     // Action to close Settings menu
     private val closeSettingsAction
         get() = actionLink(byXpath("//div[@text='Cancel']"))
@@ -160,6 +164,14 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
                 }
             }
         }
+    }
+
+    /**
+     * Method to press ok on settings.
+     * This will apply the changes and close settings.
+     */
+    fun okSettings() {
+        okSettingsAction.click()
     }
 
     /**
