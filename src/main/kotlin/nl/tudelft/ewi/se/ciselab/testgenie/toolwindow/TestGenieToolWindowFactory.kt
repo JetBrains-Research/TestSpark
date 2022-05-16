@@ -9,7 +9,7 @@ import com.intellij.ui.content.ContentFactory
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 
 /**
- * This class is responsible for creating the UI of the TestGenie tool window.
+ * This class is responsible for creating the tabs and the UI of the TestGenie tool window.
  */
 class TestGenieToolWindowFactory : ToolWindowFactory {
     /**

@@ -1,8 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.toolwindow
 
 /**
- * This class is responsible for persisting the values of the parameters in the Quick Access (tool window),
- *   which are also present in the settings menu.
+ * This class is responsible for persisting the values of the parameters in the "Parameters" tool window tab.
  */
 data class TestGenieToolWindowState
 constructor(
