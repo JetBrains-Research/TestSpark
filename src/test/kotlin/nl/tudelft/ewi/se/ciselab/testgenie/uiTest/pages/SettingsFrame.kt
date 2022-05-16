@@ -62,9 +62,17 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     val seedLabel
         get() = jLabel(byXpath("//div[@text='Seed(random if left empty) ']"))
 
+    // Action for seed text field
+    val seedTextField
+        get() = textField(byXpath("//div[@tooltiptext='Leave empty if you want random seed']"))
+
     // Action for configuration id label
     val configurationIdLabel
         get() = jLabel(byXpath("//div[@text='Select configuration id (null if left empty) ']"))
+
+    // Action for configuration id text field
+    val configurationIdField
+        get() = textField(byXpath("//div[@tooltiptext='Label that identifies the used configuration of EvoSuite. This is only done when running experiments.']"))
 
     // Action for Execute tests in a sandbox environment checkbox
     val executeTestsCheckbox
