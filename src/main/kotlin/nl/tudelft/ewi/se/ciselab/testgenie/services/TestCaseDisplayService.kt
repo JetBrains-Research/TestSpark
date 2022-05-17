@@ -1,8 +1,13 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.ide.util.TreeClassChooserFactory
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.fileChooser.FileChooserFactory
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import org.evosuite.utils.CompactReport
@@ -91,27 +96,27 @@ class TestCaseDisplayService(private val project: Project) {
         val testCaseComponents = selectedTestCases.map {
             testCasePanels[it]!!.getComponent(1) as EditorTextField
         }.map {
-//            val code = it.document.text
-//            JavaCodeFragmentFactory.getInstance(project)
-//                .createExpressionCodeFragment(code, null, null, true)
-            it.document.text
+            val code = it.document.text
+            JavaCodeFragmentFactory.getInstance(project)
+                .createExpressionCodeFragment(code, null, null, true)
         }
 
-        println(testCaseComponents)
 
-//        val testSuiteFile = PsiFileFactory.getInstance(project)
-//            .createFileFromText("test_suite.java", JavaFileType.INSTANCE, testSuiteClass) as PsiJavaFile
-//        val testSuiteFileDirectory = testSuiteFile.containingDirectory
-//        val testSuiteFileDirectoryVirtualFile = testSuiteFileDirectory.virtualFile
-//        val testSuiteFileDirectoryPsiDirectory =
-//            PsiManager.getInstance(project).findDirectory(testSuiteFileDirectoryVirtualFile)!!
-//        val testSuiteFilePsiDirectory = testSuiteFileDirectoryPsiDirectory.findSubdirectory("test")!!
-//        val testSuiteFilePsiFile = testSuiteFilePsiDirectory.findFile("TestSuite.java")!!
-//        val testSuiteFilePsiFileVirtualFile = testSuiteFilePsiFile.virtualFile
-//        val testSuiteFilePsiFilePsiFile = PsiManager.getInstance(project).findFile(testSuiteFilePsiFileVirtualFile)!!
-//        val testSuiteFilePsiFilePsiDirectory = testSuiteFilePsiFilePsiFile.parent!!
-//        val testSuiteFilePsiFilePsiFileDirectoryVirtualFile = testSuiteFilePsiFilePsiDirectory.virtualFile
-//        val testSuiteFilePsiFilePsiFileDirectoryPsiDirectory =
-//            PsiManager.getInstance(project).findDirectory(testSuiteFilePsiFilePsiDirectory.virtualFile)!!
+        // show chooser dialog to select test file
+        val chooser = TreeClassChooserFactory.getInstance(project)
+            .createProjectScopeChooser(
+                "Insert Test Cases into Class"
+            )
+        chooser.showDialog()
+
+        // get selected class or return if no class was selected
+        val selectedClass = chooser.selected ?: return
+
+        // insert test case components into selected class
+        WriteCommandAction.runWriteCommandAction(project) {
+            testCaseComponents.forEach {
+                selectedClass.addBefore(it, selectedClass.rBrace)
+            }
+        }
     }
 }
