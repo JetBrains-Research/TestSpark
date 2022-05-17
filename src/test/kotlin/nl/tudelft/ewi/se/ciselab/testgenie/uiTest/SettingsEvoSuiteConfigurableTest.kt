@@ -7,6 +7,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsEvoSuiteConfigurable
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import java.util.stream.Stream
 
 class SettingsEvoSuiteConfigurableTest : BasePlatformTestCase() {
@@ -20,6 +21,59 @@ class SettingsEvoSuiteConfigurableTest : BasePlatformTestCase() {
         settingsConfigurable.reset()
         settingsComponent = settingsConfigurable.settingsComponent!!
         settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+    }
+
+    fun testIsModifiedSeed() {
+        val oldValue = settingsComponent.seed
+        settingsComponent.seed = "7"
+        assertThat(settingsConfigurable.isModified).isTrue
+        settingsComponent.seed = oldValue
+    }
+
+    fun testResetSeed() {
+        val oldValue = settingsComponent.seed
+        settingsComponent.seed = "5"
+        settingsConfigurable.reset()
+        assertThat(oldValue).isEqualTo(settingsComponent.seed)
+    }
+
+    fun testApplySeedCorrect() {
+        val oldValue = settingsComponent.seed
+        settingsComponent.seed = "3"
+        settingsConfigurable.apply()
+        assertThat(oldValue).isNotEqualTo(settingsComponent.seed)
+        assertThat(oldValue).isNotEqualTo(settingsState.seed)
+        settingsComponent.seed = oldValue
+    }
+
+    fun testApplySeedIncorrect() {
+        val oldValue = settingsComponent.seed
+        settingsComponent.seed = "not a number"
+        assertThatThrownBy { settingsConfigurable.apply() }.isInstanceOf(RuntimeException::class.java)
+        settingsComponent.seed = oldValue
+    }
+
+    fun testIsModifiedConfigurationId() {
+        val oldValue = settingsComponent.configurationId
+        settingsComponent.configurationId = "7id"
+        assertThat(settingsConfigurable.isModified).isTrue
+        settingsComponent.configurationId = oldValue
+    }
+
+    fun testResetConfigurationId() {
+        val oldValue = settingsComponent.configurationId
+        settingsComponent.configurationId = "5id"
+        settingsConfigurable.reset()
+        assertThat(oldValue).isEqualTo(settingsComponent.configurationId)
+    }
+
+    fun testApplyConfigurationId() {
+        val oldValue = settingsComponent.configurationId
+        settingsComponent.configurationId = "3id"
+        settingsConfigurable.apply()
+        assertThat(oldValue).isNotEqualTo(settingsComponent.configurationId)
+        assertThat(oldValue).isNotEqualTo(settingsState.configurationId)
+        settingsComponent.configurationId = oldValue
     }
 
     fun testIsModifiedCheckBoxes() {
