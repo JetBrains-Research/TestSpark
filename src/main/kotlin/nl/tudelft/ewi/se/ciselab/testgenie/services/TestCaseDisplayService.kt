@@ -5,6 +5,7 @@ import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaCodeFragmentFactory
+import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
@@ -12,7 +13,11 @@ import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
-import javax.swing.*
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JPanel
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -82,6 +87,11 @@ class TestCaseDisplayService(private val project: Project) {
         }.start()
     }
 
+
+    /**
+     * Show a dialog where the user can select what test class the tests should be applied to,
+     * and apply the selected tests to the test class.
+     */
     private fun applyTests() {
         val selectedTestCases = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
             .map { it.key }
@@ -90,11 +100,8 @@ class TestCaseDisplayService(private val project: Project) {
         val testCaseComponents = selectedTestCases.map {
             testCasePanels[it]!!.getComponent(1) as EditorTextField
         }.map {
-            val code = it.document.text
-            JavaCodeFragmentFactory.getInstance(project)
-                .createExpressionCodeFragment(code, null, null, true)
+            it.document.text
         }
-
 
         // show chooser dialog to select test file
         val chooser = TreeClassChooserFactory.getInstance(project)
@@ -107,9 +114,24 @@ class TestCaseDisplayService(private val project: Project) {
         val selectedClass = chooser.selected ?: return
 
         // insert test case components into selected class
+        appendTestsToClass(testCaseComponents, selectedClass)
+    }
+
+    /**
+     * Append the provided test cases to the provided class.
+     *
+     * @param testCaseComponents the test cases to be appended
+     * @param selectedClass the class which the test cases should be appended to
+     */
+    private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass) {
         WriteCommandAction.runWriteCommandAction(project) {
             testCaseComponents.forEach {
-                selectedClass.addBefore(it, selectedClass.rBrace)
+                PsiDocumentManager.getInstance(project)
+                    .getDocument(selectedClass.containingFile)!!
+                    .insertString(
+                        selectedClass.rBrace!!.textRange.startOffset,
+                        it
+                    )
             }
         }
     }
