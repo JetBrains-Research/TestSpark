@@ -22,7 +22,7 @@ class TestCaseDisplayService(private val project: Project) {
     private val applyButton: JButton = JButton("Apply")
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
-    private var editorList: MutableList<Pair<String, EditorTextField>> = arrayListOf()
+    private var testCasePanels: HashMap<String, EditorTextField> = HashMap()
     private val highlightColor: Color = Color(100, 150, 20, 30)
 
     init {
@@ -40,7 +40,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     fun displayTestCases(testReport: CompactReport) {
         allTestCasePanel.removeAll()
-        editorList = arrayListOf()
+        testCasePanels.clear()
         testReport.testCaseList.values.forEach {
             val testCode = it.testCode
             val testName = it.testName
@@ -55,7 +55,7 @@ class TestCaseDisplayService(private val project: Project) {
                 .createExpressionCodeFragment(testCode, null, null, true)
             val document = PsiDocumentManager.getInstance(project).getDocument(code)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
-            editorList.add(Pair(testName, editor))
+            testCasePanels[testName] = editor
 
             editor.setOneLineMode(false)
             editor.isViewer = true
@@ -74,18 +74,12 @@ class TestCaseDisplayService(private val project: Project) {
      * @param name name of the test whose editor should be highlighted
      */
     fun highlight(name: String) {
-        for (i in editorList) {
-            val testCase = i.first
-            if (testCase == name) {
-                val editor = i.second
-                val backgroundDefault = editor.background
-                editor.background = highlightColor
-                Thread {
-                    Thread.sleep(10000)
-                    editor.background = backgroundDefault
-                }.start()
-                return
-            }
-        }
+        val editor = testCasePanels[name]!!
+        val backgroundDefault = editor.background
+        editor.background = highlightColor
+        Thread {
+            Thread.sleep(10000)
+            editor.background = backgroundDefault
+        }.start()
     }
 }
