@@ -87,7 +87,6 @@ class TestCaseDisplayService(private val project: Project) {
         }.start()
     }
 
-
     /**
      * Show a dialog where the user can select what test class the tests should be applied to,
      * and apply the selected tests to the test class.
@@ -95,7 +94,6 @@ class TestCaseDisplayService(private val project: Project) {
     private fun applyTests() {
         val selectedTestCases = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
             .map { it.key }
-
 
         val testCaseComponents = selectedTestCases.map {
             testCasePanels[it]!!.getComponent(1) as EditorTextField
