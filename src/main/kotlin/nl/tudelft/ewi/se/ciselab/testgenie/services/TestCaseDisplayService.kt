@@ -22,7 +22,7 @@ class TestCaseDisplayService(private val project: Project) {
     private val applyButton: JButton = JButton("Apply")
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
-    private var testCasePanels: HashMap<String, EditorTextField> = HashMap()
+    private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private val highlightColor: Color = Color(100, 150, 20, 30)
 
     init {
@@ -55,7 +55,6 @@ class TestCaseDisplayService(private val project: Project) {
                 .createExpressionCodeFragment(testCode, null, null, true)
             val document = PsiDocumentManager.getInstance(project).getDocument(code)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
-            testCasePanels[testName] = editor
 
             editor.setOneLineMode(false)
             editor.isViewer = true
@@ -64,6 +63,7 @@ class TestCaseDisplayService(private val project: Project) {
 
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
+            testCasePanels[testName] = testCasePanel
             allTestCasePanel.add(Box.createRigidArea(Dimension(0, 5)))
         }
     }
@@ -74,7 +74,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @param name name of the test whose editor should be highlighted
      */
     fun highlight(name: String) {
-        val editor = testCasePanels[name]!!
+        val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
         val backgroundDefault = editor.background
         editor.background = highlightColor
         Thread {
