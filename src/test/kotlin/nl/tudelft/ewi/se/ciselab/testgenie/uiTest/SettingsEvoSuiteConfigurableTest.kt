@@ -25,6 +25,43 @@ class SettingsEvoSuiteConfigurableTest : BasePlatformTestCase() {
     fun testIsModifiedCheckBoxes() {
         helperIsModifiedCheckBoxes(checkBoxGenerator())
     }
+
+    fun testResetCheckBoxes() {
+        helperResetCheckBoxes(checkBoxGenerator())
+    }
+
+    fun testApplyCheckBoxes() {
+        helperApplyCheckBoxes(checkBoxGenerator())
+    }
+
+    /**
+     * Helper method to test if Reset is working correctly when modifying checkbox values.
+     *
+     * @param functions stream of expressions to execute
+     */
+    private fun helperResetCheckBoxes(functions: Stream<() -> Triple<() -> Unit, () -> Boolean, () -> Boolean>>) {
+        for (function in functions) {
+            val triple = function()
+            triple.first()
+            settingsConfigurable.reset()
+            assertThat(triple.second()).isTrue
+            assertThat(triple.third()).isTrue
+        }
+    }
+
+    /**
+     * Helper method to test if Apply is working correctly when modifying checkbox values.
+     *
+     * @param functions stream of expressions to execute
+     */
+    private fun helperApplyCheckBoxes(functions: Stream<() -> Triple<() -> Unit, () -> Boolean, () -> Boolean>>) {
+        for (function in functions) {
+            val triple = function()
+            triple.first()
+            settingsConfigurable.apply()
+            assertThat(triple.second()).isFalse
+            assertThat(triple.third()).isFalse
+        }
     }
 
     /**
