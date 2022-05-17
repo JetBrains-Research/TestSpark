@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.ContentDigestAlgorithm
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsEvoSuiteComponent
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsEvoSuiteConfigurable
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
@@ -74,6 +75,29 @@ class SettingsEvoSuiteConfigurableTest : BasePlatformTestCase() {
         assertThat(oldValue).isNotEqualTo(settingsComponent.configurationId)
         assertThat(oldValue).isNotEqualTo(settingsState.configurationId)
         settingsComponent.configurationId = oldValue
+    }
+
+    fun testResetAlgorithmComboBox() {
+        val oldValue = settingsComponent.algorithm
+        settingsComponent.algorithm = ContentDigestAlgorithm.NSGAII
+        settingsConfigurable.reset()
+        assertThat(oldValue).isEqualTo(settingsComponent.algorithm)
+    }
+
+    fun testApplyAlgorithmComboBox() {
+        val oldValue = settingsComponent.algorithm
+        settingsComponent.algorithm = ContentDigestAlgorithm.BREEDER_GA
+        settingsConfigurable.apply()
+        assertThat(oldValue).isNotEqualTo(settingsComponent.algorithm)
+        assertThat(oldValue).isNotEqualTo(settingsState.algorithm)
+        settingsComponent.algorithm = oldValue
+    }
+
+    fun testIsModifiedAlgorithmComboBox() {
+        val oldValue = settingsComponent.algorithm
+        settingsComponent.algorithm = ContentDigestAlgorithm.DYNAMOSA
+        assertThat(settingsConfigurable.isModified).isTrue
+        settingsComponent.algorithm = oldValue
     }
 
     fun testIsModifiedCheckBoxes() {
