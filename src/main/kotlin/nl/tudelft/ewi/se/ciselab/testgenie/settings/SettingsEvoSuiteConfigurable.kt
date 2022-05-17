@@ -9,7 +9,7 @@ import javax.swing.JComponent
  */
 class SettingsEvoSuiteConfigurable : Configurable {
 
-    private var settingsComponent: SettingsEvoSuiteComponent? = null
+    var settingsComponent: SettingsEvoSuiteComponent? = null
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
