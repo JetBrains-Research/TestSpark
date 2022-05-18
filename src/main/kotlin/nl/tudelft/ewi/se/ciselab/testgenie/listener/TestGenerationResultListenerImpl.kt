@@ -18,7 +18,7 @@ class TestGenerationResultListenerImpl(private val project: Project) : TestGener
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
 
         ApplicationManager.getApplication().invokeLater {
-            testCaseDisplayService.displayTestCases(testReport)
+            testCaseDisplayService.showGeneratedTests(testReport)
         }
 
         val coverageVisualisationService = project.service<CoverageVisualisationService>()
