@@ -1,9 +1,13 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.ide.util.TreeClassChooserFactory
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
@@ -24,7 +28,7 @@ class TestCaseDisplayService(private val project: Project) {
     private val applyButton: JButton = JButton("Apply")
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
-    private var editorList: MutableList<Pair<String, EditorTextField>> = arrayListOf()
+    private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private val highlightColor: Color = Color(100, 150, 20, 30)
 
     // Variable to keep reference to the coverage visualisation content
@@ -33,6 +37,7 @@ class TestCaseDisplayService(private val project: Project) {
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
+        applyButton.addActionListener { applyTests() }
         mainPanel.add(applyButton, BorderLayout.SOUTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
     }
@@ -54,7 +59,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun displayTestCases(testReport: CompactReport) {
         allTestCasePanel.removeAll()
-        editorList = arrayListOf()
+        testCasePanels.clear()
         testReport.testCaseList.values.forEach {
             val testCode = it.testCode
             val testName = it.testName
@@ -70,7 +75,6 @@ class TestCaseDisplayService(private val project: Project) {
 
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
-            editorList.add(Pair(testName, editor))
 
             editor.setOneLineMode(false)
             editor.isViewer = true
@@ -79,6 +83,7 @@ class TestCaseDisplayService(private val project: Project) {
 
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
+            testCasePanels[testName] = testCasePanel
             allTestCasePanel.add(Box.createRigidArea(Dimension(0, 5)))
         }
     }
@@ -89,17 +94,58 @@ class TestCaseDisplayService(private val project: Project) {
      * @param name name of the test whose editor should be highlighted
      */
     fun highlight(name: String) {
-        for (i in editorList) {
-            val testCase = i.first
-            if (testCase == name) {
-                val editor = i.second
-                val backgroundDefault = editor.background
-                editor.background = highlightColor
-                Thread {
-                    Thread.sleep(10000)
-                    editor.background = backgroundDefault
-                }.start()
-                return
+        val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
+        val backgroundDefault = editor.background
+        editor.background = highlightColor
+        Thread {
+            Thread.sleep(10000)
+            editor.background = backgroundDefault
+        }.start()
+    }
+
+    /**
+     * Show a dialog where the user can select what test class the tests should be applied to,
+     * and apply the selected tests to the test class.
+     */
+    private fun applyTests() {
+        val selectedTestCases = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+            .map { it.key }
+
+        val testCaseComponents = selectedTestCases.map {
+            testCasePanels[it]!!.getComponent(1) as EditorTextField
+        }.map {
+            it.document.text
+        }
+
+        // show chooser dialog to select test file
+        val chooser = TreeClassChooserFactory.getInstance(project)
+            .createProjectScopeChooser(
+                "Insert Test Cases into Class"
+            )
+        chooser.showDialog()
+
+        // get selected class or return if no class was selected
+        val selectedClass = chooser.selected ?: return
+
+        // insert test case components into selected class
+        appendTestsToClass(testCaseComponents, selectedClass)
+    }
+
+    /**
+     * Append the provided test cases to the provided class.
+     *
+     * @param testCaseComponents the test cases to be appended
+     * @param selectedClass the class which the test cases should be appended to
+     */
+    private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass) {
+        WriteCommandAction.runWriteCommandAction(project) {
+            testCaseComponents.forEach {
+                PsiDocumentManager.getInstance(project)
+                    .getDocument(selectedClass.containingFile)!!
+                    .insertString(
+                        selectedClass.rBrace!!.textRange.startOffset,
+                        it
+                    )
             }
         }
     }
