@@ -72,7 +72,6 @@ class TestCaseDisplayService(private val project: Project) {
             editorList.add(Pair(testName, editor))
 
             editor.setOneLineMode(false)
-            editor.isViewer = true
 
             testCasePanel.add(editor, BorderLayout.CENTER)
 
