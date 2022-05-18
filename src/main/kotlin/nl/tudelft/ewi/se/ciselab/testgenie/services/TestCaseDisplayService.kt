@@ -61,11 +61,14 @@ class TestCaseDisplayService(private val project: Project) {
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
 
+            // fix Windows line separators
+            val testCodeFormatted = testCode.replace("\r\n", "\n")
+
             val checkbox = JCheckBox()
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val document = EditorFactory.getInstance().createDocument(testCode)
+            val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
             editorList.add(Pair(testName, editor))
 
