@@ -1,10 +1,9 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.JavaCodeFragmentFactory
-import com.intellij.psi.PsiDocumentManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
@@ -66,8 +65,7 @@ class TestCaseDisplayService(private val project: Project) {
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val code = JavaCodeFragmentFactory.getInstance(project).createExpressionCodeFragment(testCode, null, null, true)
-            val document = PsiDocumentManager.getInstance(project).getDocument(code)
+            val document = EditorFactory.getInstance().createDocument(testCode)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
             editorList.add(Pair(testName, editor))
 
