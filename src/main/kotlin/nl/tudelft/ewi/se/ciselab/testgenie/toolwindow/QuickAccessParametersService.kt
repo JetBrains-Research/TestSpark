@@ -10,16 +10,16 @@ import com.intellij.openapi.components.Storage
  * It provides ability to load state and get state.
  */
 @State(name = "TestGenieToolWindowState", storages = [Storage("testGenieToolWindowState.xml")])
-class QuickAccessParametersService : PersistentStateComponent<TestGenieToolWindowState> {
+class QuickAccessParametersService : PersistentStateComponent<QuickAccessParametersState> {
 
-    private var toolWindowState: TestGenieToolWindowState = TestGenieToolWindowState()
+    private var toolWindowState: QuickAccessParametersState = QuickAccessParametersState()
 
     /**
      * Gets the currently persisted state. This method is called every time the save button is pressed in the menu.
      *
      * @return the current tool window state
      */
-    override fun getState(): TestGenieToolWindowState = toolWindowState
+    override fun getState(): QuickAccessParametersState = toolWindowState
 
     /**
      * Loads the state. Everytime we need to update the parameters in the GUI according to a new state we call this
@@ -27,7 +27,7 @@ class QuickAccessParametersService : PersistentStateComponent<TestGenieToolWindo
      *
      * @param state the new state
      */
-    override fun loadState(state: TestGenieToolWindowState) {
+    override fun loadState(state: QuickAccessParametersState) {
         toolWindowState = state
     }
 
@@ -38,7 +38,7 @@ class QuickAccessParametersService : PersistentStateComponent<TestGenieToolWindo
          *
          * @return the service that manages the state
          */
-        fun getInstance(): PersistentStateComponent<TestGenieToolWindowState> {
+        fun getInstance(): PersistentStateComponent<QuickAccessParametersState> {
             return ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java)
         }
     }
