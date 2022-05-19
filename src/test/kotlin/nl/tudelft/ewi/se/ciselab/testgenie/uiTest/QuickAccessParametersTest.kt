@@ -8,6 +8,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
@@ -20,6 +21,8 @@ import java.time.Duration
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(RemoteRobotExtension::class)
 class QuickAccessParametersTest {
+    // Open the tool window frame
+    lateinit var toolWindowFrame: ToolWindowFrame
 
     /**
      * Opens an untitled project from the IntelliJ welcome screen.
@@ -38,11 +41,16 @@ class QuickAccessParametersTest {
         }
     }
 
+    @BeforeEach
+    fun setUp(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        toolWindowFrame = find(ToolWindowFrame::class.java, timeout = Duration.ofSeconds(15))
+    }
+
     @Order(1)
     @Test
     fun checkTestGenieToolWindowPanel(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Open the tool window frame
-        val toolWindowFrame = find(ToolWindowFrame::class.java, timeout = Duration.ofSeconds(15))
+//        val toolWindowFrame = find(ToolWindowFrame::class.java, timeout = Duration.ofSeconds(15))
         // Open the "Quick Access Parameters" tab
         toolWindowFrame.openQuickAccessParametersTab()
         // toolWindowFrame.quickAccessParametersContent.click()
@@ -79,6 +87,30 @@ class QuickAccessParametersTest {
         Assertions.assertThat(toolWindowFrame.geneticAlgorithmSeparator.value).isEqualTo("Genetic Algorithm")
         Assertions.assertThat(toolWindowFrame.populationLimit.value).isEqualTo("Population limit")
         Assertions.assertThat(toolWindowFrame.populationValue.value).isEqualTo("Population")
+    }
+
+    @Order(1)
+    @Test
+    fun checkTestGenieToolWindowPanel2(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        // Open the tool window frame
+//        val toolWindowFrame = find(ToolWindowFrame::class.java, timeout = Duration.ofSeconds(15))
+        // Open the "Quick Access Parameters" tab
+        toolWindowFrame.openQuickAccessParametersTab()
+        // toolWindowFrame.quickAccessParametersContent.click()
+
+        // Assert text is visible
+        Assertions.assertThat(toolWindowFrame.title.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.searchBudgetSeparator.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.searchBudgetType.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.searchBudgetValue.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.timeoutsSeparator.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.initializationTimeout.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.minimisationTimeout.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.assertionTimeout.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.jUnitCheckTimeout.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.geneticAlgorithmSeparator.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.populationLimit.isVisible()).isTrue
+        Assertions.assertThat(toolWindowFrame.populationValue.isVisible()).isTrue
     }
 
     /**
