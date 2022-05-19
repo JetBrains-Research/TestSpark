@@ -67,16 +67,16 @@ TestGenie offers an option to highlight lines which the generated test suite cov
 EvoSuite, the basis of TestGenie, works only on Java classes which have already been compiled. Please make sure to compile your classes, before running EvoSuite with TestGenie. Otherwise, TestGenie will not work.
 
 ### Generating Tests for Classes
-To generate a test for a class, right-click (with mouse) any method within the class you want to test or right-click the class name itself. Under the "TestGenie" option, select "Generate Tests for Class [...]" option:\
+To generate a test for a class, right-click (with mouse) anywhere within the class you want to test or right-click the class name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Class [...]" option:\
 ![Test generation for classes](readme-images/ClassTest.jpg)\
  EvoSuite going to run in the background and generate tests. While EvoSuite is running, a progress bar in the bottom right-hand corner of the IDE:\
 ![Progress bar](readme-images/ProgressBar.jpg)\
-Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
+Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the right-hand side of the IDE:\
 ![Generated Tests](readme-images/GeneratedTests.jpg)\
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). Hitting the "apply" button will add the selected tests to your test class.
 
 ### Generating Tests for Methods
-To generate a test for a method, right-click (with mouse) any code section within the method you want to test or right-click the method name itself. Under the "TestGenie" option, select "Generate Tests for Method [...]" option:\
+To generate a test for a method, right-click (with mouse) anywhere within the method you want to test or right-click the method name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Method [...]" option:\
 ![Test generation for methods](readme-images/MethodTest.jpg)\
  EvoSuite going to run in the background and generate tests. While EvoSuite is running, a progress bar in the bottom right-hand corner of the IDE:\
 ![Progress bar](readme-images/ProgressBar.jpg)\
