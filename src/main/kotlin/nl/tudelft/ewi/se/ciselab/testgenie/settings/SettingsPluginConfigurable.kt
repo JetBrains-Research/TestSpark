@@ -36,7 +36,7 @@ class SettingsPluginConfigurable : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        var modified: Boolean =  settingsComponent!!.showCoverage != settingsState.showCoverage
+        var modified: Boolean = settingsComponent!!.showCoverage != settingsState.showCoverage
         modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
         return modified
     }
