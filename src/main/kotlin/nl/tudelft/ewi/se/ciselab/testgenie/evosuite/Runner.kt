@@ -4,6 +4,7 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -13,9 +14,11 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import java.io.File
 import java.nio.charset.Charset
+import java.util.UUID
 import java.util.regex.Pattern
 
 /**
@@ -31,7 +34,9 @@ class Runner(
     private val project: Project,
     private val projectPath: String,
     private val projectClassPath: String,
-    private val classFQN: String
+    private val classFQN: String,
+    private val fileName: String,
+    private val modTs: Long
 ) {
     private val log = Logger.getInstance(this::class.java)
 
@@ -42,10 +47,13 @@ class Runner(
     private val pluginsPath = System.getProperty("idea.plugins.path")
     private var evoSuitePath = "$pluginsPath/TestGenie/lib/evosuite-$evosuiteVersion.jar"
 
-    private val ts = System.currentTimeMillis()
+    private val id = UUID.randomUUID().toString()
     private val sep = File.separatorChar
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
-    private val testResultName = "test_gen_result_$ts"
+    private val testResultName = "test_gen_result_$id"
+
+    private var key = Workspace.TestJobKey(fileName, classFQN, modTs, testResultName)
+
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
     private val settingsState = TestGenieSettingsService.getInstance().state
@@ -70,6 +78,10 @@ class Runner(
         command =
             SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethod(methodDescriptor)
                 .build()
+
+        // attach method desc. to target unit key
+        key = Workspace.TestJobKey(fileName, "$classFQN#$methodDescriptor", modTs, testResultName)
+
         return this
     }
 
@@ -109,6 +121,9 @@ class Runner(
 
                             if (indicator.isCanceled) {
                                 log.info("Cancelling search")
+                                val workspace = project.service<Workspace>()
+                                workspace.cancelPendingResult(testResultName)
+
                                 handler.destroyProcess()
                             }
 
@@ -158,6 +173,10 @@ class Runner(
                     indicator.stop()
                 }
             })
+
+        val workspace = project.service<Workspace>()
+        workspace.addPendingResult(testResultName, key)
+
         return testResultName
     }
 }

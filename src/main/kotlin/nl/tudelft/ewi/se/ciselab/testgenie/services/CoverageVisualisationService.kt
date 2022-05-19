@@ -38,6 +38,19 @@ class CoverageVisualisationService(private val project: Project) {
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
         if (state.showCoverage) {
+
+//            val documentManager = FileDocumentManager.getInstance()
+//            // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
+//            FileEditorManager.getInstance(project).allEditors.map { it as TextEditor }.map { it.editor }.map {
+//
+//                val file = documentManager.getFile(it.document)
+//                if (file != null) {
+//
+//                    println(file.name)
+//                    file.canonicalPath
+//                }
+//            }
+
             val editor = FileEditorManager.getInstance(project).selectedTextEditor!!
 
             val color = Color(100, 150, 20)
