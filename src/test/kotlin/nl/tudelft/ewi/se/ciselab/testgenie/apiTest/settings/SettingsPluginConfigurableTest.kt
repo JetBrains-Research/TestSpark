@@ -8,7 +8,8 @@ import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
 import org.assertj.core.api.Assertions.assertThat
 
-class SettingsPluginConfigurableTest : BasePlatformTestCase() {
+
+class SettingsPluginConfigurableTest {
     private val settingsConfigurable = SettingsPluginConfigurable()
     private lateinit var settingsComponent: SettingsPluginComponent
     private lateinit var settingsState: TestGenieSettingsState

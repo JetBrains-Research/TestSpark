@@ -11,7 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import java.util.stream.Stream
 
-class SettingsEvoSuiteConfigurableTest : BasePlatformTestCase() {
+class SettingsEvoSuiteConfigurableTest {
     private val settingsConfigurable = SettingsEvoSuiteConfigurable()
     private lateinit var settingsComponent: SettingsEvoSuiteComponent
     private lateinit var settingsState: TestGenieSettingsState
