@@ -30,7 +30,7 @@ class QuickAccessParametersTest {
      */
     @BeforeAll
     fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        // Open the 'untitled' project
+        // Open an 'untitled' project
         find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             open("untitled")
         }
@@ -53,23 +53,12 @@ class QuickAccessParametersTest {
     @Test
     fun testEverythingIsVisible(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Assert text is visible
-        Assertions.assertThat(toolWindowFrame.title.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.searchBudgetSeparator.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.searchBudgetType.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.searchBudgetValue.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.timeoutsSeparator.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.initializationTimeout.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.minimisationTimeout.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.assertionTimeout.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.jUnitCheckTimeout.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.geneticAlgorithmSeparator.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.populationLimit.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.populationValue.isVisible()).isTrue
+        toolWindowFrame.getTitles().forEach { Assertions.assertThat(it.isVisible()) }
+        toolWindowFrame.getUIElementLabels().forEach { Assertions.assertThat(it.isVisible()) }
 
         // Assert buttons are visible
-        Assertions.assertThat(toolWindowFrame.actionLink.isShowing).isTrue
-        Assertions.assertThat(toolWindowFrame.saveButton.isShowing).isTrue
-        Assertions.assertThat(toolWindowFrame.resetButton.isShowing).isTrue
+        Assertions.assertThat(toolWindowFrame.advancedSettingsButton.isShowing).isTrue
+        toolWindowFrame.getButtons().forEach { Assertions.assertThat(it.isShowing) }
     }
 
     @Order(1)

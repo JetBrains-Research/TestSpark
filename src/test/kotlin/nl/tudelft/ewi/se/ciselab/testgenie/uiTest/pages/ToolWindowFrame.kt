@@ -2,20 +2,18 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages
 
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.data.RemoteComponent
-import com.intellij.remoterobot.fixtures.CommonContainerFixture
-import com.intellij.remoterobot.fixtures.DefaultXpath
-import com.intellij.remoterobot.fixtures.FixtureName
+import com.intellij.remoterobot.fixtures.*
 import com.intellij.remoterobot.search.locators.byXpath
 
 @FixtureName("Tool Window Frame")
 @DefaultXpath(
     "type", "//div[@accessiblename='Parameters Tool Window']"
-) // TODO: rename to "Parameters Tool Window Frame" when we remove "Generated Tests" tab
+)
 class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
 
     // The tab label "Parameters"
-    val parametersTab
+    private val parametersTab
         get() = actionLink(byXpath("//div[@text='Parameters']"))
 
     // The actual panel
@@ -71,7 +69,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
         get() = jLabel(byXpath("//div[@text='Population']"))
 
     // The action link text
-    val actionLink
+    val advancedSettingsButton
         get() = actionLink(byXpath("//div[@class='ActionLink']"))
 
     // The save button
@@ -87,5 +85,29 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      */
     fun openQuickAccessParametersTab() {
         parametersTab.click()
+    }
+
+    /**
+     * Gets all the titles, namely, the title and three category separators.
+     *
+     * @return the list of titles, as described above
+     */
+    fun getTitles(): List<JLabelFixture> {
+        return listOf(
+            title, searchBudgetSeparator,
+            timeoutsSeparator, geneticAlgorithmSeparator
+        )
+    }
+
+    fun getUIElementLabels(): List<JLabelFixture> {
+        return listOf(
+            searchBudgetType, searchBudgetValue, initializationTimeout,
+            minimisationTimeout, assertionTimeout, jUnitCheckTimeout,
+            populationLimit, populationValue
+        )
+    }
+
+    fun getButtons(): List<JButtonFixture> {
+        return listOf(saveButton, resetButton)
     }
 }
