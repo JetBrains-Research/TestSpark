@@ -2,10 +2,10 @@ package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
-import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
+import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
+import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -16,7 +16,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
-
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettingsEvoSuiteConfigurableTest {
