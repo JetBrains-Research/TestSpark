@@ -3,8 +3,8 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.HighlighterLayer
-import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.Content
@@ -30,7 +30,7 @@ class CoverageVisualisationService(private val project: Project) {
      *
      * @param testReport the generated tests summary
      */
-    fun showCoverage(testReport: CompactReport) {
+    fun showCoverage(testReport: CompactReport, editor: Editor) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
         createToolWindowTab()
@@ -38,21 +38,6 @@ class CoverageVisualisationService(private val project: Project) {
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
         if (state.showCoverage) {
-
-//            val documentManager = FileDocumentManager.getInstance()
-//            // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
-//            FileEditorManager.getInstance(project).allEditors.map { it as TextEditor }.map { it.editor }.map {
-//
-//                val file = documentManager.getFile(it.document)
-//                if (file != null) {
-//
-//                    println(file.name)
-//                    file.canonicalPath
-//                }
-//            }
-
-            val editor = FileEditorManager.getInstance(project).selectedTextEditor!!
-
             val color = Color(100, 150, 20)
 
             editor.markupModel.removeAllHighlighters()
