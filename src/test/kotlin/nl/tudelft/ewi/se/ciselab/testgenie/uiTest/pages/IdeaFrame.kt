@@ -38,7 +38,7 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
 
     // Find TestGenie on the right sidebar
     private val openToolWindow
-        get() = actionLink(byXpath("//div[@text='TestGenie']"))
+        get() = actionLink(byXpath("//div[@tooltiptext='TestGenie']"))
 
     /**
      * Method to close the current project.
