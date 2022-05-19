@@ -43,18 +43,15 @@ class QuickAccessParametersTest {
 
     @BeforeEach
     fun setUp(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        // Open the tool window frame
         toolWindowFrame = find(ToolWindowFrame::class.java, timeout = Duration.ofSeconds(15))
+        // Open the "Quick Access Parameters" tab
+        toolWindowFrame.openQuickAccessParametersTab()
     }
 
     @Order(1)
     @Test
-    fun checkTestGenieToolWindowPanel(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        // Open the tool window frame
-//        val toolWindowFrame = find(ToolWindowFrame::class.java, timeout = Duration.ofSeconds(15))
-        // Open the "Quick Access Parameters" tab
-        toolWindowFrame.openQuickAccessParametersTab()
-        // toolWindowFrame.quickAccessParametersContent.click()
-
+    fun testEverythingIsVisible(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Assert text is visible
         Assertions.assertThat(toolWindowFrame.title.isVisible()).isTrue
         Assertions.assertThat(toolWindowFrame.searchBudgetSeparator.isVisible()).isTrue
@@ -73,7 +70,11 @@ class QuickAccessParametersTest {
         Assertions.assertThat(toolWindowFrame.actionLink.isShowing).isTrue
         Assertions.assertThat(toolWindowFrame.saveButton.isShowing).isTrue
         Assertions.assertThat(toolWindowFrame.resetButton.isShowing).isTrue
+    }
 
+    @Order(1)
+    @Test
+    fun testLabelsAreCorrect(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Assert labels have the text
         Assertions.assertThat(toolWindowFrame.title.value).isEqualTo("Quick Access Parameters")
         Assertions.assertThat(toolWindowFrame.searchBudgetSeparator.value).isEqualTo("Search budget")
@@ -87,30 +88,6 @@ class QuickAccessParametersTest {
         Assertions.assertThat(toolWindowFrame.geneticAlgorithmSeparator.value).isEqualTo("Genetic Algorithm")
         Assertions.assertThat(toolWindowFrame.populationLimit.value).isEqualTo("Population limit")
         Assertions.assertThat(toolWindowFrame.populationValue.value).isEqualTo("Population")
-    }
-
-    @Order(1)
-    @Test
-    fun checkTestGenieToolWindowPanel2(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        // Open the tool window frame
-//        val toolWindowFrame = find(ToolWindowFrame::class.java, timeout = Duration.ofSeconds(15))
-        // Open the "Quick Access Parameters" tab
-        toolWindowFrame.openQuickAccessParametersTab()
-        // toolWindowFrame.quickAccessParametersContent.click()
-
-        // Assert text is visible
-        Assertions.assertThat(toolWindowFrame.title.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.searchBudgetSeparator.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.searchBudgetType.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.searchBudgetValue.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.timeoutsSeparator.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.initializationTimeout.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.minimisationTimeout.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.assertionTimeout.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.jUnitCheckTimeout.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.geneticAlgorithmSeparator.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.populationLimit.isVisible()).isTrue
-        Assertions.assertThat(toolWindowFrame.populationValue.isVisible()).isTrue
     }
 
     /**
