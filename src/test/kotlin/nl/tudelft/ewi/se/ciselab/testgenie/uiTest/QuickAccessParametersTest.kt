@@ -61,22 +61,16 @@ class QuickAccessParametersTest {
         toolWindowFrame.getButtons().forEach { Assertions.assertThat(it.isShowing) }
     }
 
-    @Order(1)
+    @Order(2)
     @Test
     fun testLabelsAreCorrect(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        val labelTexts = listOf(
+            "Search budget type", "Search budget", "Initialization timeout",
+            "Minimisation timeout", "Assertion timeout", "JUnit check timeout",
+            "Population limit", "Population"
+        )
         // Assert labels have the text
-        Assertions.assertThat(toolWindowFrame.title.value).isEqualTo("Quick Access Parameters")
-        Assertions.assertThat(toolWindowFrame.searchBudgetSeparator.value).isEqualTo("Search budget")
-        Assertions.assertThat(toolWindowFrame.searchBudgetTypeLabel.value).isEqualTo("Search budget type")
-        Assertions.assertThat(toolWindowFrame.searchBudgetValueLabel.value).isEqualTo("Search budget")
-        Assertions.assertThat(toolWindowFrame.timeoutsSeparator.value).isEqualTo("Timeouts")
-        Assertions.assertThat(toolWindowFrame.initializationTimeoutLabel.value).isEqualTo("Initialization timeout")
-        Assertions.assertThat(toolWindowFrame.minimisationTimeoutLabel.value).isEqualTo("Minimisation timeout")
-        Assertions.assertThat(toolWindowFrame.assertionTimeoutLabel.value).isEqualTo("Assertion timeout")
-        Assertions.assertThat(toolWindowFrame.jUnitCheckTimeoutLabel.value).isEqualTo("JUnit check timeout")
-        Assertions.assertThat(toolWindowFrame.geneticAlgorithmSeparator.value).isEqualTo("Genetic Algorithm")
-        Assertions.assertThat(toolWindowFrame.populationLimitLabel.value).isEqualTo("Population limit")
-        Assertions.assertThat(toolWindowFrame.populationValueLabel.value).isEqualTo("Population")
+        toolWindowFrame.getUIElementLabels().zip(labelTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
     }
 
     /**
