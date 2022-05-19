@@ -3,6 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.fixtures.JCheckboxFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.waitFor
@@ -248,8 +249,15 @@ class SettingsComponentTest {
 
         assertThat(errorDialog.hasText("Incorrect Numeric Type For Seed")).isTrue
 
-        val okDialog =
-            errorDialog.button(byXpath("//div[@class='CustomFrameDialogContent'][.//div[@class='Container']]//div[@class='SouthPanel']//div[@class='JButton']"))
+        val okDialog: JButtonFixture?
+
+        if (remoteRobot.isWin()) {
+            okDialog =
+                errorDialog.button(byXpath("//div[@class='CustomFrameDialogContent'][.//div[@class='Container']]//div[@class='SouthPanel']//div[@class='JButton']"))
+        } else {
+            okDialog =
+                errorDialog.button(byXpath("//div[@class='JBLayeredPane'][.//div[@class='Container']]//div[@class='JButton']"))
+        }
         okDialog.click()
     }
 
