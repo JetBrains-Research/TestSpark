@@ -141,7 +141,8 @@ class TestCaseDisplayService(private val project: Project) {
                     .getDocument(selectedClass.containingFile)!!
                     .insertString(
                         selectedClass.rBrace!!.textRange.startOffset,
-                        it
+                        // Fix Windows line separators
+                        it.replace("\r\n", "\n")
                     )
             }
         }
