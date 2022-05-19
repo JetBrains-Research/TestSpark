@@ -46,7 +46,7 @@ class SettingsPluginComponent {
             .addComponent(pluginDiscription)
             // Add visual coverage checkbox
             .addComponent(showCoverageCheckBox, 10)
-            .addComponent(JXTitledSeparator("Environment settings"))
+            .addComponent(JXTitledSeparator("Environment settings"), 15)
             .addLabeledComponent(JBLabel("Java 11 path:"), javaPathTextField, 10, false)
             .addComponentFillVertically(JPanel(), 0)
             .panel
