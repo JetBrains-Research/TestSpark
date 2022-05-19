@@ -2,7 +2,11 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages
 
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.data.RemoteComponent
-import com.intellij.remoterobot.fixtures.*
+import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.DefaultXpath
+import com.intellij.remoterobot.fixtures.FixtureName
+import com.intellij.remoterobot.fixtures.JButtonFixture
+import com.intellij.remoterobot.fixtures.JLabelFixture
 import com.intellij.remoterobot.search.locators.byXpath
 
 @FixtureName("Tool Window Frame")
@@ -99,6 +103,11 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
         )
     }
 
+    /**
+     * Gets the labels of the UI elements (checkboxes and spinners etc.).
+     *
+     * @return the list of labels of the UI elements
+     */
     fun getUIElementLabels(): List<JLabelFixture> {
         return listOf(
             searchBudgetTypeLabel, searchBudgetValueLabel, initializationTimeoutLabel,
@@ -107,6 +116,11 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
         )
     }
 
+    /**
+     * Gets save and reset buttons in one list.
+     *
+     * @return the list with save and reset buttons
+     */
     fun getButtons(): List<JButtonFixture> {
         return listOf(saveButton, resetButton)
     }
