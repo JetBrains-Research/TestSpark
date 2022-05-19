@@ -81,6 +81,15 @@ class QuickAccessParametersTest {
         toolWindowFrame.getTitles().zip(titleTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
     }
 
+    @Order(4)
+    @Test
+    fun testToolTipsOnUIElementLabels(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        val tooltipTexts = listOf<String>(
+            "Default: Max time", "Default: 120 seconds", "Default: Individuals"
+        )
+        toolWindowFrame.getDefaultTooltips().zip(tooltipTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
+    }
+
     /**
      * First closes the TestGenie sidebar by clicking on the stripe button again.
      * Secondly, closes the project itself and returns the sandbox to IntelliJ welcome state.
