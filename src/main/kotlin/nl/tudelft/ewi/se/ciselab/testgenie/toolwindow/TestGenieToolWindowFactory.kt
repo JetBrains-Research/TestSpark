@@ -7,7 +7,7 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 
 /**
- * This class is responsible for creating the UI of the TestGenie tool window.
+ * This class is responsible for creating the tabs and the UI of the TestGenie tool window.
  */
 class TestGenieToolWindowFactory : ToolWindowFactory {
     /**
