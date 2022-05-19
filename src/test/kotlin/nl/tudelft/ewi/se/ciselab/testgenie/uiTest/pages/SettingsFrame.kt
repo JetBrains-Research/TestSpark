@@ -40,7 +40,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for search text filed in Settings menu
     val searchTextBox
-        get() = textField(byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"))
+        get() = textField(byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"), Duration.ofSeconds(60))
 
     // Action to find Settings tree view
     val projectViewTree
