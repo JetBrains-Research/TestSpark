@@ -34,13 +34,13 @@ class QuickAccessParameters(_project: Project) {
 
     // UI elements for EvoSuite parameters
     private var stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
-    private var searchBudget: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
-    private var initializationTimeout: JSpinner = JSpinner(SpinnerNumberModel(120, 0, 10000, 1))
-    private var minimisationTimeout: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
-    private var assertionTimeout: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
-    private var junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(60, 0, 10000, 1))
+    private var searchBudget: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private var initializationTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private var minimisationTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private var assertionTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private var junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
     private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
-    private var population: JSpinner = JSpinner(SpinnerNumberModel(50, 0, 10000, 1))
+    private var population: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
 
     // Save and Reset buttons
     private var saveButton: JButton = JButton("Save")
@@ -59,7 +59,7 @@ class QuickAccessParameters(_project: Project) {
     private var stoppingConditionToolTip =
         JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
     private var populationLimitToolTip =
-        JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+        JBLabel("Default: 50 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
 
     // Template strings for "default" tooltips
     private val defaultStr: String = "Default: %s"
@@ -85,7 +85,7 @@ class QuickAccessParameters(_project: Project) {
 
         // Add an action listener to population limit combo box to update the "default" tooltip
         fun updatePopulationLimitToolTip() {
-            populationLimitToolTip.text = default("60 ${populationLimit.item.toString().toLowerCase()}")
+            populationLimitToolTip.text = default("50 ${populationLimit.item.toString().toLowerCase()}")
         }
         populationLimitToolTip.border = JBUI.Borders.emptyLeft(10)
         populationLimit.addActionListener { updatePopulationLimitToolTip() }
@@ -230,15 +230,15 @@ class QuickAccessParameters(_project: Project) {
         )
 
         if (choice == 0) {
-            val state: TestGenieToolWindowState = QuickAccessParametersService.getInstance().state!!
-            state.stoppingCondition = StoppingCondition.MAXTIME
-            state.searchBudget = 60
-            state.initializationTimeout = 120
-            state.minimizationTimeout = 60
-            state.assertionTimeout = 60
-            state.junitCheckTimeout = 60
-            state.populationLimit = PopulationLimit.INDIVIDUALS
-            state.population = 50
+            val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
+            state.stoppingCondition = QuickAccessParametersState.DefaultState.stoppingCondition
+            state.searchBudget = QuickAccessParametersState.DefaultState.searchBudget
+            state.initializationTimeout = QuickAccessParametersState.DefaultState.initializationTimeout
+            state.minimizationTimeout = QuickAccessParametersState.DefaultState.minimizationTimeout
+            state.assertionTimeout = QuickAccessParametersState.DefaultState.assertionTimeout
+            state.junitCheckTimeout = QuickAccessParametersState.DefaultState.junitCheckTimeout
+            state.populationLimit = QuickAccessParametersState.DefaultState.populationLimit
+            state.population = QuickAccessParametersState.DefaultState.population
 
             loadState()
 
@@ -259,7 +259,7 @@ class QuickAccessParameters(_project: Project) {
      * Loads the persisted state and updates the UI elements with the corresponding values.
      */
     private fun loadState() {
-        val state: TestGenieToolWindowState = QuickAccessParametersService.getInstance().state!!
+        val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
 
         stoppingCondition.item = state.stoppingCondition
         searchBudget.value = state.searchBudget
@@ -275,7 +275,7 @@ class QuickAccessParameters(_project: Project) {
      * Persist the state by reading off the values from the UI elements.
      */
     private fun saveState() {
-        val state: TestGenieToolWindowState = QuickAccessParametersService.getInstance().state!!
+        val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
 
         state.stoppingCondition = stoppingCondition.item
         state.searchBudget = searchBudget.value as Int
