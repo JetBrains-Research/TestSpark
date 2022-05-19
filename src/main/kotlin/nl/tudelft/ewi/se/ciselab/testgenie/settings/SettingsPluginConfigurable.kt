@@ -10,7 +10,7 @@ import javax.swing.JComponent
  */
 class SettingsPluginConfigurable : Configurable {
 
-    private var settingsComponent: SettingsPluginComponent? = null
+    var settingsComponent: SettingsPluginComponent? = null
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
