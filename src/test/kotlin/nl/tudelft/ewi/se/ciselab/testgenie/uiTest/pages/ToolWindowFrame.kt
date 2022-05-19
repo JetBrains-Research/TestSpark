@@ -9,7 +9,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 
 @FixtureName("Tool Window Frame")
 @DefaultXpath(
-    "type", "//div[@accessiblename='Generated Tests Tool Window']"
+    "type", "//div[@accessiblename='Parameters Tool Window']"
 ) // TODO: rename to "Parameters Tool Window Frame" when we remove "Generated Tests" tab
 class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
