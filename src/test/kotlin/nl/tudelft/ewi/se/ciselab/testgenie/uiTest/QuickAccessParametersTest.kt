@@ -73,6 +73,14 @@ class QuickAccessParametersTest {
         toolWindowFrame.getUIElementLabels().zip(labelTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
     }
 
+    @Order(3)
+    @Test
+    fun testTitlesAreCorrect(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        val titleTexts = listOf("Quick Access Parameters", "Search budget", "Timeouts", "Genetic Algorithm")
+        // Assert labels have the text
+        toolWindowFrame.getTitles().zip(titleTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
+    }
+
     /**
      * First closes the TestGenie sidebar by clicking on the stripe button again.
      * Secondly, closes the project itself and returns the sandbox to IntelliJ welcome state.
