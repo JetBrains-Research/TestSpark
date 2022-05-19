@@ -5,6 +5,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.settings
  */
 data class TestGenieSettingsState(
     var showCoverage: Boolean = false,
+    var javaPath: String = "",
 
     var sandbox: Boolean = true,
     var assertions: Boolean = true,
