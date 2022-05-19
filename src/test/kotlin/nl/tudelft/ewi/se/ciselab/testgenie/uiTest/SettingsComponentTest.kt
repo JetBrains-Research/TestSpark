@@ -130,7 +130,7 @@ class SettingsComponentTest {
         coverageCheckBoxesList.forEach { x -> assertThat(x.isShowing).isTrue }
     }
 
-    private fun helperCoverageCheckBoxes(settingsFrame : SettingsFrame): List<JCheckboxFixture> {
+    private fun helperCoverageCheckBoxes(settingsFrame: SettingsFrame): List<JCheckboxFixture> {
         return listOf(
             settingsFrame.lineCoverageCheckBox,
             settingsFrame.branchCoverageCheckBox,
@@ -177,7 +177,7 @@ class SettingsComponentTest {
         ideaFrame.openSettings()
     }
 
-    private fun helperGeneralCheckBoxes(settingsFrame : SettingsFrame): List<JCheckboxFixture> {
+    private fun helperGeneralCheckBoxes(settingsFrame: SettingsFrame): List<JCheckboxFixture> {
         return listOf(
             settingsFrame.executeTestsCheckbox,
             settingsFrame.createAssertionsCheckBox,
