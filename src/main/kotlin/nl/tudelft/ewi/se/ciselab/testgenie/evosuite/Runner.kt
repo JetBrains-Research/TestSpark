@@ -36,7 +36,6 @@ class Runner(
     private val log = Logger.getInstance(this::class.java)
 
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
-    private val javaPath = "java" // TODO: Source from config
     private val evosuiteVersion = "1.0.2" // TODO: Figure out a better way to source this
 
     private val pluginsPath = System.getProperty("idea.plugins.path")
@@ -84,7 +83,7 @@ class Runner(
 
         val cmd = ArrayList<String>()
 
-        cmd.add(javaPath)
+        cmd.add(settingsState?.javaPath!!)
         cmd.add("-jar")
         cmd.add(evoSuitePath)
         cmd.addAll(command)
