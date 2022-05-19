@@ -114,9 +114,5 @@ class CoverageVisualisationService(private val project: Project) {
             visualisationService.mainPanel, "Coverage Visualisation", true
         )
         contentManager.addContent(content!!)
-
-        // Focus on coverage tab and open toolWindow if not opened already
-        contentManager.setSelectedContent(content!!)
-        toolWindowManager.show()
     }
 }
