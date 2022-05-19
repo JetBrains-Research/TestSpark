@@ -77,7 +77,6 @@ class TestCaseDisplayService(private val project: Project) {
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
 
             editor.setOneLineMode(false)
-            editor.isViewer = true
 
             testCasePanel.add(editor, BorderLayout.CENTER)
 
@@ -144,7 +143,8 @@ class TestCaseDisplayService(private val project: Project) {
                     .getDocument(selectedClass.containingFile)!!
                     .insertString(
                         selectedClass.rBrace!!.textRange.startOffset,
-                        it
+                        // Fix Windows line separators
+                        it.replace("\r\n", "\n")
                     )
             }
         }
