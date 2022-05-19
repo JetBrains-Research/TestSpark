@@ -14,7 +14,9 @@ import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
 
 /**
- * This class generates tests for a method.
+ * This class contains all the logic related to generating tests for a method.
+ * No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available,
+ *   getting the information about the selected method and passing it to (EvoSuite) Runner.
  */
 class GenerateTestsActionMethod : AnAction() {
     private val log = Logger.getInstance(this.javaClass)
