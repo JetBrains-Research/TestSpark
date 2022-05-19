@@ -3,6 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.JCheckboxFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.waitFor
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Duration
+import kotlin.streams.toList
 
 @TestMethodOrder(OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -119,21 +121,26 @@ class SettingsComponentTest {
         assertThat(settingsFrame.seedTextField.isShowing).isTrue
         assertThat(settingsFrame.configurationIdLabel.isShowing).isTrue
         assertThat(settingsFrame.configurationIdField.isShowing).isTrue
-        assertThat(settingsFrame.executeTestsCheckbox.isShowing).isTrue
-        assertThat(settingsFrame.createAssertionsCheckBox.isShowing).isTrue
-        assertThat(settingsFrame.debugModeCheckbox.isShowing).isTrue
-        assertThat(settingsFrame.minimiseTestSuiteCheckBox.isShowing).isTrue
-        assertThat(settingsFrame.flakyTestCheckBox.isShowing).isTrue
-
         assertThat(settingsFrame.coverageSeparator.isShowing).isTrue
-        assertThat(settingsFrame.lineCoverageCheckBox.isShowing).isTrue
-        assertThat(settingsFrame.branchCoverageCheckBox.isShowing).isTrue
-        assertThat(settingsFrame.exceptionCoverageCheckBox.isShowing).isTrue
-        assertThat(settingsFrame.mutationCoverageCheckBox.isShowing).isTrue
-        assertThat(settingsFrame.outputCoverageCheckBox.isShowing).isTrue
-        assertThat(settingsFrame.methodCoverageCheckBox.isShowing).isTrue
-        assertThat(settingsFrame.methodNoExcCoverageCheckBox.isShowing).isTrue
-        assertThat(settingsFrame.cBranchCoverageCheckBox.isShowing).isTrue
+
+        val generalCheckBoxesList = helperGeneralCheckBoxes(settingsFrame)
+        generalCheckBoxesList.forEach { x -> assertThat(x.isShowing).isTrue }
+
+        val coverageCheckBoxesList = helperCoverageCheckBoxes(settingsFrame)
+        coverageCheckBoxesList.forEach { x -> assertThat(x.isShowing).isTrue }
+    }
+
+    private fun helperCoverageCheckBoxes(settingsFrame : SettingsFrame): List<JCheckboxFixture> {
+        return listOf(
+            settingsFrame.lineCoverageCheckBox,
+            settingsFrame.branchCoverageCheckBox,
+            settingsFrame.exceptionCoverageCheckBox,
+            settingsFrame.mutationCoverageCheckBox,
+            settingsFrame.outputCoverageCheckBox,
+            settingsFrame.methodCoverageCheckBox,
+            settingsFrame.methodNoExcCoverageCheckBox,
+            settingsFrame.cBranchCoverageCheckBox
+        )
     }
 
     @Order(6)
@@ -141,24 +148,12 @@ class SettingsComponentTest {
     fun changeEvoSuiteTabCoverageSectionValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Get previous values
         var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
-        val prevLineCoverageCheckBoxValue = settingsFrame.lineCoverageCheckBox.isSelected()
-        val prevBranchCoverageCheckBoxValue = settingsFrame.branchCoverageCheckBox.isSelected()
-        val prevExceptionCoverageCheckBoxValue = settingsFrame.exceptionCoverageCheckBox.isSelected()
-        val prevMutationCoverageCheckBoxValue = settingsFrame.mutationCoverageCheckBox.isSelected()
-        val prevOutputCoverageCheckBoxValue = settingsFrame.outputCoverageCheckBox.isSelected()
-        val prevMethodCoverageCheckBoxValue = settingsFrame.methodCoverageCheckBox.isSelected()
-        val prevMethodNoExcCoverageCheckBoxValue = settingsFrame.methodNoExcCoverageCheckBox.isSelected()
-        val prevCBranchCoverageCheckBoxValue = settingsFrame.cBranchCoverageCheckBox.isSelected()
 
-        // Change checkbox values and apply the settings
-        settingsFrame.lineCoverageCheckBox.setValue(!prevLineCoverageCheckBoxValue)
-        settingsFrame.branchCoverageCheckBox.setValue(!prevBranchCoverageCheckBoxValue)
-        settingsFrame.exceptionCoverageCheckBox.setValue(!prevExceptionCoverageCheckBoxValue)
-        settingsFrame.mutationCoverageCheckBox.setValue(!prevMutationCoverageCheckBoxValue)
-        settingsFrame.outputCoverageCheckBox.setValue(!prevOutputCoverageCheckBoxValue)
-        settingsFrame.methodCoverageCheckBox.setValue(!prevMethodCoverageCheckBoxValue)
-        settingsFrame.methodNoExcCoverageCheckBox.setValue(!prevMethodNoExcCoverageCheckBoxValue)
-        settingsFrame.cBranchCoverageCheckBox.setValue(!prevCBranchCoverageCheckBoxValue)
+        var coverageCheckBoxesList = helperCoverageCheckBoxes(settingsFrame)
+
+        val prevCoverageCheckBoxesValueList = coverageCheckBoxesList.stream().map { x -> x.isSelected() }.toList()
+        coverageCheckBoxesList.forEach { x -> x.setValue(!x.isSelected()) }
+
         settingsFrame.okSettings()
 
         // Open settings again
@@ -168,32 +163,28 @@ class SettingsComponentTest {
         // Find again EvoSuite
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         settingsFrame.findEvoSuite()
+        coverageCheckBoxesList = helperCoverageCheckBoxes(settingsFrame)
 
         // Verify the values changed
-        assertThat(settingsFrame.lineCoverageCheckBox.isSelected()).isNotEqualTo(prevLineCoverageCheckBoxValue)
-        assertThat(settingsFrame.branchCoverageCheckBox.isSelected()).isNotEqualTo(prevBranchCoverageCheckBoxValue)
-        assertThat(settingsFrame.exceptionCoverageCheckBox.isSelected()).isNotEqualTo(prevExceptionCoverageCheckBoxValue)
-        assertThat(settingsFrame.mutationCoverageCheckBox.isSelected()).isNotEqualTo(prevMutationCoverageCheckBoxValue)
-        assertThat(settingsFrame.outputCoverageCheckBox.isSelected()).isNotEqualTo(prevOutputCoverageCheckBoxValue)
-        assertThat(settingsFrame.methodCoverageCheckBox.isSelected()).isNotEqualTo(prevMethodCoverageCheckBoxValue)
-        assertThat(settingsFrame.methodNoExcCoverageCheckBox.isSelected()).isNotEqualTo(
-            prevMethodNoExcCoverageCheckBoxValue
-        )
-        assertThat(settingsFrame.cBranchCoverageCheckBox.isSelected()).isNotEqualTo(prevCBranchCoverageCheckBoxValue)
+        coverageCheckBoxesList.zip(prevCoverageCheckBoxesValueList)
+            .forEach { x -> assertThat(x.first.isSelected()).isNotEqualTo(x.second) }
 
         // Change the checkbox value to previous state and close settings
-        settingsFrame.lineCoverageCheckBox.setValue(prevLineCoverageCheckBoxValue)
-        settingsFrame.branchCoverageCheckBox.setValue(prevBranchCoverageCheckBoxValue)
-        settingsFrame.exceptionCoverageCheckBox.setValue(prevExceptionCoverageCheckBoxValue)
-        settingsFrame.mutationCoverageCheckBox.setValue(prevMutationCoverageCheckBoxValue)
-        settingsFrame.outputCoverageCheckBox.setValue(prevOutputCoverageCheckBoxValue)
-        settingsFrame.methodCoverageCheckBox.setValue(prevMethodCoverageCheckBoxValue)
-        settingsFrame.methodNoExcCoverageCheckBox.setValue(prevMethodNoExcCoverageCheckBoxValue)
-        settingsFrame.cBranchCoverageCheckBox.setValue(prevCBranchCoverageCheckBoxValue)
+        coverageCheckBoxesList.forEach { x -> x.setValue(!x.isSelected()) }
         settingsFrame.okSettings()
 
         // Open settings again
         ideaFrame.openSettings()
+    }
+
+    private fun helperGeneralCheckBoxes(settingsFrame : SettingsFrame): List<JCheckboxFixture> {
+        return listOf(
+            settingsFrame.executeTestsCheckbox,
+            settingsFrame.createAssertionsCheckBox,
+            settingsFrame.debugModeCheckbox,
+            settingsFrame.minimiseTestSuiteCheckBox,
+            settingsFrame.flakyTestCheckBox
+        )
     }
 
     @Order(7)
@@ -201,21 +192,16 @@ class SettingsComponentTest {
     fun changeEvoSuiteTabGeneralSectionValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Get previous values
         var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
-        val prevExecuteTestsCheckboxValue = settingsFrame.executeTestsCheckbox.isSelected()
-        val prevCreateAssertionsCheckBoxValue = settingsFrame.createAssertionsCheckBox.isSelected()
-        val prevDebugModeCheckboxValue = settingsFrame.debugModeCheckbox.isSelected()
-        val prevMinimiseTestSuiteCheckBoxValue = settingsFrame.minimiseTestSuiteCheckBox.isSelected()
-        val prevFlakyTestCheckBoxValue = settingsFrame.flakyTestCheckBox.isSelected()
+        var generalCheckBoxesList = helperGeneralCheckBoxes(settingsFrame)
+        val prevCoverageCheckBoxesValueList = generalCheckBoxesList.stream().map { x -> x.isSelected() }.toList()
+
         val prevSearchAlgorithmComboBoxValue = settingsFrame.searchAlgorithmComboBox.selectedText()
         val prevSeedTextFieldValue = settingsFrame.seedTextField.text
         val prevConfigurationIdFieldValue = settingsFrame.configurationIdField.text
 
         // Change values and apply the settings
-        settingsFrame.executeTestsCheckbox.setValue(!prevExecuteTestsCheckboxValue)
-        settingsFrame.createAssertionsCheckBox.setValue(!prevCreateAssertionsCheckBoxValue)
-        settingsFrame.debugModeCheckbox.setValue(!prevDebugModeCheckboxValue)
-        settingsFrame.minimiseTestSuiteCheckBox.setValue(!prevMinimiseTestSuiteCheckBoxValue)
-        settingsFrame.flakyTestCheckBox.setValue(!prevFlakyTestCheckBoxValue)
+        generalCheckBoxesList.forEach { x -> x.setValue(!x.isSelected()) }
+
         settingsFrame.searchAlgorithmComboBox.selectItem("BREEDER_GA")
         settingsFrame.seedTextField.text = "3"
         settingsFrame.configurationIdField.text = "configuration id here"
@@ -228,23 +214,19 @@ class SettingsComponentTest {
         // Find again EvoSuite
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         settingsFrame.findEvoSuite()
+        generalCheckBoxesList = helperGeneralCheckBoxes(settingsFrame)
 
         // Verify the values changed
-        assertThat(settingsFrame.executeTestsCheckbox.isSelected()).isNotEqualTo(prevExecuteTestsCheckboxValue)
-        assertThat(settingsFrame.createAssertionsCheckBox.isSelected()).isNotEqualTo(prevCreateAssertionsCheckBoxValue)
-        assertThat(settingsFrame.debugModeCheckbox.isSelected()).isNotEqualTo(prevDebugModeCheckboxValue)
-        assertThat(settingsFrame.minimiseTestSuiteCheckBox.isSelected()).isNotEqualTo(prevMinimiseTestSuiteCheckBoxValue)
-        assertThat(settingsFrame.flakyTestCheckBox.isSelected()).isNotEqualTo(prevFlakyTestCheckBoxValue)
+        generalCheckBoxesList.zip(prevCoverageCheckBoxesValueList)
+            .forEach { x -> assertThat(x.first.isSelected()).isNotEqualTo(x.second) }
+
         assertThat(settingsFrame.searchAlgorithmComboBox.selectedText()).isEqualTo("BREEDER_GA")
         assertThat(settingsFrame.seedTextField.text).isEqualTo("3")
         assertThat(settingsFrame.configurationIdField.text).isEqualTo("configuration id here")
 
         // Change the values to previous state and close settings
-        settingsFrame.executeTestsCheckbox.setValue(prevExecuteTestsCheckboxValue)
-        settingsFrame.createAssertionsCheckBox.setValue(prevCreateAssertionsCheckBoxValue)
-        settingsFrame.debugModeCheckbox.setValue(prevDebugModeCheckboxValue)
-        settingsFrame.minimiseTestSuiteCheckBox.setValue(prevMinimiseTestSuiteCheckBoxValue)
-        settingsFrame.flakyTestCheckBox.setValue(prevFlakyTestCheckBoxValue)
+        generalCheckBoxesList.forEach { x -> x.setValue(!x.isSelected()) }
+
         settingsFrame.searchAlgorithmComboBox.selectItem(prevSearchAlgorithmComboBoxValue)
         settingsFrame.configurationIdField.text = prevConfigurationIdFieldValue
         settingsFrame.seedTextField.text = prevSeedTextFieldValue
