@@ -1,55 +1,68 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.apiTest.settings
 
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.LightProjectDescriptor
+import com.intellij.testFramework.fixtures.CodeInsightTestFixture
+import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
+import com.intellij.testFramework.fixtures.impl.LightTempDirTestFixtureImpl
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.ContentDigestAlgorithm
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
-class TestGenieSettingsStateTest : BasePlatformTestCase() {
+class TestGenieSettingsStateTest {
     private lateinit var settingsState: TestGenieSettingsState
+    private lateinit var fixture: CodeInsightTestFixture
 
-    override fun setUp() {
-        super.setUp()
-        settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+    @BeforeEach
+    fun setUp() {
+        val factory = IdeaTestFixtureFactory.getFixtureFactory()
+        val testFixture = factory.createLightFixtureBuilder(LightProjectDescriptor.EMPTY_PROJECT_DESCRIPTOR).fixture
+        fixture = factory.createCodeInsightFixture(testFixture, LightTempDirTestFixtureImpl(true))
+        fixture.setUp()
+        settingsState = TestGenieSettingsState()
+
+        settingsState.algorithm = ContentDigestAlgorithm.DYNAMOSA
     }
 
+    @AfterEach
+    fun tearDown() {
+        fixture.tearDown()
+    }
+
+    @Test
     fun testSerialiseEmpty() {
-        settingsState.algorithm = ContentDigestAlgorithm.DYNAMOSA
         assertThat(settingsState.serializeChangesFromDefault()).isEqualTo(mutableListOf<String>())
     }
 
+    @Test
     fun testSerialiseSandbox() {
-        settingsState.algorithm = ContentDigestAlgorithm.DYNAMOSA
         settingsState.sandbox = !settingsState.sandbox
         assertThat(settingsState.serializeChangesFromDefault()).isEqualTo(mutableListOf("-Dsandbox=false"))
-        settingsState.sandbox = !settingsState.sandbox
     }
 
+    @Test
     fun testSerialiseAssertions() {
-        settingsState.algorithm = ContentDigestAlgorithm.DYNAMOSA
         settingsState.assertions = !settingsState.assertions
         assertThat(settingsState.serializeChangesFromDefault()).isEqualTo(mutableListOf("-Dassertions=false"))
-        settingsState.assertions = !settingsState.assertions
     }
 
+    @Test
     fun testSerialiseAlgorithm() {
         settingsState.algorithm = ContentDigestAlgorithm.RANDOM_SEARCH
         assertThat(settingsState.serializeChangesFromDefault()).isEqualTo(mutableListOf("-Dalgorithm=RANDOM_SEARCH"))
     }
 
+    @Test
     fun testSerialiseJunitCheck() {
-        settingsState.algorithm = ContentDigestAlgorithm.DYNAMOSA
         settingsState.junitCheck = !settingsState.junitCheck
         assertThat(settingsState.serializeChangesFromDefault()).isEqualTo(mutableListOf("-Djunit_check=true"))
-        settingsState.junitCheck = !settingsState.junitCheck
     }
 
+    @Test
     fun testSerialiseMinimize() {
-        settingsState.algorithm = ContentDigestAlgorithm.DYNAMOSA
         settingsState.minimize = !settingsState.minimize
         assertThat(settingsState.serializeChangesFromDefault()).isEqualTo(mutableListOf("-Dminimize=false"))
-        settingsState.minimize = !settingsState.minimize
     }
 }
