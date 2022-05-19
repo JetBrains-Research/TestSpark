@@ -29,11 +29,11 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
         get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JLabel' and @text='Search budget']"))
 
     // The search budget type text
-    val searchBudgetType
+    val searchBudgetTypeLabel
         get() = jLabel(byXpath("//div[@text='Search budget type']"))
 
-    // The search buget value text
-    val searchBudgetValue
+    // The search budget value text
+    val searchBudgetValueLabel
         get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JBLabel' and @text='Search budget']"))
 
     // The timeouts' separator line
@@ -41,19 +41,19 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
         get() = jLabel(byXpath("//div[@text='Timeouts']"))
 
     // The initialization timeout text
-    val initializationTimeout
+    val initializationTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Initialization timeout']"))
 
     // The minimisation timeout text
-    val minimisationTimeout
+    val minimisationTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Minimisation timeout']"))
 
     // The assertion timeout text
-    val assertionTimeout
+    val assertionTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Assertion timeout']"))
 
     // The JUnit check timeout text
-    val jUnitCheckTimeout
+    val jUnitCheckTimeoutLabel
         get() = jLabel(byXpath("//div[@text='JUnit check timeout']"))
 
     // The genetic algorithm separator line
@@ -61,11 +61,11 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
         get() = jLabel(byXpath("//div[@text='Genetic Algorithm']"))
 
     // The population limit text
-    val populationLimit
+    val populationLimitLabel
         get() = jLabel(byXpath("//div[@text='Population limit']"))
 
     // The population value text
-    val populationValue
+    val populationValueLabel
         get() = jLabel(byXpath("//div[@text='Population']"))
 
     // The action link text
@@ -101,9 +101,9 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
 
     fun getUIElementLabels(): List<JLabelFixture> {
         return listOf(
-            searchBudgetType, searchBudgetValue, initializationTimeout,
-            minimisationTimeout, assertionTimeout, jUnitCheckTimeout,
-            populationLimit, populationValue
+            searchBudgetTypeLabel, searchBudgetValueLabel, initializationTimeoutLabel,
+            minimisationTimeoutLabel, assertionTimeoutLabel, jUnitCheckTimeoutLabel,
+            populationLimitLabel, populationValueLabel
         )
     }
 

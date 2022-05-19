@@ -30,7 +30,7 @@ class QuickAccessParametersTest {
      */
     @BeforeAll
     fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        // Open an 'untitled' project
+        // Open an 'untitled' projectLabel
         find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             open("untitled")
         }
@@ -67,16 +67,16 @@ class QuickAccessParametersTest {
         // Assert labels have the text
         Assertions.assertThat(toolWindowFrame.title.value).isEqualTo("Quick Access Parameters")
         Assertions.assertThat(toolWindowFrame.searchBudgetSeparator.value).isEqualTo("Search budget")
-        Assertions.assertThat(toolWindowFrame.searchBudgetType.value).isEqualTo("Search budget type")
-        Assertions.assertThat(toolWindowFrame.searchBudgetValue.value).isEqualTo("Search budget")
+        Assertions.assertThat(toolWindowFrame.searchBudgetTypeLabel.value).isEqualTo("Search budget type")
+        Assertions.assertThat(toolWindowFrame.searchBudgetValueLabel.value).isEqualTo("Search budget")
         Assertions.assertThat(toolWindowFrame.timeoutsSeparator.value).isEqualTo("Timeouts")
-        Assertions.assertThat(toolWindowFrame.initializationTimeout.value).isEqualTo("Initialization timeout")
-        Assertions.assertThat(toolWindowFrame.minimisationTimeout.value).isEqualTo("Minimisation timeout")
-        Assertions.assertThat(toolWindowFrame.assertionTimeout.value).isEqualTo("Assertion timeout")
-        Assertions.assertThat(toolWindowFrame.jUnitCheckTimeout.value).isEqualTo("JUnit check timeout")
+        Assertions.assertThat(toolWindowFrame.initializationTimeoutLabel.value).isEqualTo("Initialization timeout")
+        Assertions.assertThat(toolWindowFrame.minimisationTimeoutLabel.value).isEqualTo("Minimisation timeout")
+        Assertions.assertThat(toolWindowFrame.assertionTimeoutLabel.value).isEqualTo("Assertion timeout")
+        Assertions.assertThat(toolWindowFrame.jUnitCheckTimeoutLabel.value).isEqualTo("JUnit check timeout")
         Assertions.assertThat(toolWindowFrame.geneticAlgorithmSeparator.value).isEqualTo("Genetic Algorithm")
-        Assertions.assertThat(toolWindowFrame.populationLimit.value).isEqualTo("Population limit")
-        Assertions.assertThat(toolWindowFrame.populationValue.value).isEqualTo("Population")
+        Assertions.assertThat(toolWindowFrame.populationLimitLabel.value).isEqualTo("Population limit")
+        Assertions.assertThat(toolWindowFrame.populationValueLabel.value).isEqualTo("Population")
     }
 
     /**
