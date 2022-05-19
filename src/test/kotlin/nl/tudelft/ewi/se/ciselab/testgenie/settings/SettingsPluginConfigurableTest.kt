@@ -1,14 +1,10 @@
-package nl.tudelft.ewi.se.ciselab.testgenie.apiTest.settings
+package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.testFramework.LightProjectDescriptor.EMPTY_PROJECT_DESCRIPTOR
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.impl.LightTempDirTestFixtureImpl
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginComponent
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginConfigurable
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

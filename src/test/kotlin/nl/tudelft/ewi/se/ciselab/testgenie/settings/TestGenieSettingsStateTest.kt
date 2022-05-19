@@ -1,11 +1,9 @@
-package nl.tudelft.ewi.se.ciselab.testgenie.apiTest.settings
+package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
 import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.impl.LightTempDirTestFixtureImpl
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.ContentDigestAlgorithm
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
