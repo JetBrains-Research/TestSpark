@@ -124,8 +124,8 @@ class SettingsEvoSuiteConfigurableTest {
 
     @ParameterizedTest
     @MethodSource("checkBoxValueGenerator")
-    fun testResetCheckBoxes(function: () -> Boolean, component: () -> Boolean, state: () -> Boolean) {
-        val oldValue = function()
+    fun testResetCheckBoxes(oldValue: Boolean, function: () -> Unit, component: () -> Boolean, state: () -> Boolean) {
+        function()
         settingsConfigurable.reset()
         assertThat(component()).isEqualTo(oldValue)
         assertThat(state()).isEqualTo(oldValue)
@@ -133,8 +133,8 @@ class SettingsEvoSuiteConfigurableTest {
 
     @ParameterizedTest
     @MethodSource("checkBoxValueGenerator")
-    fun testApplyCheckBoxes(function: () -> Boolean, component: () -> Boolean, state: () -> Boolean) {
-        val oldValue = function()
+    fun testApplyCheckBoxes(oldValue: Boolean, function: () -> Unit, component: () -> Boolean, state: () -> Boolean) {
+        function()
         settingsConfigurable.apply()
         assertThat(component()).isNotEqualTo(oldValue)
         assertThat(state()).isNotEqualTo(oldValue)
@@ -142,8 +142,13 @@ class SettingsEvoSuiteConfigurableTest {
 
     @ParameterizedTest
     @MethodSource("checkBoxValueGenerator")
-    fun testIsModifiedCheckBoxes(function: () -> Boolean, component: () -> Boolean, state: () -> Boolean) {
-        val oldValue = function()
+    fun testIsModifiedCheckBoxes(
+        oldValue: Boolean,
+        function: () -> Unit,
+        component: () -> Boolean,
+        state: () -> Boolean
+    ) {
+        function()
         assertThat(settingsConfigurable.isModified).isTrue
         assertThat(component()).isNotEqualTo(oldValue)
         assertThat(state()).isEqualTo(oldValue)
@@ -157,119 +162,80 @@ class SettingsEvoSuiteConfigurableTest {
     private fun checkBoxValueGenerator(): Stream<Arguments> {
         return Stream.of(
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.junitCheck
-                    settingsComponent.junitCheck = !settingsComponent.junitCheck
-                    return@of oldValue
-                },
+                settingsComponent.junitCheck,
+                { settingsComponent.junitCheck = !settingsComponent.junitCheck },
                 { settingsComponent.junitCheck },
                 { settingsState.junitCheck }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.assertions
-                    settingsComponent.assertions = !settingsComponent.assertions
-                    return@of oldValue
-                },
+                settingsComponent.assertions,
+                { settingsComponent.assertions = !settingsComponent.assertions },
                 { settingsComponent.assertions },
                 { settingsState.assertions }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.clientOnThread
-                    settingsComponent.clientOnThread = !settingsComponent.clientOnThread
-                    return@of oldValue
-                },
+                settingsComponent.clientOnThread,
+                { settingsComponent.clientOnThread = !settingsComponent.clientOnThread },
                 { settingsComponent.clientOnThread },
                 { settingsState.clientOnThread }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.criterionBranch
-                    settingsComponent.criterionBranch = !settingsComponent.criterionBranch
-                    return@of oldValue
-                },
+                settingsComponent.criterionBranch,
+                { settingsComponent.criterionBranch = !settingsComponent.criterionBranch },
                 { settingsComponent.criterionBranch },
                 { settingsState.criterionBranch }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.criterionCBranch
-                    settingsComponent.criterionCBranch = !settingsComponent.criterionCBranch
-                    return@of oldValue
-                },
+                settingsComponent.criterionCBranch,
+                { settingsComponent.criterionCBranch = !settingsComponent.criterionCBranch },
                 { settingsComponent.criterionCBranch },
                 { settingsState.criterionCBranch }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.criterionException
-                    settingsComponent.criterionException = !settingsComponent.criterionException
-                    return@of oldValue
-                },
+                settingsState.criterionException,
+                { settingsComponent.criterionException = !settingsComponent.criterionException },
                 { settingsComponent.criterionException },
                 { settingsState.criterionException }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.criterionLine
-                    settingsComponent.criterionLine = !settingsComponent.criterionLine
-                    return@of oldValue
-                },
+                settingsComponent.criterionLine,
+                { settingsComponent.criterionLine = !settingsComponent.criterionLine },
                 { settingsComponent.criterionLine },
                 { settingsState.criterionLine }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.criterionMethod
-                    settingsComponent.criterionMethod = !settingsComponent.criterionMethod
-                    return@of oldValue
-                },
+                settingsComponent.criterionMethod,
+                { settingsComponent.criterionMethod = !settingsComponent.criterionMethod },
                 { settingsComponent.criterionMethod },
                 { settingsState.criterionMethod }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.criterionMethodNoException
-                    settingsComponent.criterionMethodNoException = !settingsComponent.criterionMethodNoException
-                    return@of oldValue
-                },
+                settingsComponent.criterionMethodNoException,
+                { settingsComponent.criterionMethodNoException = !settingsComponent.criterionMethodNoException },
                 { settingsComponent.criterionMethodNoException },
                 { settingsState.criterionMethodNoException }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.criterionOutput
-                    settingsComponent.criterionOutput = !settingsComponent.criterionOutput
-                    return@of oldValue
-                },
+                settingsComponent.criterionOutput,
+                { settingsComponent.criterionOutput = !settingsComponent.criterionOutput },
                 { settingsComponent.criterionOutput },
                 { settingsState.criterionOutput }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.criterionWeakMutation
-                    settingsComponent.criterionWeakMutation = !settingsComponent.criterionWeakMutation
-                    return@of oldValue
-                },
+                settingsComponent.criterionWeakMutation,
+                { settingsComponent.criterionWeakMutation = !settingsComponent.criterionWeakMutation },
                 { settingsComponent.criterionWeakMutation },
                 { settingsState.criterionWeakMutation }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.minimize
-                    settingsComponent.minimize = !settingsComponent.minimize
-                    return@of oldValue
-                },
+                settingsComponent.minimize,
+                { settingsComponent.minimize = !settingsComponent.minimize },
                 { settingsComponent.minimize },
                 { settingsState.minimize }
             ),
             Arguments.of(
-                {
-                    val oldValue = settingsComponent.sandbox
-                    settingsComponent.sandbox = !settingsComponent.sandbox
-                    return@of oldValue
-                },
+                settingsComponent.sandbox,
+                { settingsComponent.sandbox = !settingsComponent.sandbox },
                 { settingsComponent.sandbox },
                 { settingsState.sandbox }
             )
