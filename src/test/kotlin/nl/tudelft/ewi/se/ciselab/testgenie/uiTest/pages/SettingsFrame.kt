@@ -22,13 +22,25 @@ import java.time.Duration
 class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
 
-    // Action to close Settings menu
-    private val closeSettingsAction
-        get() = actionLink(byXpath("//div[@text='Cancel']"))
+    // Locator to Dialog for wrong seed
+    val seedDialogLocator
+        get() = byXpath("//div[@accessiblename='Incorrect Numeric Type For Seed' and @class='MyDialog']")
+
+    // Action to close Settings menu and save changes
+    private val okSettingsAction
+        get() = button(byXpath("//div[@text='OK']"))
+
+    // Action to save Settings changes without closing
+    private val applySettingsAction
+        get() = button(byXpath("//div[@text='Apply']"))
+
+    // Action to cancel Settings menu changes
+    private val cancelSettingsAction
+        get() = button(byXpath("//div[@text='Cancel']"))
 
     // Action for search text filed in Settings menu
     val searchTextBox
-        get() = textField(byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"))
+        get() = textField(byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"), Duration.ofSeconds(60))
 
     // Action to find Settings tree view
     val projectViewTree
@@ -58,25 +70,37 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     val seedLabel
         get() = jLabel(byXpath("//div[@text='Seed(random if left empty) ']"))
 
+    // Action for seed text field
+    val seedTextField
+        get() = textField(byXpath("//div[@tooltiptext='Leave empty if you want random seed']"))
+
     // Action for configuration id label
     val configurationIdLabel
         get() = jLabel(byXpath("//div[@text='Select configuration id (null if left empty) ']"))
 
+    // Action for configuration id text field
+    val configurationIdField
+        get() = textField(byXpath("//div[@tooltiptext='Label that identifies the used configuration of EvoSuite. This is only done when running experiments.']"))
+
     // Action for Execute tests in a sandbox environment checkbox
     val executeTestsCheckbox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Execute tests in a sandbox environment']"))
+
+    // Action for Create assertions checkbox
+    val createAssertionsCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Create assertions']"))
 
     // Action for Debug mode checkbox
     val debugModeCheckbox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Debug mode']"))
 
     // Action for Minimize test suite after generation checkbox
     val minimiseTestSuiteCheckBox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Minimize test suite after generation']"))
 
     // Action for Flaky tests checkbox
     val flakyTestCheckBox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Line coverage']"))
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Flaky tests']"))
 
     // Action for separator of coverage
     val coverageSeparator
@@ -163,9 +187,31 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     }
 
     /**
+     * Method to press ok on settings.
+     * This will apply the changes and close settings.
+     */
+    fun okSettings() {
+        okSettingsAction.click()
+    }
+
+    /**
+     * Method to apply settings changes without closing the window.
+     */
+    fun applySettings() {
+        if (!applySettingsAction.isEnabled()) {
+            applySettingsAction.click()
+        }
+        // Wait for apply button to be available
+        waitFor(Duration.ofSeconds(10)) {
+            applySettingsAction.isEnabled()
+        }
+        applySettingsAction.click()
+    }
+
+    /**
      * Method to open the settings of IntelliJ.
      */
     fun closeSettings() {
-        closeSettingsAction.click()
+        cancelSettingsAction.click()
     }
 }
