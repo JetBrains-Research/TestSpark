@@ -27,6 +27,9 @@ class GenerateTestsActionClass : AnAction() {
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+        val fileName = vFile.presentableUrl
+        val modificationStamp = vFile.modificationStamp
 
         val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
         val classFQN = psiClass.qualifiedName ?: return
@@ -38,7 +41,7 @@ class GenerateTestsActionClass : AnAction() {
 
         log.info("Selected class is $classFQN")
 
-        Runner(project, projectPath, projectClassPath, classFQN).forClass().runEvoSuite()
+        Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp).forClass().runEvoSuite()
     }
 
     /**
