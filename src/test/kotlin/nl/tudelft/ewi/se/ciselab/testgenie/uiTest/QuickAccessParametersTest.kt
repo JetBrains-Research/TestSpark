@@ -1,6 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.fixtures.JLabelFixture
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.ToolWindowFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
@@ -15,7 +16,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.Duration
+import java.util.stream.Stream
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -62,16 +67,39 @@ class QuickAccessParametersTest {
     }
 
     @Order(2)
-    @Test
-    fun testLabelsAreCorrect(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        val labelTexts = listOf(
-            "Search budget type", "Search budget", "Initialization timeout",
-            "Minimisation timeout", "Assertion timeout", "JUnit check timeout",
-            "Population limit", "Population"
-        )
+    @ParameterizedTest
+    @MethodSource("valueGeneratorForLabelsAndTexts")
+    fun testLabelsAreCorrect(expectedText: String, label: JLabelFixture) {
         // Assert labels have the text
-        toolWindowFrame.getUIElementLabels().zip(labelTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
+        Assertions.assertThat(label.value).isEqualTo(expectedText)
     }
+
+    private fun valueGeneratorForLabelsAndTexts(): Stream<Arguments> = Stream.of(
+        Arguments.of(
+            "Search budget type", toolWindowFrame.searchBudgetTypeLabel
+        ),
+        Arguments.of(
+            "Search budget", toolWindowFrame.searchBudgetValueLabel
+        ),
+        Arguments.of(
+            "Initialization timeout", toolWindowFrame.initializationTimeoutLabel
+        ),
+        Arguments.of(
+            "Minimisation timeout", toolWindowFrame.minimisationTimeoutLabel
+        ),
+        Arguments.of(
+            "Assertion timeout", toolWindowFrame.assertionTimeoutLabel
+        ),
+        Arguments.of(
+            "JUnit check timeout", toolWindowFrame.jUnitCheckTimeoutLabel
+        ),
+        Arguments.of(
+            "Population limit", toolWindowFrame.populationLimitLabel
+        ),
+        Arguments.of(
+            "Population", toolWindowFrame.populationValueLabel
+        )
+    )
 
     @Order(3)
     @Test
