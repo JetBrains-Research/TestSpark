@@ -146,7 +146,7 @@ class Runner(
 
                         // treat this as a join handle
                         if (!handler.waitFor(evoSuiteProcessTimeout)) {
-                            log.error("EvoSuite process exceeded timeout - ${evoSuiteProcessTimeout}ms")
+                            evosuiteError("EvoSuite process exceeded timeout - ${evoSuiteProcessTimeout}ms")
                         }
 
                         if (handler.exitCode == 0) {
@@ -156,24 +156,33 @@ class Runner(
                                     .execute(ResultWatcher(project, testResultName))
                             }
                         } else {
-                            log.error("EvoSuite process exited with non-zero exit code - ${handler.exitCode}")
+                            evosuiteError("EvoSuite process exited with non-zero exit code - ${handler.exitCode}")
                         }
 
                         indicator.fraction = 1.0
                         indicator.stop()
                     } catch (e: Exception) {
-                        NotificationGroupManager.getInstance()
-                            .getNotificationGroup("EvoSuite Execution Error")
-                            .createNotification(
-                                TestGenieBundle.message("evosuiteErrorTitle"),
-                                TestGenieBundle.message("evosuiteErrorMessage").format(e.message),
-                                NotificationType.ERROR
-                            )
-                            .notify(project);
+                        evosuiteError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
                         e.printStackTrace()
                     }
                 }
             })
         return testResultName
+    }
+
+    /**
+     * Show an EvoSuite execution error balloon.
+     *
+     * @param msg the balloon content to display
+     */
+    private fun evosuiteError(msg: String) {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("EvoSuite Execution Error")
+            .createNotification(
+                TestGenieBundle.message("evosuiteErrorTitle"),
+                msg,
+                NotificationType.ERROR
+            )
+            .notify(project);
     }
 }
