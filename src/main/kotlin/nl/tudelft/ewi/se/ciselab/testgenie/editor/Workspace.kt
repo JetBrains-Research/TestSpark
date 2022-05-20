@@ -77,7 +77,7 @@ class Workspace(private val project: Project) {
     }
 
     fun lastTestGeneration(fileName: String): Pair<TestJobKey, CompactReport>? {
-        return testGenerationResults[fileName]?.first()
+        return testGenerationResults[fileName]?.last()
     }
 
     fun addPendingResult(id: String, jobKey: TestJobKey) {
