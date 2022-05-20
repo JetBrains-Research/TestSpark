@@ -4,9 +4,11 @@ import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.impl.LightTempDirTestFixtureImpl
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -80,4 +82,33 @@ class QuickAccessParametersStateTest {
             mutableListOf("-Dpopulation=128")
         )
     )
+
+    @Test
+    fun testDefaultStateNotAffected() {
+        state.stoppingCondition = StoppingCondition.TIMEDELTA
+        state.searchBudget = 123
+        state.initializationTimeout = 890
+        state.minimizationTimeout = 534
+        state.assertionTimeout = 231
+        state.junitCheckTimeout = 217
+        state.populationLimit = PopulationLimit.TESTS
+        state.population = 1
+
+        Assertions.assertThat(QuickAccessParametersState.DefaultState.stoppingCondition.name)
+            .isEqualTo(TestGenieDefaultsBundle.defaultValue("stoppingCondition"))
+        Assertions.assertThat(QuickAccessParametersState.DefaultState.searchBudget)
+            .isEqualTo(TestGenieDefaultsBundle.defaultValue("searchBudget").toInt())
+        Assertions.assertThat(QuickAccessParametersState.DefaultState.initializationTimeout)
+            .isEqualTo(TestGenieDefaultsBundle.defaultValue("initializationTimeout").toInt())
+        Assertions.assertThat(QuickAccessParametersState.DefaultState.minimizationTimeout)
+            .isEqualTo(TestGenieDefaultsBundle.defaultValue("minimizationTimeout").toInt())
+        Assertions.assertThat(QuickAccessParametersState.DefaultState.assertionTimeout)
+            .isEqualTo(TestGenieDefaultsBundle.defaultValue("assertionTimeout").toInt())
+        Assertions.assertThat(QuickAccessParametersState.DefaultState.junitCheckTimeout)
+            .isEqualTo(TestGenieDefaultsBundle.defaultValue("junitCheckTimeout").toInt())
+        Assertions.assertThat(QuickAccessParametersState.DefaultState.populationLimit.name)
+            .isEqualTo(TestGenieDefaultsBundle.defaultValue("populationLimit"))
+        Assertions.assertThat(QuickAccessParametersState.DefaultState.population)
+            .isEqualTo(TestGenieDefaultsBundle.defaultValue("population").toInt())
+    }
 }
