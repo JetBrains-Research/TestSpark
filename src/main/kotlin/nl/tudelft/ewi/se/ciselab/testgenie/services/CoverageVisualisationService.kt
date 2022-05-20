@@ -2,9 +2,9 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diff.DiffColors
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.markup.HighlighterLayer
-import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.Content
@@ -30,7 +30,7 @@ class CoverageVisualisationService(private val project: Project) {
      *
      * @param testReport the generated tests summary
      */
-    fun showCoverage(testReport: CompactReport) {
+    fun showCoverage(testReport: CompactReport, editor: Editor) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
         createToolWindowTab()
@@ -38,15 +38,18 @@ class CoverageVisualisationService(private val project: Project) {
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
         if (state.showCoverage) {
-            val editor = FileEditorManager.getInstance(project).selectedTextEditor!!
 
-            val color = Color(100, 150, 20)
+            val service = TestGenieSettingsService.getInstance().state
+            val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
+            val colorForLines = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
 
             editor.markupModel.removeAllHighlighters()
 
             for (i in testReport.allCoveredLines) {
                 val line = i - 1
-                val hl = editor.markupModel.addLineHighlighter(DiffColors.DIFF_INSERTED, line, HighlighterLayer.LAST)
+                val textat = TextAttributesKey.createTextAttributesKey("custom")
+                textat.defaultAttributes.backgroundColor = colorForLines
+                val hl = editor.markupModel.addLineHighlighter(textat, line, HighlighterLayer.LAST)
                 hl.lineMarkerRenderer = CoverageRenderer(
                     color,
                     line,
@@ -92,7 +95,7 @@ class CoverageVisualisationService(private val project: Project) {
         coverageToolWindowDisplayService.data[0] = testReport.UUT
         coverageToolWindowDisplayService.data[1] = "$relativeLines% ($coveredLines/$allLines)"
         coverageToolWindowDisplayService.data[2] = "$relativeBranch% ($coveredBranches/$allBranches)"
-        coverageToolWindowDisplayService.data[3] = "$relativeMutations% ($coveredMutations/ $allMutations)"
+        coverageToolWindowDisplayService.data[3] = "$relativeMutations% ($coveredMutations/$allMutations)"
     }
 
     /**
@@ -114,9 +117,5 @@ class CoverageVisualisationService(private val project: Project) {
             visualisationService.mainPanel, "Coverage Visualisation", true
         )
         contentManager.addContent(content!!)
-
-        // Focus on coverage tab and open toolWindow if not opened already
-        contentManager.setSelectedContent(content!!)
-        toolWindowManager.show()
     }
 }

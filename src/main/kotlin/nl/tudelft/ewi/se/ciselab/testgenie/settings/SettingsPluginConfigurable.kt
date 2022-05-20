@@ -4,11 +4,13 @@ import com.intellij.openapi.options.Configurable
 import javax.swing.JComponent
 
 /**
- * This class interacts with the other two Settings classes. It provides controller functionality for the settingsState.
+ * This class allows to configure some Plugin settings via the Plugin page in the Settings dialog, observes the changes and manages the UI and state
+ * It interacts with the SettingsPluginComponent, TestGenieSettingsService and TestGenieSettingsState.
+ * It provides controller functionality for the TestGenieSettingsState.
  */
 class SettingsPluginConfigurable : Configurable {
 
-    private var settingsComponent: SettingsPluginComponent? = null
+    var settingsComponent: SettingsPluginComponent? = null
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
@@ -26,6 +28,10 @@ class SettingsPluginConfigurable : Configurable {
     override fun reset() {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
         settingsComponent!!.showCoverage = settingsState.showCoverage
+        settingsComponent!!.javaPath = settingsState.javaPath
+        settingsComponent!!.colorRed = settingsState.colorRed
+        settingsComponent!!.colorGreen = settingsState.colorGreen
+        settingsComponent!!.colorBlue = settingsState.colorBlue
     }
 
     /**
@@ -35,7 +41,12 @@ class SettingsPluginConfigurable : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        return settingsComponent!!.showCoverage != settingsState.showCoverage
+        var modified: Boolean = settingsComponent!!.showCoverage != settingsState.showCoverage
+        modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
+        modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
+        modified = modified or (settingsComponent!!.colorGreen != settingsState.colorGreen)
+        modified = modified or (settingsComponent!!.colorBlue != settingsState.colorBlue)
+        return modified
     }
 
     /**
@@ -44,6 +55,10 @@ class SettingsPluginConfigurable : Configurable {
     override fun apply() {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
         settingsState.showCoverage = settingsComponent!!.showCoverage
+        settingsState.javaPath = settingsComponent!!.javaPath
+        settingsState.colorRed = settingsComponent!!.colorRed
+        settingsState.colorGreen = settingsComponent!!.colorGreen
+        settingsState.colorBlue = settingsComponent!!.colorBlue
     }
 
     /**
