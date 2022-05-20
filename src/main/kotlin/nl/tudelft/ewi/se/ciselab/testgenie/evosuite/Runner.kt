@@ -149,14 +149,15 @@ class Runner(
                             evosuiteError("EvoSuite process exceeded timeout - ${evoSuiteProcessTimeout}ms")
                         }
 
-                        if (handler.exitCode == 0) {
-                            // if process wasn't cancelled, start result watcher
-                            if (!indicator.isCanceled) {
+                        if (!indicator.isCanceled) {
+                            if (handler.exitCode == 0) {
+                                // if process wasn't cancelled, start result watcher
                                 AppExecutorUtil.getAppScheduledExecutorService()
                                     .execute(ResultWatcher(project, testResultName))
+
+                            } else {
+                                evosuiteError("EvoSuite process exited with non-zero exit code - ${handler.exitCode}")
                             }
-                        } else {
-                            evosuiteError("EvoSuite process exited with non-zero exit code - ${handler.exitCode}")
                         }
 
                         indicator.fraction = 1.0
