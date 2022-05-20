@@ -4,6 +4,8 @@ import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.JLabelFixture
 import com.intellij.remoterobot.fixtures.JListFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.BasicArrowButtonFixture
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.JSpinnerFixture
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.QuickAccessParametersFixtures
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
@@ -194,6 +196,50 @@ class QuickAccessParametersTest {
         Arguments.of("Tests"),
         Arguments.of("Statements"),
         Arguments.of("Individuals"),
+    )
+
+    // @Order(9)
+    @ParameterizedTest
+    @MethodSource("valueGeneratorForSpinners")
+    fun testSpinner(arrowUp: BasicArrowButtonFixture, arrowDown: BasicArrowButtonFixture, spinner: JSpinnerFixture, clicksUp: Int, clicksDown: Int) {
+        val oldValue = spinner.data.getAll()[0].text.toInt()
+
+        for (i in 1..clicksUp) {
+            arrowUp.click()
+        }
+        Assertions.assertThat(spinner.data.getAll()[0].text.toInt()).isEqualTo(oldValue + clicksUp)
+
+        for (i in 1..clicksDown) {
+            arrowDown.click()
+        }
+        Assertions.assertThat(spinner.data.getAll()[0].text.toInt()).isEqualTo(oldValue + clicksUp - clicksDown)
+    }
+
+    private fun valueGeneratorForSpinners(): Stream<Arguments> = Stream.of(
+        Arguments.of(
+            quickAccessParameters.searchBudgetValueUpArrow, quickAccessParameters.searchBudgetValueDownArrow,
+            quickAccessParameters.searchBudgetValueSpinner, 2, 4
+        ),
+        Arguments.of(
+            quickAccessParameters.initializationTimeoutUpArrow, quickAccessParameters.initializationTimeoutDownArrow,
+            quickAccessParameters.initializationTimeoutSpinner, 4, 2
+        ),
+        Arguments.of(
+            quickAccessParameters.minimisationTimeoutUpArrow, quickAccessParameters.minimisationTimeoutDownArrow,
+            quickAccessParameters.minimisationTimeoutSpinner, 3, 3
+        ),
+        Arguments.of(
+            quickAccessParameters.assertionTimeoutUpArrow, quickAccessParameters.assertionTimeoutDownArrow,
+            quickAccessParameters.assertionTimeoutSpinner, 1, 2
+        ),
+        Arguments.of(
+            quickAccessParameters.jUnitCheckTimeoutUpArrow, quickAccessParameters.jUnitCheckTimeoutDownArrow,
+            quickAccessParameters.jUnitCheckTimeoutSpinner, 2, 1
+        ),
+        Arguments.of(
+            quickAccessParameters.populationValueUpArrow, quickAccessParameters.populationValueDownArrow,
+            quickAccessParameters.populationValueSpinner, 3, 4
+        )
     )
 
     // TODO: spinner modifications
