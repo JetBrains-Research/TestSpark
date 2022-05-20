@@ -18,19 +18,32 @@ import org.evosuite.utils.CompactReport
 
 /**
  * Workspace state service
+ *
+ * Handles user workspace state and modifications of that state
+ * related to test generation.
+ *
  */
 class Workspace(private val project: Project) {
-    data class TestJobKey(val filename: String, var targetUnit: String, val modificationTS: Long, val jobId: String)
+    data class TestJobInfo(val filename: String, var targetUnit: String, val modificationTS: Long, val jobId: String)
 
     private val log = Logger.getInstance(this.javaClass)
 
-    private val testGenerationResults: HashMap<String, ArrayList<Pair<TestJobKey, CompactReport>>> = HashMap()
-    private var pendingTestResults: HashMap<String, TestJobKey> = HashMap()
+    /**
+     * Maps a workspace file to the test generation jobs that were triggered on it.
+     * Currently, the file key is represented by its presentableUrl
+     */
+    private val testGenerationResults: HashMap<String, ArrayList<Pair<TestJobInfo, CompactReport>>> = HashMap()
+
+    /**
+     * Maps a test generation job id to its corresponding test job information
+     */
+    private var pendingTestResults: HashMap<String, TestJobInfo> = HashMap()
 
     init {
         val connection = project.messageBus.connect()
 
-        // listen for editor editor switches
+        // Set event listener for changes to the VFS. The overridden event is
+        // triggered whenever the user switches their editor window selection inside the IDE
         connection.subscribe(
             FileEditorManagerListener.FILE_EDITOR_MANAGER,
             object : FileEditorManagerListener {
@@ -46,13 +59,14 @@ class Workspace(private val project: Project) {
                     if (lastTest.first.modificationTS == file.modificationStamp) {
                         // get editor for file
                         val editor = (event.newEditor as TextEditor).editor
-                        updateEditorCoverageDisplay(lastTest.second, editor)
+                        showCoverage(lastTest.second, editor)
                     }
                 }
             }
         )
 
-        // listen for document changes
+        // Set event listener for document changes. These are triggered whenever the user changes
+        // the contents of the editor.
         EditorFactory.getInstance().eventMulticaster.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 super.documentChanged(event)
@@ -66,7 +80,7 @@ class Workspace(private val project: Project) {
                 if (job.first.modificationTS == modTs) {
                     val editor = editorForVFile(file) ?: return
 
-                    updateEditorCoverageDisplay(job.second, editor)
+                    showCoverage(job.second, editor)
                 } else {
                     val editor = editorForVFile(file)
 
@@ -76,20 +90,29 @@ class Workspace(private val project: Project) {
         }) {}
     }
 
-    fun lastTestGeneration(fileName: String): Pair<TestJobKey, CompactReport>? {
+    fun lastTestGeneration(fileName: String): Pair<TestJobInfo, CompactReport>? {
         return testGenerationResults[fileName]?.last()
     }
 
-    fun addPendingResult(id: String, jobKey: TestJobKey) {
-        pendingTestResults[id] = jobKey
+    /**
+     * @param testResultName the test result job id, which is also its file name
+     */
+    fun addPendingResult(testResultName: String, jobKey: TestJobInfo) {
+        pendingTestResults[testResultName] = jobKey
     }
 
     fun cancelPendingResult(id: String) {
         pendingTestResults.remove(id)
     }
 
-    fun receiveGenerationResult(id: String, testReport: CompactReport) {
-        val jobKey = pendingTestResults.remove(id)!!
+    /**
+     * Updates the state after the action of publishing results.
+     *
+     * @param testResultName the test result job id which was received
+     * @param testReport the generated test suite
+     */
+    fun receiveGenerationResult(testResultName: String, testReport: CompactReport) {
+        val jobKey = pendingTestResults.remove(testResultName)!!
 
         val resultsForFile = testGenerationResults.getOrPut(jobKey.filename) { ArrayList() }
         resultsForFile.add(Pair(jobKey, testReport))
@@ -98,14 +121,17 @@ class Workspace(private val project: Project) {
 
         if (editor != null) {
             if (editor.document.modificationStamp == jobKey.modificationTS) {
-                updateEditorCoverageDisplay(testReport, editor)
+                showCoverage(testReport, editor)
             }
         } else {
             log.info("No editor opened for received test result")
         }
     }
 
-    // Returns the instance of the currently opened editor for a virtual file
+    /**
+     * Utility function that returns the editor for a specific file url,
+     * in case it is opened in the IDE
+     */
     private fun editorForFileUrl(fileUrl: String): Editor? {
         val documentManager = FileDocumentManager.getInstance()
         // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
@@ -120,7 +146,10 @@ class Workspace(private val project: Project) {
         return null
     }
 
-    // Returns the instance of the currently opened editor for a virtual file
+    /**
+     * Utility function that returns the editor for a specific VirtualFile
+     * in case it is opened in the IDE
+     */
     fun editorForVFile(file: VirtualFile): Editor? {
         val documentManager = FileDocumentManager.getInstance()
         FileEditorManager.getInstance(project).allEditors.map { it as TextEditor }.map { it.editor }.map {
@@ -134,7 +163,7 @@ class Workspace(private val project: Project) {
         return null
     }
 
-    private fun updateEditorCoverageDisplay(testReport: CompactReport, editor: Editor) {
+    private fun showCoverage(testReport: CompactReport, editor: Editor) {
         val visualizationService = project.service<CoverageVisualisationService>()
         visualizationService.showCoverage(testReport, editor)
     }
