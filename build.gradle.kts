@@ -50,7 +50,12 @@ dependencies {
     // https://mvnrepository.com/artifact/org.assertj/assertj-core
     testImplementation("org.assertj:assertj-core:3.22.0")
 
+    // https://mvnrepository.com/artifact/com.automation-remarks/video-recorder-junit5
     implementation("com.automation-remarks:video-recorder-junit5:2.0")
+
+    // https://mvnrepository.com/artifact/org.mockito/mockito-all
+    testImplementation("org.mockito:mockito-all:1.9.5")
+
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
