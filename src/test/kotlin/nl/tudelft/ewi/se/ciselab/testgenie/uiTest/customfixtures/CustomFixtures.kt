@@ -15,7 +15,9 @@ import java.time.Duration
 open class JSpinnerFixture(
     remoteRobot: RemoteRobot,
     remoteComponent: RemoteComponent
-) : ComponentFixture(remoteRobot, remoteComponent)
+) : ComponentFixture(remoteRobot, remoteComponent) {
+
+}
 
 fun ContainerFixture.jSpinner(locator: Locator): JSpinnerFixture {
     return find(locator, Duration.ofSeconds(60))
