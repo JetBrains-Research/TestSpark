@@ -5,7 +5,6 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.HighlighterLayer
-import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.Content
@@ -39,7 +38,6 @@ class CoverageVisualisationService(private val project: Project) {
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
         if (state.showCoverage) {
-            val editor = FileEditorManager.getInstance(project).selectedTextEditor!!
 
             val service = TestGenieSettingsService.getInstance().state
             val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
