@@ -4,7 +4,9 @@ import com.intellij.openapi.options.Configurable
 import javax.swing.JComponent
 
 /**
- * This class interacts with the other two Settings classes. It provides controller functionality for the settingsState.
+ * This class allows to configure some Plugin settings via the Plugin page in the Settings dialog, observes the changes and manages the UI and state
+ * It interacts with the SettingsPluginComponent, TestGenieSettingsService and TestGenieSettingsState.
+ * It provides controller functionality for the TestGenieSettingsState.
  */
 class SettingsPluginConfigurable : Configurable {
 
