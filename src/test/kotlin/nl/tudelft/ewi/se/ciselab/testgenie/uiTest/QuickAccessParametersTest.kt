@@ -3,7 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.JLabelFixture
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
-import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.ToolWindowFrame
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.QuickAccessParametersFixtures
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import org.assertj.core.api.Assertions
@@ -27,7 +27,7 @@ import java.util.stream.Stream
 @ExtendWith(RemoteRobotExtension::class)
 class QuickAccessParametersTest {
     // Open the tool window frame
-    private lateinit var toolWindowFrame: ToolWindowFrame
+    private lateinit var quickAccessParameters: QuickAccessParametersFixtures
 
     /**
      * Opens an untitled project from the IntelliJ welcome screen.
@@ -49,21 +49,21 @@ class QuickAccessParametersTest {
     @BeforeEach
     fun setUp(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Open the tool window frame
-        toolWindowFrame = find(ToolWindowFrame::class.java, timeout = Duration.ofSeconds(15))
+        quickAccessParameters = find(QuickAccessParametersFixtures::class.java, timeout = Duration.ofSeconds(15))
         // Open the "Quick Access Parameters" tab
-        toolWindowFrame.openQuickAccessParametersTab()
+        quickAccessParameters.openQuickAccessParametersTab()
     }
 
     @Order(1)
     @Test
     fun testEverythingIsVisible(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Assert text is visible
-        toolWindowFrame.getTitles().forEach { Assertions.assertThat(it.isVisible()) }
-        toolWindowFrame.getUIElementLabels().forEach { Assertions.assertThat(it.isVisible()) }
+        quickAccessParameters.getTitles().forEach { Assertions.assertThat(it.isVisible()) }
+        quickAccessParameters.getUIElementLabels().forEach { Assertions.assertThat(it.isVisible()) }
 
         // Assert buttons are visible
-        Assertions.assertThat(toolWindowFrame.advancedSettingsButton.isShowing).isTrue
-        toolWindowFrame.getButtons().forEach { Assertions.assertThat(it.isShowing) }
+        Assertions.assertThat(quickAccessParameters.advancedSettingsButton.isShowing).isTrue
+        quickAccessParameters.getButtons().forEach { Assertions.assertThat(it.isShowing) }
     }
 
     @Order(2)
@@ -76,28 +76,28 @@ class QuickAccessParametersTest {
 
     private fun valueGeneratorForLabelsAndTexts(): Stream<Arguments> = Stream.of(
         Arguments.of(
-            "Search budget type", toolWindowFrame.searchBudgetTypeLabel
+            "Search budget type", quickAccessParameters.searchBudgetTypeLabel
         ),
         Arguments.of(
-            "Search budget", toolWindowFrame.searchBudgetValueLabel
+            "Search budget", quickAccessParameters.searchBudgetValueLabel
         ),
         Arguments.of(
-            "Initialization timeout", toolWindowFrame.initializationTimeoutLabel
+            "Initialization timeout", quickAccessParameters.initializationTimeoutLabel
         ),
         Arguments.of(
-            "Minimisation timeout", toolWindowFrame.minimisationTimeoutLabel
+            "Minimisation timeout", quickAccessParameters.minimisationTimeoutLabel
         ),
         Arguments.of(
-            "Assertion timeout", toolWindowFrame.assertionTimeoutLabel
+            "Assertion timeout", quickAccessParameters.assertionTimeoutLabel
         ),
         Arguments.of(
-            "JUnit check timeout", toolWindowFrame.jUnitCheckTimeoutLabel
+            "JUnit check timeout", quickAccessParameters.jUnitCheckTimeoutLabel
         ),
         Arguments.of(
-            "Population limit", toolWindowFrame.populationLimitLabel
+            "Population limit", quickAccessParameters.populationLimitLabel
         ),
         Arguments.of(
-            "Population", toolWindowFrame.populationValueLabel
+            "Population", quickAccessParameters.populationValueLabel
         )
     )
 
@@ -111,16 +111,16 @@ class QuickAccessParametersTest {
 
     private fun valueGeneratorForTitlesAndTexts(): Stream<Arguments> = Stream.of(
         Arguments.of(
-            "Quick Access Parameters", toolWindowFrame.title
+            "Quick Access Parameters", quickAccessParameters.title
         ),
         Arguments.of(
-            "Search budget", toolWindowFrame.searchBudgetSeparator
+            "Search budget", quickAccessParameters.searchBudgetSeparator
         ),
         Arguments.of(
-            "Timeouts", toolWindowFrame.timeoutsSeparator
+            "Timeouts", quickAccessParameters.timeoutsSeparator
         ),
         Arguments.of(
-            "Genetic Algorithm", toolWindowFrame.geneticAlgorithmSeparator
+            "Genetic Algorithm", quickAccessParameters.geneticAlgorithmSeparator
         )
     )
 
@@ -131,7 +131,7 @@ class QuickAccessParametersTest {
         val tooltipTexts = listOf(
             "Default: Max time", "Default: 120 seconds", "Default: Individuals"
         )
-        toolWindowFrame.getDefaultTooltips().zip(tooltipTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
+        quickAccessParameters.getDefaultTooltips().zip(tooltipTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
     }
 
     // TODO: spinners + modifications
