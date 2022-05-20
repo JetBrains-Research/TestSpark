@@ -26,7 +26,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
         get() = actionLink(byXpath("//div[@class='DumbUnawareHider']"))
 
     // The title "Quick Access Parameters"
-    private val title
+    val title
         get() = jLabel(byXpath("//div[@javaclass='javax.swing.JLabel']"))
 
     /**
@@ -34,7 +34,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      */
 
     // The search budget separator line
-    private val searchBudgetSeparator
+    val searchBudgetSeparator
         get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JLabel' and @text='Search budget']"))
 
     /**
@@ -42,7 +42,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      */
 
     // The search budget type text
-    private val searchBudgetTypeLabel
+    val searchBudgetTypeLabel
         get() = jLabel(byXpath("//div[@text='Search budget type']"))
 
     // The search budget type combo-box
@@ -50,14 +50,14 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
 //        get() = ...(byXpath(""))
 
     // The text with the default value for the search budget type
-    private val searchBudgetTypeDefaultTooltip
+    val searchBudgetTypeDefaultTooltip
         get() = jLabel(byXpath("//div[@text='Default: Max time']"))
 
     /**
      * Search budget (value)
      */
     // The search budget value text
-    private val searchBudgetValueLabel
+    val searchBudgetValueLabel
         get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JBLabel' and @text='Search budget']"))
 
     // The search budget value spinner
@@ -73,7 +73,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      */
 
     // The timeouts' separator line
-    private val timeoutsSeparator
+    val timeoutsSeparator
         get() = jLabel(byXpath("//div[@text='Timeouts']"))
 
     /**
@@ -81,7 +81,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      */
 
     // The initialization timeout text
-    private val initializationTimeoutLabel
+    val initializationTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Initialization timeout']"))
 
     // The initialization timeout spinner   TODO: find itTODO: find it
@@ -89,7 +89,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
 //        get() = ...(byXpath(""))
 
     // The text with the default value for the initialization timeout
-    private val initializationTimeoutDefaultTooltip
+    val initializationTimeoutDefaultTooltip
         get() = jLabel(byXpath("//div[@text='Default: 120 seconds']"))
 
     /**
@@ -97,7 +97,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      */
 
     // The minimisation timeout text
-    private val minimisationTimeoutLabel
+    val minimisationTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Minimisation timeout']"))
 
     // The minimisation timeout spinner TODO: find it
@@ -113,7 +113,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      */
 
     // The assertion timeout text
-    private val assertionTimeoutLabel
+    val assertionTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Assertion timeout']"))
 
     // The assertion timeout spinner TODO: find it
@@ -129,7 +129,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      */
 
     // The JUnit check timeout text
-    private val jUnitCheckTimeoutLabel
+    val jUnitCheckTimeoutLabel
         get() = jLabel(byXpath("//div[@text='JUnit check timeout']"))
 
     // The JUnit check timeout spinner TODO: find it
@@ -144,7 +144,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      * GENETIC ALGORITHM SECTION
      */
     // The genetic algorithm separator line
-    private val geneticAlgorithmSeparator
+    val geneticAlgorithmSeparator
         get() = jLabel(byXpath("//div[@text='Genetic Algorithm']"))
 
     /**
@@ -152,7 +152,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      */
 
     // The population limit text
-    private val populationLimitLabel
+    val populationLimitLabel
         get() = jLabel(byXpath("//div[@text='Population limit']"))
 
     // The population limit combo-box TODO: find it
@@ -160,7 +160,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
 //        get() = ...(byXpath(""))
 
     // The text with the default value for the population limit TODO: find it
-    private val populationLimitDefaultTooltip
+    val populationLimitDefaultTooltip
         get() = jLabel(byXpath("//div[@text='Default: Individuals']"))
 
     /**
@@ -168,7 +168,7 @@ class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent
      */
 
     // The population value text
-    private val populationValueLabel
+    val populationValueLabel
         get() = jLabel(byXpath("//div[@text='Population']"))
 
     // The population value spinner TODO: find it
