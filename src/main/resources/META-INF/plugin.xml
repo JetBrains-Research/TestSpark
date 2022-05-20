@@ -14,6 +14,7 @@
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageToolWindowDisplayService"/>
+        <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace"/>
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
@@ -32,6 +33,9 @@
                 instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsEvoSuiteConfigurable"
                 id="TestGenieSettings.evosuite"
                 displayName="EvoSuite"/>
+
+        <notificationGroup id="EvoSuite Execution Error"
+                           displayType="BALLOON"/>
     </extensions>
 
     <projectListeners>

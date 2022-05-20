@@ -1,10 +1,13 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
+
 /**
  * This class is the actual data class that stores the values of the Settings entries.
  */
 data class TestGenieSettingsState(
     var showCoverage: Boolean = false,
+    var javaPath: String = DefaultSettingsState.javaPath,
 
     var sandbox: Boolean = true,
     var assertions: Boolean = true,
@@ -32,6 +35,8 @@ data class TestGenieSettingsState(
         const val junitCheck: Boolean = false
         const val minimize: Boolean = true
         val algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.DYNAMOSA
+
+        val javaPath: String = TestGenieDefaultsBundle.defaultValue("javaPath")
     }
 
     fun serializeChangesFromDefault(): List<String> {

@@ -12,7 +12,9 @@ import com.intellij.psi.PsiFile
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
- * This class generates tests for a class.
+ * This class contains all the logic related to generating tests for a class.
+ * No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available,
+ *   getting the information about the selected class and passing it to (EvoSuite) Runner.
  */
 class GenerateTestsActionClass : AnAction() {
     private val log = Logger.getInstance(this.javaClass)
@@ -27,6 +29,9 @@ class GenerateTestsActionClass : AnAction() {
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+        val fileName = vFile.presentableUrl
+        val modificationStamp = vFile.modificationStamp
 
         val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
         val classFQN = psiClass.qualifiedName ?: return
@@ -38,7 +43,7 @@ class GenerateTestsActionClass : AnAction() {
 
         log.info("Selected class is $classFQN")
 
-        Runner(project, projectPath, projectClassPath, classFQN).forClass().runEvoSuite()
+        Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp).forClass().runEvoSuite()
     }
 
     /**

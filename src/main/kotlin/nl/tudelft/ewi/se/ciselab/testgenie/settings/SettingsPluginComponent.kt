@@ -10,6 +10,7 @@ import javax.swing.JColorChooser
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JTextField
 
 /**
  * This class displays and captures changes to the values of the Settings entries.
@@ -26,6 +27,9 @@ class SettingsPluginComponent {
 
     // Checkbox options
     private var showCoverageCheckBox = JCheckBox("Show visualised coverage")
+
+    // Environment options (Java path)
+    private var javaPathTextField = JTextField()
 
     // Accessibility options
     private val accessibilitySeparator = JXTitledSeparator("Accessibility settings")
@@ -48,6 +52,8 @@ class SettingsPluginComponent {
             .addComponent(pluginDiscription)
             // Add visual coverage checkbox
             .addComponent(showCoverageCheckBox, 10)
+            .addComponent(JXTitledSeparator("Environment settings"), 15)
+            .addLabeledComponent(JBLabel("Java 11 path:"), javaPathTextField, 10, false)
             // Add accessibility options
             .addComponent(accessibilitySeparator)
             .addComponent(JBLabel("Choose color for visualisation highlight"))
@@ -95,6 +101,12 @@ class SettingsPluginComponent {
         get() = showCoverageCheckBox.isSelected
         set(newStatus) {
             showCoverageCheckBox.isSelected = newStatus
+        }
+
+    var javaPath: String
+        get() = javaPathTextField.text
+        set(newConfig) {
+            javaPathTextField.text = newConfig
         }
 
     var colorRed: Int

@@ -1,56 +1,57 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.toolwindow
 
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
+
 /**
- * This class is responsible for persisting the values of the parameters in the Quick Access (tool window),
- *   which are also present in the settings menu.
+ * This class is responsible for persisting the values of the parameters in the "Parameters" tool window tab.
  */
-data class TestGenieToolWindowState
-constructor(
-    var stoppingCondition: StoppingCondition = StoppingCondition.MAXTIME,
-    var searchBudget: Int = 60,
-    var initializationTimeout: Int = 120,
-    var minimizationTimeout: Int = 60,
-    var assertionTimeout: Int = 60,
-    var junitCheckTimeout: Int = 60,
-    var populationLimit: PopulationLimit = PopulationLimit.INDIVIDUALS,
-    var population: Int = 50
+data class QuickAccessParametersState(
+    var stoppingCondition: StoppingCondition = DefaultState.stoppingCondition,
+    var searchBudget: Int = DefaultState.searchBudget,
+    var initializationTimeout: Int = DefaultState.initializationTimeout,
+    var minimizationTimeout: Int = DefaultState.minimizationTimeout,
+    var assertionTimeout: Int = DefaultState.assertionTimeout,
+    var junitCheckTimeout: Int = DefaultState.junitCheckTimeout,
+    var populationLimit: PopulationLimit = DefaultState.populationLimit,
+    var population: Int = DefaultState.population
 ) {
-    private object DefaultToolWindowState {
-        val stoppingCondition: StoppingCondition = StoppingCondition.MAXTIME
-        const val searchBudget: Int = 60
-        const val initializationTimeout: Int = 120
-        const val minimizationTimeout: Int = 60
-        const val assertionTimeout: Int = 60
-        const val junitCheckTimeout: Int = 60
-        val populationLimit: PopulationLimit = PopulationLimit.INDIVIDUALS
-        const val population: Int = 50
+
+    object DefaultState {
+        val stoppingCondition: StoppingCondition = StoppingCondition.valueOf(TestGenieDefaultsBundle.defaultValue("stoppingCondition"))
+        val searchBudget: Int = TestGenieDefaultsBundle.defaultValue("searchBudget").toInt()
+        val initializationTimeout: Int = TestGenieDefaultsBundle.defaultValue("initializationTimeout").toInt()
+        val minimizationTimeout: Int = TestGenieDefaultsBundle.defaultValue("minimizationTimeout").toInt()
+        val assertionTimeout: Int = TestGenieDefaultsBundle.defaultValue("assertionTimeout").toInt()
+        val junitCheckTimeout: Int = TestGenieDefaultsBundle.defaultValue("junitCheckTimeout").toInt()
+        val populationLimit: PopulationLimit = PopulationLimit.valueOf(TestGenieDefaultsBundle.defaultValue("populationLimit"))
+        val population: Int = TestGenieDefaultsBundle.defaultValue("population").toInt()
     }
 
     fun serializeChangesFromDefault(): List<String> {
 
         val params = mutableListOf<String>()
-        if (this.stoppingCondition != DefaultToolWindowState.stoppingCondition) {
+        if (this.stoppingCondition != DefaultState.stoppingCondition) {
             params.add("-Dstopping_condition=${this.stoppingCondition.name}")
         }
-        if (this.searchBudget != DefaultToolWindowState.searchBudget) {
+        if (this.searchBudget != DefaultState.searchBudget) {
             params.add("-Dsearch_budget=${this.searchBudget}")
         }
-        if (this.initializationTimeout != DefaultToolWindowState.initializationTimeout) {
+        if (this.initializationTimeout != DefaultState.initializationTimeout) {
             params.add("-Dinitialization_timeout=${this.initializationTimeout}")
         }
-        if (this.minimizationTimeout != DefaultToolWindowState.minimizationTimeout) {
+        if (this.minimizationTimeout != DefaultState.minimizationTimeout) {
             params.add("-Dminimization_timeout=${this.minimizationTimeout}")
         }
-        if (this.assertionTimeout != DefaultToolWindowState.assertionTimeout) {
+        if (this.assertionTimeout != DefaultState.assertionTimeout) {
             params.add("-Dassertion_timeout=${this.assertionTimeout}")
         }
-        if (this.junitCheckTimeout != DefaultToolWindowState.junitCheckTimeout) {
+        if (this.junitCheckTimeout != DefaultState.junitCheckTimeout) {
             params.add("-Djunit_check_timeout=${this.junitCheckTimeout}")
         }
-        if (this.populationLimit != DefaultToolWindowState.populationLimit) {
+        if (this.populationLimit != DefaultState.populationLimit) {
             params.add("-Dpopulation_limit=${this.populationLimit.name}")
         }
-        if (this.population != DefaultToolWindowState.population) {
+        if (this.population != DefaultState.population) {
             params.add("-Dpopulation=${this.population}")
         }
         return params

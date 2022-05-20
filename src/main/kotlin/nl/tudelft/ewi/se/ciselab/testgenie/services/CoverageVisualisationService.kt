@@ -3,6 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
@@ -30,7 +31,7 @@ class CoverageVisualisationService(private val project: Project) {
      *
      * @param testReport the generated tests summary
      */
-    fun showCoverage(testReport: CompactReport) {
+    fun showCoverage(testReport: CompactReport, editor: Editor) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
         createToolWindowTab()
@@ -115,9 +116,5 @@ class CoverageVisualisationService(private val project: Project) {
             visualisationService.mainPanel, "Coverage Visualisation", true
         )
         contentManager.addContent(content!!)
-
-        // Focus on coverage tab and open toolWindow if not opened already
-        contentManager.setSelectedContent(content!!)
-        toolWindowManager.show()
     }
 }
