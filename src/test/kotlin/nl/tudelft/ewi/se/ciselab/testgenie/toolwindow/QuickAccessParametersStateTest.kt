@@ -5,7 +5,7 @@ import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.impl.LightTempDirTestFixtureImpl
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,7 +39,7 @@ class QuickAccessParametersStateTest {
     @MethodSource("valueGenerator")
     fun testSerialise(updateValue: () -> Unit, expected: MutableList<String>) {
         updateValue()
-        Assertions.assertThat(expected).isEqualTo(state.serializeChangesFromDefault())
+        assertThat(expected).isEqualTo(state.serializeChangesFromDefault())
     }
 
     /**
@@ -96,40 +96,40 @@ class QuickAccessParametersStateTest {
 
         val state = QuickAccessParametersState.DefaultState
 
-        Assertions.assertThat(state.stoppingCondition.name).isEqualTo(TestGenieDefaultsBundle.defaultValue("stoppingCondition"))
-        Assertions.assertThat(state.searchBudget).isEqualTo(TestGenieDefaultsBundle.defaultValue("searchBudget").toInt())
-        Assertions.assertThat(state.initializationTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("initializationTimeout").toInt())
-        Assertions.assertThat(state.minimizationTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("minimizationTimeout").toInt())
-        Assertions.assertThat(state.assertionTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("assertionTimeout").toInt())
-        Assertions.assertThat(state.junitCheckTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("junitCheckTimeout").toInt())
-        Assertions.assertThat(state.populationLimit.name).isEqualTo(TestGenieDefaultsBundle.defaultValue("populationLimit"))
-        Assertions.assertThat(state.population).isEqualTo(TestGenieDefaultsBundle.defaultValue("population").toInt())
+        assertThat(state.stoppingCondition.name).isEqualTo(TestGenieDefaultsBundle.defaultValue("stoppingCondition"))
+        assertThat(state.searchBudget).isEqualTo(TestGenieDefaultsBundle.defaultValue("searchBudget").toInt())
+        assertThat(state.initializationTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("initializationTimeout").toInt())
+        assertThat(state.minimizationTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("minimizationTimeout").toInt())
+        assertThat(state.assertionTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("assertionTimeout").toInt())
+        assertThat(state.junitCheckTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("junitCheckTimeout").toInt())
+        assertThat(state.populationLimit.name).isEqualTo(TestGenieDefaultsBundle.defaultValue("populationLimit"))
+        assertThat(state.population).isEqualTo(TestGenieDefaultsBundle.defaultValue("population").toInt())
     }
 
     @Test
     fun testStoppingConditionToString() {
-        Assertions.assertThat(StoppingCondition.MAXTIME.toString()).isEqualTo("Max time")
-        Assertions.assertThat(StoppingCondition.MAXSTATEMENTS.toString()).isEqualTo("Max statements")
-        Assertions.assertThat(StoppingCondition.MAXTESTS.toString()).isEqualTo("Max tests")
-        Assertions.assertThat(StoppingCondition.MAXGENERATIONS.toString()).isEqualTo("Max generations")
-        Assertions.assertThat(StoppingCondition.MAXFITNESSEVALUATIONS.toString()).isEqualTo("Max fitness evaluations")
-        Assertions.assertThat(StoppingCondition.TIMEDELTA.toString()).isEqualTo("Time delta")
+        assertThat(StoppingCondition.MAXTIME.toString()).isEqualTo("Max time")
+        assertThat(StoppingCondition.MAXSTATEMENTS.toString()).isEqualTo("Max statements")
+        assertThat(StoppingCondition.MAXTESTS.toString()).isEqualTo("Max tests")
+        assertThat(StoppingCondition.MAXGENERATIONS.toString()).isEqualTo("Max generations")
+        assertThat(StoppingCondition.MAXFITNESSEVALUATIONS.toString()).isEqualTo("Max fitness evaluations")
+        assertThat(StoppingCondition.TIMEDELTA.toString()).isEqualTo("Time delta")
     }
 
     @Test
     fun testStoppingConditionUnits() {
-        Assertions.assertThat(StoppingCondition.MAXTIME.units()).isEqualTo("seconds")
-        Assertions.assertThat(StoppingCondition.MAXSTATEMENTS.units()).isEqualTo("statements")
-        Assertions.assertThat(StoppingCondition.MAXTESTS.units()).isEqualTo("tests")
-        Assertions.assertThat(StoppingCondition.MAXGENERATIONS.units()).isEqualTo("generations")
-        Assertions.assertThat(StoppingCondition.MAXFITNESSEVALUATIONS.units()).isEqualTo("evaluations")
-        Assertions.assertThat(StoppingCondition.TIMEDELTA.units()).isEqualTo("")
+        assertThat(StoppingCondition.MAXTIME.units()).isEqualTo("seconds")
+        assertThat(StoppingCondition.MAXSTATEMENTS.units()).isEqualTo("statements")
+        assertThat(StoppingCondition.MAXTESTS.units()).isEqualTo("tests")
+        assertThat(StoppingCondition.MAXGENERATIONS.units()).isEqualTo("generations")
+        assertThat(StoppingCondition.MAXFITNESSEVALUATIONS.units()).isEqualTo("evaluations")
+        assertThat(StoppingCondition.TIMEDELTA.units()).isEqualTo("")
     }
 
     @Test
     fun testPopulationLimitToString() {
-        Assertions.assertThat(PopulationLimit.INDIVIDUALS.toString()).isEqualTo("Individuals")
-        Assertions.assertThat(PopulationLimit.TESTS.toString()).isEqualTo("Tests")
-        Assertions.assertThat(PopulationLimit.STATEMENTS.toString()).isEqualTo("Statements")
+        assertThat(PopulationLimit.INDIVIDUALS.toString()).isEqualTo("Individuals")
+        assertThat(PopulationLimit.TESTS.toString()).isEqualTo("Tests")
+        assertThat(PopulationLimit.STATEMENTS.toString()).isEqualTo("Statements")
     }
 }
