@@ -92,7 +92,7 @@ class CoverageVisualisationService(private val project: Project) {
         coverageToolWindowDisplayService.data[0] = testReport.UUT
         coverageToolWindowDisplayService.data[1] = "$relativeLines% ($coveredLines/$allLines)"
         coverageToolWindowDisplayService.data[2] = "$relativeBranch% ($coveredBranches/$allBranches)"
-        coverageToolWindowDisplayService.data[3] = "$relativeMutations% ($coveredMutations/ $allMutations)"
+        coverageToolWindowDisplayService.data[3] = "$relativeMutations% ($coveredMutations/$allMutations)"
     }
 
     /**

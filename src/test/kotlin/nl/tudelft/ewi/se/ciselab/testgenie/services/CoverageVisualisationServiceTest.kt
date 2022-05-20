@@ -52,5 +52,12 @@ class CoverageVisualisationServiceTest {
             .registerToolWindow(RegisterToolWindowTask("TestGenie", ToolWindowAnchor.RIGHT))
     }
 
-    
+    @Test
+    fun fillToolWindowContents() {
+        coverageVisualisationService.showCoverage(compactReport)
+        assertThat(coverageToolWindowDisplayService.data[0]).isEqualTo("MyClass")
+        assertThat(coverageToolWindowDisplayService.data[1]).isEqualTo("57% (4/7)")
+        assertThat(coverageToolWindowDisplayService.data[2]).isEqualTo("50% (1/2)")
+        assertThat(coverageToolWindowDisplayService.data[3]).isEqualTo("100% (1/1)")
+    }
 }
