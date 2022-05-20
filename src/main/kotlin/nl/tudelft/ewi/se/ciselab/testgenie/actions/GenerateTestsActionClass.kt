@@ -12,7 +12,9 @@ import com.intellij.psi.PsiFile
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
- * This class generates tests for a class.
+ * This class contains all the logic related to generating tests for a class.
+ * No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available,
+ *   getting the information about the selected class and passing it to (EvoSuite) Runner.
  */
 class GenerateTestsActionClass : AnAction() {
     private val log = Logger.getInstance(this.javaClass)

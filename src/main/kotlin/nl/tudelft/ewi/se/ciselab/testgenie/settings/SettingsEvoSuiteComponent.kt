@@ -88,6 +88,7 @@ class SettingsEvoSuiteComponent {
         algorithmSelector.setMinimumAndPreferredWidth(300)
 
         // Tooltips
+        seedTextField.toolTipText = "Leave empty if you want random seed"
         configurationIdTextField.toolTipText = "Label that identifies the used configuration of EvoSuite. This is only done when running experiments."
         clientOnThreadCheckBox.toolTipText = "Run client process on same JVM of master in separate thread. To be used only for debugging purposes"
         junitCheckCheckBox.toolTipText = "Compile and run resulting JUnit test suite (if any was created)"
