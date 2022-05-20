@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindowAnchor
@@ -33,6 +34,7 @@ class CoverageVisualisationServiceTest {
     private lateinit var fixture: CodeInsightTestFixture
     private lateinit var coverageVisualisationService: CoverageVisualisationService
     private lateinit var project: Project
+    private val editor = Mockito.mock(Editor::class.java)
     private lateinit var coverageToolWindowDisplayService: CoverageToolWindowDisplayService
 
     private val branch1 = Mockito.mock(BranchInfo::class.java)
@@ -96,7 +98,7 @@ class CoverageVisualisationServiceTest {
         compactReport.allCoveredMutation = coveredMutationSet
         compactReport.allUncoveredMutation = uncoveredMutationSet
 
-        coverageVisualisationService.showCoverage(compactReport)
+        coverageVisualisationService.showCoverage(compactReport, editor)
         assertThat(className).isEqualTo(coverageToolWindowDisplayService.data[0])
         assertThat(lineCoverage).isEqualTo(coverageToolWindowDisplayService.data[1])
         assertThat(branchCoverage).isEqualTo(coverageToolWindowDisplayService.data[2])
@@ -105,7 +107,7 @@ class CoverageVisualisationServiceTest {
 
     @Test
     fun createToolWindowTabTestSingleContent() {
-        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()))
+        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()), editor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
 
         // Verify only 1 content is created
@@ -114,7 +116,7 @@ class CoverageVisualisationServiceTest {
 
     @Test
     fun createToolWindowTabTestContent() {
-        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()))
+        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()), editor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
         val content = toolWindow.contentManager.getContent(0)!!
         assertThat(content.displayName).isEqualTo("Coverage Visualisation")
