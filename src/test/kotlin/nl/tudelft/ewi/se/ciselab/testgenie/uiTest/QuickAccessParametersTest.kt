@@ -10,7 +10,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.QuickAccessParametersFixtures
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -45,7 +45,7 @@ class QuickAccessParametersTest {
         find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             open("untitled")
         }
-        Thread.sleep(10)
+        Thread.sleep(10000)
         // Open the TestGenie tool window
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             clickOnToolWindow()
@@ -57,20 +57,21 @@ class QuickAccessParametersTest {
         remoteRobot = _remoteRobot
         // Open the tool window frame
         quickAccessParameters = find(QuickAccessParametersFixtures::class.java, timeout = Duration.ofSeconds(15))
-        // Open the "Quick Access Parameters" tab
-        quickAccessParameters.openQuickAccessParametersTab()
     }
 
     @Order(1)
     @Test
     fun testEverythingIsVisible() {
+        // Open the "Quick Access Parameters" tab
+        quickAccessParameters.openQuickAccessParametersTab()
+
         // Assert text is visible
-        quickAccessParameters.getTitles().forEach { Assertions.assertThat(it.isVisible()) }
-        quickAccessParameters.getUIElementLabels().forEach { Assertions.assertThat(it.isVisible()) }
+        quickAccessParameters.getTitles().forEach { assertThat(it.isVisible()) }
+        quickAccessParameters.getUIElementLabels().forEach { assertThat(it.isVisible()) }
 
         // Assert buttons are visible
-        Assertions.assertThat(quickAccessParameters.advancedSettingsButton.isShowing).isTrue
-        quickAccessParameters.getButtons().forEach { Assertions.assertThat(it.isShowing) }
+        assertThat(quickAccessParameters.advancedSettingsButton.isShowing).isTrue
+        quickAccessParameters.getButtons().forEach { assertThat(it.isShowing) }
     }
 
     @Order(2)
@@ -78,7 +79,7 @@ class QuickAccessParametersTest {
     @MethodSource("valueGeneratorForLabelsAndTexts")
     fun testLabelsAreCorrect(expectedText: String, label: JLabelFixture) {
         // Assert labels have the correct text
-        Assertions.assertThat(label.value).isEqualTo(expectedText)
+        assertThat(label.value).isEqualTo(expectedText)
     }
 
     private fun valueGeneratorForLabelsAndTexts(): Stream<Arguments> = Stream.of(
@@ -113,7 +114,7 @@ class QuickAccessParametersTest {
     @MethodSource("valueGeneratorForTitlesAndTexts")
     fun testTitlesAreCorrect(expectedText: String, title: JLabelFixture) {
         // Assert labels have the text
-        Assertions.assertThat(title.value).isEqualTo(expectedText)
+        assertThat(title.value).isEqualTo(expectedText)
     }
 
     private fun valueGeneratorForTitlesAndTexts(): Stream<Arguments> = Stream.of(
@@ -136,7 +137,7 @@ class QuickAccessParametersTest {
     @MethodSource("valueGeneratorForDefaultTooltipsAndTexts")
     fun testToolTipsOnUIElementLabels(expectedText: String, tooltipLabel: JLabelFixture) {
         // TODO: add other default tooltips
-        Assertions.assertThat(tooltipLabel.value).isEqualTo(expectedText)
+        assertThat(tooltipLabel.value).isEqualTo(expectedText)
     }
 
     private fun valueGeneratorForDefaultTooltipsAndTexts(): Stream<Arguments> = Stream.of(
@@ -160,7 +161,7 @@ class QuickAccessParametersTest {
     @Order(6)
     @Test
     fun testSpinnersAreVisible() {
-        quickAccessParameters.getJSpinners().forEach { Assertions.assertThat(it.isShowing) }
+        quickAccessParameters.getJSpinners().forEach { assertThat(it.isShowing) }
     }
 
     @Order(7)
@@ -170,7 +171,7 @@ class QuickAccessParametersTest {
         quickAccessParameters.searchBudgetTypeArrow.click()
         val choices: JListFixture = find(byXpath("//div[@class='JList']"), Duration.ofSeconds(15))
         choices.clickItem(choice)
-        Assertions.assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(choice))
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(choice))
     }
 
     private fun valueGeneratorForSearchBudgetTypeComboBoxChoices(): Stream<Arguments> = Stream.of(
@@ -189,7 +190,7 @@ class QuickAccessParametersTest {
         quickAccessParameters.populationLimitArrow.click()
         val choices: JListFixture = find(byXpath("//div[@class='JList']"), Duration.ofSeconds(15))
         choices.clickItem(choice)
-        Assertions.assertThat(quickAccessParameters.populationLimitComboBox.hasText(choice))
+        assertThat(quickAccessParameters.populationLimitComboBox.hasText(choice))
     }
 
     private fun valueGeneratorForPopulationLimitComboBoxChoices(): Stream<Arguments> = Stream.of(
@@ -198,7 +199,7 @@ class QuickAccessParametersTest {
         Arguments.of("Individuals"),
     )
 
-    // @Order(9)
+    @Order(9)
     @ParameterizedTest
     @MethodSource("valueGeneratorForSpinners")
     fun testSpinner(arrowUp: BasicArrowButtonFixture, arrowDown: BasicArrowButtonFixture, spinner: JSpinnerFixture, clicksUp: Int, clicksDown: Int) {
@@ -207,12 +208,12 @@ class QuickAccessParametersTest {
         for (i in 1..clicksUp) {
             arrowUp.click()
         }
-        Assertions.assertThat(spinner.data.getAll()[0].text.toInt()).isEqualTo(oldValue + clicksUp)
+        assertThat(spinner.data.getAll()[0].text.toInt()).isEqualTo(oldValue + clicksUp)
 
         for (i in 1..clicksDown) {
             arrowDown.click()
         }
-        Assertions.assertThat(spinner.data.getAll()[0].text.toInt()).isEqualTo(oldValue + clicksUp - clicksDown)
+        assertThat(spinner.data.getAll()[0].text.toInt()).isEqualTo(oldValue + clicksUp - clicksDown)
     }
 
     private fun valueGeneratorForSpinners(): Stream<Arguments> = Stream.of(

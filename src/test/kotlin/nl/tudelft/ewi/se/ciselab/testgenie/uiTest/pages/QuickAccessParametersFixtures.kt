@@ -297,20 +297,6 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     }
 
     /**
-     * Gets the tooltips with default values of the parameters.
-     *
-     * @return the list of "default tooltips"
-     */
-    fun getDefaultTooltips(): List<JLabelFixture> {
-        // TODO: pass others once they are found
-        return listOf(
-            searchBudgetTypeDefaultTooltip,
-            initializationTimeoutDefaultTooltip,
-            populationLimitDefaultTooltip
-        )
-    }
-
-    /**
      * Gets the combo-boxes, for search budget type (aka stopping condition) and population limit.
      *
      * @return the list of check-boxes, as described above
