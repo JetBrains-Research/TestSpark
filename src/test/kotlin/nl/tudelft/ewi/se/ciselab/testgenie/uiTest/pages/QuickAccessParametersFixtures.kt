@@ -46,8 +46,8 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
         get() = jLabel(byXpath("//div[@text='Search budget type']"))
 
     // The search budget type combo-box
-//    val searchBudgetTypeComboBox
-//        get() = ...(byXpath(""))
+    val searchBudgetTypeComboBox
+        get() = comboBox(byXpath("//div[@class='ComboBox' and @tooltiptext='What condition should be checked to end the search.']"))
 
     // The text with the default value for the search budget type
     val searchBudgetTypeDefaultTooltip
@@ -61,12 +61,13 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
         get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JBLabel' and @text='Search budget']"))
 
     // The search budget value spinner
-//    val searchBudgetValueSpinner
-//        get() = ...(byXpath(""))
+    val searchBudgetValueSpinner
+        get() = actionLink(byXpath("//div[@class='JSpinner' and @tooltiptext='Maximum search duration.']"))
 
     // The text with the default value for the search budget value TODO: find it
 //    val searchBudgetValueDefaultTooltip
 //        get() = jLabel(byXpath(""))
+//    get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JBLabel' and @text='Search budget']"))
 
     /**
      * TIMEOUTS SECTION
@@ -84,9 +85,9 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val initializationTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Initialization timeout']"))
 
-    // The initialization timeout spinner   TODO: find itTODO: find it
-//    val initializationTimeoutSpinner
-//        get() = ...(byXpath(""))
+    // The initialization timeout spinner   TODO: find it
+    val initializationTimeoutSpinner
+        get() = actionLink(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for initializing the search.']"))
 
     // The text with the default value for the initialization timeout
     val initializationTimeoutDefaultTooltip
@@ -101,8 +102,8 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
         get() = jLabel(byXpath("//div[@text='Minimisation timeout']"))
 
     // The minimisation timeout spinner TODO: find it
-//    val minimisationTimeoutSpinner
-//        get() = ...(byXpath(""))
+    val minimisationTimeoutSpinner
+        get() = jLabel(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for minimization at the end.']"))
 
     // The text with the default value for the minimisation timeout TODO: find it
 //    val minimisationTimeoutDefaultTooltip
@@ -117,8 +118,8 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
         get() = jLabel(byXpath("//div[@text='Assertion timeout']"))
 
     // The assertion timeout spinner TODO: find it
-//    val assertionTimeoutSpinner
-//        get() = ...(byXpath(""))
+    val assertionTimeoutSpinner
+        get() = jLabel(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for assertion generation at the end.']"))
 
     // The text with the default value for the assertion timeout TODO: find it
 //    val assertionTimeoutDefaultTooltip
@@ -133,8 +134,8 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
         get() = jLabel(byXpath("//div[@text='JUnit check timeout']"))
 
     // The JUnit check timeout spinner TODO: find it
-//    val jUnitCheckTimeoutSpinner
-//        get() = ...(byXpath(""))
+    val jUnitCheckTimeoutSpinner
+        get() = jLabel(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability).']"))
 
     // The text with the default value for the JUnit check timeout TODO: find it
 //    val jUnitCheckTimeoutDefaultTooltip
@@ -156,8 +157,8 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
         get() = jLabel(byXpath("//div[@text='Population limit']"))
 
     // The population limit combo-box TODO: find it
-//    val populationLimitComboBox
-//        get() = ...(byXpath(""))
+    val populationLimitComboBox
+        get() = jLabel(byXpath("//div[@class='ComboBox' and @tooltiptext='What to use as limit for the population size.']"))
 
     // The text with the default value for the population limit TODO: find it
     val populationLimitDefaultTooltip
@@ -172,8 +173,8 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
         get() = jLabel(byXpath("//div[@text='Population']"))
 
     // The population value spinner TODO: find it
-//    val populationValueSpinner
-//        get() = ...(byXpath(""))
+    val populationValueSpinner
+        get() = jLabel(byXpath("//div[@class='JSpinner' and @tooltiptext='Population size of genetic algorithm.']"))
 
     // The text with the default value for the population value TODO: find it
 //    val populationValueDefaultTooltip
