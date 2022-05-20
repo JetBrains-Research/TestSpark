@@ -154,7 +154,6 @@ class Runner(
                                 // if process wasn't cancelled, start result watcher
                                 AppExecutorUtil.getAppScheduledExecutorService()
                                     .execute(ResultWatcher(project, testResultName))
-
                             } else {
                                 evosuiteError("EvoSuite process exited with non-zero exit code - ${handler.exitCode}")
                             }
@@ -184,6 +183,6 @@ class Runner(
                 msg,
                 NotificationType.ERROR
             )
-            .notify(project);
+            .notify(project)
     }
 }
