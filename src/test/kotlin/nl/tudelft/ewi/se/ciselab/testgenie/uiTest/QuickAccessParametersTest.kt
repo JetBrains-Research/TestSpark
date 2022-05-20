@@ -22,7 +22,7 @@ import java.time.Duration
 @ExtendWith(RemoteRobotExtension::class)
 class QuickAccessParametersTest {
     // Open the tool window frame
-    lateinit var toolWindowFrame: ToolWindowFrame
+    private lateinit var toolWindowFrame: ToolWindowFrame
 
     /**
      * Opens an untitled project from the IntelliJ welcome screen.
@@ -84,11 +84,24 @@ class QuickAccessParametersTest {
     @Order(4)
     @Test
     fun testToolTipsOnUIElementLabels(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        val tooltipTexts = listOf<String>(
+        // TODO: add other default tooltips
+        val tooltipTexts = listOf(
             "Default: Max time", "Default: 120 seconds", "Default: Individuals"
         )
         toolWindowFrame.getDefaultTooltips().zip(tooltipTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
     }
+
+    // TODO: spinners + modifications
+
+    // TODO: combo-boxes + modifications
+
+    // TODO: advanced settings button
+
+    // TODO: save button
+
+    // TODO: reset button
+
+    // TODO (Optional): tooltips on hovering
 
     /**
      * First closes the TestGenie sidebar by clicking on the stripe button again.
