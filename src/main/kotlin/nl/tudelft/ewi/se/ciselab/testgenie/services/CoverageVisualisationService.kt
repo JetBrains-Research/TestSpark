@@ -2,8 +2,8 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
@@ -38,13 +38,18 @@ class CoverageVisualisationService(private val project: Project) {
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
         if (state.showCoverage) {
-            val color = Color(100, 150, 20)
+
+            val service = TestGenieSettingsService.getInstance().state
+            val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
+            val colorForLines = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
 
             editor.markupModel.removeAllHighlighters()
 
             for (i in testReport.allCoveredLines) {
                 val line = i - 1
-                val hl = editor.markupModel.addLineHighlighter(DiffColors.DIFF_INSERTED, line, HighlighterLayer.LAST)
+                val textat = TextAttributesKey.createTextAttributesKey("custom")
+                textat.defaultAttributes.backgroundColor = colorForLines
+                val hl = editor.markupModel.addLineHighlighter(textat, line, HighlighterLayer.LAST)
                 hl.lineMarkerRenderer = CoverageRenderer(
                     color,
                     line,
