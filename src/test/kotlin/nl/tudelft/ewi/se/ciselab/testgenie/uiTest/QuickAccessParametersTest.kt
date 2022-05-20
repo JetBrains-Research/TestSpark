@@ -125,14 +125,24 @@ class QuickAccessParametersTest {
     )
 
     @Order(4)
-    @Test
-    fun testToolTipsOnUIElementLabels() {
+    @ParameterizedTest
+    @MethodSource("valueGeneratorForDefaultTooltipsAndTexts")
+    fun testToolTipsOnUIElementLabels(expectedText: String, tooltipLabel: JLabelFixture) {
         // TODO: add other default tooltips
-        val tooltipTexts = listOf(
-            "Default: Max time", "Default: 120 seconds", "Default: Individuals"
-        )
-        quickAccessParameters.getDefaultTooltips().zip(tooltipTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
+        Assertions.assertThat(tooltipLabel.value).isEqualTo(expectedText)
     }
+
+    private fun valueGeneratorForDefaultTooltipsAndTexts(): Stream<Arguments> = Stream.of(
+        Arguments.of(
+            "Default: Max time", quickAccessParameters.searchBudgetTypeDefaultTooltip
+        ),
+        Arguments.of(
+            "Default: 120 seconds", quickAccessParameters.initializationTimeoutDefaultTooltip
+        ),
+        Arguments.of(
+            "Default: Individuals", quickAccessParameters.populationLimitDefaultTooltip
+        )
+    )
 
     @Order(5)
     @Test

@@ -9,8 +9,6 @@ import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.fixtures.JLabelFixture
 import com.intellij.remoterobot.search.locators.byXpath
-import org.assertj.swing.fixture.JComboBoxFixture
-import javax.swing.JSpinner
 
 @FixtureName("Quick Access Parameters")
 @DefaultXpath(
