@@ -6,43 +6,41 @@ import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.testFramework.fixtures.*
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import org.assertj.core.api.Assertions.assertThat
 import org.evosuite.result.BranchInfo
 import org.evosuite.result.MutationInfo
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.shaded.org.mockito.Mockito
 import org.evosuite.utils.CompactReport
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CoverageVisualisationServiceTest {
 
     private lateinit var fixture: CodeInsightTestFixture
     private lateinit var coverageVisualisationService: CoverageVisualisationService
-    private lateinit var compactReport: CompactReport
     private lateinit var project: Project
     private lateinit var coverageToolWindowDisplayService: CoverageToolWindowDisplayService
 
-    @BeforeAll
-    fun setUpAll() {
-        val branch1 = Mockito.mock(BranchInfo::class.java)
-        val branch2 = Mockito.mock(BranchInfo::class.java)
-        val branch3 = Mockito.mock(BranchInfo::class.java)
-        val branch4 = Mockito.mock(BranchInfo::class.java)
-        val branch5 = Mockito.mock(BranchInfo::class.java)
+    private val branch1 = Mockito.mock(BranchInfo::class.java)
+    private val branch2 = Mockito.mock(BranchInfo::class.java)
+    private val branch3 = Mockito.mock(BranchInfo::class.java)
+    private val branch4 = Mockito.mock(BranchInfo::class.java)
+    private val branch5 = Mockito.mock(BranchInfo::class.java)
 
-        compactReport = CompactReport(TestGenerationResultImpl())
-        compactReport.UUT = "MyClass"
-        compactReport.allCoveredLines = setOf(1, 2, 5, 7)
-        compactReport.allUncoveredLines = setOf(3, 4, 6)
-        compactReport.allUncoveredBranches = setOf(branch1, branch2, branch3)
-        compactReport.allCoveredBranches = setOf(branch4, branch5)
-        compactReport.allCoveredMutation = setOf(null)
-        compactReport.allUncoveredMutation = setOf()
-    }
+    private val mutation1 = Mockito.mock(MutationInfo::class.java)
+    private val mutation2 = Mockito.mock(MutationInfo::class.java)
+    private val mutation3 = Mockito.mock(MutationInfo::class.java)
+    private val mutation4 = Mockito.mock(MutationInfo::class.java)
+    private val mutation5 = Mockito.mock(MutationInfo::class.java)
 
     @BeforeEach
     fun setUp() {
@@ -63,10 +61,103 @@ class CoverageVisualisationServiceTest {
 
     @Test
     fun fillToolWindowContents() {
+    @AfterEach
+    fun tearDown() {
+        fixture.tearDown()
+    }
+
+    @ParameterizedTest
+    @MethodSource("valueGenerator")
+    fun fillToolWindowContents(
+        className: String,
+        coveredLinesSet: Set<Int>,
+        uncoveredLinesSet: Set<Int>,
+        coveredBranchesSet: Set<BranchInfo>,
+        uncoveredBranchesSet: Set<BranchInfo>,
+        coveredMutationSet: Set<MutationInfo>,
+        uncoveredMutationSet: Set<MutationInfo>,
+        lineCoverage: String,
+        branchCoverage: String,
+        mutationCoverage: String
+    ) {
+        val compactReport = CompactReport(TestGenerationResultImpl())
+        compactReport.UUT = className
+        compactReport.allCoveredLines = coveredLinesSet
+        compactReport.allUncoveredLines = uncoveredLinesSet
+        compactReport.allCoveredBranches = coveredBranchesSet
+        compactReport.allUncoveredBranches = uncoveredBranchesSet
+        compactReport.allCoveredMutation = coveredMutationSet
+        compactReport.allUncoveredMutation = uncoveredMutationSet
+
         coverageVisualisationService.showCoverage(compactReport)
-        assertThat(coverageToolWindowDisplayService.data[0]).isEqualTo("MyClass")
-        assertThat(coverageToolWindowDisplayService.data[1]).isEqualTo("57% (4/7)")
-        assertThat(coverageToolWindowDisplayService.data[2]).isEqualTo("40% (2/5)")
-        assertThat(coverageToolWindowDisplayService.data[3]).isEqualTo("100% (1/1)")
+        assertThat(className).isEqualTo(coverageToolWindowDisplayService.data[0])
+        assertThat(lineCoverage).isEqualTo(coverageToolWindowDisplayService.data[1])
+        assertThat(branchCoverage).isEqualTo(coverageToolWindowDisplayService.data[2])
+        assertThat(mutationCoverage).isEqualTo(coverageToolWindowDisplayService.data[3])
+    }
+
+    private fun valueGenerator(): Stream<Arguments> {
+        return Stream.of(
+            Arguments.of(
+                "MyClass",
+                setOf(1, 2),
+                setOf(2, 3),
+                setOf(branch1),
+                setOf(branch2),
+                setOf(mutation1, mutation2),
+                setOf<MutationInfo>(),
+                "50% (2/4)",
+                "50% (1/2)",
+                "100% (2/2)"
+            ),
+            Arguments.of(
+                "MyClass",
+                setOf(1, 2, 5),
+                setOf(2, 3),
+                setOf<BranchInfo>(),
+                setOf(branch1, branch2),
+                setOf(mutation1, mutation2),
+                setOf(mutation3),
+                "60% (3/5)",
+                "0% (0/2)",
+                "67% (2/3)"
+            ),
+            Arguments.of(
+                "MyClass",
+                setOf(1),
+                setOf(2, 3, 4, 5, 6),
+                setOf(branch5),
+                setOf(branch1, branch2, branch3, branch4),
+                setOf(mutation1),
+                setOf(mutation3),
+                "17% (1/6)",
+                "20% (1/5)",
+                "50% (1/2)"
+            ),
+            Arguments.of(
+                "MyClass",
+                setOf(1, 2, 3, 4, 5, 6, 7),
+                setOf<Int>(),
+                setOf(branch1, branch2, branch3, branch4, branch5),
+                setOf<BranchInfo>(),
+                setOf<MutationInfo>(),
+                setOf(mutation1, mutation3),
+                "100% (7/7)",
+                "100% (5/5)",
+                "0% (0/2)"
+            ),
+            Arguments.of(
+                "MyClass",
+                setOf<Int>(),
+                setOf(1, 2, 3),
+                setOf(branch1, branch2, branch3, branch4, branch5),
+                setOf(branch1, branch2, branch3),
+                setOf(mutation1, mutation2),
+                setOf(mutation1, mutation2, mutation3, mutation4, mutation5),
+                "0% (0/3)",
+                "63% (5/8)",
+                "29% (2/7)"
+            )
+        )
     }
 }
