@@ -16,9 +16,9 @@ import java.io.FileReader
  * and the thread exits.
  *
  * @param project Project context variable which is required for message bus passing
- * @param resultPath result path on which to watch for results
+ * @param resultName result path on which to watch for results
  */
-class ResultWatcher(private val project: Project, private val resultPath: String) : Runnable {
+class ResultWatcher(private val project: Project, private val resultName: String) : Runnable {
     private val log = Logger.getInstance(ResultWatcher::class.java)
 
     override fun run() {
@@ -34,7 +34,7 @@ class ResultWatcher(private val project: Project, private val resultPath: String
             tmpDir.mkdirs()
         }
 
-        log.info("Started result listener thread for $resultPath")
+        log.info("Started result listener thread for $resultName")
 
         val startTime = System.currentTimeMillis()
 
@@ -42,18 +42,18 @@ class ResultWatcher(private val project: Project, private val resultPath: String
             val currentTime = System.currentTimeMillis()
 
             if (currentTime - startTime > maxWatchDurationMillis) {
-                log.info("Max watch duration exceeded, exiting Watcher thread for $resultPath")
+                log.info("Max watch duration exceeded, exiting Watcher thread for $resultName")
                 return
             }
 
-            log.info("Searching for $resultPath results in $testResultDirectory")
+            log.info("Searching for $resultName results in $testResultDirectory")
             val list = tmpDir.list()
 
             if (list == null) {
                 log.info("Empty dir")
             } else {
                 for (pathname in list) {
-                    if (pathname == resultPath) {
+                    if (pathname == resultName) {
                         log.info("Found file $pathname")
 
                         val gson = Gson()
@@ -63,8 +63,8 @@ class ResultWatcher(private val project: Project, private val resultPath: String
 
                         log.info("Publishing test generation result to ${TEST_GENERATION_RESULT_TOPIC.displayName}")
                         project.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC)
-                            .testGenerationResult(testGenerationResult)
-                        log.info("Exiting Watcher thread for $resultPath")
+                            .testGenerationResult(testGenerationResult, resultName)
+                        log.info("Exiting Watcher thread for $resultName")
                         return
                     }
                 }
