@@ -53,7 +53,7 @@ class Runner(
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
     private val testResultName = "test_gen_result_$id"
 
-    private var key = Workspace.TestJobKey(fileName, classFQN, modTs, testResultName)
+    private var key = Workspace.TestJobInfo(fileName, classFQN, modTs, testResultName)
 
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
@@ -81,7 +81,7 @@ class Runner(
                 .build()
 
         // attach method desc. to target unit key
-        key = Workspace.TestJobKey(fileName, "$classFQN#$methodDescriptor", modTs, testResultName)
+        key = Workspace.TestJobInfo(fileName, "$classFQN#$methodDescriptor", modTs, testResultName)
 
         return this
     }
