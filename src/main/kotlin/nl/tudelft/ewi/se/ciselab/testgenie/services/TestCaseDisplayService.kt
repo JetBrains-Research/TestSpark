@@ -148,19 +148,6 @@ class TestCaseDisplayService(private val project: Project) {
                         // Fix Windows line separators
                         it.replace("\r\n", "\n")
                     )
-//        for (i in editorList) {
-//            val testCase = i.first
-//            if (testCase == name) {
-//                val editor = i.second
-//                val backgroundDefault = editor.background
-//                val service = TestGenieSettingsService.getInstance().state
-//                val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
-//                editor.background = highlightColor
-//                Thread {
-//                    Thread.sleep(10000)
-//                    editor.background = backgroundDefault
-//                }.start()
-//                return
             }
         }
     }
