@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.Duration
 import java.util.stream.Stream
+import kotlin.random.Random
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -51,6 +52,8 @@ class QuickAccessParametersTest {
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             clickOnToolWindow()
         }
+        quickAccessParameters = find(QuickAccessParametersFixtures::class.java, timeout = Duration.ofSeconds(15))
+        quickAccessParameters.openQuickAccessParametersTab()
     }
 
     @BeforeEach
@@ -237,32 +240,36 @@ class QuickAccessParametersTest {
         }
     }
 
-    private fun valueGeneratorForSpinnersOnValidInputs(): Stream<Arguments> = Stream.of(
-        Arguments.of(
-            quickAccessParameters.searchBudgetValueUpArrow, quickAccessParameters.searchBudgetValueDownArrow,
-            quickAccessParameters.searchBudgetValueSpinner, 2, 4, "Maximum search duration."
-        ),
-        Arguments.of(
-            quickAccessParameters.initializationTimeoutUpArrow, quickAccessParameters.initializationTimeoutDownArrow,
-            quickAccessParameters.initializationTimeoutSpinner, 4, 2, "Seconds allowed for initializing the search."
-        ),
-        Arguments.of(
-            quickAccessParameters.minimisationTimeoutUpArrow, quickAccessParameters.minimisationTimeoutDownArrow,
-            quickAccessParameters.minimisationTimeoutSpinner, 3, 3, "Seconds allowed for minimization at the end."
-        ),
-        Arguments.of(
-            quickAccessParameters.assertionTimeoutUpArrow, quickAccessParameters.assertionTimeoutDownArrow,
-            quickAccessParameters.assertionTimeoutSpinner, 1, 2, "Seconds allowed for assertion generation at the end."
-        ),
-        Arguments.of(
-            quickAccessParameters.jUnitCheckTimeoutUpArrow, quickAccessParameters.jUnitCheckTimeoutDownArrow,
-            quickAccessParameters.jUnitCheckTimeoutSpinner, 2, 1, "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
-        ),
-        Arguments.of(
-            quickAccessParameters.populationValueUpArrow, quickAccessParameters.populationValueDownArrow,
-            quickAccessParameters.populationValueSpinner, 3, 4, "Population size of genetic algorithm."
+    private fun valueGeneratorForSpinnersOnValidInputs(): Stream<Arguments> {
+        fun rand(): Int = Random.nextInt(1, 6)
+
+        return Stream.of(
+            Arguments.of(
+                quickAccessParameters.searchBudgetValueUpArrow, quickAccessParameters.searchBudgetValueDownArrow,
+                quickAccessParameters.searchBudgetValueSpinner, rand(), rand(), "Maximum search duration."
+            ),
+            Arguments.of(
+                quickAccessParameters.initializationTimeoutUpArrow, quickAccessParameters.initializationTimeoutDownArrow,
+                quickAccessParameters.initializationTimeoutSpinner, rand(), rand(), "Seconds allowed for initializing the search."
+            ),
+            Arguments.of(
+                quickAccessParameters.minimisationTimeoutUpArrow, quickAccessParameters.minimisationTimeoutDownArrow,
+                quickAccessParameters.minimisationTimeoutSpinner, rand(), rand(), "Seconds allowed for minimization at the end."
+            ),
+            Arguments.of(
+                quickAccessParameters.assertionTimeoutUpArrow, quickAccessParameters.assertionTimeoutDownArrow,
+                quickAccessParameters.assertionTimeoutSpinner, rand(), rand(), "Seconds allowed for assertion generation at the end."
+            ),
+            Arguments.of(
+                quickAccessParameters.jUnitCheckTimeoutUpArrow, quickAccessParameters.jUnitCheckTimeoutDownArrow,
+                quickAccessParameters.jUnitCheckTimeoutSpinner, rand(), rand(), "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
+            ),
+            Arguments.of(
+                quickAccessParameters.populationValueUpArrow, quickAccessParameters.populationValueDownArrow,
+                quickAccessParameters.populationValueSpinner, rand(), rand(), "Population size of genetic algorithm."
+            )
         )
-    )
+    }
 
     @Order(10)
     @ParameterizedTest
@@ -309,8 +316,6 @@ class QuickAccessParametersTest {
             quickAccessParameters.populationValueSpinner, "Population size of genetic algorithm."
         )
     )
-
-    // TODO: spinner modifications
 
     // TODO: advanced settings button
 
