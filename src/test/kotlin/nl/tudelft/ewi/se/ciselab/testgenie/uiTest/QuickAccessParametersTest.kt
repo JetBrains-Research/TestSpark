@@ -70,7 +70,7 @@ class QuickAccessParametersTest {
     @ParameterizedTest
     @MethodSource("valueGeneratorForLabelsAndTexts")
     fun testLabelsAreCorrect(expectedText: String, label: JLabelFixture) {
-        // Assert labels have the text
+        // Assert labels have the correct text
         Assertions.assertThat(label.value).isEqualTo(expectedText)
     }
 
@@ -102,12 +102,27 @@ class QuickAccessParametersTest {
     )
 
     @Order(3)
-    @Test
-    fun testTitlesAreCorrect(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        val titleTexts = listOf("Quick Access Parameters", "Search budget", "Timeouts", "Genetic Algorithm")
+    @ParameterizedTest
+    @MethodSource("valueGeneratorForTitlesAndTexts")
+    fun testTitlesAreCorrect(expectedText: String, title: JLabelFixture) {
         // Assert labels have the text
-        toolWindowFrame.getTitles().zip(titleTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
+        Assertions.assertThat(title.value).isEqualTo(expectedText)
     }
+
+    private fun valueGeneratorForTitlesAndTexts(): Stream<Arguments> = Stream.of(
+        Arguments.of(
+            "Quick Access Parameters", toolWindowFrame.title
+        ),
+        Arguments.of(
+            "Search budget", toolWindowFrame.searchBudgetSeparator
+        ),
+        Arguments.of(
+            "Timeouts", toolWindowFrame.timeoutsSeparator
+        ),
+        Arguments.of(
+            "Genetic Algorithm", toolWindowFrame.geneticAlgorithmSeparator
+        )
+    )
 
     @Order(4)
     @Test
