@@ -66,7 +66,7 @@ class CoverageVisualisationServiceTest {
             .registerToolWindow(RegisterToolWindowTask("TestGenie", ToolWindowAnchor.RIGHT))
 
         // Disable coverage visualisation
-        val settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state!!
+        val settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
         settingsState.showCoverage = false
     }
 
