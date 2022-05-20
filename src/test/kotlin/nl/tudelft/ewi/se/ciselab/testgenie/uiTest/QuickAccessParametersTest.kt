@@ -147,7 +147,13 @@ class QuickAccessParametersTest {
     @Order(5)
     @Test
     fun testComboBoxesAreVisible() {
-        quickAccessParameters.findComboBoxes().forEach { it.isShowing }
+        quickAccessParameters.getComboBoxes().forEach { it.isShowing }
+    }
+
+    @Order(6)
+    @Test
+    fun testSpinnersAreVisible() {
+        quickAccessParameters.getJSpinners().forEach { Assertions.assertThat(it.isShowing) }
     }
 
     // TODO: spinners + modifications

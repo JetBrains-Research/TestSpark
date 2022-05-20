@@ -9,6 +9,8 @@ import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.fixtures.JLabelFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.JSpinnerFixture
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.jSpinner
 
 @FixtureName("Quick Access Parameters")
 @DefaultXpath(
@@ -62,7 +64,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
 
     // The search budget value spinner
     val searchBudgetValueSpinner
-        get() = actionLink(byXpath("//div[@class='JSpinner' and @tooltiptext='Maximum search duration.']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Maximum search duration.']"))
 
     // The text with the default value for the search budget value TODO: find it
 //    val searchBudgetValueDefaultTooltip
@@ -87,7 +89,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
 
     // The initialization timeout spinner   TODO: find it
     val initializationTimeoutSpinner
-        get() = actionLink(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for initializing the search.']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for initializing the search.']"))
 
     // The text with the default value for the initialization timeout
     val initializationTimeoutDefaultTooltip
@@ -103,7 +105,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
 
     // The minimisation timeout spinner TODO: find it
     val minimisationTimeoutSpinner
-        get() = jLabel(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for minimization at the end.']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for minimization at the end.']"))
 
     // The text with the default value for the minimisation timeout TODO: find it
 //    val minimisationTimeoutDefaultTooltip
@@ -119,7 +121,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
 
     // The assertion timeout spinner TODO: find it
     val assertionTimeoutSpinner
-        get() = jLabel(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for assertion generation at the end.']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for assertion generation at the end.']"))
 
     // The text with the default value for the assertion timeout TODO: find it
 //    val assertionTimeoutDefaultTooltip
@@ -135,7 +137,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
 
     // The JUnit check timeout spinner TODO: find it
     val jUnitCheckTimeoutSpinner
-        get() = jLabel(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability).']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability).']"))
 
     // The text with the default value for the JUnit check timeout TODO: find it
 //    val jUnitCheckTimeoutDefaultTooltip
@@ -174,7 +176,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
 
     // The population value spinner TODO: find it
     val populationValueSpinner
-        get() = jLabel(byXpath("//div[@class='JSpinner' and @tooltiptext='Population size of genetic algorithm.']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Population size of genetic algorithm.']"))
 
     // The text with the default value for the population value TODO: find it
 //    val populationValueDefaultTooltip
@@ -256,7 +258,20 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
      *
      * @return the list of check-boxes, as described above
      */
-    fun findComboBoxes(): List<ComboBoxFixture> {
+    fun getComboBoxes(): List<ComboBoxFixture> {
         return listOf(searchBudgetTypeComboBox, populationLimitComboBox)
+    }
+
+    /**
+     * Gets the spinners, 1 for search budget, 4 for timeouts and 1 for population.
+     *
+     * @return the list of spinners, as described above
+     */
+    fun getJSpinners(): List<JSpinnerFixture> {
+        return listOf(
+            searchBudgetValueSpinner, initializationTimeoutSpinner,
+            minimisationTimeoutSpinner, assertionTimeoutSpinner,
+            jUnitCheckTimeoutSpinner, populationValueSpinner
+        )
     }
 }
