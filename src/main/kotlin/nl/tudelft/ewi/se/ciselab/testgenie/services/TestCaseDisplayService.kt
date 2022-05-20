@@ -12,6 +12,7 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
 import java.awt.Color
@@ -29,7 +30,6 @@ class TestCaseDisplayService(private val project: Project) {
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
-    private val highlightColor: Color = Color(100, 150, 20, 30)
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -95,6 +95,8 @@ class TestCaseDisplayService(private val project: Project) {
     fun highlight(name: String) {
         val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
         val backgroundDefault = editor.background
+        val service = TestGenieSettingsService.getInstance().state
+        val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
         editor.background = highlightColor
         Thread {
             Thread.sleep(10000)
