@@ -36,6 +36,10 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     private val inlineProgressPanel
         get() = find<ComponentFixture>(byXpath("//div[@class='InlineProgressPanel']"), Duration.ofSeconds(60))
 
+    // Find TestGenie on the right sidebar
+    private val openToolWindow
+        get() = actionLink(byXpath("//div[@tooltiptext='TestGenie']"))
+
     /**
      * Method to close the current project.
      */
@@ -50,6 +54,14 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     fun openSettings() {
         openFileMenu.click()
         openSettingsAction.click()
+    }
+
+    /**
+     * Method to click on TestGenie stripe button on the right sidebar.
+     * First click opens the tool window, second click closes tool window.
+     */
+    fun clickOnToolWindow() {
+        openToolWindow.click()
     }
 
     /**
