@@ -2,12 +2,14 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages
 
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.data.RemoteComponent
+import com.intellij.remoterobot.fixtures.ComboBoxFixture
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.fixtures.JLabelFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import org.assertj.swing.fixture.JComboBoxFixture
 import javax.swing.JSpinner
 
 @FixtureName("Quick Access Parameters")
@@ -158,7 +160,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
 
     // The population limit combo-box TODO: find it
     val populationLimitComboBox
-        get() = jLabel(byXpath("//div[@class='ComboBox' and @tooltiptext='What to use as limit for the population size.']"))
+        get() = comboBox(byXpath("//div[@class='ComboBox' and @tooltiptext='What to use as limit for the population size.']"))
 
     // The text with the default value for the population limit TODO: find it
     val populationLimitDefaultTooltip
@@ -252,12 +254,11 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     }
 
     /**
-     * Gets the spinners (1 spinner for search budget value, 4 spinners for timeouts, 1 spinner for population value).
+     * Gets the combo-boxes, for search budget type (aka stopping condition) and population limit.
      *
      * @return the list of check-boxes, as described above
      */
-    fun findComboBoxes(): List<JSpinner> {
-        // TODO: find them and return them
-        return listOf()
+    fun findComboBoxes(): List<ComboBoxFixture> {
+        return listOf(searchBudgetTypeComboBox, populationLimitComboBox)
     }
 }
