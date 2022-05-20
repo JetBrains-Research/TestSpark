@@ -24,7 +24,10 @@ data class TestGenieSettingsState(
     var criterionMethod: Boolean = true,
     var criterionMethodNoException: Boolean = true,
     var criterionCBranch: Boolean = true,
-    var minimize: Boolean = true
+    var minimize: Boolean = true,
+    var colorRed: Int = DefaultSettingsState.colorRed,
+    var colorGreen: Int = DefaultSettingsState.colorGreen,
+    var colorBlue: Int = DefaultSettingsState.colorBlue
 ) {
     private object DefaultSettingsState {
         const val sandbox: Boolean = true
@@ -34,6 +37,9 @@ data class TestGenieSettingsState(
         val algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.DYNAMOSA
 
         val javaPath: String = TestGenieDefaultsBundle.defaultValue("javaPath")
+        val colorRed: Int = TestGenieDefaultsBundle.defaultValue("colorRed").toInt()
+        val colorGreen: Int = TestGenieDefaultsBundle.defaultValue("colorGreen").toInt()
+        val colorBlue: Int = TestGenieDefaultsBundle.defaultValue("colorBlue").toInt()
     }
 
     fun serializeChangesFromDefault(): List<String> {
