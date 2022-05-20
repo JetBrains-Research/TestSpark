@@ -10,6 +10,7 @@ import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.fixtures.JLabelFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.JSpinnerFixture
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.basicArrowButton
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.jSpinner
 
 @FixtureName("Quick Access Parameters")
@@ -50,6 +51,9 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     // The search budget type combo-box
     val searchBudgetTypeComboBox
         get() = comboBox(byXpath("//div[@class='ComboBox' and @tooltiptext='What condition should be checked to end the search.']"))
+
+    val searchBudgetTypeArrow
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @tooltiptext='What condition should be checked to end the search.']"))
 
     // The text with the default value for the search budget type
     val searchBudgetTypeDefaultTooltip
