@@ -5,11 +5,14 @@ import com.intellij.openapi.ui.Messages
 import javax.swing.JComponent
 
 /**
- * This class interacts with the other two Settings classes. It provides controller functionality for the settingsState.
+ * This class allows to configure some EvoSuite settings via the EvoSuite page in the Settings dialog,
+ *   observes the changes and manages the UI and state.
+ * It interacts with the SettingsEvoSuiteComponent, TestGenieSettingsService and TestGenieSettingsState.
+ * It provides controller functionality for the TestGenieSettingsState.
  */
 class SettingsEvoSuiteConfigurable : Configurable {
 
-    private var settingsComponent: SettingsEvoSuiteComponent? = null
+    var settingsComponent: SettingsEvoSuiteComponent? = null
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
@@ -74,16 +77,9 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val seed = settingsComponent!!.seed.toLongOrNull()
-        if (settingsComponent!!.seed != "" && seed == null) {
-            Messages.showErrorDialog("Seed parameter is not of numeric type.", "Incorrect Numeric Type For Seed")
-            return
-        }
-
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions
-        settingsState.seed = settingsComponent!!.seed
         settingsState.algorithm = settingsComponent!!.algorithm
         settingsState.configurationId = settingsComponent!!.configurationId
         settingsState.clientOnThread = settingsComponent!!.clientOnThread
@@ -97,6 +93,16 @@ class SettingsEvoSuiteConfigurable : Configurable {
         settingsState.criterionMethodNoException = settingsComponent!!.criterionMethodNoException
         settingsState.criterionCBranch = settingsComponent!!.criterionCBranch
         settingsState.minimize = settingsComponent!!.minimize
+
+        val seed = settingsComponent!!.seed.toLongOrNull()
+        if (settingsComponent!!.seed != "" && seed == null) {
+            Messages.showErrorDialog(
+                "Seed parameter is not of numeric type. Therefore, it will not be saved. However, the rest of the parameters have been successfully saved.",
+                "Incorrect Numeric Type For Seed"
+            )
+            return
+        }
+        settingsState.seed = settingsComponent!!.seed
     }
 
     /**

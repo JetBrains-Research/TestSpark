@@ -14,7 +14,9 @@ import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
 
 /**
- * This class generates tests for a method.
+ * This class contains all the logic related to generating tests for a method.
+ * No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available,
+ *   getting the information about the selected method and passing it to (EvoSuite) Runner.
  */
 class GenerateTestsActionMethod : AnAction() {
     private val log = Logger.getInstance(this.javaClass)
@@ -29,6 +31,9 @@ class GenerateTestsActionMethod : AnAction() {
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+        val fileName = vFile.presentableUrl
+        val modificationStamp = vFile.modificationStamp
 
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
         val containingClass: PsiClass = psiMethod.containingClass ?: return
@@ -43,7 +48,14 @@ class GenerateTestsActionMethod : AnAction() {
 
         log.info("Selected class is $classFQN, method is $methodDescriptor")
 
-        Runner(project, projectPath, projectClassPath, classFQN).forMethod(methodDescriptor).runEvoSuite()
+        Runner(
+            project,
+            projectPath,
+            projectClassPath,
+            classFQN,
+            fileName,
+            modificationStamp
+        ).forMethod(methodDescriptor).runEvoSuite()
     }
 
     /**

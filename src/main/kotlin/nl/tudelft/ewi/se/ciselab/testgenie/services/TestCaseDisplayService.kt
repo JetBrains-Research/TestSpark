@@ -1,11 +1,17 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.ide.util.TreeClassChooserFactory
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
-import com.intellij.psi.JavaCodeFragmentFactory
+import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.content.Content
+import com.intellij.ui.content.ContentFactory
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
@@ -19,17 +25,30 @@ import javax.swing.JPanel
 
 class TestCaseDisplayService(private val project: Project) {
 
-    val mainPanel: JPanel = JPanel()
+    private val mainPanel: JPanel = JPanel()
     private val applyButton: JButton = JButton("Apply")
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
-    private var editorList: MutableList<Pair<String, EditorTextField>> = arrayListOf()
+    private var testCasePanels: HashMap<String, JPanel> = HashMap()
+
+    // Variable to keep reference to the coverage visualisation content
+    private var content: Content? = null
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
+        applyButton.addActionListener { applyTests() }
         mainPanel.add(applyButton, BorderLayout.SOUTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
+    }
+
+    /**
+     * Creates the complete panel in the "Generated Tests" tab,
+     * and adds the "Generated Tests" tab to the sidebar tool window.
+     */
+    fun showGeneratedTests(testReport: CompactReport) {
+        displayTestCases(testReport)
+        createToolWindowTab()
     }
 
     /**
@@ -38,32 +57,32 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param testReport The report from which each testcase should be displayed
      */
-    fun displayTestCases(testReport: CompactReport) {
+    private fun displayTestCases(testReport: CompactReport) {
         allTestCasePanel.removeAll()
-        editorList = arrayListOf()
+        testCasePanels.clear()
         testReport.testCaseList.values.forEach {
             val testCode = it.testCode
             val testName = it.testName
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
 
+            // fix Windows line separators
+            val testCodeFormatted = testCode.replace("\r\n", "\n")
+
             val checkbox = JCheckBox()
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val code = JavaCodeFragmentFactory.getInstance(project)
-                .createExpressionCodeFragment(testCode, null, null, true)
-            val document = PsiDocumentManager.getInstance(project).getDocument(code)
+            val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
-            editorList.add(Pair(testName, editor))
 
             editor.setOneLineMode(false)
-            editor.isViewer = true
 
             testCasePanel.add(editor, BorderLayout.CENTER)
 
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
+            testCasePanels[testName] = testCasePanel
             allTestCasePanel.add(Box.createRigidArea(Dimension(0, 5)))
         }
     }
@@ -74,20 +93,99 @@ class TestCaseDisplayService(private val project: Project) {
      * @param name name of the test whose editor should be highlighted
      */
     fun highlight(name: String) {
-        for (i in editorList) {
-            val testCase = i.first
-            if (testCase == name) {
-                val editor = i.second
-                val backgroundDefault = editor.background
-                val service = TestGenieSettingsService.getInstance().state
-                val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
-                editor.background = highlightColor
-                Thread {
-                    Thread.sleep(10000)
-                    editor.background = backgroundDefault
-                }.start()
-                return
+        val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
+        val backgroundDefault = editor.background
+        val service = TestGenieSettingsService.getInstance().state
+        val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
+        editor.background = highlightColor
+        Thread {
+            Thread.sleep(10000)
+            editor.background = backgroundDefault
+        }.start()
+    }
+
+    /**
+     * Show a dialog where the user can select what test class the tests should be applied to,
+     * and apply the selected tests to the test class.
+     */
+    private fun applyTests() {
+        val selectedTestCases = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+            .map { it.key }
+
+        val testCaseComponents = selectedTestCases.map {
+            testCasePanels[it]!!.getComponent(1) as EditorTextField
+        }.map {
+            it.document.text
+        }
+
+        // show chooser dialog to select test file
+        val chooser = TreeClassChooserFactory.getInstance(project)
+            .createProjectScopeChooser(
+                "Insert Test Cases into Class"
+            )
+        chooser.showDialog()
+
+        // get selected class or return if no class was selected
+        val selectedClass = chooser.selected ?: return
+
+        // insert test case components into selected class
+        appendTestsToClass(testCaseComponents, selectedClass)
+    }
+
+    /**
+     * Append the provided test cases to the provided class.
+     *
+     * @param testCaseComponents the test cases to be appended
+     * @param selectedClass the class which the test cases should be appended to
+     */
+    private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass) {
+        WriteCommandAction.runWriteCommandAction(project) {
+            testCaseComponents.forEach {
+                PsiDocumentManager.getInstance(project)
+                    .getDocument(selectedClass.containingFile)!!
+                    .insertString(
+                        selectedClass.rBrace!!.textRange.startOffset,
+                        // Fix Windows line separators
+                        it.replace("\r\n", "\n")
+                    )
+//        for (i in editorList) {
+//            val testCase = i.first
+//            if (testCase == name) {
+//                val editor = i.second
+//                val backgroundDefault = editor.background
+//                val service = TestGenieSettingsService.getInstance().state
+//                val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
+//                editor.background = highlightColor
+//                Thread {
+//                    Thread.sleep(10000)
+//                    editor.background = backgroundDefault
+//                }.start()
+//                return
             }
         }
+    }
+
+    /**
+     * Creates a new toolWindow tab for the coverage visualisation.
+     */
+    private fun createToolWindowTab() {
+
+        // Remove generated tests tab from content manager if necessary
+        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
+        val contentManager = toolWindowManager!!.contentManager
+        if (content != null) {
+            contentManager.removeContent(content!!, true)
+        }
+
+        // If there is no generated tests tab, make it
+        val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
+        content = contentFactory.createContent(
+            mainPanel, "Generated Tests", true
+        )
+        contentManager.addContent(content!!)
+
+        // Focus on generated tests tab and open toolWindow if not opened already
+        contentManager.setSelectedContent(content!!)
+        toolWindowManager.show()
     }
 }
