@@ -7,7 +7,10 @@ import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.testFramework.fixtures.*
 import org.assertj.core.api.Assertions.assertThat
+import org.evosuite.result.BranchInfo
+import org.evosuite.result.MutationInfo
 import org.evosuite.result.TestGenerationResultImpl
+import org.evosuite.shaded.org.mockito.Mockito
 import org.evosuite.utils.CompactReport
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -25,12 +28,18 @@ class CoverageVisualisationServiceTest {
 
     @BeforeAll
     fun setUpAll() {
+        val branch1 = Mockito.mock(BranchInfo::class.java)
+        val branch2 = Mockito.mock(BranchInfo::class.java)
+        val branch3 = Mockito.mock(BranchInfo::class.java)
+        val branch4 = Mockito.mock(BranchInfo::class.java)
+        val branch5 = Mockito.mock(BranchInfo::class.java)
+
         compactReport = CompactReport(TestGenerationResultImpl())
         compactReport.UUT = "MyClass"
         compactReport.allCoveredLines = setOf(1, 2, 5, 7)
         compactReport.allUncoveredLines = setOf(3, 4, 6)
-        compactReport.allUncoveredBranches = setOf(null)
-        compactReport.allCoveredBranches = setOf(null)
+        compactReport.allUncoveredBranches = setOf(branch1, branch2, branch3)
+        compactReport.allCoveredBranches = setOf(branch4, branch5)
         compactReport.allCoveredMutation = setOf(null)
         compactReport.allUncoveredMutation = setOf()
     }
@@ -57,7 +66,7 @@ class CoverageVisualisationServiceTest {
         coverageVisualisationService.showCoverage(compactReport)
         assertThat(coverageToolWindowDisplayService.data[0]).isEqualTo("MyClass")
         assertThat(coverageToolWindowDisplayService.data[1]).isEqualTo("57% (4/7)")
-        assertThat(coverageToolWindowDisplayService.data[2]).isEqualTo("50% (1/2)")
+        assertThat(coverageToolWindowDisplayService.data[2]).isEqualTo("40% (2/5)")
         assertThat(coverageToolWindowDisplayService.data[3]).isEqualTo("100% (1/1)")
     }
 }
