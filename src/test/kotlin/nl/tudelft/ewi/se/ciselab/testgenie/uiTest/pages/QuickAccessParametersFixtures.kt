@@ -10,11 +10,11 @@ import com.intellij.remoterobot.fixtures.JLabelFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import javax.swing.JSpinner
 
-@FixtureName("Tool Window Frame")
+@FixtureName("Quick Access Parameters")
 @DefaultXpath(
     "type", "//div[@accessiblename='Parameters Tool Window']"
 )
-class ToolWindowFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
+class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
 
     // The tab label "Parameters"
