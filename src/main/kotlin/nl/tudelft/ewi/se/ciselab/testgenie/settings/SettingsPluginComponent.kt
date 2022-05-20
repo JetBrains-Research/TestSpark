@@ -1,11 +1,14 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
+import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
+import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Dimension
 import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JTextField
 
 /**
  * This class displays and captures changes to the values of the Settings entries.
@@ -22,6 +25,9 @@ class SettingsPluginComponent {
 
     // Checkbox options
     private var showCoverageCheckBox = JCheckBox("Show visualised coverage")
+
+    // Environment options (Java path)
+    private var javaPathTextField = JTextField()
 
     init {
         // Apply style to panel (must be first)
@@ -40,6 +46,8 @@ class SettingsPluginComponent {
             .addComponent(pluginDiscription)
             // Add visual coverage checkbox
             .addComponent(showCoverageCheckBox, 10)
+            .addComponent(JXTitledSeparator("Environment settings"), 15)
+            .addLabeledComponent(JBLabel("Java 11 path:"), javaPathTextField, 10, false)
             .addComponentFillVertically(JPanel(), 0)
             .panel
     }
@@ -73,5 +81,11 @@ class SettingsPluginComponent {
         get() = showCoverageCheckBox.isSelected
         set(newStatus) {
             showCoverageCheckBox.isSelected = newStatus
+        }
+
+    var javaPath: String
+        get() = javaPathTextField.text
+        set(newConfig) {
+            javaPathTextField.text = newConfig
         }
 }

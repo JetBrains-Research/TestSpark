@@ -3,6 +3,9 @@ package nl.tudelft.ewi.se.ciselab.testgenie.editor
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
@@ -25,7 +28,10 @@ class Workspace(private val project: Project) {
     private var pendingTestResults: HashMap<String, TestJobKey> = HashMap()
 
     init {
-        project.messageBus.connect().subscribe(
+        val connection = project.messageBus.connect()
+
+        // listen for editor editor switches
+        connection.subscribe(
             FileEditorManagerListener.FILE_EDITOR_MANAGER,
             object : FileEditorManagerListener {
                 override fun selectionChanged(event: FileEditorManagerEvent) {
@@ -35,13 +41,43 @@ class Workspace(private val project: Project) {
                     // check if file has any tests generated for it
                     val list = testGenerationResults[fileUrl] ?: return
                     val lastTest = list.lastOrNull() ?: return
-                    // get editor for file
-                    val editor = (event.newEditor as TextEditor).editor
-                    log.info("Displaying test report on freshly opened editor for target ${lastTest.first.targetUnit}")
-                    updateEditorCoverageDisplay(lastTest.second, editor)
+
+                    // check if file is in same state so that coverage visualization is valid
+                    if (lastTest.first.modificationTS == file.modificationStamp) {
+                        // get editor for file
+                        val editor = (event.newEditor as TextEditor).editor
+                        updateEditorCoverageDisplay(lastTest.second, editor)
+                    }
                 }
             }
         )
+
+        // listen for document changes
+        EditorFactory.getInstance().eventMulticaster.addDocumentListener(object : DocumentListener {
+            override fun documentChanged(event: DocumentEvent) {
+                super.documentChanged(event)
+
+                val file = FileDocumentManager.getInstance().getFile(event.document) ?: return
+                val fileName = file.presentableUrl
+                val modTs = event.document.modificationStamp
+
+                val job = lastTestGeneration(fileName) ?: return
+
+                if (job.first.modificationTS == modTs) {
+                    val editor = editorForVFile(file) ?: return
+
+                    updateEditorCoverageDisplay(job.second, editor)
+                } else {
+                    val editor = editorForVFile(file)
+
+                    editor?.markupModel?.removeAllHighlighters()
+                }
+            }
+        }) {}
+    }
+
+    fun lastTestGeneration(fileName: String): Pair<TestJobKey, CompactReport>? {
+        return testGenerationResults[fileName]?.first()
     }
 
     fun addPendingResult(id: String, jobKey: TestJobKey) {
@@ -53,14 +89,17 @@ class Workspace(private val project: Project) {
     }
 
     fun receiveGenerationResult(id: String, testReport: CompactReport) {
-        val jobKey = pendingTestResults.remove(id)!! // TODO: throw exception
+        val jobKey = pendingTestResults.remove(id)!!
 
         val resultsForFile = testGenerationResults.getOrPut(jobKey.filename) { ArrayList() }
         resultsForFile.add(Pair(jobKey, testReport))
 
         val editor = editorForFileUrl(jobKey.filename)
+
         if (editor != null) {
-            updateEditorCoverageDisplay(testReport, editor)
+            if (editor.document.modificationStamp == jobKey.modificationTS) {
+                updateEditorCoverageDisplay(testReport, editor)
+            }
         } else {
             log.info("No editor opened for received test result")
         }
