@@ -54,8 +54,7 @@ dependencies {
     implementation("com.automation-remarks:video-recorder-junit5:2.0")
 
     // https://mvnrepository.com/artifact/org.mockito/mockito-all
-    testImplementation("org.mockito:mockito-all:1.9.5")
-
+    testImplementation("org.mockito:mockito-all:1.10.19")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
