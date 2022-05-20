@@ -164,7 +164,7 @@ class QuickAccessParametersTest {
     @Order(7)
     @ParameterizedTest
     @MethodSource("valueGeneratorForSearchBudgetTypeComboBoxChoices")
-    fun testSearchBudgetComboBox(choice: String): Unit = with(remoteRobot) {
+    fun testSearchBudgetComboBoxes(choice: String): Unit = with(remoteRobot) {
         quickAccessParameters.searchBudgetTypeArrow.click()
         val choices: JListFixture = find(byXpath("//div[@class='JList']"), Duration.ofSeconds(15))
         choices.clickItem(choice)
@@ -180,9 +180,23 @@ class QuickAccessParametersTest {
         Arguments.of("Max time"),
     )
 
-    // TODO: spinner modifications
+    @Order(8)
+    @ParameterizedTest
+    @MethodSource("valueGeneratorForPopulationLimitComboBoxChoices")
+    fun testPopulationLimitComboBoxes(choice: String): Unit = with(remoteRobot) {
+        quickAccessParameters.populationLimitArrow.click()
+        val choices: JListFixture = find(byXpath("//div[@class='JList']"), Duration.ofSeconds(15))
+        choices.clickItem(choice)
+        Assertions.assertThat(quickAccessParameters.populationLimitComboBox.hasText(choice))
+    }
 
-    // TODO: combo-box modifications
+    private fun valueGeneratorForPopulationLimitComboBoxChoices(): Stream<Arguments> = Stream.of(
+        Arguments.of("Tests"),
+        Arguments.of("Statements"),
+        Arguments.of("Individuals"),
+    )
+
+    // TODO: spinner modifications
 
     // TODO: advanced settings button
 
