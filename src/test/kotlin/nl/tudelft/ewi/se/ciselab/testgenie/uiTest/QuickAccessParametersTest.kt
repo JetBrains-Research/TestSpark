@@ -2,6 +2,8 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.JLabelFixture
+import com.intellij.remoterobot.fixtures.JListFixture
+import com.intellij.remoterobot.search.locators.byXpath
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.QuickAccessParametersFixtures
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
@@ -29,6 +31,8 @@ class QuickAccessParametersTest {
     // Open the tool window frame
     private lateinit var quickAccessParameters: QuickAccessParametersFixtures
 
+    private lateinit var remoteRobot: RemoteRobot
+
     /**
      * Opens an untitled project from the IntelliJ welcome screen.
      * Then opens the TestGenie sidebar on the right.
@@ -39,7 +43,7 @@ class QuickAccessParametersTest {
         find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             open("untitled")
         }
-
+        Thread.sleep(10)
         // Open the TestGenie tool window
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             clickOnToolWindow()
@@ -47,7 +51,8 @@ class QuickAccessParametersTest {
     }
 
     @BeforeEach
-    fun setUp(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+    fun setUp(_remoteRobot: RemoteRobot): Unit = with(_remoteRobot) {
+        remoteRobot = _remoteRobot
         // Open the tool window frame
         quickAccessParameters = find(QuickAccessParametersFixtures::class.java, timeout = Duration.ofSeconds(15))
         // Open the "Quick Access Parameters" tab
@@ -156,9 +161,28 @@ class QuickAccessParametersTest {
         quickAccessParameters.getJSpinners().forEach { Assertions.assertThat(it.isShowing) }
     }
 
-    // TODO: spinners + modifications
+    @Order(7)
+    @ParameterizedTest
+    @MethodSource("valueGeneratorForSearchBudgetTypeComboBoxChoices")
+    fun testSearchBudgetComboBox(choice: String): Unit = with(remoteRobot) {
+        quickAccessParameters.searchBudgetTypeArrow.click()
+        val choices: JListFixture = find(byXpath("//div[@class='JList']"), Duration.ofSeconds(15))
+        choices.clickItem(choice)
+        Assertions.assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(choice))
+    }
 
-    // TODO: combo-boxes + modifications
+    private fun valueGeneratorForSearchBudgetTypeComboBoxChoices(): Stream<Arguments> = Stream.of(
+        Arguments.of("Max statements"),
+        Arguments.of("Max tests"),
+        Arguments.of("Max generations"),
+        Arguments.of("Max fitness evaluations"),
+        Arguments.of("Time delta"),
+        Arguments.of("Max time"),
+    )
+
+    // TODO: spinner modifications
+
+    // TODO: combo-box modifications
 
     // TODO: advanced settings button
 
