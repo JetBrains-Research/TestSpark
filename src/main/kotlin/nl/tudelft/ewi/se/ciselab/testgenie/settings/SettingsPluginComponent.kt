@@ -55,8 +55,8 @@ class SettingsPluginComponent {
             .addComponent(JXTitledSeparator("Environment settings"), 15)
             .addLabeledComponent(JBLabel("Java 11 path:"), javaPathTextField, 10, false)
             // Add accessibility options
-            .addComponent(accessibilitySeparator)
-            .addComponent(JBLabel("Choose color for visualisation highlight"))
+            .addComponent(accessibilitySeparator, 15)
+            .addComponent(JBLabel("Choose color for visualisation highlight"), 15)
             .addComponent(colorPicker, 10)
             .addComponentFillVertically(JPanel(), 0)
             .panel
