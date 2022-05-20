@@ -94,22 +94,16 @@ class QuickAccessParametersStateTest {
         state.populationLimit = PopulationLimit.TESTS
         state.population = 1
 
-        Assertions.assertThat(QuickAccessParametersState.DefaultState.stoppingCondition.name)
-            .isEqualTo(TestGenieDefaultsBundle.defaultValue("stoppingCondition"))
-        Assertions.assertThat(QuickAccessParametersState.DefaultState.searchBudget)
-            .isEqualTo(TestGenieDefaultsBundle.defaultValue("searchBudget").toInt())
-        Assertions.assertThat(QuickAccessParametersState.DefaultState.initializationTimeout)
-            .isEqualTo(TestGenieDefaultsBundle.defaultValue("initializationTimeout").toInt())
-        Assertions.assertThat(QuickAccessParametersState.DefaultState.minimizationTimeout)
-            .isEqualTo(TestGenieDefaultsBundle.defaultValue("minimizationTimeout").toInt())
-        Assertions.assertThat(QuickAccessParametersState.DefaultState.assertionTimeout)
-            .isEqualTo(TestGenieDefaultsBundle.defaultValue("assertionTimeout").toInt())
-        Assertions.assertThat(QuickAccessParametersState.DefaultState.junitCheckTimeout)
-            .isEqualTo(TestGenieDefaultsBundle.defaultValue("junitCheckTimeout").toInt())
-        Assertions.assertThat(QuickAccessParametersState.DefaultState.populationLimit.name)
-            .isEqualTo(TestGenieDefaultsBundle.defaultValue("populationLimit"))
-        Assertions.assertThat(QuickAccessParametersState.DefaultState.population)
-            .isEqualTo(TestGenieDefaultsBundle.defaultValue("population").toInt())
+        val state = QuickAccessParametersState.DefaultState
+
+        Assertions.assertThat(state.stoppingCondition.name).isEqualTo(TestGenieDefaultsBundle.defaultValue("stoppingCondition"))
+        Assertions.assertThat(state.searchBudget).isEqualTo(TestGenieDefaultsBundle.defaultValue("searchBudget").toInt())
+        Assertions.assertThat(state.initializationTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("initializationTimeout").toInt())
+        Assertions.assertThat(state.minimizationTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("minimizationTimeout").toInt())
+        Assertions.assertThat(state.assertionTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("assertionTimeout").toInt())
+        Assertions.assertThat(state.junitCheckTimeout).isEqualTo(TestGenieDefaultsBundle.defaultValue("junitCheckTimeout").toInt())
+        Assertions.assertThat(state.populationLimit.name).isEqualTo(TestGenieDefaultsBundle.defaultValue("populationLimit"))
+        Assertions.assertThat(state.population).isEqualTo(TestGenieDefaultsBundle.defaultValue("population").toInt())
     }
 
     @Test
