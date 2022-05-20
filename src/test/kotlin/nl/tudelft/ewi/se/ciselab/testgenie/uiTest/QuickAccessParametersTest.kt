@@ -56,7 +56,7 @@ class QuickAccessParametersTest {
 
     @Order(1)
     @Test
-    fun testEverythingIsVisible(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+    fun testEverythingIsVisible() {
         // Assert text is visible
         quickAccessParameters.getTitles().forEach { Assertions.assertThat(it.isVisible()) }
         quickAccessParameters.getUIElementLabels().forEach { Assertions.assertThat(it.isVisible()) }
@@ -126,12 +126,18 @@ class QuickAccessParametersTest {
 
     @Order(4)
     @Test
-    fun testToolTipsOnUIElementLabels(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+    fun testToolTipsOnUIElementLabels() {
         // TODO: add other default tooltips
         val tooltipTexts = listOf(
             "Default: Max time", "Default: 120 seconds", "Default: Individuals"
         )
         quickAccessParameters.getDefaultTooltips().zip(tooltipTexts).forEach { Assertions.assertThat(it.first.value).isEqualTo(it.second) }
+    }
+
+    @Order(5)
+    @Test
+    fun testComboBoxesAreVisible() {
+        quickAccessParameters.findComboBoxes().forEach { it.isShowing }
     }
 
     // TODO: spinners + modifications
