@@ -1,11 +1,16 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.testFramework.fixtures.*
+import com.intellij.testFramework.fixtures.CodeInsightTestFixture
+import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
+import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
+import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
+import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import org.assertj.core.api.Assertions.assertThat
 import org.evosuite.result.BranchInfo
@@ -57,10 +62,12 @@ class CoverageVisualisationServiceTest {
         // Initialise the toolWindow TestGenie
         ToolWindowManager.getInstance(project)
             .registerToolWindow(RegisterToolWindowTask("TestGenie", ToolWindowAnchor.RIGHT))
+
+        // Disable coverage visualisation
+        val settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state!!
+        settingsState.showCoverage = false
     }
 
-    @Test
-    fun fillToolWindowContents() {
     @AfterEach
     fun tearDown() {
         fixture.tearDown()
@@ -94,6 +101,23 @@ class CoverageVisualisationServiceTest {
         assertThat(lineCoverage).isEqualTo(coverageToolWindowDisplayService.data[1])
         assertThat(branchCoverage).isEqualTo(coverageToolWindowDisplayService.data[2])
         assertThat(mutationCoverage).isEqualTo(coverageToolWindowDisplayService.data[3])
+    }
+
+    @Test
+    fun createToolWindowTabTestSingleContent() {
+        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()))
+        val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
+
+        // Verify only 1 content is created
+        assertThat(toolWindow.contentManager.contents.size).isEqualTo(1)
+    }
+
+    @Test
+    fun createToolWindowTabTestContent() {
+        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()))
+        val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
+        val content = toolWindow.contentManager.getContent(0)!!
+        assertThat(content.displayName).isEqualTo("Coverage Visualisation")
     }
 
     private fun valueGenerator(): Stream<Arguments> {
