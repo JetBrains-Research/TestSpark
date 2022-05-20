@@ -9,7 +9,7 @@ import com.intellij.remoterobot.search.locators.Locator
 import java.time.Duration
 
 /**
- * This class represents the StripeButton.
+ * This file contains the custom fixtures used for UI testing.
  */
 @FixtureName("JSpinner")
 open class JSpinnerFixture(
@@ -18,5 +18,15 @@ open class JSpinnerFixture(
 ) : ComponentFixture(remoteRobot, remoteComponent)
 
 fun ContainerFixture.jSpinner(locator: Locator): JSpinnerFixture {
+    return find(locator, Duration.ofSeconds(60))
+}
+
+@FixtureName("BasicArrowButton")
+open class BasicArrowButtonFixture(
+    remoteRobot: RemoteRobot,
+    remoteComponent: RemoteComponent
+) : ComponentFixture(remoteRobot, remoteComponent)
+
+fun ContainerFixture.basicArrowButton(locator: Locator): BasicArrowButtonFixture {
     return find(locator, Duration.ofSeconds(60))
 }
