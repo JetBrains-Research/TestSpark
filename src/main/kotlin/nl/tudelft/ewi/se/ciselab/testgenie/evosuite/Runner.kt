@@ -4,6 +4,8 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
@@ -41,7 +43,6 @@ class Runner(
     private val log = Logger.getInstance(this::class.java)
 
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
-    private val javaPath = "java" // TODO: Source from config
     private val evosuiteVersion = "1.0.2" // TODO: Figure out a better way to source this
 
     private val pluginsPath = System.getProperty("idea.plugins.path")
@@ -96,7 +97,7 @@ class Runner(
 
         val cmd = ArrayList<String>()
 
-        cmd.add(javaPath)
+        cmd.add(settingsState?.javaPath!!)
         cmd.add("-jar")
         cmd.add(evoSuitePath)
         cmd.addAll(command)
@@ -108,69 +109,77 @@ class Runner(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
-                    indicator.isIndeterminate = false
-                    indicator.text = TestGenieBundle.message("evosuiteSearchMessage")
-                    val evoSuiteProcess = GeneralCommandLine(cmd)
-                    evoSuiteProcess.charset = Charset.forName("UTF-8")
-                    evoSuiteProcess.setWorkDirectory(projectPath)
-                    val handler = OSProcessHandler(evoSuiteProcess)
+                    try {
+                        indicator.isIndeterminate = false
+                        indicator.text = TestGenieBundle.message("evosuiteSearchMessage")
+                        val evoSuiteProcess = GeneralCommandLine(cmd)
+                        evoSuiteProcess.charset = Charset.forName("UTF-8")
+                        evoSuiteProcess.setWorkDirectory(projectPath)
+                        val handler = OSProcessHandler(evoSuiteProcess)
 
-                    // attach process listener for output
-                    handler.addProcessListener(object : ProcessAdapter() {
-                        override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                        // attach process listener for output
+                        handler.addProcessListener(object : ProcessAdapter() {
+                            override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                                if (indicator.isCanceled) {
+                                    log.info("Cancelling search")
 
-                            if (indicator.isCanceled) {
-                                log.info("Cancelling search")
-                                val workspace = project.service<Workspace>()
-                                workspace.cancelPendingResult(testResultName)
+                                    val workspace = project.service<Workspace>()
+                                    workspace.cancelPendingResult(testResultName)
 
-                                handler.destroyProcess()
+                                    handler.destroyProcess()
+                                }
+
+                                val text = event.text
+
+                                val progressMatcher =
+                                    Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
+                                val coverageMatcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
+
+                                log.info(text) // kept for debugging purposes
+
+                                val progress =
+                                    if (progressMatcher.find()) progressMatcher.group(1)?.toDouble()?.div(100)
+                                    else null
+                                val coverage =
+                                    if (coverageMatcher.find()) coverageMatcher.group(1)?.toDouble()?.div(100)
+                                    else null
+                                if (progress != null && coverage != null) {
+                                    indicator.fraction = if (progress >= coverage) progress else coverage
+                                } else if (progress != null) {
+                                    indicator.fraction = progress
+                                } else if (coverage != null) {
+                                    indicator.fraction = coverage
+                                }
+
+                                if (indicator.fraction == 1.0 && indicator.text != TestGenieBundle.message("evosuitePostProcessMessage")) {
+                                    indicator.text = TestGenieBundle.message("evosuitePostProcessMessage")
+                                }
                             }
+                        })
 
-                            val text = event.text
+                        handler.startNotify()
 
-                            val progressMatcher = Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
-                            val coverageMatcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
-
-                            log.info(text) // kept for debugging purposes
-
-                            val progress =
-                                if (progressMatcher.find()) progressMatcher.group(1)?.toDouble()?.div(100) else null
-                            val coverage =
-                                if (coverageMatcher.find()) coverageMatcher.group(1)?.toDouble()?.div(100) else null
-                            if (progress != null && coverage != null) {
-                                indicator.fraction = if (progress >= coverage) progress else coverage
-                            } else if (progress != null) {
-                                indicator.fraction = progress
-                            } else if (coverage != null) {
-                                indicator.fraction = coverage
-                            }
-
-                            if (indicator.fraction == 1.0 && indicator.text != TestGenieBundle.message("evosuitePostProcessMessage")) {
-                                indicator.text = TestGenieBundle.message("evosuitePostProcessMessage")
-                            }
+                        // treat this as a join handle
+                        if (!handler.waitFor(evoSuiteProcessTimeout)) {
+                            evosuiteError("EvoSuite process exceeded timeout - ${evoSuiteProcessTimeout}ms")
                         }
-                    })
 
-                    handler.startNotify()
-
-                    // treat this as a join handle
-                    if (!handler.waitFor(evoSuiteProcessTimeout)) {
-                        log.error("EvoSuite process exceeded timeout - ${evoSuiteProcessTimeout}ms")
-                    }
-
-                    if (handler.exitCode == 0) {
-                        // if process wasn't cancelled, start result watcher
                         if (!indicator.isCanceled) {
-                            AppExecutorUtil.getAppScheduledExecutorService()
-                                .execute(ResultWatcher(project, testResultName))
+                            if (handler.exitCode == 0) {
+                                // if process wasn't cancelled, start result watcher
+                                AppExecutorUtil.getAppScheduledExecutorService()
+                                    .execute(ResultWatcher(project, testResultName))
+                            } else {
+                                evosuiteError("EvoSuite process exited with non-zero exit code - ${handler.exitCode}")
+                            }
                         }
-                    } else {
-                        log.error("EvoSuite process exited with non-zero exit code - ${handler.exitCode}")
-                    }
 
-                    indicator.fraction = 1.0
-                    indicator.stop()
+                        indicator.fraction = 1.0
+                        indicator.stop()
+                    } catch (e: Exception) {
+                        evosuiteError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
+                        e.printStackTrace()
+                    }
                 }
             })
 
@@ -178,5 +187,21 @@ class Runner(
         workspace.addPendingResult(testResultName, key)
 
         return testResultName
+    }
+
+    /**
+     * Show an EvoSuite execution error balloon.
+     *
+     * @param msg the balloon content to display
+     */
+    private fun evosuiteError(msg: String) {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("EvoSuite Execution Error")
+            .createNotification(
+                TestGenieBundle.message("evosuiteErrorTitle"),
+                msg,
+                NotificationType.ERROR
+            )
+            .notify(project)
     }
 }
