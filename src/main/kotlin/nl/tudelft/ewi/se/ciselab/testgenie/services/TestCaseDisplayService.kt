@@ -3,9 +3,9 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.JavaCodeFragmentFactory
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.ui.EditorTextField
@@ -66,16 +66,17 @@ class TestCaseDisplayService(private val project: Project) {
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
 
+            // fix Windows line separators
+            val testCodeFormatted = testCode.replace("\r\n", "\n")
+
             val checkbox = JCheckBox()
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val code = JavaCodeFragmentFactory.getInstance(project).createExpressionCodeFragment(testCode, null, null, true)
-            val document = PsiDocumentManager.getInstance(project).getDocument(code)
+            val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
 
             editor.setOneLineMode(false)
-            editor.isViewer = true
 
             testCasePanel.add(editor, BorderLayout.CENTER)
 
@@ -142,7 +143,8 @@ class TestCaseDisplayService(private val project: Project) {
                     .getDocument(selectedClass.containingFile)!!
                     .insertString(
                         selectedClass.rBrace!!.textRange.startOffset,
-                        it
+                        // Fix Windows line separators
+                        it.replace("\r\n", "\n")
                     )
             }
         }
