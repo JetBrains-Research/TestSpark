@@ -111,4 +111,31 @@ class QuickAccessParametersStateTest {
         Assertions.assertThat(QuickAccessParametersState.DefaultState.population)
             .isEqualTo(TestGenieDefaultsBundle.defaultValue("population").toInt())
     }
+
+    @Test
+    fun testStoppingConditionToString() {
+        Assertions.assertThat(StoppingCondition.MAXTIME.toString()).isEqualTo("Max time")
+        Assertions.assertThat(StoppingCondition.MAXSTATEMENTS.toString()).isEqualTo("Max statements")
+        Assertions.assertThat(StoppingCondition.MAXTESTS.toString()).isEqualTo("Max tests")
+        Assertions.assertThat(StoppingCondition.MAXGENERATIONS.toString()).isEqualTo("Max generations")
+        Assertions.assertThat(StoppingCondition.MAXFITNESSEVALUATIONS.toString()).isEqualTo("Max fitness evaluations")
+        Assertions.assertThat(StoppingCondition.TIMEDELTA.toString()).isEqualTo("Time delta")
+    }
+
+    @Test
+    fun testStoppingConditionUnits() {
+        Assertions.assertThat(StoppingCondition.MAXTIME.units()).isEqualTo("seconds")
+        Assertions.assertThat(StoppingCondition.MAXSTATEMENTS.units()).isEqualTo("statements")
+        Assertions.assertThat(StoppingCondition.MAXTESTS.units()).isEqualTo("tests")
+        Assertions.assertThat(StoppingCondition.MAXGENERATIONS.units()).isEqualTo("generations")
+        Assertions.assertThat(StoppingCondition.MAXFITNESSEVALUATIONS.units()).isEqualTo("evaluations")
+        Assertions.assertThat(StoppingCondition.TIMEDELTA.units()).isEqualTo("")
+    }
+
+    @Test
+    fun testPopulationLimitToString() {
+        Assertions.assertThat(PopulationLimit.INDIVIDUALS.toString()).isEqualTo("Individuals")
+        Assertions.assertThat(PopulationLimit.TESTS.toString()).isEqualTo("Tests")
+        Assertions.assertThat(PopulationLimit.STATEMENTS.toString()).isEqualTo("Statements")
+    }
 }
