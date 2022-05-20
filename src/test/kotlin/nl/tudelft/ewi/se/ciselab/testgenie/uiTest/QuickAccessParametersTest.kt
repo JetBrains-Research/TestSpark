@@ -3,6 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.JLabelFixture
 import com.intellij.remoterobot.fixtures.JListFixture
+import com.intellij.remoterobot.fixtures.JTextFieldFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.BasicArrowButtonFixture
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.JSpinnerFixture
@@ -196,50 +197,116 @@ class QuickAccessParametersTest {
     private fun valueGeneratorForPopulationLimitComboBoxChoices(): Stream<Arguments> = Stream.of(
         Arguments.of("Tests"),
         Arguments.of("Statements"),
-        Arguments.of("Individuals"),
+        Arguments.of("Individuals")
     )
 
     @Order(9)
     @ParameterizedTest
-    @MethodSource("valueGeneratorForSpinners")
-    fun testSpinner(arrowUp: BasicArrowButtonFixture, arrowDown: BasicArrowButtonFixture, spinner: JSpinnerFixture, clicksUp: Int, clicksDown: Int) {
-        val oldValue = spinner.data.getAll()[0].text.toInt()
+    @MethodSource("valueGeneratorForSpinnersOnValidInputs")
+    fun testSpinnerOnValidInputs(
+        arrowUp: BasicArrowButtonFixture,
+        arrowDown: BasicArrowButtonFixture,
+        spinner: JSpinnerFixture,
+        clicksUp: Int,
+        clicksDown: Int,
+        toolTipText: String
+    ) {
+        with(remoteRobot) {
+            // Get the actual interior text field
+            val textField: JTextFieldFixture = find(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='$toolTipText']"))
 
-        for (i in 1..clicksUp) {
-            arrowUp.click()
-        }
-        assertThat(spinner.data.getAll()[0].text.toInt()).isEqualTo(oldValue + clicksUp)
+            // Save the old value to restore it later
+            val oldValue: Int = textField.text.toInt()
 
-        for (i in 1..clicksDown) {
-            arrowDown.click()
+            // Increment the specified number of times
+            for (i in 1..clicksUp) {
+                arrowUp.click()
+            }
+            assertThat(spinner.data.getAll()[0].text.toInt()).isEqualTo(oldValue + clicksUp)
+
+            // Decrement the specified number of times
+            for (i in 1..clicksDown) {
+                arrowDown.click()
+            }
+            assertThat(textField.text.toInt()).isEqualTo(oldValue + clicksUp - clicksDown)
+
+            // Set back the old value
+            textField.text = oldValue.toString()
+            // Click on another non-label element to make sure the value of the spinner has been updated (this is required)
+            quickAccessParameters.searchBudgetTypeComboBox.doubleClick()
         }
-        assertThat(spinner.data.getAll()[0].text.toInt()).isEqualTo(oldValue + clicksUp - clicksDown)
     }
 
-    private fun valueGeneratorForSpinners(): Stream<Arguments> = Stream.of(
+    private fun valueGeneratorForSpinnersOnValidInputs(): Stream<Arguments> = Stream.of(
         Arguments.of(
             quickAccessParameters.searchBudgetValueUpArrow, quickAccessParameters.searchBudgetValueDownArrow,
-            quickAccessParameters.searchBudgetValueSpinner, 2, 4
+            quickAccessParameters.searchBudgetValueSpinner, 2, 4, "Maximum search duration."
         ),
         Arguments.of(
             quickAccessParameters.initializationTimeoutUpArrow, quickAccessParameters.initializationTimeoutDownArrow,
-            quickAccessParameters.initializationTimeoutSpinner, 4, 2
+            quickAccessParameters.initializationTimeoutSpinner, 4, 2, "Seconds allowed for initializing the search."
         ),
         Arguments.of(
             quickAccessParameters.minimisationTimeoutUpArrow, quickAccessParameters.minimisationTimeoutDownArrow,
-            quickAccessParameters.minimisationTimeoutSpinner, 3, 3
+            quickAccessParameters.minimisationTimeoutSpinner, 3, 3, "Seconds allowed for minimization at the end."
         ),
         Arguments.of(
             quickAccessParameters.assertionTimeoutUpArrow, quickAccessParameters.assertionTimeoutDownArrow,
-            quickAccessParameters.assertionTimeoutSpinner, 1, 2
+            quickAccessParameters.assertionTimeoutSpinner, 1, 2, "Seconds allowed for assertion generation at the end."
         ),
         Arguments.of(
             quickAccessParameters.jUnitCheckTimeoutUpArrow, quickAccessParameters.jUnitCheckTimeoutDownArrow,
-            quickAccessParameters.jUnitCheckTimeoutSpinner, 2, 1
+            quickAccessParameters.jUnitCheckTimeoutSpinner, 2, 1, "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
         ),
         Arguments.of(
             quickAccessParameters.populationValueUpArrow, quickAccessParameters.populationValueDownArrow,
-            quickAccessParameters.populationValueSpinner, 3, 4
+            quickAccessParameters.populationValueSpinner, 3, 4, "Population size of genetic algorithm."
+        )
+    )
+
+    @Order(10)
+    @ParameterizedTest
+    @MethodSource("valueGeneratorForSpinnersOnInvalidInputs")
+    fun testSpinnerOnInvalidInputs(spinner: JSpinnerFixture, toolTipText: String): Unit = with(remoteRobot) {
+        // Get the actual interior text field
+        val textField: JTextFieldFixture = find(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='$toolTipText']"))
+
+        // Save the value to restore it later
+        val oldValue: String = textField.text
+
+        // Update the value of the spinner to something invalid
+        textField.text = "gibberish"
+        // Click on another non-label element to make sure the value of the spinner has been updated (this is required)
+        quickAccessParameters.searchBudgetTypeComboBox.doubleClick()
+        // Assert that the old value is set instead
+        assertThat(textField.text).isEqualTo(oldValue)
+
+        // Update the value of the spinner to no input
+        textField.text = ""
+        // Click on another non-label element to make sure the value of the spinner has been updated (this is required)
+        quickAccessParameters.searchBudgetTypeComboBox.doubleClick()
+        // Assert that the old value is set instead
+        assertThat(textField.text).isEqualTo(oldValue)
+    }
+
+    private fun valueGeneratorForSpinnersOnInvalidInputs(): Stream<Arguments> = Stream.of(
+        Arguments.of(
+            quickAccessParameters.searchBudgetValueSpinner, "Maximum search duration."
+        ),
+        Arguments.of(
+            quickAccessParameters.initializationTimeoutSpinner, "Seconds allowed for initializing the search."
+        ),
+        Arguments.of(
+            quickAccessParameters.minimisationTimeoutSpinner, "Seconds allowed for minimization at the end."
+        ),
+        Arguments.of(
+            quickAccessParameters.assertionTimeoutSpinner, "Seconds allowed for assertion generation at the end."
+        ),
+        Arguments.of(
+            quickAccessParameters.jUnitCheckTimeoutSpinner, "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
+        ),
+        Arguments.of(
+            quickAccessParameters.populationValueSpinner, "Population size of genetic algorithm."
         )
     )
 
