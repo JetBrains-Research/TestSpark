@@ -1,10 +1,13 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
+
 /**
  * This class is the actual data class that stores the values of the Settings entries.
  */
 data class TestGenieSettingsState(
     var showCoverage: Boolean = false,
+    var javaPath: String = DefaultSettingsState.javaPath,
 
     var sandbox: Boolean = true,
     var assertions: Boolean = true,
@@ -21,7 +24,10 @@ data class TestGenieSettingsState(
     var criterionMethod: Boolean = true,
     var criterionMethodNoException: Boolean = true,
     var criterionCBranch: Boolean = true,
-    var minimize: Boolean = true
+    var minimize: Boolean = true,
+    var colorRed: Int = DefaultSettingsState.colorRed,
+    var colorGreen: Int = DefaultSettingsState.colorGreen,
+    var colorBlue: Int = DefaultSettingsState.colorBlue
 ) {
     private object DefaultSettingsState {
         const val sandbox: Boolean = true
@@ -29,6 +35,11 @@ data class TestGenieSettingsState(
         const val junitCheck: Boolean = false
         const val minimize: Boolean = true
         val algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.DYNAMOSA
+
+        val javaPath: String = TestGenieDefaultsBundle.defaultValue("javaPath")
+        val colorRed: Int = TestGenieDefaultsBundle.defaultValue("colorRed").toInt()
+        val colorGreen: Int = TestGenieDefaultsBundle.defaultValue("colorGreen").toInt()
+        val colorBlue: Int = TestGenieDefaultsBundle.defaultValue("colorBlue").toInt()
     }
 
     fun serializeChangesFromDefault(): List<String> {

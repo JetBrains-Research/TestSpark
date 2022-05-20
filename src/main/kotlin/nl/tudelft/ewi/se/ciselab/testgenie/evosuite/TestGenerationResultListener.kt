@@ -14,5 +14,5 @@ val TEST_GENERATION_RESULT_TOPIC: Topic<TestGenerationResultListener> = Topic.cr
  * generation job with testgenie.evosuite.Runner
  */
 interface TestGenerationResultListener {
-    fun testGenerationResult(testReport: CompactReport)
+    fun testGenerationResult(testReport: CompactReport, resultName: String)
 }
