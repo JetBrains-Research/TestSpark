@@ -94,30 +94,14 @@ class QuickAccessParametersTest {
     }
 
     private fun valueGeneratorForTestLabelsAreCorrect(): Stream<Arguments> = Stream.of(
-        Arguments.of(
-            "Search budget type", quickAccessParameters.searchBudgetTypeLabel
-        ),
-        Arguments.of(
-            "Search budget", quickAccessParameters.searchBudgetValueLabel
-        ),
-        Arguments.of(
-            "Initialization timeout", quickAccessParameters.initializationTimeoutLabel
-        ),
-        Arguments.of(
-            "Minimisation timeout", quickAccessParameters.minimizationTimeoutLabel
-        ),
-        Arguments.of(
-            "Assertion timeout", quickAccessParameters.assertionTimeoutLabel
-        ),
-        Arguments.of(
-            "JUnit check timeout", quickAccessParameters.jUnitCheckTimeoutLabel
-        ),
-        Arguments.of(
-            "Population limit", quickAccessParameters.populationLimitLabel
-        ),
-        Arguments.of(
-            "Population", quickAccessParameters.populationValueLabel
-        )
+        Arguments.of("Search budget type", quickAccessParameters.searchBudgetTypeLabel),
+        Arguments.of("Search budget", quickAccessParameters.searchBudgetValueLabel),
+        Arguments.of("Initialization timeout", quickAccessParameters.initializationTimeoutLabel),
+        Arguments.of("Minimisation timeout", quickAccessParameters.minimizationTimeoutLabel),
+        Arguments.of("Assertion timeout", quickAccessParameters.assertionTimeoutLabel),
+        Arguments.of("JUnit check timeout", quickAccessParameters.jUnitCheckTimeoutLabel),
+        Arguments.of("Population limit", quickAccessParameters.populationLimitLabel),
+        Arguments.of("Population", quickAccessParameters.populationValueLabel)
     )
 
     @Order(3)
@@ -129,18 +113,10 @@ class QuickAccessParametersTest {
     }
 
     private fun valueGeneratorForTestTitlesAreCorrect(): Stream<Arguments> = Stream.of(
-        Arguments.of(
-            "Quick Access Parameters", quickAccessParameters.title
-        ),
-        Arguments.of(
-            "Search budget", quickAccessParameters.searchBudgetSeparator
-        ),
-        Arguments.of(
-            "Timeouts", quickAccessParameters.timeoutsSeparator
-        ),
-        Arguments.of(
-            "Genetic Algorithm", quickAccessParameters.geneticAlgorithmSeparator
-        )
+        Arguments.of("Quick Access Parameters", quickAccessParameters.title),
+        Arguments.of("Search budget", quickAccessParameters.searchBudgetSeparator),
+        Arguments.of("Timeouts", quickAccessParameters.timeoutsSeparator),
+        Arguments.of("Genetic Algorithm", quickAccessParameters.geneticAlgorithmSeparator)
     )
 
     @Order(4)
@@ -299,24 +275,12 @@ class QuickAccessParametersTest {
     }
 
     private fun valueGeneratorForTestSpinnerOnInvalidInputs(): Stream<Arguments> = Stream.of(
-        Arguments.of(
-            quickAccessParameters.searchBudgetValueSpinner, quickAccessParameters.searchBudgetValueTooltip
-        ),
-        Arguments.of(
-            quickAccessParameters.initializationTimeoutSpinner, quickAccessParameters.initializationTimeoutTooltip
-        ),
-        Arguments.of(
-            quickAccessParameters.minimizationTimeoutSpinner, quickAccessParameters.minimizationTimeoutTooltip
-        ),
-        Arguments.of(
-            quickAccessParameters.assertionTimeoutSpinner, quickAccessParameters.assertionTimeoutTooltip
-        ),
-        Arguments.of(
-            quickAccessParameters.jUnitCheckTimeoutSpinner, quickAccessParameters.jUnitCheckTimeoutTooltip
-        ),
-        Arguments.of(
-            quickAccessParameters.populationValueSpinner, quickAccessParameters.populationValueTooltip
-        )
+        Arguments.of(quickAccessParameters.searchBudgetValueSpinner, quickAccessParameters.searchBudgetValueTooltip),
+        Arguments.of(quickAccessParameters.initializationTimeoutSpinner, quickAccessParameters.initializationTimeoutTooltip),
+        Arguments.of(quickAccessParameters.minimizationTimeoutSpinner, quickAccessParameters.minimizationTimeoutTooltip),
+        Arguments.of(quickAccessParameters.assertionTimeoutSpinner, quickAccessParameters.assertionTimeoutTooltip),
+        Arguments.of(quickAccessParameters.jUnitCheckTimeoutSpinner, quickAccessParameters.jUnitCheckTimeoutTooltip),
+        Arguments.of(quickAccessParameters.populationValueSpinner, quickAccessParameters.populationValueTooltip)
     )
 
     @Order(11)
