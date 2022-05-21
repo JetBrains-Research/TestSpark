@@ -490,6 +490,24 @@ class QuickAccessParametersTest {
         Arguments.of(StoppingCondition.TIMEDELTA), Arguments.of(StoppingCondition.MAXTIME),
     )
 
+    @Order(15)
+    @ParameterizedTest
+    @MethodSource("valueGeneratorForPopulationLimitUnitsAreChangingTest")
+    fun testPopulationLimitUnitsAreChanging(item: PopulationLimit, units: String): Unit = with(remoteRobot) {
+        val locator = byXpath("//div[@text='Default: 50 $units']")
+        val foundBefore: Int = findAll<JLabelFixture>(locator).size
+
+        quickAccessParameters.populationLimitArrow.click()
+        find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(item.toString())
+        assertThat(findAll<JLabelFixture>(locator).size).isEqualTo(foundBefore + 1)
+    }
+
+    private fun valueGeneratorForPopulationLimitUnitsAreChangingTest(): Stream<Arguments> = Stream.of(
+        Arguments.of(PopulationLimit.TESTS, "tests"),
+        Arguments.of(PopulationLimit.STATEMENTS, "statements"),
+        Arguments.of(PopulationLimit.INDIVIDUALS, "individuals")
+    )
+
     // TODO (Optional): tooltips on hovering
 
     /**
