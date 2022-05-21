@@ -66,14 +66,14 @@ class QuickAccessParametersTest {
     @BeforeEach
     fun setUp(_remoteRobot: RemoteRobot): Unit = with(_remoteRobot) {
         remoteRobot = _remoteRobot
-        // Open the tool window frame
+        // Find the tool window frame
         quickAccessParameters = find(QuickAccessParametersFixtures::class.java, timeout = Duration.ofSeconds(15))
     }
 
     @Order(1)
     @Test
     fun testEverythingIsVisible() {
-        // Open the "Quick Access Parameters" tab
+        // Find the "Quick Access Parameters" tab
         quickAccessParameters.openQuickAccessParametersTab()
 
         // Assert text is visible
@@ -87,13 +87,13 @@ class QuickAccessParametersTest {
 
     @Order(2)
     @ParameterizedTest
-    @MethodSource("valueGeneratorForLabelsAndTexts")
+    @MethodSource("valueGeneratorForTestLabelsAreCorrect")
     fun testLabelsAreCorrect(expectedText: String, label: JLabelFixture) {
         // Assert labels have the correct text
         assertThat(label.value).isEqualTo(expectedText)
     }
 
-    private fun valueGeneratorForLabelsAndTexts(): Stream<Arguments> = Stream.of(
+    private fun valueGeneratorForTestLabelsAreCorrect(): Stream<Arguments> = Stream.of(
         Arguments.of(
             "Search budget type", quickAccessParameters.searchBudgetTypeLabel
         ),
@@ -122,13 +122,13 @@ class QuickAccessParametersTest {
 
     @Order(3)
     @ParameterizedTest
-    @MethodSource("valueGeneratorForTitlesAndTexts")
+    @MethodSource("valueGeneratorForTestTitlesAreCorrect")
     fun testTitlesAreCorrect(expectedText: String, title: JLabelFixture) {
         // Assert labels have the text
         assertThat(title.value).isEqualTo(expectedText)
     }
 
-    private fun valueGeneratorForTitlesAndTexts(): Stream<Arguments> = Stream.of(
+    private fun valueGeneratorForTestTitlesAreCorrect(): Stream<Arguments> = Stream.of(
         Arguments.of(
             "Quick Access Parameters", quickAccessParameters.title
         ),
@@ -172,7 +172,7 @@ class QuickAccessParametersTest {
 
     @Order(7)
     @ParameterizedTest
-    @MethodSource("valueGeneratorForSearchBudgetTypeComboBoxChoices")
+    @MethodSource("valueGeneratorForTestSearchBudgetComboBoxes")
     fun testSearchBudgetComboBoxes(choice: String): Unit = with(remoteRobot) {
         quickAccessParameters.searchBudgetTypeArrow.click()
         val choices: JListFixture = find(byXpath("//div[@class='JList']"), Duration.ofSeconds(15))
@@ -180,7 +180,7 @@ class QuickAccessParametersTest {
         assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(choice))
     }
 
-    private fun valueGeneratorForSearchBudgetTypeComboBoxChoices(): Stream<Arguments> = Stream.of(
+    private fun valueGeneratorForTestSearchBudgetComboBoxes(): Stream<Arguments> = Stream.of(
         Arguments.of("Max statements"),
         Arguments.of("Max tests"),
         Arguments.of("Max generations"),
@@ -191,7 +191,7 @@ class QuickAccessParametersTest {
 
     @Order(8)
     @ParameterizedTest
-    @MethodSource("valueGeneratorForPopulationLimitComboBoxChoices")
+    @MethodSource("valueGeneratorForTestPopulationLimitComboBoxes")
     fun testPopulationLimitComboBoxes(choice: String): Unit = with(remoteRobot) {
         quickAccessParameters.populationLimitArrow.click()
         val choices: JListFixture = find(byXpath("//div[@class='JList']"), Duration.ofSeconds(15))
@@ -199,7 +199,7 @@ class QuickAccessParametersTest {
         assertThat(quickAccessParameters.populationLimitComboBox.hasText(choice))
     }
 
-    private fun valueGeneratorForPopulationLimitComboBoxChoices(): Stream<Arguments> = Stream.of(
+    private fun valueGeneratorForTestPopulationLimitComboBoxes(): Stream<Arguments> = Stream.of(
         Arguments.of("Tests"),
         Arguments.of("Statements"),
         Arguments.of("Individuals")
@@ -207,7 +207,7 @@ class QuickAccessParametersTest {
 
     @Order(9)
     @ParameterizedTest
-    @MethodSource("valueGeneratorForSpinnersOnValidInputs")
+    @MethodSource("valueGeneratorForTestSpinnerOnValidInputs")
     fun testSpinnerOnValidInputs(
         arrowUp: BasicArrowButtonFixture,
         arrowDown: BasicArrowButtonFixture,
@@ -242,7 +242,7 @@ class QuickAccessParametersTest {
         }
     }
 
-    private fun valueGeneratorForSpinnersOnValidInputs(): Stream<Arguments> {
+    private fun valueGeneratorForTestSpinnerOnValidInputs(): Stream<Arguments> {
         fun rand(): Int = random.nextInt(1, 6)
 
         return Stream.of(
@@ -275,7 +275,7 @@ class QuickAccessParametersTest {
 
     @Order(10)
     @ParameterizedTest
-    @MethodSource("valueGeneratorForSpinnersOnInvalidInputs")
+    @MethodSource("valueGeneratorForTestSpinnerOnInvalidInputs")
     fun testSpinnerOnInvalidInputs(spinner: JSpinnerFixture, toolTipText: String): Unit = with(remoteRobot) {
         // Get the actual interior text field
         val textField: JTextFieldFixture = find(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='$toolTipText']"))
@@ -298,7 +298,7 @@ class QuickAccessParametersTest {
         assertThat(textField.text).isEqualTo(oldValue)
     }
 
-    private fun valueGeneratorForSpinnersOnInvalidInputs(): Stream<Arguments> = Stream.of(
+    private fun valueGeneratorForTestSpinnerOnInvalidInputs(): Stream<Arguments> = Stream.of(
         Arguments.of(
             quickAccessParameters.searchBudgetValueSpinner, quickAccessParameters.searchBudgetValueTooltip
         ),
@@ -474,7 +474,7 @@ class QuickAccessParametersTest {
 
     @Order(14)
     @ParameterizedTest
-    @MethodSource("valueGeneratorForSearchBudgetUnitsAreChangingTest")
+    @MethodSource("valueGeneratorForTestSearchBudgetUnitsAreChanging")
     fun testSearchBudgetUnitsAreChanging(item: StoppingCondition): Unit = with(remoteRobot) {
         val locator = byXpath("//div[@text='Default: 60 ${item.units()}']")
         val foundBefore: Int = findAll<JLabelFixture>(locator).size
@@ -484,7 +484,7 @@ class QuickAccessParametersTest {
         assertThat(findAll<JLabelFixture>(locator).size).isEqualTo(foundBefore + 1)
     }
 
-    private fun valueGeneratorForSearchBudgetUnitsAreChangingTest(): Stream<Arguments> = Stream.of(
+    private fun valueGeneratorForTestSearchBudgetUnitsAreChanging(): Stream<Arguments> = Stream.of(
         Arguments.of(StoppingCondition.MAXSTATEMENTS), Arguments.of(StoppingCondition.MAXTESTS),
         Arguments.of(StoppingCondition.MAXGENERATIONS), Arguments.of(StoppingCondition.MAXFITNESSEVALUATIONS),
         Arguments.of(StoppingCondition.TIMEDELTA), Arguments.of(StoppingCondition.MAXTIME),
@@ -492,7 +492,7 @@ class QuickAccessParametersTest {
 
     @Order(15)
     @ParameterizedTest
-    @MethodSource("valueGeneratorForPopulationLimitUnitsAreChangingTest")
+    @MethodSource("valueGeneratorForTestPopulationLimitUnitsAreChanging")
     fun testPopulationLimitUnitsAreChanging(item: PopulationLimit, units: String): Unit = with(remoteRobot) {
         val locator = byXpath("//div[@text='Default: 50 $units']")
         val foundBefore: Int = findAll<JLabelFixture>(locator).size
@@ -502,13 +502,11 @@ class QuickAccessParametersTest {
         assertThat(findAll<JLabelFixture>(locator).size).isEqualTo(foundBefore + 1)
     }
 
-    private fun valueGeneratorForPopulationLimitUnitsAreChangingTest(): Stream<Arguments> = Stream.of(
+    private fun valueGeneratorForTestPopulationLimitUnitsAreChanging(): Stream<Arguments> = Stream.of(
         Arguments.of(PopulationLimit.TESTS, "tests"),
         Arguments.of(PopulationLimit.STATEMENTS, "statements"),
         Arguments.of(PopulationLimit.INDIVIDUALS, "individuals")
     )
-
-    // TODO (Optional): tooltips on hovering
 
     /**
      * First closes the TestGenie sidebar by clicking on the stripe button again.
