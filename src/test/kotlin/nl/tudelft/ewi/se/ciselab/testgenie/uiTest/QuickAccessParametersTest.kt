@@ -144,24 +144,20 @@ class QuickAccessParametersTest {
     )
 
     @Order(4)
-    @ParameterizedTest
-    @MethodSource("valueGeneratorForDefaultTooltipsAndTexts")
-    fun testToolTipsOnUIElementLabels(expectedText: String, tooltipLabel: JLabelFixture) {
+    @Test
+    fun testDefaultToolTips(): Unit = with(remoteRobot) {
         // TODO: add other default tooltips
-        assertThat(tooltipLabel.value).isEqualTo(expectedText)
-    }
+        // Default tooltips for `search budget type`, `initialization timeout` and `population limit` and `population` have unique (non-repeating) default values
+        // They can be found individually
+        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: Max time']")).isShowing)
+        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: 120 seconds']")).isShowing)
+        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: Individuals']")).isShowing)
+        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: 50 individuals']")).isShowing)
 
-    private fun valueGeneratorForDefaultTooltipsAndTexts(): Stream<Arguments> = Stream.of(
-        Arguments.of(
-            "Default: Max time", quickAccessParameters.searchBudgetTypeDefaultTooltip
-        ),
-        Arguments.of(
-            "Default: 120 seconds", quickAccessParameters.initializationTimeoutDefaultTooltip
-        ),
-        Arguments.of(
-            "Default: Individuals", quickAccessParameters.populationLimitDefaultTooltip
-        )
-    )
+        // Default tooltips for `search budget`, `minimisation timeout`, `assertion timeout`, `JUnit timeout` and have the same default value of 60 seconds.
+        // They cannot be found individually. Since these are the only labels with the text `Default: 60 seconds` the number of found such labels is asserted
+        assertThat(findAll<JLabelFixture>(byXpath("//div[@class='JBLabel' and @text='Default: 60 seconds']")).size).isEqualTo(4)
+    }
 
     @Order(5)
     @Test
@@ -477,6 +473,11 @@ class QuickAccessParametersTest {
         assertThat(quickAccessParameters.populationValueSpinnerTextField.text).isEqualTo(defaultState.population.toString())
     }
 
+    @Order(14)
+    @Test
+    fun testSus() {
+    }
+
     // TODO (Optional): tooltips on hovering
 
     /**
@@ -485,6 +486,10 @@ class QuickAccessParametersTest {
      */
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        // Reset all the parameters to defaults to prevent flakiness
+        quickAccessParameters.resetButton.click()
+        find<JButtonFixture>(byXpath("//div[@text='Yes']")).click()
+        find<JButtonFixture>(byXpath("//div[@text='OK']")).click()
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             clickOnToolWindow()

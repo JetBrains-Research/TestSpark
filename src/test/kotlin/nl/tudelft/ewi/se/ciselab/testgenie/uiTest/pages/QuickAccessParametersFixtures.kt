@@ -59,10 +59,6 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val searchBudgetTypeArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @tooltiptext='$searchBudgetTypeTooltip']"))
 
-    // The text with the default value for the search budget type
-    val searchBudgetTypeDefaultTooltip
-        get() = jLabel(byXpath("//div[@text='Default: Max time']"))
-
     /**
      * Search budget (value)
      */
@@ -88,11 +84,6 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     // The arrow to decrease the value
     val searchBudgetValueDownArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$searchBudgetValueTooltip']"))
-
-    // The text with the default value for the search budget value TODO: find it
-//    val searchBudgetValueDefaultTooltip
-//        get() = jLabel(byXpath(""))
-//    get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JBLabel' and @text='Search budget']"))
 
     /**
      * TIMEOUTS SECTION
@@ -129,10 +120,6 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val initializationTimeoutDownArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$initializationTimeoutTooltip']"))
 
-    // The text with the default value for the initialization timeout
-    val initializationTimeoutDefaultTooltip
-        get() = jLabel(byXpath("//div[@text='Default: 120 seconds']"))
-
     /**
      * Minimization timeout
      */
@@ -159,10 +146,6 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     // The arrow to decrease the value
     val minimizationTimeoutDownArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$minimizationTimeoutTooltip']"))
-
-    // The text with the default value for the minimization timeout TODO: find it
-//    val minimizationTimeoutDefaultTooltip
-//        get() = jLabel(byXpath(""))
 
     /**
      * Assertion timeout
@@ -191,17 +174,13 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val assertionTimeoutDownArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$assertionTimeoutTooltip']"))
 
-    // The text with the default value for the assertion timeout TODO: find it
-//    val assertionTimeoutDefaultTooltip
-//        get() = jLabel(byXpath(""))
-
     /**
      * JUnit check timeout
      */
 
     // The JUnit check timeout text
     val jUnitCheckTimeoutLabel
-        get() = jLabel(byXpath("//div[@text='JUnit check timeout']"))
+        get() = jLabel(byXpath("//div[@text='JUnit check timeout' and a]"))
 
     // The tooltip for JUnit check timeout
     val jUnitCheckTimeoutTooltip: String = "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
@@ -221,10 +200,6 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     // The arrow to decrease the value
     val jUnitCheckTimeoutDownArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$jUnitCheckTimeoutTooltip']"))
-
-    // The text with the default value for the JUnit check timeout TODO: find it
-//    val jUnitCheckTimeoutDefaultTooltip
-//        get() = jLabel(byXpath(""))
 
     /**
      * GENETIC ALGORITHM SECTION
@@ -252,10 +227,6 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val populationLimitArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @tooltiptext='$populationLimitTooltip']"))
 
-    // The text with the default value for the population limit
-    val populationLimitDefaultTooltip
-        get() = jLabel(byXpath("//div[@text='Default: Individuals']"))
-
     /**
      * Population value
      */
@@ -282,10 +253,6 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     // The arrow to decrease the value
     val populationValueDownArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$populationValueTooltip']"))
-
-    // The text with the default value for the population value TODO: find it
-//    val populationValueDefaultTooltip
-//        get() = jLabel(byXpath(""))
 
     /**
      * ACTION LINK AND BUTTONS
