@@ -473,11 +473,22 @@ class QuickAccessParametersTest {
     }
 
     @Order(14)
-    @Test
-    fun testSearchBudgetUnitsAreChanging() {
-        val oldValue = quickAccessParameters.searchBudgetTypeComboBox.selectedText()
-        assertThat(oldValue).isEqualTo("Max time")
+    @ParameterizedTest
+    @MethodSource("valueGeneratorForSearchBudgetUnitsAreChangingTest")
+    fun testSearchBudgetUnitsAreChanging(item: StoppingCondition): Unit = with(remoteRobot) {
+        val locator = byXpath("//div[@text='Default: 60 ${item.units()}']")
+        val foundBefore: Int = findAll<JLabelFixture>(locator).size
+
+        quickAccessParameters.searchBudgetTypeArrow.click()
+        find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(item.toString())
+        assertThat(findAll<JLabelFixture>(locator).size).isEqualTo(foundBefore + 1)
     }
+
+    private fun valueGeneratorForSearchBudgetUnitsAreChangingTest(): Stream<Arguments> = Stream.of(
+        Arguments.of(StoppingCondition.MAXSTATEMENTS), Arguments.of(StoppingCondition.MAXTESTS),
+        Arguments.of(StoppingCondition.MAXGENERATIONS), Arguments.of(StoppingCondition.MAXFITNESSEVALUATIONS),
+        Arguments.of(StoppingCondition.TIMEDELTA), Arguments.of(StoppingCondition.MAXTIME),
+    )
 
     // TODO (Optional): tooltips on hovering
 
