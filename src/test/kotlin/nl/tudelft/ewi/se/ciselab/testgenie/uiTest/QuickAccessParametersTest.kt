@@ -9,6 +9,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.BasicArrowButto
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.JSpinnerFixture
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.QuickAccessParametersFixtures
+import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.SettingsFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import org.assertj.core.api.Assertions.assertThat
@@ -317,7 +318,17 @@ class QuickAccessParametersTest {
         )
     )
 
-    // TODO: advanced settings button
+    @Order(11)
+    @Test
+    fun testAdvancedSettings(): Unit = with(remoteRobot) {
+        quickAccessParameters.advancedSettingsButton.click()
+
+        find(SettingsFrame::class.java, Duration.ofSeconds(20)).apply {
+            val breadcrumbs = jLabel(byXpath("//div[@class='Breadcrumbs' and @visible_text='Tools || TestGenie || EvoSuite']"))
+            assertThat(breadcrumbs.isShowing)
+            closeSettings()
+        }
+    }
 
     // TODO: save button
 
