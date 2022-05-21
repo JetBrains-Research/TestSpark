@@ -24,10 +24,6 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     private val parametersTab
         get() = actionLink(byXpath("//div[@text='Parameters']"))
 
-    // The actual panel
-    val quickAccessParametersContent
-        get() = actionLink(byXpath("//div[@class='DumbUnawareHider']"))
-
     // The title "Quick Access Parameters"
     val title
         get() = jLabel(byXpath("//div[@javaclass='javax.swing.JLabel']"))
