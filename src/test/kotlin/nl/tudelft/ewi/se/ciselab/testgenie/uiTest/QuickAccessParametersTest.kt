@@ -146,7 +146,6 @@ class QuickAccessParametersTest {
     @Order(4)
     @Test
     fun testDefaultToolTips(): Unit = with(remoteRobot) {
-        // TODO: add other default tooltips
         // Default tooltips for `search budget type`, `initialization timeout` and `population limit` and `population` have unique (non-repeating) default values
         // They can be found individually
         assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: Max time']")).isShowing)
@@ -337,7 +336,7 @@ class QuickAccessParametersTest {
     fun testSaveButton(): Unit = with(remoteRobot) {
         // Set new values everywhere and store the old values to restore them at the end of the test
 
-        val searchBudgetTypeOld: String = quickAccessParameters.searchBudgetTypeComboBox.data.getAll()[0].text
+        val searchBudgetTypeOld: String = quickAccessParameters.searchBudgetTypeComboBox.selectedText()
         val searchBudgetTypeNew: String = StoppingCondition.values()[random.nextInt(0, StoppingCondition.values().size)].toString()
         quickAccessParameters.searchBudgetTypeArrow.click()
         find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(searchBudgetTypeNew)
@@ -385,14 +384,14 @@ class QuickAccessParametersTest {
         setUpAll(remoteRobot)
 
         // Assert that the state has been modified
-        assertThat(quickAccessParameters.searchBudgetTypeComboBox.data.getAll()[0].text).isEqualTo(searchBudgetTypeNew)
-        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.text).isEqualTo(searchBudgetValueNew)
-        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.text).isEqualTo(initializationTimeoutNew)
-        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.text).isEqualTo(minimizationTimeoutNew)
-        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.text).isEqualTo(assertionTimeoutNew)
-        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text).isEqualTo(junitCheckTimeoutNew)
-        assertThat(quickAccessParameters.populationLimitComboBox.data.getAll()[0].text).isEqualTo(populationLimitNew)
-        assertThat(quickAccessParameters.populationValueSpinnerTextField.text).isEqualTo(populationValueNew)
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(searchBudgetTypeNew))
+        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.hasText(searchBudgetValueNew))
+        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.hasText(initializationTimeoutNew))
+        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.hasText(minimizationTimeoutNew))
+        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.hasText(assertionTimeoutNew))
+        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.hasText(junitCheckTimeoutNew))
+        assertThat(quickAccessParameters.populationLimitComboBox.hasText(populationLimitNew))
+        assertThat(quickAccessParameters.populationValueSpinnerTextField.hasText(populationValueNew))
 
         // Restore everything back
         quickAccessParameters.searchBudgetTypeArrow.click()
@@ -447,13 +446,13 @@ class QuickAccessParametersTest {
         find<JButtonFixture>(byXpath("//div[@text='No']")).click()
 
         // Assert that nothing has been modified
-        assertThat(quickAccessParameters.searchBudgetTypeComboBox.data.getAll()[0].text).isEqualTo(searchBudgetTypeNew)
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(searchBudgetTypeNew))
         assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.text.replace(",", "")).isEqualTo(searchBudgetValueNew)
         assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(initializationTimeoutNew)
         assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(minimizationTimeoutNew)
         assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(assertionTimeoutNew)
         assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(junitCheckTimeoutNew)
-        assertThat(quickAccessParameters.populationLimitComboBox.data.getAll()[0].text).isEqualTo(populationLimitNew)
+        assertThat(quickAccessParameters.populationLimitComboBox.hasText(populationLimitNew))
         assertThat(quickAccessParameters.populationValueSpinnerTextField.text.replace(",", "")).isEqualTo(populationValueNew)
 
         // Now actually reset the values to defaults
@@ -463,19 +462,21 @@ class QuickAccessParametersTest {
 
         // Assert that the default values have been set
         val defaultState = QuickAccessParametersState.DefaultState
-        assertThat(quickAccessParameters.searchBudgetTypeComboBox.data.getAll()[0].text).isEqualTo(defaultState.stoppingCondition.toString())
-        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.text).isEqualTo(defaultState.searchBudget.toString())
-        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.text).isEqualTo(defaultState.initializationTimeout.toString())
-        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.text).isEqualTo(defaultState.minimizationTimeout.toString())
-        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.text).isEqualTo(defaultState.assertionTimeout.toString())
-        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text).isEqualTo(defaultState.junitCheckTimeout.toString())
-        assertThat(quickAccessParameters.populationLimitComboBox.data.getAll()[0].text).isEqualTo(defaultState.populationLimit.toString())
-        assertThat(quickAccessParameters.populationValueSpinnerTextField.text).isEqualTo(defaultState.population.toString())
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(defaultState.stoppingCondition.toString()))
+        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.hasText(defaultState.searchBudget.toString()))
+        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.hasText(defaultState.initializationTimeout.toString()))
+        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.hasText(defaultState.minimizationTimeout.toString()))
+        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.hasText(defaultState.assertionTimeout.toString()))
+        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.hasText(defaultState.junitCheckTimeout.toString()))
+        assertThat(quickAccessParameters.populationLimitComboBox.hasText(defaultState.populationLimit.toString()))
+        assertThat(quickAccessParameters.populationValueSpinnerTextField.hasText(defaultState.population.toString()))
     }
 
     @Order(14)
     @Test
-    fun testSus() {
+    fun testSearchBudgetUnitsAreChanging() {
+        val oldValue = quickAccessParameters.searchBudgetTypeComboBox.selectedText()
+        assertThat(oldValue).isEqualTo("Max time")
     }
 
     // TODO (Optional): tooltips on hovering
