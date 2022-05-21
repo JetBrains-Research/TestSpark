@@ -176,7 +176,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
 
     // The JUnit check timeout text
     val jUnitCheckTimeoutLabel
-        get() = jLabel(byXpath("//div[@text='JUnit check timeout' and a]"))
+        get() = jLabel(byXpath("//div[@text='JUnit check timeout']"))
 
     // The tooltip for JUnit check timeout
     val jUnitCheckTimeoutTooltip: String = "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
