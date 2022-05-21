@@ -71,6 +71,10 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val searchBudgetValueSpinner
         get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Maximum search duration.']"))
 
+    // The search budget value text field of the spinner
+    val searchBudgetValueSpinnerTextField
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Maximum search duration.']"))
+
     // The arrow to increase the value
     val searchBudgetValueUpArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='Maximum search duration.']"))
@@ -104,6 +108,10 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val initializationTimeoutSpinner
         get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for initializing the search.']"))
 
+    // The initialization timeout text field of the spinner
+    val initializationTimeoutSpinnerTextField
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Seconds allowed for initializing the search.']"))
+
     // The arrow to increase the value
     val initializationTimeoutUpArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='Seconds allowed for initializing the search.']"))
@@ -120,24 +128,28 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
      * Minimization timeout
      */
 
-    // The minimisation timeout text
-    val minimisationTimeoutLabel
+    // The minimization timeout text
+    val minimizationTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Minimisation timeout']"))
 
-    // The minimisation timeout spinner
-    val minimisationTimeoutSpinner
+    // The minimization timeout spinner
+    val minimizationTimeoutSpinner
         get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for minimization at the end.']"))
 
+    // The minimization timeout text field of the spinner
+    val minimizationTimeoutSpinnerTextField
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Seconds allowed for minimization at the end.']"))
+
     // The arrow to increase the value
-    val minimisationTimeoutUpArrow
+    val minimizationTimeoutUpArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='Seconds allowed for minimization at the end.']"))
 
     // The arrow to decrease the value
-    val minimisationTimeoutDownArrow
+    val minimizationTimeoutDownArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='Seconds allowed for minimization at the end.']"))
 
-    // The text with the default value for the minimisation timeout TODO: find it
-//    val minimisationTimeoutDefaultTooltip
+    // The text with the default value for the minimization timeout TODO: find it
+//    val minimizationTimeoutDefaultTooltip
 //        get() = jLabel(byXpath(""))
 
     /**
@@ -151,6 +163,10 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     // The assertion timeout spinner
     val assertionTimeoutSpinner
         get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for assertion generation at the end.']"))
+
+    // The assertion timeout text field of the spinner
+    val assertionTimeoutSpinnerTextField
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Seconds allowed for assertion generation at the end.']"))
 
     // The arrow to increase the value
     val assertionTimeoutUpArrow
@@ -175,6 +191,10 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     // The JUnit check timeout spinner
     val jUnitCheckTimeoutSpinner
         get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability).']"))
+
+    // The JUnit check timeout text field of the spinner
+    val jUnitCheckTimeoutSpinnerTextField
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability).']"))
 
     // The arrow to increase the value
     val jUnitCheckTimeoutUpArrow
@@ -227,6 +247,10 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val populationValueSpinner
         get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Population size of genetic algorithm.']"))
 
+    // The population value text field of the spinner
+    val populationValueSpinnerTextField
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Population size of genetic algorithm.']"))
+
     // The arrow to increase the value
     val populationValueUpArrow
         get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='Population size of genetic algorithm.']"))
@@ -248,11 +272,11 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
         get() = actionLink(byXpath("//div[@class='ActionLink']"))
 
     // The save button
-    private val saveButton
+    val saveButton
         get() = button(byXpath("//div[@text='Save']"))
 
     // The reset button
-    private val resetButton
+    val resetButton
         get() = button(byXpath("//div[@text='Reset']"))
 
     /**
@@ -282,7 +306,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     fun getUIElementLabels(): List<JLabelFixture> {
         return listOf(
             searchBudgetTypeLabel, searchBudgetValueLabel, initializationTimeoutLabel,
-            minimisationTimeoutLabel, assertionTimeoutLabel, jUnitCheckTimeoutLabel,
+            minimizationTimeoutLabel, assertionTimeoutLabel, jUnitCheckTimeoutLabel,
             populationLimitLabel, populationValueLabel
         )
     }
@@ -313,7 +337,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     fun getJSpinners(): List<JSpinnerFixture> {
         return listOf(
             searchBudgetValueSpinner, initializationTimeoutSpinner,
-            minimisationTimeoutSpinner, assertionTimeoutSpinner,
+            minimizationTimeoutSpinner, assertionTimeoutSpinner,
             jUnitCheckTimeoutSpinner, populationValueSpinner
         )
     }

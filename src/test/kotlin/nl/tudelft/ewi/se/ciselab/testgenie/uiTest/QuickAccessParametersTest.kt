@@ -1,10 +1,13 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.fixtures.JLabelFixture
 import com.intellij.remoterobot.fixtures.JListFixture
 import com.intellij.remoterobot.fixtures.JTextFieldFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.PopulationLimit
+import nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.StoppingCondition
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.BasicArrowButtonFixture
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.JSpinnerFixture
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
@@ -98,7 +101,7 @@ class QuickAccessParametersTest {
             "Initialization timeout", quickAccessParameters.initializationTimeoutLabel
         ),
         Arguments.of(
-            "Minimisation timeout", quickAccessParameters.minimisationTimeoutLabel
+            "Minimisation timeout", quickAccessParameters.minimizationTimeoutLabel
         ),
         Arguments.of(
             "Assertion timeout", quickAccessParameters.assertionTimeoutLabel
@@ -254,8 +257,8 @@ class QuickAccessParametersTest {
                 quickAccessParameters.initializationTimeoutSpinner, rand(), rand(), "Seconds allowed for initializing the search."
             ),
             Arguments.of(
-                quickAccessParameters.minimisationTimeoutUpArrow, quickAccessParameters.minimisationTimeoutDownArrow,
-                quickAccessParameters.minimisationTimeoutSpinner, rand(), rand(), "Seconds allowed for minimization at the end."
+                quickAccessParameters.minimizationTimeoutUpArrow, quickAccessParameters.minimizationTimeoutDownArrow,
+                quickAccessParameters.minimizationTimeoutSpinner, rand(), rand(), "Seconds allowed for minimization at the end."
             ),
             Arguments.of(
                 quickAccessParameters.assertionTimeoutUpArrow, quickAccessParameters.assertionTimeoutDownArrow,
@@ -305,7 +308,7 @@ class QuickAccessParametersTest {
             quickAccessParameters.initializationTimeoutSpinner, "Seconds allowed for initializing the search."
         ),
         Arguments.of(
-            quickAccessParameters.minimisationTimeoutSpinner, "Seconds allowed for minimization at the end."
+            quickAccessParameters.minimizationTimeoutSpinner, "Seconds allowed for minimization at the end."
         ),
         Arguments.of(
             quickAccessParameters.assertionTimeoutSpinner, "Seconds allowed for assertion generation at the end."
@@ -328,6 +331,80 @@ class QuickAccessParametersTest {
             assertThat(breadcrumbs.isShowing)
             closeSettings()
         }
+    }
+
+    @Order(12)
+    @Test
+    fun testSaveButton(): Unit = with(remoteRobot) {
+        // Set new values everywhere and store the old values to restore them at the end of the test
+
+        val searchBudgetTypeOld: String = quickAccessParameters.searchBudgetTypeComboBox.data.getAll()[0].text
+        val searchBudgetTypeNew: String = StoppingCondition.values()[Random.nextInt(0, StoppingCondition.values().size)].toString()
+        quickAccessParameters.searchBudgetTypeArrow.click()
+        find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(searchBudgetTypeNew)
+
+        val searchBudgetValueOld: String = quickAccessParameters.searchBudgetValueSpinnerTextField.text
+        val searchBudgetValueNew: String = Random.nextInt(0, 1000).toString()
+        quickAccessParameters.searchBudgetValueSpinnerTextField.text = searchBudgetValueNew
+
+        val initializationTimeoutOld: String = quickAccessParameters.initializationTimeoutSpinnerTextField.text
+        val initializationTimeoutNew: String = Random.nextInt(0, 1000).toString()
+        quickAccessParameters.initializationTimeoutSpinnerTextField.text = initializationTimeoutNew
+
+        val minimizationTimeoutOld: String = quickAccessParameters.minimizationTimeoutSpinnerTextField.text
+        val minimizationTimeoutNew: String = Random.nextInt(0, 1000).toString()
+        quickAccessParameters.minimizationTimeoutSpinnerTextField.text = minimizationTimeoutNew
+
+        val assertionTimeoutOld: String = quickAccessParameters.assertionTimeoutSpinnerTextField.text
+        val assertionTimeoutNew: String = Random.nextInt(0, 1000).toString()
+        quickAccessParameters.assertionTimeoutSpinnerTextField.text = assertionTimeoutNew
+
+        val junitCheckTimeoutOld: String = quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text
+        val junitCheckTimeoutNew: String = Random.nextInt(0, 1000).toString()
+        quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text = junitCheckTimeoutNew
+
+        val populationLimitOld: String = quickAccessParameters.populationLimitComboBox.data.getAll()[0].text
+        val populationLimitNew: String = PopulationLimit.values()[Random.nextInt(0, PopulationLimit.values().size)].toString()
+        quickAccessParameters.populationLimitArrow.click()
+        find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(populationLimitNew)
+
+        val populationValueOld: String = quickAccessParameters.populationValueSpinnerTextField.text
+        val populationValueNew: String = Random.nextInt(0, 1000).toString()
+        quickAccessParameters.populationValueSpinnerTextField.text = populationValueNew
+
+        // Save the modified values
+        quickAccessParameters.populationLimitArrow.doubleClick() // click somewhere else to make sure that the value in the last spinner is recorded
+        quickAccessParameters.saveButton.click()
+        find<JButtonFixture>(byXpath("//div[@text='OK']")).click()
+
+        // Close the tool window and the project
+        closeAll(remoteRobot)
+
+        // Open the project and tool window again
+        setUpAll(remoteRobot)
+
+        // Assert that the state has been modified
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.data.getAll()[0].text).isEqualTo(searchBudgetTypeNew)
+        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.text).isEqualTo(searchBudgetValueNew)
+        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.text).isEqualTo(initializationTimeoutNew)
+        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.text).isEqualTo(minimizationTimeoutNew)
+        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.text).isEqualTo(assertionTimeoutNew)
+        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text).isEqualTo(junitCheckTimeoutNew)
+        assertThat(quickAccessParameters.populationLimitComboBox.data.getAll()[0].text).isEqualTo(populationLimitNew)
+        assertThat(quickAccessParameters.populationValueSpinnerTextField.text).isEqualTo(populationValueNew)
+
+        // Restore everything back
+        quickAccessParameters.searchBudgetTypeArrow.click()
+        find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(searchBudgetTypeOld)
+        quickAccessParameters.searchBudgetValueSpinnerTextField.text = searchBudgetValueOld
+        quickAccessParameters.initializationTimeoutSpinnerTextField.text = initializationTimeoutOld
+        quickAccessParameters.minimizationTimeoutSpinnerTextField.text = minimizationTimeoutOld
+        quickAccessParameters.assertionTimeoutSpinnerTextField.text = assertionTimeoutOld
+        quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text = junitCheckTimeoutOld
+        quickAccessParameters.populationLimitArrow.click()
+        find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(populationLimitOld)
+        quickAccessParameters.populationValueSpinnerTextField.text = populationValueOld
+        quickAccessParameters.populationLimitArrow.doubleClick()
     }
 
     // TODO: save button
