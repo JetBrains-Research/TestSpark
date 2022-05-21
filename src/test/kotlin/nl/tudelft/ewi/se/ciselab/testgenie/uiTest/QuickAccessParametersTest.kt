@@ -7,6 +7,7 @@ import com.intellij.remoterobot.fixtures.JListFixture
 import com.intellij.remoterobot.fixtures.JTextFieldFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.PopulationLimit
+import nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.QuickAccessParametersState
 import nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.StoppingCondition
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.BasicArrowButtonFixture
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.customfixtures.JSpinnerFixture
@@ -40,6 +41,8 @@ class QuickAccessParametersTest {
     private lateinit var quickAccessParameters: QuickAccessParametersFixtures
 
     private lateinit var remoteRobot: RemoteRobot
+
+    private val random: Random = Random.Default
 
     /**
      * Opens an untitled project from the IntelliJ welcome screen.
@@ -245,7 +248,7 @@ class QuickAccessParametersTest {
     }
 
     private fun valueGeneratorForSpinnersOnValidInputs(): Stream<Arguments> {
-        fun rand(): Int = Random.nextInt(1, 6)
+        fun rand(): Int = random.nextInt(1, 6)
 
         return Stream.of(
             Arguments.of(
@@ -339,41 +342,43 @@ class QuickAccessParametersTest {
         // Set new values everywhere and store the old values to restore them at the end of the test
 
         val searchBudgetTypeOld: String = quickAccessParameters.searchBudgetTypeComboBox.data.getAll()[0].text
-        val searchBudgetTypeNew: String = StoppingCondition.values()[Random.nextInt(0, StoppingCondition.values().size)].toString()
+        val searchBudgetTypeNew: String = StoppingCondition.values()[random.nextInt(0, StoppingCondition.values().size)].toString()
         quickAccessParameters.searchBudgetTypeArrow.click()
         find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(searchBudgetTypeNew)
 
         val searchBudgetValueOld: String = quickAccessParameters.searchBudgetValueSpinnerTextField.text
-        val searchBudgetValueNew: String = Random.nextInt(0, 1000).toString()
+        val searchBudgetValueNew: String = random.nextInt(0, 10000).toString()
         quickAccessParameters.searchBudgetValueSpinnerTextField.text = searchBudgetValueNew
 
         val initializationTimeoutOld: String = quickAccessParameters.initializationTimeoutSpinnerTextField.text
-        val initializationTimeoutNew: String = Random.nextInt(0, 1000).toString()
+        val initializationTimeoutNew: String = random.nextInt(0, 10000).toString()
         quickAccessParameters.initializationTimeoutSpinnerTextField.text = initializationTimeoutNew
 
         val minimizationTimeoutOld: String = quickAccessParameters.minimizationTimeoutSpinnerTextField.text
-        val minimizationTimeoutNew: String = Random.nextInt(0, 1000).toString()
+        val minimizationTimeoutNew: String = random.nextInt(0, 10000).toString()
         quickAccessParameters.minimizationTimeoutSpinnerTextField.text = minimizationTimeoutNew
 
         val assertionTimeoutOld: String = quickAccessParameters.assertionTimeoutSpinnerTextField.text
-        val assertionTimeoutNew: String = Random.nextInt(0, 1000).toString()
+        val assertionTimeoutNew: String = random.nextInt(0, 10000).toString()
         quickAccessParameters.assertionTimeoutSpinnerTextField.text = assertionTimeoutNew
 
         val junitCheckTimeoutOld: String = quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text
-        val junitCheckTimeoutNew: String = Random.nextInt(0, 1000).toString()
+        val junitCheckTimeoutNew: String = random.nextInt(0, 10000).toString()
         quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text = junitCheckTimeoutNew
 
         val populationLimitOld: String = quickAccessParameters.populationLimitComboBox.data.getAll()[0].text
-        val populationLimitNew: String = PopulationLimit.values()[Random.nextInt(0, PopulationLimit.values().size)].toString()
+        val populationLimitNew: String = PopulationLimit.values()[random.nextInt(0, PopulationLimit.values().size)].toString()
         quickAccessParameters.populationLimitArrow.click()
         find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(populationLimitNew)
 
         val populationValueOld: String = quickAccessParameters.populationValueSpinnerTextField.text
-        val populationValueNew: String = Random.nextInt(0, 1000).toString()
+        val populationValueNew: String = random.nextInt(0, 10000).toString()
         quickAccessParameters.populationValueSpinnerTextField.text = populationValueNew
 
+        // Click somewhere else to make sure that the value in the last spinner is recorded
+        quickAccessParameters.populationLimitArrow.doubleClick()
+
         // Save the modified values
-        quickAccessParameters.populationLimitArrow.doubleClick() // click somewhere else to make sure that the value in the last spinner is recorded
         quickAccessParameters.saveButton.click()
         find<JButtonFixture>(byXpath("//div[@text='OK']")).click()
 
@@ -407,10 +412,70 @@ class QuickAccessParametersTest {
         quickAccessParameters.populationLimitArrow.doubleClick()
     }
 
-    // TODO: quick access UI - why vars?
-    // Change range of spinners to 1000
+    @Order(13)
+    @Test
+    fun testResetButton(): Unit = with(remoteRobot) {
+        // Set new values everywhere
 
-    // TODO: reset button
+        val searchBudgetTypeNew: String = StoppingCondition.values()[random.nextInt(0, StoppingCondition.values().size)].toString()
+        quickAccessParameters.searchBudgetTypeArrow.click()
+        find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(searchBudgetTypeNew)
+
+        val searchBudgetValueNew: String = random.nextInt(0, 10000).toString()
+        quickAccessParameters.searchBudgetValueSpinnerTextField.text = searchBudgetValueNew
+
+        val initializationTimeoutNew: String = random.nextInt(0, 10000).toString()
+        quickAccessParameters.initializationTimeoutSpinnerTextField.text = initializationTimeoutNew
+
+        val minimizationTimeoutNew: String = random.nextInt(0, 10000).toString()
+        quickAccessParameters.minimizationTimeoutSpinnerTextField.text = minimizationTimeoutNew
+
+        val assertionTimeoutNew: String = random.nextInt(0, 10000).toString()
+        quickAccessParameters.assertionTimeoutSpinnerTextField.text = assertionTimeoutNew
+
+        val junitCheckTimeoutNew: String = random.nextInt(0, 10000).toString()
+        quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text = junitCheckTimeoutNew
+
+        val populationLimitNew: String = PopulationLimit.values()[random.nextInt(0, PopulationLimit.values().size)].toString()
+        quickAccessParameters.populationLimitArrow.click()
+        find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(populationLimitNew)
+
+        val populationValueNew: String = random.nextInt(0, 10000).toString()
+        quickAccessParameters.populationValueSpinnerTextField.text = populationValueNew
+
+        // Click somewhere else to make sure that the value in the last spinner is recorded
+        quickAccessParameters.populationLimitArrow.doubleClick()
+
+        // Try to reset the modified values
+        quickAccessParameters.resetButton.click()
+        find<JButtonFixture>(byXpath("//div[@text='No']")).click()
+
+        // Assert that nothing has been modified
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.data.getAll()[0].text).isEqualTo(searchBudgetTypeNew)
+        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.text.replace(",", "")).isEqualTo(searchBudgetValueNew)
+        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(initializationTimeoutNew)
+        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(minimizationTimeoutNew)
+        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(assertionTimeoutNew)
+        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(junitCheckTimeoutNew)
+        assertThat(quickAccessParameters.populationLimitComboBox.data.getAll()[0].text).isEqualTo(populationLimitNew)
+        assertThat(quickAccessParameters.populationValueSpinnerTextField.text.replace(",", "")).isEqualTo(populationValueNew)
+
+        // Now actually reset the values to defaults
+        quickAccessParameters.resetButton.click()
+        find<JButtonFixture>(byXpath("//div[@text='Yes']")).click()
+        find<JButtonFixture>(byXpath("//div[@text='OK']")).click()
+
+        // Assert that the default values have been set
+        val defaultState = QuickAccessParametersState.DefaultState
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.data.getAll()[0].text).isEqualTo(defaultState.stoppingCondition.toString())
+        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.text).isEqualTo(defaultState.searchBudget.toString())
+        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.text).isEqualTo(defaultState.initializationTimeout.toString())
+        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.text).isEqualTo(defaultState.minimizationTimeout.toString())
+        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.text).isEqualTo(defaultState.assertionTimeout.toString())
+        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text).isEqualTo(defaultState.junitCheckTimeout.toString())
+        assertThat(quickAccessParameters.populationLimitComboBox.data.getAll()[0].text).isEqualTo(defaultState.populationLimit.toString())
+        assertThat(quickAccessParameters.populationValueSpinnerTextField.text).isEqualTo(defaultState.population.toString())
+    }
 
     // TODO (Optional): tooltips on hovering
 
