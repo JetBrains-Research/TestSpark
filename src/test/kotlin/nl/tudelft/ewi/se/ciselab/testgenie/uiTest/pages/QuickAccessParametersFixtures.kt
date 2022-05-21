@@ -48,13 +48,16 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val searchBudgetTypeLabel
         get() = jLabel(byXpath("//div[@text='Search budget type']"))
 
+    // Tool tip for search budget type
+    private val searchBudgetTypeTooltip: String = "What condition should be checked to end the search."
+
     // The search budget type combo-box
     val searchBudgetTypeComboBox
-        get() = comboBox(byXpath("//div[@class='ComboBox' and @tooltiptext='What condition should be checked to end the search.']"))
+        get() = comboBox(byXpath("//div[@class='ComboBox' and @tooltiptext='$searchBudgetTypeTooltip']"))
 
     // The search budget type combo-box arrow
     val searchBudgetTypeArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @tooltiptext='What condition should be checked to end the search.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @tooltiptext='$searchBudgetTypeTooltip']"))
 
     // The text with the default value for the search budget type
     val searchBudgetTypeDefaultTooltip
@@ -67,21 +70,24 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val searchBudgetValueLabel
         get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JBLabel' and @text='Search budget']"))
 
+    // Tool tip for search budget value
+    val searchBudgetValueTooltip: String = "Maximum search duration."
+
     // The search budget value spinner
     val searchBudgetValueSpinner
-        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Maximum search duration.']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='$searchBudgetValueTooltip']"))
 
     // The search budget value text field of the spinner
     val searchBudgetValueSpinnerTextField
-        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Maximum search duration.']"))
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='$searchBudgetValueTooltip']"))
 
     // The arrow to increase the value
     val searchBudgetValueUpArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='Maximum search duration.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='$searchBudgetValueTooltip']"))
 
     // The arrow to decrease the value
     val searchBudgetValueDownArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='Maximum search duration.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$searchBudgetValueTooltip']"))
 
     // The text with the default value for the search budget value TODO: find it
 //    val searchBudgetValueDefaultTooltip
@@ -104,21 +110,24 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val initializationTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Initialization timeout']"))
 
+    // The tooltip for initialization timeout
+    val initializationTimeoutTooltip: String = "Seconds allowed for initializing the search."
+
     // The initialization timeout spinner
     val initializationTimeoutSpinner
-        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for initializing the search.']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='$initializationTimeoutTooltip']"))
 
     // The initialization timeout text field of the spinner
     val initializationTimeoutSpinnerTextField
-        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Seconds allowed for initializing the search.']"))
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='$initializationTimeoutTooltip']"))
 
     // The arrow to increase the value
     val initializationTimeoutUpArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='Seconds allowed for initializing the search.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='$initializationTimeoutTooltip']"))
 
     // The arrow to decrease the value
     val initializationTimeoutDownArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='Seconds allowed for initializing the search.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$initializationTimeoutTooltip']"))
 
     // The text with the default value for the initialization timeout
     val initializationTimeoutDefaultTooltip
@@ -132,21 +141,24 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val minimizationTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Minimisation timeout']"))
 
+    // The tooltip for minimization timeout
+    val minimizationTimeoutTooltip: String = "Seconds allowed for minimization at the end."
+
     // The minimization timeout spinner
     val minimizationTimeoutSpinner
-        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for minimization at the end.']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='$minimizationTimeoutTooltip']"))
 
     // The minimization timeout text field of the spinner
     val minimizationTimeoutSpinnerTextField
-        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Seconds allowed for minimization at the end.']"))
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='$minimizationTimeoutTooltip']"))
 
     // The arrow to increase the value
     val minimizationTimeoutUpArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='Seconds allowed for minimization at the end.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='$minimizationTimeoutTooltip']"))
 
     // The arrow to decrease the value
     val minimizationTimeoutDownArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='Seconds allowed for minimization at the end.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$minimizationTimeoutTooltip']"))
 
     // The text with the default value for the minimization timeout TODO: find it
 //    val minimizationTimeoutDefaultTooltip
@@ -160,21 +172,24 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val assertionTimeoutLabel
         get() = jLabel(byXpath("//div[@text='Assertion timeout']"))
 
+    // The tooltip for assertion timeout
+    val assertionTimeoutTooltip: String = "Seconds allowed for assertion generation at the end."
+
     // The assertion timeout spinner
     val assertionTimeoutSpinner
-        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for assertion generation at the end.']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='$assertionTimeoutTooltip']"))
 
     // The assertion timeout text field of the spinner
     val assertionTimeoutSpinnerTextField
-        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Seconds allowed for assertion generation at the end.']"))
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='$assertionTimeoutTooltip']"))
 
     // The arrow to increase the value
     val assertionTimeoutUpArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='Seconds allowed for assertion generation at the end.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='$assertionTimeoutTooltip']"))
 
     // The arrow to decrease the value
     val assertionTimeoutDownArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='Seconds allowed for assertion generation at the end.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$assertionTimeoutTooltip']"))
 
     // The text with the default value for the assertion timeout TODO: find it
 //    val assertionTimeoutDefaultTooltip
@@ -188,21 +203,24 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val jUnitCheckTimeoutLabel
         get() = jLabel(byXpath("//div[@text='JUnit check timeout']"))
 
+    // The tooltip for JUnit check timeout
+    val jUnitCheckTimeoutTooltip: String = "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
+
     // The JUnit check timeout spinner
     val jUnitCheckTimeoutSpinner
-        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability).']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='$jUnitCheckTimeoutTooltip']"))
 
     // The JUnit check timeout text field of the spinner
     val jUnitCheckTimeoutSpinnerTextField
-        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability).']"))
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='$jUnitCheckTimeoutTooltip']"))
 
     // The arrow to increase the value
     val jUnitCheckTimeoutUpArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability).']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='$jUnitCheckTimeoutTooltip']"))
 
     // The arrow to decrease the value
     val jUnitCheckTimeoutDownArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability).']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$jUnitCheckTimeoutTooltip']"))
 
     // The text with the default value for the JUnit check timeout TODO: find it
 //    val jUnitCheckTimeoutDefaultTooltip
@@ -223,13 +241,16 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val populationLimitLabel
         get() = jLabel(byXpath("//div[@text='Population limit']"))
 
+    // The tooltip for population limit
+    private val populationLimitTooltip: String = "What to use as limit for the population size."
+
     // The population limit combo-box
     val populationLimitComboBox
-        get() = comboBox(byXpath("//div[@class='ComboBox' and @tooltiptext='What to use as limit for the population size.']"))
+        get() = comboBox(byXpath("//div[@class='ComboBox' and @tooltiptext='$populationLimitTooltip']"))
 
     // The population limit combo-box arrow
     val populationLimitArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @tooltiptext='What to use as limit for the population size.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @tooltiptext='$populationLimitTooltip']"))
 
     // The text with the default value for the population limit
     val populationLimitDefaultTooltip
@@ -243,21 +264,24 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val populationValueLabel
         get() = jLabel(byXpath("//div[@text='Population']"))
 
+    // The tooltip for population value
+    val populationValueTooltip: String = "Population size of genetic algorithm."
+
     // The population value spinner
     val populationValueSpinner
-        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='Population size of genetic algorithm.']"))
+        get() = jSpinner(byXpath("//div[@class='JSpinner' and @tooltiptext='$populationValueTooltip']"))
 
     // The population value text field of the spinner
     val populationValueSpinnerTextField
-        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='Population size of genetic algorithm.']"))
+        get() = textField(byXpath("//div[@class='JFormattedTextField' and @name='Spinner.formattedTextField' and @tooltiptext='$populationValueTooltip']"))
 
     // The arrow to increase the value
     val populationValueUpArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='Population size of genetic algorithm.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.nextButton' and @tooltiptext='$populationValueTooltip']"))
 
     // The arrow to decrease the value
     val populationValueDownArrow
-        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='Population size of genetic algorithm.']"))
+        get() = basicArrowButton(byXpath("//div[@class='BasicArrowButton' and @name='Spinner.previousButton' and @tooltiptext='$populationValueTooltip']"))
 
     // The text with the default value for the population value TODO: find it
 //    val populationValueDefaultTooltip
