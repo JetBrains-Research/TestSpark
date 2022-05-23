@@ -129,9 +129,14 @@ class TestCaseDisplayService(private val project: Project) {
         // the AbstractTreeClassChooserDialog (parent of the TreeJavaClassChooserDialog).
         // If this is not done, the user can pick a non-project class (e.g. a class from a library).
         // See https://github.com/ciselab/TestGenie/issues/102
-        val showLibraryContentsField = chooser.javaClass.superclass.getDeclaredField("myIsShowLibraryContents")
-        showLibraryContentsField.isAccessible = true
-        showLibraryContentsField.set(chooser, false)
+        try {
+            val showLibraryContentsField = chooser.javaClass.superclass.getDeclaredField("myIsShowLibraryContents")
+            showLibraryContentsField.isAccessible = true
+            showLibraryContentsField.set(chooser, false)
+        } catch (_: Exception) {
+            // could not set field
+            // ignoring the exception is acceptable as this part is not critical
+        }
 
         chooser.showDialog()
 
