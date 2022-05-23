@@ -12,7 +12,6 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import org.assertj.core.api.Assertions.assertThat
 import org.evosuite.result.BranchInfo
 import org.evosuite.result.MutationInfo
