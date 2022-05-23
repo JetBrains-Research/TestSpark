@@ -122,6 +122,17 @@ class TestCaseDisplayService(private val project: Project) {
             .createProjectScopeChooser(
                 "Insert Test Cases into Class"
             )
+
+        // Warning: The following code is extremely cursed.
+        // It is a workaround for an oversight in the IntelliJ TreeJavaClassChooserDialog.
+        // This is necessary in order to set isShowLibraryContents to false in
+        // the AbstractTreeClassChooserDialog (parent of the TreeJavaClassChooserDialog).
+        // If this is not done, the user can pick a non-project class (e.g. a class from a library).
+        // See https://github.com/ciselab/TestGenie/issues/102
+        val showLibraryContentsField = chooser.javaClass.superclass.getDeclaredField("myIsShowLibraryContents")
+        showLibraryContentsField.isAccessible = true
+        showLibraryContentsField.set(chooser, false)
+
         chooser.showDialog()
 
         // get selected class or return if no class was selected
