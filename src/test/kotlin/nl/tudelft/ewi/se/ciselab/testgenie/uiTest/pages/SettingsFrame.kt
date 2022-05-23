@@ -40,7 +40,10 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for search text filed in Settings menu
     val searchTextBox
-        get() = textField(byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"), Duration.ofSeconds(60))
+        get() = textField(
+            byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"),
+            Duration.ofSeconds(60)
+        )
 
     // Action to find Settings tree view
     val projectViewTree
@@ -53,6 +56,26 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     // Action for coverage checkbox
     val coverageCheckBox
         get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Show visualised coverage']"))
+
+    // Action for separator "Environment settings"
+    val environmentSettingsSeparator
+        get() = actionLink(byXpath("//div[@class='JXTitledSeparator'][.//div[@text='Environment settings']]//div[@class='JSeparator']"))
+
+    // Action for java path label
+    val javaPathLabel
+        get() = jLabel(byXpath("//div[@text='Java 11 path:']"))
+
+    // Action for java path text field
+    val javaPathField
+        get() = textField(byXpath("//div[@tooltiptext='Path to a java binary']"))
+
+    // Action for separator "Accessibility settings"
+    val accessibilitySettingsSeparator
+        get() = actionLink(byXpath("//div[@class='JXTitledSeparator'][.//div[@text='Accessibility settings']]//div[@class='JSeparator']"))
+
+    // Action for color picker
+    val colorPicker
+        get() = actionLink(byXpath("//div[@class='JColorChooser']"))
 
     // Action for separator of coverage
     val generalSettingsSeparator
