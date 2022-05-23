@@ -1,6 +1,8 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.actions
 
 import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
@@ -60,6 +62,14 @@ fun getSurroundingMethod(psiFile: PsiFile, caret: Caret): PsiMethod? {
         }
     }
     return surroundingMethod
+}
+
+fun getSurroundingLine(doc: Document, caret: Caret): Int? {
+    val line = doc.getLineNumber(caret.offset)
+
+    val text = doc.getText(TextRange(doc.getLineStartOffset(line), doc.getLineEndOffset(line)))
+        .replace(Regex("[\n\t{} ]"), "")
+    return if (text.isBlank()) null else line
 }
 
 /**
