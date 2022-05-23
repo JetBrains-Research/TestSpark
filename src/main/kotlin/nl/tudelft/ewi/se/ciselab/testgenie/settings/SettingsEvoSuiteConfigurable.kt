@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.ui.Messages
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import javax.swing.JComponent
 
 /**
