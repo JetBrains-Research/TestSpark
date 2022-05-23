@@ -10,6 +10,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 
 /**
  * This class contains all the logic related to generating tests for a class.
@@ -37,7 +38,7 @@ class GenerateTestsActionClass : AnAction() {
         val classFQN = psiClass.qualifiedName ?: return
 
         val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-        val projectClassPath = "$projectPath/target/classes/"
+        val projectClassPath = "$projectPath/" + TestGenieSettingsService.getInstance().state!!.buildPath
 
         log.info("Generating tests for project $projectPath with classpath $projectClassPath")
 
