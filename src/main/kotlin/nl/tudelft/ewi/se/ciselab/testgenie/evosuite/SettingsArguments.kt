@@ -1,8 +1,8 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.evosuite
 
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
-import nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.QuickAccessParametersService
 
 /**
  * This class is used for constructing the necessary parameters for running evosuite
