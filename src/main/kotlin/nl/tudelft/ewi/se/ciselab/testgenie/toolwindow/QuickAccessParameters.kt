@@ -10,6 +10,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
+import nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Dimension
 import java.awt.Font
