@@ -17,7 +17,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import java.io.File
 import java.nio.charset.Charset
 import java.util.UUID
