@@ -5,6 +5,7 @@ import com.intellij.testFramework.LightProjectDescriptor.EMPTY_PROJECT_DESCRIPTO
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.impl.LightTempDirTestFixtureImpl
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

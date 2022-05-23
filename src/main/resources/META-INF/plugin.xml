@@ -20,7 +20,7 @@
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
         <applicationService
-                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService"/>
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService"/>
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.QuickAccessParametersService"/>
         <applicationConfigurable
