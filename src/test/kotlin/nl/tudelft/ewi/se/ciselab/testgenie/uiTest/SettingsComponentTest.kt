@@ -65,6 +65,11 @@ class SettingsComponentTest {
         settingsFrame.findTestGenie()
         assertThat(settingsFrame.introLabel.isShowing).isTrue
         assertThat(settingsFrame.coverageCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.environmentSettingsSeparator.isShowing).isTrue
+        assertThat(settingsFrame.javaPathField.isShowing).isTrue
+        assertThat(settingsFrame.javaPathLabel.isShowing).isTrue
+        assertThat(settingsFrame.accessibilitySettingsSeparator.isShowing).isTrue
+        assertThat(settingsFrame.colorPicker.isShowing).isTrue
     }
 
     @Order(3)
@@ -72,9 +77,10 @@ class SettingsComponentTest {
     fun changeTestGenieTabValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         val prevCoverageCheckBoxValue = settingsFrame.coverageCheckBox.isSelected()
-
+        val prevJavaPathFieldValue = settingsFrame.javaPathField.text
         // Change checkbox value and apply the settings
         settingsFrame.coverageCheckBox.setValue(!prevCoverageCheckBoxValue)
+        settingsFrame.javaPathField.text = "java path"
         settingsFrame.okSettings()
 
         // Open settings again
@@ -88,6 +94,7 @@ class SettingsComponentTest {
         // Change the checkbox to previous state and close settings
         assertThat(settingsFrame.coverageCheckBox.isSelected()).isNotEqualTo(prevCoverageCheckBoxValue)
         settingsFrame.coverageCheckBox.setValue(prevCoverageCheckBoxValue)
+        settingsFrame.javaPathField.text = prevJavaPathFieldValue
         settingsFrame.okSettings()
 
         // Open settings again
