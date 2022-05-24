@@ -70,6 +70,9 @@ class SettingsComponentTest {
         assertThat(settingsFrame.javaPathLabel.isShowing).isTrue
         assertThat(settingsFrame.accessibilitySettingsSeparator.isShowing).isTrue
         assertThat(settingsFrame.colorPicker.isShowing).isTrue
+        assertThat(settingsFrame.hueTextField.isShowing).isTrue
+        assertThat(settingsFrame.saturationTextField.isShowing).isTrue
+        assertThat(settingsFrame.valueTextField.isShowing).isTrue
     }
 
     @Order(3)
@@ -78,9 +81,16 @@ class SettingsComponentTest {
         var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         val prevCoverageCheckBoxValue = settingsFrame.coverageCheckBox.isSelected()
         val prevJavaPathFieldValue = settingsFrame.javaPathField.text
+        val prevHueTextFieldValue = settingsFrame.hueTextField.text
+        val prevSaturationTextFieldValue = settingsFrame.saturationTextField.text
+        val prevValueTextFieldValue = settingsFrame.valueTextField.text
+
         // Change checkbox value and apply the settings
         settingsFrame.coverageCheckBox.setValue(!prevCoverageCheckBoxValue)
         settingsFrame.javaPathField.text = "java path"
+        settingsFrame.hueTextField.text = "100"
+        settingsFrame.saturationTextField.text = "18"
+        settingsFrame.valueTextField.text = "78"
         settingsFrame.okSettings()
 
         // Open settings again
@@ -95,6 +105,9 @@ class SettingsComponentTest {
         assertThat(settingsFrame.coverageCheckBox.isSelected()).isNotEqualTo(prevCoverageCheckBoxValue)
         settingsFrame.coverageCheckBox.setValue(prevCoverageCheckBoxValue)
         settingsFrame.javaPathField.text = prevJavaPathFieldValue
+        settingsFrame.hueTextField.text = prevHueTextFieldValue
+        settingsFrame.saturationTextField.text = prevSaturationTextFieldValue
+        settingsFrame.valueTextField.text = prevValueTextFieldValue
         settingsFrame.okSettings()
 
         // Open settings again
