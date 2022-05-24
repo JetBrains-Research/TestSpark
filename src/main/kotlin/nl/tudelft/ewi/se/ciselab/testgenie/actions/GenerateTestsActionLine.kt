@@ -60,6 +60,6 @@ class GenerateTestsActionLine : AnAction() {
         val line: Int = getSurroundingLine(psiFile, caret) ?: return
 
         e.presentation.isEnabledAndVisible = true
-        e.presentation.text = "Generate Tests For $line"
+        e.presentation.text = "Generate Tests For Line ${line + 1}"
     }
 }
