@@ -29,9 +29,10 @@ class GenerateTestsActionLine : AnAction() {
 
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
         val doc: Document = PsiDocumentManager.getInstance(e.project!!).getDocument(psiFile) ?: return
-        val line: Int? = getSurroundingLine(doc, caret)
+        // val line: Int? = getSurroundingLine(doc, caret)
 
-        e.presentation.isEnabledAndVisible = validateLine(line!!, psiMethod, doc)
+        val lineValid = validateLine(caret.caretModel.primaryCaret.offset, psiMethod, doc)
+        e.presentation.isEnabledAndVisible = lineValid
         e.presentation.text = "Generate Tests For ${getMethodDisplayName(psiMethod)}"
     }
 }

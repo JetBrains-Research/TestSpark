@@ -132,10 +132,48 @@ private fun validateClass(psiClass: PsiClass): Boolean {
     return !psiClass.isEnum && psiClass !is PsiAnonymousClass
 }
 
-fun validateLine(line: Int, psiMethod: PsiMethod, doc: Document): Boolean {
-    val startDeclaration: Int = doc.getLineNumber(psiMethod.startOffset)
-    val startBody: Int = doc.getLineNumber(psiMethod.body?.startOffset!!)
-    return line >= startBody + 1
+fun validateLine(offset: Int, psiMethod: PsiMethod, doc: Document): Boolean {
+    val line: Int = doc.getLineNumber(offset)
+
+    val openingBraceOffset: Int = psiMethod.body?.lBrace?.startOffset!!
+    val closingBraceOffset: Int = psiMethod.body?.rBrace?.startOffset!!
+
+    val openingBraceLine: Int = doc.getLineNumber(openingBraceOffset)
+    val closingBraceLine: Int = doc.getLineNumber(closingBraceOffset)
+
+    println("Opening brace offset: $openingBraceOffset")
+    println("Closing brace offset: $closingBraceOffset")
+
+    println("Opening brace line: ${openingBraceLine + 1}")
+    println("Closing brace line: ${closingBraceLine + 1}")
+
+    println(
+        "Opening brace line offsets: (${doc.getLineStartOffset(openingBraceLine)},${
+        doc.getLineEndOffset(
+            openingBraceLine
+        )
+        }"
+    )
+    println(
+        "Closing brace line offsets: (${doc.getLineStartOffset(closingBraceLine)},${
+        doc.getLineEndOffset(
+            closingBraceLine
+        )
+        }"
+    )
+
+    if (openingBraceLine == closingBraceLine) return line == openingBraceLine
+
+    // Figure out case 3.1, 3.1.1 and 3.2
+    if (openingBraceLine + 1 == closingBraceLine) {
+        // do something
+    }
+    // ...
+
+    if (line <= openingBraceLine) return false
+    val text =
+        doc.getText(TextRange(doc.getLineStartOffset(line), doc.getLineEndOffset(line))).replace(Regex("[\n\t{} ]"), "")
+    return !text.isBlank()
 }
 
 /**
