@@ -87,6 +87,17 @@ class Runner(
     }
 
     /**
+     * Sets up evosuite to run for a target line of the target class. This attaches the selected line argument
+     * to the evosuite process.
+     */
+    fun forLine(selectedLine: Int): Runner {
+        command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forLine(selectedLine)
+            .build()
+
+        return this
+    }
+
+    /**
      * Performs final argument preparation and launches the evosuite process on a separate thread.
      *
      * @return the path to which results will be (eventually) saved
