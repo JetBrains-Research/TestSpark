@@ -5,9 +5,12 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiCodeBlock
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiStatement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
@@ -64,12 +67,17 @@ fun getSurroundingMethod(psiFile: PsiFile, caret: Caret): PsiMethod? {
     return surroundingMethod
 }
 
-fun getSurroundingLine(doc: Document, caret: Caret): Int? {
-    val line = doc.getLineNumber(caret.offset)
+fun getSurroundingLine(psiFile: PsiFile, caret: Caret): Int? {
+    val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return null
 
-    val text =
-        doc.getText(TextRange(doc.getLineStartOffset(line), doc.getLineEndOffset(line))).replace(Regex("[\n\t{} ]"), "")
-    return if (text.isBlank()) null else line
+    val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
+
+    val selectedLine: Int = doc.getLineNumber(caret.offset)
+    val selectedLineText: String =
+        doc.getText(TextRange(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine)))
+
+    if (selectedLineText.isBlank()) return null
+    return if (!validateLine(selectedLine, psiMethod, psiFile)) null else selectedLine
 }
 
 /**
@@ -132,48 +140,19 @@ private fun validateClass(psiClass: PsiClass): Boolean {
     return !psiClass.isEnum && psiClass !is PsiAnonymousClass
 }
 
-fun validateLine(offset: Int, psiMethod: PsiMethod, doc: Document): Boolean {
-    val line: Int = doc.getLineNumber(offset)
+private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFile): Boolean {
+    val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
 
-    val openingBraceOffset: Int = psiMethod.body?.lBrace?.startOffset!!
-    val closingBraceOffset: Int = psiMethod.body?.rBrace?.startOffset!!
+    val psiMethodBody: PsiCodeBlock = psiMethod.body ?: return false
+    if (psiMethodBody.statements.isEmpty()) return false
 
-    val openingBraceLine: Int = doc.getLineNumber(openingBraceOffset)
-    val closingBraceLine: Int = doc.getLineNumber(closingBraceOffset)
+    val firstStatement: PsiStatement = psiMethodBody.statements.first()
+    val lastStatement: PsiStatement = psiMethodBody.statements.last()
 
-    println("Opening brace offset: $openingBraceOffset")
-    println("Closing brace offset: $closingBraceOffset")
+    val firstStatementLine: Int = doc.getLineNumber(firstStatement.startOffset)
+    val lastStatementLine: Int = doc.getLineNumber(lastStatement.endOffset)
 
-    println("Opening brace line: ${openingBraceLine + 1}")
-    println("Closing brace line: ${closingBraceLine + 1}")
-
-    println(
-        "Opening brace line offsets: (${doc.getLineStartOffset(openingBraceLine)},${
-        doc.getLineEndOffset(
-            openingBraceLine
-        )
-        }"
-    )
-    println(
-        "Closing brace line offsets: (${doc.getLineStartOffset(closingBraceLine)},${
-        doc.getLineEndOffset(
-            closingBraceLine
-        )
-        }"
-    )
-
-    if (openingBraceLine == closingBraceLine) return line == openingBraceLine
-
-    // Figure out case 3.1, 3.1.1 and 3.2
-    if (openingBraceLine + 1 == closingBraceLine) {
-        // do something
-    }
-    // ...
-
-    if (line <= openingBraceLine) return false
-    val text =
-        doc.getText(TextRange(doc.getLineStartOffset(line), doc.getLineEndOffset(line))).replace(Regex("[\n\t{} ]"), "")
-    return !text.isBlank()
+    return (selectedLine in firstStatementLine..lastStatementLine)
 }
 
 /**
