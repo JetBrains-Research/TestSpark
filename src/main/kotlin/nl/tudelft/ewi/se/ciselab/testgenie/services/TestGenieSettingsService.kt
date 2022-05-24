@@ -1,9 +1,10 @@
-package nl.tudelft.ewi.se.ciselab.testgenie.settings
+package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
 
 /**
  * This class is responsible for storing the Settings persistently. It uses TestGenieSettingsState class for that.
