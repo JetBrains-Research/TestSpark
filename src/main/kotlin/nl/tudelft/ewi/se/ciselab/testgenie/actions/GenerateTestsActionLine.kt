@@ -29,14 +29,14 @@ class GenerateTestsActionLine : AnAction() {
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
-        val fileName = vFile.presentableUrl
-        val modificationStamp = vFile.modificationStamp
 
         val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
         val classFQN = psiClass.qualifiedName ?: return
 
         val selectedLine: Int = getSurroundingLine(psiFile, caret) ?: return
+        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+        val fileName = vFile.presentableUrl
+        val modificationStamp = vFile.modificationStamp
 
         val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val projectClassPath = "$projectPath/target/classes/"
@@ -46,7 +46,8 @@ class GenerateTestsActionLine : AnAction() {
         log.info("Selected class is $classFQN")
         log.info("Selected line is $selectedLine")
 
-        Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp).forLine(selectedLine).runEvoSuite()
+        Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp).forLine(selectedLine)
+            .runEvoSuite()
     }
 
     /**
