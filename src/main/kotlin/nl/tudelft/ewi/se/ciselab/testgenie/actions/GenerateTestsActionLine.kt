@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
  * This class contains all the logic related to generating tests for a line.
@@ -28,11 +29,14 @@ class GenerateTestsActionLine : AnAction() {
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+        val fileName = vFile.presentableUrl
+        val modificationStamp = vFile.modificationStamp
 
         val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
         val classFQN = psiClass.qualifiedName ?: return
 
-        val line: Int = getSurroundingLine(psiFile, caret) ?: return
+        val selectedLine: Int = getSurroundingLine(psiFile, caret) ?: return
 
         val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val projectClassPath = "$projectPath/target/classes/"
@@ -40,9 +44,9 @@ class GenerateTestsActionLine : AnAction() {
         log.info("Generating tests for project $projectPath with classpath $projectClassPath")
 
         log.info("Selected class is $classFQN")
-        log.info("Selected line is $line")
+        log.info("Selected line is $selectedLine")
 
-        // Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp).forClass().runEvoSuite()
+        Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp).forLine(selectedLine).runEvoSuite()
     }
 
     /**
