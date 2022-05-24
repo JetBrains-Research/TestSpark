@@ -6,6 +6,7 @@ import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.ContainerFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
+import com.intellij.remoterobot.fixtures.JTextFieldFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.waitFor
 import java.time.Duration
@@ -76,6 +77,18 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     // Action for color picker
     val colorPicker
         get() = actionLink(byXpath("//div[@class='JColorChooser']"))
+
+    // Action for color picker hue value
+    val hueTextField: JTextFieldFixture
+        get() = find(byXpath("//div[@accessiblename='Hue' and @class='JFormattedTextField' and @name='Spinner.formattedTextField']"))
+
+    // Action for color picker saturation value
+    val saturationTextField: JTextFieldFixture
+        get() = find(byXpath("//div[@accessiblename='Saturation' and @class='JFormattedTextField' and @name='Spinner.formattedTextField']"))
+
+    // Action for color picker third value
+    val valueTextField: JTextFieldFixture
+        get() = find(byXpath("//div[@accessiblename='Value' and @class='JFormattedTextField' and @name='Spinner.formattedTextField']"))
 
     // Action for separator of coverage
     val generalSettingsSeparator
