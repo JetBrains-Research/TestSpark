@@ -5,9 +5,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
-import com.intellij.openapi.ui.Messages
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiMethod
 
 class GenerateTestsActionLine : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
@@ -27,15 +27,11 @@ class GenerateTestsActionLine : AnAction() {
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
-        getSurroundingMethod(psiFile, caret) ?: return
+        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
         val doc: Document = PsiDocumentManager.getInstance(e.project!!).getDocument(psiFile) ?: return
         val line: Int? = getSurroundingLine(doc, caret)
-        println(line)
-        // TODO Ignore declarations
-        return
-        Messages.showInfoMessage("Selected line: $line\nSelected text:\n$", "la")
 
-        e.presentation.isEnabledAndVisible = true
-//        e.presentation.text = "Generate Tests For ${getMethodDisplayName(psiMethod)}"
+        e.presentation.isEnabledAndVisible = validateLine(line!!, psiMethod, doc)
+        e.presentation.text = "Generate Tests For ${getMethodDisplayName(psiMethod)}"
     }
 }

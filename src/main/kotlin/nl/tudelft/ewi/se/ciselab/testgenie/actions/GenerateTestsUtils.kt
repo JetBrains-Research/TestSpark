@@ -67,8 +67,8 @@ fun getSurroundingMethod(psiFile: PsiFile, caret: Caret): PsiMethod? {
 fun getSurroundingLine(doc: Document, caret: Caret): Int? {
     val line = doc.getLineNumber(caret.offset)
 
-    val text = doc.getText(TextRange(doc.getLineStartOffset(line), doc.getLineEndOffset(line)))
-        .replace(Regex("[\n\t{} ]"), "")
+    val text =
+        doc.getText(TextRange(doc.getLineStartOffset(line), doc.getLineEndOffset(line))).replace(Regex("[\n\t{} ]"), "")
     return if (text.isBlank()) null else line
 }
 
@@ -130,6 +130,12 @@ private fun isAbstractClass(psiClass: PsiClass): Boolean {
  */
 private fun validateClass(psiClass: PsiClass): Boolean {
     return !psiClass.isEnum && psiClass !is PsiAnonymousClass
+}
+
+fun validateLine(line: Int, psiMethod: PsiMethod, doc: Document): Boolean {
+    val startDeclaration: Int = doc.getLineNumber(psiMethod.startOffset)
+    val startBody: Int = doc.getLineNumber(psiMethod.body?.startOffset!!)
+    return line >= startBody + 1
 }
 
 /**
