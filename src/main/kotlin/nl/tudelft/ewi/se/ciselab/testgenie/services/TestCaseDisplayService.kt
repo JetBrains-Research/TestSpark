@@ -1,5 +1,6 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
+import com.google.gson.Gson
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.command.WriteCommandAction
@@ -15,6 +16,7 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -35,6 +37,7 @@ class TestCaseDisplayService(private val project: Project) {
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private var testCheckboxes: MutableList<Pair<JCheckBox, String>> = mutableListOf()
     private var unhighlightList: MutableList<String> = mutableListOf()
+    private val originalCompactReports: HashMap<String, CompactReport> = HashMap()
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -119,7 +122,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Logic found in addCheckboxListener
      * @param report compactReport with tests
      */
-    fun applyListenersToCheckBoxes(report: CompactReport) {
+    private fun applyListenersToCheckBoxes(report: CompactReport) {
         testCheckboxes.forEach {
             val checkbox = it.first
             val testName = it.second
@@ -135,20 +138,37 @@ class TestCaseDisplayService(private val project: Project) {
      * Works by replicating the original file within the Workspace, then changing its values and placing the new version in Workspace
      * @param checkbox the checkbox to add listener to
      * @param testName the name of the test to add/remove from unhighlightList
-     * @param report the compactReport with the tests
+     * @param reportFetched the compactReport with the tests
      */
-    private fun addCheckboxListener(checkbox: JCheckBox, testName: String, report: CompactReport): (ActionEvent) -> Unit = {
+    private fun addCheckboxListener(checkbox: JCheckBox, testName: String, reportFetched: CompactReport): (ActionEvent) -> Unit = {
         if (checkbox.isSelected) {
             unhighlightList.remove(testName)
         } else {
             unhighlightList.add(testName)
         }
+
+        val originalResult = project.service<Workspace>().getTestGenerationResult(reportFetched)
+
+        var report = reportFetched
+
+        // Always use the root report. That's the report with all the tests still in it
+        // Otherwise, we will lose information if we deselect multiple tests
+        if (originalCompactReports.containsKey(originalResult.first)) {
+            // Deep copy required
+            report = deepCopy(originalCompactReports.get(originalResult.first) ?: reportFetched)
+        } else {
+            originalCompactReports.put(originalResult.first, deepCopy(reportFetched))
+        }
+
         // copy report
         val reportNew: CompactReport = report
 
+        val removedNames = mutableListOf<Pair<String, CompactTestCase?>>()
+
         // remove tests which are not selected
         unhighlightList.forEach {
-            reportNew.testCaseList.remove(it)
+            val test = reportNew.testCaseList.remove(it)
+            removedNames.add(Pair(it, test))
         }
         val coveredLinesNew: MutableSet<Int> = mutableSetOf()
 
@@ -156,13 +176,24 @@ class TestCaseDisplayService(private val project: Project) {
         report.testCaseList.forEach {
             coveredLinesNew.addAll(it.value.coveredLines)
         }
+
         reportNew.allCoveredLines = coveredLinesNew
 
         // replace original file in workplace
-        val originalResult = project.service<Workspace>().getTestGenerationResult(report)
-
         project.service<Workspace>().addPendingResult(originalResult.first, originalResult.second)
         project.service<Workspace>().receiveGenerationResult(originalResult.first, reportNew)
+    }
+
+    /**
+     * Makes a deep copy of the compact report
+     * Credits to https://medium.com/@gugabernardo/here-is-the-easiest-way-to-deep-copy-an-object-in-kotlin-cf200c2130b
+     * @param report the compactReport to make the copy of
+     * @return copy of compactReport
+     */
+    private fun deepCopy(report: CompactReport): CompactReport {
+        val gson = Gson()
+        val json = gson.toJson(report)
+        return gson.fromJson(json, CompactReport::class.java)
     }
 
     /**
