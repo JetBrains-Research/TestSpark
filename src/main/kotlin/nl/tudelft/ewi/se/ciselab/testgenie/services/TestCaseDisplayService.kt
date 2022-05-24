@@ -3,6 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
@@ -12,15 +13,18 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
+import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.event.ActionEvent
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JPanel
+import kotlin.collections.HashMap
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -29,6 +33,8 @@ class TestCaseDisplayService(private val project: Project) {
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
+    private var testCheckboxes: MutableList<Pair<JCheckBox, String>> = mutableListOf()
+    private var unhighlightList: MutableList<String> = mutableListOf()
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -71,6 +77,7 @@ class TestCaseDisplayService(private val project: Project) {
             val checkbox = JCheckBox()
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
+            testCheckboxes.add(Pair(checkbox, it.testName))
 
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
@@ -84,6 +91,7 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanels[testName] = testCasePanel
             allTestCasePanel.add(Box.createRigidArea(Dimension(0, 5)))
         }
+        applyListenersToCheckBoxes(testReport)
     }
 
     /**
@@ -92,6 +100,9 @@ class TestCaseDisplayService(private val project: Project) {
      * @param name name of the test whose editor should be highlighted
      */
     fun highlight(name: String) {
+        if (unhighlightList.contains(name)) {
+            return
+        }
         val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
         val backgroundDefault = editor.background
         val service = TestGenieSettingsService.getInstance().state
@@ -101,6 +112,57 @@ class TestCaseDisplayService(private val project: Project) {
             Thread.sleep(10000)
             editor.background = backgroundDefault
         }.start()
+    }
+
+    /**
+     * Applies the same listener to all checkboxes
+     * Logic found in addCheckboxListener
+     * @param report compactReport with tests
+     */
+    fun applyListenersToCheckBoxes(report: CompactReport) {
+        testCheckboxes.forEach {
+            val checkbox = it.first
+            val testName = it.second
+            checkbox.addActionListener {
+                addCheckboxListener(checkbox, testName, report)(it)
+            }
+        }
+    }
+
+    /**
+     * Adds listener to checkbox
+     * If a test is selected, the lines it covers will be highlighted. Otherwise they will not.
+     * Works by replicating the original file within the Workspace, then changing its values and placing the new version in Workspace
+     * @param checkbox the checkbox to add listener to
+     * @param testName the name of the test to add/remove from unhighlightList
+     * @param report the compactReport with the tests
+     */
+    private fun addCheckboxListener(checkbox: JCheckBox, testName: String, report: CompactReport): (ActionEvent) -> Unit = {
+        if (checkbox.isSelected) {
+            unhighlightList.remove(testName)
+        } else {
+            unhighlightList.add(testName)
+        }
+        // copy report
+        val reportNew: CompactReport = report
+
+        // remove tests which are not selected
+        unhighlightList.forEach {
+            reportNew.testCaseList.remove(it)
+        }
+        val coveredLinesNew: MutableSet<Int> = mutableSetOf()
+
+        // only count the covered lines of selected tests
+        report.testCaseList.forEach {
+            coveredLinesNew.addAll(it.value.coveredLines)
+        }
+        reportNew.allCoveredLines = coveredLinesNew
+
+        // replace original file in workplace
+        val originalResult = project.service<Workspace>().getTestGenerationResult(report)
+
+        project.service<Workspace>().addPendingResult(originalResult.first, originalResult.second)
+        project.service<Workspace>().receiveGenerationResult(originalResult.first, reportNew)
     }
 
     /**

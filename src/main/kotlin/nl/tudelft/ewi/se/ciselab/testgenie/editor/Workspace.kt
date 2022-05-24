@@ -112,7 +112,7 @@ class Workspace(private val project: Project) {
      * @param testReport the generated test suite
      */
     fun receiveGenerationResult(testResultName: String, testReport: CompactReport) {
-        val jobKey = pendingTestResults.remove(testResultName)!!
+        val jobKey = pendingTestResults.get(testResultName)!!
 
         val resultsForFile = testGenerationResults.getOrPut(jobKey.filename) { ArrayList() }
         resultsForFile.add(Pair(jobKey, testReport))
@@ -166,5 +166,28 @@ class Workspace(private val project: Project) {
     private fun showCoverage(testReport: CompactReport, editor: Editor) {
         val visualizationService = project.service<CoverageVisualisationService>()
         visualizationService.showCoverage(testReport, editor)
+    }
+
+    /**
+     * Gets the key for the pending Test result which was used in the latest visualisation
+     * Needed, to allow dynamic change of visualisation (according to what tests have been "ticked" in tool window)
+     * @param report the report which was used to find the key (basically, reverse search)
+     * @return the key of the pendingTestResult and the associated TestJobInfo
+     */
+    fun getTestGenerationResult(report: CompactReport): Pair<String, TestJobInfo> {
+        testGenerationResults.forEach {
+            val value = it.value
+            value.forEach {
+                if (it.second.equals(report)) {
+                    val tji = it.first
+                    pendingTestResults.keys.forEach {
+                        if (pendingTestResults.get(it)!!.equals(tji)) {
+                            return Pair(it, tji)
+                        }
+                    }
+                }
+            }
+        }
+        return Pair("", TestJobInfo("NaN", "NaN", 0, "NaN"))
     }
 }
