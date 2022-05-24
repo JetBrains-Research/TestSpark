@@ -10,6 +10,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
+import nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Dimension
 import java.awt.Font
@@ -33,21 +34,21 @@ class QuickAccessParameters(_project: Project) {
     private var project: Project = _project
 
     // UI elements for EvoSuite parameters
-    private var stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
-    private var searchBudget: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
-    private var initializationTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
-    private var minimisationTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
-    private var assertionTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
-    private var junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
-    private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
-    private var population: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
+    private val searchBudget: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val initializationTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val minimisationTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val assertionTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
+    private val population: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
 
     // Save and Reset buttons
-    private var saveButton: JButton = JButton("Save")
-    private var resetButton: JButton = JButton("Reset")
+    private val saveButton: JButton = JButton("Save")
+    private val resetButton: JButton = JButton("Reset")
 
     // Link to open settings
-    private var settingsLink: ActionLink = ActionLink("Advanced Settings") {
+    private val settingsLink: ActionLink = ActionLink("Advanced Settings") {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, "EvoSuite")
     }
 
@@ -56,9 +57,9 @@ class QuickAccessParameters(_project: Project) {
     private var toolWindowPanel: JPanel = JPanel()
 
     // The tooltip labels
-    private var stoppingConditionToolTip =
+    private val stoppingConditionToolTip =
         JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
-    private var populationLimitToolTip =
+    private val populationLimitToolTip =
         JBLabel("Default: 50 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
 
     // Template strings for "default" tooltips
