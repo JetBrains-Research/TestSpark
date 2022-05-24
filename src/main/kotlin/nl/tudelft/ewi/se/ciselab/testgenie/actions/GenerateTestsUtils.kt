@@ -67,6 +67,15 @@ fun getSurroundingMethod(psiFile: PsiFile, caret: Caret): PsiMethod? {
     return surroundingMethod
 }
 
+/**
+ * Gets the selected line if the constraints on the selected line are satisfied,
+ *   so that EvoSuite can generate tests for it.
+ * Namely, the line is within a method, it is not blank and contains (part of) a statement.
+ *
+ * @param psiFile the current PSI file (where the user makes the click)
+ * @param caret the current (primary) caret that did the click
+ * @return line number if the constraints are satisfied else null
+ */
 fun getSurroundingLine(psiFile: PsiFile, caret: Caret): Int? {
     val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return null
 
@@ -140,6 +149,15 @@ private fun validateClass(psiClass: PsiClass): Boolean {
     return !psiClass.isEnum && psiClass !is PsiAnonymousClass
 }
 
+/**
+ * Checks if the selected line contains (part of) a statement and is a valid line to be selected for EvoSuite.
+ * Namely, the line is within a method, it is not blank and contains (part of) a statement.
+ *
+ * @param selectedLine selected line number
+ * @param psiMethod surrounding PSI method
+ * @param psiFile containing PSI file
+ * @return true if the line is valid, false otherwise
+ */
 private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFile): Boolean {
     val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
 
