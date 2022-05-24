@@ -12,7 +12,6 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
 import java.awt.Color
