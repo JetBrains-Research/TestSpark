@@ -7,7 +7,9 @@ import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
+import java.awt.event.KeyEvent
 import java.time.Duration
 
 /**
@@ -39,6 +41,22 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     // Find TestGenie on the right sidebar
     private val openToolWindow
         get() = actionLink(byXpath("//div[@tooltiptext='TestGenie']"))
+
+    // Find ProjectViewTree (the thing with files on the left side)
+    val projectViewTree
+        get() = actionLink(byXpath("//div[@class='ProjectViewTree']"))
+
+    fun openProjectFile(fileName: String, projectName: String) {
+        with(projectViewTree) {
+            // Wait for file name to be found
+            findText(projectName).rightClick()
+        }
+        actionLink(byXpath("//div[@text='Find in Files...']")).click()
+        val fileSearchTextField = textField(byXpath("//div[@class='JBTextAreaWithMixedAccessibleContext']"))
+        fileSearchTextField.text = fileName
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+        actionLink(byXpath("//div[@class='SingleHeightLabel']//div[@class='InplaceButton']")).click()
+    }
 
     /**
      * Method to close the current project.
