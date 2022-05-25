@@ -2,19 +2,22 @@ package nl.tudelft.ewi.se.ciselab.testgenie.editor
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.FileEditorManagerEvent
-import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import nl.tudelft.ewi.se.ciselab.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
+import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageSelectionToggleListener
 import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
 
 /**
  * Workspace state service
@@ -26,19 +29,25 @@ import org.evosuite.utils.CompactReport
 class Workspace(private val project: Project) {
     data class TestJobInfo(val filename: String, var targetUnit: String, val modificationTS: Long, val jobId: String)
 
+    class TestJob(val info: TestJobInfo, val report: CompactReport, val selectedTests: HashSet<String>) {
+        fun getSelectedTests(): List<CompactTestCase> {
+            return report.testCaseList.filter { selectedTests.contains(it.key) }.map { it.value }
+        }
+
+        fun getSelectedLines(): HashSet<Int> {
+            val lineSet: HashSet<Int> = HashSet()
+            report.testCaseList.filter { selectedTests.contains(it.key) }.map { lineSet.addAll(it.value.coveredLines) }
+            return lineSet
+        }
+    }
+
     private val log = Logger.getInstance(this.javaClass)
 
     /**
      * Maps a workspace file to the test generation jobs that were triggered on it.
      * Currently, the file key is represented by its presentableUrl
      */
-    private val testGenerationResults: HashMap<String, ArrayList<Pair<TestJobInfo, CompactReport>>> = HashMap()
-
-    /**
-     * reverses the mapping of testGenerationResult for dynamic coverage visualisation.
-     * Needed because we only have access to the compactReport then.
-     */
-    private val reverseTestGenerationStorage: HashMap<CompactReport, ArrayList<Pair<String, TestJobInfo>>> = HashMap()
+    private val testGenerationResults: HashMap<String, ArrayList<TestJob>> = HashMap()
 
     /**
      * Maps a test generation job id to its corresponding test job information
@@ -51,22 +60,20 @@ class Workspace(private val project: Project) {
         // Set event listener for changes to the VFS. The overridden event is
         // triggered whenever the user switches their editor window selection inside the IDE
         connection.subscribe(
-            FileEditorManagerListener.FILE_EDITOR_MANAGER,
-            object : FileEditorManagerListener {
-                override fun selectionChanged(event: FileEditorManagerEvent) {
-                    super.selectionChanged(event)
-                    val file = event.newFile
-                    val fileUrl = file.presentableUrl
-                    // check if file has any tests generated for it
-                    val list = testGenerationResults[fileUrl] ?: return
-                    val lastTest = list.lastOrNull() ?: return
+            COVERAGE_SELECTION_TOGGLE_TOPIC,
+            object : CoverageSelectionToggleListener {
+                override fun testGenerationResult(testName: String, selected: Boolean, editor: Editor) {
+                    val vFile = vFileForDocument(editor.document) ?: return
+                    val fileKey = vFile.presentableUrl
+                    val testJob = testGenerationResults[fileKey]?.last() ?: return
 
-                    // check if file is in same state so that coverage visualization is valid
-                    if (lastTest.first.modificationTS == file.modificationStamp) {
-                        // get editor for file
-                        val editor = (event.newEditor as TextEditor).editor
-                        showCoverage(lastTest.second, editor)
+                    if (selected) {
+                        testJob.selectedTests.add(testName)
+                    } else {
+                        testJob.selectedTests.remove(testName)
                     }
+
+                    updateCoverage(testJob.getSelectedLines(), testJob.getSelectedTests(), editor)
                 }
             }
         )
@@ -83,10 +90,10 @@ class Workspace(private val project: Project) {
 
                 val job = lastTestGeneration(fileName) ?: return
 
-                if (job.first.modificationTS == modTs) {
+                if (job.info.modificationTS == modTs) {
                     val editor = editorForVFile(file) ?: return
 
-                    showCoverage(job.second, editor)
+                    showReport(job.report, editor)
                 } else {
                     val editor = editorForVFile(file)
 
@@ -96,7 +103,7 @@ class Workspace(private val project: Project) {
         }) {}
     }
 
-    fun lastTestGeneration(fileName: String): Pair<TestJobInfo, CompactReport>? {
+    fun lastTestGeneration(fileName: String): TestJob? {
         return testGenerationResults[fileName]?.last()
     }
 
@@ -118,19 +125,18 @@ class Workspace(private val project: Project) {
      * @param testReport the generated test suite
      */
     fun receiveGenerationResult(testResultName: String, testReport: CompactReport) {
-        val jobKey = pendingTestResults.get(testResultName)!!
+        val jobKey = pendingTestResults.remove(testResultName)!!
 
         val resultsForFile = testGenerationResults.getOrPut(jobKey.filename) { ArrayList() }
-        resultsForFile.add(Pair(jobKey, testReport))
-
-        val resultReverse = reverseTestGenerationStorage.getOrPut(testReport) { ArrayList() }
-        resultReverse.add(Pair(testResultName, jobKey))
+        val displayedSet = HashSet<String>()
+        displayedSet.addAll(testReport.testCaseList.keys)
+        resultsForFile.add(TestJob(jobKey, testReport, displayedSet))
 
         val editor = editorForFileUrl(jobKey.filename)
 
         if (editor != null) {
             if (editor.document.modificationStamp == jobKey.modificationTS) {
-                showCoverage(testReport, editor)
+                showReport(testReport, editor)
             }
         } else {
             log.info("No editor opened for received test result")
@@ -172,18 +178,28 @@ class Workspace(private val project: Project) {
         return null
     }
 
-    private fun showCoverage(testReport: CompactReport, editor: Editor) {
+    /**
+     * Utility function that returns the editor for a specific VirtualFile
+     * in case it is opened in the IDE
+     */
+    fun vFileForDocument(document: Document): VirtualFile? {
+        val documentManager = FileDocumentManager.getInstance()
+        return documentManager.getFile(document)
+    }
+
+    private fun showReport(testReport: CompactReport, editor: Editor) {
         val visualizationService = project.service<CoverageVisualisationService>()
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+        testCaseDisplayService.showGeneratedTests(testReport, editor)
         visualizationService.showCoverage(testReport, editor)
     }
 
-    /**
-     * Gets the key for the pending Test result which was used in the latest visualisation
-     * Needed, to allow dynamic change of visualisation (according to what tests have been "ticked" in tool window)
-     * @param report the report which was used to find the key (basically, reverse search)
-     * @return the key of the pendingTestResult and the associated TestJobInfo
-     */
-    fun getTestGenerationResult(report: CompactReport): Pair<String, TestJobInfo>? {
-        return reverseTestGenerationStorage.get(report)?.last()
+    private fun updateCoverage(
+        linesToCover: Set<Int>,
+        testCaseList: List<CompactTestCase>,
+        editor: Editor
+    ) {
+        val visualizationService = project.service<CoverageVisualisationService>()
+        visualizationService.updateCoverage(linesToCover, testCaseList, editor)
     }
 }
