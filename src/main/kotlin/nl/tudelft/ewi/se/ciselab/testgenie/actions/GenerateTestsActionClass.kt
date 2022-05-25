@@ -38,7 +38,8 @@ class GenerateTestsActionClass : AnAction() {
         val classFQN = psiClass.qualifiedName ?: return
 
         val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-        val projectClassPath = "$projectPath/" + TestGenieSettingsService.getInstance().state!!.buildPath
+        val settingsState = TestGenieSettingsService.getInstance().state ?: return
+        val projectClassPath = "$projectPath/" + settingsState.buildPath
 
         log.info("Generating tests for project $projectPath with classpath $projectClassPath")
 
