@@ -53,8 +53,6 @@ class CoverageVisualisationToolWindowTest {
     fun testCoverageVisualisationTab(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
         ideaFrame.apply {
-            val coverageVisualisationTab =
-                actionLink(byXpath("//div[@class='ContentTabLabel' and @text='Coverage Visualisation']"))
             coverageVisualisationTab.click()
             assertThat(coverageVisualisationTab.hasText("Coverage Visualisation")).isTrue
         }
