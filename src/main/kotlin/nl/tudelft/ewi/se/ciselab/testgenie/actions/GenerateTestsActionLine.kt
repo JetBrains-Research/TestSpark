@@ -33,7 +33,7 @@ class GenerateTestsActionLine : AnAction() {
         val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
         val classFQN = psiClass.qualifiedName ?: return
 
-        val selectedLine: Int = getSurroundingLine(psiFile, caret) ?: return
+        val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1) ?: return // lines in the editor and in EvoSuite are one-based
         val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
         val fileName = vFile.presentableUrl
         val modificationStamp = vFile.modificationStamp
@@ -62,9 +62,9 @@ class GenerateTestsActionLine : AnAction() {
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
-        val line: Int = getSurroundingLine(psiFile, caret) ?: return
+        val line: Int = getSurroundingLine(psiFile, caret)?.plus(1) ?: return // lines in the editor and in EvoSuite are one-based
 
         e.presentation.isEnabledAndVisible = true
-        e.presentation.text = "Generate Tests For Line ${line + 1}"
+        e.presentation.text = "Generate Tests For Line $line"
     }
 }
