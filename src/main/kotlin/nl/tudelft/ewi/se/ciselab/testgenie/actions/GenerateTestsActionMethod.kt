@@ -16,36 +16,21 @@ import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
  *   getting the information about the selected method and passing it to (EvoSuite) Runner.
  */
 class GenerateTestsActionMethod : AnAction() {
-    private val log = Logger.getInstance(this.javaClass)
-
     /**
      * Performs test generation for a method when the action is invoked.
      *
      * @param e an action event that contains useful information
      */
     override fun actionPerformed(e: AnActionEvent) {
-//        val project: Project = e.project ?: return
-
         val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-//        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
-//        val fileName = vFile.presentableUrl
-//        val modificationStamp = vFile.modificationStamp
 
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
-//        val containingClass: PsiClass = psiMethod.containingClass ?: return
-
-//        val classFQN = containingClass.qualifiedName ?: return
         val methodDescriptor = generateMethodDescriptor(psiMethod)
 
-//        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-//        val projectClassPath = "$projectPath/target/classes/"
-//
-//        log.info("Generating tests for project $projectPath with classpath $projectClassPath")
-
-        Logger.getInstance("Test Generation").info("Selected method is $methodDescriptor")
+        Logger.getInstance("GenerateTestsUtils").info("Selected method is $methodDescriptor")
 
         evoSuiteRunner.forMethod(methodDescriptor).runEvoSuite()
     }

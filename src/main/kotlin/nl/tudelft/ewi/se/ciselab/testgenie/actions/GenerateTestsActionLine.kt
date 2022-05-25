@@ -14,40 +14,22 @@ import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
  *   getting the information about the selected class and passing it to (EvoSuite) Runner.
  */
 class GenerateTestsActionLine : AnAction() {
-    private val log = Logger.getInstance(this.javaClass)
-
     /**
      * Performs test generation for a line when the action is invoked.
      *
      * @param e an action event that contains useful information
      */
     override fun actionPerformed(e: AnActionEvent) {
-//        val project: Project = e.project ?: return
-
         val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
 
-//        val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
-//        val classFQN = psiClass.qualifiedName ?: return
+        val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)
+            ?: return // lines in the editor and in EvoSuite are one-based
 
-        val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1) ?: return // lines in the editor and in EvoSuite are one-based
-//        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
-//        val fileName = vFile.presentableUrl
-//        val modificationStamp = vFile.modificationStamp
+        Logger.getInstance("GenerateTestsUtils").info("Selected line is $selectedLine")
 
-//        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-//        val projectClassPath = "$projectPath/target/classes/"
-
-//        log.info("Generating tests for project $projectPath with classpath $projectClassPath")
-
-//        log.info("Selected class is $classFQN")
-
-        Logger.getInstance("Test Generation").info("Selected line is $selectedLine")
-
-//        Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp).forLine(selectedLine)
-//            .runEvoSuite()
         evoSuiteRunner.forLine(selectedLine).runEvoSuite()
     }
 
