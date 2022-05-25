@@ -73,7 +73,7 @@ To generate a test for a class, right-click (with mouse) anywhere within the cla
 ![Progress bar](readme-images/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the right-hand side of the IDE:\
 ![Generated Tests](readme-images/GeneratedTests.jpg)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). Hitting the "apply" button will add the selected tests to your test class.
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.
 
 ### Generating Tests for Methods
 To generate a test for a method, right-click (with mouse) anywhere within the method you want to test or right-click the method name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Method [...]" option:\
@@ -82,7 +82,7 @@ To generate a test for a method, right-click (with mouse) anywhere within the me
 ![Progress bar](readme-images/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
 ![Generated Tests](readme-images/GeneratedTests.jpg)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). Hitting the "apply" button will add the selected tests to your test class.
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.
 
 ### Coverage Visualisation
 For coverage visualisation to work, you must have it turned on. The setting is available in `Settings` -> `Tools` -> `TestGenie` -> "Show visualised coverage":\
