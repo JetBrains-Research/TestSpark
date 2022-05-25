@@ -26,6 +26,7 @@ class TestCaseDisplayService(private val project: Project) {
 
     private val mainPanel: JPanel = JPanel()
     private val applyButton: JButton = JButton("Apply to test suite")
+    private val validateButton: JButton = JButton("Validate tests")
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
@@ -36,9 +37,17 @@ class TestCaseDisplayService(private val project: Project) {
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
-        applyButton.addActionListener { applyTests() }
-        mainPanel.add(applyButton, BorderLayout.SOUTH)
+
+        val buttons = JPanel()
+        buttons.add(applyButton)
+        buttons.add(validateButton)
+
+        mainPanel.add(buttons, BorderLayout.SOUTH)
+
         mainPanel.add(scrollPane, BorderLayout.CENTER)
+
+        applyButton.addActionListener { applyTests() }
+        validateButton.addActionListener { validateTests() }
     }
 
     /**
@@ -147,6 +156,8 @@ class TestCaseDisplayService(private val project: Project) {
         // insert test case components into selected class
         appendTestsToClass(testCaseComponents, selectedClass)
     }
+
+    private fun validateTests() {}
 
     /**
      * Append the provided test cases to the provided class.

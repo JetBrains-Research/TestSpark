@@ -43,7 +43,6 @@ class Workspace(private val project: Project) {
         EditorFactory.getInstance().eventMulticaster.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 super.documentChanged(event)
-
                 val file = FileDocumentManager.getInstance().getFile(event.document) ?: return
                 val fileName = file.presentableUrl
                 val modTs = event.document.modificationStamp
