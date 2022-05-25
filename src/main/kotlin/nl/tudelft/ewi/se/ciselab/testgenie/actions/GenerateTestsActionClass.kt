@@ -25,25 +25,26 @@ class GenerateTestsActionClass : AnAction() {
      * @param e an action event that contains useful information
      */
     override fun actionPerformed(e: AnActionEvent) {
-        val project: Project = e.project ?: return
+//        val project: Project = e.project ?: return
+//
+//        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+//        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+//        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+//        val fileName = vFile.presentableUrl
+//        val modificationStamp = vFile.modificationStamp
+//
+//        val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
+//        val classFQN = psiClass.qualifiedName ?: return
+//
+//        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+//        val projectClassPath = "$projectPath/target/classes/"
+//
+//        log.info("Generating tests for project $projectPath with classpath $projectClassPath")
+//
+//        log.info("Selected class is $classFQN")
 
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
-        val fileName = vFile.presentableUrl
-        val modificationStamp = vFile.modificationStamp
-
-        val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
-        val classFQN = psiClass.qualifiedName ?: return
-
-        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-        val projectClassPath = "$projectPath/target/classes/"
-
-        log.info("Generating tests for project $projectPath with classpath $projectClassPath")
-
-        log.info("Selected class is $classFQN")
-
-        Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp).forClass().runEvoSuite()
+//        Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp).forClass().runEvoSuite()
+        createEvoSuiteRunner(e)?.forClass()?.runEvoSuite()
     }
 
     /**

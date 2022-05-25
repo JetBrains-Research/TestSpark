@@ -5,9 +5,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
@@ -27,35 +24,30 @@ class GenerateTestsActionMethod : AnAction() {
      * @param e an action event that contains useful information
      */
     override fun actionPerformed(e: AnActionEvent) {
-        val project: Project = e.project ?: return
+//        val project: Project = e.project ?: return
+
+        val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
-        val fileName = vFile.presentableUrl
-        val modificationStamp = vFile.modificationStamp
+//        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+//        val fileName = vFile.presentableUrl
+//        val modificationStamp = vFile.modificationStamp
 
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
-        val containingClass: PsiClass = psiMethod.containingClass ?: return
+//        val containingClass: PsiClass = psiMethod.containingClass ?: return
 
-        val classFQN = containingClass.qualifiedName ?: return
+//        val classFQN = containingClass.qualifiedName ?: return
         val methodDescriptor = generateMethodDescriptor(psiMethod)
 
-        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-        val projectClassPath = "$projectPath/target/classes/"
+//        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+//        val projectClassPath = "$projectPath/target/classes/"
+//
+//        log.info("Generating tests for project $projectPath with classpath $projectClassPath")
 
-        log.info("Generating tests for project $projectPath with classpath $projectClassPath")
+        Logger.getInstance("Test Generation").info("Selected method is $methodDescriptor")
 
-        log.info("Selected class is $classFQN, method is $methodDescriptor")
-
-        Runner(
-            project,
-            projectPath,
-            projectClassPath,
-            classFQN,
-            fileName,
-            modificationStamp
-        ).forMethod(methodDescriptor).runEvoSuite()
+        evoSuiteRunner.forMethod(methodDescriptor).runEvoSuite()
     }
 
     /**
