@@ -40,7 +40,7 @@ fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
     val projectClassPath = "$projectPath/target/classes/"
 
-    val log = Logger.getInstance("Test Generation")
+    val log = Logger.getInstance("GenerateTestsUtils")
 
     log.info("Generating tests for project $projectPath with classpath $projectClassPath")
 
