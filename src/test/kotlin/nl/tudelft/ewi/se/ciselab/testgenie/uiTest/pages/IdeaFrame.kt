@@ -4,6 +4,7 @@ import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.data.RemoteComponent
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.ComponentFixture
+import com.intellij.remoterobot.fixtures.ContainerFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.search.locators.byXpath
@@ -40,6 +41,12 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     private val openToolWindow
         get() = actionLink(byXpath("//div[@tooltiptext='TestGenie']"))
 
+    private val projectTab
+        get() = actionLink(byXpath("//div[@tooltiptext='Project']"))
+
+    private val projectViewTree
+        get() = find<ContainerFixture>(byXpath("//div[@class='ProjectViewTree']"))
+
     /**
      * Method to close the current project.
      */
@@ -75,5 +82,12 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
             }
             return@waitFor true
         }
+    }
+
+    fun openProjectFromProjectTree() {
+        projectTab.click()
+        // projectViewTree.find()
+        // projectViewTree.click()
+        projectTab.click()
     }
 }
