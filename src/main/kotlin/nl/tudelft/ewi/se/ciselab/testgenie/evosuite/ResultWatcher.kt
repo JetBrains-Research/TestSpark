@@ -30,10 +30,6 @@ class ResultWatcher(private val project: Project, private val resultName: String
 
         val tmpDir = File(testResultDirectory)
 
-        if (!tmpDir.exists()) {
-            tmpDir.mkdirs()
-        }
-
         log.info("Started result listener thread for $resultName")
 
         val startTime = System.currentTimeMillis()
