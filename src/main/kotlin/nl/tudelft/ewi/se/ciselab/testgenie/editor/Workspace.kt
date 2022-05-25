@@ -27,7 +27,7 @@ import org.evosuite.utils.CompactTestCase
  *
  */
 class Workspace(private val project: Project) {
-    data class TestJobInfo(val filename: String, var targetUnit: String, val modificationTS: Long, val jobId: String)
+    data class TestJobInfo(val fileUrl: String, var targetUnit: String, val modificationTS: Long, val jobId: String)
 
     class TestJob(val info: TestJobInfo, val report: CompactReport, val selectedTests: HashSet<String>) {
         fun getSelectedTests(): List<CompactTestCase> {
@@ -83,20 +83,14 @@ class Workspace(private val project: Project) {
         EditorFactory.getInstance().eventMulticaster.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 super.documentChanged(event)
-
                 val file = FileDocumentManager.getInstance().getFile(event.document) ?: return
                 val fileName = file.presentableUrl
                 val modTs = event.document.modificationStamp
 
                 val job = lastTestGeneration(fileName) ?: return
 
-                if (job.info.modificationTS == modTs) {
-                    val editor = editorForVFile(file) ?: return
-
-                    showReport(job.report, editor)
-                } else {
+                if (job.info.modificationTS != modTs) {
                     val editor = editorForVFile(file)
-
                     editor?.markupModel?.removeAllHighlighters()
                 }
             }
@@ -127,12 +121,12 @@ class Workspace(private val project: Project) {
     fun receiveGenerationResult(testResultName: String, testReport: CompactReport) {
         val jobKey = pendingTestResults.remove(testResultName)!!
 
-        val resultsForFile = testGenerationResults.getOrPut(jobKey.filename) { ArrayList() }
+        val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
         val displayedSet = HashSet<String>()
         displayedSet.addAll(testReport.testCaseList.keys)
         resultsForFile.add(TestJob(jobKey, testReport, displayedSet))
 
-        val editor = editorForFileUrl(jobKey.filename)
+        val editor = editorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
             if (editor.document.modificationStamp == jobKey.modificationTS) {
