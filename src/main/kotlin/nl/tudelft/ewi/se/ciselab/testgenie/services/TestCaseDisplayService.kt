@@ -25,7 +25,7 @@ import javax.swing.JPanel
 class TestCaseDisplayService(private val project: Project) {
 
     private val mainPanel: JPanel = JPanel()
-    private val applyButton: JButton = JButton("Apply")
+    private val applyButton: JButton = JButton("Apply to test suite")
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
