@@ -148,7 +148,7 @@ class TestCaseDisplayService(private val project: Project) {
         }
 
         // fetch the report
-        val originalResult = project.service<Workspace>().getTestGenerationResult(report)
+        val originalResult = project.service<Workspace>().getTestGenerationResult(report)!!
 
         // add only the lines of the tests which have been selected
         coveredLinesSet.clear()
@@ -161,7 +161,7 @@ class TestCaseDisplayService(private val project: Project) {
         report.allCoveredLines = coveredLinesSet
 
         // replace original file in workplace
-        project.service<Workspace>().addPendingResult(originalResult.first, originalResult.second)
+        project.service<Workspace>().addPendingResult(originalResult!!.first, originalResult.second)
         project.service<Workspace>().receiveGenerationResult(originalResult.first, report)
     }
 
