@@ -47,6 +47,22 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     val projectViewTree
         get() = actionLink(byXpath("//div[@class='ProjectViewTree']"))
 
+    // Action to find coverage visualisation tab in toolWindow
+    val coverageVisualisationTab
+        get() = actionLink(byXpath("//div[@class='ContentTabLabel' and @text='Coverage Visualisation']"))
+
+    // Action to find "Find in Files..." menu
+    val findInFilesAction
+        get() = actionLink(byXpath("//div[@text='Find in Files...']"))
+
+    // Action to find "File Name" textField
+    val findFileFileNameAction
+        get() = textField(byXpath("//div[@class='JBTextAreaWithMixedAccessibleContext']"))
+
+    // Action to find "File path" textField
+    val findFilePathNameAction
+        get() = textField(byXpath("//div[@class='FindPopupDirectoryChooser']//div[@class='BorderlessTextField']"))
+
     /**
      * Open file inside project.
      *
@@ -58,12 +74,9 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
             // Wait for file name to be found
             findText(projectName).rightClick()
         }
-        actionLink(byXpath("//div[@text='Find in Files...']")).click()
-        val fileSearchTextField = textField(byXpath("//div[@class='JBTextAreaWithMixedAccessibleContext']"))
-        fileSearchTextField.text = fileName
-        val pathField =
-            textField(byXpath("//div[@class='FindPopupDirectoryChooser']//div[@class='BorderlessTextField']"))
-        pathField.text = pathField.text + "\\src\\main"
+        findInFilesAction.click()
+        findFileFileNameAction.text = fileName
+        findFilePathNameAction.text = findFilePathNameAction.text + "\\src\\main"
         remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
     }
 
