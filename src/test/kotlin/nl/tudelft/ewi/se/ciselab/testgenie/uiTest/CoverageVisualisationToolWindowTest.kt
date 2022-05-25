@@ -1,14 +1,8 @@
-package nl.tudelft.ewi.se.ciselab.testgenie.uiTest;
+package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
-import com.intellij.remoterobot.fixtures.CommonContainerFixture
-import com.intellij.remoterobot.fixtures.JButtonFixture
-import com.intellij.remoterobot.fixtures.JCheckboxFixture
-import com.intellij.remoterobot.search.locators.byXpath
-import com.intellij.remoterobot.utils.waitFor
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
-import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.SettingsFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import org.assertj.core.api.Assertions.assertThat
@@ -21,7 +15,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Duration
-import kotlin.streams.toList
 
 @TestMethodOrder(OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,19 +31,27 @@ class CoverageVisualisationToolWindowTest {
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             waitForBackgroundTasks()
-            openProjectFile("ArrayUtils")
+            clickOnToolWindow()
+            openProjectFile("ArrayUtils", "untitled")
         }
     }
 
     @Order(1)
+    @Video
     @Test
-    fun test() {
+    fun test(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
+        ideaFrame.changeQuickAccess()
+        ideaFrame.runTestsForClass()
         assertThat(true).isTrue
+        Thread.sleep(20000)
     }
 
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
+            clickOnToolWindow()
+            closeProjectFile()
             closeProject()
         }
     }
