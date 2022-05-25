@@ -11,6 +11,7 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import nl.tudelft.ewi.se.ciselab.testgenie.coverage.CoverageRenderer
 import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -40,19 +41,50 @@ class CoverageVisualisationService(private val project: Project) {
 
             val service = TestGenieSettingsService.getInstance().state
             val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
-            val colorForLines = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
+            val colorForLines = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
 
             editor.markupModel.removeAllHighlighters()
-
             for (i in testReport.allCoveredLines) {
                 val line = i - 1
-                val textat = TextAttributesKey.createTextAttributesKey("custom")
-                textat.defaultAttributes.backgroundColor = colorForLines
-                val hl = editor.markupModel.addLineHighlighter(textat, line, HighlighterLayer.LAST)
+                val textAttributesKey = TextAttributesKey.createTextAttributesKey("custom")
+                textAttributesKey.defaultAttributes.backgroundColor = colorForLines
+                val hl = editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.LAST)
                 hl.lineMarkerRenderer = CoverageRenderer(
                     color,
                     line,
                     testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }, project
+                )
+            }
+        }
+    }
+
+    /**
+     * Shows coverage on the gutter next to the covered lines.
+     *
+     * @param testReport the generated tests summary
+     */
+    fun updateCoverage(linesToCover: Set<Int>, testCaseList: List<CompactTestCase>, editor: Editor) {
+        // Show in-line coverage only if enabled in settings
+        val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+
+        if (state.showCoverage) {
+            val service = TestGenieSettingsService.getInstance().state
+            val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
+            val colorForLines = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
+
+            editor.markupModel.removeAllHighlighters()
+
+            for (i in linesToCover) {
+                val line = i - 1
+                val textAttributesKey = TextAttributesKey.createTextAttributesKey("custom")
+                textAttributesKey.defaultAttributes.backgroundColor = colorForLines
+                val hl = editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.LAST)
+
+                hl.lineMarkerRenderer = CoverageRenderer(
+                    color,
+                    line,
+                    testCaseList.filter { x -> i in x.coveredLines }.map { x -> x.testName },
+                    project
                 )
             }
         }
