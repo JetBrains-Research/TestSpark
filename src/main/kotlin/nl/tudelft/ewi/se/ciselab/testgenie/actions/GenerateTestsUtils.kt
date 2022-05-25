@@ -86,7 +86,9 @@ fun getSurroundingLine(psiFile: PsiFile, caret: Caret): Int? {
         doc.getText(TextRange(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine)))
 
     if (selectedLineText.isBlank()) return null
-    return if (!validateLine(selectedLine, psiMethod, psiFile)) null else selectedLine
+
+    if (!validateLine(selectedLine, psiMethod, psiFile)) return null
+    return selectedLine
 }
 
 /**
