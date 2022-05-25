@@ -6,6 +6,7 @@ import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
+import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
@@ -55,7 +56,25 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
         val fileSearchTextField = textField(byXpath("//div[@class='JBTextAreaWithMixedAccessibleContext']"))
         fileSearchTextField.text = fileName
         remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+    }
+
+    fun closeProjectFile() {
         actionLink(byXpath("//div[@class='SingleHeightLabel']//div[@class='InplaceButton']")).click()
+    }
+
+    fun changeQuickAccess() {
+        find(QuickAccessParametersFixtures::class.java, timeout = Duration.ofSeconds(60)).apply {
+            searchBudgetTypeComboBox.selectItem("Max time")
+            searchBudgetValueSpinnerTextField.text = "2"
+            saveButton.click()
+        }
+        find<JButtonFixture>(byXpath("//div[@text='OK']")).click()
+    }
+
+    fun runTestsForClass() {
+        actionLink(byXpath("//div[@class='EditorComponentImpl']")).click()
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_ALT, KeyEvent.VK_G) }
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_C) }
     }
 
     /**
