@@ -1,7 +1,12 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.actions
 
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
@@ -14,10 +19,35 @@ import com.intellij.psi.PsiStatement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
  * This file contains some useful methods related to GenerateTests actions.
  */
+
+fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
+    val project: Project = e.project ?: return null
+
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return null
+    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
+    val fileName = vFile.presentableUrl
+    val modificationStamp = vFile.modificationStamp
+
+    val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
+    val classFQN = psiClass.qualifiedName ?: return null
+
+    val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+    val projectClassPath = "$projectPath/target/classes/"
+
+    val log = Logger.getInstance("Test Generation")
+
+    log.info("Generating tests for project $projectPath with classpath $projectClassPath")
+
+    log.info("Selected class is $classFQN")
+
+    return Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp)
+}
 
 /**
  * Gets the class on which the user has clicked (the click has to be inside the contents of the class).
