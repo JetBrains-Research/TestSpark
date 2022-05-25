@@ -2,7 +2,6 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
-import com.intellij.remoterobot.search.locators.byXpath
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
