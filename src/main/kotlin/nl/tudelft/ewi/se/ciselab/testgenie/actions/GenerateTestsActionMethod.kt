@@ -19,7 +19,7 @@ class GenerateTestsActionMethod : AnAction() {
     /**
      * Creates and calls (EvoSuite) Runner to generate tests for a method when the action is invoked.
      *
-     * @param e an action event that contains useful information
+     * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
         val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
@@ -39,7 +39,7 @@ class GenerateTestsActionMethod : AnAction() {
      * Makes the action visible only if a method has been selected.
      * It also updates the action name depending on which method has been selected.
      *
-     * @param e an action event that contains useful information
+     * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun update(e: AnActionEvent) {
         e.presentation.isEnabledAndVisible = false

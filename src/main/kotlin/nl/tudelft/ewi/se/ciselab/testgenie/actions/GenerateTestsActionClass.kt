@@ -16,7 +16,7 @@ class GenerateTestsActionClass : AnAction() {
     /**
      * Creates and calls (EvoSuite) Runner to generate tests for a class when the action is invoked.
      *
-     * @param e an action event that contains useful information
+     * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
         createEvoSuiteRunner(e)?.forClass()?.runEvoSuite()
@@ -26,7 +26,7 @@ class GenerateTestsActionClass : AnAction() {
      * Makes the action visible only if a class has been selected.
      * It also updates the action name depending on which class has been selected.
      *
-     * @param e an action event that contains useful information
+     * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun update(e: AnActionEvent) {
         e.presentation.isEnabledAndVisible = false
