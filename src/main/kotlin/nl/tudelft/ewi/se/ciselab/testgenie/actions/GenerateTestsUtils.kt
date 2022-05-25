@@ -25,6 +25,12 @@ import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
  * This file contains some useful methods related to GenerateTests actions.
  */
 
+/**
+ * Extracts the required information from an action event and creates an (EvoSuite) runner.
+ *
+ * @param e an action event that contains useful information and corresponds to the action invoked by the user
+ * @return the created (EvoSuite) Runner, null if some information is missing or if there is no surrounding class
+ */
 fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
     val project: Project = e.project ?: return null
 
