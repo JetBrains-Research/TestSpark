@@ -35,6 +35,12 @@ class Workspace(private val project: Project) {
     private val testGenerationResults: HashMap<String, ArrayList<Pair<TestJobInfo, CompactReport>>> = HashMap()
 
     /**
+     * reverses the mapping of testGenerationResult for dynamic coverage visualisation.
+     * Needed because we only have access to the compactReport then.
+     */
+    private val reverseTestGenerationStorage: HashMap<CompactReport, ArrayList<Pair<String, TestJobInfo>>> = HashMap()
+
+    /**
      * Maps a test generation job id to its corresponding test job information
      */
     private var pendingTestResults: HashMap<String, TestJobInfo> = HashMap()
@@ -117,6 +123,9 @@ class Workspace(private val project: Project) {
         val resultsForFile = testGenerationResults.getOrPut(jobKey.filename) { ArrayList() }
         resultsForFile.add(Pair(jobKey, testReport))
 
+        val resultReverse = reverseTestGenerationStorage.getOrPut(testReport) { ArrayList() }
+        resultReverse.add(Pair(testResultName, jobKey))
+
         val editor = editorForFileUrl(jobKey.filename)
 
         if (editor != null) {
@@ -174,20 +183,7 @@ class Workspace(private val project: Project) {
      * @param report the report which was used to find the key (basically, reverse search)
      * @return the key of the pendingTestResult and the associated TestJobInfo
      */
-    fun getTestGenerationResult(report: CompactReport): Pair<String, TestJobInfo> {
-        testGenerationResults.forEach {
-            val value = it.value
-            value.forEach {
-                if (it.second.equals(report)) {
-                    val tji = it.first
-                    pendingTestResults.keys.forEach {
-                        if (pendingTestResults.get(it)!!.equals(tji)) {
-                            return Pair(it, tji)
-                        }
-                    }
-                }
-            }
-        }
-        return Pair("", TestJobInfo("NaN", "NaN", 0, "NaN"))
+    fun getTestGenerationResult(report: CompactReport): Pair<String, TestJobInfo>? {
+        return reverseTestGenerationStorage.get(report)?.last()
     }
 }
