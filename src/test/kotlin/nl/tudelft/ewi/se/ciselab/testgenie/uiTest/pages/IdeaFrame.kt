@@ -47,6 +47,12 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     val projectViewTree
         get() = actionLink(byXpath("//div[@class='ProjectViewTree']"))
 
+    /**
+     * Open file inside project.
+     *
+     * @param fileName name of file to open
+     * @param projectName name of project
+     */
     fun openProjectFile(fileName: String, projectName: String) {
         with(projectViewTree) {
             // Wait for file name to be found
@@ -61,10 +67,16 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
         remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
     }
 
+    /**
+     * Closes opened project file.
+     */
     fun closeProjectFile() {
         actionLink(byXpath("//div[@class='SingleHeightLabel']//div[@class='InplaceButton']")).click()
     }
 
+    /**
+     * Change the quick access params to have max search time to 2 seconds.
+     */
     fun changeQuickAccess() {
         find(QuickAccessParametersFixtures::class.java, timeout = Duration.ofSeconds(60)).apply {
             searchBudgetTypeComboBox.selectItem("Max time")
@@ -74,6 +86,9 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
         find<JButtonFixture>(byXpath("//div[@text='OK']")).click()
     }
 
+    /**
+     * Run EvoSuite using a shortcut to generate tests for class
+     */
     fun runTestsForClass() {
         actionLink(byXpath("//div[@class='EditorComponentImpl']")).click()
         remoteRobot.keyboard { hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_ALT, KeyEvent.VK_G) }
