@@ -14,7 +14,7 @@ import com.intellij.psi.PsiFile
  */
 class GenerateTestsActionClass : AnAction() {
     /**
-     * Performs test generation for a class when the action is invoked.
+     * Creates and calls (EvoSuite) Runner to generate tests for a class when the action is invoked.
      *
      * @param e an action event that contains useful information
      */
