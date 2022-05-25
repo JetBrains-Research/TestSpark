@@ -55,6 +55,9 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
         actionLink(byXpath("//div[@text='Find in Files...']")).click()
         val fileSearchTextField = textField(byXpath("//div[@class='JBTextAreaWithMixedAccessibleContext']"))
         fileSearchTextField.text = fileName
+        val pathField =
+            textField(byXpath("//div[@class='FindPopupDirectoryChooser']//div[@class='BorderlessTextField']"))
+        pathField.text = pathField.text + "\\src\\main"
         remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
     }
 

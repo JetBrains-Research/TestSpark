@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
 import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.search.locators.byXpath
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
@@ -33,18 +34,27 @@ class CoverageVisualisationToolWindowTest {
             waitForBackgroundTasks()
             clickOnToolWindow()
             openProjectFile("ArrayUtils", "untitled")
+
+            // Change quick access params
+            changeQuickAccess()
+            // Run EvoSuite on entire class
+            runTestsForClass()
+            // Wait for background tasks to finish
+            Thread.sleep(5000)
+            waitForBackgroundTasks()
         }
     }
 
     @Order(1)
     @Video
     @Test
-    fun test(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+    fun testCoverageVisualisationTab(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        ideaFrame.changeQuickAccess()
-        ideaFrame.runTestsForClass()
-        assertThat(true).isTrue
-        Thread.sleep(20000)
+        ideaFrame.apply {
+            val coverageVisualisationTab = actionLink(byXpath("//div[@class='ContentTabLabel' and @text='Coverage Visualisation']"))
+            coverageVisualisationTab.click()
+            assertThat(coverageVisualisationTab.hasText("Coverage Visualisation")).isTrue
+        }
     }
 
     @AfterAll
