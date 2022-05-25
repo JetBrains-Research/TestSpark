@@ -15,7 +15,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
  */
 class GenerateTestsActionLine : AnAction() {
     /**
-     * Performs test generation for a line when the action is invoked.
+     * Creates and calls (EvoSuite) Runner to generate tests for a line when the action is invoked.
      *
      * @param e an action event that contains useful information
      */

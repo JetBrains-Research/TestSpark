@@ -17,7 +17,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
  */
 class GenerateTestsActionMethod : AnAction() {
     /**
-     * Performs test generation for a method when the action is invoked.
+     * Creates and calls (EvoSuite) Runner to generate tests for a method when the action is invoked.
      *
      * @param e an action event that contains useful information
      */
