@@ -16,6 +16,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import java.io.File
@@ -60,6 +61,10 @@ class Runner(
     private val settingsState = TestGenieSettingsService.getInstance().state
 
     private var command = mutableListOf<String>()
+
+    init {
+        Util.makeTmp()
+    }
 
     /**
      * Sets up evosuite to run for a target class. This is the simplest configuration.
