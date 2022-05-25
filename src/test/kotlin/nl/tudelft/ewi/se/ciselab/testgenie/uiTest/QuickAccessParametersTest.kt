@@ -461,9 +461,6 @@ class QuickAccessParametersTest {
      */
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        // Reset all the parameters to defaults to prevent flakiness
-        reset()
-
         // Close the tool window tab
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             clickOnToolWindow()
