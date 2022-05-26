@@ -20,26 +20,6 @@ class GenerateTestsActionClass : AnAction() {
      */
     override fun actionPerformed(e: AnActionEvent) {
         createEvoSuiteRunner(e)?.forClass()?.runEvoSuite()
-        val project: Project = e.project ?: return
-
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
-        val fileName = vFile.presentableUrl
-        val modificationStamp = vFile.modificationStamp
-
-        val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
-        val classFQN = psiClass.qualifiedName ?: return
-
-        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-        val settingsState = TestGenieSettingsService.getInstance().state ?: return
-        val projectClassPath = "$projectPath/" + settingsState.buildPath
-
-        log.info("Generating tests for project $projectPath with classpath $projectClassPath")
-
-        log.info("Selected class is $classFQN")
-
-        Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp).forClass().runEvoSuite()
     }
 
     /**
