@@ -19,7 +19,7 @@ import java.time.Duration
  */
 
 @FixtureName("Settings Frame")
-@DefaultXpath("type", "//div[@class='MyDialog' and @title='Settings']")
+@DefaultXpath("type", "//div[@class='MyDialog']")
 class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
 
