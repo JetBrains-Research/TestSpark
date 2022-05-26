@@ -4,10 +4,12 @@ import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.ContainerFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.WaitForConditionTimeoutException
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -24,12 +26,42 @@ import java.time.Duration
 class PsiSelectionTest {
     private lateinit var remoteRobot: RemoteRobot
     private val pathToMainFile: List<String> = listOf("pizzeria", "src", "main", "java", "PizzaClasse")
+    private val actionClassText: String = "Generate Tests For Class "
+    private val actionMethodText: String = "Generate Tests For Method "
+    private val actionLineText: String = "Generate Tests For Line "
 
-    private fun assertGenerateTestsActionVisible(title: String) {
+    /**
+     * Makes the robot click on TestGenie action group.
+     */
+    private fun clickOnTestGenieActionGroup() {
         with(remoteRobot) {
             find<ComponentFixture>(byXpath("//div[@accessiblename='TestGenie' and @class='ActionMenu' and @text='TestGenie']")).click()
-            assertThat(find<ComponentFixture>(byXpath("//div[@text='TestGenie']//div[contains(@text, '$title')]"), Duration.ofSeconds(5)).isShowing).isTrue
         }
+    }
+
+    /**
+     * Asserts that the action menu item is visible.
+     *
+     * @param text the display text of the action
+     */
+    private fun assertThatActionIsVisible(text: String) {
+        with(remoteRobot) {
+            assertThat(
+                find<ComponentFixture>(
+                    byXpath("//div[@text='TestGenie']//div[contains(@text, '$text')]"),
+                    Duration.ofSeconds(3)
+                ).isShowing
+            ).isTrue
+        }
+    }
+
+    /**
+     * Asserts that the action menu item is not visible.
+     *
+     * @param text the display text of the action
+     */
+    private fun assertThatActionIsNotVisible(text: String) {
+        assertThatThrownBy { assertThatActionIsVisible(text) }.isInstanceOf(WaitForConditionTimeoutException::class.java)
     }
 
     /**
@@ -41,6 +73,8 @@ class PsiSelectionTest {
         find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             open("pizzeria")
         }
+
+        Thread.sleep(3000L)
 
         // Open the main file of the project and enter full screen mode
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
@@ -59,7 +93,11 @@ class PsiSelectionTest {
         val editor = find<ContainerFixture>(byXpath("//div[@class='EditorComponentImpl']"))
         println(editor.findAllText().map { it.text })
         editor.findText("Classe").rightClick()
-        assertGenerateTestsActionVisible("Class PizzaClasse")
+
+        clickOnTestGenieActionGroup()
+        assertThatActionIsVisible(actionClassText.plus("PizzaClasse"))
+        assertThatActionIsNotVisible(actionMethodText)
+        assertThatActionIsNotVisible(actionLineText)
     }
 
     @AfterAll
