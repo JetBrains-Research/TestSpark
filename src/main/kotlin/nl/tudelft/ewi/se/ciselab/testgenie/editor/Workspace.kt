@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.editor
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
@@ -11,8 +12,12 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import nl.tudelft.ewi.se.ciselab.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
+import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageSelectionToggleListener
 import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
 
 /**
  * Workspace state service
@@ -24,13 +29,25 @@ import org.evosuite.utils.CompactReport
 class Workspace(private val project: Project) {
     data class TestJobInfo(val fileUrl: String, var targetUnit: String, val modificationTS: Long, val jobId: String)
 
+    private class TestJob(val info: TestJobInfo, val report: CompactReport, val selectedTests: HashSet<String>) {
+        fun getSelectedTests(): List<CompactTestCase> {
+            return report.testCaseList.filter { selectedTests.contains(it.key) }.map { it.value }
+        }
+
+        fun getSelectedLines(): HashSet<Int> {
+            val lineSet: HashSet<Int> = HashSet()
+            getSelectedTests().map { lineSet.addAll(it.coveredLines) }
+            return lineSet
+        }
+    }
+
     private val log = Logger.getInstance(this.javaClass)
 
     /**
      * Maps a workspace file to the test generation jobs that were triggered on it.
      * Currently, the file key is represented by its presentableUrl
      */
-    private val testGenerationResults: HashMap<String, ArrayList<Pair<TestJobInfo, CompactReport>>> = HashMap()
+    private val testGenerationResults: HashMap<String, ArrayList<TestJob>> = HashMap()
 
     /**
      * Maps a test generation job id to its corresponding test job information
@@ -38,28 +55,50 @@ class Workspace(private val project: Project) {
     private var pendingTestResults: HashMap<String, TestJobInfo> = HashMap()
 
     init {
+        val connection = project.messageBus.connect()
+
+        // Set event listener for changes to the VFS. The overridden event is
+        // triggered whenever the user switches their editor window selection inside the IDE
+        connection.subscribe(
+            COVERAGE_SELECTION_TOGGLE_TOPIC,
+            object : CoverageSelectionToggleListener {
+                override fun testGenerationResult(testName: String, selected: Boolean, editor: Editor) {
+                    val vFile = vFileForDocument(editor.document) ?: return
+                    val fileKey = vFile.presentableUrl
+                    val testJob = testGenerationResults[fileKey]?.last() ?: return
+                    val modTs = editor.document.modificationStamp
+
+                    if (selected) {
+                        testJob.selectedTests.add(testName)
+                    } else {
+                        testJob.selectedTests.remove(testName)
+                    }
+
+                    // update coverage only if the modification timestamp is the same
+                    if (testJob.info.modificationTS == modTs) {
+                        updateCoverage(testJob.getSelectedLines(), testJob.getSelectedTests(), editor)
+                    }
+                }
+            }
+        )
+
         // Set event listener for document changes. These are triggered whenever the user changes
         // the contents of the editor.
         EditorFactory.getInstance().eventMulticaster.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 super.documentChanged(event)
-
                 val file = FileDocumentManager.getInstance().getFile(event.document) ?: return
                 val fileName = file.presentableUrl
                 val modTs = event.document.modificationStamp
 
-                val job = lastTestGeneration(fileName) ?: return
+                val testJob = lastTestGeneration(fileName) ?: return
 
-                if (job.first.modificationTS != modTs) {
+                if (testJob.info.modificationTS != modTs) {
                     val editor = editorForVFile(file)
                     editor?.markupModel?.removeAllHighlighters()
                 }
             }
         }) {}
-    }
-
-    fun lastTestGeneration(fileName: String): Pair<TestJobInfo, CompactReport>? {
-        return testGenerationResults[fileName]?.last()
     }
 
     /**
@@ -83,13 +122,15 @@ class Workspace(private val project: Project) {
         val jobKey = pendingTestResults.remove(testResultName)!!
 
         val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
-        resultsForFile.add(Pair(jobKey, testReport))
+        val displayedSet = HashSet<String>()
+        displayedSet.addAll(testReport.testCaseList.keys)
+        resultsForFile.add(TestJob(jobKey, testReport, displayedSet))
 
         val editor = editorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
             if (editor.document.modificationStamp == jobKey.modificationTS) {
-                showCoverage(testReport, editor)
+                showReport(testReport, editor)
             }
         } else {
             log.info("No editor opened for received test result")
@@ -118,7 +159,7 @@ class Workspace(private val project: Project) {
      * Utility function that returns the editor for a specific VirtualFile
      * in case it is opened in the IDE
      */
-    fun editorForVFile(file: VirtualFile): Editor? {
+    private fun editorForVFile(file: VirtualFile): Editor? {
         val documentManager = FileDocumentManager.getInstance()
         FileEditorManager.getInstance(project).allEditors.map { it as TextEditor }.map { it.editor }.map {
             val currentFile = documentManager.getFile(it.document)
@@ -131,8 +172,41 @@ class Workspace(private val project: Project) {
         return null
     }
 
-    private fun showCoverage(testReport: CompactReport, editor: Editor) {
+    /**
+     * Utility function that returns the virtual file
+     * for a specific document instance
+     */
+    private fun vFileForDocument(document: Document): VirtualFile? {
+        val documentManager = FileDocumentManager.getInstance()
+        return documentManager.getFile(document)
+    }
+
+    /**
+     * Function that calls the services responsible for visualizing
+     * coverage and displaying the generated test cases. This
+     * is used whenever a new test generation result gets published.
+     *
+     * @param testReport the new test report
+     * @param editor editor instance where coverage should be
+     * visualized
+     */
+    private fun showReport(testReport: CompactReport, editor: Editor) {
         val visualizationService = project.service<CoverageVisualisationService>()
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+        testCaseDisplayService.showGeneratedTests(testReport, editor)
         visualizationService.showCoverage(testReport, editor)
+    }
+
+    private fun updateCoverage(
+        linesToCover: Set<Int>,
+        testCaseList: List<CompactTestCase>,
+        editor: Editor
+    ) {
+        val visualizationService = project.service<CoverageVisualisationService>()
+        visualizationService.updateCoverage(linesToCover, testCaseList, editor)
+    }
+
+    private fun lastTestGeneration(fileName: String): TestJob? {
+        return testGenerationResults[fileName]?.last()
     }
 }
