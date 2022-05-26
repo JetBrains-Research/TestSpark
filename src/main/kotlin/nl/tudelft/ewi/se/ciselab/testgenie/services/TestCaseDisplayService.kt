@@ -25,7 +25,7 @@ import javax.swing.JPanel
 class TestCaseDisplayService(private val project: Project) {
 
     private val mainPanel: JPanel = JPanel()
-    private val applyButton: JButton = JButton("Apply")
+    private val applyButton: JButton = JButton("Apply to test suite")
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
@@ -122,6 +122,23 @@ class TestCaseDisplayService(private val project: Project) {
             .createProjectScopeChooser(
                 "Insert Test Cases into Class"
             )
+
+        // Warning: The following code is extremely cursed.
+        // It is a workaround for an oversight in the IntelliJ TreeJavaClassChooserDialog.
+        // This is necessary in order to set isShowLibraryContents to false in
+        // the AbstractTreeClassChooserDialog (parent of the TreeJavaClassChooserDialog).
+        // If this is not done, the user can pick a non-project class (e.g. a class from a library).
+        // See https://github.com/ciselab/TestGenie/issues/102
+        // TODO: In the future, this should be replaced with a custom dialog (which can also create new classes).
+        try {
+            val showLibraryContentsField = chooser.javaClass.superclass.getDeclaredField("myIsShowLibraryContents")
+            showLibraryContentsField.isAccessible = true
+            showLibraryContentsField.set(chooser, false)
+        } catch (_: Exception) {
+            // could not set field
+            // ignoring the exception is acceptable as this part is not critical
+        }
+
         chooser.showDialog()
 
         // get selected class or return if no class was selected
