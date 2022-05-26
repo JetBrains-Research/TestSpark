@@ -8,7 +8,9 @@ import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.fixtures.JTextFieldFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
+import java.awt.event.KeyEvent
 import java.time.Duration
 
 /**
@@ -180,6 +182,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     fun findTestGenie() {
         waitFor(Duration.ofSeconds(60)) {
             searchTextBox.text = "TestGenie"
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
             if (searchTextBox.text == "TestGenie") {
                 return@waitFor true
             }
@@ -204,6 +207,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     fun findEvoSuite() {
         waitFor(Duration.ofSeconds(60)) {
             searchTextBox.text = "EvoSuite"
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
             if (searchTextBox.text == "EvoSuite") {
                 return@waitFor true
             }
