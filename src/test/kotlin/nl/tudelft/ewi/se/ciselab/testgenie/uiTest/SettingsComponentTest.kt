@@ -37,13 +37,7 @@ class SettingsComponentTest {
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             waitForBackgroundTasks()
-            // Check if operating system is Mac
-            if (remoteRobot.isMac()) { // If so then we need another way to open settings
-                clickOnToolWindow() // Open sidebar tool window
-                advancedSettingsButton() // Use action link in quick access parameters to open settings
-            } else {
-                openSettings()
-            }
+            openSettings(false)
         }
     }
 
@@ -84,12 +78,7 @@ class SettingsComponentTest {
 
         // Open settings again
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        // Check if operating system is Mac
-        if (remoteRobot.isMac()) { // If so then we need another way to open settings
-            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
-        } else {
-            ideaFrame.openSettings()
-        }
+        ideaFrame.openSettings(true)
 
         // Find again TestGenie
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
@@ -101,12 +90,7 @@ class SettingsComponentTest {
         settingsFrame.okSettings()
 
         // Open settings again
-        // Check if operating system is Mac
-        if (remoteRobot.isMac()) { // If so then we need another way to open settings
-            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
-        } else {
-            ideaFrame.openSettings()
-        }
+        ideaFrame.openSettings(true)
     }
 
     @Order(4)
@@ -174,12 +158,7 @@ class SettingsComponentTest {
 
         // Open settings again
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        // Check if operating system is Mac
-        if (remoteRobot.isMac()) { // If so then we need another way to open settings
-            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
-        } else {
-            ideaFrame.openSettings()
-        }
+        ideaFrame.openSettings(true)
 
         // Find again EvoSuite
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
@@ -195,12 +174,7 @@ class SettingsComponentTest {
         settingsFrame.okSettings()
 
         // Open settings again
-        // Check if operating system is Mac
-        if (remoteRobot.isMac()) { // If so then we need another way to open settings
-            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
-        } else {
-            ideaFrame.openSettings()
-        }
+        ideaFrame.openSettings(true)
     }
 
     private fun helperGeneralCheckBoxes(settingsFrame: SettingsFrame): List<JCheckboxFixture> {
@@ -235,12 +209,7 @@ class SettingsComponentTest {
 
         // Open settings again
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        // Check if operating system is Mac
-        if (remoteRobot.isMac()) { // If so then we need another way to open settings
-            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
-        } else {
-            ideaFrame.openSettings()
-        }
+        ideaFrame.openSettings(true)
 
         // Find again EvoSuite
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
@@ -264,12 +233,7 @@ class SettingsComponentTest {
         settingsFrame.okSettings()
 
         // Open settings again
-        // Check if operating system is Mac
-        if (remoteRobot.isMac()) { // If so then we need another way to open settings
-            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
-        } else {
-            ideaFrame.openSettings()
-        }
+        ideaFrame.openSettings(true)
     }
 
     @Order(8)
