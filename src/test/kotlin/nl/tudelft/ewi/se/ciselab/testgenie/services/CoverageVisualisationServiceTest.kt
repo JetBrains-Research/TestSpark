@@ -54,7 +54,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
 
         // Disable coverage visualisation
         val settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
-        settingsState.showCoverage = false
+//        settingsState.showCoverage = false
     }
 
     @AfterEach
