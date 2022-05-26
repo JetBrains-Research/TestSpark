@@ -10,6 +10,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -65,6 +66,30 @@ class SettingsPluginConfigurableTest {
         settingsConfigurable.apply()
         assertThat(component()).isNotEqualTo(oldValue)
         assertThat(state()).isNotEqualTo(oldValue)
+    }
+
+    @Test
+    fun testIsModifiedJavaPath() {
+        settingsComponent.javaPath = "this is modified: first"
+        assertThat(settingsConfigurable.isModified).isTrue
+        assertThat(settingsComponent.javaPath).isNotEqualTo(settingsState.javaPath)
+    }
+
+    @Test
+    fun testResetJavaPath() {
+        val oldValue = settingsComponent.javaPath
+        settingsComponent.javaPath = "this is modified: second"
+        settingsConfigurable.reset()
+        assertThat(oldValue).isEqualTo(settingsComponent.javaPath)
+    }
+
+    @Test
+    fun testApplyJavaPath() {
+        val oldValue = settingsComponent.javaPath
+        settingsComponent.javaPath = "this is modified: third"
+        settingsConfigurable.apply()
+        assertThat(oldValue).isNotEqualTo(settingsComponent.javaPath)
+        assertThat(oldValue).isNotEqualTo(settingsState.javaPath)
     }
 
     private fun intValueGenerator(): Stream<Arguments> {
