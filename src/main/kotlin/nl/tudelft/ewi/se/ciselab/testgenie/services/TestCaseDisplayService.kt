@@ -29,6 +29,9 @@ class TestCaseDisplayService(private val project: Project) {
     private val mainPanel: JPanel = JPanel()
     private val applyButton: JButton = JButton("Apply to test suite")
     private val validateButton: JButton = JButton("Validate tests")
+    private val selectAllButton: JButton = JButton("Select All")
+    private val deselectAllButton: JButton = JButton("Deselect All")
+
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
@@ -43,6 +46,8 @@ class TestCaseDisplayService(private val project: Project) {
         val buttons = JPanel()
         buttons.add(applyButton)
         buttons.add(validateButton)
+        buttons.add(selectAllButton)
+        buttons.add(deselectAllButton)
 
         mainPanel.add(buttons, BorderLayout.SOUTH)
 
@@ -50,6 +55,8 @@ class TestCaseDisplayService(private val project: Project) {
 
         applyButton.addActionListener { applyTests() }
         validateButton.addActionListener { validateTests() }
+        selectAllButton.addActionListener { toggleAllCheckboxes(true) }
+        deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
     }
 
     /**
@@ -83,7 +90,7 @@ class TestCaseDisplayService(private val project: Project) {
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            checkbox.addActionListener {
+            checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                     .testGenerationResult(testName, checkbox.isSelected, editor)
             }
@@ -165,6 +172,13 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     private fun validateTests() {}
+
+    private fun toggleAllCheckboxes(selected: Boolean) {
+        testCasePanels.forEach { (_, jPanel) ->
+            val checkBox = jPanel.getComponent(0) as JCheckBox
+            checkBox.isSelected = selected
+        }
+    }
 
     /**
      * Append the provided test cases to the provided class.
