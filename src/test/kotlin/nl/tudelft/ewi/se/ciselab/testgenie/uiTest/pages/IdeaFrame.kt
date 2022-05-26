@@ -142,14 +142,6 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     }
 
     /**
-     * Method to open the settings on IntelliJ
-     *  through the action link in the quick access parameters in the sidebar tool window.
-     */
-    fun advancedSettingsButton() {
-        advancedSettingsButton.click()
-    }
-
-    /**
      * Method to click on TestGenie stripe button on the right sidebar.
      * First click opens the tool window, second click closes tool window.
      */
