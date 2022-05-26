@@ -146,6 +146,7 @@ tasks {
         systemProperty("ide.show.tips.on.startup.default.value", "false")
         systemProperty("jb.consents.confirmation.enabled", "false")
         systemProperty("ide.mac.file.chooser.native", "false")
+        systemProperty("apple.laf.useScreenMenuBar", "false")
     }
 
     signPlugin {

@@ -10,7 +10,6 @@ import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import nl.tudelft.ewi.se.ciselab.testgenie.coverage.CoverageRenderer
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
 import org.evosuite.utils.CompactReport
 import java.awt.Color
 import kotlin.math.roundToInt
@@ -41,7 +40,7 @@ class CoverageVisualisationService(private val project: Project) {
 
             val service = TestGenieSettingsService.getInstance().state
             val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
-            val colorForLines = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
+            val colorForLines = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
 
             editor.markupModel.removeAllHighlighters()
 
