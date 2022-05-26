@@ -96,12 +96,23 @@ class Runner(
         if (!settingsState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsState?.configurationId}")
 
         val cmd = ArrayList<String>()
+        cmd.add("cmd.exe")
+        cmd.add("/c")
+        //cmd.add("mvn compile")
+        //cmd.add("&&")
 
-        cmd.add(settingsState?.javaPath!!)
-        cmd.add("-jar")
-        cmd.add(evoSuitePath)
-        cmd.addAll(command)
+        val string = "${settingsState!!.buildCommand} && ${settingsState?.javaPath!!} -jar \\\"${evoSuitePath}\\\" ${command.joinToString(separator = " ")}"
+
+        cmd.add(string)
+
+        //cmd.add(settingsState?.javaPath!!)
+        //cmd.add("-jar")
+        //cmd.add(evoSuitePath)
+        //cmd.addAll(command)
         val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
+
+        // var cmd1 = ArrayList<String>()
+        // cmd1 = arrayListOf<String>()
 
         log.info("Starting EvoSuite with arguments: $cmdString")
         log.info("Results will be saved to $serializeResultPath")
