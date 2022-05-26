@@ -3,3 +3,4 @@
 .qodana
 build
 lib/
+evosuite-tests
