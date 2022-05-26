@@ -51,6 +51,7 @@ class PsiSelectionTest {
         // Close the project
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             closeProjectFromProjectTree(arrayOf("src", "pizzeria"))
+            closeProject()
         }
     }
 }
