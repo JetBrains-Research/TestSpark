@@ -104,7 +104,7 @@ class Runner(
     }
 
     /**
-     * Performs final argument preparation and launches the evosuite process on a separate thread.
+     * Builds the project and launches EvoSuite on a separate thread.
      *
      * @return the path to which results will be (eventually) saved
      */
@@ -141,6 +141,11 @@ class Runner(
         return testResultName
     }
 
+    /**
+     * Runs the build command as defined in settings.
+     *
+     * @param indicator the progress indicator
+     */
     private fun runBuild(indicator: ProgressIndicator) {
         indicator.isIndeterminate = true
         indicator.text = TestGenieBundle.message("evosuiteBuildMessage")
@@ -183,6 +188,11 @@ class Runner(
         }
     }
 
+    /**
+     * Executes EvoSuite.
+     *
+     * @param indicator the progress indicator
+     */
     private fun runEvoSuite(indicator: ProgressIndicator) {
         if (!settingsState?.seed.isNullOrBlank()) command.add("-seed=${settingsState?.seed}")
         if (!settingsState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsState?.configurationId}")
