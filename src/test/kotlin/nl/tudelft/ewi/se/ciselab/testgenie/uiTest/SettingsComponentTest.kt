@@ -286,7 +286,7 @@ class SettingsComponentTest {
         // This assertion on macOS is different. Reason is unclear.
         if (remoteRobot.isMac()) {
             assertThat(errorDialog.hasText("Seed parameter is not of numeric type. Therefore, it will not be saved." +
-                    " However, the rest of the parameters have been successfully saved."))
+                    " However, the rest of the parameters have been successfully saved.")).isTrue
         } else {
             assertThat(errorDialog.hasText("'Incorrect Numeric Type For Seed'")).isTrue
         }
