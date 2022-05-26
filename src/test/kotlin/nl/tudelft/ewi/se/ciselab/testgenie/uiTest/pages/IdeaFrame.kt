@@ -84,10 +84,24 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
         }
     }
 
-    fun openProjectFromProjectTree() {
+    /**
+     * Opens the project by clicking on the file tabs in the projectViewTree.
+     *
+     * @param pathToMainFile an array of file tabs that the robot has to (double) click on to open the main file
+     */
+    fun openProjectFromProjectTree(pathToMainFile: Array<String>) {
         projectTab.click()
-        // projectViewTree.find()
-        // projectViewTree.click()
+        pathToMainFile.forEach { projectViewTree.findText(it).doubleClick() }
+    }
+
+    /**
+     * Closes the project by closing the file and clicking on the file tabs in the projectViewTree.
+     *
+     * @param pathFromMainFile an array of file tabs that the robot has to (double) click on to close them
+     */
+    fun closeProjectFromProjectTree(pathFromMainFile: Array<String>) {
+        button(byXpath("//div[@class='InplaceButton']")).click()
+        pathFromMainFile.forEach { projectViewTree.findText(it).doubleClick() }
         projectTab.click()
     }
 }
