@@ -190,4 +190,22 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
         pathFromMainFile.forEach { projectViewTree.findText(it).doubleClick() }
         projectTab.click()
     }
+
+    fun goFullScreen() {
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        val actionSearchBox = textField(byXpath("//div[@class='SearchField']"))
+        actionSearchBox.text = "Enter Full Screen"
+        Thread.sleep(2000L)
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+    }
+
+    fun quitFullScreen() {
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        val actionSearchBox = textField(byXpath("//div[@class='SearchField']"))
+        actionSearchBox.text = "Exit Full Screen"
+        Thread.sleep(2000L)
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+    }
 }
