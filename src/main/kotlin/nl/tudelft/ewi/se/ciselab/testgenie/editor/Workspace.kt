@@ -29,14 +29,14 @@ import org.evosuite.utils.CompactTestCase
 class Workspace(private val project: Project) {
     data class TestJobInfo(val fileUrl: String, var targetUnit: String, val modificationTS: Long, val jobId: String)
 
-    class TestJob(val info: TestJobInfo, val report: CompactReport, val selectedTests: HashSet<String>) {
+    private class TestJob(val info: TestJobInfo, val report: CompactReport, val selectedTests: HashSet<String>) {
         fun getSelectedTests(): List<CompactTestCase> {
             return report.testCaseList.filter { selectedTests.contains(it.key) }.map { it.value }
         }
 
         fun getSelectedLines(): HashSet<Int> {
             val lineSet: HashSet<Int> = HashSet()
-            report.testCaseList.filter { selectedTests.contains(it.key) }.map { lineSet.addAll(it.value.coveredLines) }
+            getSelectedTests().map { lineSet.addAll(it.coveredLines) }
             return lineSet
         }
     }
@@ -66,6 +66,7 @@ class Workspace(private val project: Project) {
                     val vFile = vFileForDocument(editor.document) ?: return
                     val fileKey = vFile.presentableUrl
                     val testJob = testGenerationResults[fileKey]?.last() ?: return
+                    val modTs = editor.document.modificationStamp
 
                     if (selected) {
                         testJob.selectedTests.add(testName)
@@ -73,7 +74,10 @@ class Workspace(private val project: Project) {
                         testJob.selectedTests.remove(testName)
                     }
 
-                    updateCoverage(testJob.getSelectedLines(), testJob.getSelectedTests(), editor)
+                    // update coverage only if the modification timestamp is the same
+                    if (testJob.info.modificationTS == modTs) {
+                        updateCoverage(testJob.getSelectedLines(), testJob.getSelectedTests(), editor)
+                    }
                 }
             }
         )
@@ -87,18 +91,14 @@ class Workspace(private val project: Project) {
                 val fileName = file.presentableUrl
                 val modTs = event.document.modificationStamp
 
-                val job = lastTestGeneration(fileName) ?: return
+                val testJob = lastTestGeneration(fileName) ?: return
 
-                if (job.info.modificationTS != modTs) {
+                if (testJob.info.modificationTS != modTs) {
                     val editor = editorForVFile(file)
                     editor?.markupModel?.removeAllHighlighters()
                 }
             }
         }) {}
-    }
-
-    fun lastTestGeneration(fileName: String): TestJob? {
-        return testGenerationResults[fileName]?.last()
     }
 
     /**
@@ -159,7 +159,7 @@ class Workspace(private val project: Project) {
      * Utility function that returns the editor for a specific VirtualFile
      * in case it is opened in the IDE
      */
-    fun editorForVFile(file: VirtualFile): Editor? {
+    private fun editorForVFile(file: VirtualFile): Editor? {
         val documentManager = FileDocumentManager.getInstance()
         FileEditorManager.getInstance(project).allEditors.map { it as TextEditor }.map { it.editor }.map {
             val currentFile = documentManager.getFile(it.document)
@@ -173,14 +173,23 @@ class Workspace(private val project: Project) {
     }
 
     /**
-     * Utility function that returns the editor for a specific VirtualFile
-     * in case it is opened in the IDE
+     * Utility function that returns the virtual file
+     * for a specific document instance
      */
-    fun vFileForDocument(document: Document): VirtualFile? {
+    private fun vFileForDocument(document: Document): VirtualFile? {
         val documentManager = FileDocumentManager.getInstance()
         return documentManager.getFile(document)
     }
 
+    /**
+     * Function that calls the services responsible for visualizing
+     * coverage and displaying the generated test cases. This
+     * is used whenever a new test generation result gets published.
+     *
+     * @param testReport the new test report
+     * @param editor editor instance where coverage should be
+     * visualized
+     */
     private fun showReport(testReport: CompactReport, editor: Editor) {
         val visualizationService = project.service<CoverageVisualisationService>()
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
@@ -195,5 +204,9 @@ class Workspace(private val project: Project) {
     ) {
         val visualizationService = project.service<CoverageVisualisationService>()
         visualizationService.updateCoverage(linesToCover, testCaseList, editor)
+    }
+
+    private fun lastTestGeneration(fileName: String): TestJob? {
+        return testGenerationResults[fileName]?.last()
     }
 }
