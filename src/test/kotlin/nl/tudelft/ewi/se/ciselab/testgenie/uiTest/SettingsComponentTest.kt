@@ -310,7 +310,7 @@ class SettingsComponentTest {
         }
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
-            clickOnToolWindow() // Close the tool window to preserve correct IdeaFrame state
+            if (remoteRobot.isMac()) clickOnToolWindow() // Close the tool window to preserve correct IdeaFrame state
             closeProject()
         }
     }
