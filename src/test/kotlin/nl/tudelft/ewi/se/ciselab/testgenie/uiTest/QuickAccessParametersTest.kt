@@ -389,14 +389,15 @@ class QuickAccessParametersTest {
         find<JButtonFixture>(byXpath("//div[@text='No']")).click()
 
         // Assert that nothing has been modified
+        val separator: String = if (remoteRobot.isMac()) "." else "," // The separator of coma and fullstops is different on macOS
         assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(searchBudgetTypeNew))
-        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.text.replace(",", "")).isEqualTo(searchBudgetValueNew)
-        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(initializationTimeoutNew)
-        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(minimizationTimeoutNew)
-        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(assertionTimeoutNew)
-        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text.replace(",", "")).isEqualTo(junitCheckTimeoutNew)
+        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.text.replace(separator, "")).isEqualTo(searchBudgetValueNew)
+        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.text.replace(separator, "")).isEqualTo(initializationTimeoutNew)
+        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.text.replace(separator, "")).isEqualTo(minimizationTimeoutNew)
+        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.text.replace(separator, "")).isEqualTo(assertionTimeoutNew)
+        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text.replace(separator, "")).isEqualTo(junitCheckTimeoutNew)
         assertThat(quickAccessParameters.populationLimitComboBox.hasText(populationLimitNew))
-        assertThat(quickAccessParameters.populationValueSpinnerTextField.text.replace(",", "")).isEqualTo(populationValueNew)
+        assertThat(quickAccessParameters.populationValueSpinnerTextField.text.replace(separator, "")).isEqualTo(populationValueNew)
 
         // Now actually reset the values to defaults and assert that it has been successful
         reset()
