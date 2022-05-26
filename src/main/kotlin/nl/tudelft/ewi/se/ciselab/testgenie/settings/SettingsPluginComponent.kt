@@ -31,6 +31,9 @@ class SettingsPluginComponent {
     // Environment options (Java path)
     private var javaPathTextField = JTextField()
 
+    // BuildPath options
+    private var buildPathTextField = JTextField()
+
     // Accessibility options
     private val accessibilitySeparator = JXTitledSeparator("Accessibility settings")
     private var colorPicker = JColorChooser()
@@ -54,6 +57,8 @@ class SettingsPluginComponent {
             .addComponent(showCoverageCheckBox, 10)
             .addComponent(JXTitledSeparator("Environment settings"), 15)
             .addLabeledComponent(JBLabel("Java 11 path:"), javaPathTextField, 10, false)
+            // Add buildPath option
+            .addLabeledComponent(JBLabel("Select the compilation path:"), buildPathTextField, 10, false)
             // Add accessibility options
             .addComponent(accessibilitySeparator, 15)
             .addComponent(JBLabel("Choose color for visualisation highlight"), 15)
@@ -67,6 +72,9 @@ class SettingsPluginComponent {
      * IMPORTANT: this is responsible for wrapping the text of a label. It must be created before createSettingsPanel()
      */
     private fun stylizePanel() {
+
+        // Add description to build Path
+        buildPathTextField.toolTipText = "Directs EvoSuite to the compiled classes. Default: target/classes"
 
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
@@ -84,6 +92,8 @@ class SettingsPluginComponent {
 
         // Set colorPicker to wrap around dimensions
         colorPicker.preferredSize = Dimension(width ?: 100, height ?: 400)
+
+        javaPathTextField.toolTipText = "Path to a java binary"
     }
 
     /**
@@ -107,6 +117,12 @@ class SettingsPluginComponent {
         get() = javaPathTextField.text
         set(newConfig) {
             javaPathTextField.text = newConfig
+        }
+
+    var buildPath: String
+        get() = buildPathTextField.text
+        set(newConfig) {
+            buildPathTextField.text = newConfig
         }
 
     var colorRed: Int
