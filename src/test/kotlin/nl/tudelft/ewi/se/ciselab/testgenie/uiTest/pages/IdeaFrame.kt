@@ -175,7 +175,7 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      *
      * @param pathToMainFile an array of file tabs that the robot has to (double) click on to open the main file
      */
-    fun openProjectFromProjectTree(pathToMainFile: Array<String>) {
+    fun openProjectFromProjectTree(pathToMainFile: List<String>) {
         projectTab.click()
         pathToMainFile.forEach { projectViewTree.findText(it).doubleClick() }
     }
@@ -185,7 +185,7 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      *
      * @param pathFromMainFile an array of file tabs that the robot has to (double) click on to close them
      */
-    fun closeProjectFromProjectTree(pathFromMainFile: Array<String>) {
+    fun closeProjectFromProjectTree(pathFromMainFile: List<String>) {
         button(byXpath("//div[@class='InplaceButton']")).click()
         pathFromMainFile.forEach { projectViewTree.findText(it).doubleClick() }
         projectTab.click()

@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 
 public class PizzaClasse {
@@ -52,3 +51,4 @@ class BuonaPizza extends PizzaAstratta {
         return List.of("Salame", "Mozzarella", "Salsa di pomodoro");
     }
 }
+
