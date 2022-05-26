@@ -69,7 +69,6 @@ class SettingsComponentTest {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.findTestGenie()
         assertThat(settingsFrame.introLabel.isShowing).isTrue
-        assertThat(settingsFrame.coverageCheckBox.isShowing).isTrue
         assertThat(settingsFrame.environmentSettingsSeparator.isShowing).isTrue
         assertThat(settingsFrame.javaPathField.isShowing).isTrue
         assertThat(settingsFrame.javaPathLabel.isShowing).isTrue
@@ -84,14 +83,12 @@ class SettingsComponentTest {
     @Test
     fun changeTestGenieTabValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
-        val prevCoverageCheckBoxValue = settingsFrame.coverageCheckBox.isSelected()
         val prevJavaPathFieldValue = settingsFrame.javaPathField.text
         val prevHueTextFieldValue = settingsFrame.hueTextField.text
         val prevSaturationTextFieldValue = settingsFrame.saturationTextField.text
         val prevValueTextFieldValue = settingsFrame.valueTextField.text
 
-        // Change checkbox value and apply the settings
-        settingsFrame.coverageCheckBox.setValue(!prevCoverageCheckBoxValue)
+        // apply the settings
         settingsFrame.javaPathField.text = "java path"
         settingsFrame.hueTextField.text = "100"
         settingsFrame.saturationTextField.text = "18"
@@ -106,9 +103,7 @@ class SettingsComponentTest {
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         settingsFrame.findTestGenie()
 
-        // Change the checkbox to previous state and close settings
-        assertThat(settingsFrame.coverageCheckBox.isSelected()).isNotEqualTo(prevCoverageCheckBoxValue)
-        settingsFrame.coverageCheckBox.setValue(prevCoverageCheckBoxValue)
+        // Change to previous state and close settings
         settingsFrame.javaPathField.text = prevJavaPathFieldValue
         settingsFrame.hueTextField.text = prevHueTextFieldValue
         settingsFrame.saturationTextField.text = prevSaturationTextFieldValue
