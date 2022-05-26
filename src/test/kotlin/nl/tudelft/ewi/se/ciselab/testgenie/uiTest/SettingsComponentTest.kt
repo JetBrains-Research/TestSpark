@@ -1,6 +1,5 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
-import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.JButtonFixture
@@ -283,13 +282,13 @@ class SettingsComponentTest {
         val errorDialog: CommonContainerFixture =
             find(settingsFrame.seedDialogLocator, timeout = Duration.ofSeconds(15))
 
-        // This assertion on macOS is different. Reason is unclear.
-        if (remoteRobot.isMac()) {
-            assertThat(errorDialog.hasText("Seed parameter is not of numeric type. Therefore, it will not be saved." +
-                    " However, the rest of the parameters have been successfully saved.")).isTrue
-        } else {
-            assertThat(errorDialog.hasText("'Incorrect Numeric Type For Seed'")).isTrue
-        }
+        // Assertion to check if the error message is correct.
+        assertThat(
+            errorDialog.hasText(
+                "Seed parameter is not of numeric type. Therefore, it will not be saved." +
+                    " However, the rest of the parameters have been successfully saved."
+            )
+        ).isTrue
 
         val okDialog: JButtonFixture?
 
