@@ -55,9 +55,15 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     /**
      * Method to open the settings of IntelliJ.
      */
-    fun openSettings() {
-        openFileMenu.click()
-        openSettingsAction.click()
+    fun openSettings(toolWindowOpen: Boolean) {
+        // Check if operating system is Mac
+        if (remoteRobot.isMac()) { // If so then we need another way to open settings
+            if (!toolWindowOpen) openToolWindow.click() // Open sidebar tool window if it is not already open
+            advancedSettingsButton.click() // Use action link in quick access parameters to open settings
+        } else {
+            openFileMenu.click()
+            openSettingsAction.click()
+        }
     }
 
     /**
