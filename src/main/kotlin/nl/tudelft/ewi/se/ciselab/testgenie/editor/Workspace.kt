@@ -8,8 +8,6 @@ import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.FileEditorManagerEvent
-import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
@@ -24,7 +22,7 @@ import org.evosuite.utils.CompactReport
  *
  */
 class Workspace(private val project: Project) {
-    data class TestJobInfo(val filename: String, var targetUnit: String, val modificationTS: Long, val jobId: String)
+    data class TestJobInfo(val fileUrl: String, var targetUnit: String, val modificationTS: Long, val jobId: String)
 
     private val log = Logger.getInstance(this.javaClass)
 
@@ -40,31 +38,6 @@ class Workspace(private val project: Project) {
     private var pendingTestResults: HashMap<String, TestJobInfo> = HashMap()
 
     init {
-        val connection = project.messageBus.connect()
-
-        // Set event listener for changes to the VFS. The overridden event is
-        // triggered whenever the user switches their editor window selection inside the IDE
-        connection.subscribe(
-            FileEditorManagerListener.FILE_EDITOR_MANAGER,
-            object : FileEditorManagerListener {
-                override fun selectionChanged(event: FileEditorManagerEvent) {
-                    super.selectionChanged(event)
-                    val file = event.newFile
-                    val fileUrl = file.presentableUrl
-                    // check if file has any tests generated for it
-                    val list = testGenerationResults[fileUrl] ?: return
-                    val lastTest = list.lastOrNull() ?: return
-
-                    // check if file is in same state so that coverage visualization is valid
-                    if (lastTest.first.modificationTS == file.modificationStamp) {
-                        // get editor for file
-                        val editor = (event.newEditor as TextEditor).editor
-                        showCoverage(lastTest.second, editor)
-                    }
-                }
-            }
-        )
-
         // Set event listener for document changes. These are triggered whenever the user changes
         // the contents of the editor.
         EditorFactory.getInstance().eventMulticaster.addDocumentListener(object : DocumentListener {
@@ -77,13 +50,8 @@ class Workspace(private val project: Project) {
 
                 val job = lastTestGeneration(fileName) ?: return
 
-                if (job.first.modificationTS == modTs) {
-                    val editor = editorForVFile(file) ?: return
-
-                    showCoverage(job.second, editor)
-                } else {
+                if (job.first.modificationTS != modTs) {
                     val editor = editorForVFile(file)
-
                     editor?.markupModel?.removeAllHighlighters()
                 }
             }
@@ -114,10 +82,10 @@ class Workspace(private val project: Project) {
     fun receiveGenerationResult(testResultName: String, testReport: CompactReport) {
         val jobKey = pendingTestResults.remove(testResultName)!!
 
-        val resultsForFile = testGenerationResults.getOrPut(jobKey.filename) { ArrayList() }
+        val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
         resultsForFile.add(Pair(jobKey, testReport))
 
-        val editor = editorForFileUrl(jobKey.filename)
+        val editor = editorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
             if (editor.document.modificationStamp == jobKey.modificationTS) {

@@ -33,17 +33,33 @@ class SettingsArguments(
 
     /**
      * Appends a method parameter to the command.
-     * This makes EvoSuite create goals only for a certain method
-     * of the CUT.
+     * This makes EvoSuite create goals only for a certain method of the CUT.
      *
      * See https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.3
      *
      * @param method The descriptor of the method we're generating tests for
+     * @return the instance object
      */
     fun forMethod(method: String): SettingsArguments {
         command.addAll(
             listOf(
                 "-Dtarget_method=$method"
+            )
+        )
+        return this
+    }
+
+    /**
+     * Appends a line parameter to the command.
+     * This makes EvoSuite create goals only for a certain line of the CUT.
+     *
+     * @param line the selected line
+     * @return the instance object
+     */
+    fun forLine(line: Int): SettingsArguments {
+        command.addAll(
+            listOf(
+                "-Dtarget_line=$line"
             )
         )
         return this
