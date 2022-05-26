@@ -129,9 +129,7 @@ class Workspace(private val project: Project) {
         val editor = editorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
-            if (editor.document.modificationStamp == jobKey.modificationTS) {
-                showReport(testReport, editor)
-            }
+            showReport(testReport, editor)
         } else {
             log.info("No editor opened for received test result")
         }
