@@ -38,13 +38,19 @@ class SettingsComponentTest {
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             waitForBackgroundTasks()
-            openSettings()
+            // Check if operating system is Mac
+            if (remoteRobot.isMac()) { // If so then we need another way to open settings
+                clickOnToolWindow() // Open sidebar tool window
+                advancedSettingsButton() // Use action link in quick access parameters to open settings
+            } else {
+                openSettings()
+            }
         }
     }
 
     @Order(1)
     @Test
-    @Video
+    // @Video
     fun checkTestGenieTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.searchTextBox.text = "TestGenie"
@@ -59,7 +65,7 @@ class SettingsComponentTest {
 
     @Order(2)
     @Test
-    @Video
+    // @Video
     fun checkTestGenieInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.findTestGenie()
@@ -79,7 +85,12 @@ class SettingsComponentTest {
 
         // Open settings again
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        ideaFrame.openSettings()
+        // Check if operating system is Mac
+        if (remoteRobot.isMac()) { // If so then we need another way to open settings
+            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
+        } else {
+            ideaFrame.openSettings()
+        }
 
         // Find again TestGenie
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
@@ -91,12 +102,17 @@ class SettingsComponentTest {
         settingsFrame.okSettings()
 
         // Open settings again
-        ideaFrame.openSettings()
+        // Check if operating system is Mac
+        if (remoteRobot.isMac()) { // If so then we need another way to open settings
+            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
+        } else {
+            ideaFrame.openSettings()
+        }
     }
 
     @Order(4)
     @Test
-    @Video
+    // @Video
     fun checkEvoSuiteTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.searchTextBox.text = "EvoSuite"
@@ -111,7 +127,7 @@ class SettingsComponentTest {
 
     @Order(5)
     @Test
-    @Video
+    // @Video
     fun checkEvoSuiteInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.findEvoSuite()
@@ -159,7 +175,12 @@ class SettingsComponentTest {
 
         // Open settings again
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        ideaFrame.openSettings()
+        // Check if operating system is Mac
+        if (remoteRobot.isMac()) { // If so then we need another way to open settings
+            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
+        } else {
+            ideaFrame.openSettings()
+        }
 
         // Find again EvoSuite
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
@@ -175,7 +196,12 @@ class SettingsComponentTest {
         settingsFrame.okSettings()
 
         // Open settings again
-        ideaFrame.openSettings()
+        // Check if operating system is Mac
+        if (remoteRobot.isMac()) { // If so then we need another way to open settings
+            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
+        } else {
+            ideaFrame.openSettings()
+        }
     }
 
     private fun helperGeneralCheckBoxes(settingsFrame: SettingsFrame): List<JCheckboxFixture> {
@@ -210,7 +236,12 @@ class SettingsComponentTest {
 
         // Open settings again
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        ideaFrame.openSettings()
+        // Check if operating system is Mac
+        if (remoteRobot.isMac()) { // If so then we need another way to open settings
+            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
+        } else {
+            ideaFrame.openSettings()
+        }
 
         // Find again EvoSuite
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
@@ -234,7 +265,12 @@ class SettingsComponentTest {
         settingsFrame.okSettings()
 
         // Open settings again
-        ideaFrame.openSettings()
+        // Check if operating system is Mac
+        if (remoteRobot.isMac()) { // If so then we need another way to open settings
+            ideaFrame.advancedSettingsButton() // Use action link in quick access parameters to open settings
+        } else {
+            ideaFrame.openSettings()
+        }
     }
 
     @Order(8)
@@ -247,7 +283,13 @@ class SettingsComponentTest {
         val errorDialog: CommonContainerFixture =
             find(settingsFrame.seedDialogLocator, timeout = Duration.ofSeconds(15))
 
-        assertThat(errorDialog.hasText("Incorrect Numeric Type For Seed")).isTrue
+        // This assertion on macOS is different. Reason is unclear.
+        if (remoteRobot.isMac()) {
+            assertThat(errorDialog.hasText("Seed parameter is not of numeric type. Therefore, it will not be saved." +
+                    " However, the rest of the parameters have been successfully saved."))
+        } else {
+            assertThat(errorDialog.hasText("'Incorrect Numeric Type For Seed'")).isTrue
+        }
 
         val okDialog: JButtonFixture?
 
@@ -268,6 +310,7 @@ class SettingsComponentTest {
         }
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
+            clickOnToolWindow() // Close the tool window to preserve correct IdeaFrame state
             closeProject()
         }
     }
