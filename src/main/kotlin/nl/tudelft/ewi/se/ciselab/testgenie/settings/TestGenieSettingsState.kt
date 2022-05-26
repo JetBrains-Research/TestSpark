@@ -6,7 +6,6 @@ import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
  * This class is the actual data class that stores the values of the Settings entries.
  */
 data class TestGenieSettingsState(
-    var showCoverage: Boolean = false,
     var javaPath: String = DefaultSettingsState.javaPath,
 
     var sandbox: Boolean = true,
