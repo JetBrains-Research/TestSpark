@@ -26,6 +26,7 @@ import java.time.Duration
 class PsiSelectionTest {
     private lateinit var remoteRobot: RemoteRobot
     private val pathToMainFile: List<String> = listOf("pizzeria", "src", "main", "java", "PizzaClasse")
+    private val pathToMainFileWindows: List<String> = listOf("pizzeria", "src", "PizzaClasse")
     private val actionClassText: String = "Generate Tests For Class "
     private val actionMethodText: String = "Generate Tests For Method "
     private val actionLineText: String = "Generate Tests For Line "
@@ -78,7 +79,7 @@ class PsiSelectionTest {
 
         // Open the main file of the project and enter full screen mode
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            openMainFileFromProjectTree(pathToMainFile)
+            openMainFileFromProjectTree(if (remoteRobot.isWin()) pathToMainFileWindows else pathToMainFile)
             goFullScreen()
         }
     }
