@@ -39,30 +39,6 @@ class SettingsPluginConfigurableTest {
         settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
     }
 
-    @Test
-    fun testIsModifiedShowCoverage() {
-        settingsComponent.showCoverage = !settingsComponent.showCoverage
-        assertThat(settingsConfigurable.isModified).isTrue
-        assertThat(settingsComponent.showCoverage).isNotEqualTo(settingsState.showCoverage)
-    }
-
-    @Test
-    fun testResetShowCoverage() {
-        val oldValue = settingsComponent.showCoverage
-        settingsComponent.showCoverage = !settingsComponent.showCoverage
-        settingsConfigurable.reset()
-        assertThat(oldValue).isEqualTo(settingsComponent.showCoverage)
-    }
-
-    @Test
-    fun testApplyShowCoverage() {
-        val oldValue = settingsComponent.showCoverage
-        settingsComponent.showCoverage = !settingsComponent.showCoverage
-        settingsConfigurable.apply()
-        assertThat(oldValue).isNotEqualTo(settingsComponent.showCoverage)
-        assertThat(oldValue).isNotEqualTo(settingsState.showCoverage)
-    }
-
     @AfterEach
     fun tearDown() {
         fixture.tearDown()
@@ -90,6 +66,30 @@ class SettingsPluginConfigurableTest {
         settingsConfigurable.apply()
         assertThat(component()).isNotEqualTo(oldValue)
         assertThat(state()).isNotEqualTo(oldValue)
+    }
+
+    @Test
+    fun testIsModifiedJavaPath() {
+        settingsComponent.javaPath = "this is modified: first"
+        assertThat(settingsConfigurable.isModified).isTrue
+        assertThat(settingsComponent.javaPath).isNotEqualTo(settingsState.javaPath)
+    }
+
+    @Test
+    fun testResetJavaPath() {
+        val oldValue = settingsComponent.javaPath
+        settingsComponent.javaPath = "this is modified: second"
+        settingsConfigurable.reset()
+        assertThat(oldValue).isEqualTo(settingsComponent.javaPath)
+    }
+
+    @Test
+    fun testApplyJavaPath() {
+        val oldValue = settingsComponent.javaPath
+        settingsComponent.javaPath = "this is modified: third"
+        settingsConfigurable.apply()
+        assertThat(oldValue).isNotEqualTo(settingsComponent.javaPath)
+        assertThat(oldValue).isNotEqualTo(settingsState.javaPath)
     }
 
     private fun intValueGenerator(): Stream<Arguments> {

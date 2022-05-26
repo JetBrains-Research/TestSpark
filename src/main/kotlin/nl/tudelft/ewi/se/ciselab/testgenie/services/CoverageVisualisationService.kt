@@ -36,7 +36,7 @@ class CoverageVisualisationService(private val project: Project) {
         createToolWindowTab()
 
         // Show in-line coverage only if enabled in settings
-        val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+        val state = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
         if (state.showCoverage) {
 
             val service = TestGenieSettingsService.getInstance().state
@@ -67,7 +67,7 @@ class CoverageVisualisationService(private val project: Project) {
      */
     fun updateCoverage(linesToCover: Set<Int>, testCaseList: List<CompactTestCase>, editor: Editor) {
         // Show in-line coverage only if enabled in settings
-        val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+        val state = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
 
         if (state.showCoverage) {
             val service = TestGenieSettingsService.getInstance().state
