@@ -84,6 +84,8 @@ class SettingsPluginComponent {
 
         // Set colorPicker to wrap around dimensions
         colorPicker.preferredSize = Dimension(width ?: 100, height ?: 400)
+
+        javaPathTextField.toolTipText = "Path to a java binary"
     }
 
     /**
