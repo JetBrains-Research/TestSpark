@@ -31,6 +31,9 @@ class SettingsPluginComponent {
     // BuildPath options
     private var buildPathTextField = JTextField()
 
+    // BuildCommand options
+    private var buildCommandTextField = JTextField()
+
     // Accessibility options
     private val accessibilitySeparator = JXTitledSeparator("Accessibility settings")
     private var colorPicker = JColorChooser()
@@ -54,6 +57,8 @@ class SettingsPluginComponent {
             .addLabeledComponent(JBLabel("Java 11 path:"), javaPathTextField, 10, false)
             // Add buildPath option
             .addLabeledComponent(JBLabel("Select the compilation path:"), buildPathTextField, 10, false)
+            // Add buildPath option
+            .addLabeledComponent(JBLabel("Select the compile command"), buildCommandTextField, 10, false)
             // Add accessibility options
             .addComponent(accessibilitySeparator, 15)
             .addComponent(JBLabel("Choose color for visualisation highlight"), 15)
@@ -70,6 +75,9 @@ class SettingsPluginComponent {
 
         // Add description to build Path
         buildPathTextField.toolTipText = "Directs EvoSuite to the compiled classes. Default: target/classes"
+
+        // Add description to build Command
+        buildCommandTextField.toolTipText = "The command you use for compiling. Usually a maven or gradle command"
 
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
@@ -112,6 +120,12 @@ class SettingsPluginComponent {
         get() = buildPathTextField.text
         set(newConfig) {
             buildPathTextField.text = newConfig
+        }
+
+    var buildCommand: String
+        get() = buildCommandTextField.text
+        set(newConfig) {
+            buildCommandTextField.text = newConfig
         }
 
     var colorRed: Int
