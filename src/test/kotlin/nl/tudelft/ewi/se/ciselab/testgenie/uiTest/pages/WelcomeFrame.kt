@@ -38,7 +38,6 @@ class WelcomeFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      */
     private fun verifyProjectTreeReady(projectName: String) {
         val tree = actionLink(byXpath("//div[@class='Tree']"))
-        tree.findText(projectName).click()
 
         waitFor {
             tree.data.hasText(projectName)
