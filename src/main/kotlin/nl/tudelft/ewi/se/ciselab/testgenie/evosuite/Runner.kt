@@ -157,7 +157,6 @@ class Runner(
             cmd.add("-c")
         }
 
-
         cmd.add(settingsState!!.buildCommand)
 
         val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
