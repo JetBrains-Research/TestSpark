@@ -46,7 +46,7 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     // The action link text in the quick access parameters of sidebar tool window
     private val advancedSettingsButton
         get() = actionLink(byXpath("//div[@class='ActionLink']"))
-        
+
     // Find ProjectViewTree (the thing with files on the left side)
     val projectViewTree
         get() = actionLink(byXpath("//div[@class='ProjectViewTree']"))

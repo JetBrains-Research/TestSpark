@@ -5,6 +5,7 @@ import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.fixtures.JCheckboxFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.SettingsFrame
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.extension.ExtendWith
+import java.awt.event.KeyEvent
 import java.time.Duration
 import kotlin.streams.toList
 
@@ -46,7 +48,11 @@ class SettingsComponentTest {
     // @Video
     fun checkTestGenieTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
-        settingsFrame.searchTextBox.text = "TestGenie"
+        waitFor(Duration.ofSeconds(60)) {
+            settingsFrame.searchTextBox.text = "TestGenie"
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+            return@waitFor settingsFrame.searchTextBox.text == "TestGenie"
+        }
 
         with(settingsFrame.projectViewTree) {
             waitFor(Duration.ofSeconds(5)) {
@@ -118,7 +124,11 @@ class SettingsComponentTest {
     // @Video
     fun checkEvoSuiteTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
-        settingsFrame.searchTextBox.text = "EvoSuite"
+        waitFor(Duration.ofSeconds(60)) {
+            settingsFrame.searchTextBox.text = "EvoSuite"
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+            return@waitFor settingsFrame.searchTextBox.text == "EvoSuite"
+        }
 
         with(settingsFrame.projectViewTree) {
             waitFor(Duration.ofSeconds(5)) {
