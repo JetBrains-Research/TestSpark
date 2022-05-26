@@ -24,7 +24,6 @@ class SettingsPluginComponent {
             " TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI."
     )
 
-
     // Environment options (Java path)
     private var javaPathTextField = JTextField()
 
