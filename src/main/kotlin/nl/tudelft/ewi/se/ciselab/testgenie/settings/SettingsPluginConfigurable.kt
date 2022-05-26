@@ -33,6 +33,7 @@ class SettingsPluginConfigurable : Configurable {
         settingsComponent!!.colorRed = settingsState.colorRed
         settingsComponent!!.colorGreen = settingsState.colorGreen
         settingsComponent!!.colorBlue = settingsState.colorBlue
+        settingsComponent!!.buildCommand = settingsState.buildCommand
     }
 
     /**
@@ -47,6 +48,7 @@ class SettingsPluginConfigurable : Configurable {
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
         modified = modified or (settingsComponent!!.colorGreen != settingsState.colorGreen)
         modified = modified or (settingsComponent!!.colorBlue != settingsState.colorBlue)
+        modified = modified or (settingsComponent!!.buildCommand != settingsState.buildCommand)
         return modified
     }
 
@@ -60,6 +62,7 @@ class SettingsPluginConfigurable : Configurable {
         settingsState.colorGreen = settingsComponent!!.colorGreen
         settingsState.colorBlue = settingsComponent!!.colorBlue
         settingsState.buildPath = settingsComponent!!.buildPath
+        settingsState.buildCommand = settingsComponent!!.buildCommand
     }
 
     /**
