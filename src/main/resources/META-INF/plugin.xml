@@ -62,6 +62,13 @@
                     description="Generate tests for the selected method using TestGenie">
                 <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="M" keymap="$default"/>
             </action>
+            <!-- Generate tests for lines -->
+            <action class="nl.tudelft.ewi.se.ciselab.testgenie.actions.GenerateTestsActionLine"
+                    id="TestGenie.TestGenieActions.GenerateTestsForLine"
+                    text="Generate Tests For Line"
+                    description="Generate tests for the selected line using TestGenie">
+                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="L" keymap="$default"/>
+            </action>
         </group>
     </actions>
 </idea-plugin>
