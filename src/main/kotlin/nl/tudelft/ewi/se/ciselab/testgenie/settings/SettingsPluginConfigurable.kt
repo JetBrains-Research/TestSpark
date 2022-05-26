@@ -30,6 +30,7 @@ class SettingsPluginConfigurable : Configurable {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
         settingsComponent!!.showCoverage = settingsState.showCoverage
         settingsComponent!!.javaPath = settingsState.javaPath
+        settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
         settingsComponent!!.colorGreen = settingsState.colorGreen
         settingsComponent!!.colorBlue = settingsState.colorBlue
@@ -44,6 +45,7 @@ class SettingsPluginConfigurable : Configurable {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
         var modified: Boolean = settingsComponent!!.showCoverage != settingsState.showCoverage
         modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
+        modified = modified or (settingsComponent!!.buildPath != settingsState.buildPath)
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
         modified = modified or (settingsComponent!!.colorGreen != settingsState.colorGreen)
         modified = modified or (settingsComponent!!.colorBlue != settingsState.colorBlue)
@@ -60,6 +62,7 @@ class SettingsPluginConfigurable : Configurable {
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen
         settingsState.colorBlue = settingsComponent!!.colorBlue
+        settingsState.buildPath = settingsComponent!!.buildPath
     }
 
     /**

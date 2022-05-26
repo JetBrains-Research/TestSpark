@@ -47,7 +47,6 @@ class SettingsEvoSuiteConfigurableTest {
 
     @Test
     fun testIsModifiedSeed() {
-        val oldValue = settingsComponent.seed
         settingsComponent.seed = "7"
         assertThat(settingsConfigurable.isModified).isTrue
     }
@@ -71,14 +70,12 @@ class SettingsEvoSuiteConfigurableTest {
 
     @Test
     fun testApplySeedIncorrect() {
-        val oldValue = settingsComponent.seed
         settingsComponent.seed = "not a number"
         assertThatThrownBy { settingsConfigurable.apply() }.isInstanceOf(RuntimeException::class.java)
     }
 
     @Test
     fun testIsModifiedConfigurationId() {
-        val oldValue = settingsComponent.configurationId
         settingsComponent.configurationId = "7id"
         assertThat(settingsConfigurable.isModified).isTrue
     }
