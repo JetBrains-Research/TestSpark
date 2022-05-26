@@ -5,7 +5,6 @@ import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Color
 import java.awt.Dimension
-import javax.swing.JCheckBox
 import javax.swing.JColorChooser
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -24,9 +23,6 @@ class SettingsPluginComponent {
             " EvoSuite is a tool that automatically generates test cases with assertions for classes written in Java code." +
             " TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI."
     )
-
-    // Checkbox options
-    private var showCoverageCheckBox = JCheckBox("Show visualised coverage")
 
     // Environment options (Java path)
     private var javaPathTextField = JTextField()
@@ -56,8 +52,6 @@ class SettingsPluginComponent {
         panel = FormBuilder.createFormBuilder()
             // Add description of TestGenie
             .addComponent(pluginDiscription)
-            // Add visual coverage checkbox
-            .addComponent(showCoverageCheckBox, 10)
             .addComponent(JXTitledSeparator("Environment settings"), 15)
             .addLabeledComponent(JBLabel("Java 11 path:"), javaPathTextField, 10, false)
             // Add buildPath option
@@ -110,16 +104,10 @@ class SettingsPluginComponent {
      * @return preferred UI component
      */
     fun getPreferredFocusedComponent(): JComponent {
-        return showCoverageCheckBox
+        return javaPathTextField
     }
 
     // Settings "changers"
-
-    var showCoverage: Boolean
-        get() = showCoverageCheckBox.isSelected
-        set(newStatus) {
-            showCoverageCheckBox.isSelected = newStatus
-        }
 
     var javaPath: String
         get() = javaPathTextField.text
