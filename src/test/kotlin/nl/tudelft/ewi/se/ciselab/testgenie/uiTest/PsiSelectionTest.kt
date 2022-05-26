@@ -20,6 +20,7 @@ import java.time.Duration
 @ExtendWith(RemoteRobotExtension::class)
 class PsiSelectionTest {
     private lateinit var remoteRobot: RemoteRobot
+    private val pathToMainFile: List<String> = listOf("pizzeria", "src", "main", "java", "PizzaClasse")
 
     /**
      * Opens an untitled project from the IntelliJ welcome screen.
@@ -32,7 +33,7 @@ class PsiSelectionTest {
         }
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            openProjectFromProjectTree(arrayOf("pizzeria", "src", "PizzaClasse"))
+            openProjectFromProjectTree(pathToMainFile)
         }
     }
 
@@ -50,7 +51,7 @@ class PsiSelectionTest {
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Close the project
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            closeProjectFromProjectTree(arrayOf("src", "pizzeria"))
+            closeProjectFromProjectTree(pathToMainFile.dropLast(1).reversed())
             closeProject()
         }
     }
