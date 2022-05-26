@@ -40,6 +40,10 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     private val openToolWindow
         get() = actionLink(byXpath("//div[@tooltiptext='TestGenie']"))
 
+    // The action link text in the quick access parameters of sidebar tool window
+    private val advancedSettingsButton
+        get() = actionLink(byXpath("//div[@class='ActionLink']"))
+
     /**
      * Method to close the current project.
      */
@@ -51,9 +55,27 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     /**
      * Method to open the settings of IntelliJ.
      */
-    fun openSettings() {
-        openFileMenu.click()
-        openSettingsAction.click()
+    fun openSettings(toolWindowOpen: Boolean) {
+        // Check if operating system is Mac
+        if (remoteRobot.isMac()) { // If so then we need another way to open settings
+            if (!toolWindowOpen) {
+                openToolWindow.click() // Open sidebar tool window if it is not already open
+                openToolWindow.click() // Open and close the tool window to get rid of...
+                openToolWindow.click() // ... horizontal scroll bar that right on top of advanceSettingsButton
+            }
+            advancedSettingsButton.click() // Use action link in quick access parameters to open settings
+        } else {
+            openFileMenu.click()
+            openSettingsAction.click()
+        }
+    }
+
+    /**
+     * Method to open the settings on IntelliJ
+     *  through the action link in the quick access parameters in the sidebar tool window.
+     */
+    fun advancedSettingsButton() {
+        advancedSettingsButton.click()
     }
 
     /**
