@@ -28,7 +28,6 @@ class SettingsPluginConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        settingsComponent!!.showCoverage = settingsState.showCoverage
         settingsComponent!!.javaPath = settingsState.javaPath
         settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
@@ -44,8 +43,7 @@ class SettingsPluginConfigurable : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        var modified: Boolean = settingsComponent!!.showCoverage != settingsState.showCoverage
-        modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
+        var modified: Boolean = settingsComponent!!.javaPath != settingsState.javaPath
         modified = modified or (settingsComponent!!.buildPath != settingsState.buildPath)
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
         modified = modified or (settingsComponent!!.colorGreen != settingsState.colorGreen)
@@ -59,7 +57,6 @@ class SettingsPluginConfigurable : Configurable {
      */
     override fun apply() {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        settingsState.showCoverage = settingsComponent!!.showCoverage
         settingsState.javaPath = settingsComponent!!.javaPath
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen
