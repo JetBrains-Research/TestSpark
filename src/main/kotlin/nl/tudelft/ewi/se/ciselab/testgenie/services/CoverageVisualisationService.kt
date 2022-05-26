@@ -61,7 +61,9 @@ class CoverageVisualisationService(private val project: Project) {
     /**
      * Shows coverage on the gutter next to the covered lines.
      *
-     * @param testReport the generated tests summary
+     * @param linesToCover total set of lines  to cover
+     * @param testCaseList list of test cases. This is used for gutter information
+     * @param editor editor instance where coverage should be updated
      */
     fun updateCoverage(linesToCover: Set<Int>, testCaseList: List<CompactTestCase>, editor: Editor) {
         // Show in-line coverage only if enabled in settings
