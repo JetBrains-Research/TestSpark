@@ -14,6 +14,8 @@ import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
  *   getting the information about the selected class and passing it to (EvoSuite) Runner.
  */
 class GenerateTestsActionLine : AnAction() {
+    private val logger: Logger = Logger.getInstance(this.javaClass)
+
     /**
      * Creates and calls (EvoSuite) Runner to generate tests for a line when the action is invoked.
      *
@@ -28,7 +30,7 @@ class GenerateTestsActionLine : AnAction() {
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)
             ?: return // lines in the editor and in EvoSuite are one-based
 
-        Logger.getInstance("GenerateTestsUtils").info("Selected line is $selectedLine")
+        logger.info("Selected line is $selectedLine")
 
         evoSuiteRunner.forLine(selectedLine).runEvoSuite()
     }

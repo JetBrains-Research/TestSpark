@@ -16,6 +16,8 @@ import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
  *   getting the information about the selected method and passing it to (EvoSuite) Runner.
  */
 class GenerateTestsActionMethod : AnAction() {
+    private val logger: Logger = Logger.getInstance(this.javaClass)
+
     /**
      * Creates and calls (EvoSuite) Runner to generate tests for a method when the action is invoked.
      *
@@ -30,7 +32,7 @@ class GenerateTestsActionMethod : AnAction() {
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
         val methodDescriptor = generateMethodDescriptor(psiMethod)
 
-        Logger.getInstance("GenerateTestsUtils").info("Selected method is $methodDescriptor")
+        logger.info("Selected method is $methodDescriptor")
 
         evoSuiteRunner.forMethod(methodDescriptor).runEvoSuite()
     }
