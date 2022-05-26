@@ -5,6 +5,7 @@ import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.fixtures.JCheckboxFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.SettingsFrame
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.extension.ExtendWith
+import java.awt.event.KeyEvent
 import java.time.Duration
 import kotlin.streams.toList
 
@@ -46,7 +48,11 @@ class SettingsComponentTest {
     // @Video
     fun checkTestGenieTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
-        settingsFrame.searchTextBox.text = "TestGenie"
+        waitFor(Duration.ofSeconds(60)) {
+            settingsFrame.searchTextBox.text = "TestGenie"
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+            return@waitFor settingsFrame.searchTextBox.text == "TestGenie"
+        }
 
         with(settingsFrame.projectViewTree) {
             waitFor(Duration.ofSeconds(5)) {
@@ -64,6 +70,14 @@ class SettingsComponentTest {
         settingsFrame.findTestGenie()
         assertThat(settingsFrame.introLabel.isShowing).isTrue
         assertThat(settingsFrame.coverageCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.environmentSettingsSeparator.isShowing).isTrue
+        assertThat(settingsFrame.javaPathField.isShowing).isTrue
+        assertThat(settingsFrame.javaPathLabel.isShowing).isTrue
+        assertThat(settingsFrame.accessibilitySettingsSeparator.isShowing).isTrue
+        assertThat(settingsFrame.colorPicker.isShowing).isTrue
+        assertThat(settingsFrame.hueTextField.isShowing).isTrue
+        assertThat(settingsFrame.saturationTextField.isShowing).isTrue
+        assertThat(settingsFrame.valueTextField.isShowing).isTrue
     }
 
     @Order(3)
@@ -71,9 +85,17 @@ class SettingsComponentTest {
     fun changeTestGenieTabValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         val prevCoverageCheckBoxValue = settingsFrame.coverageCheckBox.isSelected()
+        val prevJavaPathFieldValue = settingsFrame.javaPathField.text
+        val prevHueTextFieldValue = settingsFrame.hueTextField.text
+        val prevSaturationTextFieldValue = settingsFrame.saturationTextField.text
+        val prevValueTextFieldValue = settingsFrame.valueTextField.text
 
         // Change checkbox value and apply the settings
         settingsFrame.coverageCheckBox.setValue(!prevCoverageCheckBoxValue)
+        settingsFrame.javaPathField.text = "java path"
+        settingsFrame.hueTextField.text = "100"
+        settingsFrame.saturationTextField.text = "18"
+        settingsFrame.valueTextField.text = "78"
         settingsFrame.okSettings()
 
         // Open settings again
@@ -87,6 +109,10 @@ class SettingsComponentTest {
         // Change the checkbox to previous state and close settings
         assertThat(settingsFrame.coverageCheckBox.isSelected()).isNotEqualTo(prevCoverageCheckBoxValue)
         settingsFrame.coverageCheckBox.setValue(prevCoverageCheckBoxValue)
+        settingsFrame.javaPathField.text = prevJavaPathFieldValue
+        settingsFrame.hueTextField.text = prevHueTextFieldValue
+        settingsFrame.saturationTextField.text = prevSaturationTextFieldValue
+        settingsFrame.valueTextField.text = prevValueTextFieldValue
         settingsFrame.okSettings()
 
         // Open settings again
@@ -98,7 +124,11 @@ class SettingsComponentTest {
     // @Video
     fun checkEvoSuiteTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
-        settingsFrame.searchTextBox.text = "EvoSuite"
+        waitFor(Duration.ofSeconds(60)) {
+            settingsFrame.searchTextBox.text = "EvoSuite"
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+            return@waitFor settingsFrame.searchTextBox.text == "EvoSuite"
+        }
 
         with(settingsFrame.projectViewTree) {
             waitFor(Duration.ofSeconds(5)) {
