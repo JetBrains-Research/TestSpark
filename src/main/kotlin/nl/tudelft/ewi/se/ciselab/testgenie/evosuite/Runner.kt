@@ -38,7 +38,7 @@ class Runner(
     private val projectPath: String,
     private val projectClassPath: String,
     private val classFQN: String,
-    private val fileName: String,
+    private val fileUrl: String,
     private val modTs: Long
 ) {
     private val log = Logger.getInstance(this::class.java)
@@ -54,7 +54,7 @@ class Runner(
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
     private val testResultName = "test_gen_result_$id"
 
-    private var key = Workspace.TestJobInfo(fileName, classFQN, modTs, testResultName)
+    private var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName)
 
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
@@ -86,7 +86,7 @@ class Runner(
                 .build()
 
         // attach method desc. to target unit key
-        key = Workspace.TestJobInfo(fileName, "$classFQN#$methodDescriptor", modTs, testResultName)
+        key = Workspace.TestJobInfo(fileUrl, "$classFQN#$methodDescriptor", modTs, testResultName)
 
         return this
     }

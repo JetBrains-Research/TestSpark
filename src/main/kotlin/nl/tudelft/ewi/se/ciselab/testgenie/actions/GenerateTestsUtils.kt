@@ -37,7 +37,7 @@ fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return null
     val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
-    val fileName = vFile.presentableUrl
+    val fileUrl = vFile.presentableUrl
     val modificationStamp = vFile.modificationStamp
 
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
@@ -52,7 +52,7 @@ fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
 
     log.info("Selected class is $classFQN")
 
-    return Runner(project, projectPath, projectClassPath, classFQN, fileName, modificationStamp)
+    return Runner(project, projectPath, projectClassPath, classFQN, fileUrl, modificationStamp)
 }
 
 /**

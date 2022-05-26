@@ -28,11 +28,7 @@ import javax.swing.SpinnerNumberModel
 /**
  * This class stores the main panel and the UI of the "Parameters" tool window tab.
  */
-class QuickAccessParameters(_project: Project) {
-
-    // Current Project
-    private var project: Project = _project
-
+class QuickAccessParameters(private val project: Project) {
     // UI elements for EvoSuite parameters
     private val stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
     private val searchBudget: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
