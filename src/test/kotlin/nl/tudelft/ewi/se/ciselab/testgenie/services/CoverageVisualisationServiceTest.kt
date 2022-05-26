@@ -53,8 +53,8 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
             .registerToolWindow(RegisterToolWindowTask("TestGenie", ToolWindowAnchor.RIGHT))
 
         // Disable coverage visualisation
-        val settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
-//        settingsState.showCoverage = false
+        val quickAccessState = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
+        quickAccessState.showCoverage = false
     }
 
     @AfterEach
