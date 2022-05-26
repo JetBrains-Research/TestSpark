@@ -32,7 +32,7 @@ class PsiSelectionTest {
         }
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            openProjectFromProjectTree()
+            openProjectFromProjectTree(arrayOf("pizzeria", "src", "PizzaClasse"))
         }
     }
 
@@ -50,7 +50,7 @@ class PsiSelectionTest {
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Close the project
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            closeProject()
+            closeProjectFromProjectTree(arrayOf("src", "pizzeria"))
         }
     }
 }
