@@ -40,7 +40,7 @@ class CoverageVisualisationService(private val project: Project) {
 
             val service = TestGenieSettingsService.getInstance().state
             val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
-            val colorForLines = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
+            val colorForLines = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
 
             editor.markupModel.removeAllHighlighters()
 

@@ -1,18 +1,59 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.actions
 
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiCodeBlock
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiStatement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
  * This file contains some useful methods related to GenerateTests actions.
  */
+
+/**
+ * Extracts the required information from an action event and creates an (EvoSuite) runner.
+ *
+ * @param e an action event that contains useful information and corresponds to the action invoked by the user
+ * @return the created (EvoSuite) Runner, null if some information is missing or if there is no surrounding class
+ */
+fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
+    val project: Project = e.project ?: return null
+
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return null
+    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
+    val fileUrl = vFile.presentableUrl
+    val modificationStamp = vFile.modificationStamp
+
+    val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
+    val classFQN = psiClass.qualifiedName ?: return null
+
+    val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+    val projectClassPath = "$projectPath/target/classes/"
+
+    val log = Logger.getInstance("GenerateTestsUtils")
+
+    log.info("Generating tests for project $projectPath with classpath $projectClassPath")
+
+    log.info("Selected class is $classFQN")
+
+    return Runner(project, projectPath, projectClassPath, classFQN, fileUrl, modificationStamp)
+}
 
 /**
  * Gets the class on which the user has clicked (the click has to be inside the contents of the class).
@@ -60,6 +101,30 @@ fun getSurroundingMethod(psiFile: PsiFile, caret: Caret): PsiMethod? {
         }
     }
     return surroundingMethod
+}
+
+/**
+ * Gets the selected line if the constraints on the selected line are satisfied,
+ *   so that EvoSuite can generate tests for it.
+ * Namely, the line is within a method, it is not blank and contains (part of) a statement.
+ *
+ * @param psiFile the current PSI file (where the user makes the click)
+ * @param caret the current (primary) caret that did the click
+ * @return line number if the constraints are satisfied else null
+ */
+fun getSurroundingLine(psiFile: PsiFile, caret: Caret): Int? {
+    val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return null
+
+    val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
+
+    val selectedLine: Int = doc.getLineNumber(caret.offset)
+    val selectedLineText: String =
+        doc.getText(TextRange(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine)))
+
+    if (selectedLineText.isBlank()) return null
+
+    if (!validateLine(selectedLine, psiMethod, psiFile)) return null
+    return selectedLine
 }
 
 /**
@@ -120,6 +185,30 @@ private fun isAbstractClass(psiClass: PsiClass): Boolean {
  */
 private fun validateClass(psiClass: PsiClass): Boolean {
     return !psiClass.isEnum && psiClass !is PsiAnonymousClass
+}
+
+/**
+ * Checks if the selected line contains (part of) a statement and is a valid line to be selected for EvoSuite.
+ * Namely, the line is within a method, it is not blank and contains (part of) a statement.
+ *
+ * @param selectedLine selected line number
+ * @param psiMethod surrounding PSI method
+ * @param psiFile containing PSI file
+ * @return true if the line is valid, false otherwise
+ */
+private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFile): Boolean {
+    val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
+
+    val psiMethodBody: PsiCodeBlock = psiMethod.body ?: return false
+    if (psiMethodBody.statements.isEmpty()) return false
+
+    val firstStatement: PsiStatement = psiMethodBody.statements.first()
+    val lastStatement: PsiStatement = psiMethodBody.statements.last()
+
+    val firstStatementLine: Int = doc.getLineNumber(firstStatement.startOffset)
+    val lastStatementLine: Int = doc.getLineNumber(lastStatement.endOffset)
+
+    return (selectedLine in firstStatementLine..lastStatementLine)
 }
 
 /**
