@@ -23,9 +23,9 @@ class SettingsArguments(
     private var command: MutableList<String> = mutableListOf(
         "-generateSuite",
         "-serializeResult",
-        "-serializeResultPath", "\"$serializeResultPath\"",
-        "-base_dir", "\"$projectPath\"",
-        "-projectCP", "\"$projectClassPath\"",
+        "-serializeResultPath", serializeResultPath,
+        "-base_dir", projectPath,
+        "-projectCP", projectClassPath,
         "-Dnew_statistics=false",
         "-class", classFQN,
         "-Dtest_naming_strategy=COVERAGE"
