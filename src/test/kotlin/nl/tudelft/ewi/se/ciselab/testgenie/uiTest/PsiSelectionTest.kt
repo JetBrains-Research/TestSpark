@@ -28,7 +28,7 @@ class PsiSelectionTest {
     private fun assertGenerateTestsActionVisible(title: String) {
         with(remoteRobot) {
             find<ComponentFixture>(byXpath("//div[@accessiblename='TestGenie' and @class='ActionMenu' and @text='TestGenie']")).click()
-            assertThat(find<ComponentFixture>(byXpath("//div[@accessiblename='TestGenie' and @class='ActionMenu' and @text='TestGenie']//div[contains(@text, '$title')]")).isShowing).isTrue
+            assertThat(find<ComponentFixture>(byXpath("//div[@text='TestGenie']//div[contains(@text, '$title')]"), Duration.ofSeconds(5)).isShowing).isTrue
         }
     }
 
@@ -37,35 +37,36 @@ class PsiSelectionTest {
      */
     @BeforeAll
     fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        // Open an 'untitled' projectLabel
+        // Open 'pizzeria' project
         find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             open("pizzeria")
         }
 
+        // Open the main file of the project and enter full screen mode
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            openProjectFromProjectTree(pathToMainFile)
+            openMainFileFromProjectTree(pathToMainFile)
             goFullScreen()
         }
     }
 
     @BeforeEach
-    fun setUp(_remoteRobot: RemoteRobot): Unit = with(_remoteRobot) {
+    fun setUp(_remoteRobot: RemoteRobot) {
         remoteRobot = _remoteRobot
     }
 
     @Test
-    fun suspiciousTest(): Unit = with(remoteRobot) {
+    fun testPossibleToGenerateTestsForClassPizzaClasse(): Unit = with(remoteRobot) {
         val editor = find<ContainerFixture>(byXpath("//div[@class='EditorComponentImpl']"))
         println(editor.findAllText().map { it.text })
-        editor.findText("zzaClasse").rightClick()
+        editor.findText("Classe").rightClick()
         assertGenerateTestsActionVisible("Class PizzaClasse")
     }
 
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        // Close the project
+        // Exit full screen mode and close the project
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            closeProjectFromProjectTree(pathToMainFile.dropLast(1).reversed())
+            closeMainFileFromProjectTree(pathToMainFile.dropLast(1).reversed())
             quitFullScreen()
             closeProject()
         }
