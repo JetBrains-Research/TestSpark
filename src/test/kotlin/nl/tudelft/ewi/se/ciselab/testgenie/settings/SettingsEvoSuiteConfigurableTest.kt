@@ -6,6 +6,7 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -46,7 +47,6 @@ class SettingsEvoSuiteConfigurableTest {
 
     @Test
     fun testIsModifiedSeed() {
-        val oldValue = settingsComponent.seed
         settingsComponent.seed = "7"
         assertThat(settingsConfigurable.isModified).isTrue
     }
@@ -70,14 +70,12 @@ class SettingsEvoSuiteConfigurableTest {
 
     @Test
     fun testApplySeedIncorrect() {
-        val oldValue = settingsComponent.seed
         settingsComponent.seed = "not a number"
         assertThatThrownBy { settingsConfigurable.apply() }.isInstanceOf(RuntimeException::class.java)
     }
 
     @Test
     fun testIsModifiedConfigurationId() {
-        val oldValue = settingsComponent.configurationId
         settingsComponent.configurationId = "7id"
         assertThat(settingsConfigurable.isModified).isTrue
     }

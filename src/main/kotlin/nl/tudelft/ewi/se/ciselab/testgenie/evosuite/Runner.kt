@@ -16,8 +16,9 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import java.io.File
 import java.nio.charset.Charset
 import java.util.UUID
@@ -37,7 +38,7 @@ class Runner(
     private val projectPath: String,
     private val projectClassPath: String,
     private val classFQN: String,
-    private val fileName: String,
+    private val fileUrl: String,
     private val modTs: Long
 ) {
     private val log = Logger.getInstance(this::class.java)
@@ -53,13 +54,17 @@ class Runner(
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
     private val testResultName = "test_gen_result_$id"
 
-    private var key = Workspace.TestJobInfo(fileName, classFQN, modTs, testResultName)
+    private var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName)
 
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
     private val settingsState = TestGenieSettingsService.getInstance().state
 
     private var command = mutableListOf<String>()
+
+    init {
+        Util.makeTmp()
+    }
 
     /**
      * Sets up evosuite to run for a target class. This is the simplest configuration.
@@ -81,7 +86,18 @@ class Runner(
                 .build()
 
         // attach method desc. to target unit key
-        key = Workspace.TestJobInfo(fileName, "$classFQN#$methodDescriptor", modTs, testResultName)
+        key = Workspace.TestJobInfo(fileUrl, "$classFQN#$methodDescriptor", modTs, testResultName)
+
+        return this
+    }
+
+    /**
+     * Sets up evosuite to run for a target line of the target class. This attaches the selected line argument
+     * to the evosuite process.
+     */
+    fun forLine(selectedLine: Int): Runner {
+        command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forLine(selectedLine)
+            .build()
 
         return this
     }
