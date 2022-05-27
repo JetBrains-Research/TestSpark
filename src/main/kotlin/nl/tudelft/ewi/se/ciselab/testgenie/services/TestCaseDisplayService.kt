@@ -237,17 +237,21 @@ class TestCaseDisplayService(private val project: Project) {
 
         // schedule telemetry
         val telemetryService = ApplicationManager.getApplication().getService(TestGenieTelemetryService::class.java)
-        telemetryService.scheduleTestCasesForTelemetry(selectedTestCases.map {
-            val modified = (testCasePanels[it]!!.getComponent(1) as EditorTextField).text
-            val original = originalTestCases[it]!!
+        telemetryService.scheduleTestCasesForTelemetry(
+            selectedTestCases.map {
+                val modified = (testCasePanels[it]!!.getComponent(1) as EditorTextField).text
+                val original = originalTestCases[it]!!
 
-            TestGenieTelemetryService.ModifiedTestCase(
-                original,
-                modified
-            )
-        })
+                TestGenieTelemetryService.ModifiedTestCase(
+                    original,
+                    modified
+                )
+            }.filter {
+                it.modified != it.original
+            }
+        )
 
-        // TODO: Upload to server in the background
+        // TODO: Upload to server in the background instead of here
         telemetryService.uploadScheduledTestCases()
     }
 
