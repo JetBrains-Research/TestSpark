@@ -308,7 +308,7 @@ class QuickAccessParametersTest {
 
         find(SettingsFrame::class.java, Duration.ofSeconds(20)).apply {
             val breadcrumbs = jLabel(byXpath("//div[@class='Breadcrumbs' and @visible_text='Tools || TestGenie || EvoSuite']"))
-            assertThat(breadcrumbs.isShowing)
+            assertThat(breadcrumbs.isShowing).isTrue
             closeSettings()
         }
     }
@@ -317,6 +317,9 @@ class QuickAccessParametersTest {
     @Test
     fun testSaveButton(): Unit = with(remoteRobot) {
         // Set new values everywhere
+        val showCoverageNew: Boolean = !quickAccessParameters.showCoverageCheckBox.isSelected()
+        quickAccessParameters.showCoverageCheckBox.click()
+
         val searchBudgetTypeNew: String = StoppingCondition.values()[random.nextInt(0, StoppingCondition.values().size)].toString()
         quickAccessParameters.searchBudgetTypeArrow.click()
         find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(searchBudgetTypeNew)
@@ -356,6 +359,7 @@ class QuickAccessParametersTest {
         setUpAll(remoteRobot)
 
         // Assert that the state has been modified
+        assertThat(quickAccessParameters.showCoverageCheckBox.isSelected()).isEqualTo(showCoverageNew)
         assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(searchBudgetTypeNew))
         assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.hasText(searchBudgetValueNew))
         assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.hasText(initializationTimeoutNew))
@@ -373,6 +377,9 @@ class QuickAccessParametersTest {
     @Test
     fun testResetButton(): Unit = with(remoteRobot) {
         // Set new values everywhere
+        val showCoverageNew: Boolean = !quickAccessParameters.showCoverageCheckBox.isSelected()
+        quickAccessParameters.showCoverageCheckBox.click()
+
         val searchBudgetTypeNew: String = StoppingCondition.values()[random.nextInt(0, StoppingCondition.values().size)].toString()
         quickAccessParameters.searchBudgetTypeArrow.click()
         find<JListFixture>(byXpath("//div[@class='JList']"), Duration.ofSeconds(15)).clickItem(searchBudgetTypeNew)
@@ -407,6 +414,7 @@ class QuickAccessParametersTest {
 
         // Assert that nothing has been modified
         val separator: String = if (remoteRobot.isMac()) "." else "," // The separator of coma and fullstops is different on macOS
+        assertThat(quickAccessParameters.showCoverageCheckBox.isSelected()).isEqualTo(showCoverageNew)
         assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(searchBudgetTypeNew))
         assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.text.replace(separator, "")).isEqualTo(searchBudgetValueNew)
         assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.text.replace(separator, "")).isEqualTo(initializationTimeoutNew)
@@ -423,6 +431,7 @@ class QuickAccessParametersTest {
 
     private fun assertThatDefaultValuesHaveBeenSet() {
         val defaultState = QuickAccessParametersState.DefaultState
+        assertThat(quickAccessParameters.showCoverageCheckBox.isSelected()).isEqualTo(defaultState.showCoverage)
         assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(defaultState.stoppingCondition.toString()))
         assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.hasText(defaultState.searchBudget.toString()))
         assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.hasText(defaultState.initializationTimeout.toString()))
