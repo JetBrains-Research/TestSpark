@@ -15,17 +15,18 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
+import com.intellij.util.ui.JBUI
 import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
+import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JPanel
-import kotlin.collections.HashMap
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -121,12 +122,16 @@ class TestCaseDisplayService(private val project: Project) {
                 WriteCommandAction.runWriteCommandAction(project) {
                     document.setText(testCodeFormatted)
                     resetButton.isEnabled = false
+                    textFieldEditor.border = JBUI.Borders.empty()
                 }
             }
             // enable reset button when editor is changed
             document.addDocumentListener(object : DocumentListener {
                 override fun documentChanged(event: DocumentEvent) {
                     resetButton.isEnabled = true
+                    val service = TestGenieSettingsService.getInstance().state
+                    val borderColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
+                    textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
                 }
             })
             topButtons.add(resetButton)
