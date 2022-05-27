@@ -26,39 +26,21 @@ class CoverageVisualisationService(private val project: Project) {
     private var content: Content? = null
 
     /**
-     * Shows coverage on the gutter next to the covered lines.
+     * Instantiates tab for coverage table and calls function to update coverage.
      *
      * @param testReport the generated tests summary
+     * @param editor editor whose contents tests were generated for
      */
     fun showCoverage(testReport: CompactReport, editor: Editor) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
         createToolWindowTab()
 
-        // Show in-line coverage only if enabled in settings
-        val state = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
-        if (state.showCoverage) {
-
-            val service = TestGenieSettingsService.getInstance().state
-            val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
-            val colorForLines = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
-
-            editor.markupModel.removeAllHighlighters()
-            for (i in testReport.allCoveredLines) {
-                val line = i - 1
-                val textAttributesKey = TextAttributesKey.createTextAttributesKey("custom")
-                textAttributesKey.defaultAttributes.backgroundColor = colorForLines
-                val hl = editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.LAST)
-                hl.lineMarkerRenderer = CoverageRenderer(
-                    color,
-                    line,
-                    testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }, project
-                )
-            }
-        }
+        updateCoverage(testReport.allCoveredLines, testReport.testCaseList.values.toList(), editor)
     }
 
     /**
+     * Highlights lines covered by selected tests.
      * Shows coverage on the gutter next to the covered lines.
      *
      * @param linesToCover total set of lines  to cover
@@ -80,7 +62,7 @@ class CoverageVisualisationService(private val project: Project) {
                 val line = i - 1
                 val textAttributesKey = TextAttributesKey.createTextAttributesKey("custom")
                 textAttributesKey.defaultAttributes.backgroundColor = colorForLines
-                val hl = editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.LAST)
+                val hl = editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.ADDITIONAL_SYNTAX)
 
                 hl.lineMarkerRenderer = CoverageRenderer(
                     color,
