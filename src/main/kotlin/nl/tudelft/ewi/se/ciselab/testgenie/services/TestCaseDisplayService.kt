@@ -3,6 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
@@ -21,11 +22,16 @@ import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JPanel
+import kotlin.collections.HashMap
 
 class TestCaseDisplayService(private val project: Project) {
 
     private val mainPanel: JPanel = JPanel()
     private val applyButton: JButton = JButton("Apply to test suite")
+    private val validateButton: JButton = JButton("Validate tests")
+    private val selectAllButton: JButton = JButton("Select All")
+    private val deselectAllButton: JButton = JButton("Deselect All")
+
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
@@ -36,17 +42,29 @@ class TestCaseDisplayService(private val project: Project) {
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
-        applyButton.addActionListener { applyTests() }
-        mainPanel.add(applyButton, BorderLayout.SOUTH)
+
+        val buttons = JPanel()
+        buttons.add(applyButton)
+        buttons.add(validateButton)
+        buttons.add(selectAllButton)
+        buttons.add(deselectAllButton)
+
+        mainPanel.add(buttons, BorderLayout.SOUTH)
+
         mainPanel.add(scrollPane, BorderLayout.CENTER)
+
+        applyButton.addActionListener { applyTests() }
+        validateButton.addActionListener { validateTests() }
+        selectAllButton.addActionListener { toggleAllCheckboxes(true) }
+        deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
     }
 
     /**
      * Creates the complete panel in the "Generated Tests" tab,
      * and adds the "Generated Tests" tab to the sidebar tool window.
      */
-    fun showGeneratedTests(testReport: CompactReport) {
-        displayTestCases(testReport)
+    fun showGeneratedTests(testReport: CompactReport, editor: Editor) {
+        displayTestCases(testReport, editor)
         createToolWindowTab()
     }
 
@@ -56,7 +74,7 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param testReport The report from which each testcase should be displayed
      */
-    private fun displayTestCases(testReport: CompactReport) {
+    private fun displayTestCases(testReport: CompactReport, editor: Editor) {
         allTestCasePanel.removeAll()
         testCasePanels.clear()
         testReport.testCaseList.values.forEach {
@@ -72,12 +90,17 @@ class TestCaseDisplayService(private val project: Project) {
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
+            checkbox.addItemListener {
+                project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
+                    .testGenerationResult(testName, checkbox.isSelected, editor)
+            }
+
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
-            val editor = EditorTextField(document, project, JavaFileType.INSTANCE)
+            val textFieldEditor = EditorTextField(document, project, JavaFileType.INSTANCE)
 
-            editor.setOneLineMode(false)
+            textFieldEditor.setOneLineMode(false)
 
-            testCasePanel.add(editor, BorderLayout.CENTER)
+            testCasePanel.add(textFieldEditor, BorderLayout.CENTER)
 
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
@@ -91,7 +114,7 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param name name of the test whose editor should be highlighted
      */
-    fun highlight(name: String) {
+    fun highlightTestCase(name: String) {
         val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
         val backgroundDefault = editor.background
         val service = TestGenieSettingsService.getInstance().state
@@ -146,6 +169,15 @@ class TestCaseDisplayService(private val project: Project) {
 
         // insert test case components into selected class
         appendTestsToClass(testCaseComponents, selectedClass)
+    }
+
+    private fun validateTests() {}
+
+    private fun toggleAllCheckboxes(selected: Boolean) {
+        testCasePanels.forEach { (_, jPanel) ->
+            val checkBox = jPanel.getComponent(0) as JCheckBox
+            checkBox.isSelected = selected
+        }
     }
 
     /**

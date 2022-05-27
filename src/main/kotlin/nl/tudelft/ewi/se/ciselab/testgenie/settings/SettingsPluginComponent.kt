@@ -5,7 +5,6 @@ import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Color
 import java.awt.Dimension
-import javax.swing.JCheckBox
 import javax.swing.JColorChooser
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -25,11 +24,14 @@ class SettingsPluginComponent {
             " TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI."
     )
 
-    // Checkbox options
-    private var showCoverageCheckBox = JCheckBox("Show visualised coverage")
-
     // Environment options (Java path)
     private var javaPathTextField = JTextField()
+
+    // BuildPath options
+    private var buildPathTextField = JTextField()
+
+    // BuildCommand options
+    private var buildCommandTextField = JTextField()
 
     // Accessibility options
     private val accessibilitySeparator = JXTitledSeparator("Accessibility settings")
@@ -50,10 +52,12 @@ class SettingsPluginComponent {
         panel = FormBuilder.createFormBuilder()
             // Add description of TestGenie
             .addComponent(pluginDiscription)
-            // Add visual coverage checkbox
-            .addComponent(showCoverageCheckBox, 10)
             .addComponent(JXTitledSeparator("Environment settings"), 15)
             .addLabeledComponent(JBLabel("Java 11 path:"), javaPathTextField, 10, false)
+            // Add buildPath option
+            .addLabeledComponent(JBLabel("Select the compilation path:"), buildPathTextField, 10, false)
+            // Add buildPath option
+            .addLabeledComponent(JBLabel("Select the compile command"), buildCommandTextField, 10, false)
             // Add accessibility options
             .addComponent(accessibilitySeparator, 15)
             .addComponent(JBLabel("Choose color for visualisation highlight"), 15)
@@ -67,6 +71,12 @@ class SettingsPluginComponent {
      * IMPORTANT: this is responsible for wrapping the text of a label. It must be created before createSettingsPanel()
      */
     private fun stylizePanel() {
+
+        // Add description to build Path
+        buildPathTextField.toolTipText = "Directs EvoSuite to the compiled classes. Default: target/classes"
+
+        // Add description to build Command
+        buildCommandTextField.toolTipText = "The command you use for compiling. Usually a maven or gradle command"
 
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
@@ -94,21 +104,27 @@ class SettingsPluginComponent {
      * @return preferred UI component
      */
     fun getPreferredFocusedComponent(): JComponent {
-        return showCoverageCheckBox
+        return javaPathTextField
     }
 
     // Settings "changers"
-
-    var showCoverage: Boolean
-        get() = showCoverageCheckBox.isSelected
-        set(newStatus) {
-            showCoverageCheckBox.isSelected = newStatus
-        }
 
     var javaPath: String
         get() = javaPathTextField.text
         set(newConfig) {
             javaPathTextField.text = newConfig
+        }
+
+    var buildPath: String
+        get() = buildPathTextField.text
+        set(newConfig) {
+            buildPathTextField.text = newConfig
+        }
+
+    var buildCommand: String
+        get() = buildCommandTextField.text
+        set(newConfig) {
+            buildCommandTextField.text = newConfig
         }
 
     var colorRed: Int
