@@ -3,7 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.google.gson.Gson
 import com.intellij.openapi.diagnostic.Logger
 
-class TestGenieTelemetryService() {
+class TestGenieTelemetryService {
     private val modifiedTestCases = mutableListOf<ModifiedTestCase>()
     private val modifiedTestCasesLock = Object()
 
