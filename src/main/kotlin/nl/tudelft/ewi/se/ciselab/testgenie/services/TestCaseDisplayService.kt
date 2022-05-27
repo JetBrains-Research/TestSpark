@@ -46,6 +46,7 @@ class TestCaseDisplayService(private val project: Project) {
         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
     )
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
+    private var originalTestCases: HashMap<String, String> = HashMap()
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -96,6 +97,8 @@ class TestCaseDisplayService(private val project: Project) {
 
             // fix Windows line separators
             val testCodeFormatted = testCode.replace("\r\n", "\n")
+
+            originalTestCases[testName] = testCodeFormatted
 
             // Add checkbox
             val checkbox = JCheckBox()
