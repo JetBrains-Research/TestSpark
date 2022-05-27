@@ -39,22 +39,7 @@ class CoverageVisualisationService(private val project: Project) {
         val state = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
         if (state.showCoverage) {
 
-            val service = TestGenieSettingsService.getInstance().state
-            val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
-            val colorForLines = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
-
-            editor.markupModel.removeAllHighlighters()
-            for (i in testReport.allCoveredLines) {
-                val line = i - 1
-                val textAttributesKey = TextAttributesKey.createTextAttributesKey("custom")
-                textAttributesKey.defaultAttributes.backgroundColor = colorForLines
-                val hl = editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.ADDITIONAL_SYNTAX)
-                hl.lineMarkerRenderer = CoverageRenderer(
-                    color,
-                    line,
-                    testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }, project
-                )
-            }
+            updateCoverage(testReport.allCoveredLines, testReport.testCaseList.values.toList(), editor)
         }
     }
 
