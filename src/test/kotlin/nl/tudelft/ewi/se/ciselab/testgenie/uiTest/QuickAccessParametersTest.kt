@@ -359,15 +359,15 @@ class QuickAccessParametersTest {
         setUpAll(remoteRobot)
 
         // Assert that the state has been modified
-        assertThat(quickAccessParameters.showCoverageCheckBox.isSelected()).isEqualTo(showCoverageNew)
-        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(searchBudgetTypeNew))
-        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.hasText(searchBudgetValueNew))
-        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.hasText(initializationTimeoutNew))
-        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.hasText(minimizationTimeoutNew))
-        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.hasText(assertionTimeoutNew))
-        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.hasText(junitCheckTimeoutNew))
-        assertThat(quickAccessParameters.populationLimitComboBox.hasText(populationLimitNew))
-        assertThat(quickAccessParameters.populationValueSpinnerTextField.hasText(populationValueNew))
+        assertThat(quickAccessParameters.showCoverageCheckBox.isSelected()).isEqualTo(showCoverageNew).isTrue
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(searchBudgetTypeNew)).isTrue
+        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.hasText(searchBudgetValueNew)).isTrue
+        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.hasText(initializationTimeoutNew)).isTrue
+        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.hasText(minimizationTimeoutNew)).isTrue
+        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.hasText(assertionTimeoutNew)).isTrue
+        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.hasText(junitCheckTimeoutNew)).isTrue
+        assertThat(quickAccessParameters.populationLimitComboBox.hasText(populationLimitNew)).isTrue
+        assertThat(quickAccessParameters.populationValueSpinnerTextField.hasText(populationValueNew)).isTrue
 
         // Restore everything back
         reset()
@@ -432,14 +432,14 @@ class QuickAccessParametersTest {
     private fun assertThatDefaultValuesHaveBeenSet() {
         val defaultState = QuickAccessParametersState.DefaultState
         assertThat(quickAccessParameters.showCoverageCheckBox.isSelected()).isEqualTo(defaultState.showCoverage)
-        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(defaultState.stoppingCondition.toString()))
-        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.hasText(defaultState.searchBudget.toString()))
-        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.hasText(defaultState.initializationTimeout.toString()))
-        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.hasText(defaultState.minimizationTimeout.toString()))
-        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.hasText(defaultState.assertionTimeout.toString()))
-        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.hasText(defaultState.junitCheckTimeout.toString()))
-        assertThat(quickAccessParameters.populationLimitComboBox.hasText(defaultState.populationLimit.toString()))
-        assertThat(quickAccessParameters.populationValueSpinnerTextField.hasText(defaultState.population.toString()))
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(defaultState.stoppingCondition.toString())).isTrue
+        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.hasText(defaultState.searchBudget.toString())).isTrue
+        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.hasText(defaultState.initializationTimeout.toString())).isTrue
+        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.hasText(defaultState.minimizationTimeout.toString())).isTrue
+        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.hasText(defaultState.assertionTimeout.toString())).isTrue
+        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.hasText(defaultState.junitCheckTimeout.toString())).isTrue
+        assertThat(quickAccessParameters.populationLimitComboBox.hasText(defaultState.populationLimit.toString())).isTrue
+        assertThat(quickAccessParameters.populationValueSpinnerTextField.hasText(defaultState.population.toString())).isTrue
     }
 
     @Order(13)
