@@ -14,9 +14,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import org.evosuite.utils.CompactReport
-import java.awt.BorderLayout
-import java.awt.Color
-import java.awt.Dimension
+import java.awt.*
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
@@ -44,6 +42,7 @@ class TestCaseDisplayService(private val project: Project) {
         mainPanel.layout = BorderLayout()
 
         val topButtons = JPanel()
+        topButtons.layout = FlowLayout(FlowLayout.TRAILING)
         topButtons.add(validateButton)
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
