@@ -6,6 +6,7 @@ import com.intellij.remoterobot.fixtures.ContainerFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException
 import com.intellij.remoterobot.utils.keyboard
+import com.intellij.remoterobot.utils.waitFor
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
@@ -31,7 +32,7 @@ import java.util.stream.Stream
 class PsiSelectionTest {
     private lateinit var remoteRobot: RemoteRobot
     private val pathToMainFile: List<String> = listOf("pizzeria", "src", "main", "java", "PizzaClasse")
-    private val pathToMainFileWindows: List<String> = listOf("pizzeria", "src", "PizzaClasse")
+    private val pathToMainFileWindows: List<String> = listOf("pizzeria", "src", "main", "PizzaClasse")
     private val actionClassText: String = "Generate Tests For Class "
     private val actionMethodText: String = "Generate Tests For Method "
     private val actionLineText: String = "Generate Tests For Line "
@@ -124,8 +125,13 @@ class PsiSelectionTest {
         lineIsVisible: Boolean
     ) {
         // Click on the PSI element
-        // println(editor.retrieveData().textDataList.forEach { println(it.text) })
-        editor.findText(textToClick).rightClick()
+        waitFor(Duration.ofSeconds(7)) {
+            if (editor.hasText(textToClick)) {
+                editor.findText(textToClick).rightClick()
+                return@waitFor true
+            }
+            return@waitFor false
+        }
 
         // If the action group must not be visible, assert that and quit (no need to check anything further)
         if (!actionGroupIsVisible) {
@@ -158,23 +164,15 @@ class PsiSelectionTest {
     }
 
     private fun valueGenerator(): Stream<Arguments> = Stream.of(
-//        Arguments.of("PizzaClasse", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
-//        Arguments.of("prezzoBase", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
-//        Arguments.of("main", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText, true, true, true, false),
-//        Arguments.of("BuonaPizza", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText.plus("9"), true, true, true, true),
-//        Arguments.of("util", actionClassText, actionMethodText, actionLineText, false, false, false, false),
-//        Arguments.of("\"Io sono una buona pizza! Mi costa \"", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("14"), true, true, true, true),
-//        Arguments.of("\"Io sono anche una buona pizza! Mi costa \"", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("17"), true, true, true, true),
-//        Arguments.of("// sono un commento", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
-//        Arguments.of("// Overriden function", actionClassText.plus("BuonaPizza"), actionMethodText.plus("selencaGliIngredienti"), actionLineText, true, true, true, false)
         Arguments.of("Classe", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
         Arguments.of("Base", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
         Arguments.of("main", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText, true, true, true, false),
         Arguments.of("BuonaPizza", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText.plus("9"), true, true, true, true),
         Arguments.of("util", actionClassText, actionMethodText, actionLineText, false, false, false, false),
-        Arguments.of("Io", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("14"), true, true, true, true),
+        Arguments.of("italiana", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("14"), true, true, true, true),
         Arguments.of("anche", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("17"), true, true, true, true),
         Arguments.of("commento", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
+        Arguments.of("Overriden", actionClassText.plus("BuonaPizza"), actionMethodText.plus("selencaGliIngredienti"), actionLineText, true, true, true, false)
         // More arguments are to follow
     )
 
