@@ -147,7 +147,7 @@ class TestCaseDisplayService(private val project: Project) {
                         textFieldEditor.editor!!.markupModel.addLineHighlighter(
                             DiffColors.DIFF_MODIFIED,
                             lineNumber,
-                            HighlighterLayer.LAST
+                            HighlighterLayer.FIRST
                         )
                     }
                 }
