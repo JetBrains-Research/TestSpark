@@ -26,9 +26,10 @@ class CoverageVisualisationService(private val project: Project) {
     private var content: Content? = null
 
     /**
-     * Shows coverage on the gutter next to the covered lines.
+     * Instantiates tab for coverage table and calls function to update coverage.
      *
      * @param testReport the generated tests summary
+     * @param editor editor whose contents tests were generated for
      */
     fun showCoverage(testReport: CompactReport, editor: Editor) {
         // Show toolWindow statistics
@@ -39,6 +40,7 @@ class CoverageVisualisationService(private val project: Project) {
     }
 
     /**
+     * Highlights lines covered by selected tests.
      * Shows coverage on the gutter next to the covered lines.
      *
      * @param linesToCover total set of lines  to cover
