@@ -62,7 +62,7 @@ class QuickAccessParametersTest {
     fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         // Open an 'untitled' projectLabel
         find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            open("untitled")
+            open("pizzeria")
         }
         Thread.sleep(10000)
         // Open the TestGenie tool window
@@ -132,7 +132,7 @@ class QuickAccessParametersTest {
 
     private fun valueGeneratorForTestTitlesAreCorrect(): Stream<Arguments> = Stream.of(
         Arguments.of("Quick Access Parameters", quickAccessParameters.title),
-        Arguments.of("Search budget", quickAccessParameters.searchBudgetSeparator),
+        Arguments.of("Search Budget", quickAccessParameters.searchBudgetSeparator),
         Arguments.of("Timeouts", quickAccessParameters.timeoutsSeparator),
         Arguments.of("Genetic Algorithm", quickAccessParameters.geneticAlgorithmSeparator)
     )
