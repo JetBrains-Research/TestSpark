@@ -28,7 +28,8 @@ data class TestGenieSettingsState(
     var colorGreen: Int = DefaultSettingsState.colorGreen,
     var colorBlue: Int = DefaultSettingsState.colorBlue,
     var buildPath: String = DefaultSettingsState.buildPath,
-    var buildCommand: String = DefaultSettingsState.buildCommand
+    var buildCommand: String = DefaultSettingsState.buildCommand,
+    var telemetryEnabled: Boolean = DefaultSettingsState.telemetryEnabled
 ) {
     private object DefaultSettingsState {
         const val sandbox: Boolean = true
@@ -43,6 +44,7 @@ data class TestGenieSettingsState(
         val colorBlue: Int = TestGenieDefaultsBundle.defaultValue("colorBlue").toInt()
         val buildPath: String = TestGenieDefaultsBundle.defaultValue("buildPath")
         val buildCommand: String = TestGenieDefaultsBundle.defaultValue("buildCommand")
+        const val telemetryEnabled: Boolean = false
     }
 
     fun serializeChangesFromDefault(): List<String> {
