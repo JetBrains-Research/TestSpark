@@ -139,10 +139,17 @@ class TestCaseDisplayService(private val project: Project) {
                     textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
                     // add line highlighting
-                    val textAttributesKey = TextAttributesKey.createTextAttributesKey("TestGenieToolWindowDiffHighlight")
+                    val textAttributesKey = TextAttributesKey.createTextAttributesKey(
+                        "TestGenieToolWindowDiffHighlight"
+                    )
                     val lineHighlightColor = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
                     textAttributesKey.defaultAttributes.backgroundColor = lineHighlightColor
-                    textFieldEditor.editor!!.markupModel.addLineHighlighter(textAttributesKey, 1, HighlighterLayer.LAST)
+                    val lineNumber = document.getLineNumber(event.offset)
+                    textFieldEditor.editor!!.markupModel.addLineHighlighter(
+                        textAttributesKey,
+                        lineNumber,
+                        HighlighterLayer.LAST
+                    )
                 }
             })
             topButtons.add(resetButton)
