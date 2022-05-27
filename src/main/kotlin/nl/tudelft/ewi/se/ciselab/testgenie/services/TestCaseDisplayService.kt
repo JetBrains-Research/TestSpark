@@ -5,8 +5,10 @@ import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
@@ -123,15 +125,24 @@ class TestCaseDisplayService(private val project: Project) {
                     document.setText(testCodeFormatted)
                     resetButton.isEnabled = false
                     textFieldEditor.border = JBUI.Borders.empty()
+                    textFieldEditor.editor!!.markupModel.removeAllHighlighters()
                 }
             }
             // enable reset button when editor is changed
             document.addDocumentListener(object : DocumentListener {
                 override fun documentChanged(event: DocumentEvent) {
                     resetButton.isEnabled = true
+
+                    // add border highlight
                     val service = TestGenieSettingsService.getInstance().state
                     val borderColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
                     textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
+
+                    // add line highlighting
+                    val textAttributesKey = TextAttributesKey.createTextAttributesKey("TestGenieToolWindowDiffHighlight")
+                    val lineHighlightColor = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
+                    textAttributesKey.defaultAttributes.backgroundColor = lineHighlightColor
+                    textFieldEditor.editor!!.markupModel.addLineHighlighter(textAttributesKey, 1, HighlighterLayer.LAST)
                 }
             })
             topButtons.add(resetButton)
