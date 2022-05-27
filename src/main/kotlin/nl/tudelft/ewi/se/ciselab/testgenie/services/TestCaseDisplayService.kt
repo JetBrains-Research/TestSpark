@@ -3,6 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
@@ -233,6 +234,21 @@ class TestCaseDisplayService(private val project: Project) {
 
         // insert test case components into selected class
         appendTestsToClass(testCaseComponents, selectedClass)
+
+        // schedule telemetry
+        val telemetryService = project.service<TestGenieTelemetryService>()
+        telemetryService.scheduleTestCasesForTelemetry(selectedTestCases.map {
+            val modified = (testCasePanels[it]!!.getComponent(1) as EditorTextField).text
+            val original = originalTestCases[it]!!
+
+            TestGenieTelemetryService.ModifiedTestCase(
+                original,
+                modified
+            )
+        })
+
+        // TODO: Upload to server in the background
+        telemetryService.uploadScheduledTestCases()
     }
 
     private fun validateTests() {}
