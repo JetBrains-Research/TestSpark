@@ -87,18 +87,22 @@ class QuickAccessParametersTest {
         quickAccessParameters.openQuickAccessParametersTab()
 
         // Assert that all titles and labels are visible
-        quickAccessParameters.getTitles().forEach { assertThat(it.isVisible()) }
-        quickAccessParameters.getUIElementLabels().forEach { assertThat(it.isVisible()) }
+        quickAccessParameters.getTitles().forEach { assertThat(it.isVisible()).isTrue }
+        quickAccessParameters.getUIElementLabels().forEach { assertThat(it.isVisible()).isTrue }
 
         // Assert that buttons are visible
         assertThat(quickAccessParameters.advancedSettingsButton.isShowing).isTrue
-        quickAccessParameters.getButtons().forEach { assertThat(it.isShowing) }
+        quickAccessParameters.getButtons().forEach { assertThat(it.isShowing).isTrue }
 
         // Assert that all combo-boxes are visible
-        quickAccessParameters.getComboBoxes().forEach { assertThat(it.isShowing) }
+        quickAccessParameters.getComboBoxes().forEach { assertThat(it.isShowing).isTrue }
 
         // Assert that all spinners are visible
-        quickAccessParameters.getJSpinners().forEach { assertThat(it.isShowing) }
+        quickAccessParameters.getJSpinners().forEach { assertThat(it.isShowing).isTrue }
+
+        // Assert that the (show coverage) check-box is visible
+        assertThat(quickAccessParameters.showCoverageCheckBox.isShowing).isTrue
+        assertThat(quickAccessParameters.showCoverageCheckBox.text).isEqualTo("Show visualised coverage")
     }
 
     @Order(2)
@@ -138,10 +142,10 @@ class QuickAccessParametersTest {
     fun testDefaultToolTips(): Unit = with(remoteRobot) {
         // Default tooltips for `search budget type`, `initialization timeout` and `population limit` and `population` have unique (non-repeating) default values
         // They can be found individually
-        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: Max time']")).isShowing)
-        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: 120 seconds']")).isShowing)
-        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: Individuals']")).isShowing)
-        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: 50 individuals']")).isShowing)
+        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: Max time']")).isShowing).isTrue
+        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: 120 seconds']")).isShowing).isTrue
+        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: Individuals']")).isShowing).isTrue
+        assertThat(find<JLabelFixture>(byXpath("//div[@text='Default: 50 individuals']")).isShowing).isTrue
 
         // Default tooltips for `search budget`, `minimisation timeout`, `assertion timeout`, `JUnit timeout` and have the same default value of 60 seconds.
         // They cannot be found individually. Since these are the only labels with the text `Default: 60 seconds` the number of found such labels is asserted
@@ -155,7 +159,7 @@ class QuickAccessParametersTest {
         quickAccessParameters.searchBudgetTypeArrow.click()
         val choices: JListFixture = find(byXpath("//div[@class='JList']"), Duration.ofSeconds(15))
         choices.clickItem(choice)
-        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(choice))
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(choice)).isTrue
     }
 
     private fun valueGeneratorForTestSearchBudgetComboBoxes(): Stream<Arguments> = Stream.of(
@@ -174,7 +178,7 @@ class QuickAccessParametersTest {
         quickAccessParameters.populationLimitArrow.click()
         val choices: JListFixture = find(byXpath("//div[@class='JList']"), Duration.ofSeconds(15))
         choices.clickItem(choice)
-        assertThat(quickAccessParameters.populationLimitComboBox.hasText(choice))
+        assertThat(quickAccessParameters.populationLimitComboBox.hasText(choice)).isTrue
     }
 
     private fun valueGeneratorForTestPopulationLimitComboBoxes(): Stream<Arguments> = Stream.of(
@@ -286,6 +290,19 @@ class QuickAccessParametersTest {
 
     @Order(9)
     @Test
+    fun testCheckBox() {
+        // Has to be true by default
+        assertThat(quickAccessParameters.showCoverageCheckBox.isSelected()).isTrue
+        // Assert that toggling works correctly
+        quickAccessParameters.showCoverageCheckBox.click()
+        assertThat(quickAccessParameters.showCoverageCheckBox.isSelected()).isFalse
+
+        // Restore everything back
+        quickAccessParameters.showCoverageCheckBox.click()
+    }
+
+    @Order(10)
+    @Test
     fun testAdvancedSettings(): Unit = with(remoteRobot) {
         quickAccessParameters.advancedSettingsButton.click()
 
@@ -296,7 +313,7 @@ class QuickAccessParametersTest {
         }
     }
 
-    @Order(10)
+    @Order(11)
     @Test
     fun testSaveButton(): Unit = with(remoteRobot) {
         // Set new values everywhere
@@ -352,7 +369,7 @@ class QuickAccessParametersTest {
         reset()
     }
 
-    @Order(11)
+    @Order(12)
     @Test
     fun testResetButton(): Unit = with(remoteRobot) {
         // Set new values everywhere
@@ -416,7 +433,7 @@ class QuickAccessParametersTest {
         assertThat(quickAccessParameters.populationValueSpinnerTextField.hasText(defaultState.population.toString()))
     }
 
-    @Order(12)
+    @Order(13)
     @ParameterizedTest
     @MethodSource("valueGeneratorForTestSearchBudgetUnitsAreChanging")
     fun testSearchBudgetUnitsAreChanging(item: StoppingCondition): Unit = with(remoteRobot) {
@@ -436,7 +453,7 @@ class QuickAccessParametersTest {
         Arguments.of(StoppingCondition.TIMEDELTA), Arguments.of(StoppingCondition.MAXTIME)
     )
 
-    @Order(13)
+    @Order(14)
     @ParameterizedTest
     @MethodSource("valueGeneratorForTestPopulationLimitUnitsAreChanging")
     fun testPopulationLimitUnitsAreChanging(item: PopulationLimit, units: String): Unit = with(remoteRobot) {
