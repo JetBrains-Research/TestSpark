@@ -108,7 +108,7 @@ class Runner(
      *
      * @return the path to which results will be (eventually) saved
      */
-    fun runEvoSuite(): String {
+    fun runTestGeneration(): String {
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
