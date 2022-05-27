@@ -44,7 +44,7 @@ data class TestGenieSettingsState(
         val colorBlue: Int = TestGenieDefaultsBundle.defaultValue("colorBlue").toInt()
         val buildPath: String = TestGenieDefaultsBundle.defaultValue("buildPath")
         val buildCommand: String = TestGenieDefaultsBundle.defaultValue("buildCommand")
-        const val telemetryEnabled: Boolean = false
+        val telemetryEnabled: Boolean = TestGenieDefaultsBundle.defaultValue("telemetryEnabled").toBoolean()
     }
 
     fun serializeChangesFromDefault(): List<String> {
