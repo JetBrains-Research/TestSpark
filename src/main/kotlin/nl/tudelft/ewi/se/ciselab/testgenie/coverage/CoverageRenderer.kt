@@ -88,7 +88,7 @@ class CoverageRenderer(private val color: Color, private val lineNumber: Int, pr
     private fun highlightInToolwindow(name: String) {
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
 
-        testCaseDisplayService.highlight(name)
+        testCaseDisplayService.highlightTestCase(name)
     }
 
     /**

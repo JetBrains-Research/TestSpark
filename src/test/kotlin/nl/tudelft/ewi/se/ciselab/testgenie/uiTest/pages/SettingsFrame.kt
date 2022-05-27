@@ -56,10 +56,6 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     val introLabel
         get() = jLabel(byXpath("//div[@class='JLabel' and @text='<html><body>TestGenie is an external graphical IntelliJ plugin that integrates EvoSuite into the IDE. EvoSuite is a tool that automatically generates test cases with assertions for classes written in Java code. TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI.']"))
 
-    // Action for coverage checkbox
-    val coverageCheckBox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Show visualised coverage']"))
-
     // Action for separator "Environment settings"
     val environmentSettingsSeparator
         get() = actionLink(byXpath("//div[@class='JXTitledSeparator'][.//div[@text='Environment settings']]//div[@class='JSeparator']"))
