@@ -19,7 +19,7 @@ class GenerateTestsActionClass : AnAction() {
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
-        createEvoSuiteRunner(e)?.forClass()?.runEvoSuite()
+        createEvoSuiteRunner(e)?.forClass()?.runTestGeneration()
     }
 
     /**
