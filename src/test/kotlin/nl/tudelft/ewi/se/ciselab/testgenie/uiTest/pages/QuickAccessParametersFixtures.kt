@@ -37,7 +37,7 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
 
     // The search budget separator line
     val searchBudgetSeparator
-        get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JLabel' and @text='Search budget']"))
+        get() = jLabel(byXpath("//div[@accessiblename='Search Budget' and @class='JLabel' and @text='Search Budget']"))
 
     /**
      * Search budget type
