@@ -157,6 +157,9 @@ class TestCaseDisplayService(private val project: Project) {
                             HighlighterLayer.FIRST
                         )
                     }
+
+                    // select checkbox
+                    checkbox.isSelected = true
                 }
             })
             topButtons.add(resetButton)
