@@ -9,12 +9,20 @@ class TestGenieTelemetryService() {
 
     private val log: Logger = Logger.getInstance(this.javaClass)
 
+    /**
+     * Adds test cases to the list of test cases scheduled for telemetry.
+     *
+     * @param testCases the test cases to add
+     */
     fun scheduleTestCasesForTelemetry(testCases: List<ModifiedTestCase>) {
         synchronized(modifiedTestCasesLock) {
             modifiedTestCases.addAll(testCases)
         }
     }
 
+    /**
+     * Sends the telemetry to the TestGenie server.
+     */
     fun uploadScheduledTestCases() {
         val testCasesToUpload = mutableListOf<ModifiedTestCase>()
 
