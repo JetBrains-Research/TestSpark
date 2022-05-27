@@ -81,7 +81,7 @@ class PsiSelectionTest {
     }
 
     /**
-     * Opens an untitled project from the IntelliJ welcome screen.
+     * Opens a 'pizzeria' project from the IntelliJ welcome screen.
      */
     @BeforeAll
     fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
@@ -136,6 +136,8 @@ class PsiSelectionTest {
         // If the action group must not be visible, assert that and quit (no need to check anything further)
         if (!actionGroupIsVisible) {
             assertThatTestGenieActionGroupIsNotVisible()
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ESCAPE) }
+            Thread.sleep(1000L)
             return
         }
         // Click on the action group so that sub actions appear on the screen
@@ -161,19 +163,48 @@ class PsiSelectionTest {
         }
 
         remoteRobot.keyboard { hotKey(KeyEvent.VK_ESCAPE) }
+        Thread.sleep(1000L)
     }
 
     private fun valueGenerator(): Stream<Arguments> = Stream.of(
+        // Line 2
         Arguments.of("Classe", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
+        // Line 3
         Arguments.of("Base", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
+        // Line 4
         Arguments.of("main", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText, true, true, true, false),
+        // Line 6
+        Arguments.of("256", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText.plus("6"), true, true, true, true),
+        // Line 9
         Arguments.of("BuonaPizza", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText.plus("9"), true, true, true, true),
+        // Line 1
         Arguments.of("util", actionClassText, actionMethodText, actionLineText, false, false, false, false),
+        // Line 14
         Arguments.of("italiana", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("14"), true, true, true, true),
-        Arguments.of("anche", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("17"), true, true, true, true),
+        // Line 15
         Arguments.of("commento", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
-        Arguments.of("Overriden", actionClassText.plus("BuonaPizza"), actionMethodText.plus("selencaGliIngredienti"), actionLineText, true, true, true, false)
-        // More arguments are to follow
+        // Line 17
+        Arguments.of("anche", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("17"), true, true, true, true),
+        // Line 19
+        Arguments.of("interface", "Interface PizzaServizio", actionMethodText, actionLineText, true, true, false, false),
+        // Line 20
+        Arguments.of("default", "Interface PizzaServizio", "Default Method saluto", actionLineText.plus("20"), true, true, true, true),
+        // Line 21
+        Arguments.of("quantita", "Interface PizzaServizio", actionMethodText.plus("pizzaMetodo"), actionLineText, true, true, false, false),
+        // Line 23
+        Arguments.of("abstract", "Abstract Class PizzaAstratta", actionMethodText, actionLineText, true, true, false, false),
+        // Line 24
+        Arguments.of("Saluto", "Abstract Class PizzaAstratta", actionMethodText.plus("salutoSaluto"), actionLineText.plus("24"), true, true, true, true),
+        // Line 25
+        Arguments.of("Ingredienti", "Abstract Class PizzaAstratta", actionMethodText, actionLineText, true, true, false, false),
+        // Line 27
+        Arguments.of("extends", actionClassText.plus("BuonaPizza"), actionMethodText, actionLineText, true, true, false, false),
+        // Line 28
+        Arguments.of("Overriden", actionClassText.plus("BuonaPizza"), actionMethodText.plus("selencaGliIngredienti"), actionLineText, true, true, true, false),
+        // Line 29
+        Arguments.of("Salame", actionClassText.plus("BuonaPizza"), actionMethodText.plus("selencaGliIngredienti"), actionLineText.plus(29), true, true, true, true),
+        // Line 31
+        Arguments.of("Appetito", actionClassText, actionMethodText, actionLineText, false, false, false, false)
     )
 
     @AfterAll
