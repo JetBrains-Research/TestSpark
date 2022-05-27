@@ -34,7 +34,7 @@ class GenerateTestsActionMethod : AnAction() {
 
         logger.info("Selected method is $methodDescriptor")
 
-        evoSuiteRunner.forMethod(methodDescriptor).runEvoSuite()
+        evoSuiteRunner.forMethod(methodDescriptor).runTestGeneration()
     }
 
     /**
