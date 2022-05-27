@@ -23,8 +23,11 @@ class TestGenieTelemetryService() {
             modifiedTestCases.clear()
         }
 
+        log.info("Uploading ${testCasesToUpload.size} test cases to server")
+
         val gson = Gson()
         val json = gson.toJson(testCasesToUpload)
+        log.trace("Uploading test cases: $json")
 
         // TODO: Actually upload test cases to server
     }
