@@ -27,7 +27,7 @@ class TestGenieTelemetryService() {
 
         val gson = Gson()
         val json = gson.toJson(testCasesToUpload)
-        log.trace("Uploading test cases: $json")
+        log.info("Uploading test cases: $json")
 
         // TODO: Actually upload test cases to server
     }
