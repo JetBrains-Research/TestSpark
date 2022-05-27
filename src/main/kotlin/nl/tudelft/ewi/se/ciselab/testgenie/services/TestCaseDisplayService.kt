@@ -3,6 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.colors.TextAttributesKey
@@ -139,14 +140,9 @@ class TestCaseDisplayService(private val project: Project) {
                     textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
                     // add line highlighting
-                    val textAttributesKey = TextAttributesKey.createTextAttributesKey(
-                        "TestGenieToolWindowDiffHighlight"
-                    )
-                    val lineHighlightColor = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
-                    textAttributesKey.defaultAttributes.backgroundColor = lineHighlightColor
                     val lineNumber = document.getLineNumber(event.offset)
                     textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                        textAttributesKey,
+                        DiffColors.DIFF_MODIFIED,
                         lineNumber,
                         HighlighterLayer.LAST
                     )
