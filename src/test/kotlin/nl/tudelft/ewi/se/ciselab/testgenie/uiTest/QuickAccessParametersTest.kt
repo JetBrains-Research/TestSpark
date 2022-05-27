@@ -359,15 +359,16 @@ class QuickAccessParametersTest {
         setUpAll(remoteRobot)
 
         // Assert that the state has been modified
-        assertThat(quickAccessParameters.showCoverageCheckBox.isSelected()).isEqualTo(showCoverageNew).isTrue
-        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(searchBudgetTypeNew)).isTrue
-        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.hasText(searchBudgetValueNew)).isTrue
-        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.hasText(initializationTimeoutNew)).isTrue
-        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.hasText(minimizationTimeoutNew)).isTrue
-        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.hasText(assertionTimeoutNew)).isTrue
-        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.hasText(junitCheckTimeoutNew)).isTrue
-        assertThat(quickAccessParameters.populationLimitComboBox.hasText(populationLimitNew)).isTrue
-        assertThat(quickAccessParameters.populationValueSpinnerTextField.hasText(populationValueNew)).isTrue
+        val separator: String = if (remoteRobot.isMac()) "." else "," // The separator of coma and fullstops is different on macOS
+        assertThat(quickAccessParameters.showCoverageCheckBox.isSelected()).isEqualTo(showCoverageNew)
+        assertThat(quickAccessParameters.searchBudgetTypeComboBox.hasText(searchBudgetTypeNew))
+        assertThat(quickAccessParameters.searchBudgetValueSpinnerTextField.text.replace(separator, "")).isEqualTo(searchBudgetValueNew)
+        assertThat(quickAccessParameters.initializationTimeoutSpinnerTextField.text.replace(separator, "")).isEqualTo(initializationTimeoutNew)
+        assertThat(quickAccessParameters.minimizationTimeoutSpinnerTextField.text.replace(separator, "")).isEqualTo(minimizationTimeoutNew)
+        assertThat(quickAccessParameters.assertionTimeoutSpinnerTextField.text.replace(separator, "")).isEqualTo(assertionTimeoutNew)
+        assertThat(quickAccessParameters.jUnitCheckTimeoutSpinnerTextField.text.replace(separator, "")).isEqualTo(junitCheckTimeoutNew)
+        assertThat(quickAccessParameters.populationLimitComboBox.hasText(populationLimitNew))
+        assertThat(quickAccessParameters.populationValueSpinnerTextField.text.replace(separator, "")).isEqualTo(populationValueNew)
 
         // Restore everything back
         reset()
