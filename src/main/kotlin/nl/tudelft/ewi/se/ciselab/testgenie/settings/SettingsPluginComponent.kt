@@ -18,10 +18,11 @@ class SettingsPluginComponent {
     var panel: JPanel? = null
 
     // Plugin description
-    private val pluginDiscription = JLabel(
-        "<html><body>TestGenie is an external graphical IntelliJ plugin that integrates EvoSuite into the IDE." +
-            " EvoSuite is a tool that automatically generates test cases with assertions for classes written in Java code." +
-            " TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI."
+    private val pluginDescription = JLabel(
+        "<html><body>TestGenie is an external graphical IntelliJ plugin that integrates <br>" +
+            "EvoSuite into the IDE. EvoSuite is a tool that automatically generates test cases <br>" +
+            "with assertions for classes written in Java code. TestGenie makes this much easier, <br>" +
+            "as it provides an intuitive modern interface for EvoSuite – so, no more CLI."
     )
 
     // Environment options (Java path)
@@ -51,7 +52,7 @@ class SettingsPluginComponent {
     private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
             // Add description of TestGenie
-            .addComponent(pluginDiscription)
+            .addComponent(pluginDescription)
             .addComponent(JXTitledSeparator("Environment settings"), 15)
             .addLabeledComponent(JBLabel("Java 11 path:"), javaPathTextField, 10, false)
             // Add buildPath option
