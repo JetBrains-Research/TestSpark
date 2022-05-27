@@ -43,15 +43,14 @@ class TestCaseDisplayService(private val project: Project) {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
 
-        val buttons = JPanel()
-        buttons.add(applyButton)
-        buttons.add(validateButton)
-        buttons.add(selectAllButton)
-        buttons.add(deselectAllButton)
-
-        mainPanel.add(buttons, BorderLayout.SOUTH)
+        val topButtons = JPanel()
+        topButtons.add(validateButton)
+        topButtons.add(selectAllButton)
+        topButtons.add(deselectAllButton)
+        mainPanel.add(topButtons, BorderLayout.NORTH)
 
         mainPanel.add(scrollPane, BorderLayout.CENTER)
+        mainPanel.add(applyButton, BorderLayout.SOUTH)
 
         applyButton.addActionListener { applyTests() }
         validateButton.addActionListener { validateTests() }
