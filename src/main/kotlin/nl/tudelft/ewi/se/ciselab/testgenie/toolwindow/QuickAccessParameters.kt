@@ -19,6 +19,7 @@ import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.event.ActionEvent
 import javax.swing.JButton
+import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -29,6 +30,9 @@ import javax.swing.SpinnerNumberModel
  * This class stores the main panel and the UI of the "Parameters" tool window tab.
  */
 class QuickAccessParameters(private val project: Project) {
+    // Coverage visualisation toggle
+    private val showCoverageCheckbox: JCheckBox = JCheckBox("Show visualised coverage")
+
     // UI elements for EvoSuite parameters
     private val stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
     private val searchBudget: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
@@ -101,8 +105,11 @@ class QuickAccessParameters(private val project: Project) {
         .setFormLeftIndent(30)
         .addVerticalGap(25)
         .addComponent(panelTitle)
+        // Add coverage visualisation checkbox
+        .addComponent(JXTitledSeparator("Plugin Setting: Coverage Visualisation"), 35)
+        .addComponent(showCoverageCheckbox, 35)
         // Add `Search Budget` category
-        .addComponent(JXTitledSeparator("Search budget"), 35)
+        .addComponent(JXTitledSeparator("Search Budget"), 35)
         .addLabeledComponent(
             customLabel(
                 "Search budget type",
@@ -228,14 +235,16 @@ class QuickAccessParameters(private val project: Project) {
 
         if (choice == 0) {
             val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
-            state.stoppingCondition = QuickAccessParametersState.DefaultState.stoppingCondition
-            state.searchBudget = QuickAccessParametersState.DefaultState.searchBudget
-            state.initializationTimeout = QuickAccessParametersState.DefaultState.initializationTimeout
-            state.minimizationTimeout = QuickAccessParametersState.DefaultState.minimizationTimeout
-            state.assertionTimeout = QuickAccessParametersState.DefaultState.assertionTimeout
-            state.junitCheckTimeout = QuickAccessParametersState.DefaultState.junitCheckTimeout
-            state.populationLimit = QuickAccessParametersState.DefaultState.populationLimit
-            state.population = QuickAccessParametersState.DefaultState.population
+            val defaultState = QuickAccessParametersState.DefaultState
+            state.showCoverage = defaultState.showCoverage
+            state.stoppingCondition = defaultState.stoppingCondition
+            state.searchBudget = defaultState.searchBudget
+            state.initializationTimeout = defaultState.initializationTimeout
+            state.minimizationTimeout = defaultState.minimizationTimeout
+            state.assertionTimeout = defaultState.assertionTimeout
+            state.junitCheckTimeout = defaultState.junitCheckTimeout
+            state.populationLimit = defaultState.populationLimit
+            state.population = defaultState.population
 
             loadState()
 
@@ -258,6 +267,7 @@ class QuickAccessParameters(private val project: Project) {
     private fun loadState() {
         val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
 
+        showCoverageCheckbox.isSelected = state.showCoverage
         stoppingCondition.item = state.stoppingCondition
         searchBudget.value = state.searchBudget
         initializationTimeout.value = state.initializationTimeout
@@ -274,6 +284,7 @@ class QuickAccessParameters(private val project: Project) {
     private fun saveState() {
         val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
 
+        state.showCoverage = showCoverageCheckbox.isSelected
         state.stoppingCondition = stoppingCondition.item
         state.searchBudget = searchBudget.value as Int
         state.initializationTimeout = initializationTimeout.value as Int
@@ -288,6 +299,7 @@ class QuickAccessParameters(private val project: Project) {
      * Adds tooltips to the actual UI elements, not the labels for them.
      */
     private fun addTooltipsToUiElements() {
+        showCoverageCheckbox.toolTipText = "Highlight lines which are covered by selected generated tests."
         stoppingCondition.toolTipText = "What condition should be checked to end the search."
         searchBudget.toolTipText = "Maximum search duration."
         initializationTimeout.toolTipText = "Seconds allowed for initializing the search."
