@@ -34,6 +34,7 @@ class SettingsPluginConfigurable : Configurable {
         settingsComponent!!.colorGreen = settingsState.colorGreen
         settingsComponent!!.colorBlue = settingsState.colorBlue
         settingsComponent!!.buildCommand = settingsState.buildCommand
+        settingsComponent!!.telemetryEnabled = settingsState.telemetryEnabled
     }
 
     /**
@@ -49,6 +50,7 @@ class SettingsPluginConfigurable : Configurable {
         modified = modified or (settingsComponent!!.colorGreen != settingsState.colorGreen)
         modified = modified or (settingsComponent!!.colorBlue != settingsState.colorBlue)
         modified = modified or (settingsComponent!!.buildCommand != settingsState.buildCommand)
+        modified = modified or (settingsComponent!!.telemetryEnabled != settingsState.telemetryEnabled)
         return modified
     }
 
@@ -63,6 +65,7 @@ class SettingsPluginConfigurable : Configurable {
         settingsState.colorBlue = settingsComponent!!.colorBlue
         settingsState.buildPath = settingsComponent!!.buildPath
         settingsState.buildCommand = settingsComponent!!.buildCommand
+        settingsState.telemetryEnabled = settingsComponent!!.telemetryEnabled
     }
 
     /**
