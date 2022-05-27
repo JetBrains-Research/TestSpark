@@ -20,9 +20,11 @@
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
         <applicationService
-                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService"/>
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService"/>
         <applicationService
-                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.QuickAccessParametersService"/>
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService"/>
+        <applicationService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieTelemetryService"/>
         <applicationConfigurable
                 parentId="tools"
                 instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginConfigurable"
@@ -61,6 +63,13 @@
                     text="Generate Tests For Method"
                     description="Generate tests for the selected method using TestGenie">
                 <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="M" keymap="$default"/>
+            </action>
+            <!-- Generate tests for lines -->
+            <action class="nl.tudelft.ewi.se.ciselab.testgenie.actions.GenerateTestsActionLine"
+                    id="TestGenie.TestGenieActions.GenerateTestsForLine"
+                    text="Generate Tests For Line"
+                    description="Generate tests for the selected line using TestGenie">
+                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="L" keymap="$default"/>
             </action>
         </group>
     </actions>

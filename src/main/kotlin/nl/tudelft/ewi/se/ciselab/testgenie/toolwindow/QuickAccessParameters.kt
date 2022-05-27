@@ -10,6 +10,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
+import nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Dimension
 import java.awt.Font
@@ -18,6 +19,7 @@ import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.event.ActionEvent
 import javax.swing.JButton
+import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -27,27 +29,26 @@ import javax.swing.SpinnerNumberModel
 /**
  * This class stores the main panel and the UI of the "Parameters" tool window tab.
  */
-class QuickAccessParameters(_project: Project) {
-
-    // Current Project
-    private var project: Project = _project
+class QuickAccessParameters(private val project: Project) {
+    // Coverage visualisation toggle
+    private val showCoverageCheckbox: JCheckBox = JCheckBox("Show visualised coverage")
 
     // UI elements for EvoSuite parameters
-    private var stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
-    private var searchBudget: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
-    private var initializationTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
-    private var minimisationTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
-    private var assertionTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
-    private var junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
-    private var populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
-    private var population: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
+    private val searchBudget: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val initializationTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val minimisationTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val assertionTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val junitCheckTimeout: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
+    private val populationLimit: ComboBox<PopulationLimit> = ComboBox(PopulationLimit.values())
+    private val population: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
 
     // Save and Reset buttons
-    private var saveButton: JButton = JButton("Save")
-    private var resetButton: JButton = JButton("Reset")
+    private val saveButton: JButton = JButton("Save")
+    private val resetButton: JButton = JButton("Reset")
 
     // Link to open settings
-    private var settingsLink: ActionLink = ActionLink("Advanced Settings") {
+    private val settingsLink: ActionLink = ActionLink("Advanced Settings") {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, "EvoSuite")
     }
 
@@ -56,9 +57,9 @@ class QuickAccessParameters(_project: Project) {
     private var toolWindowPanel: JPanel = JPanel()
 
     // The tooltip labels
-    private var stoppingConditionToolTip =
+    private val stoppingConditionToolTip =
         JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
-    private var populationLimitToolTip =
+    private val populationLimitToolTip =
         JBLabel("Default: 50 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
 
     // Template strings for "default" tooltips
@@ -104,8 +105,11 @@ class QuickAccessParameters(_project: Project) {
         .setFormLeftIndent(30)
         .addVerticalGap(25)
         .addComponent(panelTitle)
+        // Add coverage visualisation checkbox
+        .addComponent(JXTitledSeparator("Plugin Setting: Coverage Visualisation"), 35)
+        .addComponent(showCoverageCheckbox, 35)
         // Add `Search Budget` category
-        .addComponent(JXTitledSeparator("Search budget"), 35)
+        .addComponent(JXTitledSeparator("Search Budget"), 35)
         .addLabeledComponent(
             customLabel(
                 "Search budget type",
@@ -231,14 +235,16 @@ class QuickAccessParameters(_project: Project) {
 
         if (choice == 0) {
             val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
-            state.stoppingCondition = QuickAccessParametersState.DefaultState.stoppingCondition
-            state.searchBudget = QuickAccessParametersState.DefaultState.searchBudget
-            state.initializationTimeout = QuickAccessParametersState.DefaultState.initializationTimeout
-            state.minimizationTimeout = QuickAccessParametersState.DefaultState.minimizationTimeout
-            state.assertionTimeout = QuickAccessParametersState.DefaultState.assertionTimeout
-            state.junitCheckTimeout = QuickAccessParametersState.DefaultState.junitCheckTimeout
-            state.populationLimit = QuickAccessParametersState.DefaultState.populationLimit
-            state.population = QuickAccessParametersState.DefaultState.population
+            val defaultState = QuickAccessParametersState.DefaultState
+            state.showCoverage = defaultState.showCoverage
+            state.stoppingCondition = defaultState.stoppingCondition
+            state.searchBudget = defaultState.searchBudget
+            state.initializationTimeout = defaultState.initializationTimeout
+            state.minimizationTimeout = defaultState.minimizationTimeout
+            state.assertionTimeout = defaultState.assertionTimeout
+            state.junitCheckTimeout = defaultState.junitCheckTimeout
+            state.populationLimit = defaultState.populationLimit
+            state.population = defaultState.population
 
             loadState()
 
@@ -261,6 +267,7 @@ class QuickAccessParameters(_project: Project) {
     private fun loadState() {
         val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
 
+        showCoverageCheckbox.isSelected = state.showCoverage
         stoppingCondition.item = state.stoppingCondition
         searchBudget.value = state.searchBudget
         initializationTimeout.value = state.initializationTimeout
@@ -277,6 +284,7 @@ class QuickAccessParameters(_project: Project) {
     private fun saveState() {
         val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
 
+        state.showCoverage = showCoverageCheckbox.isSelected
         state.stoppingCondition = stoppingCondition.item
         state.searchBudget = searchBudget.value as Int
         state.initializationTimeout = initializationTimeout.value as Int
@@ -291,6 +299,7 @@ class QuickAccessParameters(_project: Project) {
      * Adds tooltips to the actual UI elements, not the labels for them.
      */
     private fun addTooltipsToUiElements() {
+        showCoverageCheckbox.toolTipText = "Highlight lines which are covered by selected generated tests."
         stoppingCondition.toolTipText = "What condition should be checked to end the search."
         searchBudget.toolTipText = "Maximum search duration."
         initializationTimeout.toolTipText = "Seconds allowed for initializing the search."

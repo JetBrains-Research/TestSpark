@@ -6,20 +6,18 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiMethod
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
-import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
 
 /**
- * This class contains all the logic related to generating tests for a method.
+ * This class contains all the logic related to generating tests for a line.
  * No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available,
- *   getting the information about the selected method and passing it to (EvoSuite) Runner.
+ *   getting the information about the selected class and passing it to (EvoSuite) Runner.
  */
-class GenerateTestsActionMethod : AnAction() {
+class GenerateTestsActionLine : AnAction() {
     private val logger: Logger = Logger.getInstance(this.javaClass)
 
     /**
-     * Creates and calls (EvoSuite) Runner to generate tests for a method when the action is invoked.
+     * Creates and calls (EvoSuite) Runner to generate tests for a line when the action is invoked.
      *
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
@@ -29,17 +27,17 @@ class GenerateTestsActionMethod : AnAction() {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
 
-        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
-        val methodDescriptor = generateMethodDescriptor(psiMethod)
+        val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)
+            ?: return // lines in the editor and in EvoSuite are one-based
 
-        logger.info("Selected method is $methodDescriptor")
+        logger.info("Selected line is $selectedLine")
 
-        evoSuiteRunner.forMethod(methodDescriptor).runTestGeneration()
+        evoSuiteRunner.forLine(selectedLine).runTestGeneration()
     }
 
     /**
-     * Makes the action visible only if a method has been selected.
-     * It also updates the action name depending on which method has been selected.
+     * Makes the action visible only if a line has been selected.
+     * It also updates the action name depending on which line has been selected.
      *
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
@@ -49,9 +47,10 @@ class GenerateTestsActionMethod : AnAction() {
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
-        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
+        val line: Int = getSurroundingLine(psiFile, caret)?.plus(1)
+            ?: return // lines in the editor and in EvoSuite are one-based
 
         e.presentation.isEnabledAndVisible = true
-        e.presentation.text = "Generate Tests For ${getMethodDisplayName(psiMethod)}"
+        e.presentation.text = "Generate Tests For Line $line"
     }
 }

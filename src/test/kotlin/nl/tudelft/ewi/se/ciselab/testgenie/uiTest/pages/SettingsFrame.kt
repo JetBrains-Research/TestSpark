@@ -6,8 +6,11 @@ import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.ContainerFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
+import com.intellij.remoterobot.fixtures.JTextFieldFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
+import java.awt.event.KeyEvent
 import java.time.Duration
 
 /**
@@ -18,7 +21,7 @@ import java.time.Duration
  */
 
 @FixtureName("Settings Frame")
-@DefaultXpath("type", "//div[@class='MyDialog' and @title='Settings']")
+@DefaultXpath("type", "//div[@class='MyDialog']")
 class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
 
@@ -40,7 +43,10 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for search text filed in Settings menu
     val searchTextBox
-        get() = textField(byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"), Duration.ofSeconds(60))
+        get() = textField(
+            byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"),
+            Duration.ofSeconds(60)
+        )
 
     // Action to find Settings tree view
     val projectViewTree
@@ -50,9 +56,37 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     val introLabel
         get() = jLabel(byXpath("//div[@class='JLabel' and @text='<html><body>TestGenie is an external graphical IntelliJ plugin that integrates EvoSuite into the IDE. EvoSuite is a tool that automatically generates test cases with assertions for classes written in Java code. TestGenie makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI.']"))
 
-    // Action for coverage checkbox
-    val coverageCheckBox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Show visualised coverage']"))
+    // Action for separator "Environment settings"
+    val environmentSettingsSeparator
+        get() = actionLink(byXpath("//div[@class='JXTitledSeparator'][.//div[@text='Environment settings']]//div[@class='JSeparator']"))
+
+    // Action for java path label
+    val javaPathLabel
+        get() = jLabel(byXpath("//div[@text='Java 11 path:']"))
+
+    // Action for java path text field
+    val javaPathField
+        get() = textField(byXpath("//div[@tooltiptext='Path to a java binary']"))
+
+    // Action for separator "Accessibility settings"
+    val accessibilitySettingsSeparator
+        get() = actionLink(byXpath("//div[@class='JXTitledSeparator'][.//div[@text='Accessibility settings']]//div[@class='JSeparator']"))
+
+    // Action for color picker
+    val colorPicker
+        get() = actionLink(byXpath("//div[@class='JColorChooser']"))
+
+    // Action for color picker hue value
+    val hueTextField: JTextFieldFixture
+        get() = find(byXpath("//div[@accessiblename='Hue' and @class='JFormattedTextField' and @name='Spinner.formattedTextField']"))
+
+    // Action for color picker saturation value
+    val saturationTextField: JTextFieldFixture
+        get() = find(byXpath("//div[@accessiblename='Saturation' and @class='JFormattedTextField' and @name='Spinner.formattedTextField']"))
+
+    // Action for color picker third value
+    val valueTextField: JTextFieldFixture
+        get() = find(byXpath("//div[@accessiblename='Value' and @class='JFormattedTextField' and @name='Spinner.formattedTextField']"))
 
     // Action for separator of coverage
     val generalSettingsSeparator
@@ -144,6 +178,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     fun findTestGenie() {
         waitFor(Duration.ofSeconds(60)) {
             searchTextBox.text = "TestGenie"
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
             if (searchTextBox.text == "TestGenie") {
                 return@waitFor true
             }
@@ -168,6 +203,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     fun findEvoSuite() {
         waitFor(Duration.ofSeconds(60)) {
             searchTextBox.text = "EvoSuite"
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
             if (searchTextBox.text == "EvoSuite") {
                 return@waitFor true
             }

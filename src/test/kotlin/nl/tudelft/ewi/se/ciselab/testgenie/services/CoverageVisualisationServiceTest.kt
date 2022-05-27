@@ -3,16 +3,10 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.RegisterToolWindowTask
 import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
-import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
-import com.intellij.testFramework.fixtures.TestFixtureBuilder
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsService
+import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase
 import org.assertj.core.api.Assertions.assertThat
 import org.evosuite.result.BranchInfo
 import org.evosuite.result.MutationInfo
@@ -29,12 +23,10 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CoverageVisualisationServiceTest {
+class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
 
-    private lateinit var fixture: CodeInsightTestFixture
     private lateinit var coverageVisualisationService: CoverageVisualisationService
-    private lateinit var project: Project
-    private val editor = Mockito.mock(Editor::class.java)
+    private val myEditor = Mockito.mock(Editor::class.java)
     private lateinit var coverageToolWindowDisplayService: CoverageToolWindowDisplayService
 
     private val branch1 = Mockito.mock(BranchInfo::class.java)
@@ -50,14 +42,9 @@ class CoverageVisualisationServiceTest {
     private val mutation5 = Mockito.mock(MutationInfo::class.java)
 
     @BeforeEach
-    fun setUp() {
-        val projectBuilder: TestFixtureBuilder<IdeaProjectTestFixture> =
-            IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder("TestGenie")
+    override fun setUp() {
+        super.setUp()
 
-        fixture = JavaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(projectBuilder.fixture)
-        fixture.setUp()
-
-        project = fixture.project
         coverageVisualisationService = project.service()
         coverageToolWindowDisplayService = project.service()
 
@@ -66,13 +53,13 @@ class CoverageVisualisationServiceTest {
             .registerToolWindow(RegisterToolWindowTask("TestGenie", ToolWindowAnchor.RIGHT))
 
         // Disable coverage visualisation
-        val settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
-        settingsState.showCoverage = false
+        val quickAccessState = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
+        quickAccessState.showCoverage = false
     }
 
     @AfterEach
-    fun tearDown() {
-        fixture.tearDown()
+    override fun tearDown() {
+        super.tearDown()
     }
 
     @ParameterizedTest
@@ -98,7 +85,7 @@ class CoverageVisualisationServiceTest {
         compactReport.allCoveredMutation = coveredMutationSet
         compactReport.allUncoveredMutation = uncoveredMutationSet
 
-        coverageVisualisationService.showCoverage(compactReport, editor)
+        coverageVisualisationService.showCoverage(compactReport, myEditor)
         assertThat(className).isEqualTo(coverageToolWindowDisplayService.data[0])
         assertThat(lineCoverage).isEqualTo(coverageToolWindowDisplayService.data[1])
         assertThat(branchCoverage).isEqualTo(coverageToolWindowDisplayService.data[2])
@@ -107,7 +94,7 @@ class CoverageVisualisationServiceTest {
 
     @Test
     fun createToolWindowTabTestSingleContent() {
-        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()), editor)
+        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()), myEditor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
 
         // Verify only 1 content is created
@@ -116,7 +103,7 @@ class CoverageVisualisationServiceTest {
 
     @Test
     fun createToolWindowTabTestContent() {
-        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()), editor)
+        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()), myEditor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
         val content = toolWindow.contentManager.getContent(0)!!
         assertThat(content.displayName).isEqualTo("Coverage Visualisation")
