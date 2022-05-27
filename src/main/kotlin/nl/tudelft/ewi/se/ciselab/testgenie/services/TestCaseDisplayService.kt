@@ -14,6 +14,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.refactoring.suggested.newRange
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
@@ -140,12 +141,15 @@ class TestCaseDisplayService(private val project: Project) {
                     textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
                     // add line highlighting
-                    val lineNumber = document.getLineNumber(event.offset)
-                    textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                        DiffColors.DIFF_MODIFIED,
-                        lineNumber,
-                        HighlighterLayer.LAST
-                    )
+                    val startLine = document.getLineNumber(event.newRange.startOffset)
+                    val endLine = document.getLineNumber(event.newRange.endOffset)
+                    for (lineNumber in startLine..endLine) {
+                        textFieldEditor.editor!!.markupModel.addLineHighlighter(
+                            DiffColors.DIFF_MODIFIED,
+                            lineNumber,
+                            HighlighterLayer.LAST
+                        )
+                    }
                 }
             })
             topButtons.add(resetButton)
