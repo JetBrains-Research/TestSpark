@@ -23,7 +23,7 @@ class TestGenieTelemetryService() {
     /**
      * Sends the telemetry to the TestGenie server.
      */
-    fun uploadScheduledTestCases() {
+    fun uploadTelemetry() {
         val testCasesToUpload = mutableListOf<ModifiedTestCase>()
 
         synchronized(modifiedTestCasesLock) {
