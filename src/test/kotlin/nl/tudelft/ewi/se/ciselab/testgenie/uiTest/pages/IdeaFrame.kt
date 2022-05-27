@@ -6,8 +6,11 @@ import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
+import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
+import java.awt.event.KeyEvent
 import java.time.Duration
 
 /**
@@ -40,6 +43,78 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     private val openToolWindow
         get() = actionLink(byXpath("//div[@tooltiptext='TestGenie']"))
 
+    // The action link text in the quick access parameters of sidebar tool window
+    private val advancedSettingsButton
+        get() = actionLink(byXpath("//div[@class='ActionLink']"))
+
+    // Find ProjectViewTree (the thing with files on the left side)
+    private val projectViewTree
+        get() = actionLink(byXpath("//div[@class='ProjectViewTree']"))
+
+    private val projectTab
+        get() = actionLink(byXpath("//div[@tooltiptext='Project']"))
+
+    // Action to find coverage visualisation tab in toolWindow
+    val coverageVisualisationTab
+        get() = actionLink(byXpath("//div[@class='ContentTabLabel' and @text='Coverage Visualisation']"))
+
+    // Action to find "Find in Files..." menu
+    private val findInFilesAction
+        get() = actionLink(byXpath("//div[@text='Find in Files...']"))
+
+    // Action to find "File Name" textField
+    private val findFileFileNameAction
+        get() = textField(byXpath("//div[@class='JBTextAreaWithMixedAccessibleContext']"))
+
+    // Action to find "File path" textField
+    private val findFilePathNameAction
+        get() = textField(byXpath("//div[@class='FindPopupDirectoryChooser']//div[@class='BorderlessTextField']"))
+
+    /**
+     * Open file inside project.
+     *
+     * @param fileName name of file to open
+     * @param projectName name of project
+     */
+    fun openProjectFile(fileName: String, projectName: String) {
+        with(projectViewTree) {
+            // Wait for file name to be found
+            findText(projectName).rightClick()
+        }
+        findInFilesAction.click()
+        findFileFileNameAction.text = fileName
+        findFilePathNameAction.text = findFilePathNameAction.text + "\\src\\main"
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+    }
+
+    /**
+     * Closes opened project file.
+     */
+    fun closeProjectFile() {
+        actionLink(byXpath("//div[@class='SingleHeightLabel']//div[@class='InplaceButton']")).click()
+    }
+
+    /**
+     * Change the quick access params to have max search time to 2 seconds.
+     */
+    fun changeQuickAccess() {
+        find(QuickAccessParametersFixtures::class.java, timeout = Duration.ofSeconds(60)).apply {
+            searchBudgetTypeComboBox.selectItem("Max time")
+            searchBudgetValueSpinnerTextField.text = "2"
+            saveButton.click()
+        }
+        find<JButtonFixture>(byXpath("//div[@text='OK']")).click()
+    }
+
+    /**
+     * Run EvoSuite using a shortcut to generate tests for class
+     */
+    fun runTestsForClass() {
+        actionLink(byXpath("//div[@class='EditorComponentImpl']")).click()
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_ALT, KeyEvent.VK_G) }
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_C) }
+    }
+
     /**
      * Method to close the current project.
      */
@@ -51,9 +126,19 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     /**
      * Method to open the settings of IntelliJ.
      */
-    fun openSettings() {
-        openFileMenu.click()
-        openSettingsAction.click()
+    fun openSettings(toolWindowOpen: Boolean) {
+        // Check if operating system is Mac
+        if (remoteRobot.isMac()) { // If so then we need another way to open settings
+            if (!toolWindowOpen) {
+                openToolWindow.click() // Open sidebar tool window if it is not already open
+                openToolWindow.click() // Open and close the tool window to get rid of...
+                openToolWindow.click() // ... horizontal scroll bar that right on top of advanceSettingsButton
+            }
+            advancedSettingsButton.click() // Use action link in quick access parameters to open settings
+        } else {
+            openFileMenu.click()
+            openSettingsAction.click()
+        }
     }
 
     /**
@@ -75,5 +160,50 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
             }
             return@waitFor true
         }
+    }
+
+    /**
+     * Opens the project by clicking on the file tabs in the projectViewTree.
+     *
+     * @param pathToMainFile an array of file tabs that the robot has to (double) click on to open the main file
+     */
+    fun openMainFileFromProjectTree(pathToMainFile: List<String>) {
+        projectTab.click()
+        pathToMainFile.forEach { projectViewTree.findText(it).doubleClick() }
+    }
+
+    /**
+     * Closes the project by closing the file and clicking on the file tabs in the projectViewTree.
+     *
+     * @param pathFromMainFile an array of file tabs that the robot has to (double) click on to close them
+     */
+    fun closeMainFileFromProjectTree(pathFromMainFile: List<String>) {
+        button(byXpath("//div[@class='InplaceButton']")).click()
+        pathFromMainFile.forEach { projectViewTree.findText(it).doubleClick() }
+        projectTab.click()
+    }
+
+    /**
+     * Enter full screen mode via SHIFT-SHIFT shortcut.
+     */
+    fun goFullScreen() {
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        val actionSearchBox = textField(byXpath("//div[@class='SearchField']"))
+        actionSearchBox.text = "Enter Full Screen"
+        Thread.sleep(2000L)
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+    }
+
+    /**
+     * Exit full screen mode via SHIFT-SHIFT shortcut.
+     */
+    fun quitFullScreen() {
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        val actionSearchBox = textField(byXpath("//div[@class='SearchField']"))
+        actionSearchBox.text = "Exit Full Screen"
+        Thread.sleep(2000L)
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
     }
 }

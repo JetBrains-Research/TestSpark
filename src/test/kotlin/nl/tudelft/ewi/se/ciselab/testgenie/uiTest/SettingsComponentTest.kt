@@ -1,11 +1,11 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.uiTest
 
-import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.fixtures.JCheckboxFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.SettingsFrame
@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.extension.ExtendWith
+import java.awt.event.KeyEvent
 import java.time.Duration
 import kotlin.streams.toList
 
@@ -38,16 +39,20 @@ class SettingsComponentTest {
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
             waitForBackgroundTasks()
-            openSettings()
+            openSettings(false)
         }
     }
 
     @Order(1)
     @Test
-    @Video
+    // @Video
     fun checkTestGenieTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
-        settingsFrame.searchTextBox.text = "TestGenie"
+        waitFor(Duration.ofSeconds(60)) {
+            settingsFrame.searchTextBox.text = "TestGenie"
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+            return@waitFor settingsFrame.searchTextBox.text == "TestGenie"
+        }
 
         with(settingsFrame.projectViewTree) {
             waitFor(Duration.ofSeconds(5)) {
@@ -59,47 +64,66 @@ class SettingsComponentTest {
 
     @Order(2)
     @Test
-    @Video
+    // @Video
     fun checkTestGenieInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.findTestGenie()
         assertThat(settingsFrame.introLabel.isShowing).isTrue
-        assertThat(settingsFrame.coverageCheckBox.isShowing).isTrue
+        assertThat(settingsFrame.environmentSettingsSeparator.isShowing).isTrue
+        assertThat(settingsFrame.javaPathField.isShowing).isTrue
+        assertThat(settingsFrame.javaPathLabel.isShowing).isTrue
+        assertThat(settingsFrame.accessibilitySettingsSeparator.isShowing).isTrue
+        assertThat(settingsFrame.colorPicker.isShowing).isTrue
+        assertThat(settingsFrame.hueTextField.isShowing).isTrue
+        assertThat(settingsFrame.saturationTextField.isShowing).isTrue
+        assertThat(settingsFrame.valueTextField.isShowing).isTrue
     }
 
     @Order(3)
     @Test
     fun changeTestGenieTabValues(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         var settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
-        val prevCoverageCheckBoxValue = settingsFrame.coverageCheckBox.isSelected()
+        val prevJavaPathFieldValue = settingsFrame.javaPathField.text
+        val prevHueTextFieldValue = settingsFrame.hueTextField.text
+        val prevSaturationTextFieldValue = settingsFrame.saturationTextField.text
+        val prevValueTextFieldValue = settingsFrame.valueTextField.text
 
-        // Change checkbox value and apply the settings
-        settingsFrame.coverageCheckBox.setValue(!prevCoverageCheckBoxValue)
+        // apply the settings
+        settingsFrame.javaPathField.text = "java path"
+        settingsFrame.hueTextField.text = "100"
+        settingsFrame.saturationTextField.text = "18"
+        settingsFrame.valueTextField.text = "78"
         settingsFrame.okSettings()
 
         // Open settings again
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        ideaFrame.openSettings()
+        ideaFrame.openSettings(true)
 
         // Find again TestGenie
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
         settingsFrame.findTestGenie()
 
-        // Change the checkbox to previous state and close settings
-        assertThat(settingsFrame.coverageCheckBox.isSelected()).isNotEqualTo(prevCoverageCheckBoxValue)
-        settingsFrame.coverageCheckBox.setValue(prevCoverageCheckBoxValue)
+        // Change to previous state and close settings
+        settingsFrame.javaPathField.text = prevJavaPathFieldValue
+        settingsFrame.hueTextField.text = prevHueTextFieldValue
+        settingsFrame.saturationTextField.text = prevSaturationTextFieldValue
+        settingsFrame.valueTextField.text = prevValueTextFieldValue
         settingsFrame.okSettings()
 
         // Open settings again
-        ideaFrame.openSettings()
+        ideaFrame.openSettings(true)
     }
 
     @Order(4)
     @Test
-    @Video
+    // @Video
     fun checkEvoSuiteTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
-        settingsFrame.searchTextBox.text = "EvoSuite"
+        waitFor(Duration.ofSeconds(60)) {
+            settingsFrame.searchTextBox.text = "EvoSuite"
+            remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+            return@waitFor settingsFrame.searchTextBox.text == "EvoSuite"
+        }
 
         with(settingsFrame.projectViewTree) {
             waitFor(Duration.ofSeconds(5)) {
@@ -111,7 +135,7 @@ class SettingsComponentTest {
 
     @Order(5)
     @Test
-    @Video
+    // @Video
     fun checkEvoSuiteInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.findEvoSuite()
@@ -159,7 +183,7 @@ class SettingsComponentTest {
 
         // Open settings again
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        ideaFrame.openSettings()
+        ideaFrame.openSettings(true)
 
         // Find again EvoSuite
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
@@ -175,7 +199,7 @@ class SettingsComponentTest {
         settingsFrame.okSettings()
 
         // Open settings again
-        ideaFrame.openSettings()
+        ideaFrame.openSettings(true)
     }
 
     private fun helperGeneralCheckBoxes(settingsFrame: SettingsFrame): List<JCheckboxFixture> {
@@ -210,7 +234,7 @@ class SettingsComponentTest {
 
         // Open settings again
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        ideaFrame.openSettings()
+        ideaFrame.openSettings(true)
 
         // Find again EvoSuite
         settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(15))
@@ -234,7 +258,7 @@ class SettingsComponentTest {
         settingsFrame.okSettings()
 
         // Open settings again
-        ideaFrame.openSettings()
+        ideaFrame.openSettings(true)
     }
 
     @Order(8)
@@ -247,7 +271,13 @@ class SettingsComponentTest {
         val errorDialog: CommonContainerFixture =
             find(settingsFrame.seedDialogLocator, timeout = Duration.ofSeconds(15))
 
-        assertThat(errorDialog.hasText("Incorrect Numeric Type For Seed")).isTrue
+        // Assertion to check if the error message is correct.
+        assertThat(
+            errorDialog.hasText(
+                "Seed parameter is not of numeric type. Therefore, it will not be saved." +
+                    " However, the rest of the parameters have been successfully saved."
+            )
+        ).isTrue
 
         val okDialog: JButtonFixture?
 
@@ -268,6 +298,7 @@ class SettingsComponentTest {
         }
 
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
+            if (remoteRobot.isMac()) clickOnToolWindow() // Close the tool window to preserve correct IdeaFrame state
             closeProject()
         }
     }

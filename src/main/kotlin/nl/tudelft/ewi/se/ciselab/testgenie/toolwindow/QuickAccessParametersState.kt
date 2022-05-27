@@ -6,6 +6,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
  * This class is responsible for persisting the values of the parameters in the "Parameters" tool window tab.
  */
 data class QuickAccessParametersState(
+    var showCoverage: Boolean = DefaultState.showCoverage,
     var stoppingCondition: StoppingCondition = DefaultState.stoppingCondition,
     var searchBudget: Int = DefaultState.searchBudget,
     var initializationTimeout: Int = DefaultState.initializationTimeout,
@@ -17,6 +18,7 @@ data class QuickAccessParametersState(
 ) {
 
     object DefaultState {
+        val showCoverage: Boolean = TestGenieDefaultsBundle.defaultValue("showCoverage").toBoolean()
         val stoppingCondition: StoppingCondition = StoppingCondition.valueOf(TestGenieDefaultsBundle.defaultValue("stoppingCondition"))
         val searchBudget: Int = TestGenieDefaultsBundle.defaultValue("searchBudget").toInt()
         val initializationTimeout: Int = TestGenieDefaultsBundle.defaultValue("initializationTimeout").toInt()

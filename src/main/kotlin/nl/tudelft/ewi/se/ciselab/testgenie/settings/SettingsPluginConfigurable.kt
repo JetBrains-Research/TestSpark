@@ -1,6 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
 import com.intellij.openapi.options.Configurable
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import javax.swing.JComponent
 
 /**
@@ -27,11 +28,13 @@ class SettingsPluginConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        settingsComponent!!.showCoverage = settingsState.showCoverage
         settingsComponent!!.javaPath = settingsState.javaPath
+        settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
         settingsComponent!!.colorGreen = settingsState.colorGreen
         settingsComponent!!.colorBlue = settingsState.colorBlue
+        settingsComponent!!.buildCommand = settingsState.buildCommand
+        settingsComponent!!.telemetryEnabled = settingsState.telemetryEnabled
     }
 
     /**
@@ -41,11 +44,13 @@ class SettingsPluginConfigurable : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        var modified: Boolean = settingsComponent!!.showCoverage != settingsState.showCoverage
-        modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
+        var modified: Boolean = settingsComponent!!.javaPath != settingsState.javaPath
+        modified = modified or (settingsComponent!!.buildPath != settingsState.buildPath)
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
         modified = modified or (settingsComponent!!.colorGreen != settingsState.colorGreen)
         modified = modified or (settingsComponent!!.colorBlue != settingsState.colorBlue)
+        modified = modified or (settingsComponent!!.buildCommand != settingsState.buildCommand)
+        modified = modified or (settingsComponent!!.telemetryEnabled != settingsState.telemetryEnabled)
         return modified
     }
 
@@ -54,11 +59,13 @@ class SettingsPluginConfigurable : Configurable {
      */
     override fun apply() {
         val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
-        settingsState.showCoverage = settingsComponent!!.showCoverage
         settingsState.javaPath = settingsComponent!!.javaPath
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen
         settingsState.colorBlue = settingsComponent!!.colorBlue
+        settingsState.buildPath = settingsComponent!!.buildPath
+        settingsState.buildCommand = settingsComponent!!.buildCommand
+        settingsState.telemetryEnabled = settingsComponent!!.telemetryEnabled
     }
 
     /**
