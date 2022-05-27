@@ -84,3 +84,42 @@ jobs:
           name: ui-test-fails-report-linux
           path: |
             build/reports
+  build-for-ui-test-mac-os:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+      - name: Setup FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v1
+        with:
+          # Not strictly necessary, but it may prevent rate limit
+          # errors especially on GitHub-hosted macos machines.
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Clean
+        run: gradle clean
+      - name: Run Idea
+        run: |
+          mkdir -p uibuild/reports
+          gradle runIdeForUiTests > build/reports/idea.log &
+      - name: Wait for Idea started
+        uses: jtalk/url-health-check-action@v2
+        with:
+          url: http://127.0.0.1:8082
+          max-attempts: 30
+          retry-delay: 30s
+      - name: Tests
+        run: gradle test
+      - name: Move video
+        if: ${{ failure() }}
+        run: mv video build/reports
+      - name: Save fails report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ui-test-fails-report-mac
+          path: |
+            build/reports
