@@ -5,6 +5,7 @@ import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Color
 import java.awt.Dimension
+import javax.swing.JCheckBox
 import javax.swing.JColorChooser
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -38,6 +39,16 @@ class SettingsPluginComponent {
     // BuildCommand options
     private var buildCommandTextField = JTextField()
 
+    // Telemetry
+    private val telemetryDescription = JLabel(
+        "<html><body>With your permission, TestGenie will send usage statistics to CISELab at <br>" +
+            "the Delft University of Technology in order to help with EvoSuite research. This includes <br>" +
+            "information about your usage patterns, such as the tests you generate and the way you <br>" +
+            "modify them manually before applying them to a test suite."
+    )
+    private val telemetrySeparator = JXTitledSeparator("Telemetry")
+    private var telemetryEnabledCheckbox = JCheckBox("Enable telemetry")
+
     // Accessibility options
     private val accessibilitySeparator = JXTitledSeparator("Accessibility settings")
     private var colorPicker = JColorChooser()
@@ -64,6 +75,10 @@ class SettingsPluginComponent {
             .addLabeledComponent(JBLabel("Select the compilation path:"), buildPathTextField, 10, false)
             // Add buildPath option
             .addLabeledComponent(JBLabel("Select the compile command"), buildCommandTextField, 10, false)
+            // Add telemetry options
+            .addComponent(telemetrySeparator, 15)
+            .addComponent(telemetryDescription, 10)
+            .addComponent(telemetryEnabledCheckbox, 10)
             // Add accessibility options
             .addComponent(accessibilitySeparator, 15)
             .addComponent(JBLabel("Choose color for visualisation highlight"), 15)
@@ -84,6 +99,9 @@ class SettingsPluginComponent {
         // Add description to build Command
         buildCommandTextField.toolTipText = "The command you use for compiling. Usually a maven or gradle command"
 
+        // Add description to telemetry
+        telemetryEnabledCheckbox.toolTipText = "Send telemetry to CISELab"
+
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
         val height = panel?.visibleRect?.height
@@ -96,7 +114,7 @@ class SettingsPluginComponent {
         colorPicker.chooserPanels.component1().isColorTransparencySelectionEnabled = false
 
         // Set description text to wrap around dimensions
-        pluginDiscription.preferredSize = Dimension(width ?: 100, height ?: 100)
+        pluginDescription.preferredSize = Dimension(width ?: 100, height ?: 100)
 
         // Set colorPicker to wrap around dimensions
         colorPicker.preferredSize = Dimension(width ?: 100, height ?: 400)
@@ -131,6 +149,12 @@ class SettingsPluginComponent {
         get() = buildCommandTextField.text
         set(newConfig) {
             buildCommandTextField.text = newConfig
+        }
+
+    var telemetryEnabled: Boolean
+        get() = telemetryEnabledCheckbox.isSelected
+        set(newStatus) {
+            telemetryEnabledCheckbox.isSelected = newStatus
         }
 
     var colorRed: Int
