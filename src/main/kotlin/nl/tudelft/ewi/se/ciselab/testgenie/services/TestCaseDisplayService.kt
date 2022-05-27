@@ -5,6 +5,8 @@ import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
@@ -31,7 +33,11 @@ class TestCaseDisplayService(private val project: Project) {
     private val deselectAllButton: JButton = JButton("Deselect All")
 
     private val allTestCasePanel: JPanel = JPanel()
-    private val scrollPane: JBScrollPane = JBScrollPane(allTestCasePanel)
+    private val scrollPane: JBScrollPane = JBScrollPane(
+        allTestCasePanel,
+        JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+    )
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
 
     // Variable to keep reference to the coverage visualisation content
@@ -84,22 +90,46 @@ class TestCaseDisplayService(private val project: Project) {
             // fix Windows line separators
             val testCodeFormatted = testCode.replace("\r\n", "\n")
 
+            // Add checkbox
             val checkbox = JCheckBox()
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
+            // Toggle coverage when checkbox is clicked
             checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                     .testGenerationResult(testName, checkbox.isSelected, editor)
             }
 
+            // Add editor
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val textFieldEditor = EditorTextField(document, project, JavaFileType.INSTANCE)
-
             textFieldEditor.setOneLineMode(false)
-
             testCasePanel.add(textFieldEditor, BorderLayout.CENTER)
 
+            // Add top buttons
+            val topButtons = JPanel()
+            topButtons.layout = FlowLayout(FlowLayout.TRAILING)
+
+            // Add "Reset" button
+            val resetButton = JButton("Reset")
+            resetButton.isEnabled = false
+            resetButton.addActionListener {
+                WriteCommandAction.runWriteCommandAction(project) {
+                    document.setText(testCodeFormatted)
+                    resetButton.isEnabled = false
+                }
+            }
+            // enable reset button when editor is changed
+            document.addDocumentListener(object : DocumentListener {
+                override fun documentChanged(event: DocumentEvent) {
+                    resetButton.isEnabled = true
+                }
+            })
+            topButtons.add(resetButton)
+            testCasePanel.add(topButtons, BorderLayout.NORTH)
+
+            // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
             testCasePanels[testName] = testCasePanel
