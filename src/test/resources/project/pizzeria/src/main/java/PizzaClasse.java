@@ -11,7 +11,7 @@ public class PizzaClasse {
         pizzaServizio.saluto();
         PizzaAstratta pizza = pizzaServizio.fareLaPizza();
     }
-    public static void pizzaMetodo() { System.out.println("Io sono una buona pizza! Mi costa " + prezzoBase + " euro."); }
+    public static void pizzaMetodo() { System.out.println("Io sono una buona pizza italiana! Mi costa " + prezzoBase + " euro."); }
     // sono un commento
 
     public static void pizzaMetodo(int prezzo) { System.out.println("Io sono anche una buona pizza! Mi costa " + prezzo + " euro."); }
