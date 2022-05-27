@@ -141,7 +141,7 @@ class TestCaseDisplayService(private val project: Project) {
                     textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
                     // add line highlighting
-                    val startLine = document.getLineNumber(event.newRange.startOffset)
+                    val startLine = document.getLineNumber(event.newRange.startOffset + 1)
                     val endLine = document.getLineNumber(event.newRange.endOffset)
                     for (lineNumber in startLine..endLine) {
                         textFieldEditor.editor!!.markupModel.addLineHighlighter(
