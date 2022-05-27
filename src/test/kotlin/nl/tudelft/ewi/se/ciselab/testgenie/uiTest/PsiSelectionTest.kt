@@ -14,11 +14,14 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.MethodOrderer
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.Duration
+import java.util.stream.Stream
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -31,6 +34,8 @@ class PsiSelectionTest {
     private val actionMethodText: String = "Generate Tests For Method "
     private val actionLineText: String = "Generate Tests For Line "
 
+    private lateinit var editor: ContainerFixture
+
     /**
      * Makes the robot click on TestGenie action group.
      */
@@ -38,6 +43,13 @@ class PsiSelectionTest {
         with(remoteRobot) {
             find<ComponentFixture>(byXpath("//div[@accessiblename='TestGenie' and @class='ActionMenu' and @text='TestGenie']")).click()
         }
+    }
+
+    /**
+     * Asserts that the action menu item is not visible.
+     */
+    private fun assertThatTestGenieActionGroupIsNotVisible() {
+        assertThatThrownBy { clickOnTestGenieActionGroup() }.isInstanceOf(WaitForConditionTimeoutException::class.java)
     }
 
     /**
@@ -75,13 +87,17 @@ class PsiSelectionTest {
             open("pizzeria")
         }
 
-        Thread.sleep(3000L)
+        Thread.sleep(5000L)
 
         // Open the main file of the project and enter full screen mode
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
             openMainFileFromProjectTree(if (remoteRobot.isWin()) pathToMainFileWindows else pathToMainFile)
             goFullScreen()
         }
+
+        Thread.sleep(5000L)
+
+        editor = find(byXpath("//div[@class='EditorComponentImpl']"))
     }
 
     @BeforeEach
@@ -89,17 +105,53 @@ class PsiSelectionTest {
         remoteRobot = _remoteRobot
     }
 
-    @Test
-    fun testPossibleToGenerateTestsForClassPizzaClasse(): Unit = with(remoteRobot) {
-        val editor = find<ContainerFixture>(byXpath("//div[@class='EditorComponentImpl']"))
-        println(editor.findAllText().map { it.text })
-        editor.findText("Classe").rightClick()
+    @ParameterizedTest
+    @MethodSource("valueGenerator")
+    fun testPsiElementsVisible(
+        textToClick: String,
+        actionClassText: String,
+        actionMethodText: String,
+        actionLineText: String,
+        actionGroupIsVisible: Boolean,
+        classIsVisible: Boolean,
+        methodIsVisible: Boolean,
+        lineIsVisible: Boolean
+    ) {
+        // Click on the PSI element
+        editor.findText(textToClick).rightClick()
 
+        // If the action group must not be visible, assert that and quit (no need to check anything further)
+        if (!actionGroupIsVisible) {
+            assertThatTestGenieActionGroupIsNotVisible()
+            return
+        }
+        // Click on the action group so that sub actions appear on the screen
         clickOnTestGenieActionGroup()
-        assertThatActionIsVisible(actionClassText.plus("PizzaClasse"))
-        assertThatActionIsNotVisible(actionMethodText)
-        assertThatActionIsNotVisible(actionLineText)
+
+        // Assert that the class action is visible/invisible
+        if (classIsVisible) {
+            assertThatActionIsVisible(actionClassText)
+        } else {
+            assertThatActionIsNotVisible(actionClassText)
+        }
+
+        if (methodIsVisible) {
+            assertThatActionIsVisible(actionMethodText)
+        } else {
+            assertThatActionIsNotVisible(actionMethodText)
+        }
+
+        if (lineIsVisible) {
+            assertThatActionIsVisible(actionLineText)
+        } else {
+            assertThatActionIsNotVisible(actionLineText)
+        }
     }
+
+    private fun valueGenerator(): Stream<Arguments> = Stream.of(
+        Arguments.of("Classe", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false)
+        // More arguments are to follow
+    )
 
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
