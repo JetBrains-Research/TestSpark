@@ -9,12 +9,19 @@ class TestGenieTelemetryService() {
 
     private val log: Logger = Logger.getInstance(this.javaClass)
 
+    private val telemetryEnabled: Boolean
+        get() = TestGenieSettingsService.getInstance().state?.telemetryEnabled ?: false
+
     /**
      * Adds test cases to the list of test cases scheduled for telemetry.
      *
      * @param testCases the test cases to add
      */
     fun scheduleTestCasesForTelemetry(testCases: List<ModifiedTestCase>) {
+        if (!telemetryEnabled) {
+            return
+        }
+
         synchronized(modifiedTestCasesLock) {
             modifiedTestCases.addAll(testCases)
         }
@@ -24,6 +31,10 @@ class TestGenieTelemetryService() {
      * Sends the telemetry to the TestGenie server.
      */
     fun uploadTelemetry() {
+        if (!telemetryEnabled) {
+            return
+        }
+
         val testCasesToUpload = mutableListOf<ModifiedTestCase>()
 
         synchronized(modifiedTestCasesLock) {
