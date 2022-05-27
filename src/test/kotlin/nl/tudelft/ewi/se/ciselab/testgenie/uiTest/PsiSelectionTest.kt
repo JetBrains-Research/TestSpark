@@ -5,6 +5,7 @@ import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.ContainerFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException
+import com.intellij.remoterobot.utils.keyboard
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.awt.event.KeyEvent
 import java.time.Duration
 import java.util.stream.Stream
 
@@ -146,10 +148,20 @@ class PsiSelectionTest {
         } else {
             assertThatActionIsNotVisible(actionLineText)
         }
+
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ESCAPE) }
     }
 
     private fun valueGenerator(): Stream<Arguments> = Stream.of(
-        Arguments.of("Classe", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false)
+        Arguments.of("PizzaClasse", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
+        Arguments.of("prezzoBase", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
+        Arguments.of("main", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText, true, true, true, false),
+        Arguments.of("BuonaPizza", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText.plus("9"), true, true, true, true),
+        Arguments.of("util", actionClassText, actionMethodText, actionLineText, false, false, false, false),
+        Arguments.of("\"Io sono una buona pizza! Mi costa \"", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("14"), true, true, true, true),
+        Arguments.of("\"Io sono anche una buona pizza! Mi costa \"", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("17"), true, true, true, true),
+        Arguments.of("// sono un commento", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
+        Arguments.of("// Overriden function", actionClassText.plus("BuonaPizza"), actionMethodText.plus("selencaGliIngredienti"), actionLineText, true, true, true, false)
         // More arguments are to follow
     )
 
