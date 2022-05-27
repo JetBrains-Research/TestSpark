@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
@@ -46,6 +47,7 @@ class TestCaseDisplayService(private val project: Project) {
         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
     )
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
+    private var originalTestCases: HashMap<String, String> = HashMap()
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -96,6 +98,8 @@ class TestCaseDisplayService(private val project: Project) {
 
             // fix Windows line separators
             val testCodeFormatted = testCode.replace("\r\n", "\n")
+
+            originalTestCases[testName] = testCodeFormatted
 
             // Add checkbox
             val checkbox = JCheckBox()
@@ -154,6 +158,9 @@ class TestCaseDisplayService(private val project: Project) {
                             HighlighterLayer.FIRST
                         )
                     }
+
+                    // select checkbox
+                    checkbox.isSelected = true
                 }
             })
             topButtons.add(resetButton)
@@ -227,6 +234,25 @@ class TestCaseDisplayService(private val project: Project) {
 
         // insert test case components into selected class
         appendTestsToClass(testCaseComponents, selectedClass)
+
+        // schedule telemetry
+        val telemetryService = ApplicationManager.getApplication().getService(TestGenieTelemetryService::class.java)
+        telemetryService.scheduleTestCasesForTelemetry(
+            selectedTestCases.map {
+                val modified = (testCasePanels[it]!!.getComponent(1) as EditorTextField).text
+                val original = originalTestCases[it]!!
+
+                TestGenieTelemetryService.ModifiedTestCase(
+                    original,
+                    modified
+                )
+            }.filter {
+                it.modified != it.original
+            }
+        )
+
+        // TODO: Upload to server in the background instead of here
+        telemetryService.uploadTelemetry()
     }
 
     private fun validateTests() {}
