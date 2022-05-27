@@ -28,13 +28,16 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
     val title
         get() = jLabel(byXpath("//div[@javaclass='javax.swing.JLabel']"))
 
+    val showCoverageCheckBox
+        get() = checkBox(byXpath("//div[@class='JCheckBox']"))
+
     /**
      * SEARCH BUDGET SECTION
      */
 
     // The search budget separator line
     val searchBudgetSeparator
-        get() = jLabel(byXpath("//div[@accessiblename='Search budget' and @class='JLabel' and @text='Search budget']"))
+        get() = jLabel(byXpath("//div[@accessiblename='Search Budget' and @class='JLabel' and @text='Search Budget']"))
 
     /**
      * Search budget type
