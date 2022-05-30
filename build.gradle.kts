@@ -6,7 +6,7 @@ import java.util.zip.ZipInputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
-val thunderdomeVersion = "1.0.2"
+val thunderdomeVersion = "1.0.3"
 
 plugins {
     // Java support
