@@ -14,6 +14,7 @@ class TestGenerationResultListenerImpl(private val project: Project) : TestGener
     override fun testGenerationResult(testReport: CompactReport, resultName: String) {
         log.info("Received test result for $resultName")
         val workspace = project.service<Workspace>()
+        println(testReport.testScaffoldCode)
 
         ApplicationManager.getApplication().invokeLater {
             workspace.receiveGenerationResult(resultName, testReport)
