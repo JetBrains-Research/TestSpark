@@ -45,7 +45,7 @@ class Runner(
     private val log = Logger.getInstance(this::class.java)
 
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
-    private val evosuiteVersion = "1.0.2" // TODO: Figure out a better way to source this
+    private val evosuiteVersion = "1.0.3" // TODO: Figure out a better way to source this
 
     private val pluginsPath = System.getProperty("idea.plugins.path")
     private var evoSuitePath = "$pluginsPath/TestGenie/lib/evosuite-$evosuiteVersion.jar"
