@@ -1,11 +1,10 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.project.Project
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
 
-class TestCaseCachingService(private val project: Project) {
+class TestCaseCachingService {
     private val log: Logger = Logger.getInstance(this.javaClass)
     private val files = mutableMapOf<String, FileTestCaseCache>()
     private val filesLock = Object()
