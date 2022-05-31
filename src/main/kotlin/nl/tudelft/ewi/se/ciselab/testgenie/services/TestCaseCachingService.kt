@@ -58,7 +58,8 @@ class TestCaseCachingService(private val project: Project) {
         }
     }
 
-    private class CachedCompactTestCase(testName: String, testCode: String, coveredLines: Set<LineTestCaseCache>) {
+    private class CachedCompactTestCase(val testName: String, val testCode: String, val coveredLines: Set<LineTestCaseCache>) {
+
 
         companion object {
             fun fromCompactTestCase(
