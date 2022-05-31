@@ -11,14 +11,16 @@ class TestCaseCachingService(private val project: Project) {
     private val filesLock = Object()
 
     fun putIntoCache(fileUrl: String, report: CompactReport) {
+        log.info("Inserting ${report.testCaseList.size} test cases into cache for $fileUrl")
         val file = getFileTestCaseCache(fileUrl)
         file.putIntoCache(report)
     }
 
     fun retrieveFromCache(fileUrl: String, lineFrom: Int, lineTo: Int): List<CompactTestCase> {
         val fileTestCaseCache = getFileTestCaseCache(fileUrl)
-
-        return fileTestCaseCache.retrieveFromCache(lineFrom, lineTo)
+        val result = fileTestCaseCache.retrieveFromCache(lineFrom, lineTo)
+        log.info("Retrieved ${result.size} test cases from cache for $fileUrl")
+        return result
     }
 
     private fun getFileTestCaseCache(fileUrl: String): FileTestCaseCache {
