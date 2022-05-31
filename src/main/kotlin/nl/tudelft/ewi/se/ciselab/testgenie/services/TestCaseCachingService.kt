@@ -80,7 +80,7 @@ class TestCaseCachingService(private val project: Project) {
          * @return the test cases that cover at least one line in the specified range
          */
         fun retrieveFromCache(lineFrom: Int, lineTo: Int): List<CompactTestCase> {
-            val result = mutableListOf<CachedCompactTestCase>()
+            val result = mutableSetOf<CachedCompactTestCase>()
             for (lineNumber in lineFrom..lineTo) {
                 val line: LineTestCaseCache = getLineTestCaseCache(lineNumber)
                 result.addAll(line.getTestCases())
