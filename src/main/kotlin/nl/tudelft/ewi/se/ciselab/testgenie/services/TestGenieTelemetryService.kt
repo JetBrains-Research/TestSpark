@@ -37,18 +37,23 @@ class TestGenieTelemetryService {
             return
         }
 
-        val testCasesToUpload = mutableListOf<ModifiedTestCase>()
+        val testCasesToSubmit = mutableListOf<ModifiedTestCase>()
 
         synchronized(modifiedTestCasesLock) {
-            testCasesToUpload.addAll(modifiedTestCases)
+            testCasesToSubmit.addAll(modifiedTestCases)
             modifiedTestCases.clear()
         }
 
-        log.info("Uploading ${testCasesToUpload.size} test cases to server")
+        // If there are no tests to submit, do not create a file
+        if (testCasesToSubmit.size == 0) {
+            return
+        }
+
+        log.info("Submiting ${testCasesToSubmit.size} test cases to server")
 
         val gson = Gson()
-        val json = gson.toJson(testCasesToUpload)
-        log.info("Uploading test cases: $json")
+        val json = gson.toJson(testCasesToSubmit)
+        log.info("Submiting test cases: $json")
 
         writeTelemetryToFile(json)
     }
