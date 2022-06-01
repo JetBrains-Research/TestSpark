@@ -252,7 +252,7 @@ class TestCaseDisplayService(private val project: Project) {
         )
 
         // TODO: Upload to server in the background instead of here
-        telemetryService.uploadTelemetry()
+        telemetryService.submitTelemetry()
     }
 
     private fun validateTests() {}
