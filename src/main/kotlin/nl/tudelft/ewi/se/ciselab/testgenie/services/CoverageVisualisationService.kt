@@ -57,16 +57,27 @@ class CoverageVisualisationService(private val project: Project) {
 
             editor.markupModel.removeAllHighlighters()
 
+            val mutationCovered = testReport.allCoveredMutation.groupBy { x -> x.lineNo }
+            val mutationNotCovered = testReport.allCoveredMutation.groupBy { x -> x.lineNo }
+
             for (i in linesToCover) {
                 val line = i - 1
                 val textAttributesKey = TextAttributesKey.createTextAttributesKey("custom")
                 textAttributesKey.defaultAttributes.backgroundColor = colorForLines
-                val hl = editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.ADDITIONAL_SYNTAX)
+                val hl =
+                    editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.ADDITIONAL_SYNTAX)
+
+                val testsCoveringLine =
+                    testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }
+                val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
+                val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 
                 hl.lineMarkerRenderer = CoverageRenderer(
                     color,
                     line,
-                    testCaseList.filter { x -> i in x.coveredLines }.map { x -> x.testName },
+                    testsCoveringLine,
+                    mutationCoveredLine,
+                    mutationNotCoveredLine,
                     project
                 )
             }
