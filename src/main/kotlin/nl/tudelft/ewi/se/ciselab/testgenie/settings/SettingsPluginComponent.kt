@@ -80,7 +80,7 @@ class SettingsPluginComponent {
             .addComponent(telemetrySeparator, 15)
             .addComponent(telemetryDescription, 10)
             .addComponent(telemetryEnabledCheckbox, 10)
-            .addComponent(telemetryPathTextField, 10)
+            .addLabeledComponent(JBLabel("Specify the folder path for telemetry data"), telemetryPathTextField, 10, false)
             // Add accessibility options
             .addComponent(accessibilitySeparator, 15)
             .addComponent(JBLabel("Choose color for visualisation highlight"), 15)
@@ -122,6 +122,7 @@ class SettingsPluginComponent {
         pluginDescription.preferredSize = Dimension(width ?: 100, height ?: 100)
         pluginDescriptionDisclaimer.preferredSize = Dimension(width ?: 100, height ?: 100)
         telemetryDescription.preferredSize = Dimension(width ?: 100, height ?: 100)
+        telemetryPathTextField.preferredSize = Dimension(width ?: 100, telemetryPathTextField.preferredSize.height)
 
         // Set colorPicker to wrap around dimensions
         colorPicker.preferredSize = Dimension(width ?: 100, height ?: 400)
