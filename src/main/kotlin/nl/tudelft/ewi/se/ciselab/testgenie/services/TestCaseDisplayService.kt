@@ -188,6 +188,10 @@ class TestCaseDisplayService(private val project: Project) {
             highlightColor = color
         }
         editor.background = highlightColor
+        returnOriginalEditorBackground(editor, backgroundDefault)
+    }
+
+    private fun returnOriginalEditorBackground(editor: EditorTextField, backgroundDefault: Color) {
         Thread {
             Thread.sleep(10000)
             editor.background = backgroundDefault

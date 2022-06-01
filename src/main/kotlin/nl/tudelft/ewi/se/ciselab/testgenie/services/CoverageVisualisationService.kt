@@ -56,7 +56,6 @@ class CoverageVisualisationService(private val project: Project) {
             val colorForLines = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
 
             editor.markupModel.removeAllHighlighters()
-            
             val mapMutantsToTests = HashMap<String, MutableList<String>>()
 
             testReport.testCaseList.values.forEach {
