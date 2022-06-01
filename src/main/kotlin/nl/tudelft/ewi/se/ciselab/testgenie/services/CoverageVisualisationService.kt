@@ -56,6 +56,17 @@ class CoverageVisualisationService(private val project: Project) {
             val colorForLines = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
 
             editor.markupModel.removeAllHighlighters()
+            
+            val mapMutantsToTests = HashMap<String, MutableList<String>>()
+
+            testReport.testCaseList.values.forEach {
+                val mutantsCovered = it.coveredMutants
+                val testName = it.testName
+                mutantsCovered.forEach {
+                    val testCasesCoveringMutant = mapMutantsToTests.getOrPut(it.replacement) { ArrayList() }
+                    testCasesCoveringMutant.add(testName)
+                }
+            }
 
             val mutationCovered = testReport.allCoveredMutation.groupBy { x -> x.lineNo }
             val mutationNotCovered = testReport.allCoveredMutation.groupBy { x -> x.lineNo }
@@ -78,6 +89,7 @@ class CoverageVisualisationService(private val project: Project) {
                     testsCoveringLine,
                     mutationCoveredLine,
                     mutationNotCoveredLine,
+                    mapMutantsToTests,
                     project
                 )
             }

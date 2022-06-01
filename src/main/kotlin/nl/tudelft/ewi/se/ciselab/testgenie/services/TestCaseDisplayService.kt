@@ -179,11 +179,14 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param name name of the test whose editor should be highlighted
      */
-    fun highlightTestCase(name: String) {
+    fun highlightTestCase(name: String, color: Color?) {
         val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
         val backgroundDefault = editor.background
         val service = TestGenieSettingsService.getInstance().state
-        val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
+        var highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
+        if (color != null) {
+            highlightColor = color
+        }
         editor.background = highlightColor
         Thread {
             Thread.sleep(10000)
@@ -191,6 +194,12 @@ class TestCaseDisplayService(private val project: Project) {
         }.start()
     }
 
+    fun highlightCoveredMutants(names: List<String>) {
+        val coveredColor = Color(204, 55, 55, 30)
+        names.forEach {
+            highlightTestCase(it, coveredColor)
+        }
+    }
     /**
      * Show a dialog where the user can select what test class the tests should be applied to,
      * and apply the selected tests to the test class.
