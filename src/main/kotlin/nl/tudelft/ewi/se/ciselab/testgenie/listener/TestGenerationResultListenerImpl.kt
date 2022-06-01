@@ -23,6 +23,11 @@ class TestGenerationResultListenerImpl(private val project: Project) : TestGener
         cacheGeneratedTestCases(testReport, fileUrl)
     }
 
+    /**
+     * Put the generated test cases into the cache.
+     * @param testReport the test report
+     * @param fileUrl the file url
+     */
     private fun cacheGeneratedTestCases(testReport: CompactReport, fileUrl: String) {
         val cache = project.service<TestCaseCachingService>()
         cache.putIntoCache(fileUrl, testReport)
