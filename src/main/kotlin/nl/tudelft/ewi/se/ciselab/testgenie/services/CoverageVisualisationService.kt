@@ -11,7 +11,6 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import nl.tudelft.ewi.se.ciselab.testgenie.coverage.CoverageRenderer
 import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -36,7 +35,7 @@ class CoverageVisualisationService(private val project: Project) {
         fillToolWindowContents(testReport)
         createToolWindowTab()
 
-        updateCoverage(testReport.allCoveredLines, testReport.testCaseList.values.toList(), editor)
+        updateCoverage(testReport.allCoveredLines, testReport, editor)
     }
 
     /**
@@ -47,7 +46,7 @@ class CoverageVisualisationService(private val project: Project) {
      * @param testCaseList list of test cases. This is used for gutter information
      * @param editor editor instance where coverage should be updated
      */
-    fun updateCoverage(linesToCover: Set<Int>, testCaseList: List<CompactTestCase>, editor: Editor) {
+    fun updateCoverage(linesToCover: Set<Int>, testReport: CompactReport, editor: Editor) {
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
 
