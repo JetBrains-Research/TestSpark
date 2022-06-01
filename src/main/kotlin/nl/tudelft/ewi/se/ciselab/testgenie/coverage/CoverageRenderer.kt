@@ -28,6 +28,10 @@ import java.awt.event.MouseEvent
  * @param color color of marker
  * @param lineNumber lineNumber to color
  * @param tests list of tests that cover this line
+ * @param coveredMutation list of mutant operation which are covered by tests
+ * @param coveredNotMutation list of mutant operation which are not covered by tests
+ * @param mapMutantsToTests map of mutant operation -> List of names of tests which cover mutant
+ * @param project the current project
  */
 class CoverageRenderer(
     private val color: Color,
@@ -120,9 +124,14 @@ class CoverageRenderer(
     private fun highlightInToolwindow(name: String) {
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
 
-        testCaseDisplayService.highlightTestCase(name, null)
+        testCaseDisplayService.highlightTestCase(name)
     }
 
+    /**
+     * Use Display service's mutant highlighter function
+     * @param mutantName name of the mutant whose coverage to visualise
+     * @param map map of mutant operations -> List of names of tests which cover the mutants
+     */
     private fun highlightMutantsInToolwindow(mutantName: String, map: HashMap<String, MutableList<String>>) {
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
 

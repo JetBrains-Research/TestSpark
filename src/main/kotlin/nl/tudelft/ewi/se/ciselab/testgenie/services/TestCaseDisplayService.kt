@@ -49,6 +49,7 @@ class TestCaseDisplayService(private val project: Project) {
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private var originalTestCases: HashMap<String, String> = HashMap()
 
+    // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
 
     // Variable to keep reference to the coverage visualisation content
@@ -117,6 +118,7 @@ class TestCaseDisplayService(private val project: Project) {
             // Add editor
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val textFieldEditor = EditorTextField(document, project, JavaFileType.INSTANCE)
+            // Set the default editor color to the one the editor was created with (only done once)
             if (defaultEditorColor == null) {
                 defaultEditorColor = textFieldEditor.background
             }
@@ -184,20 +186,21 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param name name of the test whose editor should be highlighted
      */
-    fun highlightTestCase(name: String, color: Color?) {
+    fun highlightTestCase(name: String) {
         val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
         if (!editor.background.equals(defaultEditorColor)) {
             return
         }
         val service = TestGenieSettingsService.getInstance().state
         var highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
-        if (color != null) {
-            highlightColor = color
-        }
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
     }
 
+    /**
+     * Reset the provided editors color to the default (initial) one after 10 seconds
+     * @param editor the editor whose color to change
+     */
     private fun returnOriginalEditorBackground(editor: EditorTextField) {
         Thread {
             Thread.sleep(10000)
@@ -205,10 +208,13 @@ class TestCaseDisplayService(private val project: Project) {
         }.start()
     }
 
+    /**
+     * Highlight a range of editors
+     * @param names list of test names to pass to highlight function
+     */
     fun highlightCoveredMutants(names: List<String>) {
-        val coveredColor = Color(204, 55, 55, 30)
         names.forEach {
-            highlightTestCase(it, coveredColor)
+            highlightTestCase(it)
         }
     }
 
