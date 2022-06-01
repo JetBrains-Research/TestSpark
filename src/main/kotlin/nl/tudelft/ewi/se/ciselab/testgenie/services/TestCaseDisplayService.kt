@@ -151,9 +151,10 @@ class TestCaseDisplayService(private val project: Project) {
                     }
                     val startLine = document.getLineNumber(event.newRange.startOffset + 1)
                     val endLine = document.getLineNumber(event.newRange.endOffset)
+                    val newLine = event.newFragment.contains('\n')
                     for (lineNumber in startLine..endLine) {
                         textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                            DiffColors.DIFF_MODIFIED,
+                            if (newLine) DiffColors.DIFF_INSERTED else DiffColors.DIFF_MODIFIED,
                             lineNumber,
                             HighlighterLayer.FIRST
                         )
