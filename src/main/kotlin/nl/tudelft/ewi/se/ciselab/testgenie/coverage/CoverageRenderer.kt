@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.coverage
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.hint.HintManagerImpl
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
@@ -16,6 +17,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
@@ -64,7 +66,8 @@ class CoverageRenderer(
             )
         }
 
-        if (coveredMutation.isNotEmpty()) {
+        val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+        if (coveredMutation.isNotEmpty() && state.criterionWeakMutation) {
             prePanel.addComponent(JBLabel(" Covered mutants:"), 10)
             for (mutantName in coveredMutation) {
                 prePanel.addComponent(
@@ -75,7 +78,7 @@ class CoverageRenderer(
             }
         }
 
-        if (coveredNotMutation.isNotEmpty()) {
+        if (coveredNotMutation.isNotEmpty() && state.criterionWeakMutation) {
             prePanel.addComponent(JBLabel(" Not covered mutants:"), 10)
             for (mutantName in coveredNotMutation) {
                 prePanel.addComponent(
