@@ -27,7 +27,14 @@ import java.awt.event.MouseEvent
  * @param lineNumber lineNumber to color
  * @param tests list of tests that cover this line
  */
-class CoverageRenderer(private val color: Color, private val lineNumber: Int, private val tests: List<String>, private val project: Project) :
+class CoverageRenderer(
+    private val color: Color,
+    private val lineNumber: Int,
+    private val tests: List<String>,
+    private val coveredMutation: List<String>,
+    private val coveredNotMutation: List<String>,
+    private val project: Project
+) :
     ActiveGutterRenderer, LineMarkerRendererEx {
 
     /**
@@ -47,6 +54,22 @@ class CoverageRenderer(private val color: Color, private val lineNumber: Int, pr
                 ActionLink(testName) {
                     highlightInToolwindow(testName)
                 }
+            )
+        }
+
+        prePanel.addComponent(JBLabel(" Covered mutants:"), 10)
+        for (mutantName in coveredMutation) {
+            prePanel.addComponent(
+                ActionLink(mutantName) {
+                    highlightInToolwindow(mutantName)
+                }
+            )
+        }
+
+        prePanel.addComponent(JBLabel(" Not covered mutants:"), 10)
+        for (mutantName in coveredNotMutation) {
+            prePanel.addComponent(
+                JBLabel(mutantName)
             )
         }
 
