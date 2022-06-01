@@ -131,6 +131,9 @@ class Runner(
         // Save all open editors
         ApplicationManager.getApplication().saveAll()
 
+        val workspace = project.service<Workspace>()
+        workspace.addPendingResult(testResultName, key)
+
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
@@ -160,9 +163,6 @@ class Runner(
                 }
             })
 
-        val workspace = project.service<Workspace>()
-        workspace.addPendingResult(testResultName, key)
-
         return testResultName
     }
 
@@ -184,6 +184,7 @@ class Runner(
             }
 
             report.testCaseList = testMap
+            report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
 
             workspace.receiveGenerationResult(testResultName, report)
         }
