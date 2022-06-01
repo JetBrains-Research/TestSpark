@@ -49,7 +49,7 @@ class TestGenieTelemetryService {
             return
         }
 
-        log.info("Submiting ${testCasesToSubmit.size} test cases to server")
+        log.info("Submiting ${testCasesToSubmit.size} test cases to a file")
 
         val gson = Gson()
         val json = gson.toJson(testCasesToSubmit)
