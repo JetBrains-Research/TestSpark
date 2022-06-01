@@ -33,6 +33,7 @@ class CoverageRenderer(
     private val tests: List<String>,
     private val coveredMutation: List<String>,
     private val coveredNotMutation: List<String>,
+    private val mapMutantsToTests: HashMap<String, MutableList<String>>,
     private val project: Project
 ) :
     ActiveGutterRenderer, LineMarkerRendererEx {
@@ -58,10 +59,10 @@ class CoverageRenderer(
         }
 
         prePanel.addComponent(JBLabel(" Covered mutants:"), 10)
-        for (mutantName in coveredMutation) {
+        for (mutant in coveredMutation) {
             prePanel.addComponent(
-                ActionLink(mutantName) {
-                    highlightInToolwindow(mutantName)
+                ActionLink(mutant) {
+                    highlightMutantsInToolwindow(mutant, mapMutantsToTests)
                 }
             )
         }
@@ -111,7 +112,13 @@ class CoverageRenderer(
     private fun highlightInToolwindow(name: String) {
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
 
-        testCaseDisplayService.highlightTestCase(name)
+        testCaseDisplayService.highlightTestCase(name, null)
+    }
+
+    private fun highlightMutantsInToolwindow(mutantName: String, map: HashMap<String, MutableList<String>>) {
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+
+        testCaseDisplayService.highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
     }
 
     /**
