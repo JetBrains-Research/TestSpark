@@ -166,6 +166,11 @@ class Runner(
         return testResultName
     }
 
+    /**
+     * Attempts to retrieve and display cached test cases.
+     *
+     * @return true if cached tests were found, false otherwise
+     */
     private fun tryShowCachedTestCases(): Boolean {
         val cache = project.service<TestCaseCachingService>()
         val testCases = cache.retrieveFromCache(fileUrl, cacheFromLine!!, cacheToLine!!)
