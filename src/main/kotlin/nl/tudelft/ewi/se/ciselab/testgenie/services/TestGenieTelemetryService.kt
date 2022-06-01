@@ -2,6 +2,8 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.google.gson.Gson
 import com.intellij.openapi.diagnostic.Logger
+import java.io.File
+import java.sql.Timestamp
 
 class TestGenieTelemetryService {
     private val modifiedTestCases = mutableListOf<ModifiedTestCase>()
@@ -48,7 +50,8 @@ class TestGenieTelemetryService {
         val json = gson.toJson(testCasesToUpload)
         log.info("Uploading test cases: $json")
 
-        // TODO: Actually upload test cases to server
+        // TODO: Actually upload test cases to a file
+        File(Timestamp(System.currentTimeMillis()).toString()).bufferedWriter().use { out -> out.write(json) }
     }
 
     class ModifiedTestCase(val original: String, val modified: String)
