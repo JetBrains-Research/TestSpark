@@ -165,6 +165,24 @@ class TestCaseCachingServiceTest {
             )
     }
 
+    @Test
+    fun nonexistentFile() {
+        val report = CompactReport(TestGenerationResultImpl())
+        val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = CompactTestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        report.testCaseList = hashMapOf(
+            createPair(test1),
+            createPair(test2)
+        )
+
+        testCaseCachingService.putIntoCache("aa", report)
+
+        val result = testCaseCachingService.retrieveFromCache("bb", 2, 2)
+
+        assertThat(result)
+            .isEmpty()
+    }
+
     private fun createPair(testCase: CompactTestCase): Pair<String, CompactTestCase> {
         return Pair(testCase.testName, testCase)
     }
