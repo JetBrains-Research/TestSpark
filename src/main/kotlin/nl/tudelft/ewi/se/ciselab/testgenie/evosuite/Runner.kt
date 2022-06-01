@@ -19,7 +19,11 @@ import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import org.evosuite.result.TestGenerationResultImpl
+import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
 import java.io.File
 import java.nio.charset.Charset
 import java.util.UUID
@@ -63,6 +67,9 @@ class Runner(
 
     private var command = mutableListOf<String>()
 
+    private var cacheFromLine: Int? = null
+    private var cacheToLine: Int? = null
+
     init {
         Util.makeTmp()
     }
@@ -104,6 +111,15 @@ class Runner(
     }
 
     /**
+     * Configures lines for the cache (0-indexed)
+     */
+    fun withCacheLines(fromLine: Int, toLine: Int): Runner {
+        this.cacheFromLine = fromLine + 1
+        this.cacheToLine = toLine + 1
+        return this
+    }
+
+    /**
      * Builds the project and launches EvoSuite on a separate thread.
      *
      * @return the path to which results will be (eventually) saved
@@ -119,6 +135,15 @@ class Runner(
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
+
+                        // Check cache
+                        val hasCachedTests = tryShowCachedTestCases()
+                        if (hasCachedTests) {
+                            log.info("Found cached tests")
+                            indicator.stop()
+                            return
+                        }
+
                         runBuild(indicator)
 
                         if (indicator.isCanceled) {
@@ -139,6 +164,31 @@ class Runner(
         workspace.addPendingResult(testResultName, key)
 
         return testResultName
+    }
+
+    private fun tryShowCachedTestCases(): Boolean {
+        val cache = project.service<TestCaseCachingService>()
+        val testCases = cache.retrieveFromCache(fileUrl, cacheFromLine!!, cacheToLine!!)
+
+        if (testCases.isEmpty()) {
+            // no suitable cached tests found
+            return false
+        }
+
+        val workspace = project.service<Workspace>()
+        ApplicationManager.getApplication().invokeLater {
+            val report = CompactReport(TestGenerationResultImpl())
+            val testMap = hashMapOf<String, CompactTestCase>()
+            testCases.forEach {
+                testMap[it.testName] = it
+            }
+
+            report.testCaseList = testMap
+
+            workspace.receiveGenerationResult(testResultName, report)
+        }
+
+        return true
     }
 
     /**
