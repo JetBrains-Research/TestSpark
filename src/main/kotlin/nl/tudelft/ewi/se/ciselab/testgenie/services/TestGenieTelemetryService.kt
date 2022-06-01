@@ -50,7 +50,7 @@ class TestGenieTelemetryService {
         val json = gson.toJson(testCasesToUpload)
         log.info("Uploading test cases: $json")
 
-        marti(json)
+        writeTelemetryToFile(json)
     }
 
     /**
@@ -58,7 +58,7 @@ class TestGenieTelemetryService {
      *
      * @param json a json object with the telemetry
      */
-    private fun marti(json: String) {
+    private fun writeTelemetryToFile(json: String) {
         // Get the separator depending on the underlying OS
         val separator: String = if (System.getProperty("os.name").contains("Windows")) "\\" else "/"
         // Get the telemetry path
@@ -75,7 +75,7 @@ class TestGenieTelemetryService {
         // Get the file name based on the current timestamp
         val telemetryFileName: String = dirName.plus(Timestamp(System.currentTimeMillis()).toString())
 
-        log.info("log4j: Saving telemetry into ".plus(telemetryFileName))
+        log.info("Saving telemetry into ".plus(telemetryFileName))
 
         // Write the json to the file
         File(telemetryFileName).bufferedWriter().use { out -> out.write(json) }
