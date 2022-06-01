@@ -48,6 +48,7 @@ class SettingsPluginComponent {
     )
     private val telemetrySeparator = JXTitledSeparator("Telemetry")
     private var telemetryEnabledCheckbox = JCheckBox("Enable telemetry")
+    private val telemetryPathTextField = JTextField(System.getProperty("user.dir"))
 
     // Accessibility options
     private val accessibilitySeparator = JXTitledSeparator("Accessibility settings")
@@ -79,6 +80,7 @@ class SettingsPluginComponent {
             .addComponent(telemetrySeparator, 15)
             .addComponent(telemetryDescription, 10)
             .addComponent(telemetryEnabledCheckbox, 10)
+            .addComponent(telemetryPathTextField, 10)
             // Add accessibility options
             .addComponent(accessibilitySeparator, 15)
             .addComponent(JBLabel("Choose color for visualisation highlight"), 15)
@@ -101,6 +103,9 @@ class SettingsPluginComponent {
 
         // Add description to telemetry
         telemetryEnabledCheckbox.toolTipText = "Send telemetry to CISELab"
+
+        // Add description to telemetry path
+        telemetryPathTextField.toolTipText = "Choose a file to save the changes into"
 
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
@@ -157,6 +162,12 @@ class SettingsPluginComponent {
         get() = telemetryEnabledCheckbox.isSelected
         set(newStatus) {
             telemetryEnabledCheckbox.isSelected = newStatus
+        }
+
+    var telemetryPath: String
+        get() = telemetryPathTextField.text
+        set(newPath) {
+            telemetryPathTextField.text = newPath
         }
 
     var colorRed: Int
