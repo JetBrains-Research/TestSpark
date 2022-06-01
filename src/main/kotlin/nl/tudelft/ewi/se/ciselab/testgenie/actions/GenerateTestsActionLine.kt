@@ -32,7 +32,10 @@ class GenerateTestsActionLine : AnAction() {
 
         logger.info("Selected line is $selectedLine")
 
-        evoSuiteRunner.forLine(selectedLine).runTestGeneration()
+        evoSuiteRunner
+            .forLine(selectedLine)
+            .withCacheLines(selectedLine - 1, selectedLine - 1)
+            .runTestGeneration()
     }
 
     /**
