@@ -30,9 +30,9 @@ class TestGenieTelemetryService {
     }
 
     /**
-     * Sends the telemetry to the TestGenie server.
+     * Saves the telemetry to a file.
      */
-    fun uploadTelemetry() {
+    fun submitTelemetry() {
         if (!telemetryEnabled) {
             return
         }
