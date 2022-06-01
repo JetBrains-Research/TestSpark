@@ -64,20 +64,24 @@ class CoverageRenderer(
             )
         }
 
-        prePanel.addComponent(JBLabel(" Covered mutants:"), 10)
-        for (mutant in coveredMutation) {
-            prePanel.addComponent(
-                ActionLink(mutant) {
-                    highlightMutantsInToolwindow(mutant, mapMutantsToTests)
-                }
-            )
+        if (coveredMutation.isNotEmpty()) {
+            prePanel.addComponent(JBLabel(" Covered mutants:"), 10)
+            for (mutantName in coveredMutation) {
+                prePanel.addComponent(
+                    ActionLink(mutantName.substringBefore('(')) {
+                        highlightMutantsInToolwindow(mutantName, mapMutantsToTests)
+                    }
+                )
+            }
         }
 
-        prePanel.addComponent(JBLabel(" Not covered mutants:"), 10)
-        for (mutantName in coveredNotMutation) {
-            prePanel.addComponent(
-                JBLabel(mutantName)
-            )
+        if (coveredNotMutation.isNotEmpty()) {
+            prePanel.addComponent(JBLabel(" Not covered mutants:"), 10)
+            for (mutantName in coveredNotMutation) {
+                prePanel.addComponent(
+                    JBLabel(mutantName.substringBefore('('))
+                )
+            }
         }
 
         val panel = JBScrollPane(
@@ -86,7 +90,7 @@ class CoverageRenderer(
             JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         )
 
-        panel.preferredSize = Dimension(panel.preferredSize.width, 200)
+        panel.preferredSize = Dimension(panel.preferredSize.width, 400.coerceAtMost(panel.preferredSize.height))
 
         val hint = LightweightHint(panel)
         val point = HintManagerImpl.getHintPosition(hint, editor, LogicalPosition(lineNumber, 0), HintManager.RIGHT)
