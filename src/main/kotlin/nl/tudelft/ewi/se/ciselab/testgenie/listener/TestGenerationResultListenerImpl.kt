@@ -6,17 +6,25 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.TestGenerationResultListener
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import org.evosuite.utils.CompactReport
 
 class TestGenerationResultListenerImpl(private val project: Project) : TestGenerationResultListener {
     private val log = Logger.getInstance(this.javaClass)
 
-    override fun testGenerationResult(testReport: CompactReport, resultName: String) {
+    override fun testGenerationResult(testReport: CompactReport, resultName: String, fileUrl: String) {
         log.info("Received test result for $resultName")
         val workspace = project.service<Workspace>()
 
         ApplicationManager.getApplication().invokeLater {
             workspace.receiveGenerationResult(resultName, testReport)
         }
+
+        cacheGeneratedTestCases(testReport, fileUrl)
+    }
+
+    private fun cacheGeneratedTestCases(testReport: CompactReport, fileUrl: String) {
+        val cache = project.service<TestCaseCachingService>()
+        cache.putIntoCache(fileUrl, testReport)
     }
 }
