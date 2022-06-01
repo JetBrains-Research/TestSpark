@@ -5,7 +5,8 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieTelemetryService
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
 
 /**
  * This class is responsible for scheduling potential submissions of telemetry into a file, which is done every 5 minutes,
