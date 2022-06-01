@@ -50,8 +50,35 @@ class TestGenieTelemetryService {
         val json = gson.toJson(testCasesToUpload)
         log.info("Uploading test cases: $json")
 
-        // TODO: Actually upload test cases to a file
-        File(Timestamp(System.currentTimeMillis()).toString()).bufferedWriter().use { out -> out.write(json) }
+        marti(json)
+    }
+
+    /**
+     * Writes a json with the telemetry to a file.
+     *
+     * @param json a json object with the telemetry
+     */
+    private fun marti(json: String) {
+        // Get the separator depending on the underlying OS
+        val separator: String = if (System.getProperty("os.name").contains("Windows")) "\\" else "/"
+        // Get the telemetry path
+        var dirName: String = TestGenieSettingsService.getInstance().state?.telemetryPath
+            ?: System.getProperty("user.dir")
+        if (!dirName.endsWith(separator)) dirName = dirName.plus(separator)
+
+        // Create the directory if it does not exist
+        val dir = File(dirName)
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+
+        // Get the file name based on the current timestamp
+        val telemetryFileName: String = dirName.plus(Timestamp(System.currentTimeMillis()).toString())
+
+        log.info("log4j: Saving telemetry into ".plus(telemetryFileName))
+
+        // Write the json to the file
+        File(telemetryFileName).bufferedWriter().use { out -> out.write(json) }
     }
 
     class ModifiedTestCase(val original: String, val modified: String)
