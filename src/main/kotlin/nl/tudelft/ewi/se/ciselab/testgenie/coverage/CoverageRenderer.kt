@@ -13,9 +13,11 @@ import com.intellij.ui.HintHint
 import com.intellij.ui.LightweightHint
 import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import java.awt.Color
+import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
@@ -74,7 +76,13 @@ class CoverageRenderer(
             )
         }
 
-        val panel = prePanel.addVerticalGap(10).panel
+        val panel = JBScrollPane(
+            prePanel.addVerticalGap(10).panel,
+            JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        )
+
+        panel.preferredSize = Dimension(panel.preferredSize.width, 200)
 
         val hint = LightweightHint(panel)
         val point = HintManagerImpl.getHintPosition(hint, editor, LogicalPosition(lineNumber, 0), HintManager.RIGHT)
