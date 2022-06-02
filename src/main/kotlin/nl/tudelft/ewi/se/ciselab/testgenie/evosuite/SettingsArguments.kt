@@ -20,11 +20,12 @@ class SettingsArguments(
     private val serializeResultPath: String,
     private val classFQN: String
 ) {
+    private var baseDir = "$serializeResultPath-validation"
     private var command: MutableList<String> = mutableListOf(
         "-generateSuite",
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
-        "-base_dir", projectPath,
+        "-base_dir", baseDir,
         "-projectCP", projectClassPath,
         "-Dnew_statistics=false",
         "-class", classFQN,

@@ -10,6 +10,8 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService"/>
+        <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Validator"/>
+
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
         <projectService

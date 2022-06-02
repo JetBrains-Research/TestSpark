@@ -4,6 +4,7 @@ import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
@@ -20,6 +21,8 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBUI
+import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Validator
 import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
 import java.awt.Color
@@ -42,15 +45,15 @@ class TestCaseDisplayService(private val project: Project) {
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
-        allTestCasePanel,
-        JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-        JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        allTestCasePanel, JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
     )
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private var originalTestCases: HashMap<String, String> = HashMap()
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
+
+    private var testJob: Workspace.TestJob? = null
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -76,8 +79,10 @@ class TestCaseDisplayService(private val project: Project) {
      * Creates the complete panel in the "Generated Tests" tab,
      * and adds the "Generated Tests" tab to the sidebar tool window.
      */
-    fun showGeneratedTests(testReport: CompactReport, editor: Editor) {
-        displayTestCases(testReport, editor)
+    fun showGeneratedTests(testJob: Workspace.TestJob, editor: Editor) {
+        this.testJob = testJob
+
+        displayTestCases(testJob.report, editor)
         createToolWindowTab()
     }
 
@@ -144,18 +149,14 @@ class TestCaseDisplayService(private val project: Project) {
                     textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
                     // add line highlighting
-                    if (event.newRange.startOffset + 1 >= document.textLength ||
-                        event.newRange.endOffset >= document.textLength
-                    ) {
+                    if (event.newRange.startOffset + 1 >= document.textLength || event.newRange.endOffset >= document.textLength) {
                         return
                     }
                     val startLine = document.getLineNumber(event.newRange.startOffset + 1)
                     val endLine = document.getLineNumber(event.newRange.endOffset)
                     for (lineNumber in startLine..endLine) {
                         textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                            DiffColors.DIFF_MODIFIED,
-                            lineNumber,
-                            HighlighterLayer.FIRST
+                            DiffColors.DIFF_MODIFIED, lineNumber, HighlighterLayer.FIRST
                         )
                     }
 
@@ -196,8 +197,8 @@ class TestCaseDisplayService(private val project: Project) {
      * and apply the selected tests to the test class.
      */
     private fun applyTests() {
-        val selectedTestCases = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
-            .map { it.key }
+        val selectedTestCases =
+            testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
 
         val testCaseComponents = selectedTestCases.map {
             testCasePanels[it]!!.getComponent(1) as EditorTextField
@@ -206,10 +207,9 @@ class TestCaseDisplayService(private val project: Project) {
         }
 
         // show chooser dialog to select test file
-        val chooser = TreeClassChooserFactory.getInstance(project)
-            .createProjectScopeChooser(
-                "Insert Test Cases into Class"
-            )
+        val chooser = TreeClassChooserFactory.getInstance(project).createProjectScopeChooser(
+            "Insert Test Cases into Class"
+        )
 
         // Warning: The following code is extremely cursed.
         // It is a workaround for an oversight in the IntelliJ TreeJavaClassChooserDialog.
@@ -255,7 +255,10 @@ class TestCaseDisplayService(private val project: Project) {
         telemetryService.uploadTelemetry()
     }
 
-    private fun validateTests() {}
+    private fun validateTests() {
+        val testJob = testJob ?: return
+        Validator(project, testJob).validateSuite()
+    }
 
     private fun toggleAllCheckboxes(selected: Boolean) {
         testCasePanels.forEach { (_, jPanel) ->
@@ -273,13 +276,11 @@ class TestCaseDisplayService(private val project: Project) {
     private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass) {
         WriteCommandAction.runWriteCommandAction(project) {
             testCaseComponents.forEach {
-                PsiDocumentManager.getInstance(project)
-                    .getDocument(selectedClass.containingFile)!!
-                    .insertString(
-                        selectedClass.rBrace!!.textRange.startOffset,
-                        // Fix Windows line separators
-                        it.replace("\r\n", "\n")
-                    )
+                PsiDocumentManager.getInstance(project).getDocument(selectedClass.containingFile)!!.insertString(
+                    selectedClass.rBrace!!.textRange.startOffset,
+                    // Fix Windows line separators
+                    it.replace("\r\n", "\n")
+                )
             }
         }
     }

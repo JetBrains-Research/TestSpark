@@ -27,9 +27,15 @@ import org.evosuite.utils.CompactTestCase
  *
  */
 class Workspace(private val project: Project) {
-    data class TestJobInfo(val fileUrl: String, var targetUnit: String, val modificationTS: Long, val jobId: String)
+    data class TestJobInfo(
+        val fileUrl: String,
+        var targetUnit: String,
+        val modificationTS: Long,
+        val jobId: String,
+        val targetClassPath: String
+    )
 
-    private class TestJob(val info: TestJobInfo, val report: CompactReport, val selectedTests: HashSet<String>) {
+    class TestJob(val info: TestJobInfo, val report: CompactReport, val selectedTests: HashSet<String>) {
         fun getSelectedTests(): List<CompactTestCase> {
             return report.testCaseList.filter { selectedTests.contains(it.key) }.map { it.value }
         }
@@ -124,12 +130,13 @@ class Workspace(private val project: Project) {
         val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
         val displayedSet = HashSet<String>()
         displayedSet.addAll(testReport.testCaseList.keys)
-        resultsForFile.add(TestJob(jobKey, testReport, displayedSet))
+        val testJob = TestJob(jobKey, testReport, displayedSet)
+        resultsForFile.add(testJob)
 
         val editor = editorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
-            showReport(testReport, editor)
+            showReport(testJob, editor)
         } else {
             log.info("No editor opened for received test result")
         }
@@ -188,11 +195,11 @@ class Workspace(private val project: Project) {
      * @param editor editor instance where coverage should be
      * visualized
      */
-    private fun showReport(testReport: CompactReport, editor: Editor) {
+    private fun showReport(testJob: TestJob, editor: Editor) {
         val visualizationService = project.service<CoverageVisualisationService>()
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.showGeneratedTests(testReport, editor)
-        visualizationService.showCoverage(testReport, editor)
+        testCaseDisplayService.showGeneratedTests(testJob, editor)
+        visualizationService.showCoverage(testJob.report, editor)
     }
 
     private fun updateCoverage(

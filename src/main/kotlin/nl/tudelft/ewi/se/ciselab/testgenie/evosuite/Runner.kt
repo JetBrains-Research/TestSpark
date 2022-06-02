@@ -45,7 +45,7 @@ class Runner(
     private val log = Logger.getInstance(this::class.java)
 
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
-    private val evosuiteVersion = "1.0.3" // TODO: Figure out a better way to source this
+    private val evosuiteVersion = "1.0.4" // TODO: Figure out a better way to source this
 
     private val pluginsPath = System.getProperty("idea.plugins.path")
     private var evoSuitePath = "$pluginsPath/TestGenie/lib/evosuite-$evosuiteVersion.jar"
@@ -55,9 +55,9 @@ class Runner(
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
     private val testResultName = "test_gen_result_$id"
 
-    private var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName)
+    private var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
-    private val serializeResultPath = "\"$testResultDirectory$testResultName\""
+    private val serializeResultPath = "$testResultDirectory$testResultName"
 
     private val settingsState = TestGenieSettingsService.getInstance().state
 
@@ -65,6 +65,7 @@ class Runner(
 
     init {
         Util.makeTmp()
+        Util.makeDir("$serializeResultPath-validation")
     }
 
     /**
@@ -87,7 +88,7 @@ class Runner(
                 .build()
 
         // attach method desc. to target unit key
-        key = Workspace.TestJobInfo(fileUrl, "$classFQN#$methodDescriptor", modTs, testResultName)
+        key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
         return this
     }
