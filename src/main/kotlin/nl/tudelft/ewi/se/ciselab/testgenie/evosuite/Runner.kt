@@ -15,6 +15,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
+import com.intellij.psi.PsiFile
 import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
@@ -124,7 +125,7 @@ class Runner(
      *
      * @return the path to which results will be (eventually) saved
      */
-    fun runTestGeneration(): String {
+    fun runTestGeneration(psiFile: PsiFile): String {
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
@@ -138,7 +139,6 @@ class Runner(
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
-
                         // Check cache
                         val hasCachedTests = tryShowCachedTestCases()
                         if (hasCachedTests) {
