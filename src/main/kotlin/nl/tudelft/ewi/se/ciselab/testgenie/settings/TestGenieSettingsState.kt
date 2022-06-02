@@ -4,6 +4,7 @@ import com.intellij.ide.DataManager
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
+import org.apache.commons.io.FilenameUtils
 import java.io.File
 
 /**
@@ -60,14 +61,13 @@ data class TestGenieSettingsState(
          *   which is in the project folder if there is a project, or in the home directory if not
          */
         private fun createDefaultTelemetryPath(): String {
-            val suffix = "TestGenieTelemetry"
+            val suffix = TestGenieDefaultsBundle.defaultValue("telemetryDirectory")
             val backupDefaultTelemetryPath: String = System.getProperty("user.home").plus(suffix)
 
             val dataContext: DataContext = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(2000)
                 ?: return backupDefaultTelemetryPath
             val projectBasePath: String = CommonDataKeys.PROJECT.getData(dataContext)?.basePath
                 ?: return backupDefaultTelemetryPath
-
             return "$projectBasePath${File.separator}$suffix"
         }
     }
