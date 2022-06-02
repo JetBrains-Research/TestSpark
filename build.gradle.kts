@@ -6,7 +6,7 @@ import java.util.zip.ZipInputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
-val thunderdomeVersion = "1.0.3"
+val thunderdomeVersion = "1.0.4"
 
 plugins {
     // Java support
@@ -33,6 +33,9 @@ repositories {
 // include evo suite jar
 dependencies {
     implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
+    implementation(files("lib/evosuite-standalone-runtime-1.2.1-SNAPSHOT.jar"))
+    implementation(files("lib/hamcrest-core-1.3.jar"))
+    implementation(files("lib/junit-4.12.jar"))
 
     // From the jetbrains repository
     testImplementation("com.intellij.remoterobot:remote-robot:0.11.13")
