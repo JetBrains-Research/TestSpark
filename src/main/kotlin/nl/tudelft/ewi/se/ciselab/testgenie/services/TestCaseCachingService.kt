@@ -62,10 +62,9 @@ class TestCaseCachingService {
          */
         fun putIntoCache(report: CompactReport) {
             report.testCaseList.values.forEach { testCase ->
+                val cachedCompactTestCase = CachedCompactTestCase.fromCompactTestCase(testCase, this)
                 testCase.coveredLines.forEach { lineNumber ->
                     val line: LineTestCaseCache = getLineTestCaseCache(lineNumber)
-
-                    val cachedCompactTestCase = CachedCompactTestCase.fromCompactTestCase(testCase, this)
                     line.putIntoCache(cachedCompactTestCase)
                 }
             }
