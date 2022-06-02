@@ -22,15 +22,23 @@ class TestGenieTelemetrySubmitListenerImpl : ProjectManagerListener {
      * @param project the current project
      */
     override fun projectOpened(project: Project) {
-        Timer().scheduleAtFixedRate(
+        val timer = Timer()
+        timer.scheduleAtFixedRate(
             object : TimerTask() {
                 override fun run() {
-                    log.info("Checking generated telemetry...")
+                    // Cancel the timer if the project is closed
+                    if (!project.isOpen) {
+                        timer.cancel()
+                        return
+                    }
+
+                    log.info("Checking generated telemetry for the project ${project.name}...")
+
                     ApplicationManager.getApplication()
                         .getService(TestGenieTelemetryService::class.java).submitTelemetry()
                 }
             },
-            300000, 300000
+            10000, 10000
         )
     }
 
@@ -40,7 +48,7 @@ class TestGenieTelemetrySubmitListenerImpl : ProjectManagerListener {
      * @param project the current project
      */
     override fun projectClosing(project: Project) {
-        log.info("Checking generated telemetry...")
+        log.info("Checking generated telemetry for the project ${project.name} before closing...")
 
         ApplicationManager.getApplication()
             .getService(TestGenieTelemetryService::class.java).submitTelemetry()
