@@ -38,7 +38,7 @@ class TestGenieTelemetrySubmitListenerImpl : ProjectManagerListener {
                         .getService(TestGenieTelemetryService::class.java).submitTelemetry()
                 }
             },
-            10000, 10000
+            300000, 300000
         )
     }
 
