@@ -3,13 +3,15 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.google.gson.Gson
 import com.intellij.openapi.diagnostic.Logger
 import java.io.File
-import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Date
 
 class TestGenieTelemetryService {
     private val modifiedTestCases = mutableListOf<ModifiedTestCase>()
     private val modifiedTestCasesLock = Object()
 
     private val log: Logger = Logger.getInstance(this.javaClass)
+    private val dateFormatter: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
 
     private val telemetryEnabled: Boolean
         get() = TestGenieSettingsService.getInstance().state?.telemetryEnabled ?: false
@@ -78,7 +80,8 @@ class TestGenieTelemetryService {
         }
 
         // Get the file name based on the current timestamp
-        val telemetryFileName: String = dirName.plus(Timestamp(System.currentTimeMillis()).toString()).plus(".json")
+        val currentTime: String = dateFormatter.format(Date())
+        val telemetryFileName: String = dirName.plus(currentTime).plus(".json")
 
         log.info("Saving telemetry into ".plus(telemetryFileName))
 
