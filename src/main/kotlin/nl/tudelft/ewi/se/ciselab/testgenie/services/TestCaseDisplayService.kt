@@ -122,6 +122,14 @@ class TestCaseDisplayService(private val project: Project) {
             val topButtons = JPanel()
             topButtons.layout = FlowLayout(FlowLayout.TRAILING)
 
+            // Add "Remove From Cache"  button
+            val removeFromCacheButton = JButton("Remove From Cache")
+            removeFromCacheButton.addActionListener {
+                // TODO: actually remove from the cache
+                println("Test $testName will be removed from the cache")
+                removeFromCacheButton.isEnabled = false
+            }
+
             // Add "Reset" button
             val resetButton = JButton("Reset")
             resetButton.isEnabled = false
@@ -176,6 +184,7 @@ class TestCaseDisplayService(private val project: Project) {
                     checkbox.isSelected = true
                 }
             })
+            topButtons.add(removeFromCacheButton)
             topButtons.add(resetButton)
             testCasePanel.add(topButtons, BorderLayout.NORTH)
 
