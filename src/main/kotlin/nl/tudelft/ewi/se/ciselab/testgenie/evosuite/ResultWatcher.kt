@@ -17,8 +17,9 @@ import java.io.FileReader
  *
  * @param project Project context variable which is required for message bus passing
  * @param resultName result path on which to watch for results
+ * @param fileUrl the file url (for caching)
  */
-class ResultWatcher(private val project: Project, private val resultName: String) : Runnable {
+class ResultWatcher(private val project: Project, private val resultName: String, private val fileUrl: String) : Runnable {
     private val log = Logger.getInstance(ResultWatcher::class.java)
 
     override fun run() {
@@ -59,7 +60,7 @@ class ResultWatcher(private val project: Project, private val resultName: String
 
                         log.info("Publishing test generation result to ${TEST_GENERATION_RESULT_TOPIC.displayName}")
                         project.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC)
-                            .testGenerationResult(testGenerationResult, resultName)
+                            .testGenerationResult(testGenerationResult, resultName, fileUrl)
                         log.info("Exiting Watcher thread for $resultName")
                         return
                     }
