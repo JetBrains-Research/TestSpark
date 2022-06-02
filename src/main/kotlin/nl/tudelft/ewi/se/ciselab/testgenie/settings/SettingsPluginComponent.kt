@@ -48,7 +48,7 @@ class SettingsPluginComponent {
     )
     private val telemetrySeparator = JXTitledSeparator("Telemetry")
     private var telemetryEnabledCheckbox = JCheckBox("Enable telemetry")
-    private val telemetryPathTextField = JTextField(System.getProperty("user.dir"))
+    private val telemetryPathTextField = JTextField(TestGenieSettingsState.DefaultSettingsState.telemetryPath)
 
     // Accessibility options
     private val accessibilitySeparator = JXTitledSeparator("Accessibility settings")
