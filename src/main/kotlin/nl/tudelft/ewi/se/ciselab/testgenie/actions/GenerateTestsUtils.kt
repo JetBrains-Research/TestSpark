@@ -216,7 +216,7 @@ private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFi
     val lastStatementLine: Int = doc.getLineNumber(lastStatement.endOffset)
 
     val list = recursePsiMethodBody(psiMethodBody)
-    val pair = createSignatureBodyPair(psiMethod.hierarchicalMethodSignature)
+    val pair = createSignatureBodyPair(psiMethod.hierarchicalMethodSignature, list)
 
     return (selectedLine in firstStatementLine..lastStatementLine)
 }
