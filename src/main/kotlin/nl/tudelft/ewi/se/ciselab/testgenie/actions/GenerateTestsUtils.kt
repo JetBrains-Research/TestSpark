@@ -216,14 +216,9 @@ private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFi
     val lastStatementLine: Int = doc.getLineNumber(lastStatement.endOffset)
 
     val list = recursePsiMethodBody(psiMethodBody)
-    val pair = createSignatureBodyPair(psiMethod.hierarchicalMethodSignature, list)
+    val pair = Pair(psiMethod.hierarchicalMethodSignature, list)
 
     return (selectedLine in firstStatementLine..lastStatementLine)
-}
-
-fun createSignatureBodyPair(signature: HierarchicalMethodSignature, body: ArrayList<PsiElement>): Pair<String, ArrayList<PsiElement>> {
-    val hash = DigestUtils.sha256Hex(signature.toString().filter { !it.isWhitespace() })
-    return Pair(hash, body)
 }
 
 /**
