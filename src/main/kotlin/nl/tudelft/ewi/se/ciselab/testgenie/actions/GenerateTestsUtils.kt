@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.HierarchicalMethodSignature
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiCodeBlock
@@ -18,12 +19,13 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiModifierList
 import com.intellij.psi.PsiReferenceParameterList
 import com.intellij.psi.PsiStatement
-import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.PsiWhiteSpace
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import org.apache.commons.codec.digest.DigestUtils
 
 /**
  * This file contains some useful methods related to GenerateTests actions.
@@ -214,8 +216,14 @@ private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFi
     val lastStatementLine: Int = doc.getLineNumber(lastStatement.endOffset)
 
     val list = recursePsiMethodBody(psiMethodBody)
+    val pair = createSignatureBodyPair(psiMethod.hierarchicalMethodSignature)
 
     return (selectedLine in firstStatementLine..lastStatementLine)
+}
+
+fun createSignatureBodyPair(signature: HierarchicalMethodSignature, body: ArrayList<PsiElement>): Pair<String, ArrayList<PsiElement>> {
+    val hash = DigestUtils.sha256Hex(signature.toString().filter { !it.isWhitespace() })
+    return Pair(hash, body)
 }
 
 /**
