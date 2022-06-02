@@ -149,12 +149,25 @@ class TestCaseDisplayService(private val project: Project) {
                     ) {
                         return
                     }
-                    val startLine = document.getLineNumber(event.newRange.startOffset + 1)
+                    val newLine = event.newFragment.contains('\n')
+                    val startLine = document.getLineNumber(
+                        event.newRange.startOffset +
+                            (if (newLine) 1 else 0)
+                    )
                     val endLine = document.getLineNumber(event.newRange.endOffset)
                     for (lineNumber in startLine..endLine) {
                         textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                            DiffColors.DIFF_MODIFIED,
+                            if (newLine) DiffColors.DIFF_INSERTED else DiffColors.DIFF_MODIFIED,
                             lineNumber,
+                            HighlighterLayer.FIRST
+                        )
+                    }
+
+                    // Highlight if line has been deleted
+                    if (event.oldFragment.contains('\n')) {
+                        textFieldEditor.editor!!.markupModel.addLineHighlighter(
+                            DiffColors.DIFF_MODIFIED,
+                            endLine,
                             HighlighterLayer.FIRST
                         )
                     }
