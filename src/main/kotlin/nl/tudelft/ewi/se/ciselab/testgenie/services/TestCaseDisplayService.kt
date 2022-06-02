@@ -160,6 +160,15 @@ class TestCaseDisplayService(private val project: Project) {
                         )
                     }
 
+                    // Highlight if line has been deleted
+                    if (event.oldFragment.contains('\n')) {
+                        textFieldEditor.editor!!.markupModel.addLineHighlighter(
+                            DiffColors.DIFF_MODIFIED,
+                            endLine,
+                            HighlighterLayer.FIRST
+                        )
+                    }
+
                     // select checkbox
                     checkbox.isSelected = true
                 }
