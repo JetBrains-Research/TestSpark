@@ -37,6 +37,18 @@ class TestCaseCachingService {
     }
 
     /**
+     * Invalidate test cases from the cache.
+     *
+     * @param fileUrl the URL of the file that the test cases belong to
+     * @param lineFrom the start of the range
+     * @param lineTo the end of the ranges
+     */
+    fun invalidateFromCache(fileUrl: String, lineFrom: Int, lineTo: Int) {
+        val fileTestCaseCache = getFileTestCaseCache(fileUrl)
+        fileTestCaseCache.invalidateFromCache(lineFrom, lineTo)
+    }
+
+    /**
      * Get the file test case cache for the specified file.
      *
      * @param fileUrl the URL of the file
@@ -88,6 +100,21 @@ class TestCaseCachingService {
         }
 
         /**
+         * Invalidate test cases from cache.
+         *
+         * @param lineFrom the start of the range
+         * @param lineTo the end of the range
+         */
+        fun invalidateFromCache(lineFrom: Int, lineTo: Int) {
+            for (lineNumber in lineFrom..lineTo) {
+                val tests: LineTestCaseCache = getLineTestCaseCache(lineNumber)
+                for (test in tests.getTestCases()) {
+                    test.invalid = true
+                }
+            }
+        }
+
+        /**
          * Get the line test case cache for the specified line.
          * @return the line test case cache
          */
@@ -130,7 +157,7 @@ class TestCaseCachingService {
          */
         fun getTestCases(): List<CachedCompactTestCase> {
             synchronized(testCasesLock) {
-                return testCases.toList()
+                return testCases.filter { x -> !x.invalid }.toList()
             }
         }
     }
@@ -143,6 +170,7 @@ class TestCaseCachingService {
         val testCode: String,
         private val coveredLines: Set<LineTestCaseCache>
     ) {
+        var invalid: Boolean = false
 
         /**
          * Convert this cached test case back to a compact test case.
