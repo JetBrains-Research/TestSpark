@@ -251,8 +251,8 @@ class TestCaseDisplayService(private val project: Project) {
             }
         )
 
-        // TODO: Upload to server in the background instead of here
-        telemetryService.uploadTelemetry()
+        // The scheduled tests will be submitted in the background
+        // (they will be checked every 5 minutes and also when the project is closed)
     }
 
     private fun validateTests() {}
