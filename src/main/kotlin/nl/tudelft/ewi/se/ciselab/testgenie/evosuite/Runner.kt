@@ -19,7 +19,11 @@ import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import org.evosuite.result.TestGenerationResultImpl
+import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
 import java.io.File
 import java.nio.charset.Charset
 import java.util.UUID
@@ -63,6 +67,9 @@ class Runner(
 
     private var command = mutableListOf<String>()
 
+    private var cacheFromLine: Int? = null
+    private var cacheToLine: Int? = null
+
     init {
         Util.makeTmp()
     }
@@ -104,6 +111,15 @@ class Runner(
     }
 
     /**
+     * Configures lines for the cache (0-indexed)
+     */
+    fun withCacheLines(fromLine: Int, toLine: Int): Runner {
+        this.cacheFromLine = fromLine + 1
+        this.cacheToLine = toLine + 1
+        return this
+    }
+
+    /**
      * Builds the project and launches EvoSuite on a separate thread.
      *
      * @return the path to which results will be (eventually) saved
@@ -115,10 +131,22 @@ class Runner(
         // Save all open editors
         ApplicationManager.getApplication().saveAll()
 
+        val workspace = project.service<Workspace>()
+        workspace.addPendingResult(testResultName, key)
+
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
+
+                        // Check cache
+                        val hasCachedTests = tryShowCachedTestCases()
+                        if (hasCachedTests) {
+                            log.info("Found cached tests")
+                            indicator.stop()
+                            return
+                        }
+
                         runBuild(indicator)
 
                         if (indicator.isCanceled) {
@@ -135,10 +163,38 @@ class Runner(
                 }
             })
 
-        val workspace = project.service<Workspace>()
-        workspace.addPendingResult(testResultName, key)
-
         return testResultName
+    }
+
+    /**
+     * Attempts to retrieve and display cached test cases.
+     *
+     * @return true if cached tests were found, false otherwise
+     */
+    private fun tryShowCachedTestCases(): Boolean {
+        val cache = project.service<TestCaseCachingService>()
+        val testCases = cache.retrieveFromCache(fileUrl, cacheFromLine!!, cacheToLine!!)
+
+        if (testCases.isEmpty()) {
+            // no suitable cached tests found
+            return false
+        }
+
+        val workspace = project.service<Workspace>()
+        ApplicationManager.getApplication().invokeLater {
+            val report = CompactReport(TestGenerationResultImpl())
+            val testMap = hashMapOf<String, CompactTestCase>()
+            testCases.forEach {
+                testMap[it.testName] = it
+            }
+
+            report.testCaseList = testMap
+            report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
+
+            workspace.receiveGenerationResult(testResultName, report)
+        }
+
+        return true
     }
 
     /**
@@ -265,7 +321,7 @@ class Runner(
             if (handler.exitCode == 0) {
                 // if process wasn't cancelled, start result watcher
                 AppExecutorUtil.getAppScheduledExecutorService()
-                    .execute(ResultWatcher(project, testResultName))
+                    .execute(ResultWatcher(project, testResultName, fileUrl))
             } else {
                 evosuiteError("EvoSuite process exited with non-zero exit code - ${handler.exitCode}")
             }
