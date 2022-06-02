@@ -105,7 +105,7 @@ class SettingsPluginComponent {
         telemetryEnabledCheckbox.toolTipText = "Send telemetry to CISELab"
 
         // Add description to telemetry path
-        telemetryPathTextField.toolTipText = "Choose a file to save the changes into"
+        telemetryPathTextField.toolTipText = "Choose a directory to save telemetry data into"
 
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width

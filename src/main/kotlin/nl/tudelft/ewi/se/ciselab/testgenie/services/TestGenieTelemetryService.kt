@@ -65,7 +65,7 @@ class TestGenieTelemetryService {
      */
     private fun writeTelemetryToFile(json: String) {
         // Get the separator depending on the underlying OS
-        val separator: String = if (System.getProperty("os.name").contains("Windows")) "\\" else "/"
+        val separator: String = java.io.File.separator
         // Get the telemetry path
         var dirName: String = TestGenieSettingsService.getInstance().state?.telemetryPath
             ?: System.getProperty("user.dir")
@@ -78,7 +78,7 @@ class TestGenieTelemetryService {
         }
 
         // Get the file name based on the current timestamp
-        val telemetryFileName: String = dirName.plus(Timestamp(System.currentTimeMillis()).toString())
+        val telemetryFileName: String = dirName.plus(Timestamp(System.currentTimeMillis()).toString()).plus(".json")
 
         log.info("Saving telemetry into ".plus(telemetryFileName))
 
