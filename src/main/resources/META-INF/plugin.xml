@@ -25,6 +25,8 @@
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService"/>
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieTelemetryService"/>
+        <applicationService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.StaticValidationService"/>
         <applicationConfigurable
                 parentId="tools"
                 instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginConfigurable"
