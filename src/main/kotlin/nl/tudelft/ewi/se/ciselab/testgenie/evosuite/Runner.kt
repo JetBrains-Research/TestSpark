@@ -15,11 +15,11 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
-import com.intellij.psi.PsiFile
 import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import org.evosuite.result.TestGenerationResultImpl
@@ -125,7 +125,7 @@ class Runner(
      *
      * @return the path to which results will be (eventually) saved
      */
-    fun runTestGeneration(): String {
+    fun runTestGeneration(linesToDeleteFromCache: Set<Int>): String {
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
@@ -139,6 +139,13 @@ class Runner(
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
+
+                        // Statically invalidate cache
+                        val cache = project.service<TestCaseCachingService>()
+                        val staticInvalidator = project.service<StaticInvalidationService>()
+                        staticInvalidator.invalidateCacheLines(fileUrl, linesToDeleteFromCache, cache)
+                        log.info("Going to invalidate $linesToDeleteFromCache lines")
+
                         // Check cache
                         val hasCachedTests = tryShowCachedTestCases()
                         if (hasCachedTests) {
