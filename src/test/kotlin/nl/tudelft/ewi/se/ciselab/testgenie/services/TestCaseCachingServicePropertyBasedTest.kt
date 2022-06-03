@@ -87,7 +87,7 @@ class TestCaseCachingServicePropertyBasedTest {
     fun lineNumberGenerator(): Arbitrary<Int> = Arbitraries.integers()
         .between(1, 10000)
         .shrinkTowards(1)
-        .withDistribution(RandomDistribution.gaussian(0.1));
+        .withDistribution(RandomDistribution.gaussian(0.1))
 
     @Provide
     fun lineRangeGenerator(): Arbitrary<Pair<Int, Int>> = lineNumberGenerator()
