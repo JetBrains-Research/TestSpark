@@ -67,6 +67,10 @@ class TestCaseCachingService {
         private val lines = mutableMapOf<Int, LineTestCaseCache>()
         private val linesLock = Object()
 
+        // Used for retrieving references of unique test cases
+        private val caseIndex = mutableMapOf<String, CachedCompactTestCase>()
+        private val caseIndexLock = Object()
+
         /**
          * Insert test cases into the file cache.
          *
@@ -78,6 +82,12 @@ class TestCaseCachingService {
                 testCase.coveredLines.forEach { lineNumber ->
                     val line: LineTestCaseCache = getLineTestCaseCache(lineNumber)
                     line.putIntoCache(cachedCompactTestCase)
+
+                    synchronized(caseIndexLock) {
+                        if (!caseIndex.contains(cachedCompactTestCase.testCode)) {
+                            caseIndex[cachedCompactTestCase.testCode] = cachedCompactTestCase;
+                        }
+                    }
                 }
             }
         }
