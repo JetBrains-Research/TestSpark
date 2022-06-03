@@ -1,27 +1,31 @@
-package nl.tudelft.ewi.se.ciselab.testgenie.evosuite
+package nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation
 
 import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.process.OSProcessHandler
-import com.intellij.execution.process.ProcessAdapter
-import com.intellij.execution.process.ProcessEvent
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
+import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.ui.content.Content
+import com.intellij.ui.content.ContentManager
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import java.io.File
+import java.io.FileWriter
 import java.nio.charset.Charset
 import javax.tools.JavaCompiler
 import javax.tools.ToolProvider
 
 class Validator(
     private val project: Project,
-    private val testJob: Workspace.TestJob
+    private val testJob: Workspace.TestJob,
+    private val edits: HashMap<String, String>
 ) {
     private val logger: Logger = Logger.getInstance(this.javaClass)
     private val settingsState = TestGenieSettingsService.getInstance().state
@@ -32,7 +36,6 @@ class Validator(
         val pathSep = File.pathSeparator
 
         val jobName = testJob.info.jobId
-        val report = testJob.report
 
         logger.info("Validating test suite $jobName")
 
@@ -61,6 +64,12 @@ class Validator(
 
         val testsPath = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}.java"
         val testsFile = File(testsPath)
+        val text = testsFile.readText()
+        val editedTests = TestCaseEditor(text, edits).edit()
+
+        logger.info("EDIT $editedTests")
+        val testsFileWriter = FileWriter(testsFile, false)
+        testsFileWriter.write(editedTests)
 
         val scaffoldPath = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}_scaffolding.java"
         val scaffoldFile = File(scaffoldPath)
@@ -122,6 +131,7 @@ class Validator(
      * @param indicator the progress indicator
      */
     private fun runTests(indicator: ProgressIndicator, classpath: String, testFqn: String) {
+        indicator.isIndeterminate = false
 
         settingsState ?: return
         // construct command
@@ -135,24 +145,29 @@ class Validator(
         val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
         logger.info("Running junit tests with: $cmdString")
 
-        indicator.isIndeterminate = false
+        val consoleBuilder = TextConsoleBuilderFactory.getInstance().createBuilder(project)
+        consoleBuilder.setViewer(true)
+        val console = consoleBuilder.console
+
         val junitProcess = GeneralCommandLine(cmd)
         junitProcess.charset = Charset.forName("UTF-8")
         val handler = OSProcessHandler(junitProcess)
 
+        console.attachToProcess(handler)
         // attach process listener for output
-        handler.addProcessListener(object : ProcessAdapter() {
-            override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                if (indicator.isCanceled) {
-                    logger.info("Cancelling tests")
-                    handler.destroyProcess()
-                }
-                val text = event.text
-                logger.info(text) // kept for debugging purposes
-            }
-        })
 
         handler.startNotify()
+
+        val manager: ToolWindowManager = ToolWindowManager.getInstance(project)
+
+        ApplicationManager.getApplication().invokeLater {
+            val window = manager.getToolWindow("TestGenie Validator")!!
+            val contentManager: ContentManager = window.contentManager
+            contentManager.removeAllContents(true)
+            val content: Content = contentManager.factory.createContent(console.component, "Running tests", false)
+            contentManager.addContent(content)
+            window.show {}
+        }
 
         // treat this as a join handle
         handler.waitFor(junitTimeout)
