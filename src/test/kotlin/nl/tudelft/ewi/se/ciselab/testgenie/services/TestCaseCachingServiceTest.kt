@@ -68,7 +68,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1a),
@@ -96,7 +96,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test2)
@@ -123,7 +123,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1)
@@ -149,7 +149,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1),
@@ -215,7 +215,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1),
@@ -391,7 +391,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1),
@@ -438,7 +438,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1),
