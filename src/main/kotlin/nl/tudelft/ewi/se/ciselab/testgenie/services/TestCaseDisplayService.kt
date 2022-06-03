@@ -194,22 +194,16 @@ class TestCaseDisplayService(private val project: Project) {
      * and apply the selected tests to the test class.
      */
     private fun applyTests() {
-        val selectedTestCases = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
-            .map { it.key }
+        // Filter the selected test cases
+        val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+        val selectedTestCases = selectedTestCasePanels.map { it.key }
 
-        // Remove the selected tests from cache
-        selectedTestCases.forEach {
-            removeFromCache(originalTestCases[it]!!)
-            testCasePanels.remove(it)
-        }
+        // Get the test case components (source code of the tests)
+        val testCaseComponents = selectedTestCases
+            .map { testCasePanels[it]!!.getComponent(1) as EditorTextField }
+            .map { it.document.text }
 
-        val testCaseComponents = selectedTestCases.map {
-            testCasePanels[it]!!.getComponent(1) as EditorTextField
-        }.map {
-            it.document.text
-        }
-
-        // show chooser dialog to select test file
+        // Show chooser dialog to select test file
         val chooser = TreeClassChooserFactory.getInstance(project)
             .createProjectScopeChooser(
                 "Insert Test Cases into Class"
@@ -230,10 +224,9 @@ class TestCaseDisplayService(private val project: Project) {
             // Could not set field
             // Ignoring the exception is acceptable as this part is not critical
         }
-
         chooser.showDialog()
 
-        // Get selected class or return if no class was selected
+        // Get the selected class or return if no class was selected
         val selectedClass = chooser.selected ?: return
 
         // Insert test case components into selected class
@@ -242,6 +235,9 @@ class TestCaseDisplayService(private val project: Project) {
         // The scheduled tests will be submitted in the background
         // (they will be checked every 5 minutes and also when the project is closed)
         scheduleTelemetry(selectedTestCases)
+
+        // Remove the selected test cases from the cache and the tool window UI
+        removeTestCases(selectedTestCasePanels)
     }
 
     private fun validateTests() {}
@@ -425,5 +421,22 @@ class TestCaseDisplayService(private val project: Project) {
                 TestGenieTelemetryService.ModifiedTestCase(original, modified)
             }.filter { it.modified != it.original }
         )
+    }
+
+    /**
+     * Removes the selected tests from the cache and tool window UI.
+     *
+     * @param selectedTestCasePanels the panels of the selected tests
+     */
+    private fun removeTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+        selectedTestCasePanels.forEach {
+            val testCaseName: String = it.key
+            val testCasePanel = it.value
+
+            removeFromCache(originalTestCases[testCaseName]!!)
+            testCasePanels.remove(testCaseName)
+            allTestCasePanel.remove(testCasePanel)
+            allTestCasePanel.updateUI()
+        }
     }
 }
