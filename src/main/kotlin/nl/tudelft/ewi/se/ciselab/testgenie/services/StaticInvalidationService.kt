@@ -24,7 +24,7 @@ class StaticInvalidationService {
         // if amount of elements in body different, method surely changed
         if (savedBody == null || body.size != savedBody.size) {
             methods.put(signature, body)
-            return false
+            return true
         }
         // compare each element (no whitespace)
         body.zip(savedBody).forEach {
