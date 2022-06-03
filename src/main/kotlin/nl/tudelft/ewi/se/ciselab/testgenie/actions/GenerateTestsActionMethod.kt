@@ -43,12 +43,12 @@ class GenerateTestsActionMethod : AnAction() {
         val cacheEndLine: Int = doc.getLineNumber(psiMethod.endOffset)
         logger.info("Selected method is on lines $cacheStartLine to $cacheEndLine")
 
-        val classSnapshot = createClassSnapshot(psiFile)
+        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
         evoSuiteRunner
             .forMethod(methodDescriptor)
             .withCacheLines(cacheStartLine, cacheEndLine)
-            .runTestGeneration() // Make snapshot of psiFile + all the logic behind static invalidation
+            .runTestGeneration(linesToInvalidateFromCache) // Make snapshot of psiFile + all the logic behind static invalidation
     }
 
     /**

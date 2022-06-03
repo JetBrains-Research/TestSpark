@@ -20,8 +20,8 @@ class GenerateTestsActionClass : AnAction() {
      */
     override fun actionPerformed(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-        val classSnapshot = createClassSnapshot(psiFile)
-        createEvoSuiteRunner(e)?.forClass()?.runTestGeneration()
+        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
+        createEvoSuiteRunner(e)?.forClass()?.runTestGeneration(linesToInvalidateFromCache)
     }
 
     /**
