@@ -98,7 +98,6 @@ class TestCaseDisplayService(private val project: Project) {
         allTestCasePanel.removeAll()
         testCasePanels.clear()
         testReport.testCaseList.values.forEach {
-            val testCase = it
             val testCode = it.testCode
             val testName = it.testName
             val testCasePanel = JPanel()
@@ -136,6 +135,13 @@ class TestCaseDisplayService(private val project: Project) {
                 // TODO: Update gutters when you remove tests from cache
                 val cache = project.service<TestCaseCachingService>()
                 cache.invalidateFromCache(fileUrl, testCode)
+
+                //
+                project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
+                    .testGenerationResult(testName, false, editor)
+
+                testCasePanels.remove(testName)
+
                 allTestCasePanel.remove(testCasePanel)
                 allTestCasePanel.updateUI()
             }
