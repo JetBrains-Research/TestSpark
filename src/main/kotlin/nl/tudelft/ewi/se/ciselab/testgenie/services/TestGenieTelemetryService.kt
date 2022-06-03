@@ -2,12 +2,16 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.google.gson.Gson
 import com.intellij.openapi.diagnostic.Logger
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 
 class TestGenieTelemetryService {
     private val modifiedTestCases = mutableListOf<ModifiedTestCase>()
     private val modifiedTestCasesLock = Object()
 
     private val log: Logger = Logger.getInstance(this.javaClass)
+    private val dateFormatter: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
 
     private val telemetryEnabled: Boolean
         get() = TestGenieSettingsService.getInstance().state?.telemetryEnabled ?: false
@@ -28,27 +32,61 @@ class TestGenieTelemetryService {
     }
 
     /**
-     * Sends the telemetry to the TestGenie server.
+     * Saves the telemetry to a file.
      */
-    fun uploadTelemetry() {
+    fun submitTelemetry() {
         if (!telemetryEnabled) {
             return
         }
 
-        val testCasesToUpload = mutableListOf<ModifiedTestCase>()
+        val testCasesToSubmit = mutableListOf<ModifiedTestCase>()
 
         synchronized(modifiedTestCasesLock) {
-            testCasesToUpload.addAll(modifiedTestCases)
+            testCasesToSubmit.addAll(modifiedTestCases)
             modifiedTestCases.clear()
         }
 
-        log.info("Uploading ${testCasesToUpload.size} test cases to server")
+        // If there are no tests to submit, do not create a file
+        if (testCasesToSubmit.size == 0) {
+            return
+        }
+
+        log.info("Submiting ${testCasesToSubmit.size} test cases to a file")
 
         val gson = Gson()
-        val json = gson.toJson(testCasesToUpload)
-        log.info("Uploading test cases: $json")
+        val json = gson.toJson(testCasesToSubmit)
+        log.info("Submiting test cases: $json")
 
-        // TODO: Actually upload test cases to server
+        writeTelemetryToFile(json)
+    }
+
+    /**
+     * Writes a json with the telemetry to a file.
+     *
+     * @param json a json object with the telemetry
+     */
+    private fun writeTelemetryToFile(json: String) {
+        // Get the separator depending on the underlying OS
+        val separator: String = java.io.File.separator
+        // Get the telemetry path
+        var dirName: String = TestGenieSettingsService.getInstance().state?.telemetryPath
+            ?: System.getProperty("user.dir")
+        if (!dirName.endsWith(separator)) dirName = dirName.plus(separator)
+
+        // Create the directory if it does not exist
+        val dir = File(dirName)
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+
+        // Get the file name based on the current timestamp
+        val currentTime: String = dateFormatter.format(Date())
+        val telemetryFileName: String = dirName.plus(currentTime).plus(".json")
+
+        log.info("Saving telemetry into ".plus(telemetryFileName))
+
+        // Write the json to the file
+        File(telemetryFileName).bufferedWriter().use { out -> out.write(json) }
     }
 
     class ModifiedTestCase(val original: String, val modified: String)
