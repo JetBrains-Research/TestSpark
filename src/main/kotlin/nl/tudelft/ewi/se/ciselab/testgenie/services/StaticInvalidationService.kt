@@ -14,64 +14,63 @@ import com.intellij.refactoring.suggested.startOffset
 
 class StaticInvalidationService {
 
-    // HashMap of Class filePath -> (HashMap of Method Signature -> Method Body)
-    private var savedMethods: HashMap<String, HashMap<String, ArrayList<PsiElement>>> = HashMap()
+    // HashMap of Class filePath -> (HashMap of Method Signature -> (Method Body, Covered Lines))
+    private var savedMethods: HashMap<String, HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>>> = HashMap()
 
     /**
      * Checks if method has been changed since last test generation (no, if first run)
      * @param signature the method in question
      * @param body list of the body-elements of the method, without whitespaces
      * @param methods hashmap of previously tested methods and their bodies
-     * @return whether a method has been modified
+     * @return the lines which should be deleted (based on previous lines for method)
      */
     private fun validateMethod(
         signature: String,
-        body: ArrayList<PsiElement>,
-        methods: HashMap<String, ArrayList<PsiElement>>
-    ): Boolean {
+        body: Pair<ArrayList<PsiElement>, Set<Int>>,
+        methods: HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>>
+    ): Set<Int> {
         val savedBody = methods[signature]
 
         // if body doesn't exist, method seen first time
         // if amount of elements in body different, method surely changed
-        if (savedBody == null || body.size != savedBody.size) {
+        if (savedBody == null || body.first.size != savedBody.first.size) {
             methods[signature] = body
-            return true
+            return setOf()
         }
         // compare each element (no whitespace)
-        body.zip(savedBody).forEach {
+        body.first.zip(savedBody.first).forEach {
             if (!it.first.text.equals(it.second.text)) {
                 methods[signature] = body
-                return true
+                return savedBody.second
             }
         }
-        return false
+        methods[signature] = Pair(savedBody.first, body.second)
+        return setOf()
     }
 
     /**
      * Checks for class what methods within it have been modified
      * @param filePath path where the class is located
-     * @param methods the methods of the class
+     * @param methods the methods of the class and the lines they cover
      * @param className the name of the class (used for preciser hashing)
-     * @return names of methods that have been changed
+     * @return the lines in the class that should be deleted (based on previous lines for method)
      */
     private fun validateClass(
         filePath: String,
-        methods: HashMap<String, ArrayList<PsiElement>>,
+        methods: HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>>,
         className: String
-    ): MutableSet<String> {
-        val methodsToDiscard = mutableSetOf<String>()
+    ): MutableSet<Int> {
+        val linesToDiscard = mutableSetOf<Int>()
 
         // get old methods
         val methodsSaved = savedMethods.getOrPut("$filePath/$className") { methods }
         // validate each method against old methods
         methods.keys.forEach {
-            val modified = validateMethod(it, methods[it]!!, methodsSaved)
-            if (modified) {
-                methodsToDiscard.add(it)
-            }
+            val changed = validateMethod(it, methods[it]!!, methodsSaved)
+            linesToDiscard.addAll(changed)
         }
 
-        return methodsToDiscard
+        return linesToDiscard
     }
 
     /**
@@ -103,20 +102,14 @@ class StaticInvalidationService {
         classToValidate.forEach { currentClass ->
             val className = currentClass.name!!
             val methods = currentClass.methods
-            val map: HashMap<String, ArrayList<PsiElement>> = HashMap()
+            val map: HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>> = HashMap()
             methods.forEach {
-                map[it.hierarchicalMethodSignature.toString()] = recursePsiMethodBody(it.body!!)
+                val startLine = doc.getLineNumber(it.identifyingElement!!.startOffset)
+                val endLine = doc.getLineNumber(it.body!!.rBrace!!.endOffset)
+                map[it.hierarchicalMethodSignature.toString()] = Pair(recursePsiMethodBody(it.body!!), startLine.rangeTo(endLine).toSet())
             }
             // validate each class
-            val methodsToDiscard = validateClass(filePath, map, className)
-            // Add lines of changed methods to list
-            methods.forEach {
-                if (methodsToDiscard.contains(it.hierarchicalMethodSignature.toString())) {
-                    val first = doc.getLineNumber(it.identifyingElement!!.startOffset)
-                    val last = doc.getLineNumber(it.body!!.rBrace!!.endOffset)
-                    linesToDiscard.addAll(first.rangeTo(last))
-                }
-            }
+            linesToDiscard.addAll(validateClass(filePath, map, className))
         }
 
         return linesToDiscard
