@@ -17,6 +17,13 @@ class StaticInvalidationService {
     // HashMap of Class filePath -> (HashMap of Method Signature -> Method Body)
     private var savedMethods: HashMap<String, HashMap<String, ArrayList<PsiElement>>> = HashMap()
 
+    /**
+     * Checks if method has been changed since last test generation (no, if first run)
+     * @param signature the method in question
+     * @param body list of the body-elements of the method, without whitespaces
+     * @param methods hashmap of previously tested methods and their bodies
+     * @return whether a method has been modified
+     */
     private fun validateMethod(
         signature: String,
         body: ArrayList<PsiElement>,
@@ -40,16 +47,23 @@ class StaticInvalidationService {
         return false
     }
 
+    /**
+     * Checks for class what methods within it have been modified
+     * @param filePath path where the class is located
+     * @param methods the methods of the class
+     * @param className the name of the class (used for preciser hashing)
+     * @return names of methods that have been changed
+     */
     private fun validateClass(
         filePath: String,
         methods: HashMap<String, ArrayList<PsiElement>>,
         className: String
     ): MutableSet<String> {
-        // return true
         val methodsToDiscard = mutableSetOf<String>()
 
-        // Get
+        // get old methods
         val methodsSaved = savedMethods.getOrPut("$filePath/$className") { methods }
+        // validate each method against old methods
         methods.keys.forEach {
             val modified = validateMethod(it, methods.get(it)!!, methodsSaved)
             if (modified) {
@@ -65,7 +79,7 @@ class StaticInvalidationService {
      *
      * @param fileUrl the url of a file
      * @param lines the lines to invalidate tests
-     * @param cache the c
+     * @param cache the cache
      */
     fun invalidateCacheLines(fileUrl: String, lines: Set<Int>, cache: TestCaseCachingService) {
         for (line in lines) {
@@ -73,12 +87,19 @@ class StaticInvalidationService {
         }
     }
 
+    /**
+     * Checks for a file what lines have been modified
+     * @param file the file in question
+     * @return list of lines that have been modified
+     */
     fun invalidate(file: PsiFile): Set<Int> {
+        // Initialize list
         val linesToDiscard: MutableSet<Int> = mutableSetOf()
+        // Get basic details
         val filePath = file.virtualFile.presentableUrl
-        val children = file.children
         val classToValidate = file.children.filterIsInstance<PsiClass>()
         val doc: Document = PsiDocumentManager.getInstance(file.project).getDocument(file) ?: return setOf()
+        // Go over all classes in file
         classToValidate.forEach {
             val className = it.name!!
             val methods = it.methods
@@ -86,7 +107,9 @@ class StaticInvalidationService {
             methods.forEach {
                 map.put(it.hierarchicalMethodSignature.toString(), recursePsiMethodBody(it.body!!))
             }
+            // validate each class
             val methodsToDiscard = validateClass(filePath, map, className)
+            // Add lines of changed methods to list
             methods.forEach {
                 if (methodsToDiscard.contains(it.hierarchicalMethodSignature.toString())) {
                     val first = doc.getLineNumber(it.identifyingElement!!.startOffset)
