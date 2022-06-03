@@ -89,8 +89,8 @@ class StaticInvalidationService {
             val methodsToDiscard = validateClass(filePath, map, className)
             methods.forEach {
                 if (methodsToDiscard.contains(it.hierarchicalMethodSignature.toString())) {
-                    val first = doc.getLineNumber(it.body!!.statements.first().startOffset)
-                    val last = doc.getLineNumber(it.body!!.statements.last().endOffset)
+                    val first = doc.getLineNumber(it.identifyingElement!!.startOffset)
+                    val last = doc.getLineNumber(it.body!!.rBrace!!.endOffset)
                     linesToDiscard.addAll(first.rangeTo(last))
                 }
             }
