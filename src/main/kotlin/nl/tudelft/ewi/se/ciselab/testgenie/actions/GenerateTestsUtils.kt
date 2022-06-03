@@ -54,7 +54,13 @@ fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
 
     log.info("Selected class is $classFQN")
 
+    val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
+    val cacheStartLine: Int = doc.getLineNumber(psiClass.startOffset)
+    val cacheEndLine: Int = doc.getLineNumber(psiClass.endOffset)
+    log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
+
     return Runner(project, projectPath, projectClassPath, classFQN, fileUrl, modificationStamp)
+        .withCacheLines(cacheStartLine, cacheEndLine)
 }
 
 /**

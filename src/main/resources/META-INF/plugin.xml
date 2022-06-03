@@ -15,6 +15,8 @@
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageToolWindowDisplayService"/>
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace"/>
+        <projectService
+            serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService"/>
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
@@ -44,6 +46,9 @@
         <listener
                 class="nl.tudelft.ewi.se.ciselab.testgenie.listener.TestGenerationResultListenerImpl"
                 topic="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.TestGenerationResultListener"/>
+        <listener
+                class="nl.tudelft.ewi.se.ciselab.testgenie.listener.TestGenieTelemetrySubmitListenerImpl"
+                topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </projectListeners>
 
     <actions>
