@@ -55,6 +55,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.mockito/mockito-all
     testImplementation("org.mockito:mockito-all:1.10.19")
+
+    // https://mvnrepository.com/artifact/net.jqwik/jqwik
+    testImplementation("net.jqwik:jqwik:1.6.5")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
