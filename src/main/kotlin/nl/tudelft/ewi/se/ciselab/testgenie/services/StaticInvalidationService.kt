@@ -100,9 +100,9 @@ class StaticInvalidationService {
         val classToValidate = file.children.filterIsInstance<PsiClass>()
         val doc: Document = PsiDocumentManager.getInstance(file.project).getDocument(file) ?: return setOf()
         // Go over all classes in file
-        classToValidate.forEach {
-            val className = it.name!!
-            val methods = it.methods
+        classToValidate.forEach { currentClass ->
+            val className = currentClass.name!!
+            val methods = currentClass.methods
             val map: HashMap<String, ArrayList<PsiElement>> = HashMap()
             methods.forEach {
                 map.put(it.hierarchicalMethodSignature.toString(), recursePsiMethodBody(it.body!!))
