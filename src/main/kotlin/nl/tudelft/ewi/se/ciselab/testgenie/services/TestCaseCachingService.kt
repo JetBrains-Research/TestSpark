@@ -223,6 +223,26 @@ class TestCaseCachingService {
             )
         }
 
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as CachedCompactTestCase
+
+            if (testName != other.testName) return false
+            if (testCode != other.testCode) return false
+            if (coveredLines != other.coveredLines) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = testName.hashCode()
+            result = 31 * result + testCode.hashCode()
+            result = 31 * result + coveredLines.hashCode()
+            return result
+        }
+
         companion object {
 
             /**
