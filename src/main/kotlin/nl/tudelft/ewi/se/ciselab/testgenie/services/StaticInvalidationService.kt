@@ -28,7 +28,7 @@ class StaticInvalidationService {
         }
         // compare each element (no whitespace)
         body.zip(savedBody).forEach {
-            if (!it.first.equals(it.second)) {
+            if (!it.first.text.equals(it.second.text)) {
                 methods.put(signature, body)
                 return true
             }
