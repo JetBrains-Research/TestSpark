@@ -128,6 +128,8 @@ class TestCaseDisplayService(private val project: Project) {
                 // TODO: actually remove from the cache
                 println("Test $testName will be removed from the cache")
                 removeFromCacheButton.isEnabled = false
+                allTestCasePanel.remove(testCasePanel)
+                allTestCasePanel.updateUI()
             }
 
             // Add "Reset" button
