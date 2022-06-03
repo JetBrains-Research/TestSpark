@@ -11,7 +11,6 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import nl.tudelft.ewi.se.ciselab.testgenie.coverage.CoverageRenderer
 import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -36,7 +35,7 @@ class CoverageVisualisationService(private val project: Project) {
         fillToolWindowContents(testReport)
         createToolWindowTab()
 
-        updateCoverage(testReport.allCoveredLines, testReport.testCaseList.values.toList(), editor)
+        updateCoverage(testReport.allCoveredLines, testReport, editor)
     }
 
     /**
@@ -44,10 +43,10 @@ class CoverageVisualisationService(private val project: Project) {
      * Shows coverage on the gutter next to the covered lines.
      *
      * @param linesToCover total set of lines  to cover
-     * @param testCaseList list of test cases. This is used for gutter information
+     * @param testReport report used for gutter information
      * @param editor editor instance where coverage should be updated
      */
-    fun updateCoverage(linesToCover: Set<Int>, testCaseList: List<CompactTestCase>, editor: Editor) {
+    fun updateCoverage(linesToCover: Set<Int>, testReport: CompactReport, editor: Editor) {
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
 
@@ -58,16 +57,40 @@ class CoverageVisualisationService(private val project: Project) {
 
             editor.markupModel.removeAllHighlighters()
 
+            // map of mutant operations -> List of names of tests which cover the mutant
+            val mapMutantsToTests = HashMap<String, MutableList<String>>()
+
+            testReport.testCaseList.values.forEach { compactTestCase ->
+                val mutantsCovered = compactTestCase.coveredMutants
+                val testName = compactTestCase.testName
+                mutantsCovered.forEach {
+                    val testCasesCoveringMutant = mapMutantsToTests.getOrPut(it.replacement) { ArrayList() }
+                    testCasesCoveringMutant.add(testName)
+                }
+            }
+
+            val mutationCovered = testReport.allCoveredMutation.groupBy { x -> x.lineNo }
+            val mutationNotCovered = testReport.allUncoveredMutation.groupBy { x -> x.lineNo }
+
             for (i in linesToCover) {
                 val line = i - 1
                 val textAttributesKey = TextAttributesKey.createTextAttributesKey("custom")
                 textAttributesKey.defaultAttributes.backgroundColor = colorForLines
-                val hl = editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.ADDITIONAL_SYNTAX)
+                val hl =
+                    editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.ADDITIONAL_SYNTAX)
+
+                val testsCoveringLine =
+                    testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }
+                val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
+                val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 
                 hl.lineMarkerRenderer = CoverageRenderer(
                     color,
                     line,
-                    testCaseList.filter { x -> i in x.coveredLines }.map { x -> x.testName },
+                    testsCoveringLine,
+                    mutationCoveredLine,
+                    mutationNotCoveredLine,
+                    mapMutantsToTests,
                     project
                 )
             }
