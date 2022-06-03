@@ -132,16 +132,16 @@ class TestCaseDisplayService(private val project: Project) {
             // Add "Remove From Cache"  button
             val removeFromCacheButton = JButton("Remove From Cache")
             removeFromCacheButton.addActionListener {
-                // TODO: Update gutters when you remove tests from cache
-                val cache = project.service<TestCaseCachingService>()
-                cache.invalidateFromCache(fileUrl, testCode)
+                removeFromCache(testCode)
 
-                //
+                // Remove the highlighting of the test
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                     .testGenerationResult(testName, false, editor)
 
+                // Remove the test from the panels
                 testCasePanels.remove(testName)
 
+                // Update the UI
                 allTestCasePanel.remove(testCasePanel)
                 allTestCasePanel.updateUI()
             }
@@ -236,6 +236,9 @@ class TestCaseDisplayService(private val project: Project) {
     private fun applyTests() {
         val selectedTestCases = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
             .map { it.key }
+
+        // Remove the selected tests from cache
+        selectedTestCases.forEach { removeFromCache(originalTestCases[it]!!) }
 
         val testCaseComponents = selectedTestCases.map {
             testCasePanels[it]!!.getComponent(1) as EditorTextField
@@ -344,5 +347,15 @@ class TestCaseDisplayService(private val project: Project) {
         // Focus on generated tests tab and open toolWindow if not opened already
         contentManager.setSelectedContent(content!!)
         toolWindowManager.show()
+    }
+
+    /**
+     * A helper method to remove a test case from cache.
+     *
+     * @param testCode the source code of a test
+     */
+    private fun removeFromCache(testCode: String) {
+        val cache = project.service<TestCaseCachingService>()
+        cache.invalidateFromCache(fileUrl, testCode)
     }
 }
