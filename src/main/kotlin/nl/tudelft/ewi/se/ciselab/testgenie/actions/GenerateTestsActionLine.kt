@@ -32,12 +32,12 @@ class GenerateTestsActionLine : AnAction() {
 
         logger.info("Selected line is $selectedLine")
 
-        val classSnapshot = createClassSnapshot(psiFile)
+        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
         evoSuiteRunner
             .forLine(selectedLine)
             .withCacheLines(selectedLine - 1, selectedLine - 1)
-            .runTestGeneration()
+            .runTestGeneration(linesToInvalidateFromCache)
     }
 
     /**

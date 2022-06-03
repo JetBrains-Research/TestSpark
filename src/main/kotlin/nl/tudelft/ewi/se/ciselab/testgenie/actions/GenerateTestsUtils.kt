@@ -221,9 +221,14 @@ private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFi
     return (selectedLine in firstStatementLine..lastStatementLine)
 }
 
-fun createClassSnapshot(psiFile: PsiFile) {
+/**
+ * Calculates which lines to invalidate from cache.
+ *
+ * @param psiFile psiFile of the document
+ */
+fun calculateLinesToInvalidate(psiFile: PsiFile): Set<Int> {
     val staticInvalidator = psiFile.project.service<StaticInvalidationService>()
-    val linesToInvalidate = staticInvalidator.invalidate(psiFile)
+    return staticInvalidator.invalidate(psiFile)
 }
 
 /**
