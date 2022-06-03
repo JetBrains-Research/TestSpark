@@ -129,8 +129,8 @@ class TestCaseDisplayService(private val project: Project) {
             val topButtons = JPanel()
             topButtons.layout = FlowLayout(FlowLayout.TRAILING)
 
-            // Add "Remove From Cache"  button
-            val removeFromCacheButton = JButton("Remove From Cache")
+            // Add "Remove"  button to remove the test from cache
+            val removeFromCacheButton = JButton("Remove")
             removeFromCacheButton.addActionListener {
                 removeFromCache(testCode)
 
