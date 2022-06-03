@@ -45,6 +45,38 @@ class TestCaseCachingServiceTest {
     }
 
     @Test
+    fun addingNewTestWithSameCodeInvalidatesPreviousOne() {
+        val report = CompactReport(TestGenerationResultImpl())
+        val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = CompactTestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        report.testCaseList = hashMapOf(
+            createPair(test1),
+            createPair(test2)
+        )
+        val report1a = CompactReport(TestGenerationResultImpl())
+        val test1a = CompactTestCase("a2", "aa", setOf(1, 2, 3), setOf(), setOf())
+        report1a.testCaseList = hashMapOf(
+            createPair(test1a)
+        )
+
+        val file = "file"
+
+        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report1a)
+
+        val result = testCaseCachingService.retrieveFromCache(file, 2, 2)
+
+        assertThat(result)
+            .extracting<Triple<String, String, Set<Int>>> {
+                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+            }
+            .containsExactlyInAnyOrder(
+                createTriple(test1a),
+                createTriple(test2)
+            )
+    }
+
+    @Test
     fun invalidateSingleFileSingleLine() {
         val report = CompactReport(TestGenerationResultImpl())
         val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
