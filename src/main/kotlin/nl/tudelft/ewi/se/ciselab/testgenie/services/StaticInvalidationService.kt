@@ -17,7 +17,11 @@ class StaticInvalidationService {
     // HashMap of Class filePath -> (HashMap of Method Signature -> Method Body)
     private var savedMethods: HashMap<String, HashMap<String, ArrayList<PsiElement>>> = HashMap()
 
-    fun validateMethod(signature: String, body: ArrayList<PsiElement>, methods: HashMap<String, ArrayList<PsiElement>>): Boolean {
+    private fun validateMethod(
+        signature: String,
+        body: ArrayList<PsiElement>,
+        methods: HashMap<String, ArrayList<PsiElement>>
+    ): Boolean {
         val savedBody = methods.get(signature)
 
         // if body doesn't exist, method seen first time
@@ -36,7 +40,11 @@ class StaticInvalidationService {
         return false
     }
 
-    fun validateClass(filePath: String, methods: HashMap<String, ArrayList<PsiElement>>, className: String): MutableSet<String> {
+    private fun validateClass(
+        filePath: String,
+        methods: HashMap<String, ArrayList<PsiElement>>,
+        className: String
+    ): MutableSet<String> {
         // return true
         val methodsToDiscard = mutableSetOf<String>()
 
@@ -97,7 +105,7 @@ class StaticInvalidationService {
      * @param psiMethodBody the psiBody of the method
      * @return the list of PsiElements
      */
-    fun recursePsiMethodBody(psiMethodBody: PsiCodeBlock): ArrayList<PsiElement> {
+    private fun recursePsiMethodBody(psiMethodBody: PsiCodeBlock): ArrayList<PsiElement> {
         val psiList: ArrayList<PsiElement> = arrayListOf()
         for (psiStatement in psiMethodBody.statements) {
             if (psiStatement.children.isEmpty()) {
@@ -117,7 +125,7 @@ class StaticInvalidationService {
      * @param psiElement the psi of the element
      * @param psiList list to append psi elements
      */
-    fun recurseTree(psiElement: PsiElement, psiList: ArrayList<PsiElement>) {
+    private fun recurseTree(psiElement: PsiElement, psiList: ArrayList<PsiElement>) {
         if (psiElement is PsiWhiteSpace || psiElement is PsiReferenceParameterList || psiElement is PsiModifierList) {
             return
         }
