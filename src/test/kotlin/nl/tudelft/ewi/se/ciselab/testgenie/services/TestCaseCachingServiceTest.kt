@@ -72,6 +72,60 @@ class TestCaseCachingServiceTest {
     }
 
     @Test
+    fun invalidateSingleTest() {
+        val report = CompactReport(TestGenerationResultImpl())
+        val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = CompactTestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        report.testCaseList = hashMapOf(
+            createPair(test1),
+            createPair(test2)
+        )
+
+        val file = "file"
+
+        testCaseCachingService.putIntoCache(file, report)
+
+        testCaseCachingService.invalidateFromCache(file, test2.testCode)
+
+        val result = testCaseCachingService.retrieveFromCache(file, 2, 2)
+
+        assertThat(result)
+            .extracting<Triple<String, String, Set<Int>>> {
+                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+            }
+            .containsExactlyInAnyOrder(
+                createTriple(test1)
+            )
+    }
+
+    @Test
+    fun invalidateNonexistentSingleTest() {
+        val report = CompactReport(TestGenerationResultImpl())
+        val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = CompactTestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        report.testCaseList = hashMapOf(
+            createPair(test1),
+            createPair(test2)
+        )
+
+        val file = "file"
+
+        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.invalidateFromCache(file, "invaid")
+
+        val result = testCaseCachingService.retrieveFromCache(file, 2, 2)
+
+        assertThat(result)
+            .extracting<Triple<String, String, Set<Int>>> {
+                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+            }
+            .containsExactlyInAnyOrder(
+                createTriple(test1),
+                createTriple(test2)
+            )
+    }
+
+    @Test
     fun singleFileMultipleLines() {
         val report = CompactReport(TestGenerationResultImpl())
         val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
