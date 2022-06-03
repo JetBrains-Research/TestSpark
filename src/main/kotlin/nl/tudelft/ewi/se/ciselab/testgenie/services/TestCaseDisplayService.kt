@@ -133,10 +133,9 @@ class TestCaseDisplayService(private val project: Project) {
             // Add "Remove From Cache"  button
             val removeFromCacheButton = JButton("Remove From Cache")
             removeFromCacheButton.addActionListener {
-                // TODO: actually remove from the cache
-                println("Test $testName will be removed from the cache")
-
-                // TODO: remove from the cache
+                // TODO: Update gutters when you remove tests from cache
+                val cache = project.service<TestCaseCachingService>()
+                cache.invalidateFromCache(fileUrl, testCode)
                 allTestCasePanel.remove(testCasePanel)
                 allTestCasePanel.updateUI()
             }
