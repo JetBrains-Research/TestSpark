@@ -277,10 +277,17 @@ class TestCaseDisplayService(private val project: Project) {
         val selectedTestCases =
             testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
 
-        return HashMap(
-            selectedTestCases.associateWith {
-                (testCasePanels[it]!!.getComponent(1) as EditorTextField).document.text
+        val lastEditsOfSelectedTestCases = selectedTestCases.associateWith {
+            (testCasePanels[it]!!.getComponent(1) as EditorTextField).document.text
+        }
+
+        val lastEditsOfEditedAndSelectedTestCases =
+            lastEditsOfSelectedTestCases.filter {
+                it.value != originalTestCases[it.key]
             }
+
+        return HashMap(
+            lastEditsOfEditedAndSelectedTestCases
         )
     }
 
