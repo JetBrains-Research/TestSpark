@@ -5,8 +5,12 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.editor.Document
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
+import com.intellij.refactoring.suggested.endOffset
+import com.intellij.refactoring.suggested.startOffset
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
 
@@ -34,7 +38,15 @@ class GenerateTestsActionMethod : AnAction() {
 
         logger.info("Selected method is $methodDescriptor")
 
-        evoSuiteRunner.forMethod(methodDescriptor).runTestGeneration()
+        val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return
+        val cacheStartLine: Int = doc.getLineNumber(psiMethod.startOffset)
+        val cacheEndLine: Int = doc.getLineNumber(psiMethod.endOffset)
+        logger.info("Selected method is on lines $cacheStartLine to $cacheEndLine")
+
+        evoSuiteRunner
+            .forMethod(methodDescriptor)
+            .withCacheLines(cacheStartLine, cacheEndLine)
+            .runTestGeneration()
     }
 
     /**
