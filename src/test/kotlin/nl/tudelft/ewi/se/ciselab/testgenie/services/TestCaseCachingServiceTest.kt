@@ -166,6 +166,29 @@ class TestCaseCachingServiceTest {
     }
 
     @Test
+    fun testCoversMultipleLinesInRange() {
+        val report = CompactReport(TestGenerationResultImpl())
+        val test1 = CompactTestCase("a", "aa", setOf(4, 5), setOf(), setOf())
+        report.testCaseList = hashMapOf(
+            createPair(test1)
+        )
+
+        val file = "file"
+
+        testCaseCachingService.putIntoCache(file, report)
+
+        val result = testCaseCachingService.retrieveFromCache(file, 1, 10)
+
+        assertThat(result)
+            .extracting<Triple<String, String, Set<Int>>> {
+                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+            }
+            .containsExactlyInAnyOrder(
+                createTriple(test1)
+            )
+    }
+
+    @Test
     fun nonexistentFile() {
         val report = CompactReport(TestGenerationResultImpl())
         val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
