@@ -223,11 +223,13 @@ class TestCaseCachingServiceTest {
             .isEmpty()
     }
 
-    private fun createPair(testCase: CompactTestCase): Pair<String, CompactTestCase> {
-        return Pair(testCase.testName, testCase)
-    }
+    companion object {
+        fun createPair(testCase: CompactTestCase): Pair<String, CompactTestCase> {
+            return Pair(testCase.testName, testCase)
+        }
 
-    private fun createTriple(testCase: CompactTestCase): Triple<String, String, Set<Int>> {
-        return Triple(testCase.testName, testCase.testCode, testCase.coveredLines)
+        fun createTriple(testCase: CompactTestCase): Triple<String, String, Set<Int>> {
+            return Triple(testCase.testName, testCase.testCode, testCase.coveredLines)
+        }
     }
 }
