@@ -59,10 +59,6 @@ class TestCaseDisplayService(private val project: Project) {
     private var content: Content? = null
 
     var fileUrl: String = ""
-        get() = field
-        set(newFileUrl) {
-            field = newFileUrl
-        }
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -157,7 +153,7 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Highlight the mini-editor in the toolwindow whose name corresponds with the name of the test provided
+     * Highlight the mini-editor in the tool window whose name corresponds with the name of the test provided
      *
      * @param name name of the test whose editor should be highlighted
      */
