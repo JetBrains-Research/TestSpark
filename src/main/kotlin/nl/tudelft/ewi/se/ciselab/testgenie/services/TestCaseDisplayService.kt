@@ -4,6 +4,7 @@ import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
@@ -52,6 +53,12 @@ class TestCaseDisplayService(private val project: Project) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
 
+    var fileUrl: String = ""
+        get() = field
+        set(newFileUrl) {
+            field = newFileUrl
+        }
+
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
@@ -91,6 +98,7 @@ class TestCaseDisplayService(private val project: Project) {
         allTestCasePanel.removeAll()
         testCasePanels.clear()
         testReport.testCaseList.values.forEach {
+            val testCase = it
             val testCode = it.testCode
             val testName = it.testName
             val testCasePanel = JPanel()
@@ -127,7 +135,8 @@ class TestCaseDisplayService(private val project: Project) {
             removeFromCacheButton.addActionListener {
                 // TODO: actually remove from the cache
                 println("Test $testName will be removed from the cache")
-                removeFromCacheButton.isEnabled = false
+
+                // TODO: remove from the cache
                 allTestCasePanel.remove(testCasePanel)
                 allTestCasePanel.updateUI()
             }
