@@ -96,7 +96,7 @@ class TestCaseCachingService {
 
                     synchronized(caseIndexLock) {
                         if (!caseIndex.contains(cachedCompactTestCase.testCode)) {
-                            caseIndex[cachedCompactTestCase.testCode] = cachedCompactTestCase;
+                            caseIndex[cachedCompactTestCase.testCode] = cachedCompactTestCase
                         }
                     }
                 }
