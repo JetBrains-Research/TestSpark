@@ -36,7 +36,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1),
@@ -68,7 +68,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test3),
@@ -110,7 +110,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test3),
@@ -157,7 +157,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test3),
@@ -181,7 +181,7 @@ class TestCaseCachingServiceTest {
 
         assertThat(result)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1)
@@ -252,7 +252,7 @@ class TestCaseCachingServiceTest {
         }
 
         fun createTriple(testCase: CompactTestCase): Triple<String, String, Set<Int>> {
-            return Triple(testCase.testName, testCase.testCode, testCase.coveredLines)
+            return Triple(testCase.testName.split(' ')[0], testCase.testCode, testCase.coveredLines)
         }
     }
 }

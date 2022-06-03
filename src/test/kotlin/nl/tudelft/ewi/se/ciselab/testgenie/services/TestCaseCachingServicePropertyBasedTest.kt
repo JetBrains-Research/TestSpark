@@ -48,7 +48,7 @@ class TestCaseCachingServicePropertyBasedTest {
 
         assertThat(actual)
             .extracting<Triple<String, String, Set<Int>>> {
-                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+                createTriple(it)
             }
             .containsExactlyInAnyOrder(
                 *expected.map2Array { createTriple(it) }
