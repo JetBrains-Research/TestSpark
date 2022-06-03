@@ -37,6 +37,29 @@ class TestCaseCachingService {
     }
 
     /**
+     * Invalidate test cases from the cache.
+     *
+     * @param fileUrl the URL of the file that the test cases belong to
+     * @param lineFrom the start of the range
+     * @param lineTo the end of the ranges
+     */
+    fun invalidateFromCache(fileUrl: String, lineFrom: Int, lineTo: Int) {
+        val fileTestCaseCache = getFileTestCaseCache(fileUrl)
+        fileTestCaseCache.invalidateFromCache(lineFrom, lineTo)
+    }
+
+    /**
+     * Invalidate test case from the cache.
+     *
+     * @param fileUrl the URL of the file that the test cases belong to
+     * @param testCode the code of the test case
+     */
+    fun invalidateFromCache(fileUrl: String, testCode: String) {
+        val fileTestCaseCache = getFileTestCaseCache(fileUrl)
+        fileTestCaseCache.invalidateFromCache(testCode)
+    }
+
+    /**
      * Get the file test case cache for the specified file.
      *
      * @param fileUrl the URL of the file
@@ -55,6 +78,10 @@ class TestCaseCachingService {
         private val lines = mutableMapOf<Int, LineTestCaseCache>()
         private val linesLock = Object()
 
+        // Used for retrieving references of unique test cases
+        private val caseIndex = mutableMapOf<String, CachedCompactTestCase>()
+        private val caseIndexLock = Object()
+
         /**
          * Insert test cases into the file cache.
          *
@@ -62,10 +89,18 @@ class TestCaseCachingService {
          */
         fun putIntoCache(report: CompactReport) {
             report.testCaseList.values.forEach { testCase ->
+                val cachedCompactTestCase = CachedCompactTestCase.fromCompactTestCase(testCase, this)
+
+                synchronized(caseIndexLock) {
+                    // invalidate existing test with the same code if one exists
+                    caseIndex[cachedCompactTestCase.testCode]?.invalid = true
+
+                    // save new test in index
+                    caseIndex[cachedCompactTestCase.testCode] = cachedCompactTestCase
+                }
+
                 testCase.coveredLines.forEach { lineNumber ->
                     val line: LineTestCaseCache = getLineTestCaseCache(lineNumber)
-
-                    val cachedCompactTestCase = CachedCompactTestCase.fromCompactTestCase(testCase, this)
                     line.putIntoCache(cachedCompactTestCase)
                 }
             }
@@ -86,6 +121,32 @@ class TestCaseCachingService {
             }
 
             return result.map { it.toCompactTestCase() }
+        }
+
+        /**
+         * Invalidate test cases from cache.
+         *
+         * @param lineFrom the start of the range
+         * @param lineTo the end of the range
+         */
+        fun invalidateFromCache(lineFrom: Int, lineTo: Int) {
+            for (lineNumber in lineFrom..lineTo) {
+                val tests: LineTestCaseCache = getLineTestCaseCache(lineNumber)
+                for (test in tests.getTestCases()) {
+                    test.invalid = true
+                }
+            }
+        }
+
+        /**
+         * Invalidate test cases from cache.
+         *
+         * @param testCode the code of the test case
+         */
+        fun invalidateFromCache(testCode: String) {
+            synchronized(caseIndexLock) {
+                caseIndex[testCode]?.invalid = true
+            }
         }
 
         /**
@@ -131,7 +192,7 @@ class TestCaseCachingService {
          */
         fun getTestCases(): List<CachedCompactTestCase> {
             synchronized(testCasesLock) {
-                return testCases.toList()
+                return testCases.filter { x -> !x.invalid }.toList()
             }
         }
     }
@@ -144,6 +205,7 @@ class TestCaseCachingService {
         val testCode: String,
         private val coveredLines: Set<LineTestCaseCache>
     ) {
+        var invalid: Boolean = false
 
         /**
          * Convert this cached test case back to a compact test case.
@@ -196,7 +258,7 @@ class TestCaseCachingService {
             ): CachedCompactTestCase {
                 return CachedCompactTestCase(
                     testCase.testName,
-                    testCase.testCode,
+                    testCase.testCode.replace("\r\n", "\n"),
                     testCase.coveredLines.map {
                         fileTestCaseCache.getLineTestCaseCache(it)
                     }.toSet()
