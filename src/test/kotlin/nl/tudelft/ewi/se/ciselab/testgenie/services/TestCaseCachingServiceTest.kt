@@ -45,6 +45,38 @@ class TestCaseCachingServiceTest {
     }
 
     @Test
+    fun addingNewTestWithSameCodeInvalidatesPreviousOne() {
+        val report = CompactReport(TestGenerationResultImpl())
+        val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = CompactTestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        report.testCaseList = hashMapOf(
+            createPair(test1),
+            createPair(test2)
+        )
+        val report1a = CompactReport(TestGenerationResultImpl())
+        val test1a = CompactTestCase("a2", "aa", setOf(1, 2, 3), setOf(), setOf())
+        report1a.testCaseList = hashMapOf(
+            createPair(test1a)
+        )
+
+        val file = "file"
+
+        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report1a)
+
+        val result = testCaseCachingService.retrieveFromCache(file, 2, 2)
+
+        assertThat(result)
+            .extracting<Triple<String, String, Set<Int>>> {
+                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+            }
+            .containsExactlyInAnyOrder(
+                createTriple(test1a),
+                createTriple(test2)
+            )
+    }
+
+    @Test
     fun invalidateSingleFileSingleLine() {
         val report = CompactReport(TestGenerationResultImpl())
         val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
@@ -67,6 +99,60 @@ class TestCaseCachingServiceTest {
                 Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
             }
             .containsExactlyInAnyOrder(
+                createTriple(test2)
+            )
+    }
+
+    @Test
+    fun invalidateSingleTest() {
+        val report = CompactReport(TestGenerationResultImpl())
+        val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = CompactTestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        report.testCaseList = hashMapOf(
+            createPair(test1),
+            createPair(test2)
+        )
+
+        val file = "file"
+
+        testCaseCachingService.putIntoCache(file, report)
+
+        testCaseCachingService.invalidateFromCache(file, test2.testCode)
+
+        val result = testCaseCachingService.retrieveFromCache(file, 2, 2)
+
+        assertThat(result)
+            .extracting<Triple<String, String, Set<Int>>> {
+                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+            }
+            .containsExactlyInAnyOrder(
+                createTriple(test1)
+            )
+    }
+
+    @Test
+    fun invalidateNonexistentSingleTest() {
+        val report = CompactReport(TestGenerationResultImpl())
+        val test1 = CompactTestCase("a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = CompactTestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        report.testCaseList = hashMapOf(
+            createPair(test1),
+            createPair(test2)
+        )
+
+        val file = "file"
+
+        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.invalidateFromCache(file, "invaid")
+
+        val result = testCaseCachingService.retrieveFromCache(file, 2, 2)
+
+        assertThat(result)
+            .extracting<Triple<String, String, Set<Int>>> {
+                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+            }
+            .containsExactlyInAnyOrder(
+                createTriple(test1),
                 createTriple(test2)
             )
     }
@@ -223,6 +309,29 @@ class TestCaseCachingServiceTest {
             .containsExactlyInAnyOrder(
                 createTriple(test3),
                 createTriple(test4)
+            )
+    }
+
+    @Test
+    fun testCoversMultipleLinesInRange() {
+        val report = CompactReport(TestGenerationResultImpl())
+        val test1 = CompactTestCase("a", "aa", setOf(4, 5), setOf(), setOf())
+        report.testCaseList = hashMapOf(
+            createPair(test1)
+        )
+
+        val file = "file"
+
+        testCaseCachingService.putIntoCache(file, report)
+
+        val result = testCaseCachingService.retrieveFromCache(file, 1, 10)
+
+        assertThat(result)
+            .extracting<Triple<String, String, Set<Int>>> {
+                Triple(it.testName.split(' ')[0], it.testCode, it.coveredLines)
+            }
+            .containsExactlyInAnyOrder(
+                createTriple(test1)
             )
     }
 
