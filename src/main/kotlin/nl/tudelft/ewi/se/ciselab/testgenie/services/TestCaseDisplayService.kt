@@ -129,7 +129,7 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.add(textFieldEditor, BorderLayout.CENTER)
 
             // Create "Remove"  button to remove the test from cache
-            val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel)
+            val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel, testCodeFormatted)
 
             // Create "Reset" button to reset the changes in the source code of the test
             val resetButton = createResetButton(document, textFieldEditor, testCodeFormatted)
@@ -301,10 +301,10 @@ class TestCaseDisplayService(private val project: Project) {
      * @param testCasePanel the test case panel
      * @return the created button
      */
-    private fun createRemoveButton(test: CompactTestCase, editor: Editor, testCasePanel: JPanel): JButton {
+    private fun createRemoveButton(test: CompactTestCase, editor: Editor, testCasePanel: JPanel, testCodeFormatted: String): JButton {
         val removeFromCacheButton = JButton("Remove")
         removeFromCacheButton.addActionListener {
-            removeFromCache(test.testCode)
+            removeFromCache(testCodeFormatted)
 
             // Remove the highlighting of the test
             project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
