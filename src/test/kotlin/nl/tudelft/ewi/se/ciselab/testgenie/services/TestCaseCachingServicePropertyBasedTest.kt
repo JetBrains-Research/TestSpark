@@ -79,6 +79,7 @@ class TestCaseCachingServicePropertyBasedTest {
             }
             .list()
             .uniqueElements { it.testName }
+            .uniqueElements { it.testCode }
 
         return compactTestCaseArbitrary
     }
