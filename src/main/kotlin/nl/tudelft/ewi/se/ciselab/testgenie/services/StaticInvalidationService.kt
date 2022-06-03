@@ -36,12 +36,12 @@ class StaticInvalidationService {
         return false
     }
 
-    fun validateClass(filePath: String, methods: HashMap<String, ArrayList<PsiElement>>): MutableSet<String> {
+    fun validateClass(filePath: String, methods: HashMap<String, ArrayList<PsiElement>>, className: String): MutableSet<String> {
         // return true
         val methodsToDiscard = mutableSetOf<String>()
 
         // Get
-        val methodsSaved = savedMethods.getOrPut(filePath) { methods }
+        val methodsSaved = savedMethods.getOrPut("$filePath/$className") { methods }
         methods.keys.forEach {
             val modified = validateMethod(it, methods.get(it)!!, methodsSaved)
             if (modified) {
@@ -59,12 +59,13 @@ class StaticInvalidationService {
         val classToValidate = file.children.filterIsInstance<PsiClass>()
         val doc: Document = PsiDocumentManager.getInstance(file.project).getDocument(file) ?: return setOf()
         classToValidate.forEach {
+            val className = it.name!!
             val methods = it.methods
             val map: HashMap<String, ArrayList<PsiElement>> = HashMap()
             methods.forEach {
                 map.put(it.hierarchicalMethodSignature.toString(), recursePsiMethodBody(it.body!!))
             }
-            val methodsToDiscard = validateClass(filePath, map)
+            val methodsToDiscard = validateClass(filePath, map, className)
             methods.forEach {
                 if (methodsToDiscard.contains(it.hierarchicalMethodSignature.toString())) {
                     val first = doc.getLineNumber(it.body!!.statements.first().startOffset)
