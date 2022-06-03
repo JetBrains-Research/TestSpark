@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
@@ -22,6 +23,7 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBUI
 import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -98,17 +100,15 @@ class TestCaseDisplayService(private val project: Project) {
         allTestCasePanel.removeAll()
         testCasePanels.clear()
         testReport.testCaseList.values.forEach {
-            val testCode = it.testCode
-            val testName = it.testName
+            val testCase = it
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
 
-            // fix Windows line separators
-            val testCodeFormatted = testCode.replace("\r\n", "\n")
+            // Fix Windows line separators
+            val testCodeFormatted = testCase.testCode.replace("\r\n", "\n")
+            originalTestCases[testCase.testName] = testCodeFormatted
 
-            originalTestCases[testName] = testCodeFormatted
-
-            // Add checkbox
+            // Add a checkbox to select the test
             val checkbox = JCheckBox()
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
@@ -116,90 +116,27 @@ class TestCaseDisplayService(private val project: Project) {
             // Toggle coverage when checkbox is clicked
             checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-                    .testGenerationResult(testName, checkbox.isSelected, editor)
+                    .testGenerationResult(testCase.testName, checkbox.isSelected, editor)
             }
 
-            // Add editor
+            // Add an editor to modify the test source code
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val textFieldEditor = EditorTextField(document, project, JavaFileType.INSTANCE)
             textFieldEditor.setOneLineMode(false)
             testCasePanel.add(textFieldEditor, BorderLayout.CENTER)
 
-            // Add top buttons
+            // Create "Remove"  button to remove the test from cache
+            val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel)
+
+            // Create "Reset" button to reset the changes in the source code of the test
+            val resetButton = createResetButton(document, textFieldEditor, testCodeFormatted)
+
+            // Enable reset button when editor is changed
+            addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox)
+
+            // Add "Remove" and "Reset" buttons to the test case panel
             val topButtons = JPanel()
             topButtons.layout = FlowLayout(FlowLayout.TRAILING)
-
-            // Add "Remove"  button to remove the test from cache
-            val removeFromCacheButton = JButton("Remove")
-            removeFromCacheButton.addActionListener {
-                removeFromCache(testCode)
-
-                // Remove the highlighting of the test
-                project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-                    .testGenerationResult(testName, false, editor)
-
-                // Remove the test from the panels
-                testCasePanels.remove(testName)
-
-                // Update the UI
-                allTestCasePanel.remove(testCasePanel)
-                allTestCasePanel.updateUI()
-            }
-
-            // Add "Reset" button
-            val resetButton = JButton("Reset")
-            resetButton.isEnabled = false
-            resetButton.addActionListener {
-                WriteCommandAction.runWriteCommandAction(project) {
-                    document.setText(testCodeFormatted)
-                    resetButton.isEnabled = false
-                    textFieldEditor.border = JBUI.Borders.empty()
-                    textFieldEditor.editor!!.markupModel.removeAllHighlighters()
-                }
-            }
-            // enable reset button when editor is changed
-            document.addDocumentListener(object : DocumentListener {
-                override fun documentChanged(event: DocumentEvent) {
-                    resetButton.isEnabled = true
-
-                    // add border highlight
-                    val service = TestGenieSettingsService.getInstance().state
-                    val borderColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
-                    textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
-
-                    // add line highlighting
-                    if (event.newRange.startOffset + 1 >= document.textLength ||
-                        event.newRange.endOffset >= document.textLength
-                    ) {
-                        return
-                    }
-                    val newLine = event.newFragment.contains('\n')
-                    val startLine = document.getLineNumber(
-                        event.newRange.startOffset +
-                            (if (newLine) 1 else 0)
-                    )
-                    val endLine = document.getLineNumber(event.newRange.endOffset)
-                    for (lineNumber in startLine..endLine) {
-                        textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                            if (newLine) DiffColors.DIFF_INSERTED else DiffColors.DIFF_MODIFIED,
-                            lineNumber,
-                            HighlighterLayer.FIRST
-                        )
-                    }
-
-                    // Highlight if line has been deleted
-                    if (event.oldFragment.contains('\n')) {
-                        textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                            DiffColors.DIFF_MODIFIED,
-                            endLine,
-                            HighlighterLayer.FIRST
-                        )
-                    }
-
-                    // select checkbox
-                    checkbox.isSelected = true
-                }
-            })
             topButtons.add(removeFromCacheButton)
             topButtons.add(resetButton)
             testCasePanel.add(topButtons, BorderLayout.NORTH)
@@ -207,7 +144,7 @@ class TestCaseDisplayService(private val project: Project) {
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
-            testCasePanels[testName] = testCasePanel
+            testCasePanels[testCase.testName] = testCasePanel
             allTestCasePanel.add(Box.createRigidArea(Dimension(0, 5)))
         }
     }
@@ -264,36 +201,21 @@ class TestCaseDisplayService(private val project: Project) {
             showLibraryContentsField.isAccessible = true
             showLibraryContentsField.set(chooser, false)
         } catch (_: Exception) {
-            // could not set field
-            // ignoring the exception is acceptable as this part is not critical
+            // Could not set field
+            // Ignoring the exception is acceptable as this part is not critical
         }
 
         chooser.showDialog()
 
-        // get selected class or return if no class was selected
+        // Get selected class or return if no class was selected
         val selectedClass = chooser.selected ?: return
 
-        // insert test case components into selected class
+        // Insert test case components into selected class
         appendTestsToClass(testCaseComponents, selectedClass)
-
-        // schedule telemetry
-        val telemetryService = ApplicationManager.getApplication().getService(TestGenieTelemetryService::class.java)
-        telemetryService.scheduleTestCasesForTelemetry(
-            selectedTestCases.map {
-                val modified = (testCasePanels[it]!!.getComponent(1) as EditorTextField).text
-                val original = originalTestCases[it]!!
-
-                TestGenieTelemetryService.ModifiedTestCase(
-                    original,
-                    modified
-                )
-            }.filter {
-                it.modified != it.original
-            }
-        )
 
         // The scheduled tests will be submitted in the background
         // (they will be checked every 5 minutes and also when the project is closed)
+        scheduleTelemetry(selectedTestCases)
     }
 
     private fun validateTests() {}
@@ -350,6 +272,33 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
+     * Creates a button to remove a test from the cache.
+     *
+     * @param test the test case
+     * @param editor the editor
+     * @param testCasePanel the test case panel
+     * @return the created button
+     */
+    private fun createRemoveButton(test: CompactTestCase, editor: Editor, testCasePanel: JPanel): JButton {
+        val removeFromCacheButton = JButton("Remove")
+        removeFromCacheButton.addActionListener {
+            removeFromCache(test.testCode)
+
+            // Remove the highlighting of the test
+            project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
+                .testGenerationResult(test.testName, false, editor)
+
+            // Remove the test from the panels
+            testCasePanels.remove(test.testName)
+
+            // Update the UI
+            allTestCasePanel.remove(testCasePanel)
+            allTestCasePanel.updateUI()
+        }
+        return removeFromCacheButton
+    }
+
+    /**
      * A helper method to remove a test case from cache.
      *
      * @param testCode the source code of a test
@@ -357,5 +306,98 @@ class TestCaseDisplayService(private val project: Project) {
     private fun removeFromCache(testCode: String) {
         val cache = project.service<TestCaseCachingService>()
         cache.invalidateFromCache(fileUrl, testCode)
+    }
+
+    /**
+     * Creates a button to reset the changes in the test source code.
+     *
+     * @param document the document with the test
+     * @param textFieldEditor the text field editor with the test
+     * @param testCode the source code of the test
+     * @return the created button
+     */
+    private fun createResetButton(document: Document, textFieldEditor: EditorTextField, testCode: String): JButton {
+        val resetButton = JButton("Reset")
+        resetButton.isEnabled = false
+        resetButton.addActionListener {
+            WriteCommandAction.runWriteCommandAction(project) {
+                document.setText(testCode)
+                resetButton.isEnabled = false
+                textFieldEditor.border = JBUI.Borders.empty()
+                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+            }
+        }
+        return resetButton
+    }
+
+    /**
+     * A helper method to add a listener to the test document (in the tool window panel)
+     *   that enables reset button when the editor is changed.
+     *
+     * @param document the document of the test case
+     * @param resetButton the button to reset changes in the test
+     * @param textFieldEditor the text field editor with the test
+     * @param checkbox the checkbox to select the test
+     */
+    private fun addListenerToTestDocument(document: Document, resetButton: JButton, textFieldEditor: EditorTextField, checkbox: JCheckBox) {
+        document.addDocumentListener(object : DocumentListener {
+            override fun documentChanged(event: DocumentEvent) {
+                resetButton.isEnabled = true
+
+                // add border highlight
+                val service = TestGenieSettingsService.getInstance().state
+                val borderColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
+                textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
+
+                // add line highlighting
+                if (event.newRange.startOffset + 1 >= document.textLength ||
+                    event.newRange.endOffset >= document.textLength
+                ) {
+                    return
+                }
+                val newLine = event.newFragment.contains('\n')
+                val startLine = document.getLineNumber(
+                    event.newRange.startOffset +
+                        (if (newLine) 1 else 0)
+                )
+                val endLine = document.getLineNumber(event.newRange.endOffset)
+                for (lineNumber in startLine..endLine) {
+                    textFieldEditor.editor!!.markupModel.addLineHighlighter(
+                        if (newLine) DiffColors.DIFF_INSERTED else DiffColors.DIFF_MODIFIED,
+                        lineNumber,
+                        HighlighterLayer.FIRST
+                    )
+                }
+
+                // Highlight if line has been deleted
+                if (event.oldFragment.contains('\n')) {
+                    textFieldEditor.editor!!.markupModel.addLineHighlighter(
+                        DiffColors.DIFF_MODIFIED,
+                        endLine,
+                        HighlighterLayer.FIRST
+                    )
+                }
+
+                // select checkbox
+                checkbox.isSelected = true
+            }
+        })
+    }
+
+    /**
+     * Schedules the telemetry for the selected and modified tests.
+     *
+     * @param selectedTestCases the test cases selected by the user
+     */
+    private fun scheduleTelemetry(selectedTestCases: List<String>) {
+        val telemetryService = ApplicationManager.getApplication().getService(TestGenieTelemetryService::class.java)
+        telemetryService.scheduleTestCasesForTelemetry(
+            selectedTestCases.map {
+                val modified = (testCasePanels[it]!!.getComponent(1) as EditorTextField).text
+                val original = originalTestCases[it]!!
+
+                TestGenieTelemetryService.ModifiedTestCase(original, modified)
+            }.filter { it.modified != it.original }
+        )
     }
 }
