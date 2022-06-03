@@ -52,6 +52,19 @@ class StaticInvalidationService {
         return methodsToDiscard
     }
 
+    /**
+     * Method to invalidate the changed parts of a cache.
+     *
+     * @param fileUrl the url of a file
+     * @param lines the lines to invalidate tests
+     * @param cache the c
+     */
+    fun invalidateCacheLines(fileUrl: String, lines: Set<Int>, cache: TestCaseCachingService) {
+        for (line in lines) {
+            cache.invalidateFromCache(fileUrl, line + 1, line + 1)
+        }
+    }
+
     fun invalidate(file: PsiFile): Set<Int> {
         val linesToDiscard: MutableSet<Int> = mutableSetOf()
         val filePath = file.virtualFile.presentableUrl
