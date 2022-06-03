@@ -2,13 +2,13 @@ package nl.tudelft.ewi.se.ciselab.testgenie.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.HierarchicalMethodSignature
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiCodeBlock
@@ -16,16 +16,13 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
-import com.intellij.psi.PsiModifierList
-import com.intellij.psi.PsiReferenceParameterList
 import com.intellij.psi.PsiStatement
-import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
+import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
-import org.apache.commons.codec.digest.DigestUtils
 
 /**
  * This file contains some useful methods related to GenerateTests actions.
@@ -221,55 +218,12 @@ private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFi
     val firstStatementLine: Int = doc.getLineNumber(firstStatement.startOffset)
     val lastStatementLine: Int = doc.getLineNumber(lastStatement.endOffset)
 
-    val list = recursePsiMethodBody(psiMethodBody)
-    val pair = Pair(psiMethod.hierarchicalMethodSignature, list)
-
     return (selectedLine in firstStatementLine..lastStatementLine)
 }
 
-/**
- * Returns a list of PsiElements that are part of the method psi children.
- *
- * @param psiMethodBody the psiBody of the method
- * @return the list of PsiElements
- */
-fun recursePsiMethodBody(psiMethodBody: PsiCodeBlock): ArrayList<PsiElement> {
-    val psiList: ArrayList<PsiElement> = arrayListOf()
-    for (psiStatement in psiMethodBody.statements) {
-        if (psiStatement.children.isEmpty()) {
-            psiList.add(psiStatement)
-            continue
-        }
-        for (psiElement in psiStatement.children) {
-            recurseTree(psiElement, psiList)
-        }
-    }
-    return psiList
-}
-
-/**
- * Append elements to the list of PsiElements
- *
- * @param psiElement the psi of the element
- * @param psiList list to append psi elements
- */
-fun recurseTree(psiElement: PsiElement, psiList: ArrayList<PsiElement>) {
-    if (psiElement is PsiWhiteSpace || psiElement is PsiReferenceParameterList || psiElement is PsiModifierList) {
-        return
-    }
-    if (psiElement.children.isEmpty()) {
-        psiList.add(psiElement)
-        return
-    }
-    for (psiElementChild in psiElement.children) {
-        recurseTree(psiElementChild, psiList)
-    }
-}
-
 fun createClassSnapshot(psiFile: PsiFile) {
-    for(child in psiFile.children) {
-        println(child.toString())
-    }
+    val staticInvalidator = psiFile.project.service<StaticInvalidationService>()
+    val linesToInvalidate = staticInvalidator.invalidate(psiFile)
 }
 
 /**
