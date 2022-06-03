@@ -70,7 +70,7 @@ class CoverageVisualisationService(private val project: Project) {
             }
 
             val mutationCovered = testReport.allCoveredMutation.groupBy { x -> x.lineNo }
-            val mutationNotCovered = testReport.allCoveredMutation.groupBy { x -> x.lineNo }
+            val mutationNotCovered = testReport.allUncoveredMutation.groupBy { x -> x.lineNo }
 
             for (i in linesToCover) {
                 val line = i - 1
