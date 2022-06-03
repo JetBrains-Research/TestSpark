@@ -63,7 +63,7 @@ data class TestGenieSettingsState(
             val suffix = TestGenieDefaultsBundle.defaultValue("telemetryDirectory")
             val backupDefaultTelemetryPath: String = System.getProperty("user.home").plus(suffix)
 
-            val dataContext: DataContext = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(5000)
+            val dataContext: DataContext = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(15000)
                 ?: return backupDefaultTelemetryPath
             val projectBasePath: String = CommonDataKeys.PROJECT.getData(dataContext)?.basePath
                 ?: return backupDefaultTelemetryPath
