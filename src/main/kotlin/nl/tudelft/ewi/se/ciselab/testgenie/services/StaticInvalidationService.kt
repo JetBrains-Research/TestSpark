@@ -30,10 +30,10 @@ class StaticInvalidationService {
         body.zip(savedBody).forEach {
             if (!it.first.equals(it.second)) {
                 methods.put(signature, body)
-                return false
+                return true
             }
         }
-        return true
+        return false
     }
 
     fun validateClass(filePath: String, methods: HashMap<String, ArrayList<PsiElement>>): MutableSet<String> {
