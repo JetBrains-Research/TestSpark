@@ -238,7 +238,7 @@ class TestCaseCachingService {
             ): CachedCompactTestCase {
                 return CachedCompactTestCase(
                     testCase.testName,
-                    testCase.testCode,
+                    testCase.testCode.replace("\r\n", "\n"),
                     testCase.coveredLines.map {
                         fileTestCaseCache.getLineTestCaseCache(it)
                     }.toSet()
