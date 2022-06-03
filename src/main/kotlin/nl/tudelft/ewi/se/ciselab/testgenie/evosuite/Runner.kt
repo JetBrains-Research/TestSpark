@@ -21,6 +21,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
@@ -170,6 +171,7 @@ class Runner(
                 }
             })
 
+        project.service<TestCaseDisplayService>().fileUrl = fileUrl
         return testResultName
     }
 

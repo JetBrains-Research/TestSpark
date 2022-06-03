@@ -49,6 +49,17 @@ class TestCaseCachingService {
     }
 
     /**
+     * Invalidate test case from the cache.
+     *
+     * @param fileUrl the URL of the file that the test cases belong to
+     * @param testCode the code of the test case
+     */
+    fun invalidateFromCache(fileUrl: String, testCode: String) {
+        val fileTestCaseCache = getFileTestCaseCache(fileUrl)
+        fileTestCaseCache.invalidateFromCache(testCode)
+    }
+
+    /**
      * Get the file test case cache for the specified file.
      *
      * @param fileUrl the URL of the file
@@ -67,6 +78,10 @@ class TestCaseCachingService {
         private val lines = mutableMapOf<Int, LineTestCaseCache>()
         private val linesLock = Object()
 
+        // Used for retrieving references of unique test cases
+        private val caseIndex = mutableMapOf<String, CachedCompactTestCase>()
+        private val caseIndexLock = Object()
+
         /**
          * Insert test cases into the file cache.
          *
@@ -75,6 +90,15 @@ class TestCaseCachingService {
         fun putIntoCache(report: CompactReport) {
             report.testCaseList.values.forEach { testCase ->
                 val cachedCompactTestCase = CachedCompactTestCase.fromCompactTestCase(testCase, this)
+
+                synchronized(caseIndexLock) {
+                    // invalidate existing test with the same code if one exists
+                    caseIndex[cachedCompactTestCase.testCode]?.invalid = true
+
+                    // save new test in index
+                    caseIndex[cachedCompactTestCase.testCode] = cachedCompactTestCase
+                }
+
                 testCase.coveredLines.forEach { lineNumber ->
                     val line: LineTestCaseCache = getLineTestCaseCache(lineNumber)
                     line.putIntoCache(cachedCompactTestCase)
@@ -111,6 +135,17 @@ class TestCaseCachingService {
                 for (test in tests.getTestCases()) {
                     test.invalid = true
                 }
+            }
+        }
+
+        /**
+         * Invalidate test cases from cache.
+         *
+         * @param testCode the code of the test case
+         */
+        fun invalidateFromCache(testCode: String) {
+            synchronized(caseIndexLock) {
+                caseIndex[testCode]?.invalid = true
             }
         }
 
@@ -188,6 +223,26 @@ class TestCaseCachingService {
             )
         }
 
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as CachedCompactTestCase
+
+            if (testName != other.testName) return false
+            if (testCode != other.testCode) return false
+            if (coveredLines != other.coveredLines) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = testName.hashCode()
+            result = 31 * result + testCode.hashCode()
+            result = 31 * result + coveredLines.hashCode()
+            return result
+        }
+
         companion object {
 
             /**
@@ -203,7 +258,7 @@ class TestCaseCachingService {
             ): CachedCompactTestCase {
                 return CachedCompactTestCase(
                     testCase.testName,
-                    testCase.testCode,
+                    testCase.testCode.replace("\r\n", "\n"),
                     testCase.coveredLines.map {
                         fileTestCaseCache.getLineTestCaseCache(it)
                     }.toSet()
