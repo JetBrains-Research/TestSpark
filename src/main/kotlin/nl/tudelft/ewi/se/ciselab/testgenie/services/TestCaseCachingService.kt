@@ -90,15 +90,18 @@ class TestCaseCachingService {
         fun putIntoCache(report: CompactReport) {
             report.testCaseList.values.forEach { testCase ->
                 val cachedCompactTestCase = CachedCompactTestCase.fromCompactTestCase(testCase, this)
+
+                synchronized(caseIndexLock) {
+                    // invalidate existing test with the same code if one exists
+                    caseIndex[cachedCompactTestCase.testCode]?.invalid = true
+
+                    // save new test in index
+                    caseIndex[cachedCompactTestCase.testCode] = cachedCompactTestCase
+                }
+
                 testCase.coveredLines.forEach { lineNumber ->
                     val line: LineTestCaseCache = getLineTestCaseCache(lineNumber)
                     line.putIntoCache(cachedCompactTestCase)
-
-                    synchronized(caseIndexLock) {
-                        if (!caseIndex.contains(cachedCompactTestCase.testCode)) {
-                            caseIndex[cachedCompactTestCase.testCode] = cachedCompactTestCase
-                        }
-                    }
                 }
             }
         }
