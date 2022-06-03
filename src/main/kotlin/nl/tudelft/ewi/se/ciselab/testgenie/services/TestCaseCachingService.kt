@@ -49,6 +49,17 @@ class TestCaseCachingService {
     }
 
     /**
+     * Invalidate test case from the cache.
+     *
+     * @param fileUrl the URL of the file that the test cases belong to
+     * @param testCode the code of the test case
+     */
+    fun invalidateFromCache(fileUrl: String, testCode: String) {
+        val fileTestCaseCache = getFileTestCaseCache(fileUrl)
+        fileTestCaseCache.invalidateFromCache(testCode)
+    }
+
+    /**
      * Get the file test case cache for the specified file.
      *
      * @param fileUrl the URL of the file
@@ -121,6 +132,17 @@ class TestCaseCachingService {
                 for (test in tests.getTestCases()) {
                     test.invalid = true
                 }
+            }
+        }
+
+        /**
+         * Invalidate test cases from cache.
+         *
+         * @param testCode the code of the test case
+         */
+        fun invalidateFromCache(testCode: String) {
+            synchronized(caseIndexLock) {
+                caseIndex[testCode]?.invalid = true
             }
         }
 
