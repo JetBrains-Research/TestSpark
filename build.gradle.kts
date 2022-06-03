@@ -37,6 +37,8 @@ dependencies {
     implementation(files("lib/hamcrest-core-1.3.jar"))
     implementation(files("lib/junit-4.12.jar"))
 
+    implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
+
     // From the jetbrains repository
     testImplementation("com.intellij.remoterobot:remote-robot:0.11.13")
     testImplementation("com.intellij.remoterobot:remote-fixtures:0.11.13")

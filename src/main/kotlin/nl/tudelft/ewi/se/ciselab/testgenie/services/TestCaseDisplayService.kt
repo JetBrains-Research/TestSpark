@@ -4,7 +4,6 @@ import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
@@ -22,7 +21,7 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBUI
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Validator
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.Validator
 import org.evosuite.utils.CompactReport
 import java.awt.BorderLayout
 import java.awt.Color
@@ -270,9 +269,25 @@ class TestCaseDisplayService(private val project: Project) {
         // (they will be checked every 5 minutes and also when the project is closed)
     }
 
+    /**
+     * Returns a pair of most-recent edit of
+     * a test, containing the test name and test code
+     */
+    private fun getEditedTests(): HashMap<String, String> {
+        val selectedTestCases =
+            testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
+
+        return HashMap(
+            selectedTestCases.associateWith {
+                (testCasePanels[it]!!.getComponent(1) as EditorTextField).document.text
+            }
+        )
+    }
+
     private fun validateTests() {
         val testJob = testJob ?: return
-        Validator(project, testJob).validateSuite()
+        val edits = getEditedTests()
+        Validator(project, testJob, edits).validateSuite()
     }
 
     private fun toggleAllCheckboxes(selected: Boolean) {

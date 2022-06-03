@@ -10,7 +10,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService"/>
-        <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Validator"/>
+        <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.Validator"/>
 
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
@@ -22,6 +22,9 @@
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
+
+        <toolWindow id="TestGenie Validator" secondary="true" anchor="bottom"
+                    factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.ValidationToolWindowFactory"/>
 
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService"/>
