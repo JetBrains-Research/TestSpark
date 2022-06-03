@@ -49,6 +49,9 @@ class TestCaseDisplayService(private val project: Project) {
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private var originalTestCases: HashMap<String, String> = HashMap()
 
+    // Default color for the editors in the tool window
+    private var defaultEditorColor: Color? = null
+
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
 
@@ -115,6 +118,10 @@ class TestCaseDisplayService(private val project: Project) {
             // Add editor
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val textFieldEditor = EditorTextField(document, project, JavaFileType.INSTANCE)
+            // Set the default editor color to the one the editor was created with (only done once)
+            if (defaultEditorColor == null) {
+                defaultEditorColor = textFieldEditor.background
+            }
             textFieldEditor.setOneLineMode(false)
             testCasePanel.add(textFieldEditor, BorderLayout.CENTER)
 
@@ -194,14 +201,34 @@ class TestCaseDisplayService(private val project: Project) {
      */
     fun highlightTestCase(name: String) {
         val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
-        val backgroundDefault = editor.background
+        if (!editor.background.equals(defaultEditorColor)) {
+            return
+        }
         val service = TestGenieSettingsService.getInstance().state
         val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
         editor.background = highlightColor
+        returnOriginalEditorBackground(editor)
+    }
+
+    /**
+     * Reset the provided editors color to the default (initial) one after 10 seconds
+     * @param editor the editor whose color to change
+     */
+    private fun returnOriginalEditorBackground(editor: EditorTextField) {
         Thread {
             Thread.sleep(10000)
-            editor.background = backgroundDefault
+            editor.background = defaultEditorColor
         }.start()
+    }
+
+    /**
+     * Highlight a range of editors
+     * @param names list of test names to pass to highlight function
+     */
+    fun highlightCoveredMutants(names: List<String>) {
+        names.forEach {
+            highlightTestCase(it)
+        }
     }
 
     /**
