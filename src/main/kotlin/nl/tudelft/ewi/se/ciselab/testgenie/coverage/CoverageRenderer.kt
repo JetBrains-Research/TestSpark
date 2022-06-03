@@ -31,7 +31,7 @@ import java.awt.event.MouseEvent
  * @param lineNumber lineNumber to color
  * @param tests list of tests that cover this line
  * @param coveredMutation list of mutant operation which are covered by tests
- * @param coveredNotMutation list of mutant operation which are not covered by tests
+ * @param notCoveredMutation list of mutant operation which are not covered by tests
  * @param mapMutantsToTests map of mutant operation -> List of names of tests which cover mutant
  * @param project the current project
  */
@@ -40,7 +40,7 @@ class CoverageRenderer(
     private val lineNumber: Int,
     private val tests: List<String>,
     private val coveredMutation: List<String>,
-    private val coveredNotMutation: List<String>,
+    private val notCoveredMutation: List<String>,
     private val mapMutantsToTests: HashMap<String, MutableList<String>>,
     private val project: Project
 ) :
@@ -78,9 +78,9 @@ class CoverageRenderer(
             }
         }
 
-        if (coveredNotMutation.isNotEmpty() && state.criterionWeakMutation) {
+        if (notCoveredMutation.isNotEmpty() && state.criterionWeakMutation) {
             prePanel.addComponent(JBLabel(" Not covered mutants:"), 10)
-            for (mutantName in coveredNotMutation) {
+            for (mutantName in notCoveredMutation) {
                 prePanel.addComponent(
                     JBLabel(mutantName.substringBefore('('))
                 )

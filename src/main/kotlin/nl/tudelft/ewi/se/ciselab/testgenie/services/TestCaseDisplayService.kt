@@ -205,7 +205,7 @@ class TestCaseDisplayService(private val project: Project) {
             return
         }
         val service = TestGenieSettingsService.getInstance().state
-        var highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
+        val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
     }

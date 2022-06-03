@@ -43,7 +43,7 @@ class CoverageVisualisationService(private val project: Project) {
      * Shows coverage on the gutter next to the covered lines.
      *
      * @param linesToCover total set of lines  to cover
-     * @param testCaseList list of test cases. This is used for gutter information
+     * @param testReport report used for gutter information
      * @param editor editor instance where coverage should be updated
      */
     fun updateCoverage(linesToCover: Set<Int>, testReport: CompactReport, editor: Editor) {
@@ -60,9 +60,9 @@ class CoverageVisualisationService(private val project: Project) {
             // map of mutant operations -> List of names of tests which cover the mutant
             val mapMutantsToTests = HashMap<String, MutableList<String>>()
 
-            testReport.testCaseList.values.forEach {
-                val mutantsCovered = it.coveredMutants
-                val testName = it.testName
+            testReport.testCaseList.values.forEach { compactTestCase ->
+                val mutantsCovered = compactTestCase.coveredMutants
+                val testName = compactTestCase.testName
                 mutantsCovered.forEach {
                     val testCasesCoveringMutant = mapMutantsToTests.getOrPut(it.replacement) { ArrayList() }
                     testCasesCoveringMutant.add(testName)
