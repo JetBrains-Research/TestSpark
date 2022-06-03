@@ -266,6 +266,12 @@ fun recurseTree(psiElement: PsiElement, psiList: ArrayList<PsiElement>) {
     }
 }
 
+fun createClassSnapshot(psiFile: PsiFile) {
+    for(child in psiFile.children) {
+        println(child.toString())
+    }
+}
+
 /**
  * Checks if the caret is within the given PsiElement.
  *
