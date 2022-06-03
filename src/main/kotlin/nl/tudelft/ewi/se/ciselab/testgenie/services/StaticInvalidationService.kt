@@ -29,18 +29,18 @@ class StaticInvalidationService {
         body: ArrayList<PsiElement>,
         methods: HashMap<String, ArrayList<PsiElement>>
     ): Boolean {
-        val savedBody = methods.get(signature)
+        val savedBody = methods[signature]
 
         // if body doesn't exist, method seen first time
         // if amount of elements in body different, method surely changed
         if (savedBody == null || body.size != savedBody.size) {
-            methods.put(signature, body)
+            methods[signature] = body
             return true
         }
         // compare each element (no whitespace)
         body.zip(savedBody).forEach {
             if (!it.first.text.equals(it.second.text)) {
-                methods.put(signature, body)
+                methods[signature] = body
                 return true
             }
         }
@@ -65,7 +65,7 @@ class StaticInvalidationService {
         val methodsSaved = savedMethods.getOrPut("$filePath/$className") { methods }
         // validate each method against old methods
         methods.keys.forEach {
-            val modified = validateMethod(it, methods.get(it)!!, methodsSaved)
+            val modified = validateMethod(it, methods[it]!!, methodsSaved)
             if (modified) {
                 methodsToDiscard.add(it)
             }
@@ -105,7 +105,7 @@ class StaticInvalidationService {
             val methods = currentClass.methods
             val map: HashMap<String, ArrayList<PsiElement>> = HashMap()
             methods.forEach {
-                map.put(it.hierarchicalMethodSignature.toString(), recursePsiMethodBody(it.body!!))
+                map[it.hierarchicalMethodSignature.toString()] = recursePsiMethodBody(it.body!!)
             }
             // validate each class
             val methodsToDiscard = validateClass(filePath, map, className)
