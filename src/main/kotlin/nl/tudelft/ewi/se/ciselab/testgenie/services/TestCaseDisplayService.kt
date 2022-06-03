@@ -198,7 +198,10 @@ class TestCaseDisplayService(private val project: Project) {
             .map { it.key }
 
         // Remove the selected tests from cache
-        selectedTestCases.forEach { removeFromCache(originalTestCases[it]!!) }
+        selectedTestCases.forEach {
+            removeFromCache(originalTestCases[it]!!)
+            testCasePanels.remove(it)
+        }
 
         val testCaseComponents = selectedTestCases.map {
             testCasePanels[it]!!.getComponent(1) as EditorTextField
