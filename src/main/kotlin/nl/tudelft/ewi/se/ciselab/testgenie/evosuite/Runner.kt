@@ -144,7 +144,7 @@ class Runner(
                         // Statically invalidate cache
                         val cache = project.service<TestCaseCachingService>()
                         val staticInvalidator = project.service<StaticInvalidationService>()
-                        staticInvalidator.invalidateCacheLines(fileUrl, linesToDeleteFromCache, project)
+                        staticInvalidator.invalidateCacheLines(fileUrl, linesToDeleteFromCache)
                         log.info("Going to invalidate $linesToDeleteFromCache lines")
 
                         // Check cache
