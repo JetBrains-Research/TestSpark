@@ -71,17 +71,17 @@ class Validator(
         val testsFile = File(testsPath)
 
         if (edits.size == 0) {
-            logger.info("No changes found, resetting files to old state")
+            logger.trace("No changes found, resetting files to old state")
             val testsFileWriter = FileWriter(testsPath, false)
             testsFileWriter.write(testJob.report.testSuiteCode)
             testsFileWriter.close()
-            logger.info("Flushed original tests to $testsPath")
+            logger.trace("Flushed original tests to $testsPath")
         } else {
             val editedTests = TestCaseEditor(testsFile.readText(), edits).edit()
             val testsFileWriter = FileWriter(testsFile, false)
             testsFileWriter.write(editedTests)
             testsFileWriter.close()
-            logger.info("Flushed edited tests to $testsPath")
+            logger.trace("Flushed edited tests to $testsPath")
         }
 
         val scaffoldPath = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}_scaffolding.java"
@@ -112,7 +112,7 @@ class Validator(
      * @param indicator the progress indicator
      */
     private fun compileTests(classpath: String, files: List<File>) {
-        logger.info("Compiling with classpath $classpath")
+        logger.trace("Compiling with classpath $classpath")
 
         val optionList: List<String> = listOf("-classpath", classpath)
 

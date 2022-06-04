@@ -21,10 +21,10 @@ class TestCaseEditor(private val text: String, private val edits: HashMap<String
             val testName = name.toString()
             val modifiedBody = edits[testName]
             if (modifiedBody != null) {
-                log.info("Test case modified! $testName")
+                log.trace("Test case modified $testName")
                 n.setBody(modifiedBody)
             } else {
-                log.info("Test case not modified! $testName")
+                log.trace("Test case not modified $testName")
             }
 
             return super.visit(n, arg)
