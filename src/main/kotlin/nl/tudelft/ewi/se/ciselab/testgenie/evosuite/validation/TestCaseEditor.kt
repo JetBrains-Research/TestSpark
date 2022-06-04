@@ -34,7 +34,7 @@ class TestCaseEditor(private val text: String, private val edits: HashMap<String
     class BodyExtractor : VoidVisitorAdapter<ArrayList<BlockStmt>>() {
         override fun visit(n: MethodDeclaration?, arg: ArrayList<BlockStmt>) {
             super.visit(n, arg)
-            val body = n?.body?.get()!!
+            val body = n?.body?.get()
             if (body != null) {
                 arg.add(body)
             }

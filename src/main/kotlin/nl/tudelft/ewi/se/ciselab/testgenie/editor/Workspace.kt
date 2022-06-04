@@ -85,7 +85,7 @@ class Workspace(private val project: Project) {
 
                     // update coverage only if the modification timestamp is the same
                     if (testJob.info.modificationTS == modTs) {
-                        updateCoverage(testJob.getSelectedLines(), testJob.getSelectedTests(), editor)
+                        updateCoverage(testJob.getSelectedLines(), testJob.report, editor)
                     }
                 }
             }
@@ -226,7 +226,7 @@ class Workspace(private val project: Project) {
      */
     private fun updateCoverage(
         linesToCover: Set<Int>,
-        testCaseList: List<CompactTestCase>,
+        testCaseList: CompactReport,
         editor: Editor
     ) {
         val visualizationService = project.service<CoverageVisualisationService>()
