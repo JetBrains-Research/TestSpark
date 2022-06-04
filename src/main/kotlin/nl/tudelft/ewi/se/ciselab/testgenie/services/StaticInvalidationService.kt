@@ -28,7 +28,6 @@ class StaticInvalidationService(private val project: Project) {
      *
      * @param fileUrl the url of a file
      * @param lines the lines to invalidate tests
-     * @param project the project
      */
     fun invalidateCacheLines(fileUrl: String, lines: Set<Int>) {
         val cache = project.service<TestCaseCachingService>()
