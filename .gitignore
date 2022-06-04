@@ -5,5 +5,7 @@ build/
 lib/
 **/evosuite-tests/
 src/test/resources/project/pizzeria/.idea/
+src/test/resources/project/pizzeria/target/
 src/test/resources/project/.idea/
 src/test/resources/project/untitled/.idea/
+.jqwik-database
