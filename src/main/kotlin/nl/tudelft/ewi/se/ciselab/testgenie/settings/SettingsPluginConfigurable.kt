@@ -77,7 +77,7 @@ class SettingsPluginConfigurable : Configurable {
      * If empty, then sets to previous state. Else, keep the new one.
      */
     private fun checkEmptyTelemetryPath(settingsState: TestGenieSettingsState): Boolean {
-        if (settingsComponent!!.telemetryEnabled && settingsComponent!!.telemetryPath.isEmpty()) {
+        if (settingsComponent!!.telemetryEnabled && settingsComponent!!.telemetryPath.isBlank()) {
             settingsState.telemetryPath = settingsState.telemetryPath
             settingsComponent!!.telemetryPath = settingsState.telemetryPath
             return true
