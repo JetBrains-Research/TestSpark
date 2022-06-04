@@ -37,7 +37,8 @@ class GenerateTestsActionLine : AnAction() {
         evoSuiteRunner
             .forLine(selectedLine)
             .withCacheLines(selectedLine - 1, selectedLine - 1)
-            .runTestGeneration(linesToInvalidateFromCache)
+            .invalidateCache(linesToInvalidateFromCache)
+            .runTestGeneration()
     }
 
     /**

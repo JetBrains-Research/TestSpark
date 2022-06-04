@@ -122,11 +122,23 @@ class Runner(
     }
 
     /**
+     * Method to invalidate the cache.
+     *
+     * @param linesToInvalidate set of lines to invalidate
+     */
+    fun invalidateCache(linesToInvalidate: Set<Int>): Runner {
+        val staticInvalidator = project.service<StaticInvalidationService>()
+        staticInvalidator.invalidateCacheLines(fileUrl, linesToInvalidate)
+        log.info("Going to invalidate $linesToInvalidate lines")
+        return this
+    }
+
+    /**
      * Builds the project and launches EvoSuite on a separate thread.
      *
      * @return the path to which results will be (eventually) saved
      */
-    fun runTestGeneration(linesToDeleteFromCache: Set<Int>): String {
+    fun runTestGeneration(): String {
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
@@ -140,12 +152,6 @@ class Runner(
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
-
-                        // Statically invalidate cache
-                        val cache = project.service<TestCaseCachingService>()
-                        val staticInvalidator = project.service<StaticInvalidationService>()
-                        staticInvalidator.invalidateCacheLines(fileUrl, linesToDeleteFromCache)
-                        log.info("Going to invalidate $linesToDeleteFromCache lines")
 
                         // Check cache
                         val hasCachedTests = tryShowCachedTestCases()

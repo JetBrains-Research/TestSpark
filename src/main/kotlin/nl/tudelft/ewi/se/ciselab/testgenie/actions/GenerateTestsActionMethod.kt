@@ -48,7 +48,8 @@ class GenerateTestsActionMethod : AnAction() {
         evoSuiteRunner
             .forMethod(methodDescriptor)
             .withCacheLines(cacheStartLine, cacheEndLine)
-            .runTestGeneration(linesToInvalidateFromCache) // Make snapshot of psiFile + all the logic behind static invalidation
+            .invalidateCache(linesToInvalidateFromCache)
+            .runTestGeneration()
     }
 
     /**

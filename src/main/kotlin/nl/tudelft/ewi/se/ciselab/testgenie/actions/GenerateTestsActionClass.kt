@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Caret
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
  * This class contains all the logic related to generating tests for a class.
@@ -21,7 +22,9 @@ class GenerateTestsActionClass : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-        createEvoSuiteRunner(e)?.forClass()?.runTestGeneration(linesToInvalidateFromCache)
+
+        val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
+        evoSuiteRunner.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
     }
 
     /**
