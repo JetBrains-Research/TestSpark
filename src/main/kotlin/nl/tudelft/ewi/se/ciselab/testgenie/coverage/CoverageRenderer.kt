@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.coverage
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.hint.HintManagerImpl
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
@@ -13,9 +14,12 @@ import com.intellij.ui.HintHint
 import com.intellij.ui.LightweightHint
 import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import java.awt.Color
+import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
@@ -26,8 +30,20 @@ import java.awt.event.MouseEvent
  * @param color color of marker
  * @param lineNumber lineNumber to color
  * @param tests list of tests that cover this line
+ * @param coveredMutation list of mutant operation which are covered by tests
+ * @param notCoveredMutation list of mutant operation which are not covered by tests
+ * @param mapMutantsToTests map of mutant operation -> List of names of tests which cover mutant
+ * @param project the current project
  */
-class CoverageRenderer(private val color: Color, private val lineNumber: Int, private val tests: List<String>, private val project: Project) :
+class CoverageRenderer(
+    private val color: Color,
+    private val lineNumber: Int,
+    private val tests: List<String>,
+    private val coveredMutation: List<String>,
+    private val notCoveredMutation: List<String>,
+    private val mapMutantsToTests: HashMap<String, MutableList<String>>,
+    private val project: Project
+) :
     ActiveGutterRenderer, LineMarkerRendererEx {
 
     /**
@@ -50,7 +66,34 @@ class CoverageRenderer(private val color: Color, private val lineNumber: Int, pr
             )
         }
 
-        val panel = prePanel.addVerticalGap(10).panel
+        val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+        if (coveredMutation.isNotEmpty() && state.criterionWeakMutation) {
+            prePanel.addComponent(JBLabel(" Covered mutants:"), 10)
+            for (mutantName in coveredMutation) {
+                prePanel.addComponent(
+                    ActionLink(mutantName.substringBefore('(')) {
+                        highlightMutantsInToolwindow(mutantName, mapMutantsToTests)
+                    }
+                )
+            }
+        }
+
+        if (notCoveredMutation.isNotEmpty() && state.criterionWeakMutation) {
+            prePanel.addComponent(JBLabel(" Not covered mutants:"), 10)
+            for (mutantName in notCoveredMutation) {
+                prePanel.addComponent(
+                    JBLabel(mutantName.substringBefore('('))
+                )
+            }
+        }
+
+        val panel = JBScrollPane(
+            prePanel.addVerticalGap(10).panel,
+            JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        )
+
+        panel.preferredSize = Dimension(panel.preferredSize.width, 400.coerceAtMost(panel.preferredSize.height))
 
         val hint = LightweightHint(panel)
         val point = HintManagerImpl.getHintPosition(hint, editor, LogicalPosition(lineNumber, 0), HintManager.RIGHT)
@@ -89,6 +132,17 @@ class CoverageRenderer(private val color: Color, private val lineNumber: Int, pr
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
 
         testCaseDisplayService.highlightTestCase(name)
+    }
+
+    /**
+     * Use Display service's mutant highlighter function
+     * @param mutantName name of the mutant whose coverage to visualise
+     * @param map map of mutant operations -> List of names of tests which cover the mutants
+     */
+    private fun highlightMutantsInToolwindow(mutantName: String, map: HashMap<String, MutableList<String>>) {
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+
+        testCaseDisplayService.highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
     }
 
     /**
