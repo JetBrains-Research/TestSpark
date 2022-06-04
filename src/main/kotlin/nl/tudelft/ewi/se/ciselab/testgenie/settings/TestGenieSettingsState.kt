@@ -1,6 +1,10 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
+import com.intellij.ide.DataManager
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.actionSystem.DataContext
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
+import java.io.File
 
 /**
  * This class is the actual data class that stores the values of the Settings entries.
@@ -59,14 +63,11 @@ data class TestGenieSettingsState(
             val suffix = TestGenieDefaultsBundle.defaultValue("telemetryDirectory")
             val backupDefaultTelemetryPath: String = System.getProperty("user.home").plus(suffix)
 
-            return backupDefaultTelemetryPath
-
-//            ApplicationManager.getApplication().invokeLater {}
-//            val dataContext: DataContext = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(2000)
-//                ?: return backupDefaultTelemetryPath
-//            val projectBasePath: String = CommonDataKeys.PROJECT.getData(dataContext)?.basePath
-//                ?: return backupDefaultTelemetryPath
-//            return "$projectBasePath${File.separator}$suffix"
+            val dataContext: DataContext = DataManager.getInstance().dataContextFromFocusAsync.blockingGet(60000)
+                ?: return backupDefaultTelemetryPath
+            val projectBasePath: String = CommonDataKeys.PROJECT.getData(dataContext)?.basePath
+                ?: return backupDefaultTelemetryPath
+            return "$projectBasePath${File.separator}$suffix"
         }
     }
 
