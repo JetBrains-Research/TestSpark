@@ -14,7 +14,11 @@ import com.intellij.psi.PsiWhiteSpace
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 
-class StaticInvalidationService {
+/**
+ * Service used to invalidate cache statically
+ * @param project - the project
+ */
+class StaticInvalidationService(private val project: Project) {
 
     // HashMap of Class filePath -> (HashMap of Method Signature -> (Method Body, Covered Lines))
     private var savedMethods: HashMap<String, HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>>> = HashMap()
@@ -26,7 +30,7 @@ class StaticInvalidationService {
      * @param lines the lines to invalidate tests
      * @param project the project
      */
-    fun invalidateCacheLines(fileUrl: String, lines: Set<Int>, project: Project) {
+    fun invalidateCacheLines(fileUrl: String, lines: Set<Int>) {
         val cache = project.service<TestCaseCachingService>()
         for (line in lines) {
             cache.invalidateFromCache(fileUrl, line + 1, line + 1)
