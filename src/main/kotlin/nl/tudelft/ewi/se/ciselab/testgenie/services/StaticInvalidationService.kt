@@ -1,6 +1,8 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiCodeBlock
 import com.intellij.psi.PsiDocumentManager
@@ -24,7 +26,8 @@ class StaticInvalidationService {
      * @param lines the lines to invalidate tests
      * @param cache the cache
      */
-    fun invalidateCacheLines(fileUrl: String, lines: Set<Int>, cache: TestCaseCachingService) {
+    fun invalidateCacheLines(fileUrl: String, lines: Set<Int>, project: Project) {
+        val cache = project.service<TestCaseCachingService>()
         for (line in lines) {
             cache.invalidateFromCache(fileUrl, line + 1, line + 1)
         }
