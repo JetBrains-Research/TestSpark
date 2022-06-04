@@ -18,6 +18,48 @@ class StaticInvalidationService {
     private var savedMethods: HashMap<String, HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>>> = HashMap()
 
     /**
+     * Method to invalidate the changed parts of a cache.
+     *
+     * @param fileUrl the url of a file
+     * @param lines the lines to invalidate tests
+     * @param cache the cache
+     */
+    fun invalidateCacheLines(fileUrl: String, lines: Set<Int>, cache: TestCaseCachingService) {
+        for (line in lines) {
+            cache.invalidateFromCache(fileUrl, line + 1, line + 1)
+        }
+    }
+
+    /**
+     * Checks for a file what lines have been modified
+     * @param file the file in question
+     * @return list of lines that have been modified
+     */
+    fun invalidate(file: PsiFile): Set<Int> {
+        // Initialize list
+        val linesToDiscard: MutableSet<Int> = mutableSetOf()
+        // Get basic details
+        val filePath = file.virtualFile.presentableUrl
+        val classToValidate = file.children.filterIsInstance<PsiClass>()
+        val doc: Document = PsiDocumentManager.getInstance(file.project).getDocument(file) ?: return setOf()
+        // Go over all classes in file
+        classToValidate.forEach { currentClass ->
+            val className = currentClass.name!!
+            val methods = currentClass.methods
+            val map: HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>> = HashMap()
+            methods.forEach {
+                val startLine = doc.getLineNumber(it.identifyingElement!!.startOffset)
+                val endLine = doc.getLineNumber(it.body!!.rBrace!!.endOffset)
+                map[it.hierarchicalMethodSignature.toString()] = Pair(recursePsiMethodBody(it.body!!), startLine.rangeTo(endLine).toSet())
+            }
+            // validate each class
+            linesToDiscard.addAll(validateClass(filePath, map, className))
+        }
+
+        return linesToDiscard
+    }
+
+    /**
      * Checks if method has been changed since last test generation (no, if first run)
      * @param signature the method in question
      * @param body list of the body-elements of the method, without whitespaces
@@ -68,48 +110,6 @@ class StaticInvalidationService {
         methods.keys.forEach {
             val changed = validateMethod(it, methods[it]!!, methodsSaved)
             linesToDiscard.addAll(changed)
-        }
-
-        return linesToDiscard
-    }
-
-    /**
-     * Method to invalidate the changed parts of a cache.
-     *
-     * @param fileUrl the url of a file
-     * @param lines the lines to invalidate tests
-     * @param cache the cache
-     */
-    fun invalidateCacheLines(fileUrl: String, lines: Set<Int>, cache: TestCaseCachingService) {
-        for (line in lines) {
-            cache.invalidateFromCache(fileUrl, line + 1, line + 1)
-        }
-    }
-
-    /**
-     * Checks for a file what lines have been modified
-     * @param file the file in question
-     * @return list of lines that have been modified
-     */
-    fun invalidate(file: PsiFile): Set<Int> {
-        // Initialize list
-        val linesToDiscard: MutableSet<Int> = mutableSetOf()
-        // Get basic details
-        val filePath = file.virtualFile.presentableUrl
-        val classToValidate = file.children.filterIsInstance<PsiClass>()
-        val doc: Document = PsiDocumentManager.getInstance(file.project).getDocument(file) ?: return setOf()
-        // Go over all classes in file
-        classToValidate.forEach { currentClass ->
-            val className = currentClass.name!!
-            val methods = currentClass.methods
-            val map: HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>> = HashMap()
-            methods.forEach {
-                val startLine = doc.getLineNumber(it.identifyingElement!!.startOffset)
-                val endLine = doc.getLineNumber(it.body!!.rBrace!!.endOffset)
-                map[it.hierarchicalMethodSignature.toString()] = Pair(recursePsiMethodBody(it.body!!), startLine.rangeTo(endLine).toSet())
-            }
-            // validate each class
-            linesToDiscard.addAll(validateClass(filePath, map, className))
         }
 
         return linesToDiscard
