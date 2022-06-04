@@ -121,7 +121,8 @@ class Runner(
     }
 
     /**
-     * Builds the project and launches EvoSuite on a separate thread.
+     * Builds the project and launches the EvoSuite process,
+     * tracking it from a separate thread.
      *
      * @return the path to which results will be (eventually) saved
      */
@@ -139,7 +140,6 @@ class Runner(
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
-
                         // Check cache
                         val hasCachedTests = tryShowCachedTestCases()
                         if (hasCachedTests) {
@@ -289,7 +289,7 @@ class Runner(
                     Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
                 val coverageMatcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
 
-                log.info(text) // kept for debugging purposes
+//                log.info(text) // kept for debugging purposes
 
                 val progress =
                     if (progressMatcher.find()) progressMatcher.group(1)?.toDouble()?.div(100)
