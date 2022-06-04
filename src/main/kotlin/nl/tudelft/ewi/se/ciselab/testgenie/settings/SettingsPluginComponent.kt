@@ -5,6 +5,7 @@ import com.intellij.openapi.ui.TextBrowseFolderListener
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Color
 import java.awt.Dimension
@@ -66,6 +67,21 @@ class SettingsPluginComponent {
 
         // Create panel
         createSettingsPanel()
+        // Create telemetry file chooser field
+        telemetryPathField()
+    }
+
+    private fun telemetryPathField() {
+        // Watch for the checkbox being clicked
+        telemetryEnabledCheckbox.addActionListener {
+            // If checkbox is clicked, change the path chooser according to the new status
+            telemetryPathChooser.isEditable = telemetryEnabledCheckbox.isSelected
+            telemetryPathChooser.isEnabled = telemetryEnabledCheckbox.isSelected
+        }
+        val telemetryEnabled = TestGenieSettingsService.getInstance().state!!.telemetryEnabled
+        telemetryPathChooser.addBrowseFolderListener(textBrowseFolderListener) // Add the ability to choose folders
+        telemetryPathChooser.isEditable = telemetryEnabled
+        telemetryPathChooser.isEnabled = telemetryEnabled
     }
 
     /**
@@ -93,8 +109,6 @@ class SettingsPluginComponent {
             .addComponent(colorPicker, 10)
             .addComponentFillVertically(JPanel(), 0)
             .panel
-        // Add functionality to choose folder to TextFieldWithBrowseButton
-        telemetryPathChooser.addBrowseFolderListener(textBrowseFolderListener)
     }
 
     /**
