@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.filters.TextConsoleBuilderFactory
+import com.intellij.execution.process.CapturingProcessAdapter
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
@@ -19,6 +20,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import java.io.File
 import java.io.FileWriter
 import java.nio.charset.Charset
+import java.util.regex.Pattern
 import javax.tools.JavaCompiler
 import javax.tools.ToolProvider
 
@@ -62,14 +64,17 @@ class Validator(
             return
         }
 
+        // set up compilation files
+
+        // flush test edits to file
         val testsPath = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}.java"
         val testsFile = File(testsPath)
-        val text = testsFile.readText()
-        val editedTests = TestCaseEditor(text, edits).edit()
 
-        logger.info("EDIT $editedTests")
-        val testsFileWriter = FileWriter(testsFile, false)
+        val editedTests = TestCaseEditor(testsFile.readText(), edits).edit()
+        val testsFileWriter = FileWriter(testsPath, false)
         testsFileWriter.write(editedTests)
+        testsFileWriter.close()
+        logger.info("Flushed edited tests to $testsPath")
 
         val scaffoldPath = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}_scaffolding.java"
         val scaffoldFile = File(scaffoldPath)
@@ -110,8 +115,7 @@ class Validator(
         val compilationUnits = fileManager.getJavaFileObjectsFromFiles(files)
 
         val task = compiler.getTask(
-            null, fileManager, null,
-            optionList, null, compilationUnits
+            null, fileManager, null, optionList, null, compilationUnits
         )
 
         val compiled = task.call()
@@ -145,19 +149,20 @@ class Validator(
         val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
         logger.info("Running junit tests with: $cmdString")
 
-        val consoleBuilder = TextConsoleBuilderFactory.getInstance().createBuilder(project)
-        consoleBuilder.setViewer(true)
-        val console = consoleBuilder.console
-
         val junitProcess = GeneralCommandLine(cmd)
         junitProcess.charset = Charset.forName("UTF-8")
         val handler = OSProcessHandler(junitProcess)
 
+        // attach console listener for displaying information
+        val consoleBuilder = TextConsoleBuilderFactory.getInstance().createBuilder(project)
+        consoleBuilder.setViewer(true)
+        val console = consoleBuilder.console
         console.attachToProcess(handler)
-        // attach process listener for output
 
+        val capturer = CapturingProcessAdapter()
+        // attach another listener for parsing process results
+        handler.addProcessListener(capturer)
         handler.startNotify()
-
         val manager: ToolWindowManager = ToolWindowManager.getInstance(project)
 
         ApplicationManager.getApplication().invokeLater {
@@ -166,10 +171,46 @@ class Validator(
             contentManager.removeAllContents(true)
             val content: Content = contentManager.factory.createContent(console.component, "Running tests", false)
             contentManager.addContent(content)
-            window.show {}
         }
 
         // treat this as a join handle
         handler.waitFor(junitTimeout)
+
+        val output = capturer.output.stdout
+
+        val junitResult = parseJunitResult(output)
+
+        project.messageBus.syncPublisher(VALIDATION_RESULT_TOPIC).validationResult(junitResult)
+    }
+
+    data class JUnitResult(val totalTests: Int, val failedTests: Int, val failedTestNames: Set<String>)
+
+    companion object {
+        fun parseJunitResult(cap: String): JUnitResult {
+
+            val output = cap.trimEnd()
+            val resultString = output.substring(output.lastIndexOf("\n")).trim()
+
+            if (resultString.startsWith("OK")) {
+                val successMatcher = Pattern.compile("(\\d+)").matcher(resultString)
+                successMatcher.find()
+                val total = successMatcher.group().toInt()
+                return JUnitResult(total, 0, emptySet())
+            } else {
+                val failMatcher = Pattern.compile("\\d+").matcher(resultString)
+                failMatcher.find()
+                val total = failMatcher.group().toInt()
+                failMatcher.find()
+                val failed = failMatcher.group().toInt()
+                val failedCaseMatcher = Pattern.compile("\\d\\) (\\w*)\\(.*\n").matcher(output)
+                val cases = mutableSetOf<String>()
+                while (failedCaseMatcher.find()) {
+                    val testName = failedCaseMatcher.group(1).trim()
+                    cases.add(testName)
+                }
+
+                return JUnitResult(total, failed, cases)
+            }
+        }
     }
 }

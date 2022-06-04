@@ -12,6 +12,9 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.VALIDATION_RESULT_TOPIC
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.ValidationResultListener
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.Validator
 import nl.tudelft.ewi.se.ciselab.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
 import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageSelectionToggleListener
 import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService
@@ -63,8 +66,8 @@ class Workspace(private val project: Project) {
     init {
         val connection = project.messageBus.connect()
 
-        // Set event listener for changes to the VFS. The overridden event is
-        // triggered whenever the user switches their editor window selection inside the IDE
+        // Set event listener for coverage visualization toggles for specific methods.
+        // These are triggered whenever the user toggles a test case's checkbox.
         connection.subscribe(
             COVERAGE_SELECTION_TOGGLE_TOPIC,
             object : CoverageSelectionToggleListener {
@@ -84,6 +87,15 @@ class Workspace(private val project: Project) {
                     if (testJob.info.modificationTS == modTs) {
                         updateCoverage(testJob.getSelectedLines(), testJob.getSelectedTests(), editor)
                     }
+                }
+            }
+        )
+
+        connection.subscribe(
+            VALIDATION_RESULT_TOPIC,
+            object : ValidationResultListener {
+                override fun validationResult(junitResult: Validator.JUnitResult) {
+                    showValidationResult(junitResult)
                 }
             }
         )
@@ -202,6 +214,16 @@ class Workspace(private val project: Project) {
         visualizationService.showCoverage(testJob.report, editor)
     }
 
+    private fun showValidationResult(validationResult: Validator.JUnitResult) {
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+        testCaseDisplayService.markFailingTestCases(validationResult.failedTestNames)
+    }
+
+    /**
+     * Function used to update coverage visualization information.
+     * Overrides the current visualization state with the one provided.
+     * Wrapper over [CoverageVisualisationService.updateCoverage]
+     */
     private fun updateCoverage(
         linesToCover: Set<Int>,
         testCaseList: List<CompactTestCase>,

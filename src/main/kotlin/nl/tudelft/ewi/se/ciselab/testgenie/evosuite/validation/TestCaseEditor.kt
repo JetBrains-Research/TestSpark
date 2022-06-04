@@ -13,12 +13,19 @@ class TestCaseEditor(private val text: String, private val edits: HashMap<String
     private val log: Logger = Logger.getInstance(this.javaClass)
 
     class TestCaseReplacer(private val edits: HashMap<String, BlockStmt>) : ModifierVisitor<Void>() {
+        private val log: Logger = Logger.getInstance(this.javaClass)
+
         override fun visit(n: MethodDeclaration?, arg: Void?): Visitable {
             val name = n?.name!!
 
-            val modifiedBody = edits[name.toString()]!!
-            println(modifiedBody)
-            n.setBody(modifiedBody)
+            val testName = name.toString()
+            val modifiedBody = edits[testName]
+            if (modifiedBody != null) {
+                log.info("Test case modified! $testName")
+                n.setBody(modifiedBody)
+            } else {
+                log.info("Test case not modified! $testName")
+            }
 
             return super.visit(n, arg)
         }
@@ -42,7 +49,8 @@ class TestCaseEditor(private val text: String, private val edits: HashMap<String
         val map = HashMap<String, BlockStmt>()
 
         for (edit in edits) {
-            val code = "package p; public class C {${edit.value}}"
+            // hack needed to make java parser parse a method
+            val code = "package p; public class c {${edit.value}}"
             val parsedModified = StaticJavaParser.parse(code)
             val extractor = BodyExtractor()
             val body = ArrayList<BlockStmt>()
@@ -52,16 +60,13 @@ class TestCaseEditor(private val text: String, private val edits: HashMap<String
 
             val blockStmt = body[0]
             map[edit.key] = blockStmt
-
-            log.info(edit.key)
-            log.info("$blockStmt")
         }
 
         val replacer = TestCaseReplacer(map)
         replacer.visit(unit, null)
 
         val result = unit.toString()
-        println(result)
+        log.trace("EDITED TEST SUITE:\n$result")
 
         return result
     }

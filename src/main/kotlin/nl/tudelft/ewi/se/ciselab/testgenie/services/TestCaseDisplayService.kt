@@ -7,6 +7,7 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.colors.EditorColorsUtil
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -204,6 +205,24 @@ class TestCaseDisplayService(private val project: Project) {
             Thread.sleep(10000)
             editor.background = backgroundDefault
         }.start()
+    }
+
+    /**
+     * Highlight tests failing dynamic validation
+     *
+     * @param names set of test names that fail
+     */
+    fun markFailingTestCases(names: Set<String>) {
+        for (testCase in testCasePanels) {
+            if (names.contains(testCase.key)) {
+                val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
+                val highlightColor = Color(255, 0, 0, 90)
+                editor.background = highlightColor
+            } else {
+                val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
+                editor.background = EditorColorsUtil.getGlobalOrDefaultColorScheme().defaultBackground
+            }
+        }
     }
 
     /**
