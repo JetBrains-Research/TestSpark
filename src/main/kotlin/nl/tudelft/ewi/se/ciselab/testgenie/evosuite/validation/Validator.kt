@@ -70,11 +70,19 @@ class Validator(
         val testsPath = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}.java"
         val testsFile = File(testsPath)
 
-        val editedTests = TestCaseEditor(testsFile.readText(), edits).edit()
-        val testsFileWriter = FileWriter(testsPath, false)
-        testsFileWriter.write(editedTests)
-        testsFileWriter.close()
-        logger.info("Flushed edited tests to $testsPath")
+        if (edits.size == 0) {
+            logger.info("No changes found, resetting files to old state")
+            val testsFileWriter = FileWriter(testsPath, false)
+            testsFileWriter.write(testJob.report.testSuiteCode)
+            testsFileWriter.close()
+            logger.info("Flushed original tests to $testsPath")
+        } else {
+            val editedTests = TestCaseEditor(testsFile.readText(), edits).edit()
+            val testsFileWriter = FileWriter(testsFile, false)
+            testsFileWriter.write(editedTests)
+            testsFileWriter.close()
+            logger.info("Flushed edited tests to $testsPath")
+        }
 
         val scaffoldPath = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}_scaffolding.java"
         val scaffoldFile = File(scaffoldPath)
