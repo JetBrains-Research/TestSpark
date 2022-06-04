@@ -47,7 +47,7 @@ data class TestGenieSettingsState(
         val buildPath: String = TestGenieDefaultsBundle.defaultValue("buildPath")
         val buildCommand: String = TestGenieDefaultsBundle.defaultValue("buildCommand")
         val telemetryEnabled: Boolean = TestGenieDefaultsBundle.defaultValue("telemetryEnabled").toBoolean()
-        val telemetryPath: String = String()
+        val telemetryPath: String = System.getProperty("user.home")
     }
 
     fun serializeChangesFromDefault(): List<String> {
