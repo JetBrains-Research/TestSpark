@@ -24,7 +24,7 @@ class StaticInvalidationService {
      *
      * @param fileUrl the url of a file
      * @param lines the lines to invalidate tests
-     * @param cache the cache
+     * @param project the project
      */
     fun invalidateCacheLines(fileUrl: String, lines: Set<Int>, project: Project) {
         val cache = project.service<TestCaseCachingService>()
@@ -64,10 +64,11 @@ class StaticInvalidationService {
 
     /**
      * Checks if method has been changed since last test generation (no, if first run)
+     * Always updates the lines the method uses (lines can change due to whitespace, but method can still be valid)
      * @param signature the method in question
      * @param body list of the body-elements of the method, without whitespaces
      * @param methods hashmap of previously tested methods and their bodies
-     * @return the lines which should be deleted (based on previous lines for method)
+     * @return the lines of methods which have been changed (based on previous lines for method)
      */
     private fun validateMethod(
         signature: String,
@@ -98,7 +99,7 @@ class StaticInvalidationService {
      * @param filePath path where the class is located
      * @param methods the methods of the class and the lines they cover
      * @param className the name of the class (used for preciser hashing)
-     * @return the lines in the class that should be deleted (based on previous lines for method)
+     * @return the lines in the class that have been changed (based on previous lines for methods)
      */
     private fun validateClass(
         filePath: String,
