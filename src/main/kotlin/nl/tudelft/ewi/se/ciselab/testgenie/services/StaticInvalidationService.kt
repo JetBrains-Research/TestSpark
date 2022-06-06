@@ -13,6 +13,7 @@ import com.intellij.psi.PsiReferenceParameterList
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import nl.tudelft.ewi.se.ciselab.testgenie.actions.isMethodConcrete
 
 /**
  * Service used to invalidate cache statically
@@ -54,9 +55,12 @@ class StaticInvalidationService(private val project: Project) {
             val methods = currentClass.methods
             val map: HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>> = HashMap()
             methods.forEach {
-                val startLine = doc.getLineNumber(it.identifyingElement!!.startOffset)
-                val endLine = doc.getLineNumber(it.body!!.rBrace!!.endOffset)
-                map[it.hierarchicalMethodSignature.toString()] = Pair(recursePsiMethodBody(it.body!!), startLine.rangeTo(endLine).toSet())
+                if (isMethodConcrete(it)) {
+                    val startLine = doc.getLineNumber(it.startOffset)
+                    val endLine = doc.getLineNumber(it.endOffset)
+                    map[it.hierarchicalMethodSignature.toString()] =
+                        Pair(recursePsiMethodBody(it.body!!), startLine.rangeTo(endLine).toSet())
+                }
             }
             // validate each class
             linesToDiscard.addAll(validateClass(filePath, map, className))
