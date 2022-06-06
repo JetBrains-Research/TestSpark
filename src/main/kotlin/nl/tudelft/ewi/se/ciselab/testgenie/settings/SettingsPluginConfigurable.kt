@@ -68,7 +68,21 @@ class SettingsPluginConfigurable : Configurable {
         settingsState.buildPath = settingsComponent!!.buildPath
         settingsState.buildCommand = settingsComponent!!.buildCommand
         settingsState.telemetryEnabled = settingsComponent!!.telemetryEnabled
+        if (checkEmptyTelemetryPath(settingsState)) return
         settingsState.telemetryPath = settingsComponent!!.telemetryPath
+    }
+
+    /**
+     * Check if the telemetry path is empty when telemetry is enabled.
+     * If empty, then sets to previous state. Else, keep the new one.
+     */
+    private fun checkEmptyTelemetryPath(settingsState: TestGenieSettingsState): Boolean {
+        if (settingsComponent!!.telemetryEnabled && settingsComponent!!.telemetryPath.isBlank()) {
+            settingsState.telemetryPath = settingsState.telemetryPath
+            settingsComponent!!.telemetryPath = settingsState.telemetryPath
+            return true
+        }
+        return false
     }
 
     /**
