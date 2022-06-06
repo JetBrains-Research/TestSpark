@@ -143,7 +143,7 @@ fun getSurroundingLine(psiFile: PsiFile, caret: Caret): Int? {
  * @param psiMethod the PSI method to check
  * @return true if the method has a body (thus, is concrete), false otherwise
  */
-private fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
+fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
     return psiMethod.body != null
 }
 
@@ -153,7 +153,7 @@ private fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
  * @param psiMethod the PSI method of interest
  * @return true if the method is a default method of an interface, false otherwise
  */
-private fun isMethodDefault(psiMethod: PsiMethod): Boolean {
+fun isMethodDefault(psiMethod: PsiMethod): Boolean {
     if (!isMethodConcrete(psiMethod)) return false
     return psiMethod.containingClass?.isInterface ?: return false
 }
