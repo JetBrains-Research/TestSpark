@@ -1,7 +1,11 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.ui.TextBrowseFolderListener
+import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Color
 import java.awt.Dimension
@@ -48,7 +52,10 @@ class SettingsPluginComponent {
     )
     private val telemetrySeparator = JXTitledSeparator("Telemetry")
     private var telemetryEnabledCheckbox = JCheckBox("Enable telemetry")
-    private val telemetryPathTextField = JTextField(TestGenieSettingsState.DefaultSettingsState.telemetryPath)
+    private val fileChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
+    private val textBrowseFolderListener = TextBrowseFolderListener(fileChooserDescriptor)
+    private val telemetryPathChooser = TextFieldWithBrowseButton()
+    private val telemetryPathLabel = JBLabel("Specify the folder path for telemetry data")
 
     // Accessibility options
     private val accessibilitySeparator = JXTitledSeparator("Accessibility settings")
@@ -60,6 +67,21 @@ class SettingsPluginComponent {
 
         // Create panel
         createSettingsPanel()
+        // Create telemetry file chooser field
+        telemetryPathField()
+    }
+
+    private fun telemetryPathField() {
+        // Watch for the checkbox being clicked
+        telemetryEnabledCheckbox.addActionListener {
+            // If checkbox is clicked, change the path chooser according to the new status
+            telemetryPathChooser.isEditable = telemetryEnabledCheckbox.isSelected
+            telemetryPathChooser.isEnabled = telemetryEnabledCheckbox.isSelected
+        }
+        val telemetryEnabled = TestGenieSettingsService.getInstance().state!!.telemetryEnabled
+        telemetryPathChooser.addBrowseFolderListener(textBrowseFolderListener) // Add the ability to choose folders
+        telemetryPathChooser.isEditable = telemetryEnabled
+        telemetryPathChooser.isEnabled = telemetryEnabled
     }
 
     /**
@@ -80,7 +102,7 @@ class SettingsPluginComponent {
             .addComponent(telemetrySeparator, 15)
             .addComponent(telemetryDescription, 10)
             .addComponent(telemetryEnabledCheckbox, 10)
-            .addLabeledComponent(JBLabel("Specify the folder path for telemetry data"), telemetryPathTextField, 10, false)
+            .addLabeledComponent(telemetryPathLabel, telemetryPathChooser, 10, false)
             // Add accessibility options
             .addComponent(accessibilitySeparator, 15)
             .addComponent(JBLabel("Choose color for visualisation highlight"), 15)
@@ -105,7 +127,7 @@ class SettingsPluginComponent {
         telemetryEnabledCheckbox.toolTipText = "Send telemetry to CISELab"
 
         // Add description to telemetry path
-        telemetryPathTextField.toolTipText = "Choose a directory to save telemetry data into"
+        telemetryPathLabel.toolTipText = "Choose a directory to save telemetry data into"
 
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
@@ -122,7 +144,7 @@ class SettingsPluginComponent {
         pluginDescription.preferredSize = Dimension(width ?: 100, height ?: 100)
         pluginDescriptionDisclaimer.preferredSize = Dimension(width ?: 100, height ?: 100)
         telemetryDescription.preferredSize = Dimension(width ?: 100, height ?: 100)
-        telemetryPathTextField.preferredSize = Dimension(width ?: 100, telemetryPathTextField.preferredSize.height)
+        telemetryPathChooser.preferredSize = Dimension(width ?: 100, telemetryPathChooser.preferredSize.height)
 
         // Set colorPicker to wrap around dimensions
         colorPicker.preferredSize = Dimension(width ?: 100, height ?: 400)
@@ -166,9 +188,9 @@ class SettingsPluginComponent {
         }
 
     var telemetryPath: String
-        get() = telemetryPathTextField.text
+        get() = telemetryPathChooser.text
         set(newPath) {
-            telemetryPathTextField.text = newPath
+            telemetryPathChooser.text = newPath
         }
 
     var colorRed: Int
