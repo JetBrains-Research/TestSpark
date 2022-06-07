@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
@@ -20,6 +21,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
+import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 
 /**
@@ -141,7 +143,7 @@ fun getSurroundingLine(psiFile: PsiFile, caret: Caret): Int? {
  * @param psiMethod the PSI method to check
  * @return true if the method has a body (thus, is concrete), false otherwise
  */
-private fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
+fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
     return psiMethod.body != null
 }
 
@@ -151,7 +153,7 @@ private fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
  * @param psiMethod the PSI method of interest
  * @return true if the method is a default method of an interface, false otherwise
  */
-private fun isMethodDefault(psiMethod: PsiMethod): Boolean {
+fun isMethodDefault(psiMethod: PsiMethod): Boolean {
     if (!isMethodConcrete(psiMethod)) return false
     return psiMethod.containingClass?.isInterface ?: return false
 }
@@ -217,6 +219,16 @@ private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFi
     val lastStatementLine: Int = doc.getLineNumber(lastStatement.endOffset)
 
     return (selectedLine in firstStatementLine..lastStatementLine)
+}
+
+/**
+ * Calculates which lines to invalidate from cache.
+ *
+ * @param psiFile psiFile of the document
+ */
+fun calculateLinesToInvalidate(psiFile: PsiFile): Set<Int> {
+    val staticInvalidator = psiFile.project.service<StaticInvalidationService>()
+    return staticInvalidator.invalidate(psiFile)
 }
 
 /**
