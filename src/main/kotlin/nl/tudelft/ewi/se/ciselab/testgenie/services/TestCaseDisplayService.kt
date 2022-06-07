@@ -9,7 +9,6 @@ import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.colors.EditorColorsUtil
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -196,16 +195,18 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param names set of test names that fail
      */
-    fun markFailingTestCases(names: Set<String>) {
-        for (testCase in testCasePanels) {
-            if (names.contains(testCase.key)) {
-                val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
-                val highlightColor = Color(255, 0, 0, 90)
-                editor.background = highlightColor
-            } else {
-                val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
-                editor.background = EditorColorsUtil.getGlobalOrDefaultColorScheme().defaultBackground
+    fun removeFailingTestCases(names: Set<String>) {
+        ApplicationManager.getApplication().invokeLater {
+            for (name in names) {
+                // Remove the test from the panels
+                val panel = testCasePanels.remove(name)
+
+                if (panel != null) {
+                    allTestCasePanel.remove(panel)
+                }
             }
+            // Update the UI
+            allTestCasePanel.updateUI()
         }
     }
 
