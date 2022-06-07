@@ -19,6 +19,7 @@ import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
@@ -118,6 +119,18 @@ class Runner(
     fun withCacheLines(fromLine: Int, toLine: Int): Runner {
         this.cacheFromLine = fromLine + 1
         this.cacheToLine = toLine + 1
+        return this
+    }
+
+    /**
+     * Method to invalidate the cache.
+     *
+     * @param linesToInvalidate set of lines to invalidate
+     */
+    fun invalidateCache(linesToInvalidate: Set<Int>): Runner {
+        val staticInvalidator = project.service<StaticInvalidationService>()
+        staticInvalidator.invalidateCacheLines(fileUrl, linesToInvalidate)
+        log.info("Going to invalidate $linesToInvalidate lines")
         return this
     }
 
