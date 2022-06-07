@@ -109,8 +109,17 @@ The tests for TestGenie can be found in `src/test` directory.
 
 - `resources` directory contains dummy projects used for testing the plugin
 - `kotlin/nl/tudelft/ewi/se/ciselab/testgenie` directory contains the actual tests
-    - `helpers` directory contains non-UI tests for the logic of our plugin
-    - `uiTest` directory contains the tests related to UI.
-      - `pages` directory has the frames used for UI testing.
-      - `utils` directory contains utils files that are helpful for UI testing.
+    - `helpers` directory contains tests for the method descriptor helper (`MethodDescriptorHelperTest`)
+    - `runner` directory contains tests for the settings arguments that are used when running EvoSuite (`SettingsArgumentTest`)
+    - `services` directory contains tests for the coverage visualisation and caching service classes (`CoverageVisualisationServiceTest`, `TestCaseCachingServicePropertyBasedTest`, `TestCaseCachingServiceTest`)
+    - `settings` directory contains unit tests for plugin and EvoSuite settings (`SettingsEvoSuiteConfigurableTest`, `SettingsPluginConfigurableTest`, `TestGenieSettingsStateTest`)
+    - `toolwindow` directory contains unit tests for tool window tabs (`QuickAccessParametersStateTest`)
+    - `uiTest` directory contains the UI tests.
+      - `customfixtures` directory contains the custom fixtures that had to be created for testing
+      - `pages` directory has the frames and fixtures that are used for UI testing (`IdeaFrame`, `QuickAccessParametersFixtures`, `SettingsFrame`, `WelcomeFrame`)
+      - `utils` directory contains utility files that are helpful for UI testing (`RemoteRobotExtension`, `StepsLogger`)
       - `tests` directory contains the actual UI tests
+      - `CoverageVisualisationToolWindowTest` contains the UI tests for *Coverage Visualisation* tab in the tool window
+      - `PsiSelectionTest` contains the UI tests for PSI element selection logic when generating tests for class, method and line
+      - `QuickAccessParametersTest` contains the UI tests for *Quick Access Parameters* tab in the tool window
+      - `SettingsComponentTest` contains the UI tests for the Settings page of the plugin (both the plugin settings page and EvoSuite settings page)
