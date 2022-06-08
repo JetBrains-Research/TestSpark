@@ -20,6 +20,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
@@ -65,7 +66,8 @@ class Runner(
 
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
-    private val settingsState = SettingsApplicationService.getInstance().state
+    private val settingsApplicationState = SettingsApplicationService.getInstance().state
+    private val settingsProjectState = project.service<SettingsProjectService>().state
 
     private var command = mutableListOf<String>()
 
@@ -233,7 +235,7 @@ class Runner(
             cmd.add("-c")
         }
 
-        cmd.add(settingsState!!.buildCommand)
+        cmd.add(settingsProjectState.buildCommand)
 
         val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
         log.info("Starting build process with arguments: $cmdString")
@@ -265,12 +267,12 @@ class Runner(
      * @param indicator the progress indicator
      */
     private fun runEvoSuite(indicator: ProgressIndicator) {
-        if (!settingsState?.seed.isNullOrBlank()) command.add("-seed=${settingsState?.seed}")
-        if (!settingsState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsState?.configurationId}")
+        if (!settingsApplicationState?.seed.isNullOrBlank()) command.add("-seed=${settingsApplicationState?.seed}")
+        if (!settingsApplicationState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsApplicationState?.configurationId}")
 
         // construct command
         val cmd = ArrayList<String>()
-        cmd.add(settingsState?.javaPath!!)
+        cmd.add(settingsProjectState.javaPath)
         cmd.add("-jar")
         cmd.add(evoSuitePath)
         cmd.addAll(command)

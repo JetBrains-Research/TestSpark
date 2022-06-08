@@ -48,12 +48,12 @@ class CoverageVisualisationService(private val project: Project) {
      */
     fun updateCoverage(linesToCover: Set<Int>, testReport: CompactReport, editor: Editor) {
         // Show in-line coverage only if enabled in settings
-        val state = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
+        val quickAccessParametersState = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
 
-        if (state.showCoverage) {
-            val service = SettingsApplicationService.getInstance().state
-            val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
-            val colorForLines = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
+        if (quickAccessParametersState.showCoverage) {
+            val settingsProjectState = project.service<SettingsProjectService>().state
+            val color = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
+            val colorForLines = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
 
             editor.markupModel.removeAllHighlighters()
 

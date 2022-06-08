@@ -21,7 +21,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
-import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 
 /**
@@ -47,8 +47,8 @@ fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
     val classFQN = psiClass.qualifiedName ?: return null
 
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    val settingsState = SettingsApplicationService.getInstance().state ?: return null
-    val projectClassPath = "$projectPath/" + settingsState.buildPath
+    val settingsProjectState = project.service<SettingsProjectService>().state
+    val projectClassPath = "$projectPath/" + settingsProjectState.buildPath
 
     val log = Logger.getInstance("GenerateTestsUtils")
 
