@@ -21,8 +21,8 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 
 /**
  * This file contains some useful methods related to GenerateTests actions.
@@ -47,7 +47,7 @@ fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
     val classFQN = psiClass.qualifiedName ?: return null
 
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    val settingsState = TestGenieSettingsService.getInstance().state ?: return null
+    val settingsState = SettingsApplicationService.getInstance().state ?: return null
     val projectClassPath = "$projectPath/" + settingsState.buildPath
 
     val log = Logger.getInstance("GenerateTestsUtils")

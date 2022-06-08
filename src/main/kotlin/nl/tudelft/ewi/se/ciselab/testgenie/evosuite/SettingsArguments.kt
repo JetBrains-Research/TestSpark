@@ -1,7 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.evosuite
 
 import nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
 
 /**
@@ -70,7 +70,7 @@ class SettingsArguments(
      */
     fun build(): MutableList<String> {
         val toolWindowState = QuickAccessParametersService.getInstance().state
-        val settingsState = TestGenieSettingsService.getInstance().state
+        val settingsState = SettingsApplicationService.getInstance().state
 
         if (toolWindowState != null) {
             val params = toolWindowState.serializeChangesFromDefault()

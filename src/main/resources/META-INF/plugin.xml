@@ -29,7 +29,7 @@
 
         <!-- Application-level services -->
         <applicationService
-                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService"/>
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService"/>
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService"/>
         <applicationService

@@ -6,7 +6,7 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -36,7 +36,7 @@ class SettingsPluginConfigurableTest {
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
         settingsComponent = settingsConfigurable.settingsComponent!!
-        settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+        settingsState = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
     }
 
     @AfterEach

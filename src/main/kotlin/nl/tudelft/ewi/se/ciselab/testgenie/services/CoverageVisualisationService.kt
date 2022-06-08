@@ -51,7 +51,7 @@ class CoverageVisualisationService(private val project: Project) {
         val state = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
 
         if (state.showCoverage) {
-            val service = TestGenieSettingsService.getInstance().state
+            val service = SettingsApplicationService.getInstance().state
             val color = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
             val colorForLines = Color(service.colorRed, service.colorGreen, service.colorBlue, 30)
 
