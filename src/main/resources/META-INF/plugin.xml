@@ -57,7 +57,7 @@
                 class="nl.tudelft.ewi.se.ciselab.testgenie.listener.TestGenerationResultListenerImpl"
                 topic="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.TestGenerationResultListener"/>
         <listener
-                class="nl.tudelft.ewi.se.ciselab.testgenie.listener.TestGenieTelemetrySubmitListenerImpl"
+                class="nl.tudelft.ewi.se.ciselab.testgenie.listener.TelemetrySubmitListenerImpl"
                 topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </projectListeners>
 

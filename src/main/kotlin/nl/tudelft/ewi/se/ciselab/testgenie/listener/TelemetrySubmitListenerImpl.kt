@@ -12,7 +12,7 @@ import java.util.TimerTask
  * This class is responsible for scheduling potential submissions of telemetry into a file, which is done every 5 minutes,
  *   as well as attempting to do it when the project is closed.
  */
-class TestGenieTelemetrySubmitListenerImpl : ProjectManagerListener {
+class TelemetrySubmitListenerImpl : ProjectManagerListener {
     private val log = Logger.getInstance(this.javaClass)
 
     /**
