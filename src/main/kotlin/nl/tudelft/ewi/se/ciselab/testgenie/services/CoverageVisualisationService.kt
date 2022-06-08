@@ -152,7 +152,7 @@ class CoverageVisualisationService(private val project: Project) {
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
         content = contentFactory.createContent(
-            visualisationService.mainPanel, "Coverage Visualisation", true
+            visualisationService.mainPanel, "Coverage", true
         )
         contentManager.addContent(content!!)
     }
