@@ -19,6 +19,7 @@ import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
@@ -173,6 +174,10 @@ class Runner(
                     } catch (e: Exception) {
                         evosuiteError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
                         e.printStackTrace()
+                    } finally {
+                        // Revert to previous state
+                        val runnerService = project.service<RunnerService>()
+                        runnerService.isRunning = false
                     }
                 }
             })
