@@ -5,6 +5,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.Content
@@ -86,8 +87,12 @@ class CoverageVisualisationService(private val project: Project) {
 
             for (i in linesToCover) {
                 val line = i - 1
-                val textAttributesKey = TextAttributesKey.createTextAttributesKey("custom")
-                textAttributesKey.defaultAttributes.backgroundColor = colorForLines
+                val textAttribute = TextAttributes()
+                textAttribute.backgroundColor = colorForLines
+                val tempTextAttributesKey =
+                    TextAttributesKey.createTempTextAttributesKey("TestGenieTemp", textAttribute)
+                val textAttributesKey = TextAttributesKey.createTextAttributesKey("TestGenie", tempTextAttributesKey)
+
                 val hl =
                     editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.ADDITIONAL_SYNTAX)
 
