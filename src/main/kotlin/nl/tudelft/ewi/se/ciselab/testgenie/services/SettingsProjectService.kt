@@ -3,6 +3,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.wm.WindowManager
@@ -12,15 +13,11 @@ import java.awt.Window
 /**
  * This class is responsible for storing the project-level settings persistently. It uses SettingsProjectState class for that.
  */
-@State(name = "TestGenieSettingsProjectState", storages = [Storage("TestGenieSettingsProject.xml")])
+@State(name = "SettingsProjectState", storages = [Storage("TestGeniePluginSettings.xml")])
 class SettingsProjectService(_project: Project) : PersistentStateComponent<SettingsProjectState> {
 
     private var settingsProjectState: SettingsProjectState = SettingsProjectState()
     private var project: Project = _project
-
-    fun getProject(): Project {
-        return this.project
-    }
 
     /**
      * Gets the currently persisted state of the open project.
@@ -43,7 +40,7 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
 
     companion object {
         @JvmStatic
-        fun getActiveProject(): Project? {
+        fun getInstance(): SettingsProjectService? {
             val projects = ProjectManager.getInstance().openProjects
             var activeProject: Project? = null
             for (project in projects) {
@@ -52,7 +49,7 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
                     activeProject = project
                 }
             }
-            return activeProject
+            return activeProject?.service()
         }
     }
 }
