@@ -22,6 +22,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.ui.JBUI
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
 import java.awt.BorderLayout
@@ -36,6 +37,8 @@ import javax.swing.JCheckBox
 import javax.swing.JPanel
 
 class TestCaseDisplayService(private val project: Project) {
+
+    private var cacheLazyRunner: Runner? = null
 
     private val mainPanel: JPanel = JPanel()
     private val applyButton: JButton = JButton("Apply to test suite")
