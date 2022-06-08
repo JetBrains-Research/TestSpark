@@ -1,7 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
 /**
- * This class is the actual data class that stores the values of the Settings entries.
+ * This class is the actual data class that stores the values of the EvoSuite Settings entries.
  */
 data class SettingsApplicationState(
     var sandbox: Boolean = true,
