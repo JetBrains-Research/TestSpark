@@ -36,7 +36,7 @@
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieTelemetryService"/>
 
         <!-- Configurables -->
-        <applicationConfigurable
+        <projectConfigurable
                 parentId="tools"
                 instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginConfigurable"
                 id="TestGenieSettings"
