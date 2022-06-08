@@ -58,6 +58,10 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     val coverageVisualisationTab
         get() = actionLink(byXpath("//div[@class='ContentTabLabel' and @text='Coverage Visualisation']"))
 
+    // Action to find generated tests tab in toolWindow
+    val generatedTestsTab
+        get() = actionLink(byXpath("//div[@class='ContentTabLabel' and @text='Generated Tests']"))
+
     // Action to find "Find in Files..." menu
     private val findInFilesAction
         get() = actionLink(byXpath("//div[@text='Find in Files...']"))
