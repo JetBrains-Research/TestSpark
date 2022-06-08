@@ -9,6 +9,10 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+
+         <!-- Project-level services -->
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService"/>
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService"/>
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
@@ -23,12 +27,15 @@
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
+        <!-- Application-level services -->
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService"/>
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService"/>
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieTelemetryService"/>
+
+        <!-- Configurables -->
         <applicationConfigurable
                 parentId="tools"
                 instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginConfigurable"
@@ -40,6 +47,7 @@
                 id="TestGenieSettings.evosuite"
                 displayName="EvoSuite"/>
 
+        <!-- Notifications -->
         <notificationGroup id="EvoSuite Execution Error"
                            displayType="BALLOON"/>
     </extensions>
@@ -54,6 +62,7 @@
     </projectListeners>
 
     <actions>
+        <!-- TestGenie actions -->
         <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true"
                class="nl.tudelft.ewi.se.ciselab.testgenie.actions.GenerateTestsActionGroup">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
