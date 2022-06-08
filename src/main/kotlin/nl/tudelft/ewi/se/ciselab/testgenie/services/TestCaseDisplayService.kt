@@ -86,8 +86,15 @@ class TestCaseDisplayService(private val project: Project) {
     /**
      * Creates the complete panel in the "Generated Tests" tab,
      * and adds the "Generated Tests" tab to the sidebar tool window.
+     *
+     * @param testReport the new test report
+     * @param editor editor instance where coverage should be
+     *               visualized
+     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     *                        due to a cache hit, or null if there was a cache miss
      */
-    fun showGeneratedTests(testReport: CompactReport, editor: Editor) {
+    fun showGeneratedTests(testReport: CompactReport, editor: Editor, cacheLazyRunner: Runner?) {
+        this.cacheLazyRunner = cacheLazyRunner
         displayTestCases(testReport, editor)
         displayLazyRunnerButton()
         createToolWindowTab()
