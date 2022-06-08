@@ -38,6 +38,9 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
         settingsProjectState = state
     }
 
+    /**
+     * Returns the service object with a static call.
+     */
     companion object {
         @JvmStatic
         fun getInstance(): SettingsProjectService? {
