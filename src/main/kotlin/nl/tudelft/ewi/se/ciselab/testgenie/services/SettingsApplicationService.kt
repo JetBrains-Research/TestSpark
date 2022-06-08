@@ -9,7 +9,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsApplicationState
 /**
  * This class is responsible for storing the application-level settings persistently. It uses SettingsApplicationState class for that.
  */
-@State(name = "TestGenieSettingsState", storages = [Storage("testGenieSettings.xml")])
+@State(name = "TestGenieSettingsApplicationState", storages = [Storage("TestGenieSettingsApplication")])
 class SettingsApplicationService : PersistentStateComponent<SettingsApplicationState> {
 
     private var settingsApplicationState: SettingsApplicationState = SettingsApplicationState()
