@@ -29,7 +29,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: TestGenieSettingsState = SettingsApplicationService.getInstance().state!!
+        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         settingsComponent!!.sandbox = settingsState.sandbox
         settingsComponent!!.assertions = settingsState.assertions
         settingsComponent!!.seed = settingsState.seed
@@ -54,7 +54,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: TestGenieSettingsState = SettingsApplicationService.getInstance().state!!
+        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         var modified: Boolean = settingsComponent!!.sandbox != settingsState.sandbox
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
         modified = modified or (settingsComponent!!.seed != settingsState.seed)
@@ -78,7 +78,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: TestGenieSettingsState = SettingsApplicationService.getInstance().state!!
+        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions
         settingsState.algorithm = settingsComponent!!.algorithm

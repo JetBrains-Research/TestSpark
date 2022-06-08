@@ -21,7 +21,7 @@ import java.util.stream.Stream
 class SettingsPluginConfigurableTest {
     private val settingsConfigurable = SettingsPluginConfigurable()
     private lateinit var settingsComponent: SettingsPluginComponent
-    private lateinit var settingsState: TestGenieSettingsState
+    private lateinit var settingsState: SettingsApplicationState
     private lateinit var fixture: CodeInsightTestFixture
 
     @BeforeEach
