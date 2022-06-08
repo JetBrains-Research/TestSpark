@@ -89,6 +89,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     fun showGeneratedTests(testReport: CompactReport, editor: Editor) {
         displayTestCases(testReport, editor)
+        displayLazyRunnerButton()
         createToolWindowTab()
     }
 
@@ -441,5 +442,34 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.remove(testCasePanel)
             allTestCasePanel.updateUI()
         }
+    }
+
+    /**
+     * Display the button to actually invoke EvoSuite if the tests are cached.
+     */
+    private fun displayLazyRunnerButton() {
+        cacheLazyRunner ?: return
+
+        val lazyRunnerPanel = JPanel()
+        lazyRunnerPanel.layout = BoxLayout(lazyRunnerPanel, BoxLayout.Y_AXIS)
+        val lazyRunnerLabel = JLabel("Showing previously generated test cases from the cache.")
+        lazyRunnerLabel.alignmentX = Component.CENTER_ALIGNMENT
+        lazyRunnerPanel.add(lazyRunnerLabel)
+
+        val lazyRunnerButton = JButton("Generate new tests")
+
+        lazyRunnerButton.addActionListener {
+            lazyRunnerButton.isEnabled = false
+            cacheLazyRunner!!
+                .withoutCache()
+                .runTestGeneration()
+        }
+
+        lazyRunnerButton.alignmentX = Component.CENTER_ALIGNMENT
+        lazyRunnerPanel.add(lazyRunnerButton)
+
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 50)))
+        allTestCasePanel.add(lazyRunnerPanel)
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 50)))
     }
 }
