@@ -27,7 +27,7 @@ import javax.tools.ToolProvider
 class Validator(
     private val project: Project,
     private val testJob: Workspace.TestJob,
-    private val edits: HashMap<String, String>
+    private val edits: HashMap<String, String> // test name, test code
 ) {
     private val logger: Logger = Logger.getInstance(this.javaClass)
     private val settingsState = TestGenieSettingsService.getInstance().state

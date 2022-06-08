@@ -4,8 +4,11 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ProjectBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
@@ -24,7 +27,12 @@ class GenerateTestsActionClass : AnAction() {
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
         val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
-        evoSuiteRunner.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
+
+        val project: Project = e.project ?: return
+        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+
+        ProjectBuilder(projectPath, project).runBuild()
+        evoSuiteRunner.forClass().runTestGeneration()
     }
 
     /**

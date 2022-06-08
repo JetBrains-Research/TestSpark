@@ -12,6 +12,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import nl.tudelft.ewi.se.ciselab.testgenie.cache.CacheService
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.VALIDATION_RESULT_TOPIC
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.ValidationResultListener
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.Validator
@@ -38,8 +39,14 @@ class Workspace(private val project: Project) {
         val targetClassPath: String
     )
 
-    class TestJob(val info: TestJobInfo, val report: CompactReport, val selectedTests: HashSet<String>) {
-        fun getSelectedTests(): List<CompactTestCase> {
+    class TestJob(
+        val info: TestJobInfo,
+        val report: CompactReport,
+        val selectedTests: HashSet<String>,
+        val testEdits: HashMap<String, String>,
+        val liveCoverage: HashMap<String, Set<Int>>
+    ) {
+        private fun getSelectedTests(): List<CompactTestCase> {
             return report.testCaseList.filter { selectedTests.contains(it.key) }.map { it.value }
         }
 
@@ -142,8 +149,12 @@ class Workspace(private val project: Project) {
         val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
         val displayedSet = HashSet<String>()
         displayedSet.addAll(testReport.testCaseList.keys)
-        val testJob = TestJob(jobKey, testReport, displayedSet)
+
+        val testJob = TestJob(jobKey, testReport, displayedSet, hashMapOf(), hashMapOf())
         resultsForFile.add(testJob)
+
+        val cacheService = project.service<CacheService>()
+        cacheService.addTestJobCache(jobKey.fileUrl, testJob)
 
         val editor = editorForFileUrl(jobKey.fileUrl)
 
