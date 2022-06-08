@@ -5,6 +5,7 @@ import com.intellij.remoterobot.RemoteRobot
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.MethodOrderer
@@ -48,7 +49,12 @@ class GeneratedTestsToolWindowTest {
     @Order(1)
     @Video
     @Test
-    fun testGeneratedTestTab(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {}
+    fun testGeneratedTestTab(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
+        val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
+        ideaFrame.apply {
+            Assertions.assertThat(generatedTestsTab.hasText("Generated Tests")).isTrue
+        }
+    }
 
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
