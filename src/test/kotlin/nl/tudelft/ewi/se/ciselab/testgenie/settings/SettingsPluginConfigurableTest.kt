@@ -1,12 +1,13 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
-import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -15,17 +16,28 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.Mockito
 import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettingsPluginConfigurableTest {
-    private val settingsConfigurable = SettingsPluginConfigurable()
+    private var project: Project = Mockito.mock(Project::class.java)
+    private lateinit var settingsConfigurable: SettingsPluginConfigurable
     private lateinit var settingsComponent: SettingsPluginComponent
-    private lateinit var settingsState: SettingsApplicationState
+    private lateinit var settingsProjectService: SettingsProjectService
+    private var settingsState: SettingsProjectState = SettingsProjectState()
     private lateinit var fixture: CodeInsightTestFixture
 
     @BeforeEach
     fun setUp() {
+        project = Mockito.mock(Project::class.java)
+        settingsProjectService = Mockito.mock(SettingsProjectService::class.java)
+
+        settingsConfigurable = SettingsPluginConfigurable(project)
+
+        Mockito.`when`(project.service<SettingsProjectService>()).thenReturn(settingsProjectService)
+        Mockito.`when`(settingsProjectService.state).thenReturn(settingsState)
+
         val projectBuilder: TestFixtureBuilder<IdeaProjectTestFixture> =
             IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder("project")
 
@@ -36,7 +48,7 @@ class SettingsPluginConfigurableTest {
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
         settingsComponent = settingsConfigurable.settingsComponent!!
-        settingsState = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
+//        settingsState = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
     }
 
     @AfterEach
