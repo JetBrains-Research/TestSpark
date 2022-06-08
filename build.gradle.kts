@@ -20,7 +20,7 @@ plugins {
     // Gradle Qodana Plugin
     id("org.jetbrains.qodana") version "0.1.13"
 }
-
+thunderdomeVersion
 group = properties("pluginGroup")
 version = properties("pluginVersion")
 
@@ -33,9 +33,9 @@ repositories {
 // include evo suite jar
 dependencies {
     implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
-    implementation(files("lib/evosuite-standalone-runtime-1.2.1-SNAPSHOT.jar"))
-    implementation(files("lib/hamcrest-core-1.3.jar"))
-    implementation(files("lib/junit-4.12.jar"))
+    implementation(files("lib/standalone-runtime.jar"))
+
+    implementation("junit:junit:4.13")
 
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
 

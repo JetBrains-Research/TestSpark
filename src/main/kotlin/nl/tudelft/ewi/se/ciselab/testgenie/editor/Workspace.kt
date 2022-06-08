@@ -216,7 +216,7 @@ class Workspace(private val project: Project) {
 
     private fun showValidationResult(validationResult: Validator.JUnitResult) {
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.removeFailingTestCases(validationResult.failedTestNames)
+        testCaseDisplayService.markFailingTestCases(validationResult.failedTestNames)
     }
 
     /**

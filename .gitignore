@@ -2,7 +2,7 @@
 .idea/
 .qodana/
 build/
-lib/
+lib/evosuite-*.jar
 **/evosuite-tests/
 src/test/resources/project/pizzeria/.idea/
 src/test/resources/project/pizzeria/target/
