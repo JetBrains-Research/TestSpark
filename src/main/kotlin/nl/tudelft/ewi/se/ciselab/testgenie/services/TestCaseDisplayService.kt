@@ -244,6 +244,7 @@ class TestCaseDisplayService(private val project: Project) {
         removeTestCases(selectedTestCasePanels)
 
         contentManager!!.removeContent(content!!, true)
+        ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
     }
 
     private fun validateTests() {}
