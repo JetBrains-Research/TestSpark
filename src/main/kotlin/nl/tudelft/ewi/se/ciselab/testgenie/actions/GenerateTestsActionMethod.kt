@@ -6,11 +6,14 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ProjectBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
 
@@ -28,8 +31,6 @@ class GenerateTestsActionMethod : AnAction() {
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
-        val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
-
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
 
@@ -45,10 +46,16 @@ class GenerateTestsActionMethod : AnAction() {
 
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
+        val project: Project = e.project ?: return
+        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+
+        ProjectBuilder(projectPath, project).runBuild()
+
+        val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
         evoSuiteRunner
             .forMethod(methodDescriptor)
-            .withCacheLines(cacheStartLine, cacheEndLine)
-            .invalidateCache(linesToInvalidateFromCache)
+//            .withCacheLines(cacheStartLine, cacheEndLine)
+//            .invalidateCache(linesToInvalidateFromCache)
             .runTestGeneration()
     }
 

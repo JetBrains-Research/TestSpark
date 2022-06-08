@@ -5,7 +5,10 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiFile
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ProjectBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
@@ -22,7 +25,6 @@ class GenerateTestsActionLine : AnAction() {
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
-        val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
@@ -32,12 +34,19 @@ class GenerateTestsActionLine : AnAction() {
 
         logger.info("Selected line is $selectedLine")
 
-        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
+//        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
+        // TODO: Check cache for line
+
+        val project: Project = e.project ?: return
+        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+
+        ProjectBuilder(projectPath, project).runBuild()
+        val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
         evoSuiteRunner
             .forLine(selectedLine)
-            .withCacheLines(selectedLine - 1, selectedLine - 1)
-            .invalidateCache(linesToInvalidateFromCache)
+//            .withCacheLines(selectedLine - 1, selectedLine - 1)
+//            .invalidateCache(linesToInvalidateFromCache)
             .runTestGeneration()
     }
 

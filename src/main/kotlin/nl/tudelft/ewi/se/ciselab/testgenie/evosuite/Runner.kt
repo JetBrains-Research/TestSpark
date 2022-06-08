@@ -19,13 +19,8 @@ import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
-import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
-import org.evosuite.result.TestGenerationResultImpl
-import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
 import java.io.File
 import java.nio.charset.Charset
 import java.util.UUID
@@ -69,9 +64,6 @@ class Runner(
 
     private var command = mutableListOf<String>()
 
-    private var cacheFromLine: Int? = null
-    private var cacheToLine: Int? = null
-
     init {
         Util.makeTmp()
         Util.makeDir("$serializeResultPath-validation")
@@ -113,26 +105,17 @@ class Runner(
         return this
     }
 
-    /**
-     * Configures lines for the cache (0-indexed)
-     */
-    fun withCacheLines(fromLine: Int, toLine: Int): Runner {
-        this.cacheFromLine = fromLine + 1
-        this.cacheToLine = toLine + 1
-        return this
-    }
-
-    /**
-     * Method to invalidate the cache.
-     *
-     * @param linesToInvalidate set of lines to invalidate
-     */
-    fun invalidateCache(linesToInvalidate: Set<Int>): Runner {
-        val staticInvalidator = project.service<StaticInvalidationService>()
-        staticInvalidator.invalidateCacheLines(fileUrl, linesToInvalidate)
-        log.info("Going to invalidate $linesToInvalidate lines")
-        return this
-    }
+//    /**
+//     * Method to invalidate the cache.
+//     *
+//     * @param linesToInvalidate set of lines to invalidate
+//     */
+//    fun invalidateCache(linesToInvalidate: Set<Int>): Runner {
+//        val staticInvalidator = project.service<StaticInvalidationService>()
+//        staticInvalidator.invalidateCacheLines(fileUrl, linesToInvalidate)
+//        log.info("Going to invalidate $linesToInvalidate lines")
+//        return this
+//    }
 
     /**
      * Builds the project and launches the EvoSuite process,
@@ -154,16 +137,6 @@ class Runner(
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
-                        // Check cache
-                        val hasCachedTests = tryShowCachedTestCases()
-                        if (hasCachedTests) {
-                            log.info("Found cached tests")
-                            indicator.stop()
-                            return
-                        }
-
-                        runBuild(indicator)
-
                         if (indicator.isCanceled) {
                             indicator.stop()
                             return
@@ -182,83 +155,36 @@ class Runner(
         return testResultName
     }
 
-    /**
-     * Attempts to retrieve and display cached test cases.
-     *
-     * @return true if cached tests were found, false otherwise
-     */
-    private fun tryShowCachedTestCases(): Boolean {
-        val cache = project.service<TestCaseCachingService>()
-        val testCases = cache.retrieveFromCache(fileUrl, cacheFromLine!!, cacheToLine!!)
-
-        if (testCases.isEmpty()) {
-            // no suitable cached tests found
-            return false
-        }
-
-        val workspace = project.service<Workspace>()
-        ApplicationManager.getApplication().invokeLater {
-            val report = CompactReport(TestGenerationResultImpl())
-            val testMap = hashMapOf<String, CompactTestCase>()
-            testCases.forEach {
-                testMap[it.testName] = it
-            }
-
-            report.testCaseList = testMap
-            report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
-
-            workspace.receiveGenerationResult(testResultName, report)
-        }
-
-        return true
-    }
-
-    /**
-     * Runs the build command as defined in settings.
-     *
-     * @param indicator the progress indicator
-     */
-    private fun runBuild(indicator: ProgressIndicator) {
-        indicator.isIndeterminate = true
-        indicator.text = TestGenieBundle.message("evosuiteBuildMessage")
-
-        val cmd = ArrayList<String>()
-
-        val operatingSystem = System.getProperty("os.name")
-
-        if (operatingSystem.toLowerCase().contains("windows")) {
-            cmd.add("cmd.exe")
-            cmd.add("/c")
-        } else {
-            cmd.add("sh")
-            cmd.add("-c")
-        }
-
-        cmd.add(settingsState!!.buildCommand)
-
-        val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
-        log.info("Starting build process with arguments: $cmdString")
-
-        val buildProcess = GeneralCommandLine(cmd)
-        buildProcess.setWorkDirectory(projectPath)
-        val handler = OSProcessHandler(buildProcess)
-        handler.startNotify()
-
-        // join build process
-        if (!handler.waitFor(evoSuiteProcessTimeout)) {
-            evosuiteError("Build process exceeded timeout - ${evoSuiteProcessTimeout}ms")
-        }
-
-        if (indicator.isCanceled) {
-            return
-        }
-
-        val exitCode = handler.exitCode
-
-        if (exitCode != 0) {
-            evosuiteError("exit code $exitCode", "Build failed")
-        }
-    }
+//    /**
+//     * Attempts to retrieve and display cached test cases.
+//     *
+//     * @return true if cached tests were found, false otherwise
+//     */
+//    private fun tryShowCachedTestCases(): Boolean {
+//        val cache = project.service<TestCaseCachingService>()
+//        val testCases = cache.retrieveFromCache(fileUrl, cacheFromLine!!, cacheToLine!!)
+//
+//        if (testCases.isEmpty()) {
+//            // no suitable cached tests found
+//            return false
+//        }
+//
+//        val workspace = project.service<Workspace>()
+//        ApplicationManager.getApplication().invokeLater {
+//            val report = CompactReport(TestGenerationResultImpl())
+//            val testMap = hashMapOf<String, CompactTestCase>()
+//            testCases.forEach {
+//                testMap[it.testName] = it
+//            }
+//
+//            report.testCaseList = testMap
+//            report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
+//
+//            workspace.receiveGenerationResult(testResultName, report)
+//        }
+//
+//        return true
+//    }
 
     /**
      * Executes EvoSuite.
@@ -304,7 +230,7 @@ class Runner(
                     Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
                 val coverageMatcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
 
-//                log.info(text) // kept for debugging purposes
+                log.info(text) // kept for debugging purposes
 
                 val progress =
                     if (progressMatcher.find()) progressMatcher.group(1)?.toDouble()?.div(100)

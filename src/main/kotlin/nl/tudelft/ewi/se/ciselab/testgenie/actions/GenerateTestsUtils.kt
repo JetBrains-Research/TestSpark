@@ -62,7 +62,7 @@ fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
     log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
 
     return Runner(project, projectPath, projectClassPath, classFQN, fileUrl, modificationStamp)
-        .withCacheLines(cacheStartLine, cacheEndLine)
+//        .withCacheLines(cacheStartLine, cacheEndLine)
 }
 
 /**
