@@ -8,7 +8,7 @@ import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.SettingsArguments
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsApplicationState
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class SettingsArgumentsTest {
-    private lateinit var settingsState: TestGenieSettingsState
+    private lateinit var settingsState: SettingsApplicationState
 
     private lateinit var fixture: CodeInsightTestFixture
 
@@ -30,7 +30,7 @@ class SettingsArgumentsTest {
         fixture.setUp()
 
         val settingsService = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java)
-        settingsService.loadState(TestGenieSettingsState())
+        settingsService.loadState(SettingsApplicationState())
 
         settingsState = settingsService.state
     }

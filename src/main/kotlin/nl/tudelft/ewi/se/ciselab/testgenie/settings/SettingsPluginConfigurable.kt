@@ -27,7 +27,7 @@ class SettingsPluginConfigurable : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: TestGenieSettingsState = SettingsApplicationService.getInstance().state!!
+        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         settingsComponent!!.javaPath = settingsState.javaPath
         settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
@@ -44,7 +44,7 @@ class SettingsPluginConfigurable : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: TestGenieSettingsState = SettingsApplicationService.getInstance().state!!
+        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         var modified: Boolean = settingsComponent!!.javaPath != settingsState.javaPath
         modified = modified or (settingsComponent!!.buildPath != settingsState.buildPath)
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
@@ -60,7 +60,7 @@ class SettingsPluginConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: TestGenieSettingsState = SettingsApplicationService.getInstance().state!!
+        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         settingsState.javaPath = settingsComponent!!.javaPath
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen
@@ -76,7 +76,7 @@ class SettingsPluginConfigurable : Configurable {
      * Check if the telemetry path is empty when telemetry is enabled.
      * If empty, then sets to previous state. Else, keep the new one.
      */
-    private fun checkEmptyTelemetryPath(settingsState: TestGenieSettingsState): Boolean {
+    private fun checkEmptyTelemetryPath(settingsState: SettingsApplicationState): Boolean {
         if (settingsComponent!!.telemetryEnabled && settingsComponent!!.telemetryPath.isBlank()) {
             settingsState.telemetryPath = settingsState.telemetryPath
             settingsComponent!!.telemetryPath = settingsState.telemetryPath

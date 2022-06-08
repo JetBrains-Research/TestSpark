@@ -22,7 +22,7 @@ import java.util.stream.Stream
 class SettingsEvoSuiteConfigurableTest {
     private val settingsConfigurable = SettingsEvoSuiteConfigurable()
     private lateinit var settingsComponent: SettingsEvoSuiteComponent
-    private lateinit var settingsState: TestGenieSettingsState
+    private lateinit var settingsState: SettingsApplicationState
     private lateinit var fixture: CodeInsightTestFixture
 
     @BeforeEach

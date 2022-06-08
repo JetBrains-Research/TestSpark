@@ -2,7 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.evosuite
 
 import nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsApplicationState
 
 /**
  * This class is used for constructing the necessary parameters for running evosuite
@@ -92,7 +92,7 @@ class SettingsArguments(
          * @param state the (settings) state that contains all the criteria
          * @return the generated criteria string, in the required format
          */
-        private fun createCriterionString(state: TestGenieSettingsState): String {
+        private fun createCriterionString(state: SettingsApplicationState): String {
             val sb = StringBuilder("-Dcriterion=") // e.g "-Dcriterion=BRANCH:WEAKMUTATION",
 
             if (state.criterionLine) {
