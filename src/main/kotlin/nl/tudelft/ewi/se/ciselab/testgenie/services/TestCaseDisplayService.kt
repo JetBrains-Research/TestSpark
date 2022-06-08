@@ -245,6 +245,8 @@ class TestCaseDisplayService(private val project: Project) {
 
         contentManager!!.removeContent(content!!, true)
         ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
+        val coverageVisualisationService = project.service<CoverageVisualisationService>()
+        coverageVisualisationService.closeToolWindowTab()
     }
 
     private fun validateTests() {}
