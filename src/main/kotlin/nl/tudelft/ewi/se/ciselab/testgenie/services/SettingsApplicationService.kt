@@ -16,7 +16,7 @@ class SettingsApplicationService : PersistentStateComponent<SettingsApplicationS
 
     /**
      * Gets the currently persisted state of the application.
-     * This method is called every time the values in the Plugin Settings page are saved.
+     * This method is called every time the values in the EvoSuite Settings page are saved.
      * If the values from getState are different from the default values obtained by calling
      *  the default constructor, the state is persisted (serialised and stored).
      */
