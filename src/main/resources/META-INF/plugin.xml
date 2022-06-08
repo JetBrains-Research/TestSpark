@@ -23,6 +23,8 @@
             serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService"/>
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieTelemetryService"/>
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
@@ -32,8 +34,6 @@
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService"/>
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService"/>
-        <applicationService
-                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieTelemetryService"/>
 
         <!-- Configurables -->
         <projectConfigurable
