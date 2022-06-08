@@ -27,6 +27,7 @@ import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
 import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
 import javax.swing.BorderFactory
@@ -34,6 +35,7 @@ import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
+import javax.swing.JLabel
 import javax.swing.JPanel
 
 class TestCaseDisplayService(private val project: Project) {
@@ -105,6 +107,8 @@ class TestCaseDisplayService(private val project: Project) {
      * Add Tests and their names to a List of pairs (used for highlighting)
      *
      * @param testReport The report from which each testcase should be displayed
+     * @param editor editor instance where coverage should be
+     *               visualized
      */
     private fun displayTestCases(testReport: CompactReport, editor: Editor) {
         allTestCasePanel.removeAll()
@@ -149,17 +153,17 @@ class TestCaseDisplayService(private val project: Project) {
             addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox)
 
             // Add "Remove" and "Reset" buttons to the test case panel
-            val topButtons = JPanel()
-            topButtons.layout = FlowLayout(FlowLayout.TRAILING)
-            topButtons.add(removeFromCacheButton)
-            topButtons.add(resetButton)
-            testCasePanel.add(topButtons, BorderLayout.NORTH)
+            val bottomButtons = JPanel()
+            bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
+            bottomButtons.add(removeFromCacheButton)
+            bottomButtons.add(resetButton)
+            testCasePanel.add(bottomButtons, BorderLayout.SOUTH)
 
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
+            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 25)))
             allTestCasePanel.add(testCasePanel)
             testCasePanels[testCase.testName] = testCasePanel
-            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 5)))
         }
     }
 
