@@ -1,7 +1,5 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
-import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
-
 /**
  * This class is the actual data class that stores the values of the Settings entries.
  */
@@ -30,15 +28,6 @@ data class SettingsApplicationState(
         const val junitCheck: Boolean = false
         const val minimize: Boolean = true
         val algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.DYNAMOSA
-
-        val javaPath: String = TestGenieDefaultsBundle.defaultValue("javaPath")
-        val colorRed: Int = TestGenieDefaultsBundle.defaultValue("colorRed").toInt()
-        val colorGreen: Int = TestGenieDefaultsBundle.defaultValue("colorGreen").toInt()
-        val colorBlue: Int = TestGenieDefaultsBundle.defaultValue("colorBlue").toInt()
-        val buildPath: String = TestGenieDefaultsBundle.defaultValue("buildPath")
-        val buildCommand: String = TestGenieDefaultsBundle.defaultValue("buildCommand")
-        val telemetryEnabled: Boolean = TestGenieDefaultsBundle.defaultValue("telemetryEnabled").toBoolean()
-        val telemetryPath: String = System.getProperty("user.home")
     }
 
     fun serializeChangesFromDefault(): List<String> {
