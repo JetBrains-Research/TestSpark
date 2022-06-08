@@ -30,7 +30,7 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
     }
 
     /**
-     * Loads the state of the application-level settings.
+     * Loads the state of the settings of the open project.
      * This method is called after the application-level settings component has been created
      *   and if the XML file with the state is changes externally.
      */
