@@ -35,7 +35,7 @@ class CoverageVisualisationService(private val project: Project) {
         fillToolWindowContents(testReport)
         createToolWindowTab()
 
-        updateCoverage(testReport.allCoveredLines, testReport, editor)
+        updateCoverage(testReport.allCoveredLines, testReport.testCaseList.keys.toHashSet(), testReport, editor)
     }
 
     /**
@@ -44,9 +44,15 @@ class CoverageVisualisationService(private val project: Project) {
      *
      * @param linesToCover total set of lines  to cover
      * @param testReport report used for gutter information
+     * @param selectedTests hash set of selected test names
      * @param editor editor instance where coverage should be updated
      */
-    fun updateCoverage(linesToCover: Set<Int>, testReport: CompactReport, editor: Editor) {
+    fun updateCoverage(
+        linesToCover: Set<Int>,
+        selectedTests: HashSet<String>,
+        testReport: CompactReport,
+        editor: Editor
+    ) {
         // Show in-line coverage only if enabled in settings
         val state = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
 
@@ -69,8 +75,14 @@ class CoverageVisualisationService(private val project: Project) {
                 }
             }
 
-            val mutationCovered = testReport.allCoveredMutation.groupBy { x -> x.lineNo }
-            val mutationNotCovered = testReport.allUncoveredMutation.groupBy { x -> x.lineNo }
+            selectedTests.forEach { x -> print(x) }
+
+            val mutationCovered =
+                testReport.testCaseList.filter { x -> x.key in selectedTests }.map { x -> x.value.coveredMutants }
+                    .flatten().groupBy { x -> x.lineNo }
+            val mutationNotCovered =
+                testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.key !in selectedTests }
+                    .map { x -> x.value.coveredMutants }.flatten().groupBy { x -> x.lineNo }
 
             for (i in linesToCover) {
                 val line = i - 1
@@ -80,7 +92,8 @@ class CoverageVisualisationService(private val project: Project) {
                     editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.ADDITIONAL_SYNTAX)
 
                 val testsCoveringLine =
-                    testReport.testCaseList.filter { x -> i in x.value.coveredLines }.map { x -> x.key }
+                    testReport.testCaseList.filter { x -> i in x.value.coveredLines && x.key in selectedTests }
+                        .map { x -> x.key }
                 val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
                 val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 
