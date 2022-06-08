@@ -47,8 +47,8 @@ class Validator(
 
         val pluginsPath = System.getProperty("idea.plugins.path")
 
-        val junitPath = "$pluginsPath/TestGenie/lib/junit-4.12.jar"
-        val standaloneRuntimePath = "$pluginsPath/TestGenie/lib/evosuite-standalone-runtime-1.2.1-SNAPSHOT.jar"
+        val junitPath = "$pluginsPath/TestGenie/lib/junit-4.13.jar"
+        val standaloneRuntimePath = "$pluginsPath/TestGenie/lib/standalone-runtime.jar"
         val hamcrestPath = "$pluginsPath/TestGenie/lib/hamcrest-core-1.3.jar"
 
         val testValidationDirectory =
