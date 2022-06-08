@@ -3,10 +3,12 @@ package nl.tudelft.ewi.se.ciselab.testgenie.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
+import nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService
 
 /**
  * This class contains all the logic related to generating tests for a class.
@@ -20,6 +22,11 @@ class GenerateTestsActionClass : AnAction() {
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
+        // Return if EvoSuite is already running
+        val project = e.project ?: return
+        val runnerService = project.service<RunnerService>()
+        if (runnerService.verifyIsRunning()) return
+
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
