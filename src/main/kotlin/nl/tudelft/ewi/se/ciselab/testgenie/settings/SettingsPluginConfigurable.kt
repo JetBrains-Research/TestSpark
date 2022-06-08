@@ -1,7 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
 import com.intellij.openapi.options.Configurable
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
 import javax.swing.JComponent
 
 /**
@@ -27,7 +27,7 @@ class SettingsPluginConfigurable : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
+        val settingsState: TestGenieSettingsState = SettingsApplicationService.getInstance().state!!
         settingsComponent!!.javaPath = settingsState.javaPath
         settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
@@ -44,7 +44,7 @@ class SettingsPluginConfigurable : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
+        val settingsState: TestGenieSettingsState = SettingsApplicationService.getInstance().state!!
         var modified: Boolean = settingsComponent!!.javaPath != settingsState.javaPath
         modified = modified or (settingsComponent!!.buildPath != settingsState.buildPath)
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
@@ -60,7 +60,7 @@ class SettingsPluginConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
+        val settingsState: TestGenieSettingsState = SettingsApplicationService.getInstance().state!!
         settingsState.javaPath = settingsComponent!!.javaPath
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen

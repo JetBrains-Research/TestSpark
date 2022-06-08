@@ -10,7 +10,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
  * This class is responsible for storing the Settings persistently. It uses TestGenieSettingsState class for that.
  */
 @State(name = "TestGenieSettingsState", storages = [Storage("testGenieSettings.xml")])
-class TestGenieSettingsService : PersistentStateComponent<TestGenieSettingsState> {
+class SettingsApplicationService : PersistentStateComponent<TestGenieSettingsState> {
 
     private var testGenieSettingsState: TestGenieSettingsState = TestGenieSettingsState()
 
@@ -36,7 +36,7 @@ class TestGenieSettingsService : PersistentStateComponent<TestGenieSettingsState
     companion object {
         @JvmStatic
         fun getInstance(): PersistentStateComponent<TestGenieSettingsState> {
-            return ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java)
+            return ApplicationManager.getApplication().getService(SettingsApplicationService::class.java)
         }
     }
 }

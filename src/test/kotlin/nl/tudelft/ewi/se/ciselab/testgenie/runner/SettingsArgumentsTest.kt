@@ -7,7 +7,7 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.SettingsArguments
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -29,7 +29,7 @@ class SettingsArgumentsTest {
         fixture = JavaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
-        val settingsService = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java)
+        val settingsService = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java)
         settingsService.loadState(TestGenieSettingsState())
 
         settingsState = settingsService.state

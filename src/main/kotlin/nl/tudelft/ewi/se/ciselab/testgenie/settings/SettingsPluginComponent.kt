@@ -5,7 +5,7 @@ import com.intellij.openapi.ui.TextBrowseFolderListener
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Color
 import java.awt.Dimension
@@ -78,7 +78,7 @@ class SettingsPluginComponent {
             telemetryPathChooser.isEditable = telemetryEnabledCheckbox.isSelected
             telemetryPathChooser.isEnabled = telemetryEnabledCheckbox.isSelected
         }
-        val telemetryEnabled = TestGenieSettingsService.getInstance().state!!.telemetryEnabled
+        val telemetryEnabled = SettingsApplicationService.getInstance().state!!.telemetryEnabled
         telemetryPathChooser.addBrowseFolderListener(textBrowseFolderListener) // Add the ability to choose folders
         telemetryPathChooser.isEditable = telemetryEnabled
         telemetryPathChooser.isEnabled = telemetryEnabled

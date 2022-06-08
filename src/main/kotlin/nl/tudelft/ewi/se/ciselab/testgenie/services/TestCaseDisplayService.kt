@@ -162,7 +162,7 @@ class TestCaseDisplayService(private val project: Project) {
         if (!editor.background.equals(defaultEditorColor)) {
             return
         }
-        val service = TestGenieSettingsService.getInstance().state
+        val service = SettingsApplicationService.getInstance().state
         val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
@@ -367,7 +367,7 @@ class TestCaseDisplayService(private val project: Project) {
                 resetButton.isEnabled = true
 
                 // add border highlight
-                val service = TestGenieSettingsService.getInstance().state
+                val service = SettingsApplicationService.getInstance().state
                 val borderColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
                 textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 

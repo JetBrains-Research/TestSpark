@@ -19,10 +19,10 @@ import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
@@ -65,7 +65,7 @@ class Runner(
 
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
-    private val settingsState = TestGenieSettingsService.getInstance().state
+    private val settingsState = SettingsApplicationService.getInstance().state
 
     private var command = mutableListOf<String>()
 
