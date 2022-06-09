@@ -2,7 +2,6 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
@@ -182,8 +181,8 @@ class TestCaseDisplayService(private val project: Project) {
         if (!editor.background.equals(defaultEditorColor)) {
             return
         }
-        val service = TestGenieSettingsService.getInstance().state
-        val highlightColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue, 30)
+        val settingsProjectState = project.service<SettingsProjectService>().state
+        val highlightColor = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
     }
@@ -392,8 +391,8 @@ class TestCaseDisplayService(private val project: Project) {
                 resetButton.isEnabled = true
 
                 // add border highlight
-                val service = TestGenieSettingsService.getInstance().state
-                val borderColor = Color(service!!.colorRed, service.colorGreen, service.colorBlue)
+                val settingsProjectState = project.service<SettingsProjectService>().state
+                val borderColor = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
                 textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
                 // add line highlighting
@@ -437,7 +436,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @param selectedTestCases the test cases selected by the user
      */
     private fun scheduleTelemetry(selectedTestCases: List<String>) {
-        val telemetryService = ApplicationManager.getApplication().getService(TestGenieTelemetryService::class.java)
+        val telemetryService = project.service<TestGenieTelemetryService>()
         telemetryService.scheduleTestCasesForTelemetry(
             selectedTestCases.map {
                 val modified = (testCasePanels[it]!!.getComponent(1) as EditorTextField).text

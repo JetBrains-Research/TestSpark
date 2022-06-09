@@ -1,9 +1,9 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.evosuite
 
 import nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.ContentDigestAlgorithm
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsApplicationState
 
 /**
  * This class is used for constructing the necessary parameters for running evosuite
@@ -19,11 +19,10 @@ class SettingsArguments(
     private val projectClassPath: String,
     private val projectPath: String,
     private val serializeResultPath: String,
-    private val classFQN: String,
-
+    private val classFQN: String
 ) {
     private var command: MutableList<String> = mutableListOf(
-        algorithmsToGenerateMap[TestGenieSettingsService.getInstance().state!!.algorithm]!!,
+        algorithmsToGenerateMap[SettingsApplicationService.getInstance().state!!.algorithm]!!,
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
         "-base_dir", projectPath,
@@ -72,7 +71,7 @@ class SettingsArguments(
      */
     fun build(): MutableList<String> {
         val toolWindowState = QuickAccessParametersService.getInstance().state
-        val settingsState = TestGenieSettingsService.getInstance().state
+        val settingsState = SettingsApplicationService.getInstance().state
 
         if (toolWindowState != null) {
             val params = toolWindowState.serializeChangesFromDefault()
@@ -124,7 +123,7 @@ class SettingsArguments(
          * @param state the (settings) state that contains all the criteria
          * @return the generated criteria string, in the required format
          */
-        private fun createCriterionString(state: TestGenieSettingsState): String {
+        private fun createCriterionString(state: SettingsApplicationState): String {
             val sb = StringBuilder("-Dcriterion=") // e.g "-Dcriterion=BRANCH:WEAKMUTATION",
 
             if (state.criterionLine) {
