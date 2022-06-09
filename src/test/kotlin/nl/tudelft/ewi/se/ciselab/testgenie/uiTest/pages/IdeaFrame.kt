@@ -123,6 +123,49 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     }
 
     /**
+     * Creates a class and closes the tab after its creation.
+     * @param testFileName - the name of the file that you want to create.
+     */
+    fun createTestClass(testFileName: String) {
+        // Click on the editor to ensure that we have access to the different functions
+        actionLink(byXpath("//div[@class='EditorComponentImpl']")).click()
+        // Do the double shift to trigger search everywhere/action window
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        Thread.sleep(1000) // Some time to ensure that everything is loaded
+        // Type Java Class in the search filed to create a new class
+        textField(byXpath("//div[@class='SearchField']")).text = "Java Class"
+        Thread.sleep(1000)
+        // Select the option to create the new class by pressing "enter"
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+        // Menu for creating a class will appear, enter the name of the file you want to create
+        textField(byXpath("//div[@class='ExtendableTextField']")).text = testFileName
+        Thread.sleep(1000)
+        // Create the class
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+        Thread.sleep(1000)
+        // The git message pops up, escape it to ignore it. If message does not appear, this should not have any effect.
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ESCAPE) }
+        Thread.sleep(1000)
+        // Close the newly created file tab
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_F4) }
+    }
+
+    /**
+     * Deletes the specified file.
+     * @param testFileName - the name of the file that you want to delete.
+     * @param projectName - the name of the project in which the file is contained.
+     */
+    fun deleteProject(testFileName: String, projectName: String) {
+        // Open the correct file
+        openProjectFile(testFileName, projectName)
+        // Function to trigger safe delete option
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ALT, KeyEvent.VK_DELETE) }
+        // Confirm the deletion of a file by pressing "OK"
+        actionLink(byXpath("//div[@text='OK']")).click()
+    }
+
+    /**
      * Run EvoSuite using a shortcut to generate tests for class
      */
     fun runTestsForClass() {
