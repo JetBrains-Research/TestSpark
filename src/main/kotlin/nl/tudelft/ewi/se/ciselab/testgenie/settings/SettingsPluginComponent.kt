@@ -7,6 +7,8 @@ import com.intellij.openapi.ui.TextBrowseFolderListener
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieToolTipsBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Color
@@ -54,15 +56,15 @@ class SettingsPluginComponent(_project: Project) {
             "information about your usage patterns, such as the tests you generate and the way you " +
             "modify them manually before applying them to a test suite."
     )
-    private val telemetrySeparator = JXTitledSeparator("Telemetry")
-    private var telemetryEnabledCheckbox = JCheckBox("Enable telemetry")
+    private val telemetrySeparator = JXTitledSeparator(TestGenieLabelsBundle.defaultValue("telemetry"))
+    private var telemetryEnabledCheckbox = JCheckBox(TestGenieLabelsBundle.defaultValue("telemetryEnabled"))
     private val fileChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
     private val textBrowseFolderListener = TextBrowseFolderListener(fileChooserDescriptor)
     private val telemetryPathChooser = TextFieldWithBrowseButton()
-    private val telemetryPathLabel = JBLabel("Specify the folder path for telemetry data")
+    private val telemetryPathLabel = JBLabel(TestGenieLabelsBundle.defaultValue("telemetryPath"))
 
     // Accessibility options
-    private val accessibilitySeparator = JXTitledSeparator("Accessibility settings")
+    private val accessibilitySeparator = JXTitledSeparator(TestGenieLabelsBundle.defaultValue("accessibility"))
     private var colorPicker = JColorChooser()
 
     init {
@@ -96,12 +98,12 @@ class SettingsPluginComponent(_project: Project) {
             // Add description of TestGenie
             .addComponent(pluginDescription)
             .addComponent(pluginDescriptionDisclaimer, 15)
-            .addComponent(JXTitledSeparator("Environment settings"), 15)
-            .addLabeledComponent(JBLabel("Java 11 path:"), javaPathTextField, 10, false)
+            .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("environmentSettings")), 15)
+            .addLabeledComponent(JBLabel(TestGenieLabelsBundle.defaultValue("javaPath")), javaPathTextField, 10, false)
             // Add buildPath option
-            .addLabeledComponent(JBLabel("Select the compilation path:"), buildPathTextField, 10, false)
+            .addLabeledComponent(JBLabel(TestGenieLabelsBundle.defaultValue("buildPath")), buildPathTextField, 10, false)
             // Add buildPath option
-            .addLabeledComponent(JBLabel("Select the compile command"), buildCommandTextField, 10, false)
+            .addLabeledComponent(JBLabel(TestGenieLabelsBundle.defaultValue("buildCommand")), buildCommandTextField, 10, false)
             // Add telemetry options
             .addComponent(telemetrySeparator, 15)
             .addComponent(telemetryDescription, 10)
@@ -109,7 +111,7 @@ class SettingsPluginComponent(_project: Project) {
             .addLabeledComponent(telemetryPathLabel, telemetryPathChooser, 10, false)
             // Add accessibility options
             .addComponent(accessibilitySeparator, 15)
-            .addComponent(JBLabel("Choose color for visualisation highlight"), 15)
+            .addComponent(JBLabel(TestGenieLabelsBundle.defaultValue("colorPicker")), 15)
             .addComponent(colorPicker, 10)
             .addComponentFillVertically(JPanel(), 0)
             .panel
@@ -122,16 +124,16 @@ class SettingsPluginComponent(_project: Project) {
     private fun stylizePanel() {
 
         // Add description to build Path
-        buildPathTextField.toolTipText = "Directs EvoSuite to the compiled classes. Default: target/classes"
+        buildPathTextField.toolTipText = TestGenieToolTipsBundle.defaultValue("buildPath")
 
         // Add description to build Command
-        buildCommandTextField.toolTipText = "The command you use for compiling. Usually a maven or gradle command"
+        buildCommandTextField.toolTipText = TestGenieToolTipsBundle.defaultValue("buildCommand")
 
         // Add description to telemetry
-        telemetryEnabledCheckbox.toolTipText = "Send telemetry to CISELab"
+        telemetryEnabledCheckbox.toolTipText = TestGenieToolTipsBundle.defaultValue("telemetryEnabled")
 
         // Add description to telemetry path
-        telemetryPathLabel.toolTipText = "Choose a directory to save telemetry data into"
+        telemetryPathLabel.toolTipText = TestGenieToolTipsBundle.defaultValue("telemetryPath")
 
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
@@ -153,7 +155,7 @@ class SettingsPluginComponent(_project: Project) {
         // Set colorPicker to wrap around dimensions
         colorPicker.preferredSize = Dimension(width ?: 100, height ?: 400)
 
-        javaPathTextField.toolTipText = "Path to a java binary"
+        javaPathTextField.toolTipText = TestGenieToolTipsBundle.defaultValue("javaPath")
     }
 
     /**

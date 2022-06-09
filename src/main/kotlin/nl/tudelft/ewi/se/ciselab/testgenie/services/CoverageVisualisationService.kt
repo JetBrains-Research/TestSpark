@@ -9,6 +9,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManager
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.coverage.CoverageRenderer
 import org.evosuite.utils.CompactReport
 import java.awt.Color
@@ -23,6 +25,7 @@ class CoverageVisualisationService(private val project: Project) {
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
+    private var contentManager: ContentManager? = null
 
     /**
      * Instantiates tab for coverage table and calls function to update coverage.
@@ -144,16 +147,23 @@ class CoverageVisualisationService(private val project: Project) {
 
         // Remove coverage visualisation from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
-        val contentManager = toolWindowManager!!.contentManager
+        contentManager = toolWindowManager!!.contentManager
         if (content != null) {
-            contentManager.removeContent(content!!, true)
+            contentManager!!.removeContent(content!!, true)
         }
 
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
         content = contentFactory.createContent(
-            visualisationService.mainPanel, "Coverage Visualisation", true
+            visualisationService.mainPanel, TestGenieLabelsBundle.defaultValue("coverageVisualisation"), true
         )
-        contentManager.addContent(content!!)
+        contentManager!!.addContent(content!!)
+    }
+
+    /**
+     * Closes the toolWindow tab for the coverage visualisation
+     */
+    fun closeToolWindowTab() {
+        contentManager!!.removeContent(content!!, true)
     }
 }

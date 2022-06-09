@@ -10,6 +10,9 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieToolTipsBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Dimension
@@ -31,7 +34,7 @@ import javax.swing.SpinnerNumberModel
  */
 class QuickAccessParameters(private val project: Project) {
     // Coverage visualisation toggle
-    private val showCoverageCheckbox: JCheckBox = JCheckBox("Show visualised coverage")
+    private val showCoverageCheckbox: JCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("showCoverage"))
 
     // UI elements for EvoSuite parameters
     private val stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
@@ -44,26 +47,26 @@ class QuickAccessParameters(private val project: Project) {
     private val population: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
 
     // Save and Reset buttons
-    private val saveButton: JButton = JButton("Save")
-    private val resetButton: JButton = JButton("Reset")
+    private val saveButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("saveButton"))
+    private val resetButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("resetButton"))
 
     // Link to open settings
-    private val settingsLink: ActionLink = ActionLink("Advanced Settings") {
+    private val settingsLink: ActionLink = ActionLink(TestGenieLabelsBundle.defaultValue("settingsLink")) {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, "EvoSuite")
     }
 
     // Tool Window panel
-    private val panelTitle = JLabel("Quick Access Parameters")
+    private val panelTitle = JLabel(TestGenieLabelsBundle.defaultValue("quickAccess"))
     private var toolWindowPanel: JPanel = JPanel()
 
     // The tooltip labels
     private val stoppingConditionToolTip =
-        JBLabel("Default: 60 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+        JBLabel(TestGenieToolTipsBundle.defaultValue("default") + "60" + TestGenieToolTipsBundle.defaultValue("seconds"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
     private val populationLimitToolTip =
-        JBLabel("Default: 50 seconds", UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+        JBLabel(TestGenieToolTipsBundle.defaultValue("default") + "50" + TestGenieToolTipsBundle.defaultValue("seconds"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
 
     // Template strings for "default" tooltips
-    private val defaultStr: String = "Default: %s"
+    private val defaultStr: String = TestGenieLabelsBundle.defaultValue("defaultStr")
 
     init {
         // Load the persisted state
@@ -106,68 +109,68 @@ class QuickAccessParameters(private val project: Project) {
         .addVerticalGap(25)
         .addComponent(panelTitle)
         // Add coverage visualisation checkbox
-        .addComponent(JXTitledSeparator("Plugin Setting: Coverage Visualisation"), 35)
+        .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("showCoverageDescription")), 35)
         .addComponent(showCoverageCheckbox, 35)
         // Add `Search Budget` category
-        .addComponent(JXTitledSeparator("Search Budget"), 35)
+        .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("searchBudget")), 35)
         .addLabeledComponent(
             customLabel(
-                "Search budget type",
-                "What condition should be checked to end the search."
+                TestGenieLabelsBundle.defaultValue("budgetType"),
+                TestGenieToolTipsBundle.defaultValue("budgetType")
             ),
             stoppingCondition, 25, false
         )
         .addTooltip(default(StoppingCondition.MAXTIME.toString()))
-        .addLabeledComponent(customLabel("Search budget", "Maximum search duration."), searchBudget, 25, false)
+        .addLabeledComponent(customLabel(TestGenieLabelsBundle.defaultValue("searchBudget"), TestGenieToolTipsBundle.defaultValue("initTimeout")), searchBudget, 25, false)
         .addComponentToRightColumn(stoppingConditionToolTip, 1)
         // Add `Timeouts` category
-        .addComponent(JXTitledSeparator("Timeouts"), 35)
+        .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("timeouts")), 35)
         .addLabeledComponent(
             customLabel(
-                "Initialization timeout",
-                "Seconds allowed for initializing the search."
+                TestGenieLabelsBundle.defaultValue("initTimeout"),
+                TestGenieToolTipsBundle.defaultValue("initTimeout")
             ),
             initializationTimeout, 25, false
         )
-        .addTooltip(default("120 seconds"))
+        .addTooltip(default("120 " + TestGenieToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
-                "Minimisation timeout",
-                "Seconds allowed for minimization at the end."
+                TestGenieLabelsBundle.defaultValue("minimTimeout"),
+                TestGenieToolTipsBundle.defaultValue("minimTimeout")
             ),
             minimisationTimeout, 20, false
         )
-        .addTooltip(default("60 seconds"))
+        .addTooltip(default("60 " + TestGenieToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
-                "Assertion timeout",
-                "Seconds allowed for assertion generation at the end."
+                TestGenieLabelsBundle.defaultValue("assertTimeout"),
+                TestGenieToolTipsBundle.defaultValue("assertTimeout")
             ),
             assertionTimeout, 20, false
         )
-        .addTooltip(default("60 seconds"))
+        .addTooltip(default("60 " + TestGenieToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
-                "JUnit check timeout",
-                "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
+                TestGenieLabelsBundle.defaultValue("junitTimeout"),
+                TestGenieToolTipsBundle.defaultValue("junitTimeout")
             ),
             junitCheckTimeout, 20, false
         )
-        .addTooltip(default("60 seconds"))
+        .addTooltip(default("60 " + TestGenieToolTipsBundle.defaultValue("seconds")))
         // Add `Genetic Algorithm` section
-        .addComponent(JXTitledSeparator("Genetic Algorithm"), 35)
+        .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("geneticAlg")), 35)
         .addLabeledComponent(
             customLabel(
-                "Population limit",
-                "What to use as limit for the population size."
+                TestGenieLabelsBundle.defaultValue("populationLim"),
+                TestGenieToolTipsBundle.defaultValue("populationLim")
             ),
             populationLimit, 25, false
         )
-        .addTooltip(default("Individuals"))
+        .addTooltip(default(TestGenieToolTipsBundle.defaultValue("individuals")))
         .addLabeledComponent(
             customLabel(
-                "Population",
-                "Population size of genetic algorithm."
+                TestGenieLabelsBundle.defaultValue("population"),
+                TestGenieToolTipsBundle.defaultValue("population")
             ),
             population, 20, false
         )
@@ -228,8 +231,8 @@ class QuickAccessParameters(private val project: Project) {
      */
     private val addListenerForResetButton: (ActionEvent) -> Unit = {
         val choice: Int = Messages.showYesNoCancelDialog(
-            "Are you sure you want to reset all the values to defaults?\nThis action cannot be undone",
-            "Are You Sure?",
+            TestGenieBundle.message("resetMessage"),
+            TestGenieBundle.message("resetTitle"),
             Messages.getQuestionIcon()
         )
 
@@ -248,7 +251,7 @@ class QuickAccessParameters(private val project: Project) {
 
             loadState()
 
-            Messages.showInfoMessage("Parameters have been restored to defaults", "Restored Successfully")
+            Messages.showInfoMessage(TestGenieBundle.message("parametersResetMessage"), TestGenieBundle.message("parametersResetTitle"))
         }
     }
 
@@ -258,7 +261,7 @@ class QuickAccessParameters(private val project: Project) {
      */
     private val addListenerForSaveButton: (ActionEvent) -> Unit = {
         saveState()
-        Messages.showInfoMessage("Parameters have been saved successfully", "Saved Successfully")
+        Messages.showInfoMessage(TestGenieBundle.message("parametersSavedMessage"), TestGenieBundle.message("parametersSavedTitle"))
     }
 
     /**
@@ -299,18 +302,17 @@ class QuickAccessParameters(private val project: Project) {
      * Adds tooltips to the actual UI elements, not the labels for them.
      */
     private fun addTooltipsToUiElements() {
-        showCoverageCheckbox.toolTipText = "Highlight lines which are covered by selected generated tests."
-        stoppingCondition.toolTipText = "What condition should be checked to end the search."
-        searchBudget.toolTipText = "Maximum search duration."
-        initializationTimeout.toolTipText = "Seconds allowed for initializing the search."
-        minimisationTimeout.toolTipText = "Seconds allowed for minimization at the end."
-        assertionTimeout.toolTipText = "Seconds allowed for assertion generation at the end."
-        junitCheckTimeout.toolTipText =
-            "Seconds allowed for checking the generated JUnit files <p/>(e.g., compilation and stability)."
-        populationLimit.toolTipText = "What to use as limit for the population size."
-        population.toolTipText = "Population size of genetic algorithm."
+        showCoverageCheckbox.toolTipText = TestGenieToolTipsBundle.defaultValue("showCoverage")
+        stoppingCondition.toolTipText = TestGenieToolTipsBundle.defaultValue("stoppingCondition")
+        searchBudget.toolTipText = TestGenieToolTipsBundle.defaultValue("searchBudget")
+        initializationTimeout.toolTipText = TestGenieToolTipsBundle.defaultValue("initTimeoutPopup")
+        minimisationTimeout.toolTipText = TestGenieToolTipsBundle.defaultValue("minimTimeoutPopup")
+        assertionTimeout.toolTipText = TestGenieToolTipsBundle.defaultValue("assertTimeoutPopup")
+        junitCheckTimeout.toolTipText = TestGenieToolTipsBundle.defaultValue("junitTimeoutPopup")
+        populationLimit.toolTipText = TestGenieToolTipsBundle.defaultValue("populationLimPopup")
+        population.toolTipText = TestGenieToolTipsBundle.defaultValue("populationPopup")
 
-        resetButton.toolTipText = "Reset all parameters to their default values"
+        resetButton.toolTipText = TestGenieToolTipsBundle.defaultValue("resetButton")
     }
 
     /**

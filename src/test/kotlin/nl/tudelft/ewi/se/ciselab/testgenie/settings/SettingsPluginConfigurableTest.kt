@@ -11,6 +11,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
@@ -73,6 +74,7 @@ class SettingsPluginConfigurableTest {
 
     @ParameterizedTest
     @MethodSource("intValueGenerator")
+    @Order(2)
     fun testApplyValues(oldValue: Int, function: () -> Unit, component: () -> Int, state: () -> Int) {
         function()
         settingsConfigurable.apply()
@@ -81,6 +83,7 @@ class SettingsPluginConfigurableTest {
     }
 
     @Test
+    @Order(1)
     fun testIsModifiedJavaPath() {
         settingsComponent.javaPath = "this is modified: first"
         assertThat(settingsConfigurable.isModified).isTrue
