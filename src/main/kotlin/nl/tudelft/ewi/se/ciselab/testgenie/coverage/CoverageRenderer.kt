@@ -68,7 +68,7 @@ class CoverageRenderer(
 
         val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
         if (coveredMutation.isNotEmpty() && state.criterionWeakMutation) {
-            prePanel.addComponent(JBLabel(" Covered mutants:"), 10)
+            prePanel.addComponent(JBLabel(" Killed mutants:"), 10)
             for (mutantName in coveredMutation) {
                 prePanel.addComponent(
                     ActionLink(mutantName.substringBefore('(')) {
@@ -79,7 +79,7 @@ class CoverageRenderer(
         }
 
         if (notCoveredMutation.isNotEmpty() && state.criterionWeakMutation) {
-            prePanel.addComponent(JBLabel(" Not covered mutants:"), 10)
+            prePanel.addComponent(JBLabel(" Not killed mutants:"), 10)
             for (mutantName in notCoveredMutation) {
                 prePanel.addComponent(
                     JBLabel(mutantName.substringBefore('('))
