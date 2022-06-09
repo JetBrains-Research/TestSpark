@@ -1,6 +1,6 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.listener
 
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener
@@ -12,7 +12,7 @@ import java.util.TimerTask
  * This class is responsible for scheduling potential submissions of telemetry into a file, which is done every 5 minutes,
  *   as well as attempting to do it when the project is closed.
  */
-class TestGenieTelemetrySubmitListenerImpl : ProjectManagerListener {
+class TelemetrySubmitListenerImpl : ProjectManagerListener {
     private val log = Logger.getInstance(this.javaClass)
 
     /**
@@ -34,8 +34,7 @@ class TestGenieTelemetrySubmitListenerImpl : ProjectManagerListener {
 
                     log.info("Checking generated telemetry for the project ${project.name}...")
 
-                    ApplicationManager.getApplication()
-                        .getService(TestGenieTelemetryService::class.java).submitTelemetry()
+                    project.service<TestGenieTelemetryService>().submitTelemetry()
                 }
             },
             300000, 300000
@@ -50,7 +49,6 @@ class TestGenieTelemetrySubmitListenerImpl : ProjectManagerListener {
     override fun projectClosing(project: Project) {
         log.info("Checking generated telemetry for the project ${project.name} before closing...")
 
-        ApplicationManager.getApplication()
-            .getService(TestGenieTelemetryService::class.java).submitTelemetry()
+        project.service<TestGenieTelemetryService>().submitTelemetry()
     }
 }
