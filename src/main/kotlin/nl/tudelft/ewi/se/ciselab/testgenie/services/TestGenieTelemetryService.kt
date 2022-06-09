@@ -1,12 +1,16 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.google.gson.Gson
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.Project
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 
-class TestGenieTelemetryService {
+class TestGenieTelemetryService(_project: Project) {
+    private val project: Project = _project
+
     private val modifiedTestCases = mutableListOf<ModifiedTestCase>()
     private val modifiedTestCasesLock = Object()
 
@@ -14,7 +18,7 @@ class TestGenieTelemetryService {
     private val dateFormatter: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
 
     private val telemetryEnabled: Boolean
-        get() = TestGenieSettingsService.getInstance().state?.telemetryEnabled ?: false
+        get() = project.service<SettingsProjectService>().state.telemetryEnabled
 
     /**
      * Adds test cases to the list of test cases scheduled for telemetry.
@@ -69,8 +73,7 @@ class TestGenieTelemetryService {
         // Get the separator depending on the underlying OS
         val separator: String = java.io.File.separator
         // Get the telemetry path
-        var dirName: String = TestGenieSettingsService.getInstance().state?.telemetryPath
-            ?: System.getProperty("user.dir")
+        var dirName: String = project.service<SettingsProjectService>().state.telemetryPath
         if (!dirName.endsWith(separator)) dirName = dirName.plus(separator)
 
         // Create the directory if it does not exist

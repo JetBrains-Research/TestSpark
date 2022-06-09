@@ -6,7 +6,7 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
@@ -22,7 +22,7 @@ import java.util.stream.Stream
 class SettingsEvoSuiteConfigurableTest {
     private val settingsConfigurable = SettingsEvoSuiteConfigurable()
     private lateinit var settingsComponent: SettingsEvoSuiteComponent
-    private lateinit var settingsState: TestGenieSettingsState
+    private lateinit var settingsState: SettingsApplicationState
     private lateinit var fixture: CodeInsightTestFixture
 
     @BeforeEach
@@ -37,7 +37,7 @@ class SettingsEvoSuiteConfigurableTest {
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
         settingsComponent = settingsConfigurable.settingsComponent!!
-        settingsState = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+        settingsState = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
     }
 
     @AfterEach
@@ -116,7 +116,7 @@ class SettingsEvoSuiteConfigurableTest {
 
     @Test
     fun testIsModifiedAlgorithmComboBox() {
-        settingsComponent.algorithm = ContentDigestAlgorithm.DYNAMOSA
+        settingsComponent.algorithm = ContentDigestAlgorithm.RANDOM_SEARCH
         assertThat(settingsConfigurable.isModified).isTrue
     }
 

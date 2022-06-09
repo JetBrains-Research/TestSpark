@@ -15,7 +15,7 @@ import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestGenieSettingsStateTest {
-    private lateinit var settingsState: TestGenieSettingsState
+    private lateinit var settingsState: SettingsApplicationState
     private lateinit var fixture: CodeInsightTestFixture
 
     @BeforeEach
@@ -24,7 +24,7 @@ class TestGenieSettingsStateTest {
         val testFixture = factory.createLightFixtureBuilder(LightProjectDescriptor.EMPTY_PROJECT_DESCRIPTOR).fixture
         fixture = factory.createCodeInsightFixture(testFixture, LightTempDirTestFixtureImpl(true))
         fixture.setUp()
-        settingsState = TestGenieSettingsState()
+        settingsState = SettingsApplicationState()
 
         settingsState.algorithm = ContentDigestAlgorithm.DYNAMOSA
     }
@@ -43,15 +43,15 @@ class TestGenieSettingsStateTest {
 
     private fun valueGenerator(): Stream<Arguments> {
         return Stream.of(
-            Arguments.of({ settingsState.minimize = !settingsState.minimize }, mutableListOf("-Dminimize=false")),
-            Arguments.of({ settingsState.junitCheck = !settingsState.junitCheck }, mutableListOf("-Djunit_check=true")),
+            Arguments.of({ settingsState.minimize = !settingsState.minimize }, mutableListOf("-Dalgorithm=DYNAMOSA", "-Dminimize=false")),
+            Arguments.of({ settingsState.junitCheck = !settingsState.junitCheck }, mutableListOf("-Dalgorithm=DYNAMOSA", "-Djunit_check=true")),
             Arguments.of(
-                { settingsState.algorithm = ContentDigestAlgorithm.RANDOM_SEARCH },
-                mutableListOf("-Dalgorithm=RANDOM_SEARCH")
+                { settingsState.algorithm = ContentDigestAlgorithm.STEADY_STATE_GA },
+                mutableListOf("-Dalgorithm=STEADY_STATE_GA")
             ),
-            Arguments.of({ settingsState.assertions = !settingsState.assertions }, mutableListOf("-Dassertions=false")),
-            Arguments.of({ settingsState.sandbox = !settingsState.sandbox }, mutableListOf("-Dsandbox=false")),
-            Arguments.of({}, mutableListOf<String>())
+            Arguments.of({ settingsState.assertions = !settingsState.assertions }, mutableListOf("-Dassertions=false", "-Dalgorithm=DYNAMOSA")),
+            Arguments.of({ settingsState.sandbox = !settingsState.sandbox }, mutableListOf("-Dsandbox=false", "-Dalgorithm=DYNAMOSA")),
+            Arguments.of({}, mutableListOf("-Dalgorithm=DYNAMOSA"))
         )
     }
 }
