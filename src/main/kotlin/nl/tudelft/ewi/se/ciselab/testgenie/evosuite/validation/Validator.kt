@@ -51,8 +51,9 @@ class Validator(
         val standaloneRuntimePath = "$pluginsPath/TestGenie/lib/standalone-runtime.jar"
         val hamcrestPath = "$pluginsPath/TestGenie/lib/hamcrest-core-1.3.jar"
 
+        val testValidationRoot = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep$jobName-validation"
         val testValidationDirectory =
-            "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep$jobName-validation${sep}evosuite-tests"
+            "$testValidationRoot${sep}evosuite-tests"
         val validationDir = File(testValidationDirectory)
 
         // TODO: Implement classpath builder
@@ -75,7 +76,7 @@ class Validator(
                 override fun run(indicator: ProgressIndicator) {
                     try {
                         runTests(indicator, classpath, targetFqn)
-                        runTestsWithCoverage(indicator, classpath, targetFqn, testValidationDirectory)
+                        runTestsWithCoverage(indicator, classpath, targetFqn, testValidationRoot)
                         indicator.stop()
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -219,7 +220,7 @@ class Validator(
         indicator: ProgressIndicator,
         classpath: String,
         testFqn: String,
-        testValidationDirectory: String
+        testValidationRoot: String
     ) {
         settingsState ?: return
 
@@ -230,7 +231,7 @@ class Validator(
         // construct command
         val cmd = ArrayList<String>()
         cmd.add(settingsState.javaPath)
-        cmd.add("-javaagent:$jacocoPath=destfile=$testValidationDirectory/jacoco.exec")
+        cmd.add("-javaagent:$jacocoPath=destfile=$testValidationRoot/jacoco.exec")
         cmd.add("-cp")
         cmd.add(classpath)
         cmd.add("org.junit.runner.JUnitCore")
