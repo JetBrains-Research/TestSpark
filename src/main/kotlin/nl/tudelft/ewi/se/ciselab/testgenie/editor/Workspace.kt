@@ -12,6 +12,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import nl.tudelft.ewi.se.ciselab.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
 import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageSelectionToggleListener
 import nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService
@@ -117,8 +118,10 @@ class Workspace(private val project: Project) {
      *
      * @param testResultName the test result job id which was received
      * @param testReport the generated test suite
+     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     *                        due to a cache hit, or null if there was a cache miss
      */
-    fun receiveGenerationResult(testResultName: String, testReport: CompactReport) {
+    fun receiveGenerationResult(testResultName: String, testReport: CompactReport, cacheLazyRunner: Runner?) {
         val jobKey = pendingTestResults.remove(testResultName)!!
 
         val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
@@ -129,7 +132,7 @@ class Workspace(private val project: Project) {
         val editor = editorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
-            showReport(testReport, editor)
+            showReport(testReport, editor, cacheLazyRunner)
         } else {
             log.info("No editor opened for received test result")
         }
@@ -186,12 +189,14 @@ class Workspace(private val project: Project) {
      *
      * @param testReport the new test report
      * @param editor editor instance where coverage should be
-     * visualized
+     *               visualized
+     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     *                        due to a cache hit, or null if there was a cache miss
      */
-    private fun showReport(testReport: CompactReport, editor: Editor) {
+    private fun showReport(testReport: CompactReport, editor: Editor, cacheLazyRunner: Runner?) {
         val visualizationService = project.service<CoverageVisualisationService>()
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.showGeneratedTests(testReport, editor)
+        testCaseDisplayService.showGeneratedTests(testReport, editor, cacheLazyRunner)
         visualizationService.showCoverage(testReport, editor)
     }
 

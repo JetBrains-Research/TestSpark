@@ -75,6 +75,8 @@ class Runner(
     private var cacheFromLine: Int? = null
     private var cacheToLine: Int? = null
 
+    private var skipCache: Boolean = false
+
     init {
         Util.makeTmp()
     }
@@ -137,6 +139,14 @@ class Runner(
     }
 
     /**
+     * Generate tests even if there is no cache miss.
+     */
+    fun withoutCache(): Runner {
+        this.skipCache = true
+        return this
+    }
+
+    /**
      * Builds the project and launches EvoSuite on a separate thread.
      *
      * @return the path to which results will be (eventually) saved
@@ -156,12 +166,14 @@ class Runner(
                 override fun run(indicator: ProgressIndicator) {
                     try {
 
-                        // Check cache
-                        val hasCachedTests = tryShowCachedTestCases()
-                        if (hasCachedTests) {
-                            log.info("Found cached tests")
-                            indicator.stop()
-                            return
+                        if (!skipCache) {
+                            // Check cache
+                            val hasCachedTests = tryShowCachedTestCases()
+                            if (hasCachedTests) {
+                                log.info("Found cached tests")
+                                indicator.stop()
+                                return
+                            }
                         }
 
                         runBuild(indicator)
@@ -213,7 +225,7 @@ class Runner(
             report.testCaseList = testMap
             report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
 
-            workspace.receiveGenerationResult(testResultName, report)
+            workspace.receiveGenerationResult(testResultName, report, this)
         }
 
         return true
