@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.evosuite
 
 import nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.ContentDigestAlgorithm
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
 
 /**
@@ -18,10 +19,31 @@ class SettingsArguments(
     private val projectClassPath: String,
     private val projectPath: String,
     private val serializeResultPath: String,
-    private val classFQN: String
+    private val classFQN: String,
+    algorithmsToGenerateMap: HashMap<String, String> = hashMapOf(
+        ContentDigestAlgorithm.DYNAMOSA.toString() to "-generateMOSuite",
+        ContentDigestAlgorithm.MOSA.toString() to "-generateMOSuite",
+        ContentDigestAlgorithm.LIPS.toString() to "-generateMOSuite",
+        ContentDigestAlgorithm.MIO.toString() to "-generateMOSuite",
+        ContentDigestAlgorithm.RANDOM_SEARCH.toString() to "-generateTests",
+        ContentDigestAlgorithm.MONOTONIC_GA.toString() to "-generateSuite",
+        ContentDigestAlgorithm.STANDARD_GA.toString() to "-generateSuite",
+        ContentDigestAlgorithm.BREEDER_GA.toString() to "-generateSuite",
+        ContentDigestAlgorithm.STANDARD_GA.toString() to "-generateSuite",
+        ContentDigestAlgorithm.STEADY_STATE_GA.toString() to "-generateSuite",
+        ContentDigestAlgorithm.CELLULAR_GA.toString() to "-generateSuite",
+        ContentDigestAlgorithm.STANDARD_CHEMICAL_REACTION.toString() to "-generateSuite",
+        ContentDigestAlgorithm.MAP_ELITES.toString() to "-generateSuite",
+        ContentDigestAlgorithm.ONE_PLUS_LAMBDA_LAMBDA_GA.toString() to "-generateSuite",
+        ContentDigestAlgorithm.ONE_PLUS_ONE_EA.toString() to "-generateSuite",
+        ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA.toString() to "-generateSuite",
+        ContentDigestAlgorithm.MU_LAMBDA_EA.toString() to "-generateSuite",
+        ContentDigestAlgorithm.NSGAII.toString() to "-generateMOSuite",
+        ContentDigestAlgorithm.SPEA2.toString() to "-generateMOSuite"
+    )
 ) {
     private var command: MutableList<String> = mutableListOf(
-        "-generateSuite",
+        algorithmsToGenerateMap[TestGenieSettingsService.getInstance().state!!.algorithm.toString()]!!,
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
         "-base_dir", projectPath,
