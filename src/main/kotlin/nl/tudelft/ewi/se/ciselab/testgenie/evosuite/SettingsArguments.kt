@@ -132,7 +132,7 @@ class SettingsArguments(
         private val algorithmsToGenerateMap: HashMap<ContentDigestAlgorithm, String> = hashMapOf(
             ContentDigestAlgorithm.DYNAMOSA to "-generateMOSuite",
             ContentDigestAlgorithm.MOSA to "-generateMOSuite",
-            ContentDigestAlgorithm.LIPS to "-generateMOSuite",
+            ContentDigestAlgorithm.LIPS to "-generateRandom",
             ContentDigestAlgorithm.MIO to "-generateMOSuite",
             ContentDigestAlgorithm.RANDOM_SEARCH to "-generateTests",
             ContentDigestAlgorithm.MONOTONIC_GA to "-generateSuite",
@@ -142,7 +142,7 @@ class SettingsArguments(
             ContentDigestAlgorithm.STEADY_STATE_GA to "-generateSuite",
             ContentDigestAlgorithm.CELLULAR_GA to "-generateSuite",
             ContentDigestAlgorithm.STANDARD_CHEMICAL_REACTION to "-generateSuite",
-            ContentDigestAlgorithm.MAP_ELITES to "-generateSuite",
+            ContentDigestAlgorithm.MAP_ELITES to "-generateRandom",
             ContentDigestAlgorithm.ONE_PLUS_LAMBDA_LAMBDA_GA to "-generateSuite",
             ContentDigestAlgorithm.ONE_PLUS_ONE_EA to "-generateSuite",
             ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA to "-generateSuite",
