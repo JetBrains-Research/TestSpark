@@ -23,10 +23,12 @@ import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.ui.JBUI
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
 import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
 import javax.swing.BorderFactory
@@ -34,9 +36,12 @@ import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
+import javax.swing.JLabel
 import javax.swing.JPanel
 
 class TestCaseDisplayService(private val project: Project) {
+
+    private var cacheLazyRunner: Runner? = null
 
     private val mainPanel: JPanel = JPanel()
     private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
@@ -87,9 +92,17 @@ class TestCaseDisplayService(private val project: Project) {
     /**
      * Creates the complete panel in the "Generated Tests" tab,
      * and adds the "Generated Tests" tab to the sidebar tool window.
+     *
+     * @param testReport the new test report
+     * @param editor editor instance where coverage should be
+     *               visualized
+     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     *                        due to a cache hit, or null if there was a cache miss
      */
-    fun showGeneratedTests(testReport: CompactReport, editor: Editor) {
+    fun showGeneratedTests(testReport: CompactReport, editor: Editor, cacheLazyRunner: Runner?) {
+        this.cacheLazyRunner = cacheLazyRunner
         displayTestCases(testReport, editor)
+        displayLazyRunnerButton()
         createToolWindowTab()
     }
 
@@ -98,6 +111,8 @@ class TestCaseDisplayService(private val project: Project) {
      * Add Tests and their names to a List of pairs (used for highlighting)
      *
      * @param testReport The report from which each testcase should be displayed
+     * @param editor editor instance where coverage should be
+     *               visualized
      */
     private fun displayTestCases(testReport: CompactReport, editor: Editor) {
         allTestCasePanel.removeAll()
@@ -142,17 +157,17 @@ class TestCaseDisplayService(private val project: Project) {
             addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox)
 
             // Add "Remove" and "Reset" buttons to the test case panel
-            val topButtons = JPanel()
-            topButtons.layout = FlowLayout(FlowLayout.TRAILING)
-            topButtons.add(removeFromCacheButton)
-            topButtons.add(resetButton)
-            testCasePanel.add(topButtons, BorderLayout.NORTH)
+            val bottomButtons = JPanel()
+            bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
+            bottomButtons.add(removeFromCacheButton)
+            bottomButtons.add(resetButton)
+            testCasePanel.add(bottomButtons, BorderLayout.SOUTH)
 
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
+            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 25)))
             allTestCasePanel.add(testCasePanel)
             testCasePanels[testCase.testName] = testCasePanel
-            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 5)))
         }
     }
 
@@ -447,5 +462,34 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.remove(testCasePanel)
             allTestCasePanel.updateUI()
         }
+    }
+
+    /**
+     * Display the button to actually invoke EvoSuite if the tests are cached.
+     */
+    private fun displayLazyRunnerButton() {
+        cacheLazyRunner ?: return
+
+        val lazyRunnerPanel = JPanel()
+        lazyRunnerPanel.layout = BoxLayout(lazyRunnerPanel, BoxLayout.Y_AXIS)
+        val lazyRunnerLabel = JLabel("Showing previously generated test cases from the cache.")
+        lazyRunnerLabel.alignmentX = Component.CENTER_ALIGNMENT
+        lazyRunnerPanel.add(lazyRunnerLabel)
+
+        val lazyRunnerButton = JButton("Generate new tests")
+
+        lazyRunnerButton.addActionListener {
+            lazyRunnerButton.isEnabled = false
+            cacheLazyRunner!!
+                .withoutCache()
+                .runTestGeneration()
+        }
+
+        lazyRunnerButton.alignmentX = Component.CENTER_ALIGNMENT
+        lazyRunnerPanel.add(lazyRunnerButton)
+
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 50)))
+        allTestCasePanel.add(lazyRunnerPanel)
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 50)))
     }
 }
