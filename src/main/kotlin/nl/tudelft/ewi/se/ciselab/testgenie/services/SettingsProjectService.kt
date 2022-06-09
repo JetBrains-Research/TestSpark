@@ -9,6 +9,7 @@ import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.wm.WindowManager
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsProjectState
 import java.awt.Window
+import java.io.File
 
 /**
  * This class is responsible for storing the project-level settings persistently. It uses SettingsProjectState class for that.
@@ -18,6 +19,10 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
 
     private var settingsProjectState: SettingsProjectState = SettingsProjectState()
     private var project: Project = _project
+
+    init {
+        settingsProjectState.telemetryPath.plus(File.separator).plus(project.name)
+    }
 
     /**
      * Gets the currently persisted state of the open project.
