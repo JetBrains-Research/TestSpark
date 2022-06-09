@@ -38,8 +38,8 @@ class SettingsArguments(
         ContentDigestAlgorithm.ONE_PLUS_ONE_EA.toString() to "-generateSuite",
         ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA.toString() to "-generateSuite",
         ContentDigestAlgorithm.MU_LAMBDA_EA.toString() to "-generateSuite",
-        ContentDigestAlgorithm.NSGAII.toString() to "-generateMOSuite",
-        ContentDigestAlgorithm.SPEA2.toString() to "-generateMOSuite"
+        ContentDigestAlgorithm.NSGAII.toString() to "-generateSuite",
+        ContentDigestAlgorithm.SPEA2.toString() to "-generateSuite"
     )
 ) {
     private var command: MutableList<String> = mutableListOf(
