@@ -53,6 +53,10 @@ class GeneratedTestsToolWindowTest {
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
         ideaFrame.apply {
             Assertions.assertThat(generatedTestsTab.hasText("Generated Tests")).isTrue
+            Assertions.assertThat(validatedTests.hasText("Validate tests")).isTrue
+            Assertions.assertThat(selectAll.hasText("Select All")).isTrue
+            Assertions.assertThat(deselectAll.hasText("Deselect All")).isTrue
+            Assertions.assertThat(applyToTestSuite.hasText("Apply to test suite")).isTrue
         }
     }
 
