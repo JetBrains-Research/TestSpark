@@ -16,8 +16,8 @@ import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
@@ -66,9 +66,9 @@ class CoverageRenderer(
             )
         }
 
-        val state = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java).state
+        val state = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
         if (coveredMutation.isNotEmpty() && state.criterionWeakMutation) {
-            prePanel.addComponent(JBLabel(" Covered mutants:"), 10)
+            prePanel.addComponent(JBLabel(" Killed mutants:"), 10)
             for (mutantName in coveredMutation) {
                 prePanel.addComponent(
                     ActionLink(mutantName.substringBefore('(')) {
@@ -79,7 +79,7 @@ class CoverageRenderer(
         }
 
         if (notCoveredMutation.isNotEmpty() && state.criterionWeakMutation) {
-            prePanel.addComponent(JBLabel(" Not covered mutants:"), 10)
+            prePanel.addComponent(JBLabel(" Not killed mutants:"), 10)
             for (mutantName in notCoveredMutation) {
                 prePanel.addComponent(
                     JBLabel(mutantName.substringBefore('('))

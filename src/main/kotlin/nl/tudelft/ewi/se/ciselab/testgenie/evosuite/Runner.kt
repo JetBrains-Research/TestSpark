@@ -19,10 +19,12 @@ import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
@@ -65,12 +67,15 @@ class Runner(
 
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
-    private val settingsState = TestGenieSettingsService.getInstance().state
+    private val settingsApplicationState = SettingsApplicationService.getInstance().state
+    private val settingsProjectState = project.service<SettingsProjectService>().state
 
     private var command = mutableListOf<String>()
 
     private var cacheFromLine: Int? = null
     private var cacheToLine: Int? = null
+
+    private var skipCache: Boolean = false
 
     init {
         Util.makeTmp()
@@ -134,6 +139,14 @@ class Runner(
     }
 
     /**
+     * Generate tests even if there is no cache miss.
+     */
+    fun withoutCache(): Runner {
+        this.skipCache = true
+        return this
+    }
+
+    /**
      * Builds the project and launches EvoSuite on a separate thread.
      *
      * @return the path to which results will be (eventually) saved
@@ -153,12 +166,14 @@ class Runner(
                 override fun run(indicator: ProgressIndicator) {
                     try {
 
-                        // Check cache
-                        val hasCachedTests = tryShowCachedTestCases()
-                        if (hasCachedTests) {
-                            log.info("Found cached tests")
-                            indicator.stop()
-                            return
+                        if (!skipCache) {
+                            // Check cache
+                            val hasCachedTests = tryShowCachedTestCases()
+                            if (hasCachedTests) {
+                                log.info("Found cached tests")
+                                indicator.stop()
+                                return
+                            }
                         }
 
                         runBuild(indicator)
@@ -173,6 +188,10 @@ class Runner(
                     } catch (e: Exception) {
                         evosuiteError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
                         e.printStackTrace()
+                    } finally {
+                        // Revert to previous state
+                        val runnerService = project.service<RunnerService>()
+                        runnerService.isRunning = false
                     }
                 }
             })
@@ -206,7 +225,7 @@ class Runner(
             report.testCaseList = testMap
             report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
 
-            workspace.receiveGenerationResult(testResultName, report)
+            workspace.receiveGenerationResult(testResultName, report, this)
         }
 
         return true
@@ -233,7 +252,7 @@ class Runner(
             cmd.add("-c")
         }
 
-        cmd.add(settingsState!!.buildCommand)
+        cmd.add(settingsProjectState.buildCommand)
 
         val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
         log.info("Starting build process with arguments: $cmdString")
@@ -265,12 +284,12 @@ class Runner(
      * @param indicator the progress indicator
      */
     private fun runEvoSuite(indicator: ProgressIndicator) {
-        if (!settingsState?.seed.isNullOrBlank()) command.add("-seed=${settingsState?.seed}")
-        if (!settingsState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsState?.configurationId}")
+        if (!settingsApplicationState?.seed.isNullOrBlank()) command.add("-seed=${settingsApplicationState?.seed}")
+        if (!settingsApplicationState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsApplicationState?.configurationId}")
 
         // construct command
         val cmd = ArrayList<String>()
-        cmd.add(settingsState?.javaPath!!)
+        cmd.add(settingsProjectState.javaPath)
         cmd.add("-jar")
         cmd.add(evoSuitePath)
         cmd.addAll(command)
