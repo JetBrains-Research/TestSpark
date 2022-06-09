@@ -116,7 +116,7 @@ class SettingsEvoSuiteConfigurableTest {
 
     @Test
     fun testIsModifiedAlgorithmComboBox() {
-        settingsComponent.algorithm = ContentDigestAlgorithm.DYNAMOSA
+        settingsComponent.algorithm = ContentDigestAlgorithm.RANDOM_SEARCH
         assertThat(settingsConfigurable.isModified).isTrue
     }
 

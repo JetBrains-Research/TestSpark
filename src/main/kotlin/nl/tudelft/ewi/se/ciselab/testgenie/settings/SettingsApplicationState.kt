@@ -1,51 +1,65 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
+
 /**
  * This class is the actual data class that stores the values of the EvoSuite Settings entries.
  */
 data class SettingsApplicationState(
-    var sandbox: Boolean = true,
-    var assertions: Boolean = true,
-    var seed: String = "",
-    var algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.RANDOM_SEARCH,
-    var configurationId: String = "",
-    var clientOnThread: Boolean = false,
-    var junitCheck: Boolean = false,
-    var criterionLine: Boolean = true,
-    var criterionBranch: Boolean = true,
-    var criterionException: Boolean = true,
-    var criterionWeakMutation: Boolean = true,
-    var criterionOutput: Boolean = true,
-    var criterionMethod: Boolean = true,
-    var criterionMethodNoException: Boolean = true,
-    var criterionCBranch: Boolean = true,
-    var minimize: Boolean = true,
+    var sandbox: Boolean = DefaultSettingsApplicationState.sandbox,
+    var assertions: Boolean = DefaultSettingsApplicationState.assertions,
+    var seed: String = DefaultSettingsApplicationState.seed,
+    var algorithm: ContentDigestAlgorithm = DefaultSettingsApplicationState.algorithm,
+    var configurationId: String = DefaultSettingsApplicationState.configurationId,
+    var clientOnThread: Boolean = DefaultSettingsApplicationState.clientOnThread,
+    var junitCheck: Boolean = DefaultSettingsApplicationState.junitCheck,
+    var criterionLine: Boolean = DefaultSettingsApplicationState.criterionLine,
+    var criterionBranch: Boolean = DefaultSettingsApplicationState.criterionBranch,
+    var criterionException: Boolean = DefaultSettingsApplicationState.criterionException,
+    var criterionWeakMutation: Boolean = DefaultSettingsApplicationState.criterionWeakMutation,
+    var criterionOutput: Boolean = DefaultSettingsApplicationState.criterionOutput,
+    var criterionMethod: Boolean = DefaultSettingsApplicationState.criterionMethod,
+    var criterionMethodNoException: Boolean = DefaultSettingsApplicationState.criterionMethodNoException,
+    var criterionCBranch: Boolean = DefaultSettingsApplicationState.criterionCBranch,
+    var minimize: Boolean = DefaultSettingsApplicationState.minimize,
 ) {
 
-    object DefaultSettingsState {
-        const val sandbox: Boolean = true
-        const val assertions: Boolean = true
-        const val junitCheck: Boolean = false
-        const val minimize: Boolean = true
+    /**
+     * Default values of SettingsApplicationState.
+     */
+    object DefaultSettingsApplicationState {
+        val sandbox: Boolean = TestGenieDefaultsBundle.defaultValue("sandbox").toBoolean()
+        val assertions: Boolean = TestGenieDefaultsBundle.defaultValue("assertions").toBoolean()
+        val seed: String = TestGenieDefaultsBundle.defaultValue("seed")
+        val junitCheck: Boolean = TestGenieDefaultsBundle.defaultValue("junitCheck").toBoolean()
+        val minimize: Boolean = TestGenieDefaultsBundle.defaultValue("minimize").toBoolean()
         val algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.DYNAMOSA
+        val configurationId: String = TestGenieDefaultsBundle.defaultValue("configurationId")
+        val clientOnThread: Boolean = TestGenieDefaultsBundle.defaultValue("clientOnThread").toBoolean()
+        val criterionLine: Boolean = TestGenieDefaultsBundle.defaultValue("criterionLine").toBoolean()
+        val criterionBranch: Boolean = TestGenieDefaultsBundle.defaultValue("criterionBranch").toBoolean()
+        val criterionException: Boolean = TestGenieDefaultsBundle.defaultValue("criterionException").toBoolean()
+        val criterionWeakMutation: Boolean = TestGenieDefaultsBundle.defaultValue("criterionWeakMutation").toBoolean()
+        val criterionOutput: Boolean = TestGenieDefaultsBundle.defaultValue("criterionOutput").toBoolean()
+        val criterionMethod: Boolean = TestGenieDefaultsBundle.defaultValue("criterionMethod").toBoolean()
+        val criterionMethodNoException: Boolean = TestGenieDefaultsBundle.defaultValue("criterionMethodNoException").toBoolean()
+        val criterionCBranch: Boolean = TestGenieDefaultsBundle.defaultValue("criterionCBranch").toBoolean()
     }
 
     fun serializeChangesFromDefault(): List<String> {
         val params = mutableListOf<String>()
         // Parameters from settings menu
-        if (this.sandbox != DefaultSettingsState.sandbox) {
+        if (this.sandbox != DefaultSettingsApplicationState.sandbox) {
             params.add("-Dsandbox=${this.sandbox}")
         }
-        if (this.assertions != DefaultSettingsState.assertions) {
+        if (this.assertions != DefaultSettingsApplicationState.assertions) {
             params.add("-Dassertions=${this.assertions}")
         }
-        if (this.algorithm != DefaultSettingsState.algorithm) {
-            params.add("-Dalgorithm=${this.algorithm}")
-        }
-        if (this.junitCheck != DefaultSettingsState.junitCheck) {
+        params.add("-Dalgorithm=${this.algorithm}")
+        if (this.junitCheck != DefaultSettingsApplicationState.junitCheck) {
             params.add("-Djunit_check=${this.junitCheck}")
         }
-        if (this.minimize != DefaultSettingsState.minimize) {
+        if (this.minimize != DefaultSettingsApplicationState.minimize) {
             params.add("-Dminimize=${this.minimize}")
         }
         return params

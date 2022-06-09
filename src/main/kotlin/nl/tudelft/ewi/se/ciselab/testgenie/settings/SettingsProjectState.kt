@@ -15,6 +15,9 @@ data class SettingsProjectState(
     var telemetryEnabled: Boolean = DefaultSettingsPluginState.telemetryEnabled,
     var telemetryPath: String = DefaultSettingsPluginState.telemetryPath
 ) {
+    /**
+     * Default values of SettingsProjectState.
+     */
     object DefaultSettingsPluginState {
         val javaPath: String = TestGenieDefaultsBundle.defaultValue("javaPath")
         val colorRed: Int = TestGenieDefaultsBundle.defaultValue("colorRed").toInt()

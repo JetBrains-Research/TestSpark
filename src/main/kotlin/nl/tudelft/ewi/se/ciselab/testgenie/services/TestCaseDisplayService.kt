@@ -20,7 +20,9 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManager
 import com.intellij.util.ui.JBUI
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
 import java.awt.BorderLayout
@@ -37,10 +39,10 @@ import javax.swing.JPanel
 class TestCaseDisplayService(private val project: Project) {
 
     private val mainPanel: JPanel = JPanel()
-    private val applyButton: JButton = JButton("Apply to test suite")
-    private val validateButton: JButton = JButton("Validate tests")
-    private val selectAllButton: JButton = JButton("Select All")
-    private val deselectAllButton: JButton = JButton("Deselect All")
+    private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
+    private val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
+    private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
@@ -53,6 +55,9 @@ class TestCaseDisplayService(private val project: Project) {
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
+
+    // Content Manager to be able to add / remove tabs from tool window
+    private var contentManager: ContentManager? = null
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -237,6 +242,11 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove the selected test cases from the cache and the tool window UI
         removeTestCases(selectedTestCasePanels)
+
+        contentManager!!.removeContent(content!!, true)
+        ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
+        val coverageVisualisationService = project.service<CoverageVisualisationService>()
+        coverageVisualisationService.closeToolWindowTab()
     }
 
     private fun validateTests() {}
@@ -275,20 +285,20 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove generated tests tab from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
-        val contentManager = toolWindowManager!!.contentManager
+        contentManager = toolWindowManager!!.contentManager
         if (content != null) {
-            contentManager.removeContent(content!!, true)
+            contentManager!!.removeContent(content!!, true)
         }
 
         // If there is no generated tests tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
         content = contentFactory.createContent(
-            mainPanel, "Generated Tests", true
+            mainPanel, TestGenieLabelsBundle.defaultValue("generatedTests"), true
         )
-        contentManager.addContent(content!!)
+        contentManager!!.addContent(content!!)
 
         // Focus on generated tests tab and open toolWindow if not opened already
-        contentManager.setSelectedContent(content!!)
+        contentManager!!.setSelectedContent(content!!)
         toolWindowManager.show()
     }
 
@@ -338,7 +348,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createResetButton(document: Document, textFieldEditor: EditorTextField, testCode: String): JButton {
-        val resetButton = JButton("Reset")
+        val resetButton = JButton(TestGenieLabelsBundle.defaultValue("resetButton"))
         resetButton.isEnabled = false
         resetButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
