@@ -70,13 +70,14 @@ data class TestGenieSettingsState(
         if (this.assertions != DefaultSettingsState.assertions) {
             params.add("-Dassertions=${this.assertions}")
         }
+        params.add("-Dalgorithm=${this.algorithm}")
         if (this.junitCheck != DefaultSettingsState.junitCheck) {
             params.add("-Djunit_check=${this.junitCheck}")
         }
         if (this.minimize != DefaultSettingsState.minimize) {
             params.add("-Dminimize=${this.minimize}")
         }
-        params.add("-Dalgorithm=${this.algorithm}")
+
         return params
     }
 }
