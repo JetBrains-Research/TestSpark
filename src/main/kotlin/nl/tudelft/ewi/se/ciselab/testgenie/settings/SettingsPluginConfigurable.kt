@@ -4,6 +4,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
+import java.io.File
 import javax.swing.JComponent
 
 /**
@@ -38,7 +39,10 @@ class SettingsPluginConfigurable(_project: Project) : Configurable {
         settingsComponent!!.colorBlue = settingsState.colorBlue
         settingsComponent!!.buildCommand = settingsState.buildCommand
         settingsComponent!!.telemetryEnabled = settingsState.telemetryEnabled
-        settingsComponent!!.telemetryPath = settingsState.telemetryPath
+        settingsComponent!!.telemetryPath =
+            if (settingsState.telemetryPath.endsWith(project.name))
+                settingsState.telemetryPath
+            else settingsState.telemetryPath.plus(File.separator).plus(project.name)
     }
 
     /**
