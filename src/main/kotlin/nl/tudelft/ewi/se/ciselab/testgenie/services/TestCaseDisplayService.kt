@@ -21,6 +21,7 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManager
 import com.intellij.util.ui.JBUI
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import org.evosuite.utils.CompactReport
@@ -59,6 +60,9 @@ class TestCaseDisplayService(private val project: Project) {
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
+
+    // Content Manager to be able to add / remove tabs from tool window
+    private var contentManager: ContentManager? = null
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -253,6 +257,11 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove the selected test cases from the cache and the tool window UI
         removeTestCases(selectedTestCasePanels)
+
+        contentManager!!.removeContent(content!!, true)
+        ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
+        val coverageVisualisationService = project.service<CoverageVisualisationService>()
+        coverageVisualisationService.closeToolWindowTab()
     }
 
     private fun validateTests() {}
@@ -291,9 +300,9 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove generated tests tab from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
-        val contentManager = toolWindowManager!!.contentManager
+        contentManager = toolWindowManager!!.contentManager
         if (content != null) {
-            contentManager.removeContent(content!!, true)
+            contentManager!!.removeContent(content!!, true)
         }
 
         // If there is no generated tests tab, make it
@@ -301,10 +310,10 @@ class TestCaseDisplayService(private val project: Project) {
         content = contentFactory.createContent(
             mainPanel, "Generated Tests", true
         )
-        contentManager.addContent(content!!)
+        contentManager!!.addContent(content!!)
 
         // Focus on generated tests tab and open toolWindow if not opened already
-        contentManager.setSelectedContent(content!!)
+        contentManager!!.setSelectedContent(content!!)
         toolWindowManager.show()
     }
 
