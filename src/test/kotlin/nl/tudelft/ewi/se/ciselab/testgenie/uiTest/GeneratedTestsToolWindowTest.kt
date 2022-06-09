@@ -38,6 +38,8 @@ class GeneratedTestsToolWindowTest {
 
             // Change quick access params
             changeQuickAccess()
+            // Create the test class
+            createTestClass("ArrayUtilsTest")
             // Run EvoSuite on entire class
             runTestsForClass()
             // Wait for background tasks to finish
@@ -63,6 +65,7 @@ class GeneratedTestsToolWindowTest {
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
+            deleteProject("ArrayUtilsTest", "untitled")
             clickOnToolWindow()
             closeProjectFile()
             closeProject()
