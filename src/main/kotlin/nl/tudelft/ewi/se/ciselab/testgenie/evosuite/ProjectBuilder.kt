@@ -9,23 +9,21 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 import java.util.concurrent.CountDownLatch
 
-class ProjectBuilder(private val projectPath: String, private val project: Project) {
-    private val builderTimeout: Long = 12000000 // TODO: Source from config
+class ProjectBuilder(private val project: Project) {
     private val log = Logger.getInstance(this::class.java)
 
+    private val builderTimeout: Long = 12000000 // TODO: Source from config
+
+    private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
     private val settingsState = TestGenieSettingsService.getInstance().state
 
-    /**
-     * Runs the build command as defined in settings.
-     *
-     * @param indicator the progress indicator
-     */
     fun runBuild() {
-        val latch = CountDownLatch(1)
+        val handle = CountDownLatch(1)
 
         log.info("Starting build thread!")
         ProgressManager.getInstance()
@@ -69,7 +67,7 @@ class ProjectBuilder(private val projectPath: String, private val project: Proje
                         if (exitCode != 0) {
                             buildError("exit code $exitCode", "Build failed")
                         }
-                        latch.countDown()
+                        handle.countDown()
                         indicator.stop()
                     } catch (e: Exception) {
                         (TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
@@ -78,8 +76,8 @@ class ProjectBuilder(private val projectPath: String, private val project: Proje
                 }
             })
 
-        latch.await()
-        log.info("Build thread freed!")
+        handle.await()
+        log.info("Build finished!")
     }
 
     private fun buildError(msg: String, title: String = TestGenieBundle.message("evosuiteErrorTitle")) {

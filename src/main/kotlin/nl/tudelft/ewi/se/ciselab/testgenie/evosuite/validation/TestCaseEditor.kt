@@ -2,7 +2,11 @@ package nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation
 
 import com.github.javaparser.JavaParser
 import com.github.javaparser.StaticJavaParser
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.NormalAnnotationExpr
+import com.github.javaparser.ast.expr.SimpleName
+import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.visitor.ModifierVisitor
 import com.github.javaparser.ast.visitor.Visitable
@@ -34,10 +38,39 @@ class TestCaseEditor(private val text: String, private val edits: HashMap<String
     class BodyExtractor : VoidVisitorAdapter<ArrayList<BlockStmt>>() {
         override fun visit(n: MethodDeclaration?, arg: ArrayList<BlockStmt>) {
             super.visit(n, arg)
+
             val body = n?.body?.get()
             if (body != null) {
                 arg.add(body)
             }
+        }
+    }
+
+    class ScaffoldRemover : ModifierVisitor<Void>() {
+
+        // removes @EvoRunnerParameters(..)
+        override fun visit(n: NormalAnnotationExpr?, arg: Void?): Visitable {
+            n ?: return super.visit(n, arg)
+            if (n.nameAsString.contains("EvoRunnerParameters")) {
+                n.remove()
+            }
+            return super.visit(n, arg)
+        }
+
+        // removes @RunWith(EvoRunner.class)
+        override fun visit(n: SingleMemberAnnotationExpr?, arg: Void?): Visitable {
+            n?.remove()
+            return super.visit(n, arg)
+        }
+
+        // Removes extension of scaffolding
+        // Changes class name
+        override fun visit(n: ClassOrInterfaceDeclaration?, arg: Void?): Visitable {
+            val scaffoldClass = n?.extendedTypes?.get(0) ?: return super.visit(n, arg)
+            scaffoldClass.remove()
+            val baseName = n.nameAsString
+            n.name = SimpleName("${baseName}_Cov")
+            return super.visit(n, arg)
         }
     }
 
@@ -67,6 +100,20 @@ class TestCaseEditor(private val text: String, private val edits: HashMap<String
 
         val result = unit.toString()
         log.trace("EDITED TEST SUITE:\n$result")
+
+        return result
+    }
+
+    fun editRemoveScaffold(): String {
+        val testClass = edit()
+        val parser = JavaParser()
+        val unit = parser.parse(testClass).result.get()
+
+        val remover = ScaffoldRemover()
+        remover.visit(unit, null)
+
+        val result = unit.toString()
+        log.debug("EDITED TEST SUITE NO SCAFFOLD:\n$result")
 
         return result
     }

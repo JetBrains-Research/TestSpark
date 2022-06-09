@@ -31,7 +31,7 @@ class GenerateTestsActionClass : AnAction() {
         val project: Project = e.project ?: return
         val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
-        ProjectBuilder(projectPath, project).runBuild()
+        ProjectBuilder(project).runBuild()
         evoSuiteRunner.forClass().runTestGeneration()
     }
 
