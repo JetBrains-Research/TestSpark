@@ -106,7 +106,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
         coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()), myEditor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
         val content = toolWindow.contentManager.getContent(0)!!
-        assertThat(content.displayName).isEqualTo("Coverage Visualisation")
+        assertThat(content.displayName).isEqualTo("Coverage")
     }
 
     private fun valueGenerator(): Stream<Arguments> {
