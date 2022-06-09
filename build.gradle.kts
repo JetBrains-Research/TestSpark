@@ -34,6 +34,7 @@ repositories {
 dependencies {
     implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
     implementation(files("lib/standalone-runtime.jar"))
+    implementation(files("lib/jacocoagent.jar"))
 
     implementation("junit:junit:4.13")
 

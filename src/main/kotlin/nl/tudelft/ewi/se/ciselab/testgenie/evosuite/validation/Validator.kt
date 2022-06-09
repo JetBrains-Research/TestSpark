@@ -64,30 +64,7 @@ class Validator(
             return
         }
 
-        // set up compilation files
-
-        // flush test edits to file
-        val testsPath = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}.java"
-        val testsFile = File(testsPath)
-
-        if (edits.size == 0) {
-            logger.trace("No changes found, resetting files to old state")
-            val testsFileWriter = FileWriter(testsPath, false)
-            testsFileWriter.write(testJob.report.testSuiteCode)
-            testsFileWriter.close()
-            logger.trace("Flushed original tests to $testsPath")
-        } else {
-            val editedTests = TestCaseEditor(testsFile.readText(), edits).edit()
-            val testsFileWriter = FileWriter(testsFile, false)
-            testsFileWriter.write(editedTests)
-            testsFileWriter.close()
-            logger.trace("Flushed edited tests to $testsPath")
-        }
-
-        val scaffoldPath = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}_scaffolding.java"
-        val scaffoldFile = File(scaffoldPath)
-
-        val compilationFiles = listOf(testsFile, scaffoldFile)
+        val compilationFiles = setupCompilationFiles(testValidationDirectory, targetFqn)
 
         logger.info("Compiling tests...")
         compileTests(classpath, compilationFiles)
@@ -98,12 +75,50 @@ class Validator(
                 override fun run(indicator: ProgressIndicator) {
                     try {
                         runTests(indicator, classpath, targetFqn)
+                        runTestsWithCoverage(indicator, classpath, targetFqn, testValidationDirectory)
                         indicator.stop()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
             })
+    }
+
+    private fun setupCompilationFiles(testValidationDirectory: String, targetFqn: String): List<File> {
+        val sep = File.separatorChar
+
+        val baseClassName = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}"
+        // flush test edits to file
+        val testsPath = "$baseClassName.java"
+        val testsFile = File(testsPath)
+
+        val editor = TestCaseEditor(testsFile.readText(), edits)
+
+        if (edits.size == 0) {
+            logger.trace("No changes found, resetting files to old state")
+            val testsFileWriter = FileWriter(testsPath, false)
+            testsFileWriter.write(testJob.report.testSuiteCode)
+            testsFileWriter.close()
+            logger.trace("Flushed original tests to $testsPath")
+        } else {
+            val editedTests = editor.edit()
+            val testsFileWriter = FileWriter(testsFile, false)
+            testsFileWriter.write(editedTests)
+            testsFileWriter.close()
+            logger.trace("Flushed edited tests to $testsPath")
+        }
+
+        val testsCovPath = "${baseClassName}_Cov.java"
+        val testsCov = File(testsCovPath)
+        val testsCovWriter = FileWriter(testsCov, false)
+        val testsNoScaffold = editor.editRemoveScaffold()
+        testsCovWriter.write(testsNoScaffold)
+        testsCovWriter.close()
+
+        val scaffoldPath = "${baseClassName}_scaffolding.java"
+        val scaffoldFile = File(scaffoldPath)
+
+        return listOf(scaffoldFile, testsFile, testsCov)
     }
 
     /**
@@ -142,10 +157,14 @@ class Validator(
      *
      * @param indicator the progress indicator
      */
-    private fun runTests(indicator: ProgressIndicator, classpath: String, testFqn: String) {
+    private fun runTests(
+        indicator: ProgressIndicator,
+        classpath: String,
+        testFqn: String,
+    ) {
         indicator.isIndeterminate = false
-
         settingsState ?: return
+
         // construct command
         val cmd = ArrayList<String>()
         cmd.add(settingsState.javaPath)
@@ -189,6 +208,55 @@ class Validator(
         val junitResult = parseJunitResult(output)
 
         project.messageBus.syncPublisher(VALIDATION_RESULT_TOPIC).validationResult(junitResult)
+    }
+
+    /**
+     * Runs the compiled tests
+     *
+     * @param indicator the progress indicator
+     */
+    private fun runTestsWithCoverage(
+        indicator: ProgressIndicator,
+        classpath: String,
+        testFqn: String,
+        testValidationDirectory: String
+    ) {
+        settingsState ?: return
+
+        indicator.text = "Calculating coverage"
+
+        val pluginsPath = System.getProperty("idea.plugins.path")
+        val jacocoPath = "$pluginsPath/TestGenie/lib/jacocoagent.jar"
+        // construct command
+        val cmd = ArrayList<String>()
+        cmd.add(settingsState.javaPath)
+        cmd.add("-javaagent:$jacocoPath=destfile=$testValidationDirectory/jacoco.exec")
+        cmd.add("-cp")
+        cmd.add(classpath)
+        cmd.add("org.junit.runner.JUnitCore")
+        cmd.add("${testFqn}_Cov")
+
+        val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
+        logger.info("Running tests for coverage with: $cmdString")
+
+        val junitProcess = GeneralCommandLine(cmd)
+        junitProcess.charset = Charset.forName("UTF-8")
+        val handler = OSProcessHandler(junitProcess)
+
+        val cap = CapturingProcessAdapter()
+        // attach another listener for parsing process results
+        handler.addProcessListener(cap)
+        handler.startNotify()
+
+        // treat this as a join handle
+        handler.waitFor(junitTimeout)
+
+        val output = cap.output.stdout
+
+        // TOOD: jacoco result
+//        val junitResult = parseJunitResult(output)
+
+//        project.messageBus.syncPublisher(VALIDATION_RESULT_TOPIC).validationResult(junitResult)
     }
 
     data class JUnitResult(val totalTests: Int, val failedTests: Int, val failedTestNames: Set<String>)
