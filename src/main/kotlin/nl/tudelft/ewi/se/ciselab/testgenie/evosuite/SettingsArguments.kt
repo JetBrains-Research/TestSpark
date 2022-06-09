@@ -20,27 +20,7 @@ class SettingsArguments(
     private val projectPath: String,
     private val serializeResultPath: String,
     private val classFQN: String,
-    algorithmsToGenerateMap: HashMap<ContentDigestAlgorithm, String> = hashMapOf(
-        ContentDigestAlgorithm.DYNAMOSA to "-generateMOSuite",
-        ContentDigestAlgorithm.MOSA to "-generateMOSuite",
-        ContentDigestAlgorithm.LIPS to "-generateMOSuite",
-        ContentDigestAlgorithm.MIO to "-generateMOSuite",
-        ContentDigestAlgorithm.RANDOM_SEARCH to "-generateTests",
-        ContentDigestAlgorithm.MONOTONIC_GA to "-generateSuite",
-        ContentDigestAlgorithm.STANDARD_GA to "-generateSuite",
-        ContentDigestAlgorithm.BREEDER_GA to "-generateSuite",
-        ContentDigestAlgorithm.STANDARD_GA to "-generateSuite",
-        ContentDigestAlgorithm.STEADY_STATE_GA to "-generateSuite",
-        ContentDigestAlgorithm.CELLULAR_GA to "-generateSuite",
-        ContentDigestAlgorithm.STANDARD_CHEMICAL_REACTION to "-generateSuite",
-        ContentDigestAlgorithm.MAP_ELITES to "-generateSuite",
-        ContentDigestAlgorithm.ONE_PLUS_LAMBDA_LAMBDA_GA to "-generateSuite",
-        ContentDigestAlgorithm.ONE_PLUS_ONE_EA to "-generateSuite",
-        ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA to "-generateSuite",
-        ContentDigestAlgorithm.MU_LAMBDA_EA to "-generateSuite",
-        ContentDigestAlgorithm.NSGAII to "-generateSuite",
-        ContentDigestAlgorithm.SPEA2 to "-generateSuite"
-    )
+
 ) {
     private var command: MutableList<String> = mutableListOf(
         algorithmsToGenerateMap[TestGenieSettingsService.getInstance().state!!.algorithm]!!,
@@ -148,5 +128,27 @@ class SettingsArguments(
             val command: String = sb.toString()
             return if (command == "-Dcriterion=") "-Dcriterion=LINE" else command
         }
+
+        private val algorithmsToGenerateMap: HashMap<ContentDigestAlgorithm, String> = hashMapOf(
+            ContentDigestAlgorithm.DYNAMOSA to "-generateMOSuite",
+            ContentDigestAlgorithm.MOSA to "-generateMOSuite",
+            ContentDigestAlgorithm.LIPS to "-generateMOSuite",
+            ContentDigestAlgorithm.MIO to "-generateMOSuite",
+            ContentDigestAlgorithm.RANDOM_SEARCH to "-generateTests",
+            ContentDigestAlgorithm.MONOTONIC_GA to "-generateSuite",
+            ContentDigestAlgorithm.STANDARD_GA to "-generateSuite",
+            ContentDigestAlgorithm.BREEDER_GA to "-generateSuite",
+            ContentDigestAlgorithm.STANDARD_GA to "-generateSuite",
+            ContentDigestAlgorithm.STEADY_STATE_GA to "-generateSuite",
+            ContentDigestAlgorithm.CELLULAR_GA to "-generateSuite",
+            ContentDigestAlgorithm.STANDARD_CHEMICAL_REACTION to "-generateSuite",
+            ContentDigestAlgorithm.MAP_ELITES to "-generateSuite",
+            ContentDigestAlgorithm.ONE_PLUS_LAMBDA_LAMBDA_GA to "-generateSuite",
+            ContentDigestAlgorithm.ONE_PLUS_ONE_EA to "-generateSuite",
+            ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA to "-generateSuite",
+            ContentDigestAlgorithm.MU_LAMBDA_EA to "-generateSuite",
+            ContentDigestAlgorithm.NSGAII to "-generateSuite",
+            ContentDigestAlgorithm.SPEA2 to "-generateSuite"
+        )
     }
 }
