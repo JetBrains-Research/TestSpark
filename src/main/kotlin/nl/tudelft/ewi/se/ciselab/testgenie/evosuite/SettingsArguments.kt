@@ -88,6 +88,36 @@ class SettingsArguments(
     }
 
     companion object {
+        private const val generateSuite = "-generateSuite"
+        private const val generateMOSuite = "-generateMOSuite"
+        private const val generateTests = "-generateTests"
+        private const val generateRandom = "-generateRandom"
+
+        /**
+         * HashMap that maps algorithms to their corresponding generation strings.
+         */
+        private val algorithmsToGenerateMap: HashMap<ContentDigestAlgorithm, String> = hashMapOf(
+            ContentDigestAlgorithm.DYNAMOSA to generateMOSuite,
+            ContentDigestAlgorithm.MOSA to generateMOSuite,
+            ContentDigestAlgorithm.LIPS to generateRandom,
+            ContentDigestAlgorithm.MIO to generateMOSuite,
+            ContentDigestAlgorithm.RANDOM_SEARCH to generateTests,
+            ContentDigestAlgorithm.MONOTONIC_GA to generateSuite,
+            ContentDigestAlgorithm.STANDARD_GA to generateSuite,
+            ContentDigestAlgorithm.BREEDER_GA to generateSuite,
+            ContentDigestAlgorithm.STANDARD_GA to generateSuite,
+            ContentDigestAlgorithm.STEADY_STATE_GA to generateSuite,
+            ContentDigestAlgorithm.CELLULAR_GA to generateSuite,
+            ContentDigestAlgorithm.STANDARD_CHEMICAL_REACTION to generateSuite,
+            ContentDigestAlgorithm.MAP_ELITES to generateRandom,
+            ContentDigestAlgorithm.ONE_PLUS_LAMBDA_LAMBDA_GA to generateSuite,
+            ContentDigestAlgorithm.ONE_PLUS_ONE_EA to generateSuite,
+            ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA to generateSuite,
+            ContentDigestAlgorithm.MU_LAMBDA_EA to generateSuite,
+            ContentDigestAlgorithm.NSGAII to generateSuite,
+            ContentDigestAlgorithm.SPEA2 to generateSuite
+        )
+
         /**
          * Creates a string for the criterion parameter in the format required by EvoSuite.
          *
@@ -128,27 +158,5 @@ class SettingsArguments(
             val command: String = sb.toString()
             return if (command == "-Dcriterion=") "-Dcriterion=LINE" else command
         }
-
-        private val algorithmsToGenerateMap: HashMap<ContentDigestAlgorithm, String> = hashMapOf(
-            ContentDigestAlgorithm.DYNAMOSA to "-generateMOSuite",
-            ContentDigestAlgorithm.MOSA to "-generateMOSuite",
-            ContentDigestAlgorithm.LIPS to "-generateRandom",
-            ContentDigestAlgorithm.MIO to "-generateMOSuite",
-            ContentDigestAlgorithm.RANDOM_SEARCH to "-generateTests",
-            ContentDigestAlgorithm.MONOTONIC_GA to "-generateSuite",
-            ContentDigestAlgorithm.STANDARD_GA to "-generateSuite",
-            ContentDigestAlgorithm.BREEDER_GA to "-generateSuite",
-            ContentDigestAlgorithm.STANDARD_GA to "-generateSuite",
-            ContentDigestAlgorithm.STEADY_STATE_GA to "-generateSuite",
-            ContentDigestAlgorithm.CELLULAR_GA to "-generateSuite",
-            ContentDigestAlgorithm.STANDARD_CHEMICAL_REACTION to "-generateSuite",
-            ContentDigestAlgorithm.MAP_ELITES to "-generateRandom",
-            ContentDigestAlgorithm.ONE_PLUS_LAMBDA_LAMBDA_GA to "-generateSuite",
-            ContentDigestAlgorithm.ONE_PLUS_ONE_EA to "-generateSuite",
-            ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA to "-generateSuite",
-            ContentDigestAlgorithm.MU_LAMBDA_EA to "-generateSuite",
-            ContentDigestAlgorithm.NSGAII to "-generateSuite",
-            ContentDigestAlgorithm.SPEA2 to "-generateSuite"
-        )
     }
 }
