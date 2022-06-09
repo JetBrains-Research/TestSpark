@@ -44,7 +44,7 @@ class SettingsArgumentsTest {
     fun testCommandForClass() {
         val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung")
         val command = mutableListOf(
-            "-generateSuite",
+            "-generateMOSuite",
             "-serializeResult",
             "-serializeResultPath",
             "serializepath",
@@ -73,7 +73,7 @@ class SettingsArgumentsTest {
             "project/classpath", "project", "serializepath", "lang.java.Dung"
         ).forMethod("dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;")
         val command = mutableListOf(
-            "-generateSuite",
+            "-generateMOSuite",
             "-serializeResult",
             "-serializeResultPath",
             "serializepath",
@@ -101,7 +101,7 @@ class SettingsArgumentsTest {
     fun testCommandForLine() {
         val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung").forLine(419)
         val command = mutableListOf(
-            "-generateSuite",
+            "-generateMOSuite",
             "-serializeResult",
             "-serializeResultPath",
             "serializepath",
