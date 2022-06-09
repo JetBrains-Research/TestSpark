@@ -76,8 +76,6 @@ class CoverageVisualisationService(private val project: Project) {
                 }
             }
 
-            selectedTests.forEach { x -> print(x) }
-
             val mutationCovered =
                 testReport.testCaseList.filter { x -> x.key in selectedTests }.map { x -> x.value.coveredMutants }
                     .flatten().groupBy { x -> x.lineNo }
