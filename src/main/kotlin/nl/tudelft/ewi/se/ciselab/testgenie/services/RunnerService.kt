@@ -26,6 +26,8 @@ class RunnerService(private val project: Project) {
 
     /**
      * Method to verify whether EvoSuite is running or not.
+     *
+     * @return true if EvoSuite is currently running
      */
     fun verifyIsRunning(): Boolean {
         if (isRunning) {
