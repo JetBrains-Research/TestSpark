@@ -10,6 +10,7 @@ import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.coverage.CoverageRenderer
 import org.evosuite.utils.CompactReport
 import java.awt.Color
@@ -154,7 +155,7 @@ class CoverageVisualisationService(private val project: Project) {
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
         content = contentFactory.createContent(
-            visualisationService.mainPanel, "Coverage Visualisation", true
+            visualisationService.mainPanel, TestGenieLabelsBundle.defaultValue("coverageVisualisation"), true
         )
         contentManager!!.addContent(content!!)
     }
