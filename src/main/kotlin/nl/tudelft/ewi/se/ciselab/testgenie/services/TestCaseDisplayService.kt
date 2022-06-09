@@ -23,6 +23,7 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.ui.JBUI
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
@@ -44,10 +45,10 @@ class TestCaseDisplayService(private val project: Project) {
     private var cacheLazyRunner: Runner? = null
 
     private val mainPanel: JPanel = JPanel()
-    private val applyButton: JButton = JButton("Apply to test suite")
-    private val validateButton: JButton = JButton("Validate tests")
-    private val selectAllButton: JButton = JButton("Select All")
-    private val deselectAllButton: JButton = JButton("Deselect All")
+    private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
+    private val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
+    private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
@@ -308,7 +309,7 @@ class TestCaseDisplayService(private val project: Project) {
         // If there is no generated tests tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
         content = contentFactory.createContent(
-            mainPanel, "Generated Tests", true
+            mainPanel, TestGenieLabelsBundle.defaultValue("generatedTests"), true
         )
         contentManager!!.addContent(content!!)
 
@@ -363,7 +364,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createResetButton(document: Document, textFieldEditor: EditorTextField, testCode: String): JButton {
-        val resetButton = JButton("Reset")
+        val resetButton = JButton(TestGenieLabelsBundle.defaultValue("resetButton"))
         resetButton.isEnabled = false
         resetButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
