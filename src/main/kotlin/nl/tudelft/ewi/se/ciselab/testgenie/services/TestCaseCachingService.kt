@@ -93,7 +93,7 @@ class TestCaseCachingService {
 
                 synchronized(caseIndexLock) {
                     // invalidate existing test with the same code if one exists
-                    caseIndex[cachedCompactTestCase.testCode]?.invalid = true
+                    caseIndex[cachedCompactTestCase.testCode]?.invalidate()
 
                     // save new test in index
                     caseIndex[cachedCompactTestCase.testCode] = cachedCompactTestCase
@@ -133,7 +133,7 @@ class TestCaseCachingService {
             for (lineNumber in lineFrom..lineTo) {
                 val tests: LineTestCaseCache = getLineTestCaseCache(lineNumber)
                 for (test in tests.getTestCases()) {
-                    test.invalid = true
+                    test.invalidate()
                 }
             }
         }
@@ -145,7 +145,7 @@ class TestCaseCachingService {
          */
         fun invalidateFromCache(testCode: String) {
             synchronized(caseIndexLock) {
-                caseIndex[testCode]?.invalid = true
+                caseIndex[testCode]?.invalidate()
             }
         }
 
@@ -160,6 +160,17 @@ class TestCaseCachingService {
                     // in all instances when line numbers change
                     LineTestCaseCache(lineNumber)
                 }
+            }
+        }
+
+        /**
+         * Remove a test case from the test case index.
+         *
+         * @param cachedCompactTestCase the test case to remove
+         */
+        fun removeTestCaseFromIndex(cachedCompactTestCase: CachedCompactTestCase) {
+            synchronized(caseIndexLock) {
+                caseIndex.remove(cachedCompactTestCase.testCode)
             }
         }
     }
@@ -192,7 +203,18 @@ class TestCaseCachingService {
          */
         fun getTestCases(): List<CachedCompactTestCase> {
             synchronized(testCasesLock) {
-                return testCases.filter { x -> !x.invalid }.toList()
+                return testCases.toList()
+            }
+        }
+
+        /**
+         * Remove a test case from this line cache.
+         *
+         * @param cachedCompactTestCase the test case to remove
+         */
+        fun removeTestCase(cachedCompactTestCase: CachedCompactTestCase) {
+            synchronized(testCasesLock) {
+                testCases.remove(cachedCompactTestCase)
             }
         }
     }
@@ -203,10 +225,9 @@ class TestCaseCachingService {
     private class CachedCompactTestCase(
         val testName: String,
         val testCode: String,
-        private val coveredLines: Set<LineTestCaseCache>
+        private val coveredLines: Set<LineTestCaseCache>,
+        private val fileTestCaseCache: FileTestCaseCache
     ) {
-        var invalid: Boolean = false
-
         /**
          * Convert this cached test case back to a compact test case.
          *
@@ -221,6 +242,19 @@ class TestCaseCachingService {
                 setOf(),
                 setOf()
             )
+        }
+
+        /**
+         * Remove this test case from the cache.
+         */
+        fun invalidate() {
+            // Remove from index
+            fileTestCaseCache.removeTestCaseFromIndex(this)
+
+            // Remove from line caches
+            this.coveredLines.forEach {
+                it.removeTestCase(this)
+            }
         }
 
         override fun equals(other: Any?): Boolean {
@@ -261,7 +295,8 @@ class TestCaseCachingService {
                     testCase.testCode.replace("\r\n", "\n"),
                     testCase.coveredLines.map {
                         fileTestCaseCache.getLineTestCaseCache(it)
-                    }.toSet()
+                    }.toSet(),
+                    fileTestCaseCache
                 )
             }
         }
