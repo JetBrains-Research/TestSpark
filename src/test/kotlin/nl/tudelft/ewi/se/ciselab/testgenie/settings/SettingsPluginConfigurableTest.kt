@@ -1,7 +1,6 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.project.Project
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
@@ -17,28 +16,17 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.Mockito
 import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettingsPluginConfigurableTest {
-    private var project: Project = Mockito.mock(Project::class.java)
     private lateinit var settingsConfigurable: SettingsPluginConfigurable
     private lateinit var settingsComponent: SettingsPluginComponent
-    private lateinit var settingsProjectService: SettingsProjectService
-    private var settingsState: SettingsProjectState = SettingsProjectState()
+    private lateinit var settingsState: SettingsProjectState
     private lateinit var fixture: CodeInsightTestFixture
 
     @BeforeEach
     fun setUp() {
-        project = Mockito.mock(Project::class.java)
-        settingsProjectService = Mockito.mock(SettingsProjectService::class.java)
-
-        settingsConfigurable = SettingsPluginConfigurable(project)
-
-        Mockito.`when`(project.service<SettingsProjectService>()).thenReturn(settingsProjectService)
-        Mockito.`when`(settingsProjectService.state).thenReturn(settingsState)
-
         val projectBuilder: TestFixtureBuilder<IdeaProjectTestFixture> =
             IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder("project")
 
@@ -46,10 +34,12 @@ class SettingsPluginConfigurableTest {
             .createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
+        settingsConfigurable = SettingsPluginConfigurable(fixture.project)
+
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
         settingsComponent = settingsConfigurable.settingsComponent!!
-//        settingsState = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
+        settingsState = fixture.project.service<SettingsProjectService>().state
     }
 
     @AfterEach
@@ -59,6 +49,7 @@ class SettingsPluginConfigurableTest {
     }
 
     @ParameterizedTest
+    @Order(2)
     @MethodSource("intValueGenerator")
     fun testIsModifiedValues(
         oldValue: Int,
@@ -68,13 +59,11 @@ class SettingsPluginConfigurableTest {
     ) {
         function()
         assertThat(settingsConfigurable.isModified).isTrue
-        assertThat(component()).isNotEqualTo(oldValue)
-        assertThat(state()).isEqualTo(oldValue)
     }
 
     @ParameterizedTest
     @MethodSource("intValueGenerator")
-    @Order(2)
+    @Order(3)
     fun testApplyValues(oldValue: Int, function: () -> Unit, component: () -> Int, state: () -> Int) {
         function()
         settingsConfigurable.apply()
@@ -90,6 +79,7 @@ class SettingsPluginConfigurableTest {
         assertThat(settingsComponent.javaPath).isNotEqualTo(settingsState.javaPath)
     }
 
+    @Order(4)
     @Test
     fun testResetJavaPath() {
         val oldValue = settingsComponent.javaPath
