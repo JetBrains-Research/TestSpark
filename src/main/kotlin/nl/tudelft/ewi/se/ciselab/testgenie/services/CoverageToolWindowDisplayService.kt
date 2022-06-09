@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.table.JBTable
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
 import java.awt.Dimension
 import javax.swing.JScrollPane
 import javax.swing.table.AbstractTableModel
@@ -54,10 +55,10 @@ class CoverageToolWindowDisplayService {
             ScrollPaneFactory.createScrollPane(table)
 
         val tableColumnModel = table.columnModel
-        tableColumnModel.getColumn(0).headerValue = "Unit under test"
-        tableColumnModel.getColumn(1).headerValue = "Line coverage"
-        tableColumnModel.getColumn(2).headerValue = "Branch coverage"
-        tableColumnModel.getColumn(3).headerValue = "Weak mutation coverage"
+        tableColumnModel.getColumn(0).headerValue = TestGenieLabelsBundle.defaultValue("unitsUndertest")
+        tableColumnModel.getColumn(1).headerValue = TestGenieLabelsBundle.defaultValue("lineCoverage")
+        tableColumnModel.getColumn(2).headerValue = TestGenieLabelsBundle.defaultValue("branchCoverage")
+        tableColumnModel.getColumn(3).headerValue = TestGenieLabelsBundle.defaultValue("weakMutationCoverage")
         table.columnModel = tableColumnModel
 
         table.minimumSize = Dimension(700, 100)
