@@ -18,7 +18,7 @@ class RunnerService(private val project: Project) {
             .getNotificationGroup("EvoSuite Execution Error")
             .createNotification(
                 "EvoSuite is already running",
-                "No new tests will be generated until this test generation run is complete.",
+                "You can generate more tests after the current test generation is complete.",
                 NotificationType.WARNING
             )
             .notify(project)
