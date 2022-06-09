@@ -21,11 +21,15 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManager
 import com.intellij.util.ui.JBUI
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
 import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
 import javax.swing.BorderFactory
@@ -33,15 +37,18 @@ import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
+import javax.swing.JLabel
 import javax.swing.JPanel
 
 class TestCaseDisplayService(private val project: Project) {
 
+    private var cacheLazyRunner: Runner? = null
+
     private val mainPanel: JPanel = JPanel()
-    private val applyButton: JButton = JButton("Apply to test suite")
-    private val validateButton: JButton = JButton("Validate tests")
-    private val selectAllButton: JButton = JButton("Select All")
-    private val deselectAllButton: JButton = JButton("Deselect All")
+    private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
+    private val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
+    private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
@@ -54,6 +61,9 @@ class TestCaseDisplayService(private val project: Project) {
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
+
+    // Content Manager to be able to add / remove tabs from tool window
+    private var contentManager: ContentManager? = null
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -83,9 +93,17 @@ class TestCaseDisplayService(private val project: Project) {
     /**
      * Creates the complete panel in the "Generated Tests" tab,
      * and adds the "Generated Tests" tab to the sidebar tool window.
+     *
+     * @param testReport the new test report
+     * @param editor editor instance where coverage should be
+     *               visualized
+     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     *                        due to a cache hit, or null if there was a cache miss
      */
-    fun showGeneratedTests(testReport: CompactReport, editor: Editor) {
+    fun showGeneratedTests(testReport: CompactReport, editor: Editor, cacheLazyRunner: Runner?) {
+        this.cacheLazyRunner = cacheLazyRunner
         displayTestCases(testReport, editor)
+        displayLazyRunnerButton()
         createToolWindowTab()
     }
 
@@ -94,6 +112,8 @@ class TestCaseDisplayService(private val project: Project) {
      * Add Tests and their names to a List of pairs (used for highlighting)
      *
      * @param testReport The report from which each testcase should be displayed
+     * @param editor editor instance where coverage should be
+     *               visualized
      */
     private fun displayTestCases(testReport: CompactReport, editor: Editor) {
         allTestCasePanel.removeAll()
@@ -138,17 +158,17 @@ class TestCaseDisplayService(private val project: Project) {
             addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox)
 
             // Add "Remove" and "Reset" buttons to the test case panel
-            val topButtons = JPanel()
-            topButtons.layout = FlowLayout(FlowLayout.TRAILING)
-            topButtons.add(removeFromCacheButton)
-            topButtons.add(resetButton)
-            testCasePanel.add(topButtons, BorderLayout.NORTH)
+            val bottomButtons = JPanel()
+            bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
+            bottomButtons.add(removeFromCacheButton)
+            bottomButtons.add(resetButton)
+            testCasePanel.add(bottomButtons, BorderLayout.SOUTH)
 
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
+            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 25)))
             allTestCasePanel.add(testCasePanel)
             testCasePanels[testCase.testName] = testCasePanel
-            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 5)))
         }
     }
 
@@ -238,6 +258,11 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove the selected test cases from the cache and the tool window UI
         removeTestCases(selectedTestCasePanels)
+
+        contentManager!!.removeContent(content!!, true)
+        ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
+        val coverageVisualisationService = project.service<CoverageVisualisationService>()
+        coverageVisualisationService.closeToolWindowTab()
     }
 
     private fun validateTests() {}
@@ -276,20 +301,20 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove generated tests tab from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
-        val contentManager = toolWindowManager!!.contentManager
+        contentManager = toolWindowManager!!.contentManager
         if (content != null) {
-            contentManager.removeContent(content!!, true)
+            contentManager!!.removeContent(content!!, true)
         }
 
         // If there is no generated tests tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
         content = contentFactory.createContent(
-            mainPanel, "Generated Tests", true
+            mainPanel, TestGenieLabelsBundle.defaultValue("generatedTests"), true
         )
-        contentManager.addContent(content!!)
+        contentManager!!.addContent(content!!)
 
         // Focus on generated tests tab and open toolWindow if not opened already
-        contentManager.setSelectedContent(content!!)
+        contentManager!!.setSelectedContent(content!!)
         toolWindowManager.show()
     }
 
@@ -339,7 +364,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createResetButton(document: Document, textFieldEditor: EditorTextField, testCode: String): JButton {
-        val resetButton = JButton("Reset")
+        val resetButton = JButton(TestGenieLabelsBundle.defaultValue("resetButton"))
         resetButton.isEnabled = false
         resetButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
@@ -438,5 +463,34 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.remove(testCasePanel)
             allTestCasePanel.updateUI()
         }
+    }
+
+    /**
+     * Display the button to actually invoke EvoSuite if the tests are cached.
+     */
+    private fun displayLazyRunnerButton() {
+        cacheLazyRunner ?: return
+
+        val lazyRunnerPanel = JPanel()
+        lazyRunnerPanel.layout = BoxLayout(lazyRunnerPanel, BoxLayout.Y_AXIS)
+        val lazyRunnerLabel = JLabel("Showing previously generated test cases from the cache.")
+        lazyRunnerLabel.alignmentX = Component.CENTER_ALIGNMENT
+        lazyRunnerPanel.add(lazyRunnerLabel)
+
+        val lazyRunnerButton = JButton("Generate new tests")
+
+        lazyRunnerButton.addActionListener {
+            lazyRunnerButton.isEnabled = false
+            cacheLazyRunner!!
+                .withoutCache()
+                .runTestGeneration()
+        }
+
+        lazyRunnerButton.alignmentX = Component.CENTER_ALIGNMENT
+        lazyRunnerPanel.add(lazyRunnerButton)
+
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 50)))
+        allTestCasePanel.add(lazyRunnerPanel)
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 50)))
     }
 }
