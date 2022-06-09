@@ -25,6 +25,8 @@
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService"/>
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieTelemetryService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService"/>
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
