@@ -62,6 +62,18 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     val generatedTestsTab
         get() = actionLink(byXpath("//div[@class='ContentTabLabel' and @text='Generated Tests']"))
 
+    val validatedTests
+        get() = actionLink(byXpath("//div[@text='Validate tests']"))
+
+    val selectAll
+        get() = actionLink(byXpath("//div[@text='Select All']"))
+
+    val deselectAll
+        get() = actionLink(byXpath("//div[@text='Deselect All']"))
+
+    val applyToTestSuite
+        get() = actionLink(byXpath("//div[@text='Apply to test suite']"))
+
     // Action to find "Find in Files..." menu
     private val findInFilesAction
         get() = actionLink(byXpath("//div[@text='Find in Files...']"))
