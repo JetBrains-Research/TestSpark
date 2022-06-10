@@ -120,17 +120,20 @@ class TestGenieTelemetryService(_project: Project) {
          *          - added variable declarations
          */
         internal fun convertToModifiedTestCaseSerializable(project: Project): ModifiedTestCaseSerializable {
+            // Create a dummy class to be a context for test methods
             val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
 
-            val originalTest: PsiMethod =
-                PsiElementFactory.getInstance(project).createMethodFromText(original.trim(), testClass)
+            // Create PSI methods for the original and modified tests
+            val originalTest: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(original.trim(), testClass)
             val modifiedTest: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(modified.trim(), testClass)
 
+            // Get the removed and added assertions
             val originalTestAssertions = extractAssertions(originalTest)
             val modifiedTestAssertions = extractAssertions(modifiedTest)
             val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
             val addedAssertions = modifiedTestAssertions.minus(originalTestAssertions)
 
+            // Get the removed and added variable declarations
             val originalVariableDeclarations = extractVariableDeclarations(originalTest)
             val modifiedVariableDeclarations = extractVariableDeclarations(modifiedTest)
             val removedVariableDeclarations = originalVariableDeclarations.minus(modifiedVariableDeclarations)
