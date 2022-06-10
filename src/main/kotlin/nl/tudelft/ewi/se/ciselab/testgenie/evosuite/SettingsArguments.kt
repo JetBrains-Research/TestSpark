@@ -1,8 +1,9 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.evosuite
 
 import nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.ContentDigestAlgorithm
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsApplicationState
 
 /**
  * This class is used for constructing the necessary parameters for running evosuite
@@ -21,7 +22,7 @@ class SettingsArguments(
     private val classFQN: String
 ) {
     private var command: MutableList<String> = mutableListOf(
-        "-generateSuite",
+        algorithmsToGenerateMap[SettingsApplicationService.getInstance().state!!.algorithm]!!,
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
         "-base_dir", projectPath,
@@ -70,7 +71,7 @@ class SettingsArguments(
      */
     fun build(): MutableList<String> {
         val toolWindowState = QuickAccessParametersService.getInstance().state
-        val settingsState = TestGenieSettingsService.getInstance().state
+        val settingsState = SettingsApplicationService.getInstance().state
 
         if (toolWindowState != null) {
             val params = toolWindowState.serializeChangesFromDefault()
@@ -86,13 +87,43 @@ class SettingsArguments(
     }
 
     companion object {
+        private const val generateSuite = "-generateSuite"
+        private const val generateMOSuite = "-generateMOSuite"
+        private const val generateTests = "-generateTests"
+        private const val generateRandom = "-generateRandom"
+
+        /**
+         * HashMap that maps algorithms to their corresponding generation strings.
+         */
+        private val algorithmsToGenerateMap: HashMap<ContentDigestAlgorithm, String> = hashMapOf(
+            ContentDigestAlgorithm.DYNAMOSA to generateMOSuite,
+            ContentDigestAlgorithm.MOSA to generateMOSuite,
+            ContentDigestAlgorithm.LIPS to generateRandom,
+            ContentDigestAlgorithm.MIO to generateMOSuite,
+            ContentDigestAlgorithm.RANDOM_SEARCH to generateTests,
+            ContentDigestAlgorithm.MONOTONIC_GA to generateSuite,
+            ContentDigestAlgorithm.STANDARD_GA to generateSuite,
+            ContentDigestAlgorithm.BREEDER_GA to generateSuite,
+            ContentDigestAlgorithm.STANDARD_GA to generateSuite,
+            ContentDigestAlgorithm.STEADY_STATE_GA to generateSuite,
+            ContentDigestAlgorithm.CELLULAR_GA to generateSuite,
+            ContentDigestAlgorithm.STANDARD_CHEMICAL_REACTION to generateSuite,
+            ContentDigestAlgorithm.MAP_ELITES to generateRandom,
+            ContentDigestAlgorithm.ONE_PLUS_LAMBDA_LAMBDA_GA to generateSuite,
+            ContentDigestAlgorithm.ONE_PLUS_ONE_EA to generateSuite,
+            ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA to generateSuite,
+            ContentDigestAlgorithm.MU_LAMBDA_EA to generateSuite,
+            ContentDigestAlgorithm.NSGAII to generateSuite,
+            ContentDigestAlgorithm.SPEA2 to generateSuite
+        )
+
         /**
          * Creates a string for the criterion parameter in the format required by EvoSuite.
          *
          * @param state the (settings) state that contains all the criteria
          * @return the generated criteria string, in the required format
          */
-        private fun createCriterionString(state: TestGenieSettingsState): String {
+        private fun createCriterionString(state: SettingsApplicationState): String {
             val sb = StringBuilder("-Dcriterion=") // e.g "-Dcriterion=BRANCH:WEAKMUTATION",
 
             if (state.criterionLine) {
