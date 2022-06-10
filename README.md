@@ -21,11 +21,13 @@ This specific section is a source for the [plugin.xml](/src/main/resources/META-
 - [Automatic test generation for classes](#generating-tests-for-classes-1)
 - [Automatic test generation for methods](#generating-tests-for-methods)
 - [Automatic test generation for lines](#generating-tests-for-lines-1)
+- [Coverage table](#coverage-table-1)
 - [Coverage visualisation for generated test suite](#coverage-visualisation-1)
 - [Killed mutants visualisation](#killed-mutants-visualisation-1)
 - [Caching Tests](#caching-tests-1)
 - [Test Validation](#test-validation-1)
 - [Accessibility Features](#accessibility-features-1)
+- [Telemetry](#telemetry-opt-in-1)
 - Assertion generation for selected tests (_to be implemented_)
 - Interactive Learning (_to be implemented_)
 - Smart Variable Name Generation (_to be implemented_)
@@ -38,6 +40,9 @@ TestGenie uses EvoSuite to automatically generate tests for Java methods. Two cl
 
 ### Generating Tests for Lines
 TestGenie uses EvoSuite to automatically generate tests for Java code lines. Two clicks are required from the user for the tests to be generated.
+
+### Coverage Table
+Basic statistics for the test suite in form of a table.
 
 ### Coverage Visualisation
 TestGenie offers an option to highlight lines which the generated test suite covers. Clicking the gutter icon (green rectangle) to the left of the lines allows the user to see which tests cover the line. Clicking a name of a test highlights the according test in the "Generated Tests" tab to make it easy to spot.
@@ -56,6 +61,9 @@ To assure that the cached tests are still valid, we have static and dynamic vali
 
 ### Accessibility Features
 Features which make the plugin more user-friendly. For instance, a color picker for coverage visualisation.
+
+### Telemetry (opt-in)
+Opt-in non-intrusive data collection to improve EvoSuite in the future.
 
 ### Assertion Generation
 *To be implemented. Currently, not supported*
@@ -111,6 +119,10 @@ To generate a test for a method, right-click (with mouse) anywhere within the li
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.
+
+### Coverage table
+Once a test suite is generated, basic statistics about it can be seen in the tool window, `coverage` tab. The statistics include line coverage, branch coverage, weak mutation coverage. The table adjusts dynamically - it only calculates the statistics for the selected tests in the test suite.\
+![Progress bar](readme-images/pngs/coverageTable.png)\
 
 ### Coverage Visualisation
 For coverage visualisation to work, you must have it turned on. The setting is available in the <kbd>Quick Access</kbd> tab.
