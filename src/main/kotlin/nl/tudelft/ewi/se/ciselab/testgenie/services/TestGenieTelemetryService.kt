@@ -5,6 +5,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiElementFactory
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiMethodCallExpression
+import com.intellij.psi.util.PsiTreeUtil
 import java.io.File
 import java.io.File.separator
 import java.text.SimpleDateFormat
@@ -108,10 +113,14 @@ class TestGenieTelemetryService(_project: Project) {
          * @return a ModifiedTestCaseWithAssertions
          */
         internal fun convertToModifiedTestCaseWithAssertions(project: Project): ModifiedTestCaseWithAssertions {
-            val removedAssertions = setOf<String>()
-            val addedAssertions = setOf<String>()
 
             // TODO: Build assertions
+            val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Sus")
+            val originalTest: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(original.trim(), testClass)
+            val modifiedTest: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(modified.trim(), testClass)
+
+            val removedAssertions = extractAssertions(originalTest)
+            val addedAssertions = extractAssertions(modifiedTest)
 
             return ModifiedTestCaseWithAssertions(
                 this.original,
@@ -120,12 +129,19 @@ class TestGenieTelemetryService(_project: Project) {
                 addedAssertions
             )
         }
+
+        private fun extractAssertions(psiMethod: PsiMethod): Set<String> {
+            val allMethodCalls = PsiTreeUtil.findChildrenOfType(psiMethod.body, PsiMethodCallExpression::class.java)
+            val assertions = allMethodCalls.filter { it.firstChild.text.contains("assert") }
+            return assertions.map { it.text }.toSet()
+        }
     }
 
     internal class ModifiedTestCaseWithAssertions(
-        original: String, modified: String,
-        val removedAssertions: Set<String>, val addedAssertions: Set<String>
+        original: String,
+        modified: String,
+        val removedAssertions: Set<String>,
+        val addedAssertions: Set<String>
     ) :
-        AbstractModifiedTestCase(original, modified) {
-    }
+        AbstractModifiedTestCase(original, modified)
 }
