@@ -126,8 +126,10 @@ class TestGenieTelemetryService(_project: Project) {
             val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
             val addedAssertions = modifiedTestAssertions.minus(originalTestAssertions)
 
-            val originalVariables = extractVariables(originalTest)
-            val modifiedVariables = extractVariables(modifiedTest)
+            val originalVariableDeclarations = extractVariableDeclarations(originalTest)
+            val modifiedVariablesDeclarations = extractVariableDeclarations(modifiedTest)
+            val originalVariableNames = extractVariableNamesFromDeclarations(originalVariableDeclarations)
+            val modifiedVariableNames = extractVariableNamesFromDeclarations(modifiedVariablesDeclarations)
 
             return ModifiedTestCaseSerializable(
                 this.original,
@@ -152,13 +154,16 @@ class TestGenieTelemetryService(_project: Project) {
             return assertions.map { it.text }.toSet()
         }
 
-        private fun extractVariables(testCase: PsiMethod): Set<String> {
-            val allVariables = testCase.body?.children
-                ?.filterIsInstance<PsiDeclarationStatement>()
-                ?.map { it.firstChild }
-                ?.filterIsInstance<PsiLocalVariable>()
-                ?.map { it.name } ?: listOf()
-            return allVariables.toSet()
+        private fun extractVariableDeclarations(testCase: PsiMethod): List<PsiDeclarationStatement> {
+            return testCase.body?.children
+                ?.filterIsInstance<PsiDeclarationStatement>() ?: listOf()
+        }
+
+        private fun extractVariableNamesFromDeclarations(declarations: List<PsiDeclarationStatement>): List<String> {
+            return declarations
+                .map { it.firstChild }
+                .filterIsInstance<PsiLocalVariable>()
+                .map { it.name }
         }
     }
 
