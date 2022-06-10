@@ -126,10 +126,15 @@ class TestGenieTelemetryService(_project: Project) {
             val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
             val addedAssertions = modifiedTestAssertions.minus(originalTestAssertions)
 
-            val originalVariableDeclarations = extractVariableDeclarations(originalTest)
-            val modifiedVariablesDeclarations = extractVariableDeclarations(modifiedTest)
-            val originalVariableNames = extractVariableNamesFromDeclarations(originalVariableDeclarations)
-            val modifiedVariableNames = extractVariableNamesFromDeclarations(modifiedVariablesDeclarations)
+            val originalVariableDeclarationStatements = extractVariableDeclarations(originalTest)
+            val modifiedVariableDeclarationStatements = extractVariableDeclarations(modifiedTest)
+            val originalVariableDeclarations = originalVariableDeclarationStatements.map { it.text }.toSet()
+            val modifiedVariableDeclarations = modifiedVariableDeclarationStatements.map { it.text }.toSet()
+
+            val originalVariableNameElements = extractVariableNamesFromDeclarations(originalVariableDeclarationStatements)
+            val modifiedVariableNameElements = extractVariableNamesFromDeclarations(modifiedVariableDeclarationStatements)
+            val originalVariableNames = originalVariableNameElements.map{ it.name }.toSet()
+            val modifiedVariableNames = modifiedVariableNameElements.map{ it.name }.toSet()
 
             return ModifiedTestCaseSerializable(
                 this.original,
@@ -159,11 +164,10 @@ class TestGenieTelemetryService(_project: Project) {
                 ?.filterIsInstance<PsiDeclarationStatement>() ?: listOf()
         }
 
-        private fun extractVariableNamesFromDeclarations(declarations: List<PsiDeclarationStatement>): List<String> {
+        private fun extractVariableNamesFromDeclarations(declarations: List<PsiDeclarationStatement>): List<PsiLocalVariable> {
             return declarations
                 .map { it.firstChild }
                 .filterIsInstance<PsiLocalVariable>()
-                .map { it.name }
         }
     }
 
