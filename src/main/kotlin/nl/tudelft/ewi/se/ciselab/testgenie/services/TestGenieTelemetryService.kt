@@ -43,17 +43,19 @@ class TestGenieTelemetryService(_project: Project) {
             return
         }
 
-        val testCasesToSubmit = mutableListOf<ModifiedTestCase>()
+        val rawTestCasesToSubmit = mutableListOf<ModifiedTestCase>()
 
         synchronized(modifiedTestCasesLock) {
-            testCasesToSubmit.addAll(modifiedTestCases)
+            rawTestCasesToSubmit.addAll(modifiedTestCases)
             modifiedTestCases.clear()
         }
 
         // If there are no tests to submit, do not create a file
-        if (testCasesToSubmit.size == 0) {
+        if (rawTestCasesToSubmit.size == 0) {
             return
         }
+
+        val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseWithAssertions() }
 
         log.info("Submiting ${testCasesToSubmit.size} test cases to a file")
 
