@@ -64,7 +64,7 @@ TestGenie offers an option to highlight lines which the generated test suite cov
 ## Usage
 <!-- How to use the plugin? What are the limitations? Are there any shortcuts? -->
 ### <u>Important note before generating tests</u>
-If you are running the plugin for the first time, checkout the `First time configuration` section.
+If you are running the plugin for the first time, checkout the [`First time configuration`](#first-time-configuration) section.
 
 ### Generating Tests for Classes
 To generate a test for a class, right-click (with mouse) anywhere within the class you want to test or right-click the class name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Class [...]" option:\
