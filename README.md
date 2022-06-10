@@ -95,14 +95,9 @@ You can examine the created tests, select those you wish to be added to your tes
 
 ### Coverage Visualisation
 For coverage visualisation to work, you must have it turned on. The setting is available in `Settings` -> `Tools` -> `TestGenie` -> "Show visualised coverage":\
-![Coverage visualisation checkbox](readme-images/testCoverageCheckbox.jpg)\
-Once test are generated, the lines which are covered by the tests will be highlighted (default color: green). The gutter next to the lines will have a green rectangle as well. If the rectangle is clicked, a popup will show the names of the tests which cover the selected line:\
-![Coverage popup](readme-images/CoveragePopup.jpg)\
-If any of the test names are clicked, the corresponding test in the toolwindow will be highlighted with the same accent color:\
-![Test Highlight](readme-images/testHighlight.jpg)\
-The effect lasts 10 seconds.\
-Statistics on code coverage can be found in the "Coverage Visualisation" tab, in the "TestGenie" toolwindow:\
-![Coverage statistics](readme-images/CoverageStats.jpg)
+![Coverage visualisation checkbox](readme-images/pngs/showCoverage.png)\
+Once test are generated, the lines which are covered by the tests will be highlighted (default color: green). The gutter next to the lines will have a green rectangle as well. If the rectangle is clicked, a popup will show the names of the tests which cover the selected line.If any of the test names are clicked, the corresponding test in the toolwindow will be highlighted with the same accent color. The effect lasts 10 seconds:
+![Test Highlight](readme-images/gifs/testHighlight.gif)\
 
 ## Configuration
 <!-- How can users configure the plugin to match their needs? -->
