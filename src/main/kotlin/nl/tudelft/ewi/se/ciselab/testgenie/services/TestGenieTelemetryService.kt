@@ -56,7 +56,7 @@ class TestGenieTelemetryService(_project: Project) {
             return
         }
 
-        val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseWithAssertions() }
+        val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseWithAssertions(project) }
 
         log.info("Submitting ${testCasesToSubmit.size} test cases to a file")
 
@@ -100,8 +100,11 @@ class TestGenieTelemetryService(_project: Project) {
         /**
          * Calculate the differences in the assertions of the original and modified test code,
          * and convert this ModifiedTestCase to a ModifiedTestCaseWithAssertions.
+         *
+         * @param project the current project
+         * @return a ModifiedTestCaseWithAssertions
          */
-        internal fun convertToModifiedTestCaseWithAssertions(): ModifiedTestCaseWithAssertions {
+        internal fun convertToModifiedTestCaseWithAssertions(project: Project): ModifiedTestCaseWithAssertions {
             val removedAssertions = setOf<String>()
             val addedAssertions = setOf<String>()
 
