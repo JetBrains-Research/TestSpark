@@ -122,7 +122,7 @@ You can examine the created tests, select those you wish to be added to your tes
 
 ### Coverage Table
 Once a test suite is generated, basic statistics about it can be seen in the tool window, `coverage` tab. The statistics include line coverage, branch coverage, weak mutation coverage. The table adjusts dynamically - it only calculates the statistics for the selected tests in the test suite.\
-![Progress bar](readme-images/pngs/coverageTable.png)\
+![Progress bar](readme-images/pngs/coverageTable.png)
 
 ### Coverage Visualisation
 For coverage visualisation to work, you must have it turned on. The setting is available in the <kbd>Quick Access</kbd> tab.
