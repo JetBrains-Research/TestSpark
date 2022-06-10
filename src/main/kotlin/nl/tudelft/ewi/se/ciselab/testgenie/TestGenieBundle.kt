@@ -7,7 +7,7 @@ import org.jetbrains.annotations.PropertyKey
 const val BUNDLE = "messages.TestGenie"
 
 /**
- * Loads the EvoSuite messages from `messages.TestGenie` file in the `recourses` directory.
+ * Loads the EvoSuite messages from `messages/TestGenie.properties` file in the `resources` directory.
  */
 object TestGenieBundle : DynamicBundle(BUNDLE) {
 
