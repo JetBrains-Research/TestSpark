@@ -53,7 +53,7 @@ class CoverageVisualisationToolWindowTest {
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
         ideaFrame.apply {
             coverageVisualisationTab.click()
-            assertThat(coverageVisualisationTab.hasText("Coverage Visualisation")).isTrue
+            assertThat(coverageVisualisationTab.hasText("Coverage")).isTrue
         }
     }
 

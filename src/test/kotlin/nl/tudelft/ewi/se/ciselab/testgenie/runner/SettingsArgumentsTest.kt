@@ -7,8 +7,8 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.SettingsArguments
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
-import nl.tudelft.ewi.se.ciselab.testgenie.settings.TestGenieSettingsState
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsApplicationState
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class SettingsArgumentsTest {
-    private lateinit var settingsState: TestGenieSettingsState
+    private lateinit var settingsState: SettingsApplicationState
 
     private lateinit var fixture: CodeInsightTestFixture
 
@@ -29,8 +29,8 @@ class SettingsArgumentsTest {
         fixture = JavaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
-        val settingsService = ApplicationManager.getApplication().getService(TestGenieSettingsService::class.java)
-        settingsService.loadState(TestGenieSettingsState())
+        val settingsService = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java)
+        settingsService.loadState(SettingsApplicationState())
 
         settingsState = settingsService.state
     }
@@ -44,7 +44,7 @@ class SettingsArgumentsTest {
     fun testCommandForClass() {
         val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung")
         val command = mutableListOf(
-            "-generateSuite",
+            "-generateMOSuite",
             "-serializeResult",
             "-serializeResultPath",
             "serializepath",
@@ -56,7 +56,7 @@ class SettingsArgumentsTest {
             "-class",
             "lang.java.Dung",
             "-Dtest_naming_strategy=COVERAGE",
-            "-Dalgorithm=RANDOM_SEARCH",
+            "-Dalgorithm=DYNAMOSA",
             "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH"
         )
 
@@ -73,7 +73,7 @@ class SettingsArgumentsTest {
             "project/classpath", "project", "serializepath", "lang.java.Dung"
         ).forMethod("dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;")
         val command = mutableListOf(
-            "-generateSuite",
+            "-generateMOSuite",
             "-serializeResult",
             "-serializeResultPath",
             "serializepath",
@@ -86,7 +86,7 @@ class SettingsArgumentsTest {
             "lang.java.Dung",
             "-Dtest_naming_strategy=COVERAGE",
             "-Dtarget_method=dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;",
-            "-Dalgorithm=RANDOM_SEARCH",
+            "-Dalgorithm=DYNAMOSA",
             "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH"
         )
 
@@ -101,7 +101,7 @@ class SettingsArgumentsTest {
     fun testCommandForLine() {
         val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung").forLine(419)
         val command = mutableListOf(
-            "-generateSuite",
+            "-generateMOSuite",
             "-serializeResult",
             "-serializeResultPath",
             "serializepath",
@@ -114,7 +114,7 @@ class SettingsArgumentsTest {
             "lang.java.Dung",
             "-Dtest_naming_strategy=COVERAGE",
             "-Dtarget_line=419",
-            "-Dalgorithm=RANDOM_SEARCH",
+            "-Dalgorithm=DYNAMOSA",
             "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH"
         )
 
