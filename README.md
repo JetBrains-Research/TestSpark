@@ -22,8 +22,9 @@ This specific section is a source for the [plugin.xml](/src/main/resources/META-
 - [Automatic test generation for methods](#generating-tests-for-methods)
 - [Automatic test generation for lines](#generating-tests-for-lines-1)
 - [Coverage visualisation for generated test suite](#coverage-visualisation-1)
-- [Caching Tests](#caching-tests-1)
 - [Killed mutants visualisation](#killed-mutants-visualisation-1)
+- [Caching Tests](#caching-tests-1)
+- [Test Validation](#test-validation-1)
 - [Accessibility Features](#accessibility-features-1)
 - Assertion generation for selected tests (_to be implemented_)
 - Interactive Learning (_to be implemented_)
@@ -48,7 +49,10 @@ TestGenie offers an option to see which mutants were killed and by which tests. 
 Due to its nature, generating tests with EvoSuite takes time. TestGenie takes steps to address this as
 much as technically feasible by caching all generated test cases that the user has decided not to apply
 immediately. This then allows TestGenie to instantly show those tests later, when the user decides to
-generate tests for a method or class that those unapplied tests also cove
+generate tests for a method or class that those unapplied tests also covered.
+
+### Test validation
+To assure that the cached tests are still valid, we have static and dynamic validation which are run before showing any cached tests.
 
 ### Accessibility Features
 Features which make the plugin more user-friendly. For instance, a color picker for coverage visualisation.
@@ -124,13 +128,22 @@ Once tests are generated, the same gutter from [`Coverage Visualisation`](#cover
 
 ### Caching Tests
 When a user initially generates tests for a class, this will take some time, as the EvoSuite backend needs to be invoked. Then, if a user generates tests for a single method in this class, Test-Genie will look in its cache and find the tests that were previously generated for the entire class, and will instantly display them to the user rather than invoking EvoSuite again.\
+Before displaying cached tests, they are (in)validated [statically and dynamically](#test-validation-1).\
 ![Cached Tests for Method](readme-images/gifs/caching.gif)
+
+### Test validation
+Tests which are no longer representative of the current state of the code under test are dropped from the cache, as they are no longer valid. We have 2 types of cache validation - static and dynamic validation. Static validation removes tests from cache by analysing the structure of the methods inside a class. If a method is modified, the tests covering it would be invalidated. Furthermore, it ignores whitespace changes, formatting inside a method and also reordering methods inside a class.Dynamic invalidation comes after static invalidation and verifies that all tests in the cache are still valid by running each of them. Failing tests are removed from the cache.
 
 ### Accessibility Features
 - The plugin supports changing the color for [coverage visualisation](#coverage-visualisation-1) and [killed mutants visualisation](#killed-mutants-visualisation-1) (one setting for both). To change the color, go to <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> > <kbd>TestGenie</kbd> and use the color picker under `Accessibility settings`:\
 ![Color Picker](readme-images/pngs/colorPicker.png)
 - The plugin has been designed with translation in mind. The vast majority of the plugins labels, tooltips, messages, etc. is stored in <kbd>.property</kbd> files. For more information on translation, refer to the developer readme.
 
+
+### Telemetry (opt-in)
+One of the biggest future plans of our client is to leverage the data that is gathered by TestGenie’s telemetry. This will help them with future research, including the development of an interactive way of using EvoSuite. The general idea behind this feature is to learn from the stored user corrections in order to improve test generation.\
+To opt into telemetry, go to <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> and tick the `Enable telemetry` checkbox. If you want, change the directory where telemetry is stored.\
+![Telemetry](readme-images/pngs/telemetry.png)
 
 ## Configuration
 <!-- How can users configure the plugin to match their needs? -->
@@ -139,6 +152,7 @@ The plugin is configured mainly through the Settings menu. The plugin settings c
 
 ### First time configuration
 Before running the plugin for the first time, we highly recommend going to the `Environment settings` section of TestGenie settings. The settings include java 11 path, compilation path (path to compiled code), compilation command. All commands have defaults. However, we recommend especially that you check compilation command. For this command the user requires maven, gradle or any other builder program which can be accessed via command. Leaving this field with a faulty value may cause unintended behaviour.
+![Setup](readme-images/pngs/Setup.png)
 
 ### Quick Access Parameters
 <!-- How to use Quick Access Parameters tab? Where to find it? What can be changed? --> 
