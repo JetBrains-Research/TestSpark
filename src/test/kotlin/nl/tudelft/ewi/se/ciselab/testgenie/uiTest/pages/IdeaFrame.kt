@@ -86,6 +86,9 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     private val findFilePathNameAction
         get() = textField(byXpath("//div[@class='FindPopupDirectoryChooser']//div[@class='BorderlessTextField']"))
 
+    val searchForTestSuite
+        get() = textField(byXpath("//div[@class='MyTextField']"))
+
     /**
      * Open file inside project.
      *
@@ -263,6 +266,46 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
         val actionSearchBox = textField(byXpath("//div[@class='SearchField']"))
         actionSearchBox.text = "Exit Full Screen"
         Thread.sleep(2000L)
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+    }
+
+    /**
+     * After the tests were generated and the tool window is open on the Generated tab,
+     * the function enables the UI robot to press "Deselect All" button to select all the generated tests.
+     * Clicks on the "Apply to test suite" button.
+     * Specifying to which class the tests should be appended and applies the tests to that file.
+     *
+     * @param testFileName - the name of the file to which the tests should be added.
+     */
+    fun deselectAllApplyTestsToTestSuite(testFileName: String) {
+        deselectAll.click()
+        applyTestsToTestSuite(testFileName)
+    }
+
+    /**
+     * After the tests were generated and the tool window is open on the Generated tab,
+     * the function enables the UI robot to press "Select All" button to select all the generated tests.
+     * Clicks on the "Apply to test suite" button.
+     * Specifying to which class the tests should be appended and applies the tests to that file.
+     *
+     * @param testFileName - the name of the file to which the tests should be added.
+     */
+    fun selectAllApplyTestsToTestSuite(testFileName: String) {
+        selectAll.click()
+        applyTestsToTestSuite(testFileName)
+    }
+
+    /**
+     * After the tests were generated and the tool window is open on the Generated tab,
+     * the function enables the UI robot to click on the "Apply to test suite" button.
+     * Specifying to which class the tests should be appended and applies the tests to that file.
+     *
+     * @param testFileName - the name of the file to which the tests should be added.
+     */
+    private fun applyTestsToTestSuite(testFileName: String) {
+        applyToTestSuite.click()
+        searchForTestSuite.text = testFileName
+        Thread.sleep(1000)
         remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
     }
 }
