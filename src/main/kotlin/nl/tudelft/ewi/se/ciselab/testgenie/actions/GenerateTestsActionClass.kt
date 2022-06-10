@@ -31,7 +31,7 @@ class GenerateTestsActionClass : AnAction() {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
-        val evoSuitePipeline: Pipeline = createevoSuitePipeline(e) ?: return
+        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
 
         ProjectBuilder(project).runBuild()
 

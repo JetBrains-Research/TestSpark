@@ -34,7 +34,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
  * @param e an action event that contains useful information and corresponds to the action invoked by the user
  * @return the created (EvoSuite) Runner, null if some information is missing or if there is no surrounding class
  */
-fun createevoSuitePipeline(e: AnActionEvent): Pipeline? {
+fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
     val project: Project = e.project ?: return null
 
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
@@ -62,7 +62,7 @@ fun createevoSuitePipeline(e: AnActionEvent): Pipeline? {
     log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
 
     return Pipeline(project, projectPath, projectClassPath, classFQN, fileUrl, modificationStamp)
-//        .withCacheLines(cacheStartLine, cacheEndLine)
+        .withCacheLines(cacheStartLine, cacheEndLine)
 }
 
 /**

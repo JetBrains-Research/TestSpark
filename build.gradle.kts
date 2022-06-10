@@ -20,7 +20,6 @@ plugins {
     // Gradle Qodana Plugin
     id("org.jetbrains.qodana") version "0.1.13"
 }
-thunderdomeVersion
 group = properties("pluginGroup")
 version = properties("pluginVersion")
 
