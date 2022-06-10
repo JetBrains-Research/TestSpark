@@ -11,7 +11,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
 
 class ProjectBuilder(private val project: Project) {
@@ -20,7 +20,7 @@ class ProjectBuilder(private val project: Project) {
     private val builderTimeout: Long = 12000000 // TODO: Source from config
 
     private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    private val settingsState = TestGenieSettingsService.getInstance().state
+    private val settingsState = SettingsProjectService.getInstance()?.state
 
     fun runBuild() {
         val handle = CountDownLatch(1)

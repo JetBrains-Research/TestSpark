@@ -3,6 +3,8 @@ package nl.tudelft.ewi.se.ciselab.testgenie.settings
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieToolTipsBundle
 import org.jdesktop.swingx.JXTitledSeparator
 import javax.swing.JCheckBox
 import javax.swing.JComponent
@@ -21,24 +23,24 @@ class SettingsEvoSuiteComponent {
     private var seedTextField = JTextField()
 
     // EvoSuite checkboxes options
-    private var sandboxCheckBox = JCheckBox("Execute tests in a sandbox environment")
-    private var assertionsCheckBox = JCheckBox("Create assertions")
-    private var clientOnThreadCheckBox = JCheckBox("Debug mode")
-    private var junitCheckCheckBox = JCheckBox("Flaky tests")
-    private var minimizeCheckBox = JCheckBox("Minimize test suite after generation")
+    private var sandboxCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("sandbox"))
+    private var assertionsCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("assertionCreation"))
+    private var clientOnThreadCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("debug"))
+    private var junitCheckCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("flaky"))
+    private var minimizeCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("minimize"))
 
     // Criterion selection checkboxes
     // There is a limited amount of criteria, but multiple can be selected at once.
     // Effectively, this requires its own section (or a checkboxed combobox of sorts)
-    private var criterionSeparator = JXTitledSeparator("Criterion selection")
-    private var criterionLineCheckBox = JCheckBox("Line coverage")
-    private var criterionBranchCheckBox = JCheckBox("Branch coverage")
-    private var criterionExceptionCheckBox = JCheckBox("Exception coverage")
-    private var criterionWeakMutationCheckBox = JCheckBox("Mutation coverage")
-    private var criterionOutputCheckBox = JCheckBox("Output coverage")
-    private var criterionMethodCheckBox = JCheckBox("Method coverage")
-    private var criterionMethodNoExceptionCheckBox = JCheckBox("Method no exception coverage")
-    private var criterionCBranchCheckBox = JCheckBox("CBranch coverage")
+    private var criterionSeparator = JXTitledSeparator(TestGenieLabelsBundle.defaultValue("criterionSeparator"))
+    private var criterionLineCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("criterionLine"))
+    private var criterionBranchCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("criterionBranch"))
+    private var criterionExceptionCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("criterionException"))
+    private var criterionWeakMutationCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("criterionWeakMutation"))
+    private var criterionOutputCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("criterionOutput"))
+    private var criterionMethodCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("criterionMethod"))
+    private var criterionMethodNoExceptionCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("criterionMethodNoExc"))
+    private var criterionCBranchCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("criterionCBranch"))
 
     init {
 
@@ -54,12 +56,12 @@ class SettingsEvoSuiteComponent {
      */
     private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
-            .addComponent(JXTitledSeparator("General settings"))
+            .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("generalSettings")))
             // EvoSuite "input" options (e.g. text, number)
             // Important settings like algorithm selection, seed selection
-            .addLabeledComponent(JBLabel("Select search algorithm"), algorithmSelector, 10, false)
-            .addLabeledComponent(JBLabel("Seed(random if left empty) "), seedTextField, 10, false)
-            .addLabeledComponent(JBLabel("Select configuration id (null if left empty) "), configurationIdTextField, 5, false)
+            .addLabeledComponent(JBLabel(TestGenieLabelsBundle.defaultValue("defaultSearch")), algorithmSelector, 10, false)
+            .addLabeledComponent(JBLabel(TestGenieLabelsBundle.defaultValue("seed")), seedTextField, 10, false)
+            .addLabeledComponent(JBLabel(TestGenieLabelsBundle.defaultValue("configId")), configurationIdTextField, 5, false)
             // Checkboxes settings
             .addComponent(sandboxCheckBox, 10)
             .addComponent(assertionsCheckBox, 10)
@@ -88,12 +90,11 @@ class SettingsEvoSuiteComponent {
         algorithmSelector.setMinimumAndPreferredWidth(300)
 
         // Tooltips
-        seedTextField.toolTipText = "Leave empty if you want random seed"
-        configurationIdTextField.toolTipText = "Label that identifies the used configuration of EvoSuite. This is only done when running experiments."
-        clientOnThreadCheckBox.toolTipText = "Run client process on same JVM of master in separate thread. To be used only for debugging purposes"
-        junitCheckCheckBox.toolTipText = "Compile and run resulting JUnit test suite (if any was created)"
-        criterionSeparator.toolTipText = "Coverage criterion. Can define more than one criterion by checking multiple checkboxes. " +
-            "\n By default, all are used."
+        seedTextField.toolTipText = TestGenieToolTipsBundle.defaultValue("seed")
+        configurationIdTextField.toolTipText = TestGenieToolTipsBundle.defaultValue("configId")
+        clientOnThreadCheckBox.toolTipText = TestGenieToolTipsBundle.defaultValue("debug")
+        junitCheckCheckBox.toolTipText = TestGenieToolTipsBundle.defaultValue("junit")
+        criterionSeparator.toolTipText = TestGenieToolTipsBundle.defaultValue("criterion")
     }
 
     /**

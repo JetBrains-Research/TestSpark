@@ -3,10 +3,10 @@ package nl.tudelft.ewi.se.ciselab.testgenie.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
-import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
@@ -15,6 +15,7 @@ import com.intellij.refactoring.suggested.startOffset
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ProjectBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
+import nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService
 
 /**
  * This class contains all the logic related to generating tests for a method.
@@ -30,6 +31,11 @@ class GenerateTestsActionMethod : AnAction() {
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
+        // Return if EvoSuite is already running
+        val project = e.project ?: return
+        val runnerService = project.service<RunnerService>()
+        if (runnerService.verifyIsRunning()) return
+
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
 
@@ -45,12 +51,10 @@ class GenerateTestsActionMethod : AnAction() {
 
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
-        val project: Project = e.project ?: return
-
         ProjectBuilder(project).runBuild()
 
-        val evoSuiteRunner: Pipeline = createEvoSuiteRunner(e) ?: return
-        evoSuiteRunner
+        val evoSuitePipeline: Pipeline = createevoSuitePipeline(e) ?: return
+        evoSuitePipeline
             .forMethod(methodDescriptor)
             .withCacheLines(cacheStartLine, cacheEndLine)
             .invalidateCache(linesToInvalidateFromCache)

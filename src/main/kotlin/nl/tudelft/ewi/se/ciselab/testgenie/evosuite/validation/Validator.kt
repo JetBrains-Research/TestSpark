@@ -16,7 +16,7 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentManager
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import org.jacoco.core.analysis.Analyzer
 import org.jacoco.core.analysis.CoverageBuilder
 import org.jacoco.core.analysis.IClassCoverage
@@ -34,7 +34,7 @@ class Validator(
     private val edits: HashMap<String, String> // test name, test code
 ) {
     private val logger: Logger = Logger.getInstance(this.javaClass)
-    private val settingsState = TestGenieSettingsService.getInstance().state
+    private val settingsState = SettingsProjectService.getInstance()?.state
     private val junitTimeout: Long = 12000000 // TODO: Source from config
 
     fun validateSuite() {
