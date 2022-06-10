@@ -58,6 +58,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/net.jqwik/jqwik
     testImplementation("net.jqwik:jqwik:1.6.5")
+
+    // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-symbol-solver-core
+    implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
