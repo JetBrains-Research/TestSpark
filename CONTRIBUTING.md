@@ -107,6 +107,9 @@ All the classes related to TestGenie Tool Window (on the right side) can be foun
 - `TestGenieLabelsBundle` is used to load the text of various UI labels in the code (from `defaults/Labels.properties` file in the `recourses` directory).
 - `TestGenieToolTipsBundle` is used to load the text of various tooltips in the code (from `defaults/Tooltips.properties` file in the `resources` directory).
 
+### Translations
+The vast majority of labels, tooltip-texts and messages are saved in their own `.properties` files. This is practical if you wish to translate the plugin to a different language - changing these files should translate most of the plugin elements. The only omitted texts are those which require certain properties set to them (e.g. IntelliJ's `.preferredSize`). Those have to be translated in the code. There also exists a `.properties` file for default TestGenie configurations. It is not related to linguistics, but useful if you wish to change default values of the plugin.
+
 ## Tests
 
 The tests for TestGenie can be found in `src/test` directory.
