@@ -22,7 +22,8 @@ This specific section is a source for the [plugin.xml](/src/main/resources/META-
 - [Automatic test generation for methods](#generating-tests-for-methods)
 - [Automatic test generation for lines](#generating-tests-for-lines-1)
 - [Coverage visualisation for generated test suite](#coverage-visualisation-1)
-- [Killed mutants visualisation](#mutation-visualisation)
+- [Killed mutants visualisation](#killed-mutants-visualisation-1)
+- [Accessibility Features](#accessibility-features-1)
 - Assertion generation for selected tests (_to be implemented_)
 - Interactive Learning (_to be implemented_)
 - Smart Variable Name Generation (_to be implemented_)
@@ -41,6 +42,9 @@ TestGenie offers an option to highlight lines which the generated test suite cov
 
 ### Killed Mutants Visualisation
 TestGenie offers an option to see which mutants were killed and by which tests. Clicking the gutter icon (green rectangle) to the left of the lines allows the user to see which tests cover the line. Clicking a name of a mutant highlights all the tests in the "Generated Tests" tab which cover it.
+
+### Accessibility Features
+Features which make the plugin more user-friendly. For instance, a color picker for coverage visualisation.
 
 ### Assertion Generation
 *To be implemented. Currently, not supported*
@@ -105,11 +109,16 @@ Once test are generated, the lines which are covered by the tests will be highli
 For reference, without visualisation the window would look like this:\
 ![No Test Highlight](readme-images/pngs/NoCoverageVisualisation.png)
 
-### Mutation Visualisation
+### Killed Mutants Visualisation
 For mutation visualisation to work, you must have [coverage visualisation](#coverage-visualisation-1) enabled. You must also have the criterion `Mutation coverage` turned on. The setting is available in the <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> > <kbd>EvoSuite</kbd> tab.\
 ![Turn on Mutation](readme-images/pngs/turnOnMutation.png)\
 Once tests are generated, the same gutter from [`Coverage Visualisation`](#coverage-visualisation-1) can be used to show which mutants are covered by the current test suite and which ones are not. For mutants covered, the mutant can be clicked. Clicking the mutant will highlight all the tests that kill the mutant. Mutation visualisation adjusts dynamically - it only shows results for the tests that are selected in the TestGenie tab.\
 ![Mutation Coverage](readme-images/gifs/mutationHighlight.gif)
+
+### Accessibility Features
+- The plugin supports changing the color for [coverage visualisation](#coverage-visualisation-1) and [killed mutants visualisation](#killed-mutants-visualisation-1) (one setting for both). To change the color, go to <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> > <kbd>TestGenie</kbd> and use the color picker under `Accessibility settings`:\
+![Color Picker](readme-images/pngs/colorPicker.png)
+- The plugin has been designed with translation in mind. The vast majority of the plugins labels, tooltips, messages, etc. is stored in <kbd>.property</kbd> files. For more information on translation, refer to the developer readme.
 
 
 ## Configuration
