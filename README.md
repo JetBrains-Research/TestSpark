@@ -17,13 +17,14 @@ This specific section is a source for the [plugin.xml](/src/main/resources/META-
 
 ## Features
 <!-- What features are supported by the plugin? -->
-- EvoSuite is installed with the plugin
-- Automatic test generation for classes
-- Automatic test generation for methods
-- Automatic test generation for lines (_to be implemented_)
-- Coverage visualisation for generated test suite
+- [EvoSuite is installed with the plugin](#installation)
+- [Automatic test generation for classes](#generating-tests-for-classes-1)
+- [Automatic test generation for methods](#generating-tests-for-methods)
+- [Automatic test generation for lines](#generating-tests-for-lines-1)
+- [Coverage visualisation for generated test suite](#coverage-visualisation-1)
+- [Killed mutants visualisation](#mutation-visualisation)
 - Assertion generation for selected tests (_to be implemented_)
-- Interactive Learning
+- Interactive Learning (_to be implemented_)
 - Smart Variable Name Generation (_to be implemented_)
 
 ### Generating Tests for Classes
@@ -33,10 +34,13 @@ TestGenie uses EvoSuite to automatically generate tests for Java classes. Two cl
 TestGenie uses EvoSuite to automatically generate tests for Java methods. Two clicks are required from the user for the tests to be generated.
 
 ### Generating Tests for Lines
-*To be implemented. Currently, not supported*
+TestGenie uses EvoSuite to automatically generate tests for Java code lines. Two clicks are required from the user for the tests to be generated.
 
 ### Coverage Visualisation
 TestGenie offers an option to highlight lines which the generated test suite covers. Clicking the gutter icon (green rectangle) to the left of the lines allows the user to see which tests cover the line. Clicking a name of a test highlights the according test in the "Generated Tests" tab to make it easy to spot.
+
+### Killed Mutants Visualisation
+TestGenie offers an option to see which mutants were killed and by which tests. Clicking the gutter icon (green rectangle) to the left of the lines allows the user to see which tests cover the line. Clicking a name of a mutant highlights all the tests in the "Generated Tests" tab which cover it.
 
 ### Assertion Generation
 *To be implemented. Currently, not supported*
@@ -111,7 +115,7 @@ Once tests are generated, the same gutter from [`Coverage Visualisation`](#cover
 ## Configuration
 <!-- How can users configure the plugin to match their needs? -->
 The plugin is configured mainly through the Settings menu. The plugin settings can be found under <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd>. Here, the user is able to select options for the plugin:\
-![Plugin Settings](readme-images/PluginSettings.jpg)
+![Plugin Settings](readme-images/pngs/PluginSettings.png)
 
 ### First time configuration
 Before running the plugin for the first time, we highly recommend going to the `Environment settings` section of TestGenie settings. The settings include java 11 path, compilation path (path to compiled code), compilation command. All commands have defaults. However, we recommend especially that you check compilation command. For this command the user requires maven, gradle or any other builder program which can be accessed via command. Leaving this field with a faulty value may cause unintended behaviour.
@@ -119,13 +123,13 @@ Before running the plugin for the first time, we highly recommend going to the `
 ### Quick Access Parameters
 <!-- How to use Quick Access Parameters tab? Where to find it? What can be changed? --> 
 Some parameters for tweaking EvoSuite are used so often, that going to the settings menu gets annoying. That why these parameters were added (exclusively) to the Quick Access Panel of the TestGenie tool window ("Parameters" tab). These are settings so common/useful that they deserved their own spot:\
-![Quick Access](readme-images/QuickParams.jpg)\
-Pro tip: don't forget to hit the "save" button at the bottom.
+![Quick Access](readme-images/gifs/QuickAccess.gif)\
+<span style="color:crimson; font-size:150%; font-weight:bold">Pro tip: don't forget to hit the "save" button at the bottom.</span>
 
 ### Advanced Parameters
 <!-- How to use Advanced Parameters Settings entry? Where to find it? What can be changed? --> 
 The settings submenu <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> > <kbd>EvoSuite</kbd> allows the user to tweak EvoSuite parameters to their liking. EvoSuite has hundreds of parameters, not all can be packed in a settings menu. However, the most commonly used and rational settings were added here:\
-![EvoSuite Settings](readme-images/EvoSuiteSettings.jpg)
+![EvoSuite Settings](readme-images/pngs/EvoSuiteSettings.png)
 
 ## Contribution
 <!-- How to contribute to the plugin -->
