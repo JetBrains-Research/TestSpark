@@ -1,10 +1,17 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.google.gson.Gson
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiElementFactory
+import com.intellij.psi.PsiExpressionStatement
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiMethodCallExpression
 import java.io.File
+import java.io.File.separator
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -43,25 +50,29 @@ class TestGenieTelemetryService(_project: Project) {
             return
         }
 
-        val testCasesToSubmit = mutableListOf<ModifiedTestCase>()
+        val rawTestCasesToSubmit = mutableListOf<ModifiedTestCase>()
 
         synchronized(modifiedTestCasesLock) {
-            testCasesToSubmit.addAll(modifiedTestCases)
+            rawTestCasesToSubmit.addAll(modifiedTestCases)
             modifiedTestCases.clear()
         }
 
         // If there are no tests to submit, do not create a file
-        if (testCasesToSubmit.size == 0) {
+        if (rawTestCasesToSubmit.size == 0) {
             return
         }
 
-        log.info("Submiting ${testCasesToSubmit.size} test cases to a file")
+        ApplicationManager.getApplication().runReadAction {
+            val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseWithAssertions(project) }
 
-        val gson = Gson()
-        val json = gson.toJson(testCasesToSubmit)
-        log.info("Submiting test cases: $json")
+            log.info("Submitting ${testCasesToSubmit.size} test cases to a file")
 
-        writeTelemetryToFile(json)
+            val gson = Gson()
+            val json = gson.toJson(testCasesToSubmit)
+            log.info("Submitting test cases: $json")
+
+            writeTelemetryToFile(json)
+        }
     }
 
     /**
@@ -70,8 +81,6 @@ class TestGenieTelemetryService(_project: Project) {
      * @param json a json object with the telemetry
      */
     private fun writeTelemetryToFile(json: String) {
-        // Get the separator depending on the underlying OS
-        val separator: String = java.io.File.separator
         // Get the telemetry path
         var dirName: String = project.service<SettingsProjectService>().state.telemetryPath
         if (!dirName.endsWith(separator)) dirName = dirName.plus(separator)
@@ -92,5 +101,58 @@ class TestGenieTelemetryService(_project: Project) {
         File(telemetryFileName).bufferedWriter().use { out -> out.write(json) }
     }
 
-    class ModifiedTestCase(val original: String, val modified: String)
+    abstract class AbstractModifiedTestCase(val original: String, val modified: String)
+
+    class ModifiedTestCase(original: String, modified: String) : AbstractModifiedTestCase(original, modified) {
+
+        /**
+         * Calculate the differences in the assertions of the original and modified test code,
+         * and convert this ModifiedTestCase to a ModifiedTestCaseWithAssertions.
+         *
+         * @param project the current project
+         * @return a ModifiedTestCaseWithAssertions
+         */
+        internal fun convertToModifiedTestCaseWithAssertions(project: Project): ModifiedTestCaseWithAssertions {
+            val originalTestAssertions = extractAssertions(original, project)
+            val modifiedTestAssertions = extractAssertions(modified, project)
+            val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
+            val addedAssertions = modifiedTestAssertions.minus(originalTestAssertions)
+
+            return ModifiedTestCaseWithAssertions(
+                this.original,
+                this.modified,
+                removedAssertions,
+                addedAssertions
+            )
+        }
+
+        /**
+         * Extracts assertions from a method.
+         *
+         * @param testCode the source code of the test
+         * @param project the currently open project
+         * @return the set of found assertion
+         */
+        private fun extractAssertions(testCode: String, project: Project): Set<String> {
+            val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
+            val psiMethod: PsiMethod =
+                PsiElementFactory.getInstance(project).createMethodFromText(testCode.trim(), testClass)
+
+            val allMethodCalls = psiMethod.body?.children
+                ?.filterIsInstance<PsiExpressionStatement>()
+                ?.map { it.firstChild }
+                ?.filterIsInstance<PsiMethodCallExpression>() ?: listOf()
+            val assertions = allMethodCalls.filter { it.firstChild.text.contains("assert") }
+            return assertions.map { it.text }.toSet()
+        }
+    }
+
+    @Suppress("unused")
+    internal class ModifiedTestCaseWithAssertions(
+        original: String,
+        modified: String,
+        val removedAssertions: Set<String>,
+        val addedAssertions: Set<String>
+    ) :
+        AbstractModifiedTestCase(original, modified)
 }
