@@ -113,14 +113,8 @@ class TestGenieTelemetryService(_project: Project) {
          * @return a ModifiedTestCaseWithAssertions
          */
         internal fun convertToModifiedTestCaseWithAssertions(project: Project): ModifiedTestCaseWithAssertions {
-
-            // TODO: Build assertions
-            val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Sus")
-            val originalTest: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(original.trim(), testClass)
-            val modifiedTest: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(modified.trim(), testClass)
-
-            val removedAssertions = extractAssertions(originalTest)
-            val addedAssertions = extractAssertions(modifiedTest)
+            val removedAssertions = extractAssertions(original, project)
+            val addedAssertions = extractAssertions(modified, project)
 
             return ModifiedTestCaseWithAssertions(
                 this.original,
@@ -133,10 +127,14 @@ class TestGenieTelemetryService(_project: Project) {
         /**
          * Extracts assertions from a method.
          *
-         * @param psiMethod the PSI method to extract assertions from
-         * @return the set of found assertions
+         * @param testCode the source code of the test
+         * @param project the currently open project
+         * @return the set of found assertion
          */
-        private fun extractAssertions(psiMethod: PsiMethod): Set<String> {
+        private fun extractAssertions(testCode: String, project: Project): Set<String> {
+            val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
+            val psiMethod: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(testCode.trim(), testClass)
+
             val allMethodCalls = PsiTreeUtil.findChildrenOfType(psiMethod.body, PsiMethodCallExpression::class.java)
             val assertions = allMethodCalls.filter { it.firstChild.text.contains("assert") }
             return assertions.map { it.text }.toSet()
