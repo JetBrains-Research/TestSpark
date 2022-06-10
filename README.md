@@ -64,7 +64,7 @@ TestGenie offers an option to highlight lines which the generated test suite cov
 ## Usage
 <!-- How to use the plugin? What are the limitations? Are there any shortcuts? -->
 ### <u>Important note before generating tests</u>
-EvoSuite, the basis of TestGenie, works only on Java classes which have already been compiled. Please make sure to compile your classes, before running EvoSuite with TestGenie. Otherwise, TestGenie will not work.
+If you are running the plugin for the first time, checkout the `First time configuration` section.
 
 ### Generating Tests for Classes
 To generate a test for a class, right-click (with mouse) anywhere within the class you want to test or right-click the class name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Class [...]" option:\
@@ -99,6 +99,9 @@ Statistics on code coverage can be found in the "Coverage Visualisation" tab, in
 <!-- How can users configure the plugin to match their needs? -->
 The plugin is configured mainly through the Settings menu. The plugin settings can be found under `Settings` -> `Tools` -> `TestGenie`. Here, the user is able to select options for the plugin:\
 ![Plugin Settings](readme-images/PluginSettings.jpg)
+
+### First time configuration
+Before running the plugin for the first time, we highly recommend going to the `Environment settings` section of TestGenie settings. The settings include java 11 path, compilation path (path to compiled code), compilation command. All commands have defaults. However, we recommend especially that you check compilation command. For this command the user requires maven, gradle or any other builder program which can be accessed via command. Leaving this field with a faulty value may cause unintended behaviour.
 
 ### Quick Access Parameters
 <!-- How to use Quick Access Parameters tab? Where to find it? What can be changed? --> 
