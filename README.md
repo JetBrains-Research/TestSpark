@@ -94,14 +94,14 @@ Once the tests are generated, they can be accessed in the "TestGenie" tool windo
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.
 
 ### Coverage Visualisation
-For coverage visualisation to work, you must have it turned on. The setting is available in `Settings` -> `Tools` -> `TestGenie` -> "Show visualised coverage":\
+For coverage visualisation to work, you must have it turned on. The setting is available in the <kbd>Quick Access</kbd> tab.
 ![Coverage visualisation checkbox](readme-images/pngs/showCoverage.png)\
 Once test are generated, the lines which are covered by the tests will be highlighted (default color: green). The gutter next to the lines will have a green rectangle as well. If the rectangle is clicked, a popup will show the names of the tests which cover the selected line.If any of the test names are clicked, the corresponding test in the toolwindow will be highlighted with the same accent color. The effect lasts 10 seconds:
-![Test Highlight](readme-images/gifs/testHighlight.gif)\
+![Test Highlight](readme-images/gifs/testHighlight.gif)
 
 ## Configuration
 <!-- How can users configure the plugin to match their needs? -->
-The plugin is configured mainly through the Settings menu. The plugin settings can be found under `Settings` -> `Tools` -> `TestGenie`. Here, the user is able to select options for the plugin:\
+The plugin is configured mainly through the Settings menu. The plugin settings can be found under <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd>. Here, the user is able to select options for the plugin:\
 ![Plugin Settings](readme-images/PluginSettings.jpg)
 
 ### First time configuration
@@ -115,7 +115,7 @@ Pro tip: don't forget to hit the "save" button at the bottom.
 
 ### Advanced Parameters
 <!-- How to use Advanced Parameters Settings entry? Where to find it? What can be changed? --> 
-The settings submenu `Settings` -> `Tools` -> `TestGenie` -> `EvoSuite` allows the user to tweak EvoSuite parameters to their liking. EvoSuite has hundreds of parameters, not all can be packed in a settings menu. However, the most commonly used and rational settings were added here:\
+The settings submenu <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> > <kbd>EvoSuite</kbd> allows the user to tweak EvoSuite parameters to their liking. EvoSuite has hundreds of parameters, not all can be packed in a settings menu. However, the most commonly used and rational settings were added here:\
 ![EvoSuite Settings](readme-images/EvoSuiteSettings.jpg)
 
 ## Contribution
