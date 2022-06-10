@@ -63,7 +63,7 @@ class TestGenieTelemetryService(_project: Project) {
         }
 
         ApplicationManager.getApplication().runReadAction {
-            val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseWithAssertions(project) }
+            val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseSerializable(project) }
 
             log.info("Submitting ${testCasesToSubmit.size} test cases to a file")
 
@@ -112,7 +112,7 @@ class TestGenieTelemetryService(_project: Project) {
          * @param project the current project
          * @return a ModifiedTestCaseWithAssertions
          */
-        internal fun convertToModifiedTestCaseWithAssertions(project: Project): ModifiedTestCaseSerializable {
+        internal fun convertToModifiedTestCaseSerializable(project: Project): ModifiedTestCaseSerializable {
             val originalTestAssertions = extractAssertions(original, project)
             val modifiedTestAssertions = extractAssertions(modified, project)
             val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
