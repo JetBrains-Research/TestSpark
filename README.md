@@ -97,7 +97,7 @@ If you are running the plugin for the first time, checkout the [`First time conf
 To generate a test for a class, right-click (with mouse) anywhere within the class you want to test or right-click the class name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Class [...]" option:\
 ![Test generation for classes](readme-images/gifs/testClass.gif)\
  EvoSuite going to run in the background and generate tests. While EvoSuite is running, a progress bar in the bottom right-hand corner of the IDE:\
-![Progress bar](readme-images/ProgressBar.jpg)\
+![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the right-hand side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.
@@ -106,7 +106,7 @@ You can examine the created tests, select those you wish to be added to your tes
 To generate a test for a method, right-click (with mouse) anywhere within the method you want to test or right-click the method name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Method [...]" option:\
 ![Test generation for methods](readme-images/gifs/testMethod.gif)\
  EvoSuite going to run in the background and generate tests. While EvoSuite is running, a progress bar in the bottom right-hand corner of the IDE:\
-![Progress bar](readme-images/ProgressBar.jpg)\
+![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.
@@ -115,7 +115,7 @@ You can examine the created tests, select those you wish to be added to your tes
 To generate a test for a method, right-click (with mouse) anywhere within the line you want. Note that the line has to contain a statement (e.g. you will not have the option on lines with only method declarations). Under the "TestGenie" option, select "Generate Tests for Line [...]" option:\
 ![Test generation for methods](readme-images/gifs/testLine.gif)\
  EvoSuite going to run in the background and generate tests. While EvoSuite is running, a progress bar in the bottom right-hand corner of the IDE:\
-![Progress bar](readme-images/ProgressBar.jpg)\
+![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.
