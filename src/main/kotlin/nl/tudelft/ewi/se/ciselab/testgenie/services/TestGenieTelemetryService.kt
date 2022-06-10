@@ -113,8 +113,10 @@ class TestGenieTelemetryService(_project: Project) {
          * @return a ModifiedTestCaseWithAssertions
          */
         internal fun convertToModifiedTestCaseWithAssertions(project: Project): ModifiedTestCaseWithAssertions {
-            val removedAssertions = extractAssertions(original, project)
-            val addedAssertions = extractAssertions(modified, project)
+            val originalTestAssertions = extractAssertions(original, project)
+            val modifiedTestAssertions = extractAssertions(modified, project)
+            val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
+            val addedAssertions = modifiedTestAssertions.minus(originalTestAssertions)
 
             return ModifiedTestCaseWithAssertions(
                 this.original,
@@ -133,7 +135,8 @@ class TestGenieTelemetryService(_project: Project) {
          */
         private fun extractAssertions(testCode: String, project: Project): Set<String> {
             val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
-            val psiMethod: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(testCode.trim(), testClass)
+            val psiMethod: PsiMethod =
+                PsiElementFactory.getInstance(project).createMethodFromText(testCode.trim(), testClass)
 
             val allMethodCalls = psiMethod.body?.children
                 ?.filterIsInstance<PsiExpressionStatement>()
