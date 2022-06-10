@@ -127,12 +127,16 @@ class TestGenieTelemetryService(_project: Project) {
 
             val originalVariableDeclarations = extractVariableDeclarations(originalTest)
             val modifiedVariableDeclarations = extractVariableDeclarations(modifiedTest)
+            val removedVariableDeclarations = originalVariableDeclarations.minus(modifiedVariableDeclarations)
+            val addedVariableDeclarations = modifiedVariableDeclarations.minus(originalVariableDeclarations)
 
             return ModifiedTestCaseSerializable(
                 this.original,
                 this.modified,
                 removedAssertions,
-                addedAssertions
+                addedAssertions,
+                removedVariableDeclarations,
+                addedVariableDeclarations
             )
         }
 
@@ -164,7 +168,9 @@ class TestGenieTelemetryService(_project: Project) {
         original: String,
         modified: String,
         val removedAssertions: Set<String>,
-        val addedAssertions: Set<String>
+        val addedAssertions: Set<String>,
+        val removedVariableDeclarations: Set<String>,
+        val addedVariableDeclarations: Set<String>
     ) :
         AbstractModifiedTestCase(original, modified)
 }
