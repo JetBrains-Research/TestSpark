@@ -1,6 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.google.gson.Gson
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -56,15 +57,17 @@ class TestGenieTelemetryService(_project: Project) {
             return
         }
 
-        val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseWithAssertions(project) }
+        ApplicationManager.getApplication().runReadAction {
+            val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseWithAssertions(project) }
 
-        log.info("Submitting ${testCasesToSubmit.size} test cases to a file")
+            log.info("Submitting ${testCasesToSubmit.size} test cases to a file")
 
-        val gson = Gson()
-        val json = gson.toJson(testCasesToSubmit)
-        log.info("Submitting test cases: $json")
+            val gson = Gson()
+            val json = gson.toJson(testCasesToSubmit)
+            log.info("Submitting test cases: $json")
 
-        writeTelemetryToFile(json)
+            writeTelemetryToFile(json)
+        }
     }
 
     /**
