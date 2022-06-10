@@ -57,11 +57,11 @@ class TestGenieTelemetryService(_project: Project) {
 
         val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseWithAssertions() }
 
-        log.info("Submiting ${testCasesToSubmit.size} test cases to a file")
+        log.info("Submitting ${testCasesToSubmit.size} test cases to a file")
 
         val gson = Gson()
         val json = gson.toJson(testCasesToSubmit)
-        log.info("Submiting test cases: $json")
+        log.info("Submitting test cases: $json")
 
         writeTelemetryToFile(json)
     }
