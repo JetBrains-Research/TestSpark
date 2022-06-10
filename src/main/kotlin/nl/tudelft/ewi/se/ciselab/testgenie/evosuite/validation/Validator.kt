@@ -232,7 +232,7 @@ class Validator(
         indicator.text = "Calculating coverage"
 
         val pluginsPath = System.getProperty("idea.plugins.path")
-        val jacocoPath = "$pluginsPath/TestGenie/lib/org.jacoco.agent-0.8.8.jar"
+        val jacocoPath = "$pluginsPath/TestGenie/lib/jacocoagent.jar"
         // construct command
         val jacocoReportPath = "$testValidationRoot/jacoco.exec"
         val cmd = ArrayList<String>()
