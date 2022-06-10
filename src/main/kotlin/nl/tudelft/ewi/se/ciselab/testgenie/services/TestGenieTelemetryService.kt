@@ -5,6 +5,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import java.io.File
+import java.io.File.separator
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -72,8 +73,6 @@ class TestGenieTelemetryService(_project: Project) {
      * @param json a json object with the telemetry
      */
     private fun writeTelemetryToFile(json: String) {
-        // Get the separator depending on the underlying OS
-        val separator: String = java.io.File.separator
         // Get the telemetry path
         var dirName: String = project.service<SettingsProjectService>().state.telemetryPath
         if (!dirName.endsWith(separator)) dirName = dirName.plus(separator)
