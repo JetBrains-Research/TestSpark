@@ -9,7 +9,6 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiElementFactory
 import com.intellij.psi.PsiExpressionStatement
-import com.intellij.psi.PsiLocalVariable
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiMethodCallExpression
 import java.io.File
@@ -126,15 +125,8 @@ class TestGenieTelemetryService(_project: Project) {
             val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
             val addedAssertions = modifiedTestAssertions.minus(originalTestAssertions)
 
-            val originalVariableDeclarationStatements = extractVariableDeclarations(originalTest)
-            val modifiedVariableDeclarationStatements = extractVariableDeclarations(modifiedTest)
-            val originalVariableDeclarations = originalVariableDeclarationStatements.map { it.text }.toSet()
-            val modifiedVariableDeclarations = modifiedVariableDeclarationStatements.map { it.text }.toSet()
-
-            val originalVariableNameElements = extractVariableNamesFromDeclarations(originalVariableDeclarationStatements)
-            val modifiedVariableNameElements = extractVariableNamesFromDeclarations(modifiedVariableDeclarationStatements)
-            val originalVariableNames = originalVariableNameElements.map{ it.name }.toSet()
-            val modifiedVariableNames = modifiedVariableNameElements.map{ it.name }.toSet()
+            val originalVariableDeclarations = extractVariableDeclarations(originalTest)
+            val modifiedVariableDeclarations = extractVariableDeclarations(modifiedTest)
 
             return ModifiedTestCaseSerializable(
                 this.original,
@@ -159,15 +151,11 @@ class TestGenieTelemetryService(_project: Project) {
             return assertions.map { it.text }.toSet()
         }
 
-        private fun extractVariableDeclarations(testCase: PsiMethod): List<PsiDeclarationStatement> {
+        private fun extractVariableDeclarations(testCase: PsiMethod): Set<String> {
             return testCase.body?.children
-                ?.filterIsInstance<PsiDeclarationStatement>() ?: listOf()
-        }
-
-        private fun extractVariableNamesFromDeclarations(declarations: List<PsiDeclarationStatement>): List<PsiLocalVariable> {
-            return declarations
-                .map { it.firstChild }
-                .filterIsInstance<PsiLocalVariable>()
+                ?.filterIsInstance<PsiDeclarationStatement>()
+                ?.map { it.text }
+                ?.toSet() ?: setOf()
         }
     }
 
