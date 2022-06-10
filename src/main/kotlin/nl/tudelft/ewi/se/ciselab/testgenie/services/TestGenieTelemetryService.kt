@@ -92,5 +92,33 @@ class TestGenieTelemetryService(_project: Project) {
         File(telemetryFileName).bufferedWriter().use { out -> out.write(json) }
     }
 
-    class ModifiedTestCase(val original: String, val modified: String)
+    abstract class AbstractModifiedTestCase(val original: String, val modified: String)
+
+    class ModifiedTestCase(original: String, modified: String) : AbstractModifiedTestCase(original, modified) {
+
+        /**
+         * Calculate the differences in the assertions of the original and modified test code,
+         * and convert this ModifiedTestCase to a ModifiedTestCaseWithAssertions.
+         */
+        internal fun convertToModifiedTestCaseWithAssertions(): ModifiedTestCaseWithAssertions {
+            val removedAssertions = setOf<String>()
+            val addedAssertions = setOf<String>()
+
+            // TODO: Build assertions
+
+            return ModifiedTestCaseWithAssertions(
+                this.original,
+                this.modified,
+                removedAssertions,
+                addedAssertions
+            )
+        }
+    }
+
+    internal class ModifiedTestCaseWithAssertions(
+        original: String, modified: String,
+        val removedAssertions: Set<String>, val addedAssertions: Set<String>
+    ) :
+        AbstractModifiedTestCase(original, modified) {
+    }
 }
