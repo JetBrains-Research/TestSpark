@@ -3,9 +3,17 @@
 .qodana/
 build/
 lib/
-**/evosuite-tests/
+
+# Test projects
+src/test/resources/project/.idea/
+
+# Pizzeria project
 src/test/resources/project/pizzeria/.idea/
 src/test/resources/project/pizzeria/target/
-src/test/resources/project/.idea/
+src/test/resources/project/pizzeria/pizzeria.iml
+
+# Untitled project
 src/test/resources/project/untitled/.idea/
+src/test/resources/project/untitled/target/
+src/test/resources/project/untitled/untitled.iml
 .jqwik-database
