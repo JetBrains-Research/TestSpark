@@ -107,11 +107,17 @@ class TestGenieTelemetryService(_project: Project) {
     class ModifiedTestCase(original: String, modified: String) : AbstractModifiedTestCase(original, modified) {
 
         /**
-         * Calculate the differences in the assertions of the original and modified test code,
+         * Calculate the differences in the assertions and variable declarations of the original and modified test code,
          * and convert this ModifiedTestCase to a ModifiedTestCaseWithAssertions.
          *
          * @param project the current project
-         * @return a ModifiedTestCaseWithAssertions
+         * @return a ModifiedTestCaseWithAssertions class that contains:
+         *          - the original test case
+         *          - modified test case
+         *          - removed assertions
+         *          - added assertions
+         *          - removed variable declarations
+         *          - added variable declarations
          */
         internal fun convertToModifiedTestCaseSerializable(project: Project): ModifiedTestCaseSerializable {
             val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
@@ -155,6 +161,12 @@ class TestGenieTelemetryService(_project: Project) {
             return assertions.map { it.text }.toSet()
         }
 
+        /**
+         * Extracts variable declarations from a test case.
+         *
+         * @param testCase the test case in the form of a PSI method
+         * @return the set of found variable declarations
+         */
         private fun extractVariableDeclarations(testCase: PsiMethod): Set<String> {
             return testCase.body?.children
                 ?.filterIsInstance<PsiDeclarationStatement>()
