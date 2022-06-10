@@ -22,6 +22,7 @@ This specific section is a source for the [plugin.xml](/src/main/resources/META-
 - [Automatic test generation for methods](#generating-tests-for-methods)
 - [Automatic test generation for lines](#generating-tests-for-lines-1)
 - [Coverage visualisation for generated test suite](#coverage-visualisation-1)
+- [Caching Tests](#caching-tests-1)
 - [Killed mutants visualisation](#killed-mutants-visualisation-1)
 - [Accessibility Features](#accessibility-features-1)
 - Assertion generation for selected tests (_to be implemented_)
@@ -42,6 +43,12 @@ TestGenie offers an option to highlight lines which the generated test suite cov
 
 ### Killed Mutants Visualisation
 TestGenie offers an option to see which mutants were killed and by which tests. Clicking the gutter icon (green rectangle) to the left of the lines allows the user to see which tests cover the line. Clicking a name of a mutant highlights all the tests in the "Generated Tests" tab which cover it.
+
+### Caching Tests
+Due to its nature, generating tests with EvoSuite takes time. TestGenie takes steps to address this as
+much as technically feasible by caching all generated test cases that the user has decided not to apply
+immediately. This then allows TestGenie to instantly show those tests later, when the user decides to
+generate tests for a method or class that those unapplied tests also cove
 
 ### Accessibility Features
 Features which make the plugin more user-friendly. For instance, a color picker for coverage visualisation.
@@ -114,6 +121,10 @@ For mutation visualisation to work, you must have [coverage visualisation](#cove
 ![Turn on Mutation](readme-images/pngs/turnOnMutation.png)\
 Once tests are generated, the same gutter from [`Coverage Visualisation`](#coverage-visualisation-1) can be used to show which mutants are covered by the current test suite and which ones are not. For mutants covered, the mutant can be clicked. Clicking the mutant will highlight all the tests that kill the mutant. Mutation visualisation adjusts dynamically - it only shows results for the tests that are selected in the TestGenie tab.\
 ![Mutation Coverage](readme-images/gifs/mutationHighlight.gif)
+
+### Caching Tests
+When a user initially generates tests for a class, this will take some time, as the EvoSuite backend needs to be invoked. Then, if a user generates tests for a single method in this class, Test-Genie will look in its cache and find the tests that were previously generated for the entire class, and will instantly display them to the user rather than invoking EvoSuite again.\
+![Cached Tests for Method](readme-images/gifs/caching.gif)
 
 ### Accessibility Features
 - The plugin supports changing the color for [coverage visualisation](#coverage-visualisation-1) and [killed mutants visualisation](#killed-mutants-visualisation-1) (one setting for both). To change the color, go to <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> > <kbd>TestGenie</kbd> and use the color picker under `Accessibility settings`:\
