@@ -6,8 +6,10 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiElementFactory
 import com.intellij.psi.PsiExpressionStatement
+import com.intellij.psi.PsiLocalVariable
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiMethodCallExpression
 import java.io.File
@@ -118,6 +120,9 @@ class TestGenieTelemetryService(_project: Project) {
             val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
             val addedAssertions = modifiedTestAssertions.minus(originalTestAssertions)
 
+            val originalVariables = extractVariables(original, project)
+            val modifiedVariables = extractVariables(modified, project)
+
             return ModifiedTestCaseSerializable(
                 this.original,
                 this.modified,
@@ -144,6 +149,19 @@ class TestGenieTelemetryService(_project: Project) {
                 ?.filterIsInstance<PsiMethodCallExpression>() ?: listOf()
             val assertions = allMethodCalls.filter { it.firstChild.text.contains("assert") }
             return assertions.map { it.text }.toSet()
+        }
+
+        private fun extractVariables(testCode: String, project: Project): Set<String> {
+            val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
+            val psiMethod: PsiMethod =
+                PsiElementFactory.getInstance(project).createMethodFromText(testCode.trim(), testClass)
+
+            val allVariables = psiMethod.body?.children
+                ?.filterIsInstance<PsiDeclarationStatement>()
+                ?.map { it.firstChild }
+                ?.filterIsInstance<PsiLocalVariable>()
+                ?.map { it.name } ?: listOf()
+            return allVariables.toSet()
         }
     }
 
