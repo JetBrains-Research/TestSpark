@@ -112,13 +112,13 @@ class TestGenieTelemetryService(_project: Project) {
          * @param project the current project
          * @return a ModifiedTestCaseWithAssertions
          */
-        internal fun convertToModifiedTestCaseWithAssertions(project: Project): ModifiedTestCaseWithAssertions {
+        internal fun convertToModifiedTestCaseWithAssertions(project: Project): ModifiedTestCaseSerializable {
             val originalTestAssertions = extractAssertions(original, project)
             val modifiedTestAssertions = extractAssertions(modified, project)
             val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
             val addedAssertions = modifiedTestAssertions.minus(originalTestAssertions)
 
-            return ModifiedTestCaseWithAssertions(
+            return ModifiedTestCaseSerializable(
                 this.original,
                 this.modified,
                 removedAssertions,
@@ -148,7 +148,7 @@ class TestGenieTelemetryService(_project: Project) {
     }
 
     @Suppress("unused")
-    internal class ModifiedTestCaseWithAssertions(
+    internal class ModifiedTestCaseSerializable(
         original: String,
         modified: String,
         val removedAssertions: Set<String>,
