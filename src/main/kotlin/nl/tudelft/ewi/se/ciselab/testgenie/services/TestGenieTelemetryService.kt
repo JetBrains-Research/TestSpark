@@ -147,6 +147,7 @@ class TestGenieTelemetryService(_project: Project) {
         }
     }
 
+    @Suppress("unused")
     internal class ModifiedTestCaseWithAssertions(
         original: String,
         modified: String,
