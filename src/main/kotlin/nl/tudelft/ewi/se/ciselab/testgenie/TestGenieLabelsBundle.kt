@@ -7,7 +7,7 @@ import org.jetbrains.annotations.PropertyKey
 const val LABELS_BUNDLE = "defaults.Labels"
 
 /**
- * Loads the default values from `defaults.TestGenie` file in the `recourses` directory.
+ * Loads the label texts from `defaults/Labels.properties` file in the `recourses` directory.
  */
 object TestGenieLabelsBundle : DynamicBundle(LABELS_BUNDLE) {
 

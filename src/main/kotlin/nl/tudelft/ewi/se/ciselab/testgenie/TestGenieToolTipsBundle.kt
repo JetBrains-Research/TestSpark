@@ -7,7 +7,7 @@ import org.jetbrains.annotations.PropertyKey
 const val TOOLTIPS_BUNDLE = "defaults.Tooltips"
 
 /**
- * Loads the default values from `defaults.TestGenie` file in the `recourses` directory.
+ * Loads the tooltip texts from `defaults/Tooltips.properties` file in the `resources` directory.
  */
 object TestGenieToolTipsBundle : DynamicBundle(TOOLTIPS_BUNDLE) {
 
