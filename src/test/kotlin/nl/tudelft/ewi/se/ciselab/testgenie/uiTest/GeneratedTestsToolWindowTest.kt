@@ -4,11 +4,14 @@ import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.EditorFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.WaitForConditionTimeoutException
 import com.intellij.remoterobot.utils.keyboard
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThatNoException
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.MethodOrderer
@@ -104,15 +107,29 @@ class GeneratedTestsToolWindowTest {
     fun testApplyTestsButtonSelectAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
         ideaFrame.apply {
+            // Check that there are multiple tests generated because they all have editor components.
+            // UI Robot can not find an editor component because there are too many. Assert that exception.
+            assertThatThrownBy {
+                editor = find(byXpath("//div[@class='EditorComponentImpl']"))
+            }.isInstanceOf(WaitForConditionTimeoutException::class.java)
+                .hasMessageContaining("Exceeded timeout (PT2S) for condition function (Found more than one 'EditorFixture' by '//div[@class='EditorComponentImpl']'")
+
             // Select all and apply to testSuite.
             selectAllApplyTestsToTestSuite(testFileName)
+
+            // Assert that after the tests are applied, all the generated test disappeared by checking
+            // that exception that multiple editor components are found is not thrown.
+            assertThatNoException().isThrownBy { editor = find(byXpath("//div[@class='EditorComponentImpl']")) }
+
             // Open the correct file.
             openProjectFile(testFileName, projectName)
             // Close tool window to decrease the number of editors.
             clickOnToolWindow()
             editor = find(byXpath("//div[@class='EditorComponentImpl']"))
+
             // Assert that tests were appended by checking the length of empty class and the new class.
             Assertions.assertThat(editor.text.length).isGreaterThan(emptyClass.length)
+
             // Close the ArrayUtilsTest file tab.
             remoteRobot.keyboard { hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_F4) }
             // Restore the state as before this test by opening the tool window again.
