@@ -7,9 +7,9 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElementFactory
+import com.intellij.psi.PsiExpressionStatement
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiMethodCallExpression
-import com.intellij.psi.util.PsiTreeUtil
 import java.io.File
 import java.io.File.separator
 import java.text.SimpleDateFormat
@@ -135,7 +135,10 @@ class TestGenieTelemetryService(_project: Project) {
             val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
             val psiMethod: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(testCode.trim(), testClass)
 
-            val allMethodCalls = PsiTreeUtil.findChildrenOfType(psiMethod.body, PsiMethodCallExpression::class.java)
+            val allMethodCalls = psiMethod.body?.children
+                ?.filterIsInstance<PsiExpressionStatement>()
+                ?.map { it.firstChild }
+                ?.filterIsInstance<PsiMethodCallExpression>() ?: listOf()
             val assertions = allMethodCalls.filter { it.firstChild.text.contains("assert") }
             return assertions.map { it.text }.toSet()
         }
