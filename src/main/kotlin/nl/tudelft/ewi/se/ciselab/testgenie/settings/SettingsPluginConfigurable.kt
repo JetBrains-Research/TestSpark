@@ -1,7 +1,10 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import com.intellij.openapi.project.Project
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
+import java.io.File
 import javax.swing.JComponent
 
 /**
@@ -9,9 +12,10 @@ import javax.swing.JComponent
  * It interacts with the SettingsPluginComponent, TestGenieSettingsService and TestGenieSettingsState.
  * It provides controller functionality for the TestGenieSettingsState.
  */
-class SettingsPluginConfigurable : Configurable {
+class SettingsPluginConfigurable(_project: Project) : Configurable {
 
     var settingsComponent: SettingsPluginComponent? = null
+    var project: Project = _project
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
@@ -19,7 +23,7 @@ class SettingsPluginConfigurable : Configurable {
      * @return the panel used for displaying settings
      */
     override fun createComponent(): JComponent? {
-        settingsComponent = SettingsPluginComponent()
+        settingsComponent = SettingsPluginComponent(project)
         return settingsComponent!!.panel
     }
 
@@ -27,7 +31,7 @@ class SettingsPluginConfigurable : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
+        val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
         settingsComponent!!.javaPath = settingsState.javaPath
         settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
@@ -35,7 +39,10 @@ class SettingsPluginConfigurable : Configurable {
         settingsComponent!!.colorBlue = settingsState.colorBlue
         settingsComponent!!.buildCommand = settingsState.buildCommand
         settingsComponent!!.telemetryEnabled = settingsState.telemetryEnabled
-        settingsComponent!!.telemetryPath = settingsState.telemetryPath
+        settingsComponent!!.telemetryPath =
+            if (settingsState.telemetryPath.endsWith(project.name))
+                settingsState.telemetryPath
+            else settingsState.telemetryPath.plus(File.separator).plus(project.name)
     }
 
     /**
@@ -44,7 +51,7 @@ class SettingsPluginConfigurable : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
+        val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
         var modified: Boolean = settingsComponent!!.javaPath != settingsState.javaPath
         modified = modified or (settingsComponent!!.buildPath != settingsState.buildPath)
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
@@ -60,7 +67,7 @@ class SettingsPluginConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: TestGenieSettingsState = TestGenieSettingsService.getInstance().state!!
+        val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
         settingsState.javaPath = settingsComponent!!.javaPath
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen
@@ -76,7 +83,7 @@ class SettingsPluginConfigurable : Configurable {
      * Check if the telemetry path is empty when telemetry is enabled.
      * If empty, then sets to previous state. Else, keep the new one.
      */
-    private fun checkEmptyTelemetryPath(settingsState: TestGenieSettingsState): Boolean {
+    private fun checkEmptyTelemetryPath(settingsState: SettingsProjectState): Boolean {
         if (settingsComponent!!.telemetryEnabled && settingsComponent!!.telemetryPath.isBlank()) {
             settingsState.telemetryPath = settingsState.telemetryPath
             settingsComponent!!.telemetryPath = settingsState.telemetryPath

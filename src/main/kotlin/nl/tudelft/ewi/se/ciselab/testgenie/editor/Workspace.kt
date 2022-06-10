@@ -12,6 +12,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.VALIDATION_RESULT_TOPIC
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.ValidationResultListener
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.Validator
@@ -91,7 +92,7 @@ class Workspace(private val project: Project) {
 
                     // update coverage only if the modification timestamp is the same
                     if (testJob.info.modificationTS == modTs) {
-                        updateCoverage(testJob.getSelectedLines(), testJob.report, editor)
+                        updateCoverage(testJob.getSelectedLines(), testJob.selectedTests, testJob.report, editor)
                     }
                 }
             }
@@ -141,8 +142,10 @@ class Workspace(private val project: Project) {
      *
      * @param testResultName the test result job id which was received
      * @param testReport the generated test suite
+     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     *                        due to a cache hit, or null if there was a cache miss
      */
-    fun receiveGenerationResult(testResultName: String, testReport: CompactReport) {
+    fun receiveGenerationResult(testResultName: String, testReport: CompactReport, cacheLazyRunner: Pipeline?) {
         val jobKey = pendingTestResults.remove(testResultName)!!
 
         val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
@@ -155,7 +158,7 @@ class Workspace(private val project: Project) {
         val editor = editorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
-            showReport(testJob, editor)
+            showReport(testJob, editor, cacheLazyRunner)
         } else {
             log.info("No editor opened for received test result")
         }
@@ -212,12 +215,14 @@ class Workspace(private val project: Project) {
      *
      * @param testReport the new test report
      * @param editor editor instance where coverage should be
-     * visualized
+     *               visualized
+     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     *                        due to a cache hit, or null if there was a cache miss
      */
-    private fun showReport(testJob: TestJob, editor: Editor) {
+    private fun showReport(testJob: TestJob, editor: Editor, cacheLazyRunner: Pipeline?) {
         val visualizationService = project.service<CoverageVisualisationService>()
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.showGeneratedTests(testJob, editor)
+        testCaseDisplayService.showGeneratedTests(testJob, editor, cacheLazyRunner)
         visualizationService.showCoverage(testJob.report, editor)
     }
 
@@ -233,11 +238,12 @@ class Workspace(private val project: Project) {
      */
     private fun updateCoverage(
         linesToCover: Set<Int>,
+        selectedTests: HashSet<String>,
         testCaseList: CompactReport,
         editor: Editor
     ) {
         val visualizationService = project.service<CoverageVisualisationService>()
-        visualizationService.updateCoverage(linesToCover, testCaseList, editor)
+        visualizationService.updateCoverage(linesToCover, selectedTests, testCaseList, editor)
     }
 
     private fun lastTestGeneration(fileName: String): TestJob? {

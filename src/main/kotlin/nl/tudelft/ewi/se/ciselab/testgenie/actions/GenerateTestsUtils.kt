@@ -21,8 +21,8 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
 
 /**
  * This file contains some useful methods related to GenerateTests actions.
@@ -34,7 +34,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
  * @param e an action event that contains useful information and corresponds to the action invoked by the user
  * @return the created (EvoSuite) Runner, null if some information is missing or if there is no surrounding class
  */
-fun createEvoSuiteRunner(e: AnActionEvent): Pipeline? {
+fun createevoSuitePipeline(e: AnActionEvent): Pipeline? {
     val project: Project = e.project ?: return null
 
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
@@ -47,8 +47,8 @@ fun createEvoSuiteRunner(e: AnActionEvent): Pipeline? {
     val classFQN = psiClass.qualifiedName ?: return null
 
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    val settingsState = TestGenieSettingsService.getInstance().state ?: return null
-    val projectClassPath = "$projectPath/" + settingsState.buildPath
+    val settingsProjectState = project.service<SettingsProjectService>().state
+    val projectClassPath = "$projectPath/" + settingsProjectState.buildPath
 
     val log = Logger.getInstance("GenerateTestsUtils")
 
