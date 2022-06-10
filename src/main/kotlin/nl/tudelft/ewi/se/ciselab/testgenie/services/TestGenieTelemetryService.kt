@@ -130,6 +130,12 @@ class TestGenieTelemetryService(_project: Project) {
             )
         }
 
+        /**
+         * Extracts assertions from a method.
+         *
+         * @param psiMethod the PSI method to extract assertions from
+         * @return the set of found assertions
+         */
         private fun extractAssertions(psiMethod: PsiMethod): Set<String> {
             val allMethodCalls = PsiTreeUtil.findChildrenOfType(psiMethod.body, PsiMethodCallExpression::class.java)
             val assertions = allMethodCalls.filter { it.firstChild.text.contains("assert") }
