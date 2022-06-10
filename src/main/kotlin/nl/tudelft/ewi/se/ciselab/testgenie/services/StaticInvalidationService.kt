@@ -86,9 +86,13 @@ class StaticInvalidationService(private val project: Project) {
 
         // if body doesn't exist, method seen first time
         // if amount of elements in body different, method surely changed
-        if (savedBody == null || body.first.size != savedBody.first.size) {
+        if (savedBody == null) {
             methods[signature] = body
             return setOf()
+        }
+        if (body.first.size != savedBody.first.size) {
+            methods[signature] = body
+            return savedBody.second
         }
         // compare each element (no whitespace)
         body.first.zip(savedBody.first).forEach {
