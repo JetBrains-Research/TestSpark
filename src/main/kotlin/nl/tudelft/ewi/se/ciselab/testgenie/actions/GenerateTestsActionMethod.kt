@@ -53,7 +53,7 @@ class GenerateTestsActionMethod : AnAction() {
 
         ProjectBuilder(project).runBuild()
 
-        val evoSuitePipeline: Pipeline = createevoSuitePipeline(e) ?: return
+        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
         evoSuitePipeline
             .forMethod(methodDescriptor)
             .withCacheLines(cacheStartLine, cacheEndLine)

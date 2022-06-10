@@ -167,19 +167,15 @@ class Pipeline(
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
-
-                        // NOT FOR HERE
-//                        if (!skipCache) {
-//                            // Check cache
-//                            val hasCachedTests = tryShowCachedTestCases()
-//                            if (hasCachedTests) {
-//                                log.info("Found cached tests")
-//                                indicator.stop()
-//                                return
-//                            }
-//                        }
-//
-//                        runBuild(indicator)
+                        if (!skipCache) {
+                            // Check cache
+                            val hasCachedTests = tryShowCachedTestCases()
+                            if (hasCachedTests) {
+                                log.info("Found cached tests")
+                                indicator.stop()
+                                return
+                            }
+                        }
 
                         if (indicator.isCanceled) {
                             indicator.stop()
