@@ -20,20 +20,25 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.awt.event.KeyEvent
 import java.time.Duration
 
+private const val testFileName = "ArrayUtilsTest"
+
+private const val projectName = "untitled"
+
+private const val emptyClass = """public class ArrayUtilsTest {
+}
+"""
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(RemoteRobotExtension::class)
 class GeneratedTestsToolWindowTest {
 
-    private val emptyClass = """public class ArrayUtilsTest {
-}
-"""
     private lateinit var editor: EditorFixture
 
     @BeforeAll
     fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
-            open("untitled")
+            open(projectName)
         }
 
         Thread.sleep(10000)
@@ -43,12 +48,12 @@ class GeneratedTestsToolWindowTest {
             clickOnToolWindow()
 
             // Open file ArrayUtils in project untitled
-            openProjectFile("ArrayUtils", "untitled")
+            openProjectFile("ArrayUtils", projectName)
 
             // Change quick access params
             changeQuickAccess()
             // Create the test class
-            createTestClass("ArrayUtilsTest")
+            createTestClass(testFileName)
             // Run EvoSuite on entire class
             runTestsForClass()
             // Wait for background tasks to finish
@@ -78,9 +83,9 @@ class GeneratedTestsToolWindowTest {
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
         ideaFrame.apply {
             // Deselect all and apply to testSuite.
-            deselectAllApplyTestsToTestSuite("ArrayUtilsTest")
+            deselectAllApplyTestsToTestSuite(testFileName)
             // Open the correct file.
-            openProjectFile("ArrayUtilsTest", "untitled")
+            openProjectFile(testFileName, projectName)
             // Close tool window to decrease the number of editors.
             clickOnToolWindow()
             editor = find(byXpath("//div[@class='EditorComponentImpl']"))
@@ -100,9 +105,9 @@ class GeneratedTestsToolWindowTest {
         val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
         ideaFrame.apply {
             // Select all and apply to testSuite.
-            selectAllApplyTestsToTestSuite("ArrayUtilsTest")
+            selectAllApplyTestsToTestSuite(testFileName)
             // Open the correct file.
-            openProjectFile("ArrayUtilsTest", "untitled")
+            openProjectFile(testFileName, projectName)
             // Close tool window to decrease the number of editors.
             clickOnToolWindow()
             editor = find(byXpath("//div[@class='EditorComponentImpl']"))
@@ -118,7 +123,7 @@ class GeneratedTestsToolWindowTest {
     @AfterAll
     fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
-            deleteProject("ArrayUtilsTest", "untitled")
+            deleteProject(testFileName, projectName)
             clickOnToolWindow()
             closeProjectFile()
             closeProject()
