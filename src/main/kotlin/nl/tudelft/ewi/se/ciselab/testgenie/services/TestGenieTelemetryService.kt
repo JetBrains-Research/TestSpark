@@ -6,6 +6,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDeclarationStatement
 import com.intellij.psi.PsiElementFactory
 import com.intellij.psi.PsiExpressionStatement
 import com.intellij.psi.PsiMethod
@@ -63,7 +64,7 @@ class TestGenieTelemetryService(_project: Project) {
         }
 
         ApplicationManager.getApplication().runReadAction {
-            val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseWithAssertions(project) }
+            val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseSerializable(project) }
 
             log.info("Submitting ${testCasesToSubmit.size} test cases to a file")
 
@@ -106,53 +107,85 @@ class TestGenieTelemetryService(_project: Project) {
     class ModifiedTestCase(original: String, modified: String) : AbstractModifiedTestCase(original, modified) {
 
         /**
-         * Calculate the differences in the assertions of the original and modified test code,
+         * Calculate the differences in the assertions and variable declarations of the original and modified test code,
          * and convert this ModifiedTestCase to a ModifiedTestCaseWithAssertions.
          *
          * @param project the current project
-         * @return a ModifiedTestCaseWithAssertions
+         * @return a ModifiedTestCaseWithAssertions class that contains:
+         *          - the original test case
+         *          - modified test case
+         *          - removed assertions
+         *          - added assertions
+         *          - removed variable declarations
+         *          - added variable declarations
          */
-        internal fun convertToModifiedTestCaseWithAssertions(project: Project): ModifiedTestCaseWithAssertions {
-            val originalTestAssertions = extractAssertions(original, project)
-            val modifiedTestAssertions = extractAssertions(modified, project)
+        internal fun convertToModifiedTestCaseSerializable(project: Project): ModifiedTestCaseSerializable {
+            // Create a dummy class to be a context for test methods
+            val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
+
+            // Create PSI methods for the original and modified tests
+            val originalTest: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(original.trim(), testClass)
+            val modifiedTest: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(modified.trim(), testClass)
+
+            // Get the removed and added assertions
+            val originalTestAssertions = extractAssertions(originalTest)
+            val modifiedTestAssertions = extractAssertions(modifiedTest)
             val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
             val addedAssertions = modifiedTestAssertions.minus(originalTestAssertions)
 
-            return ModifiedTestCaseWithAssertions(
+            // Get the removed and added variable declarations
+            val originalVariableDeclarations = extractVariableDeclarations(originalTest)
+            val modifiedVariableDeclarations = extractVariableDeclarations(modifiedTest)
+            val removedVariableDeclarations = originalVariableDeclarations.minus(modifiedVariableDeclarations)
+            val addedVariableDeclarations = modifiedVariableDeclarations.minus(originalVariableDeclarations)
+
+            return ModifiedTestCaseSerializable(
                 this.original,
                 this.modified,
                 removedAssertions,
-                addedAssertions
+                addedAssertions,
+                removedVariableDeclarations,
+                addedVariableDeclarations
             )
         }
 
         /**
-         * Extracts assertions from a method.
+         * Extracts assertions from a test case.
          *
-         * @param testCode the source code of the test
-         * @param project the currently open project
+         * @param testCase the test case in the form of a PSI method
          * @return the set of found assertion
          */
-        private fun extractAssertions(testCode: String, project: Project): Set<String> {
-            val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
-            val psiMethod: PsiMethod =
-                PsiElementFactory.getInstance(project).createMethodFromText(testCode.trim(), testClass)
-
-            val allMethodCalls = psiMethod.body?.children
+        private fun extractAssertions(testCase: PsiMethod): Set<String> {
+            val allMethodCalls = testCase.body?.children
                 ?.filterIsInstance<PsiExpressionStatement>()
                 ?.map { it.firstChild }
                 ?.filterIsInstance<PsiMethodCallExpression>() ?: listOf()
             val assertions = allMethodCalls.filter { it.firstChild.text.contains("assert") }
             return assertions.map { it.text }.toSet()
         }
+
+        /**
+         * Extracts variable declarations from a test case.
+         *
+         * @param testCase the test case in the form of a PSI method
+         * @return the set of found variable declarations
+         */
+        private fun extractVariableDeclarations(testCase: PsiMethod): Set<String> {
+            return testCase.body?.children
+                ?.filterIsInstance<PsiDeclarationStatement>()
+                ?.map { it.text }
+                ?.toSet() ?: setOf()
+        }
     }
 
     @Suppress("unused")
-    internal class ModifiedTestCaseWithAssertions(
+    internal class ModifiedTestCaseSerializable(
         original: String,
         modified: String,
         val removedAssertions: Set<String>,
-        val addedAssertions: Set<String>
+        val addedAssertions: Set<String>,
+        val removedVariableDeclarations: Set<String>,
+        val addedVariableDeclarations: Set<String>
     ) :
         AbstractModifiedTestCase(original, modified)
 }
