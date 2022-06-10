@@ -37,7 +37,7 @@ dependencies {
     implementation(files("lib/jacocoagent.jar"))
 
     implementation("junit:junit:4.13")
-
+    implementation("org.jacoco:org.jacoco.core:0.8.8")
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
 
     // From the jetbrains repository

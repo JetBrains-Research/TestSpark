@@ -19,8 +19,13 @@ import com.intellij.util.concurrency.AppExecutorUtil
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.Util
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import org.evosuite.result.TestGenerationResultImpl
+import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
 import java.io.File
 import java.nio.charset.Charset
 import java.util.UUID
@@ -35,7 +40,7 @@ import java.util.regex.Pattern
  * build system (e.g. Maven target/classes or Gradle build/classes)
  * @param classFQN Fully qualified name of the class under test
  */
-class Runner(
+class Pipeline(
     private val project: Project,
     private val projectPath: String,
     private val projectClassPath: String,
@@ -63,6 +68,8 @@ class Runner(
     private val settingsState = TestGenieSettingsService.getInstance().state
 
     private var command = mutableListOf<String>()
+    private var cacheFromLine: Int? = null
+    private var cacheToLine: Int? = null
 
     init {
         Util.makeTmp()
@@ -72,7 +79,7 @@ class Runner(
     /**
      * Sets up evosuite to run for a target class. This is the simplest configuration.
      */
-    fun forClass(): Runner {
+    fun forClass(): Pipeline {
         command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).build()
         return this
     }
@@ -83,13 +90,13 @@ class Runner(
      *
      * @param methodDescriptor The method descriptor of the method under test
      */
-    fun forMethod(methodDescriptor: String): Runner {
+    fun forMethod(methodDescriptor: String): Pipeline {
         command =
             SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethod(methodDescriptor)
                 .build()
 
         // attach method desc. to target unit key
-        key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
+        key = Workspace.TestJobInfo(fileUrl, "$classFQN#$methodDescriptor", modTs, testResultName, projectClassPath)
 
         return this
     }
@@ -98,24 +105,33 @@ class Runner(
      * Sets up evosuite to run for a target line of the target class. This attaches the selected line argument
      * to the evosuite process.
      */
-    fun forLine(selectedLine: Int): Runner {
+    fun forLine(selectedLine: Int): Pipeline {
         command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forLine(selectedLine)
             .build()
 
         return this
     }
 
-//    /**
-//     * Method to invalidate the cache.
-//     *
-//     * @param linesToInvalidate set of lines to invalidate
-//     */
-//    fun invalidateCache(linesToInvalidate: Set<Int>): Runner {
-//        val staticInvalidator = project.service<StaticInvalidationService>()
-//        staticInvalidator.invalidateCacheLines(fileUrl, linesToInvalidate)
-//        log.info("Going to invalidate $linesToInvalidate lines")
-//        return this
-//    }
+    /**
+     * Configures lines for the cache (0-indexed)
+     */
+    fun withCacheLines(fromLine: Int, toLine: Int): Pipeline {
+        this.cacheFromLine = fromLine + 1
+        this.cacheToLine = toLine + 1
+        return this
+    }
+
+    /**
+     * Method to invalidate the cache.
+     *
+     * @param linesToInvalidate set of lines to invalidate
+     */
+    fun invalidateCache(linesToInvalidate: Set<Int>): Pipeline {
+        val staticInvalidator = project.service<StaticInvalidationService>()
+        staticInvalidator.invalidateCacheLines(fileUrl, linesToInvalidate)
+        log.info("Going to invalidate $linesToInvalidate lines")
+        return this
+    }
 
     /**
      * Builds the project and launches the EvoSuite process,
@@ -155,36 +171,36 @@ class Runner(
         return testResultName
     }
 
-//    /**
-//     * Attempts to retrieve and display cached test cases.
-//     *
-//     * @return true if cached tests were found, false otherwise
-//     */
-//    private fun tryShowCachedTestCases(): Boolean {
-//        val cache = project.service<TestCaseCachingService>()
-//        val testCases = cache.retrieveFromCache(fileUrl, cacheFromLine!!, cacheToLine!!)
-//
-//        if (testCases.isEmpty()) {
-//            // no suitable cached tests found
-//            return false
-//        }
-//
-//        val workspace = project.service<Workspace>()
-//        ApplicationManager.getApplication().invokeLater {
-//            val report = CompactReport(TestGenerationResultImpl())
-//            val testMap = hashMapOf<String, CompactTestCase>()
-//            testCases.forEach {
-//                testMap[it.testName] = it
-//            }
-//
-//            report.testCaseList = testMap
-//            report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
-//
-//            workspace.receiveGenerationResult(testResultName, report)
-//        }
-//
-//        return true
-//    }
+    /**
+     * Attempts to retrieve and display cached test cases.
+     *
+     * @return true if cached tests were found, false otherwise
+     */
+    private fun tryShowCachedTestCases(): Boolean {
+        val cache = project.service<TestCaseCachingService>()
+        val testCases = cache.retrieveFromCache(fileUrl, cacheFromLine!!, cacheToLine!!)
+
+        if (testCases.isEmpty()) {
+            // no suitable cached tests found
+            return false
+        }
+
+        val workspace = project.service<Workspace>()
+        ApplicationManager.getApplication().invokeLater {
+            val report = CompactReport(TestGenerationResultImpl())
+            val testMap = hashMapOf<String, CompactTestCase>()
+            testCases.forEach {
+                testMap[it.testName] = it
+            }
+
+            report.testCaseList = testMap
+            report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
+
+            workspace.receiveGenerationResult(testResultName, report)
+        }
+
+        return true
+    }
 
     /**
      * Executes EvoSuite.

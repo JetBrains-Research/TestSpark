@@ -17,6 +17,10 @@ import com.intellij.ui.content.ContentManager
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import org.jacoco.core.analysis.Analyzer
+import org.jacoco.core.analysis.CoverageBuilder
+import org.jacoco.core.analysis.IClassCoverage
+import org.jacoco.core.tools.ExecFileLoader
 import java.io.File
 import java.io.FileWriter
 import java.nio.charset.Charset
@@ -41,7 +45,8 @@ class Validator(
 
         logger.info("Validating test suite $jobName")
 
-        val targetFqn = "${testJob.info.targetUnit}_ESTest"
+        val fqn = testJob.info.targetUnit.split('#').first()
+        val targetFqn = "${fqn}_ESTest"
 
         val targetProjectCP = testJob.info.targetClassPath
 
@@ -52,8 +57,7 @@ class Validator(
         val hamcrestPath = "$pluginsPath/TestGenie/lib/hamcrest-core-1.3.jar"
 
         val testValidationRoot = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep$jobName-validation"
-        val testValidationDirectory =
-            "$testValidationRoot${sep}evosuite-tests"
+        val testValidationDirectory = "$testValidationRoot${sep}evosuite-tests"
         val validationDir = File(testValidationDirectory)
 
         // TODO: Implement classpath builder
@@ -76,7 +80,7 @@ class Validator(
                 override fun run(indicator: ProgressIndicator) {
                     try {
                         runTests(indicator, classpath, targetFqn)
-                        runTestsWithCoverage(indicator, classpath, targetFqn, testValidationRoot)
+                        runTestsWithCoverage(indicator, classpath, targetFqn, testValidationRoot, targetProjectCP)
                         indicator.stop()
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -220,7 +224,8 @@ class Validator(
         indicator: ProgressIndicator,
         classpath: String,
         testFqn: String,
-        testValidationRoot: String
+        testValidationRoot: String,
+        projectClasses: String
     ) {
         settingsState ?: return
 
@@ -229,9 +234,10 @@ class Validator(
         val pluginsPath = System.getProperty("idea.plugins.path")
         val jacocoPath = "$pluginsPath/TestGenie/lib/jacocoagent.jar"
         // construct command
+        val jacocoReportPath = "$testValidationRoot/jacoco.exec"
         val cmd = ArrayList<String>()
         cmd.add(settingsState.javaPath)
-        cmd.add("-javaagent:$jacocoPath=destfile=$testValidationRoot/jacoco.exec")
+        cmd.add("-javaagent:$jacocoPath=destfile=$jacocoReportPath")
         cmd.add("-cp")
         cmd.add(classpath)
         cmd.add("org.junit.runner.JUnitCore")
@@ -252,12 +258,76 @@ class Validator(
         // treat this as a join handle
         handler.waitFor(junitTimeout)
 
-        val output = cap.output.stdout
+        val loader = ExecFileLoader()
+        loader.load(File(jacocoReportPath))
+        val executionData = loader.executionDataStore
+        val sessionInfo = loader.sessionInfoStore
 
-        // TOOD: jacoco result
-//        val junitResult = parseJunitResult(output)
+        val coverageBuilder = CoverageBuilder()
+        val analyzer = Analyzer(executionData, coverageBuilder)
+        val count = analyzer.analyzeAll(File(projectClasses))
+        logger.info("$count classes analyzed")
 
-//        project.messageBus.syncPublisher(VALIDATION_RESULT_TOPIC).validationResult(junitResult)
+        val coverages = coverageBuilder.classes
+        logJacoco(coverages)
+
+        val cov = getCoverageLineByLine(coverages)
+
+        project.messageBus.syncPublisher(JACOCO_REPORT_TOPIC).receiveJacocoReport(cov)
+    }
+
+    private fun logJacoco(coverages: Collection<IClassCoverage>) {
+        val totalCoveredLines = coverages.stream().mapToInt { coverage: IClassCoverage ->
+            coverage.lineCounter.coveredCount
+        }.sum()
+        val totalLines = coverages.stream().mapToInt { coverage: IClassCoverage ->
+            coverage.lineCounter.totalCount
+        }.sum()
+        val totalCoveredInstructions = coverages.stream().mapToInt { coverage: IClassCoverage ->
+            coverage.instructionCounter.coveredCount
+        }.sum()
+        val totalInstructions = coverages.stream().mapToInt { coverage: IClassCoverage ->
+            coverage.instructionCounter.totalCount
+        }.sum()
+        val totalCoveredBranches = coverages.stream().mapToInt { coverage: IClassCoverage ->
+            coverage.branchCounter.coveredCount
+        }.sum()
+        val totalBranches = coverages.stream().mapToInt { coverage: IClassCoverage ->
+            coverage.branchCounter.totalCount
+        }.sum()
+        logger.info("Lines: $totalCoveredLines/$totalLines | Branches: $totalCoveredBranches/$totalBranches | Instructions: $totalCoveredInstructions/$totalInstructions")
+    }
+
+    data class CoverageLineByLine(
+        val fullyCoveredLines: MutableList<Int>,
+        val partiallyCoveredLines: MutableList<Int>,
+        val notCoveredLines: MutableList<Int>,
+    )
+
+    private fun getCoverageLineByLine(coverages: Collection<IClassCoverage>): CoverageLineByLine {
+        val fullyCoveredLines: MutableList<Int> = ArrayList()
+        val partiallyCoveredLines: MutableList<Int> = ArrayList()
+        val notCoveredLines: MutableList<Int> = ArrayList()
+        for (coverage in coverages) {
+            for (method in coverage.methods) {
+                for (line in method.firstLine..method.lastLine) {
+                    val totalBranches = method.getLine(line).branchCounter.totalCount
+                    val missedBranches = method.getLine(line).branchCounter.missedCount
+                    val lineTouched =
+                        method.getLine(line).instructionCounter.totalCount == 0 || method.getLine(line).instructionCounter.coveredCount > 0
+                    val fullCoverage = lineTouched && missedBranches == 0
+                    val partialCoverage = lineTouched && missedBranches > 0 && totalBranches > 0
+                    if (fullCoverage) {
+                        fullyCoveredLines.add(line)
+                    } else if (partialCoverage) {
+                        partiallyCoveredLines.add(line)
+                    } else {
+                        notCoveredLines.add(line)
+                    }
+                }
+            }
+        }
+        return CoverageLineByLine(fullyCoveredLines, partiallyCoveredLines, notCoveredLines)
     }
 
     data class JUnitResult(val totalTests: Int, val failedTests: Int, val failedTestNames: Set<String>)

@@ -5,11 +5,10 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ProjectBuilder
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
 
 /**
  * This class contains all the logic related to generating tests for a class.
@@ -26,13 +25,12 @@ class GenerateTestsActionClass : AnAction() {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
-        val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
+        val evoSuiteRunner: Pipeline = createEvoSuiteRunner(e) ?: return
 
         val project: Project = e.project ?: return
-        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-
         ProjectBuilder(project).runBuild()
-        evoSuiteRunner.forClass().runTestGeneration()
+
+        evoSuiteRunner.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
     }
 
     /**

@@ -12,7 +12,6 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import nl.tudelft.ewi.se.ciselab.testgenie.cache.CacheService
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.VALIDATION_RESULT_TOPIC
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.ValidationResultListener
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.Validator
@@ -152,9 +151,6 @@ class Workspace(private val project: Project) {
 
         val testJob = TestJob(jobKey, testReport, displayedSet, hashMapOf(), hashMapOf())
         resultsForFile.add(testJob)
-
-        val cacheService = project.service<CacheService>()
-        cacheService.addTestJobCache(jobKey.fileUrl, testJob)
 
         val editor = editorForFileUrl(jobKey.fileUrl)
 
