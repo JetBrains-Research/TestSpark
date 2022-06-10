@@ -115,13 +115,19 @@ class TestGenieTelemetryService(_project: Project) {
          * @return a ModifiedTestCaseWithAssertions
          */
         internal fun convertToModifiedTestCaseSerializable(project: Project): ModifiedTestCaseSerializable {
-            val originalTestAssertions = extractAssertions(original, project)
-            val modifiedTestAssertions = extractAssertions(modified, project)
+            val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
+
+            val originalTest: PsiMethod =
+                PsiElementFactory.getInstance(project).createMethodFromText(original.trim(), testClass)
+            val modifiedTest: PsiMethod = PsiElementFactory.getInstance(project).createMethodFromText(modified.trim(), testClass)
+
+            val originalTestAssertions = extractAssertions(originalTest)
+            val modifiedTestAssertions = extractAssertions(modifiedTest)
             val removedAssertions = originalTestAssertions.minus(modifiedTestAssertions)
             val addedAssertions = modifiedTestAssertions.minus(originalTestAssertions)
 
-            val originalVariables = extractVariables(original, project)
-            val modifiedVariables = extractVariables(modified, project)
+            val originalVariables = extractVariables(originalTest)
+            val modifiedVariables = extractVariables(modifiedTest)
 
             return ModifiedTestCaseSerializable(
                 this.original,
@@ -132,18 +138,13 @@ class TestGenieTelemetryService(_project: Project) {
         }
 
         /**
-         * Extracts assertions from a method.
+         * Extracts assertions from a test case.
          *
-         * @param testCode the source code of the test
-         * @param project the currently open project
+         * @param testCase the test case in the form of a PSI method
          * @return the set of found assertion
          */
-        private fun extractAssertions(testCode: String, project: Project): Set<String> {
-            val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
-            val psiMethod: PsiMethod =
-                PsiElementFactory.getInstance(project).createMethodFromText(testCode.trim(), testClass)
-
-            val allMethodCalls = psiMethod.body?.children
+        private fun extractAssertions(testCase: PsiMethod): Set<String> {
+            val allMethodCalls = testCase.body?.children
                 ?.filterIsInstance<PsiExpressionStatement>()
                 ?.map { it.firstChild }
                 ?.filterIsInstance<PsiMethodCallExpression>() ?: listOf()
@@ -151,12 +152,8 @@ class TestGenieTelemetryService(_project: Project) {
             return assertions.map { it.text }.toSet()
         }
 
-        private fun extractVariables(testCode: String, project: Project): Set<String> {
-            val testClass: PsiClass = PsiElementFactory.getInstance(project).createClass("Test")
-            val psiMethod: PsiMethod =
-                PsiElementFactory.getInstance(project).createMethodFromText(testCode.trim(), testClass)
-
-            val allVariables = psiMethod.body?.children
+        private fun extractVariables(testCase: PsiMethod): Set<String> {
+            val allVariables = testCase.body?.children
                 ?.filterIsInstance<PsiDeclarationStatement>()
                 ?.map { it.firstChild }
                 ?.filterIsInstance<PsiLocalVariable>()
