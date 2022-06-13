@@ -42,14 +42,14 @@ class SettingsArgumentsTest {
 
     @Test
     fun testCommandForClass() {
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung")
+        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir")
         val command = mutableListOf(
             "-generateMOSuite",
             "-serializeResult",
             "-serializeResultPath",
             "serializepath",
             "-base_dir",
-            "serializepath-validation",
+            """"basedir"""",
             "-projectCP",
             "project/classpath",
             "-Dnew_statistics=false",
@@ -70,7 +70,7 @@ class SettingsArgumentsTest {
     @Test
     fun testCommandForMethod() {
         val settings = SettingsArguments(
-            "project/classpath", "project", "serializepath", "lang.java.Dung"
+            "project/classpath", "project", "serializepath", "lang.java.Dung", "basedir"
         ).forMethod("dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;")
         val command = mutableListOf(
             "-generateMOSuite",
@@ -78,7 +78,7 @@ class SettingsArgumentsTest {
             "-serializeResultPath",
             "serializepath",
             "-base_dir",
-            "serializepath-validation",
+            "\"basedir\"",
             "-projectCP",
             "project/classpath",
             "-Dnew_statistics=false",
@@ -99,14 +99,15 @@ class SettingsArgumentsTest {
 
     @Test
     fun testCommandForLine() {
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung").forLine(419)
+        val settings =
+            SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir").forLine(419)
         val command = mutableListOf(
             "-generateMOSuite",
             "-serializeResult",
             "-serializeResultPath",
             "serializepath",
             "-base_dir",
-            "serializepath-validation",
+            """"basedir"""",
             "-projectCP",
             "project/classpath",
             "-Dnew_statistics=false",
@@ -136,7 +137,7 @@ class SettingsArgumentsTest {
         settingsState.criterionMethod = false
         settingsState.criterionOutput = false
 
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung")
+        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir")
 
         val criterion = settings.build().last()
 
@@ -152,7 +153,7 @@ class SettingsArgumentsTest {
         settingsState.criterionWeakMutation = false
         settingsState.criterionLine = false
 
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung")
+        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir")
 
         val criterion = settings.build().last()
 
@@ -163,7 +164,7 @@ class SettingsArgumentsTest {
 
     @Test
     fun testCriterionStringAll() {
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung")
+        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir")
 
         val criterion = settings.build().last()
 

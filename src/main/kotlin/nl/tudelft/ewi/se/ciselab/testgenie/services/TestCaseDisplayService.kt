@@ -231,7 +231,7 @@ class TestCaseDisplayService(private val project: Project) {
                 textFieldEditor.border = BorderFactory.createLineBorder(highlightColor, 3)
             } else {
                 val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
-                (editor as EditorTextField).border = defaultBorder
+                (editor as EditorTextField).border = JBUI.Borders.empty()
             }
         }
     }
