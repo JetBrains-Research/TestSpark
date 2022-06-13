@@ -65,7 +65,8 @@ class Pipeline(
 
     private var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
-    private val serializeResultPath = "$testResultDirectory$testResultName"
+    private val serializeResultPath = "\"$testResultDirectory$testResultName\""
+    private var baseDir = "$testResultDirectory$testResultName-validation"
 
     private val settingsApplicationState = SettingsApplicationService.getInstance().state
     private val settingsProjectState = project.service<SettingsProjectService>().state
@@ -78,14 +79,14 @@ class Pipeline(
 
     init {
         Util.makeTmp()
-        Util.makeDir("$serializeResultPath-validation")
+        Util.makeDir(baseDir)
     }
 
     /**
      * Sets up evosuite to run for a target class. This is the simplest configuration.
      */
     fun forClass(): Pipeline {
-        command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).build()
+        command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).build()
         return this
     }
 
@@ -97,7 +98,9 @@ class Pipeline(
      */
     fun forMethod(methodDescriptor: String): Pipeline {
         command =
-            SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forMethod(methodDescriptor)
+            SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forMethod(
+                methodDescriptor
+            )
                 .build()
 
         // attach method desc. to target unit key
@@ -111,7 +114,9 @@ class Pipeline(
      * to the evosuite process.
      */
     fun forLine(selectedLine: Int): Pipeline {
-        command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN).forLine(selectedLine)
+        command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forLine(
+            selectedLine
+        )
             .build()
 
         return this
@@ -159,11 +164,13 @@ class Pipeline(
 
         val workspace = project.service<Workspace>()
         workspace.addPendingResult(testResultName, key)
+        val projectBuilder = ProjectBuilder(project)
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
+                        projectBuilder.runBuild(indicator)
                         if (!skipCache) {
                             // Check cache
                             val hasCachedTests = tryShowCachedTestCases()

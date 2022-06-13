@@ -8,7 +8,6 @@ import com.intellij.openapi.editor.Caret
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ProjectBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService
 
 /**
@@ -29,8 +28,6 @@ class GenerateTestsActionClass : AnAction() {
 
         val runnerService = project.service<RunnerService>()
         if (!runnerService.verify(psiFile)) return
-
-        ProjectBuilder(project).runBuild()
 
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 

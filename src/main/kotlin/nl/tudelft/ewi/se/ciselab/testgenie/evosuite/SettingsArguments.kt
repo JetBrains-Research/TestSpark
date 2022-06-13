@@ -19,9 +19,9 @@ class SettingsArguments(
     private val projectClassPath: String,
     private val projectPath: String,
     private val serializeResultPath: String,
-    private val classFQN: String
+    private val classFQN: String,
+    private val baseDir: String
 ) {
-    private var baseDir = "$serializeResultPath-validation"
     private var command: MutableList<String> = mutableListOf(
         algorithmsToGenerateMap[SettingsApplicationService.getInstance().state!!.algorithm]!!,
         "-serializeResult",

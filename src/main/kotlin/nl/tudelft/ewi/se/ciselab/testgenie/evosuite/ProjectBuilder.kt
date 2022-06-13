@@ -8,8 +8,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
@@ -24,64 +22,58 @@ class ProjectBuilder(private val project: Project) {
     private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
     private val settingsState = project.service<SettingsProjectService>().state
 
-    fun runBuild() {
-        val handle = CountDownLatch(1)
-
-        // Save all open editors
+    init {
         ApplicationManager.getApplication().saveAll()
+    }
 
-        log.info("Starting build thread!")
-        ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
-                override fun run(indicator: ProgressIndicator) {
-                    try {
-                        indicator.isIndeterminate = true
-                        indicator.text = TestGenieBundle.message("evosuiteBuildMessage")
-                        val cmd = ArrayList<String>()
+    fun runBuild(indicator: ProgressIndicator) {
+        val handle = CountDownLatch(1)
+        log.info("Starting build!")
 
-                        val operatingSystem = System.getProperty("os.name")
+        try {
+            indicator.isIndeterminate = true
+            indicator.text = TestGenieBundle.message("evosuiteBuildMessage")
+            // Save all open editors
+            val cmd = ArrayList<String>()
 
-                        if (operatingSystem.toLowerCase().contains("windows")) {
-                            cmd.add("cmd.exe")
-                            cmd.add("/c")
-                        } else {
-                            cmd.add("sh")
-                            cmd.add("-c")
-                        }
+            val operatingSystem = System.getProperty("os.name")
 
-                        cmd.add(settingsState!!.buildCommand)
+            if (operatingSystem.toLowerCase().contains("windows")) {
+                cmd.add("cmd.exe")
+                cmd.add("/c")
+            } else {
+                cmd.add("sh")
+                cmd.add("-c")
+            }
 
-                        val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
-                        log.info("Starting build process with arguments: $cmdString")
+            cmd.add(settingsState.buildCommand)
 
-                        val buildProcess = GeneralCommandLine(cmd)
-                        buildProcess.setWorkDirectory(projectPath)
-                        val handler = OSProcessHandler(buildProcess)
-                        handler.startNotify()
+            val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
+            log.info("Starting build process with arguments: $cmdString")
 
-                        if (!handler.waitFor(builderTimeout)) {
-                            buildError("Build process exceeded timeout - ${builderTimeout}ms")
-                        }
+            val buildProcess = GeneralCommandLine(cmd)
+            buildProcess.setWorkDirectory(projectPath)
+            val handler = OSProcessHandler(buildProcess)
+            handler.startNotify()
 
-                        if (indicator.isCanceled) {
-                            return
-                        }
+            if (!handler.waitFor(builderTimeout)) {
+                buildError("Build process exceeded timeout - ${builderTimeout}ms")
+            }
 
-                        val exitCode = handler.exitCode
+            if (indicator.isCanceled) {
+                return
+            }
 
-                        if (exitCode != 0) {
-                            buildError("exit code $exitCode", "Build failed")
-                        }
-                        handle.countDown()
-                        indicator.stop()
-                    } catch (e: Exception) {
-                        (TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
-                        e.printStackTrace()
-                    }
-                }
-            })
+            val exitCode = handler.exitCode
 
-        handle.await()
+            if (exitCode != 0) {
+                buildError("exit code $exitCode", "Build failed")
+            }
+            handle.countDown()
+        } catch (e: Exception) {
+            (TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
+            e.printStackTrace()
+        }
         log.info("Build finished!")
     }
 
