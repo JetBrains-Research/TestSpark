@@ -100,8 +100,7 @@ class Pipeline(
         command =
             SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forMethod(
                 methodDescriptor
-            )
-                .build()
+            ).build()
 
         // attach method desc. to target unit key
         key = Workspace.TestJobInfo(fileUrl, "$classFQN#$methodDescriptor", modTs, testResultName, projectClassPath)

@@ -26,7 +26,7 @@ class SettingsArguments(
         algorithmsToGenerateMap[SettingsApplicationService.getInstance().state!!.algorithm]!!,
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
-        "-base_dir", baseDir,
+        "-base_dir", """"$baseDir"""",
         "-projectCP", projectClassPath,
         "-Dnew_statistics=false",
         "-class", classFQN,
