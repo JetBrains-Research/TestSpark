@@ -10,7 +10,6 @@ import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.IdeaFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.pages.WelcomeFrame
 import nl.tudelft.ewi.se.ciselab.testgenie.uiTest.utils.RemoteRobotExtension
 import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.assertThatNoException
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -95,9 +94,11 @@ class GeneratedTestsToolWindowTest {
             // Assert that the test file only has the class signature and nothing else.
             Assertions.assertThat(editor.text).isEqualTo(emptyClass)
             // Close the ArrayUtilsTest file tab.
+            editor.click()
             remoteRobot.keyboard { hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_F4) }
-            // Restore the state as before this test by opening the tool window again.
-            clickOnToolWindow()
+            runTestsForClass()
+            // Wait for background tasks to finish
+            Thread.sleep(5000)
         }
     }
 
@@ -110,16 +111,18 @@ class GeneratedTestsToolWindowTest {
             // Check that there are multiple tests generated because they all have editor components.
             // UI Robot can not find an editor component because there are too many. Assert that exception.
             assertThatThrownBy {
-                editor = find(byXpath("//div[@class='EditorComponentImpl']"))
+                editor = find(byXpath("//div[@accessiblename='Remove' and @class='JButton' and @text='Remove']"))
             }.isInstanceOf(WaitForConditionTimeoutException::class.java)
-                .hasMessageContaining("Exceeded timeout (PT2S) for condition function (Found more than one 'EditorFixture' by '//div[@class='EditorComponentImpl']'")
+                .hasMessageContaining("Exceeded timeout (PT2S) for condition function (Found more than one 'EditorFixture' by '//div[@accessiblename='Remove' and @class='JButton' and @text='Remove']'")
 
             // Select all and apply to testSuite.
             selectAllApplyTestsToTestSuite(testFileName)
 
-            // Assert that after the tests are applied, all the generated test disappeared by checking
-            // that exception that multiple editor components are found is not thrown.
-            assertThatNoException().isThrownBy { editor = find(byXpath("//div[@class='EditorComponentImpl']")) }
+            // Assert that a different exception is raised after applying the tests.
+            assertThatThrownBy {
+                editor = find(byXpath("//div[@accessiblename='Remove' and @class='JButton' and @text='Remove']"))
+            }.isInstanceOf(WaitForConditionTimeoutException::class.java)
+                .hasMessageContaining("Exceeded timeout (PT2S) for condition function (Failed to find 'EditorFixture' by '//div[@accessiblename='Remove' and @class='JButton' and @text='Remove']'")
 
             // Open the correct file.
             openProjectFile(testFileName, projectName)
