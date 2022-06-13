@@ -58,6 +58,22 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     val coverageVisualisationTab
         get() = actionLink(byXpath("//div[@class='ContentTabLabel' and @text='Coverage']"))
 
+    // Action to find generated tests tab in toolWindow
+    val generatedTestsTab
+        get() = actionLink(byXpath("//div[@class='ContentTabLabel' and @text='Generated Tests']"))
+
+    val validatedTests
+        get() = actionLink(byXpath("//div[@text='Validate tests']"))
+
+    val selectAll
+        get() = actionLink(byXpath("//div[@text='Select All']"))
+
+    val deselectAll
+        get() = actionLink(byXpath("//div[@text='Deselect All']"))
+
+    val applyToTestSuite
+        get() = actionLink(byXpath("//div[@text='Apply to test suite']"))
+
     // Action to find "Find in Files..." menu
     private val findInFilesAction
         get() = actionLink(byXpath("//div[@text='Find in Files...']"))
@@ -69,6 +85,9 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     // Action to find "File path" textField
     private val findFilePathNameAction
         get() = textField(byXpath("//div[@class='FindPopupDirectoryChooser']//div[@class='BorderlessTextField']"))
+
+    val searchForTestSuite
+        get() = textField(byXpath("//div[@class='MyTextField']"))
 
     /**
      * Open file inside project.
@@ -104,6 +123,49 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
             saveButton.click()
         }
         find<JButtonFixture>(byXpath("//div[@text='OK']")).click()
+    }
+
+    /**
+     * Creates a class and closes the tab after its creation.
+     * @param testFileName - the name of the file that you want to create.
+     */
+    fun createTestClass(testFileName: String) {
+        // Click on the editor to ensure that we have access to the different functions
+        actionLink(byXpath("//div[@class='EditorComponentImpl']")).click()
+        // Do the double shift to trigger search everywhere/action window
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_SHIFT) }
+        Thread.sleep(1000) // Some time to ensure that everything is loaded
+        // Type Java Class in the search filed to create a new class
+        textField(byXpath("//div[@class='SearchField']")).text = "Java Class"
+        Thread.sleep(1000)
+        // Select the option to create the new class by pressing "enter"
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+        // Menu for creating a class will appear, enter the name of the file you want to create
+        textField(byXpath("//div[@class='ExtendableTextField']")).text = testFileName
+        Thread.sleep(1000)
+        // Create the class
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+        Thread.sleep(1000)
+        // The git message pops up, escape it to ignore it. If message does not appear, this should not have any effect.
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ESCAPE) }
+        Thread.sleep(1000)
+        // Close the newly created file tab
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_CONTROL, KeyEvent.VK_F4) }
+    }
+
+    /**
+     * Deletes the specified file.
+     * @param testFileName - the name of the file that you want to delete.
+     * @param projectName - the name of the project in which the file is contained.
+     */
+    fun deleteProject(testFileName: String, projectName: String) {
+        // Open the correct file
+        openProjectFile(testFileName, projectName)
+        // Function to trigger safe delete option
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ALT, KeyEvent.VK_DELETE) }
+        // Confirm the deletion of a file by pressing "OK"
+        actionLink(byXpath("//div[@text='OK']")).click()
     }
 
     /**
@@ -204,6 +266,46 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
         val actionSearchBox = textField(byXpath("//div[@class='SearchField']"))
         actionSearchBox.text = "Exit Full Screen"
         Thread.sleep(2000L)
+        remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
+    }
+
+    /**
+     * After the tests were generated and the tool window is open on the Generated tab,
+     * the function enables the UI robot to press "Deselect All" button to select all the generated tests.
+     * Clicks on the "Apply to test suite" button.
+     * Specifying to which class the tests should be appended and applies the tests to that file.
+     *
+     * @param testFileName - the name of the file to which the tests should be added.
+     */
+    fun deselectAllApplyTestsToTestSuite(testFileName: String) {
+        deselectAll.click()
+        applyTestsToTestSuite(testFileName)
+    }
+
+    /**
+     * After the tests were generated and the tool window is open on the Generated tab,
+     * the function enables the UI robot to press "Select All" button to select all the generated tests.
+     * Clicks on the "Apply to test suite" button.
+     * Specifying to which class the tests should be appended and applies the tests to that file.
+     *
+     * @param testFileName - the name of the file to which the tests should be added.
+     */
+    fun selectAllApplyTestsToTestSuite(testFileName: String) {
+        selectAll.click()
+        applyTestsToTestSuite(testFileName)
+    }
+
+    /**
+     * After the tests were generated and the tool window is open on the Generated tab,
+     * the function enables the UI robot to click on the "Apply to test suite" button.
+     * Specifying to which class the tests should be appended and applies the tests to that file.
+     *
+     * @param testFileName - the name of the file to which the tests should be added.
+     */
+    private fun applyTestsToTestSuite(testFileName: String) {
+        applyToTestSuite.click()
+        searchForTestSuite.text = testFileName
+        Thread.sleep(1000)
         remoteRobot.keyboard { hotKey(KeyEvent.VK_ENTER) }
     }
 }
