@@ -53,9 +53,9 @@ class Validator(
 
         val pluginsPath = System.getProperty("idea.plugins.path")
 
-        val junitPath = "$pluginsPath/TestGenie/lib/junit-4.13.jar"
-        val standaloneRuntimePath = "$pluginsPath/TestGenie/lib/standalone-runtime.jar"
-        val hamcrestPath = "$pluginsPath/TestGenie/lib/hamcrest-core-1.3.jar"
+        val junitPath = "$pluginsPath${sep}TestGenie${sep}lib${sep}junit-4.13.jar"
+        val standaloneRuntimePath = "$pluginsPath${sep}TestGenie${sep}lib${sep}standalone-runtime.jar"
+        val hamcrestPath = "$pluginsPath${sep}TestGenie${sep}lib${sep}hamcrest-core-1.3.jar"
 
         val testValidationRoot = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep$jobName-validation"
         val testValidationDirectory = "$testValidationRoot${sep}evosuite-tests"
@@ -73,7 +73,10 @@ class Validator(
         val compilationFiles = setupCompilationFiles(testValidationDirectory, targetFqn)
 
         logger.info("Compiling tests...")
-        compileTests(classpath, compilationFiles)
+        val successfulCompilation = compileTests(classpath, compilationFiles)
+
+        // TODO: add message box
+        if (!successfulCompilation) return
 
         logger.info("Executing tests...")
         ProgressManager.getInstance()
@@ -130,7 +133,7 @@ class Validator(
     /**
      * Compiles the provided test files with the provided classpath
      */
-    private fun compileTests(classpath: String, files: List<File>) {
+    private fun compileTests(classpath: String, files: List<File>): Boolean {
         logger.trace("Compiling with classpath $classpath")
 
         val optionList: List<String> = listOf("-classpath", classpath)
@@ -152,8 +155,8 @@ class Validator(
             logger.info("Compilation successful!")
         } else {
             logger.error("Compilation failed!")
-            return
         }
+        return compiled
     }
 
     /**
@@ -200,7 +203,11 @@ class Validator(
             val window = manager.getToolWindow("TestGenie Validator")!!
             val contentManager: ContentManager = window.contentManager
             contentManager.removeAllContents(true)
-            val content: Content = contentManager.factory.createContent(console.component, TestGenieLabelsBundle.defaultValue("junitRun"), false)
+            val content: Content = contentManager.factory.createContent(
+                console.component,
+                TestGenieLabelsBundle.defaultValue("junitRun"),
+                false
+            )
             contentManager.addContent(content)
         }
 
@@ -230,10 +237,11 @@ class Validator(
 
         indicator.text = "Calculating coverage"
 
+        val sep = File.separatorChar
         val pluginsPath = System.getProperty("idea.plugins.path")
-        val jacocoPath = "$pluginsPath/TestGenie/lib/jacocoagent.jar"
+        val jacocoPath = "$pluginsPath${sep}TestGenie${sep}lib${sep}jacocoagent.jar"
         // construct command
-        val jacocoReportPath = "$testValidationRoot/jacoco.exec"
+        val jacocoReportPath = "$testValidationRoot${sep}jacoco.exec"
         val cmd = ArrayList<String>()
         cmd.add(settingsState.javaPath)
         cmd.add("-javaagent:$jacocoPath=destfile=$jacocoReportPath")
