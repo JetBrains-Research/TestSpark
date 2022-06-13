@@ -8,7 +8,6 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.psi.PsiFile
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ProjectBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService
 
 /**
@@ -38,8 +37,6 @@ class GenerateTestsActionLine : AnAction() {
         logger.info("Selected line is $selectedLine")
 
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-
-        ProjectBuilder(project).runBuild()
 
         val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
         evoSuitePipeline

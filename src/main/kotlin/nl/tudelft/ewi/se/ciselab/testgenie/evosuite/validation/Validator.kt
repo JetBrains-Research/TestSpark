@@ -80,14 +80,14 @@ class Validator(
             logger.error("Validation dir does not exist! - $testValidationDirectory")
             return
         }
+        logger.info("Rebuilding user project...")
+        val projectBuilder = ProjectBuilder(project)
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("validationCompilation")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
-                        logger.info("Rebuilding user project...")
-
-                        ProjectBuilder(project).runBuild()
+                        projectBuilder.runBuild(indicator)
 
                         val compilationFiles = setupCompilationFiles(testValidationDirectory, targetFqn) ?: return
 

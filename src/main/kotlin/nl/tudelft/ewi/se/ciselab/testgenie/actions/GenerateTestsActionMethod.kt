@@ -13,7 +13,6 @@ import com.intellij.psi.PsiMethod
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ProjectBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.helpers.generateMethodDescriptor
 import nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService
 
@@ -48,8 +47,6 @@ class GenerateTestsActionMethod : AnAction() {
         val cacheEndLine: Int = doc.getLineNumber(psiMethod.endOffset)
         logger.info("Selected method is on lines $cacheStartLine to $cacheEndLine")
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-
-        ProjectBuilder(project).runBuild()
 
         val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
         evoSuitePipeline
