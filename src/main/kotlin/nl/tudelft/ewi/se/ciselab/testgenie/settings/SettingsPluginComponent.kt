@@ -1,13 +1,15 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.settings
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.TextBrowseFolderListener
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieToolTipsBundle
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Color
 import java.awt.Dimension
@@ -21,7 +23,9 @@ import javax.swing.JTextField
 /**
  * This class displays and captures changes to the values of the Settings entries.
  */
-class SettingsPluginComponent {
+class SettingsPluginComponent(_project: Project) {
+    private val project: Project = _project
+
     var panel: JPanel? = null
 
     // Plugin description
@@ -80,7 +84,7 @@ class SettingsPluginComponent {
             telemetryPathChooser.isEditable = telemetryEnabledCheckbox.isSelected
             telemetryPathChooser.isEnabled = telemetryEnabledCheckbox.isSelected
         }
-        val telemetryEnabled = TestGenieSettingsService.getInstance().state!!.telemetryEnabled
+        val telemetryEnabled = project.service<SettingsProjectService>().state.telemetryEnabled
         telemetryPathChooser.addBrowseFolderListener(textBrowseFolderListener) // Add the ability to choose folders
         telemetryPathChooser.isEditable = telemetryEnabled
         telemetryPathChooser.isEnabled = telemetryEnabled

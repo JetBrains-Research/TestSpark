@@ -15,7 +15,7 @@ import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestGenieSettingsStateTest {
-    private lateinit var settingsState: TestGenieSettingsState
+    private lateinit var settingsState: SettingsApplicationState
     private lateinit var fixture: CodeInsightTestFixture
 
     @BeforeEach
@@ -24,7 +24,7 @@ class TestGenieSettingsStateTest {
         val testFixture = factory.createLightFixtureBuilder(LightProjectDescriptor.EMPTY_PROJECT_DESCRIPTOR).fixture
         fixture = factory.createCodeInsightFixture(testFixture, LightTempDirTestFixtureImpl(true))
         fixture.setUp()
-        settingsState = TestGenieSettingsState()
+        settingsState = SettingsApplicationState()
 
         settingsState.algorithm = ContentDigestAlgorithm.DYNAMOSA
     }
