@@ -23,7 +23,9 @@ import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.ui.JBUI
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
+import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.Validator
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
 import java.awt.BorderLayout
@@ -38,10 +40,11 @@ import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.border.Border
 
 class TestCaseDisplayService(private val project: Project) {
 
-    private var cacheLazyRunner: Runner? = null
+    private var cacheLazyPipeline: Pipeline? = null
 
     private val mainPanel: JPanel = JPanel()
     private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
@@ -51,15 +54,14 @@ class TestCaseDisplayService(private val project: Project) {
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
-        allTestCasePanel,
-        JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-        JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        allTestCasePanel, JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
     )
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private var originalTestCases: HashMap<String, String> = HashMap()
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
+    private var defaultBorder: Border? = null
 
     // Content Manager to be able to add / remove tabs from tool window
     private var contentManager: ContentManager? = null
@@ -67,6 +69,7 @@ class TestCaseDisplayService(private val project: Project) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
 
+    private var testJob: Workspace.TestJob? = null
     var fileUrl: String = ""
 
     init {
@@ -93,15 +96,16 @@ class TestCaseDisplayService(private val project: Project) {
      * Creates the complete panel in the "Generated Tests" tab,
      * and adds the "Generated Tests" tab to the sidebar tool window.
      *
-     * @param testReport the new test report
+     * @param testJob the new test job
      * @param editor editor instance where coverage should be
      *               visualized
-     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
      */
-    fun showGeneratedTests(testReport: CompactReport, editor: Editor, cacheLazyRunner: Runner?) {
-        this.cacheLazyRunner = cacheLazyRunner
-        displayTestCases(testReport, editor)
+    fun showGeneratedTests(testJob: Workspace.TestJob, editor: Editor, cacheLazyPipeline: Pipeline?) {
+        this.testJob = testJob
+        this.cacheLazyPipeline = cacheLazyPipeline
+        displayTestCases(testJob.report, editor)
         displayLazyRunnerButton()
         createToolWindowTab()
     }
@@ -157,6 +161,19 @@ class TestCaseDisplayService(private val project: Project) {
             addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox)
 
             // Add "Remove" and "Reset" buttons to the test case panel
+            val topButtons = JPanel()
+            topButtons.layout = FlowLayout(FlowLayout.TRAILING)
+            resetButton.addActionListener {
+                WriteCommandAction.runWriteCommandAction(project) {
+                    document.setText(testCodeFormatted)
+                    resetButton.isEnabled = false
+                    textFieldEditor.border = JBUI.Borders.empty()
+                    textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+                }
+            }
+            topButtons.add(removeFromCacheButton)
+            topButtons.add(resetButton)
+            testCasePanel.add(topButtons, BorderLayout.NORTH)
             val bottomButtons = JPanel()
             bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
             bottomButtons.add(removeFromCacheButton)
@@ -182,7 +199,8 @@ class TestCaseDisplayService(private val project: Project) {
             return
         }
         val settingsProjectState = project.service<SettingsProjectService>().state
-        val highlightColor = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
+        val highlightColor =
+            Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
     }
@@ -196,6 +214,26 @@ class TestCaseDisplayService(private val project: Project) {
             Thread.sleep(10000)
             editor.background = defaultEditorColor
         }.start()
+    }
+
+    /**
+     * Highlight tests failing dynamic validation
+     *
+     * @param names set of test names that fail
+     */
+    fun markFailingTestCases(names: Set<String>) {
+        for (testCase in testCasePanels) {
+            if (names.contains(testCase.key)) {
+                val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
+                val highlightColor = Color(255, 0, 0, 90)
+                val textFieldEditor = (editor as EditorTextField)
+                defaultBorder = textFieldEditor.border
+                textFieldEditor.border = BorderFactory.createLineBorder(highlightColor, 3)
+            } else {
+                val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
+                (editor as EditorTextField).border = JBUI.Borders.empty()
+            }
+        }
     }
 
     /**
@@ -264,7 +302,31 @@ class TestCaseDisplayService(private val project: Project) {
         coverageVisualisationService.closeToolWindowTab()
     }
 
-    private fun validateTests() {}
+    /**
+     * Returns a pair of most-recent edit of
+     * a test, containing the test name and test code
+     */
+    private fun getEditedTests(): HashMap<String, String> {
+        val selectedTestCases =
+            testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
+
+        val lastEditsOfSelectedTestCases = selectedTestCases.associateWith {
+            (testCasePanels[it]!!.getComponent(1) as EditorTextField).document.text
+        }
+
+        val lastEditsOfEditedAndSelectedTestCases =
+            lastEditsOfSelectedTestCases.filter {
+                it.value != originalTestCases[it.key]
+            }
+
+        return HashMap(lastEditsOfEditedAndSelectedTestCases)
+    }
+
+    private fun validateTests() {
+        val testJob = testJob ?: return
+        val edits = getEditedTests()
+        Validator(project, testJob, edits).validateSuite()
+    }
 
     private fun toggleAllCheckboxes(selected: Boolean) {
         testCasePanels.forEach { (_, jPanel) ->
@@ -282,13 +344,11 @@ class TestCaseDisplayService(private val project: Project) {
     private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass) {
         WriteCommandAction.runWriteCommandAction(project) {
             testCaseComponents.forEach {
-                PsiDocumentManager.getInstance(project)
-                    .getDocument(selectedClass.containingFile)!!
-                    .insertString(
-                        selectedClass.rBrace!!.textRange.startOffset,
-                        // Fix Windows line separators
-                        it.replace("\r\n", "\n")
-                    )
+                PsiDocumentManager.getInstance(project).getDocument(selectedClass.containingFile)!!.insertString(
+                    selectedClass.rBrace!!.textRange.startOffset,
+                    // Fix Windows line separators
+                    it.replace("\r\n", "\n")
+                )
             }
         }
     }
@@ -325,7 +385,12 @@ class TestCaseDisplayService(private val project: Project) {
      * @param testCasePanel the test case panel
      * @return the created button
      */
-    private fun createRemoveButton(test: CompactTestCase, editor: Editor, testCasePanel: JPanel, testCodeFormatted: String): JButton {
+    private fun createRemoveButton(
+        test: CompactTestCase,
+        editor: Editor,
+        testCasePanel: JPanel,
+        testCodeFormatted: String
+    ): JButton {
         val removeFromCacheButton = JButton("Remove")
         removeFromCacheButton.addActionListener {
             removeFromCache(testCodeFormatted)
@@ -385,14 +450,23 @@ class TestCaseDisplayService(private val project: Project) {
      * @param textFieldEditor the text field editor with the test
      * @param checkbox the checkbox to select the test
      */
-    private fun addListenerToTestDocument(document: Document, resetButton: JButton, textFieldEditor: EditorTextField, checkbox: JCheckBox) {
+    private fun addListenerToTestDocument(
+        document: Document,
+        resetButton: JButton,
+        textFieldEditor: EditorTextField,
+        checkbox: JCheckBox
+    ) {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 resetButton.isEnabled = true
 
                 // add border highlight
                 val settingsProjectState = project.service<SettingsProjectService>().state
-                val borderColor = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
+                val borderColor = Color(
+                    settingsProjectState.colorRed,
+                    settingsProjectState.colorGreen,
+                    settingsProjectState.colorBlue
+                )
                 textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
                 // add line highlighting
@@ -468,7 +542,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Display the button to actually invoke EvoSuite if the tests are cached.
      */
     private fun displayLazyRunnerButton() {
-        cacheLazyRunner ?: return
+        cacheLazyPipeline ?: return
 
         val lazyRunnerPanel = JPanel()
         lazyRunnerPanel.layout = BoxLayout(lazyRunnerPanel, BoxLayout.Y_AXIS)
@@ -480,7 +554,7 @@ class TestCaseDisplayService(private val project: Project) {
 
         lazyRunnerButton.addActionListener {
             lazyRunnerButton.isEnabled = false
-            cacheLazyRunner!!
+            cacheLazyPipeline!!
                 .withoutCache()
                 .runTestGeneration()
         }

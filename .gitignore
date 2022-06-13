@@ -2,7 +2,8 @@
 .idea/
 .qodana/
 build/
-lib/
+lib/evosuite-*.jar
+**/evosuite-tests/
 
 # Test projects
 src/test/resources/project/.idea/

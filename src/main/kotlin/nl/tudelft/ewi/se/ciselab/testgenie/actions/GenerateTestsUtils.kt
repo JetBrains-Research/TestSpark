@@ -20,7 +20,7 @@ import com.intellij.psi.PsiStatement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 
@@ -29,12 +29,12 @@ import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
  */
 
 /**
- * Extracts the required information from an action event and creates an (EvoSuite) runner.
+ * Extracts the required information from an action event and creates an (EvoSuite) Pipeline.
  *
  * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @return the created (EvoSuite) Runner, null if some information is missing or if there is no surrounding class
+ * @return the created (EvoSuite) Pipeline, null if some information is missing or if there is no surrounding class
  */
-fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
+fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
     val project: Project = e.project ?: return null
 
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
@@ -61,7 +61,7 @@ fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
     val cacheEndLine: Int = doc.getLineNumber(psiClass.endOffset)
     log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
 
-    return Runner(project, projectPath, projectClassPath, classFQN, fileUrl, modificationStamp)
+    return Pipeline(project, projectPath, projectClassPath, classFQN, fileUrl, modificationStamp)
         .withCacheLines(cacheStartLine, cacheEndLine)
 }
 

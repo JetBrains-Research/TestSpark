@@ -7,30 +7,32 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
 import nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService
 
 /**
  * This class contains all the logic related to generating tests for a class.
  * No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available,
- *   getting the information about the selected class and passing it to (EvoSuite) Runner.
+ *   getting the information about the selected class and passing it to (EvoSuite) Pipeline.
  */
 class GenerateTestsActionClass : AnAction() {
     /**
-     * Creates and calls (EvoSuite) Runner to generate tests for a class when the action is invoked.
+     * Creates and calls (EvoSuite) Pipeline to generate tests for a class when the action is invoked.
      *
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
         val project = e.project ?: return
+
         val runnerService = project.service<RunnerService>()
         if (!runnerService.verify(psiFile)) return
 
-        val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
-        evoSuiteRunner.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
+        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
+
+        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
+        evoSuitePipeline.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
     }
 
     /**
