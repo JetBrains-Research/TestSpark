@@ -231,53 +231,6 @@ class Pipeline(
     }
 
     /**
-     * Runs the build command as defined in settings.
-     *
-     * @param indicator the progress indicator
-     */
-    private fun runBuild(indicator: ProgressIndicator) {
-        indicator.isIndeterminate = true
-        indicator.text = TestGenieBundle.message("evosuiteBuildMessage")
-
-        val cmd = ArrayList<String>()
-
-        val operatingSystem = System.getProperty("os.name")
-
-        if (operatingSystem.toLowerCase().contains("windows")) {
-            cmd.add("cmd.exe")
-            cmd.add("/c")
-        } else {
-            cmd.add("sh")
-            cmd.add("-c")
-        }
-
-        cmd.add(settingsProjectState.buildCommand)
-
-        val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
-        log.info("Starting build process with arguments: $cmdString")
-
-        val buildProcess = GeneralCommandLine(cmd)
-        buildProcess.setWorkDirectory(projectPath)
-        val handler = OSProcessHandler(buildProcess)
-        handler.startNotify()
-
-        // join build process
-        if (!handler.waitFor(evoSuiteProcessTimeout)) {
-            evosuiteError("Build process exceeded timeout - ${evoSuiteProcessTimeout}ms")
-        }
-
-        if (indicator.isCanceled) {
-            return
-        }
-
-        val exitCode = handler.exitCode
-
-        if (exitCode != 0) {
-            evosuiteError("exit code $exitCode", "Build failed")
-        }
-    }
-
-    /**
      * Executes EvoSuite.
      *
      * @param indicator the progress indicator

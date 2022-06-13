@@ -29,14 +29,17 @@ repositories {
     maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
 }
 
-// include evo suite jar
 dependencies {
     implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
     implementation(files("lib/standalone-runtime.jar"))
     implementation(files("lib/jacocoagent.jar"))
 
+    // validation dependencies
+    // https://mvnrepository.com/artifact/junit/junit
     implementation("junit:junit:4.13")
+    // https://mvnrepository.com/artifact/org.jacoco/org.jacoco.core
     implementation("org.jacoco:org.jacoco.core:0.8.8")
+    // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-core
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
 
     // From the jetbrains repository

@@ -14,7 +14,6 @@
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService"/>
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService"/>
-        <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.Validator"/>
 
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
@@ -23,8 +22,6 @@
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace"/>
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService"/>
-        <projectService
-                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.cache.CacheService"/>
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService"/>
         <projectService
