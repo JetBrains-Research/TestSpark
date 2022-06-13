@@ -31,13 +31,12 @@ class GenerateTestsActionMethod : AnAction() {
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
-        // Return if EvoSuite is already running
-        val project = e.project ?: return
-        val runnerService = project.service<RunnerService>()
-        if (runnerService.verifyIsRunning()) return
-
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+
+        val project = e.project ?: return
+        val runnerService = project.service<RunnerService>()
+        if (!runnerService.verify(psiFile)) return
 
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
         val methodDescriptor = generateMethodDescriptor(psiMethod)
