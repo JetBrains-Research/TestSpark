@@ -27,10 +27,10 @@ class GenerateTestsActionClass : AnAction() {
 
         val project = e.project ?: return
 
-        ProjectBuilder(project).runBuild()
-
         val runnerService = project.service<RunnerService>()
         if (!runnerService.verify(psiFile)) return
+
+        ProjectBuilder(project).runBuild()
 
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 

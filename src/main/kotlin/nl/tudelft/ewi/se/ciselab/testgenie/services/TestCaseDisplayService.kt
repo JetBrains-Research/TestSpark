@@ -316,9 +316,7 @@ class TestCaseDisplayService(private val project: Project) {
                 it.value != originalTestCases[it.key]
             }
 
-        return HashMap(
-            lastEditsOfEditedAndSelectedTestCases
-        )
+        return HashMap(lastEditsOfEditedAndSelectedTestCases)
     }
 
     private fun validateTests() {

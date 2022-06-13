@@ -1,5 +1,6 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation
 
+import com.github.javaparser.ParseProblemException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.process.CapturingProcessAdapter
@@ -7,6 +8,7 @@ import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -38,7 +40,7 @@ class Validator(
     private val edits: HashMap<String, String> // test name, test code
 ) {
     private val logger: Logger = Logger.getInstance(this.javaClass)
-    private val settingsState = SettingsProjectService.getInstance()?.state
+    private val settingsState = project.service<SettingsProjectService>().state
     private val junitTimeout: Long = 12000000 // TODO: Source from config
 
     fun validateSuite() {
@@ -73,27 +75,29 @@ class Validator(
             return
         }
 
-        logger.info("Rebuilding user project...")
-        ProjectBuilder(project).runBuild()
-
-        val compilationFiles = setupCompilationFiles(testValidationDirectory, targetFqn)
-
-        logger.info("Compiling tests...")
-        val successfulCompilation = compileTests(classpath, compilationFiles)
-
-        // TODO: add message box
-        if (!successfulCompilation) {
-            logger.warn("Compilation failed")
-            showTestsCompilationFailed()
-            return
-        }
-        logger.info("Compilation successful!")
-
-        logger.info("Executing tests...")
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestValidationRunMessage")) {
+            .run(object : Task.Backgroundable(project, TestGenieBundle.message("validationCompilation")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
+                        logger.info("Rebuilding user project...")
+
+                        ProjectBuilder(project).runBuild()
+
+                        val compilationFiles = setupCompilationFiles(testValidationDirectory, targetFqn) ?: return
+
+                        logger.info("Compiling tests...")
+                        val successfulCompilation = compileTests(classpath, compilationFiles)
+
+                        // TODO: add message box
+                        if (!successfulCompilation) {
+                            logger.warn("Compilation failed")
+                            showTestsCompilationFailed()
+                            return
+                        }
+                        logger.info("Compilation successful!")
+                        logger.info("Executing tests...")
+                        indicator.text = TestGenieBundle.message("validationRunning")
+
                         runTests(indicator, classpath, targetFqn)
                         runTestsWithCoverage(indicator, classpath, targetFqn, testValidationRoot, targetProjectCP)
                         indicator.stop()
@@ -104,7 +108,7 @@ class Validator(
             })
     }
 
-    private fun setupCompilationFiles(testValidationDirectory: String, targetFqn: String): List<File> {
+    private fun setupCompilationFiles(testValidationDirectory: String, targetFqn: String): List<File>? {
         val sep = File.separatorChar
 
         val baseClassName = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}"
@@ -114,18 +118,24 @@ class Validator(
 
         val editor = TestCaseEditor(testsFile.readText(), edits)
 
-        if (edits.size == 0) {
-            logger.trace("No changes found, resetting files to old state")
-            val testsFileWriter = FileWriter(testsPath, false)
-            testsFileWriter.write(testJob.report.testSuiteCode)
-            testsFileWriter.close()
-            logger.trace("Flushed original tests to $testsPath")
-        } else {
-            val editedTests = editor.edit()
-            val testsFileWriter = FileWriter(testsFile, false)
-            testsFileWriter.write(editedTests)
-            testsFileWriter.close()
-            logger.trace("Flushed edited tests to $testsPath")
+        try {
+            if (edits.size == 0) {
+                logger.trace("No changes found, resetting files to old state")
+                val testsFileWriter = FileWriter(testsPath, false)
+                testsFileWriter.write(testJob.report.testSuiteCode)
+                testsFileWriter.close()
+                logger.trace("Flushed original tests to $testsPath")
+            } else {
+                val editedTests = editor.edit()
+                val testsFileWriter = FileWriter(testsFile, false)
+                testsFileWriter.write(editedTests)
+                testsFileWriter.close()
+                logger.trace("Flushed edited tests to $testsPath")
+            }
+        } catch (e: ParseProblemException) {
+            logger.warn("Parsing tests failed - $e")
+            showTestsParsingFailed()
+            return null
         }
 
         val testsCovPath = "${baseClassName}_Cov.java"
@@ -342,10 +352,21 @@ class Validator(
     }
 
     /**
-     * Method to show notification that the class cannot be parsed.
+     * Method to show notification that the tests cannot be compiled.
      */
     private fun showTestsCompilationFailed() {
-        NotificationGroupManager.getInstance().getNotificationGroup("EvoSuite Execution Error").createNotification(
+        NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
+            TestGenieBundle.message("compilationFailedNotificationTitle"),
+            TestGenieBundle.message("compilationFailedNotificationText"),
+            NotificationType.ERROR
+        ).notify(project)
+    }
+
+    /**
+     * Method to show notification that the tests cannot be parsed.
+     */
+    private fun showTestsParsingFailed() {
+        NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
             TestGenieBundle.message("compilationFailedNotificationTitle"),
             TestGenieBundle.message("compilationFailedNotificationText"),
             NotificationType.ERROR

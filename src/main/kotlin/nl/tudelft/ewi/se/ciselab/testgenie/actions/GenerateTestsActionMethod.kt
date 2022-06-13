@@ -47,7 +47,7 @@ class GenerateTestsActionMethod : AnAction() {
         val cacheStartLine: Int = doc.getLineNumber(psiMethod.startOffset)
         val cacheEndLine: Int = doc.getLineNumber(psiMethod.endOffset)
         logger.info("Selected method is on lines $cacheStartLine to $cacheEndLine")
-
+        3
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
         ProjectBuilder(project).runBuild()
