@@ -4,6 +4,7 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -20,7 +21,7 @@ class ProjectBuilder(private val project: Project) {
     private val builderTimeout: Long = 12000000 // TODO: Source from config
 
     private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    private val settingsState = SettingsProjectService.getInstance()?.state
+    private val settingsState = project.service<SettingsProjectService>().state
 
     fun runBuild() {
         val handle = CountDownLatch(1)
@@ -81,7 +82,7 @@ class ProjectBuilder(private val project: Project) {
     }
 
     private fun buildError(msg: String, title: String = TestGenieBundle.message("evosuiteErrorTitle")) {
-        NotificationGroupManager.getInstance().getNotificationGroup("Builder Execution Error").createNotification(
+        NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
             title, msg, NotificationType.ERROR
         ).notify(project)
     }

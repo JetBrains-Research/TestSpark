@@ -3,12 +3,8 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.wm.WindowManager
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsProjectState
-import java.awt.Window
 import java.io.File
 
 /**
@@ -41,23 +37,5 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
      */
     override fun loadState(state: SettingsProjectState) {
         settingsProjectState = state
-    }
-
-    /**
-     * Returns the service object with a static call.
-     */
-    companion object {
-        @JvmStatic
-        fun getInstance(): SettingsProjectService? {
-            val projects = ProjectManager.getInstance().openProjects
-            var activeProject: Project? = null
-            for (project in projects) {
-                val window: Window? = WindowManager.getInstance().suggestParentWindow(project)
-                if (window != null && window.isActive) {
-                    activeProject = project
-                }
-            }
-            return activeProject?.service()
-        }
     }
 }
