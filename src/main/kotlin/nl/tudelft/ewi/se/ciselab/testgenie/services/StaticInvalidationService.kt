@@ -37,10 +37,6 @@ class StaticInvalidationService(private val project: Project) {
         }
     }
 
-    // want tests for some line (line):
-    // if there are unedited tests with coverage information for the current version of code, return tests covering line, else
-    // if there are edited tests run dynamic validation with coverage information
-    //
     /**
      * Checks for a file what lines have been modified
      * @param file the file in question

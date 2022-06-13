@@ -14,11 +14,11 @@ import nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService
 /**
  * This class contains all the logic related to generating tests for a class.
  * No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available,
- *   getting the information about the selected class and passing it to (EvoSuite) Runner.
+ *   getting the information about the selected class and passing it to (EvoSuite) Pipeline.
  */
 class GenerateTestsActionClass : AnAction() {
     /**
-     * Creates and calls (EvoSuite) Runner to generate tests for a class when the action is invoked.
+     * Creates and calls (EvoSuite) Pipeline to generate tests for a class when the action is invoked.
      *
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
@@ -34,8 +34,8 @@ class GenerateTestsActionClass : AnAction() {
 
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
 
-        val evoSuiteRunner: Pipeline = createEvoSuitePipeline(e) ?: return
-        evoSuiteRunner.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
+        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
+        evoSuitePipeline.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
     }
 
     /**

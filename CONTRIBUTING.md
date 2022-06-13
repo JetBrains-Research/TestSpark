@@ -16,10 +16,10 @@ All the classes can be found in `src/main/kotlin/nl/tudelft/ewi/se/ciselab/testg
 
 All the action classes can be found in `actions` directory.
 
-- `GenerateTestsActionClass` contains all the logic related to generating tests for a class. No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available, getting the information about the selected class and passing it to (EvoSuite) Runner. 
+- `GenerateTestsActionClass` contains all the logic related to generating tests for a class. No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available, getting the information about the selected class and passing it to (EvoSuite) Pipeline.
 - `GenerateTestsActionGroup` is the group class for TestGenie actions.
-- `GenerateTestsActionMethod` contains all the logic related to generating tests for a method. No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available, getting the information about the selected method and passing it to (EvoSuite) Runner.
-- `GenerateTestsActionLine` contains all the logic related to generating tests for a line. No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available, getting the information about the selected line and passing it to (EvoSuite) Runner.
+- `GenerateTestsActionMethod` contains all the logic related to generating tests for a method. No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available, getting the information about the selected method and passing it to (EvoSuite) Pipeline.
+- `GenerateTestsActionLine` contains all the logic related to generating tests for a line. No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available, getting the information about the selected line and passing it to (EvoSuite) Pipeline.
 - `GenerateTestsUtils` contains useful functions for `GenerateTestsActionClass`, `GenerateTestsActionMethod` and `GenerateTestsActionLine` classes, but one function are also used by `StaticInvalidationService`.
 
 ### Coverage

@@ -20,13 +20,13 @@ import nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService
 /**
  * This class contains all the logic related to generating tests for a method.
  * No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available,
- *   getting the information about the selected method and passing it to (EvoSuite) Runner.
+ *   getting the information about the selected method and passing it to (EvoSuite) Pipeline.
  */
 class GenerateTestsActionMethod : AnAction() {
     private val logger: Logger = Logger.getInstance(this.javaClass)
 
     /**
-     * Creates and calls (EvoSuite) Runner to generate tests for a method when the action is invoked.
+     * Creates and calls (EvoSuite) Pipeline to generate tests for a method when the action is invoked.
      *
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
