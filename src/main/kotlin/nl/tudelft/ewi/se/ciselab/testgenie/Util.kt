@@ -15,5 +15,12 @@ class Util {
                 tmpDir.mkdirs()
             }
         }
+
+        fun makeDir(path: String) {
+            val dir = File(path)
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+        }
     }
 }

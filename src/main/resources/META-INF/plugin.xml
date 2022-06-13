@@ -9,25 +9,40 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+
+        <!-- Project-level services -->
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService"/>
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService"/>
+
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageToolWindowDisplayService"/>
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace"/>
         <projectService
-            serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService"/>
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieTelemetryService"/>
+        <projectService
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.RunnerService"/>
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
+        <toolWindow id="TestGenie Validator" secondary="true" anchor="bottom"
+                    factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.ValidationToolWindowFactory"/>
+
+        <!-- Application-level services -->
         <applicationService
-                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService"/>
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsApplicationService"/>
         <applicationService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.QuickAccessParametersService"/>
-        <applicationService
-                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieTelemetryService"/>
-        <applicationConfigurable
+
+        <!-- Configurables -->
+        <projectConfigurable
                 parentId="tools"
                 instance="nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsPluginConfigurable"
                 id="TestGenieSettings"
@@ -38,7 +53,12 @@
                 id="TestGenieSettings.evosuite"
                 displayName="EvoSuite"/>
 
+        <!-- Notifications -->
         <notificationGroup id="EvoSuite Execution Error"
+                           displayType="BALLOON"/>
+        <notificationGroup id="Test Validation Error"
+                           displayType="BALLOON"/>
+        <notificationGroup id="Build Execution Error"
                            displayType="BALLOON"/>
     </extensions>
 
@@ -47,11 +67,12 @@
                 class="nl.tudelft.ewi.se.ciselab.testgenie.listener.TestGenerationResultListenerImpl"
                 topic="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.TestGenerationResultListener"/>
         <listener
-                class="nl.tudelft.ewi.se.ciselab.testgenie.listener.TestGenieTelemetrySubmitListenerImpl"
+                class="nl.tudelft.ewi.se.ciselab.testgenie.listener.TelemetrySubmitListenerImpl"
                 topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </projectListeners>
 
     <actions>
+        <!-- TestGenie actions -->
         <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true"
                class="nl.tudelft.ewi.se.ciselab.testgenie.actions.GenerateTestsActionGroup">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>

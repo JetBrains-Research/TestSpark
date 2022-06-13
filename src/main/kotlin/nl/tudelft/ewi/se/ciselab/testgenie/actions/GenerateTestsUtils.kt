@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
@@ -19,20 +20,21 @@ import com.intellij.psi.PsiStatement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Runner
-import nl.tudelft.ewi.se.ciselab.testgenie.services.TestGenieSettingsService
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
+import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
+import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
 
 /**
  * This file contains some useful methods related to GenerateTests actions.
  */
 
 /**
- * Extracts the required information from an action event and creates an (EvoSuite) runner.
+ * Extracts the required information from an action event and creates an (EvoSuite) Pipeline.
  *
  * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @return the created (EvoSuite) Runner, null if some information is missing or if there is no surrounding class
+ * @return the created (EvoSuite) Pipeline, null if some information is missing or if there is no surrounding class
  */
-fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
+fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
     val project: Project = e.project ?: return null
 
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
@@ -45,8 +47,8 @@ fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
     val classFQN = psiClass.qualifiedName ?: return null
 
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    val settingsState = TestGenieSettingsService.getInstance().state ?: return null
-    val projectClassPath = "$projectPath/" + settingsState.buildPath
+    val settingsProjectState = project.service<SettingsProjectService>().state
+    val projectClassPath = "$projectPath/" + settingsProjectState.buildPath
 
     val log = Logger.getInstance("GenerateTestsUtils")
 
@@ -59,7 +61,7 @@ fun createEvoSuiteRunner(e: AnActionEvent): Runner? {
     val cacheEndLine: Int = doc.getLineNumber(psiClass.endOffset)
     log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
 
-    return Runner(project, projectPath, projectClassPath, classFQN, fileUrl, modificationStamp)
+    return Pipeline(project, projectPath, projectClassPath, classFQN, fileUrl, modificationStamp)
         .withCacheLines(cacheStartLine, cacheEndLine)
 }
 
@@ -141,7 +143,7 @@ fun getSurroundingLine(psiFile: PsiFile, caret: Caret): Int? {
  * @param psiMethod the PSI method to check
  * @return true if the method has a body (thus, is concrete), false otherwise
  */
-private fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
+fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
     return psiMethod.body != null
 }
 
@@ -151,7 +153,7 @@ private fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
  * @param psiMethod the PSI method of interest
  * @return true if the method is a default method of an interface, false otherwise
  */
-private fun isMethodDefault(psiMethod: PsiMethod): Boolean {
+fun isMethodDefault(psiMethod: PsiMethod): Boolean {
     if (!isMethodConcrete(psiMethod)) return false
     return psiMethod.containingClass?.isInterface ?: return false
 }
@@ -217,6 +219,16 @@ private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFi
     val lastStatementLine: Int = doc.getLineNumber(lastStatement.endOffset)
 
     return (selectedLine in firstStatementLine..lastStatementLine)
+}
+
+/**
+ * Calculates which lines to invalidate from cache.
+ *
+ * @param psiFile psiFile of the document
+ */
+fun calculateLinesToInvalidate(psiFile: PsiFile): Set<Int> {
+    val staticInvalidator = psiFile.project.service<StaticInvalidationService>()
+    return staticInvalidator.invalidate(psiFile)
 }
 
 /**
