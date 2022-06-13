@@ -4,6 +4,8 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.process.CapturingProcessAdapter
 import com.intellij.execution.process.OSProcessHandler
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
@@ -17,6 +19,7 @@ import com.intellij.ui.content.ContentManager
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
+import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ProjectBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import org.jacoco.core.analysis.Analyzer
 import org.jacoco.core.analysis.CoverageBuilder
@@ -70,13 +73,21 @@ class Validator(
             return
         }
 
+        logger.info("Rebuilding user project...")
+        ProjectBuilder(project).runBuild()
+
         val compilationFiles = setupCompilationFiles(testValidationDirectory, targetFqn)
 
         logger.info("Compiling tests...")
         val successfulCompilation = compileTests(classpath, compilationFiles)
 
         // TODO: add message box
-        if (!successfulCompilation) return
+        if (!successfulCompilation) {
+            logger.warn("Compilation failed")
+            showTestsCompilationFailed()
+            return
+        }
+        logger.info("Compilation successful!")
 
         logger.info("Executing tests...")
         ProgressManager.getInstance()
@@ -151,11 +162,6 @@ class Validator(
         val compiled = task.call()
         fileManager.close()
 
-        if (compiled) {
-            logger.info("Compilation successful!")
-        } else {
-            logger.error("Compilation failed!")
-        }
         return compiled
     }
 
@@ -204,9 +210,7 @@ class Validator(
             val contentManager: ContentManager = window.contentManager
             contentManager.removeAllContents(true)
             val content: Content = contentManager.factory.createContent(
-                console.component,
-                TestGenieLabelsBundle.defaultValue("junitRun"),
-                false
+                console.component, TestGenieLabelsBundle.defaultValue("junitRun"), false
             )
             contentManager.addContent(content)
         }
@@ -335,6 +339,17 @@ class Validator(
             }
         }
         return CoverageLineByLine(fullyCoveredLines, partiallyCoveredLines, notCoveredLines)
+    }
+
+    /**
+     * Method to show notification that the class cannot be parsed.
+     */
+    private fun showTestsCompilationFailed() {
+        NotificationGroupManager.getInstance().getNotificationGroup("EvoSuite Execution Error").createNotification(
+            TestGenieBundle.message("compilationFailedNotificationTitle"),
+            TestGenieBundle.message("compilationFailedNotificationText"),
+            NotificationType.ERROR
+        ).notify(project)
     }
 
     data class JUnitResult(val totalTests: Int, val failedTests: Int, val failedTestNames: Set<String>)
