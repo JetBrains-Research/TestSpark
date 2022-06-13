@@ -34,6 +34,12 @@ import java.util.regex.Pattern
 import javax.tools.JavaCompiler
 import javax.tools.ToolProvider
 
+/**
+ * Class for validating and calculating the coverage of an optionally
+ * edited set of test cases.
+ *
+ * @param edits a map of test names and their edits
+ */
 class Validator(
     private val project: Project,
     private val testJob: Workspace.TestJob,
@@ -43,10 +49,10 @@ class Validator(
     private val settingsState = project.service<SettingsProjectService>().state
     private val junitTimeout: Long = 12000000 // TODO: Source from config
 
-    fun validateSuite() {
-        val sep = File.separatorChar
-        val pathSep = File.pathSeparator
+    private val sep = File.separatorChar
+    private val pathSep = File.pathSeparatorChar
 
+    fun validateSuite() {
         val jobName = testJob.info.jobId
 
         logger.info("Validating test suite $jobName")
@@ -109,7 +115,6 @@ class Validator(
     }
 
     private fun setupCompilationFiles(testValidationDirectory: String, targetFqn: String): List<File>? {
-        val sep = File.separatorChar
 
         val baseClassName = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}"
         // flush test edits to file
@@ -247,11 +252,8 @@ class Validator(
         testValidationRoot: String,
         projectClasses: String
     ) {
-        settingsState ?: return
-
         indicator.text = "Calculating coverage"
 
-        val sep = File.separatorChar
         val pluginsPath = System.getProperty("idea.plugins.path")
         val jacocoPath = "$pluginsPath${sep}TestGenie${sep}lib${sep}jacocoagent.jar"
         // construct command
@@ -282,7 +284,6 @@ class Validator(
         val loader = ExecFileLoader()
         loader.load(File(jacocoReportPath))
         val executionData = loader.executionDataStore
-        val sessionInfo = loader.sessionInfoStore
 
         val coverageBuilder = CoverageBuilder()
         val analyzer = Analyzer(executionData, coverageBuilder)
