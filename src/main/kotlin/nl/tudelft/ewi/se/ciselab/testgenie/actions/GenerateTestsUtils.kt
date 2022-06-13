@@ -29,10 +29,10 @@ import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
  */
 
 /**
- * Extracts the required information from an action event and creates an (EvoSuite) runner.
+ * Extracts the required information from an action event and creates an (EvoSuite) Pipeline.
  *
  * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @return the created (EvoSuite) Runner, null if some information is missing or if there is no surrounding class
+ * @return the created (EvoSuite) Pipeline, null if some information is missing or if there is no surrounding class
  */
 fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
     val project: Project = e.project ?: return null

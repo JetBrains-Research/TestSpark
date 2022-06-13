@@ -142,10 +142,10 @@ class Workspace(private val project: Project) {
      *
      * @param testResultName the test result job id which was received
      * @param testReport the generated test suite
-     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
      */
-    fun receiveGenerationResult(testResultName: String, testReport: CompactReport, cacheLazyRunner: Pipeline?) {
+    fun receiveGenerationResult(testResultName: String, testReport: CompactReport, cacheLazyPipeline: Pipeline?) {
         val jobKey = pendingTestResults.remove(testResultName)!!
 
         val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
@@ -158,7 +158,7 @@ class Workspace(private val project: Project) {
         val editor = editorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
-            showReport(testJob, editor, cacheLazyRunner)
+            showReport(testJob, editor, cacheLazyPipeline)
         } else {
             log.info("No editor opened for received test result")
         }
@@ -216,13 +216,13 @@ class Workspace(private val project: Project) {
      * @param testReport the new test report
      * @param editor editor instance where coverage should be
      *               visualized
-     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
      */
-    private fun showReport(testJob: TestJob, editor: Editor, cacheLazyRunner: Pipeline?) {
+    private fun showReport(testJob: TestJob, editor: Editor, cacheLazyPipeline: Pipeline?) {
         val visualizationService = project.service<CoverageVisualisationService>()
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.showGeneratedTests(testJob, editor, cacheLazyRunner)
+        testCaseDisplayService.showGeneratedTests(testJob, editor, cacheLazyPipeline)
         visualizationService.showCoverage(testJob.report, editor)
     }
 

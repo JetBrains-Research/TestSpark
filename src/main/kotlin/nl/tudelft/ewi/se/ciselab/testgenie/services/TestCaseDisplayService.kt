@@ -44,7 +44,7 @@ import javax.swing.JPanel
 
 class TestCaseDisplayService(private val project: Project) {
 
-    private var cacheLazyRunner: Pipeline? = null
+    private var cacheLazyPipeline: Pipeline? = null
 
     private val mainPanel: JPanel = JPanel()
     private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
@@ -98,12 +98,12 @@ class TestCaseDisplayService(private val project: Project) {
      * @param testReport the new test report
      * @param editor editor instance where coverage should be
      *               visualized
-     * @param cacheLazyRunner the runner that was instantiated but not used to create the test suite
+     * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
      */
-    fun showGeneratedTests(testJob: Workspace.TestJob, editor: Editor, cacheLazyRunner: Pipeline?) {
+    fun showGeneratedTests(testJob: Workspace.TestJob, editor: Editor, cacheLazyPipeline: Pipeline?) {
         this.testJob = testJob
-        this.cacheLazyRunner = cacheLazyRunner
+        this.cacheLazyPipeline = cacheLazyPipeline
         displayTestCases(testJob.report, editor)
         displayLazyRunnerButton()
         createToolWindowTab()
@@ -541,7 +541,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Display the button to actually invoke EvoSuite if the tests are cached.
      */
     private fun displayLazyRunnerButton() {
-        cacheLazyRunner ?: return
+        cacheLazyPipeline ?: return
 
         val lazyRunnerPanel = JPanel()
         lazyRunnerPanel.layout = BoxLayout(lazyRunnerPanel, BoxLayout.Y_AXIS)
@@ -553,7 +553,7 @@ class TestCaseDisplayService(private val project: Project) {
 
         lazyRunnerButton.addActionListener {
             lazyRunnerButton.isEnabled = false
-            cacheLazyRunner!!
+            cacheLazyPipeline!!
                 .withoutCache()
                 .runTestGeneration()
         }
