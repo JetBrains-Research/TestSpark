@@ -10,17 +10,18 @@
 
     <extensions defaultExtensionNs="com.intellij">
 
-         <!-- Project-level services -->
+        <!-- Project-level services -->
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService"/>
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService"/>
+
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageVisualisationService"/>
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.CoverageToolWindowDisplayService"/>
         <projectService serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace"/>
         <projectService
-            serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService"/>
+                serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingService"/>
         <projectService
                 serviceImplementation="nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService"/>
         <projectService
@@ -30,6 +31,9 @@
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.toolwindow.TestGenieToolWindowFactory"/>
+
+        <toolWindow id="TestGenie Validator" secondary="true" anchor="bottom"
+                    factoryClass="nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.ValidationToolWindowFactory"/>
 
         <!-- Application-level services -->
         <applicationService
@@ -51,6 +55,10 @@
 
         <!-- Notifications -->
         <notificationGroup id="EvoSuite Execution Error"
+                           displayType="BALLOON"/>
+        <notificationGroup id="Test Validation Error"
+                           displayType="BALLOON"/>
+        <notificationGroup id="Build Execution Error"
                            displayType="BALLOON"/>
     </extensions>
 

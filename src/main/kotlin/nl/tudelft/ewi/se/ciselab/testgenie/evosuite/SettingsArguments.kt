@@ -19,13 +19,14 @@ class SettingsArguments(
     private val projectClassPath: String,
     private val projectPath: String,
     private val serializeResultPath: String,
-    private val classFQN: String
+    private val classFQN: String,
+    private val baseDir: String
 ) {
     private var command: MutableList<String> = mutableListOf(
         algorithmsToGenerateMap[SettingsApplicationService.getInstance().state!!.algorithm]!!,
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
-        "-base_dir", projectPath,
+        "-base_dir", """"$baseDir"""",
         "-projectCP", projectClassPath,
         "-Dnew_statistics=false",
         "-class", classFQN,
