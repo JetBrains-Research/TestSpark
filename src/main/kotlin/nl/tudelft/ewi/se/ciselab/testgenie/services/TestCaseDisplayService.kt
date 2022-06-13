@@ -8,7 +8,6 @@ import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.colors.EditorColorsUtil
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -41,6 +40,7 @@ import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.border.Border
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -61,6 +61,7 @@ class TestCaseDisplayService(private val project: Project) {
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
+    private var defaultBorder: Border? = null
 
     // Content Manager to be able to add / remove tabs from tool window
     private var contentManager: ContentManager? = null
@@ -225,10 +226,12 @@ class TestCaseDisplayService(private val project: Project) {
             if (names.contains(testCase.key)) {
                 val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
                 val highlightColor = Color(255, 0, 0, 90)
-                (editor as EditorTextField).border = BorderFactory.createLineBorder(highlightColor, 3)
+                val textFieldEditor = (editor as EditorTextField)
+                defaultBorder = textFieldEditor.border
+                textFieldEditor.border = BorderFactory.createLineBorder(highlightColor, 3)
             } else {
                 val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
-                editor.background = EditorColorsUtil.getGlobalOrDefaultColorScheme().defaultBackground
+                (editor as EditorTextField).border = defaultBorder
             }
         }
     }

@@ -7,10 +7,10 @@ val VALIDATION_RESULT_TOPIC: Topic<ValidationResultListener> = Topic.create(
 )
 
 /**
- * Topic interface for sending and receiving test results produced by evosuite
+ * Topic interface for sending and receiving results of test validation
  *
- * Subscribers to this topic will receive a CompactReport whenever the plugin triggers a test
- * generation job with testgenie.evosuite.Runner
+ * Subscribers to this topic will receive a validation result whenever the user triggers test
+ * generation validation
  */
 interface ValidationResultListener {
     fun validationResult(junitResult: Validator.JUnitResult)
