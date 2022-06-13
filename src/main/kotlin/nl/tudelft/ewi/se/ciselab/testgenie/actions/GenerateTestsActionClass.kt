@@ -22,13 +22,12 @@ class GenerateTestsActionClass : AnAction() {
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
-        // Return if EvoSuite is already running
-        val project = e.project ?: return
-        val runnerService = project.service<RunnerService>()
-        if (runnerService.verifyIsRunning()) return
-
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
+
+        val project = e.project ?: return
+        val runnerService = project.service<RunnerService>()
+        if (!runnerService.verify(psiFile)) return
 
         val evoSuiteRunner: Runner = createEvoSuiteRunner(e) ?: return
         evoSuiteRunner.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
