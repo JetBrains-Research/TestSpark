@@ -95,7 +95,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Creates the complete panel in the "Generated Tests" tab,
      * and adds the "Generated Tests" tab to the sidebar tool window.
      *
-     * @param testReport the new test report
+     * @param testJob the new test job
      * @param editor editor instance where coverage should be
      *               visualized
      * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite

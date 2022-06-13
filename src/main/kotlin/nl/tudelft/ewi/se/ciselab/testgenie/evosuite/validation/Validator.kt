@@ -15,6 +15,7 @@ import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentManager
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import org.jacoco.core.analysis.Analyzer
@@ -127,9 +128,7 @@ class Validator(
     }
 
     /**
-     * Compiles the test files with the provided classpath
-     *
-     * @param indicator the progress indicator
+     * Compiles the provided test files with the provided classpath
      */
     private fun compileTests(classpath: String, files: List<File>) {
         logger.trace("Compiling with classpath $classpath")
@@ -201,7 +200,7 @@ class Validator(
             val window = manager.getToolWindow("TestGenie Validator")!!
             val contentManager: ContentManager = window.contentManager
             contentManager.removeAllContents(true)
-            val content: Content = contentManager.factory.createContent(console.component, "Running tests", false)
+            val content: Content = contentManager.factory.createContent(console.component, TestGenieLabelsBundle.defaultValue("junitRun"), false)
             contentManager.addContent(content)
         }
 

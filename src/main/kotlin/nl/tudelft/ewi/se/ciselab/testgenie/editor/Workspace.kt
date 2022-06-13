@@ -43,8 +43,6 @@ class Workspace(private val project: Project) {
         val info: TestJobInfo,
         val report: CompactReport,
         val selectedTests: HashSet<String>,
-        val testEdits: HashMap<String, String>,
-        val liveCoverage: HashMap<String, Set<Int>>
     ) {
         private fun getSelectedTests(): List<CompactTestCase> {
             return report.testCaseList.filter { selectedTests.contains(it.key) }.map { it.value }
@@ -152,7 +150,7 @@ class Workspace(private val project: Project) {
         val displayedSet = HashSet<String>()
         displayedSet.addAll(testReport.testCaseList.keys)
 
-        val testJob = TestJob(jobKey, testReport, displayedSet, hashMapOf(), hashMapOf())
+        val testJob = TestJob(jobKey, testReport, displayedSet)
         resultsForFile.add(testJob)
 
         val editor = editorForFileUrl(jobKey.fileUrl)
@@ -213,7 +211,7 @@ class Workspace(private val project: Project) {
      * coverage and displaying the generated test cases. This
      * is used whenever a new test generation result gets published.
      *
-     * @param testReport the new test report
+     * @param testJob the new test job
      * @param editor editor instance where coverage should be
      *               visualized
      * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
