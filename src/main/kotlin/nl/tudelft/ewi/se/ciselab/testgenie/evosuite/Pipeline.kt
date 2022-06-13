@@ -157,9 +157,6 @@ class Pipeline(
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
-        // Save all open editors
-        ApplicationManager.getApplication().saveAll()
-
         val workspace = project.service<Workspace>()
         workspace.addPendingResult(testResultName, key)
 

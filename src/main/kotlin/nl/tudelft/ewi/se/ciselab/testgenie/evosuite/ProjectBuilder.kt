@@ -4,6 +4,7 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
@@ -25,6 +26,9 @@ class ProjectBuilder(private val project: Project) {
 
     fun runBuild() {
         val handle = CountDownLatch(1)
+
+        // Save all open editors
+        ApplicationManager.getApplication().saveAll()
 
         log.info("Starting build thread!")
         ProgressManager.getInstance()
