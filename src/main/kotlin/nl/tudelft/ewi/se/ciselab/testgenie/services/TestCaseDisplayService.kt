@@ -549,6 +549,9 @@ class TestCaseDisplayService(private val project: Project) {
         }
     }
 
+    /**
+     * Removes all test cases from the cache and tool window UI.
+     */
     private fun removeAllTestCases() {
         val tests = testCasePanels.toMap()
         removeTestCases(tests)
