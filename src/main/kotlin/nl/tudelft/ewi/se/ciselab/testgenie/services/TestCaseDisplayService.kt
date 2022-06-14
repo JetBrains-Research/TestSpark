@@ -447,6 +447,7 @@ class TestCaseDisplayService(private val project: Project) {
     ): JButton {
         val removeFromCacheButton = JButton("Remove")
         removeFromCacheButton.addActionListener {
+            // Remove the test case from the cache
             removeFromCache(testCodeFormatted)
 
             // Remove the highlighting of the test
@@ -463,6 +464,9 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.remove(testCasePanel)
             allTestCasePanel.updateUI()
             updateTestsSelectedLabel()
+
+            // If no more tests are remaining, close the tool window
+            if (testCasePanels.size == 0) closeToolWindow()
         }
         return removeFromCacheButton
     }
