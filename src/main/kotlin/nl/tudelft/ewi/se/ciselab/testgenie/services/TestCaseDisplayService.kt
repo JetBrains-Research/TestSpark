@@ -302,13 +302,19 @@ class TestCaseDisplayService(private val project: Project) {
         coverageVisualisationService.closeToolWindowTab()
     }
 
+    private fun getActiveTests(): Set<String> {
+        val selectedTestCases =
+            testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
+
+        return selectedTestCases.toSet()
+    }
+
     /**
      * Returns a pair of most-recent edit of
      * a test, containing the test name and test code
      */
     private fun getEditedTests(): HashMap<String, String> {
-        val selectedTestCases =
-            testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
+        val selectedTestCases = getActiveTests()
 
         val lastEditsOfSelectedTestCases = selectedTestCases.associateWith {
             (testCasePanels[it]!!.getComponent(1) as EditorTextField).document.text
@@ -325,7 +331,8 @@ class TestCaseDisplayService(private val project: Project) {
     private fun validateTests() {
         val testJob = testJob ?: return
         val edits = getEditedTests()
-        Validator(project, testJob, edits).validateSuite()
+        val activeTests = getActiveTests()
+        Validator(project, testJob, activeTests, edits).validateSuite()
     }
 
     private fun toggleAllCheckboxes(selected: Boolean) {

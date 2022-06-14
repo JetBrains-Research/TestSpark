@@ -43,6 +43,7 @@ import javax.tools.ToolProvider
 class Validator(
     private val project: Project,
     private val testJob: Workspace.TestJob,
+    private val activeTests: Set<String>,
     private val edits: HashMap<String, String> // test name, test code
 ) {
     private val logger: Logger = Logger.getInstance(this.javaClass)
@@ -89,12 +90,14 @@ class Validator(
                     try {
                         projectBuilder.runBuild(indicator)
 
-                        val compilationFiles = setupCompilationFiles(testValidationDirectory, targetFqn) ?: return
+                        val originalTestSuite = testJob.report.testSuiteCode
+                        val compilationFiles =
+                            setupCompilationFiles(testValidationDirectory, targetFqn, originalTestSuite)
+                                ?: return
 
                         logger.info("Compiling tests...")
                         val successfulCompilation = compileTests(classpath, compilationFiles)
 
-                        // TODO: add message box
                         if (!successfulCompilation) {
                             logger.warn("Compilation failed")
                             showTestsCompilationFailed()
@@ -114,24 +117,30 @@ class Validator(
             })
     }
 
-    private fun setupCompilationFiles(testValidationDirectory: String, targetFqn: String): List<File>? {
+    private fun setupCompilationFiles(
+        testValidationDirectory: String,
+        targetFqn: String,
+        originalTestSuite: String
+    ): List<File>? {
 
         val baseClassName = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}"
         // flush test edits to file
         val testsPath = "$baseClassName.java"
         val testsFile = File(testsPath)
 
-        val editor = TestCaseEditor(testsFile.readText(), edits)
+        val editor = TestCaseEditor(originalTestSuite, edits, activeTests)
+        val editedTests: String?
 
         try {
-            if (edits.size == 0) {
+            editedTests = editor.edit()
+
+            if (edits.size == 0 && activeTests.size == testJob.report.testCaseList.size) {
                 logger.trace("No changes found, resetting files to old state")
                 val testsFileWriter = FileWriter(testsPath, false)
                 testsFileWriter.write(testJob.report.testSuiteCode)
                 testsFileWriter.close()
                 logger.trace("Flushed original tests to $testsPath")
             } else {
-                val editedTests = editor.edit()
                 val testsFileWriter = FileWriter(testsFile, false)
                 testsFileWriter.write(editedTests)
                 testsFileWriter.close()
@@ -146,7 +155,8 @@ class Validator(
         val testsCovPath = "${baseClassName}_Cov.java"
         val testsCov = File(testsCovPath)
         val testsCovWriter = FileWriter(testsCov, false)
-        val testsNoScaffold = editor.editRemoveScaffold()
+        val testsNoScaffold = editor.editRemoveScaffold(editedTests)
+
         testsCovWriter.write(testsNoScaffold)
         testsCovWriter.close()
 
