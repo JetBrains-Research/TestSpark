@@ -104,7 +104,6 @@ class Workspace(private val project: Project) {
                 }
             }
         )
-
         // Set event listener for document changes. These are triggered whenever the user changes
         // the contents of the editor.
         EditorFactory.getInstance().eventMulticaster.addDocumentListener(object : DocumentListener {

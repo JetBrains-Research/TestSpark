@@ -1,6 +1,11 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation
 
 import com.github.javaparser.ParseProblemException
+import com.intellij.coverage.CoverageDataManager
+import com.intellij.coverage.CoverageRunner
+import com.intellij.coverage.CoverageSuite
+import com.intellij.coverage.CoverageSuitesBundle
+import com.intellij.coverage.DefaultCoverageFileProvider
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.process.CapturingProcessAdapter
@@ -14,7 +19,10 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Comparing
 import com.intellij.openapi.util.io.FileUtilRt
+import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentManager
@@ -23,10 +31,7 @@ import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.ProjectBuilder
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
-import org.jacoco.core.analysis.Analyzer
-import org.jacoco.core.analysis.CoverageBuilder
-import org.jacoco.core.analysis.IClassCoverage
-import org.jacoco.core.tools.ExecFileLoader
+import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseDisplayService
 import java.io.File
 import java.io.FileWriter
 import java.nio.charset.Charset
@@ -108,11 +113,16 @@ class Validator(
                         indicator.text = TestGenieBundle.message("validationRunning")
 
                         runTests(indicator, classpath, targetFqn)
-                        runTestsWithCoverage(indicator, classpath, targetFqn, testValidationRoot, targetProjectCP)
+                        runTestsWithCoverage(indicator, classpath, targetFqn, testValidationRoot)
                         indicator.stop()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
+                }
+
+                override fun onFinished() {
+                    super.onFinished()
+                    project.service<TestCaseDisplayService>().makeValidatedButtonAvailable()
                 }
             })
     }
@@ -201,7 +211,7 @@ class Validator(
         testFqn: String,
     ) {
         indicator.isIndeterminate = false
-        settingsState ?: return
+        settingsState
 
         // construct command
         val cmd = ArrayList<String>()
@@ -260,7 +270,6 @@ class Validator(
         classpath: String,
         testFqn: String,
         testValidationRoot: String,
-        projectClasses: String
     ) {
         indicator.text = "Calculating coverage"
 
@@ -291,75 +300,27 @@ class Validator(
         // treat this as a join handle
         handler.waitFor(junitTimeout)
 
-        val loader = ExecFileLoader()
-        loader.load(File(jacocoReportPath))
-        val executionData = loader.executionDataStore
+        val manager = CoverageDataManager.getInstance(project)
+        val virtualFile = LocalFileSystem.getInstance().findFileByPath(jacocoReportPath)!!
 
-        val coverageBuilder = CoverageBuilder()
-        val analyzer = Analyzer(executionData, coverageBuilder)
-        val count = analyzer.analyzeAll(File(projectClasses))
-        logger.info("$count classes analyzed")
+        val coverageRunner = getCoverageRunner(virtualFile)
 
-        val coverages = coverageBuilder.classes
-        logJacoco(coverages)
+        val coverageSuite: CoverageSuite = manager
+            .addExternalCoverageSuite(
+                virtualFile.name, virtualFile.timeStamp, coverageRunner,
+                DefaultCoverageFileProvider(virtualFile.path)
+            )
 
-        val cov = getCoverageLineByLine(coverages)
-
-        project.messageBus.syncPublisher(JACOCO_REPORT_TOPIC).receiveJacocoReport(cov)
+        manager.chooseSuitesBundle(CoverageSuitesBundle(coverageSuite))
     }
 
-    private fun logJacoco(coverages: Collection<IClassCoverage>) {
-        val totalCoveredLines = coverages.stream().mapToInt { coverage: IClassCoverage ->
-            coverage.lineCounter.coveredCount
-        }.sum()
-        val totalLines = coverages.stream().mapToInt { coverage: IClassCoverage ->
-            coverage.lineCounter.totalCount
-        }.sum()
-        val totalCoveredInstructions = coverages.stream().mapToInt { coverage: IClassCoverage ->
-            coverage.instructionCounter.coveredCount
-        }.sum()
-        val totalInstructions = coverages.stream().mapToInt { coverage: IClassCoverage ->
-            coverage.instructionCounter.totalCount
-        }.sum()
-        val totalCoveredBranches = coverages.stream().mapToInt { coverage: IClassCoverage ->
-            coverage.branchCounter.coveredCount
-        }.sum()
-        val totalBranches = coverages.stream().mapToInt { coverage: IClassCoverage ->
-            coverage.branchCounter.totalCount
-        }.sum()
-        logger.info("Lines: $totalCoveredLines/$totalLines | Branches: $totalCoveredBranches/$totalBranches | Instructions: $totalCoveredInstructions/$totalInstructions")
-    }
-
-    data class CoverageLineByLine(
-        val fullyCoveredLines: MutableList<Int>,
-        val partiallyCoveredLines: MutableList<Int>,
-        val notCoveredLines: MutableList<Int>,
-    )
-
-    private fun getCoverageLineByLine(coverages: Collection<IClassCoverage>): CoverageLineByLine {
-        val fullyCoveredLines: MutableList<Int> = ArrayList()
-        val partiallyCoveredLines: MutableList<Int> = ArrayList()
-        val notCoveredLines: MutableList<Int> = ArrayList()
-        for (coverage in coverages) {
-            for (method in coverage.methods) {
-                for (line in method.firstLine..method.lastLine) {
-                    val totalBranches = method.getLine(line).branchCounter.totalCount
-                    val missedBranches = method.getLine(line).branchCounter.missedCount
-                    val lineTouched =
-                        method.getLine(line).instructionCounter.totalCount == 0 || method.getLine(line).instructionCounter.coveredCount > 0
-                    val fullCoverage = lineTouched && missedBranches == 0
-                    val partialCoverage = lineTouched && missedBranches > 0 && totalBranches > 0
-                    if (fullCoverage) {
-                        fullyCoveredLines.add(line)
-                    } else if (partialCoverage) {
-                        partiallyCoveredLines.add(line)
-                    } else {
-                        notCoveredLines.add(line)
-                    }
-                }
+    private fun getCoverageRunner(file: VirtualFile): CoverageRunner? {
+        for (runner in CoverageRunner.EP_NAME.extensionList) {
+            for (extension in runner.dataFileExtensions) {
+                if (Comparing.strEqual(file.extension, extension)) return runner
             }
         }
-        return CoverageLineByLine(fullyCoveredLines, partiallyCoveredLines, notCoveredLines)
+        return null
     }
 
     /**
