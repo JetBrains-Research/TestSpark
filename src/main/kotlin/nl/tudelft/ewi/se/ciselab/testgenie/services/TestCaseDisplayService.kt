@@ -92,7 +92,7 @@ class TestCaseDisplayService(private val project: Project) {
         validateButton.addActionListener { validateTests() }
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
-        removeAllButton.addActionListener { removeAllTestCases()}
+        removeAllButton.addActionListener { removeAllTestCases() }
     }
 
     /**
@@ -576,6 +576,7 @@ class TestCaseDisplayService(private val project: Project) {
     private fun removeAllTestCases() {
         val tests = testCasePanels.toMap()
         removeSelectedTestCases(tests)
+        closeToolWindow()
     }
 
     /**
