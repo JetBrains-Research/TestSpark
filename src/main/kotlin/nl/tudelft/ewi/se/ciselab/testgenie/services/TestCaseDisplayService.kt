@@ -194,7 +194,10 @@ class TestCaseDisplayService(private val project: Project) {
      * @param name name of the test whose editor should be highlighted
      */
     fun highlightTestCase(name: String) {
-        val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
+        val myPanel = testCasePanels[name] ?: return
+        scrollToPanel(myPanel)
+
+        val editor = myPanel.getComponent(1) as EditorTextField
         if (!editor.background.equals(defaultEditorColor)) {
             return
         }
@@ -203,6 +206,24 @@ class TestCaseDisplayService(private val project: Project) {
             Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
+    }
+
+    /**
+     * Scrolls to the highlighted panel.
+     *
+     * @param myPanel the panel to scroll to
+     */
+    private fun scrollToPanel(myPanel: JPanel) {
+        var sum = 0
+        for (panel in testCasePanels.values) {
+            if (panel == myPanel) {
+                break
+            } else {
+                sum += panel.height + 25
+            }
+        }
+        val scroll = scrollPane.verticalScrollBar
+        scroll.value = (scroll.minimum + scroll.maximum) * sum / testCasePanels.values.sumOf { x -> x.height }
     }
 
     /**
