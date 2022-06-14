@@ -2,6 +2,8 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
@@ -22,6 +24,7 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.ui.JBUI
+import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieLabelsBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
@@ -337,6 +340,11 @@ class TestCaseDisplayService(private val project: Project) {
         val edits = getEditedTests()
         val activeTests = getActiveTests()
         validateButton.isEnabled = false
+        if (activeTests.isEmpty()) {
+            showEmptyTests()
+            return
+        }
+
         Validator(project, testJob, activeTests, edits).validateSuite()
     }
 
@@ -548,6 +556,17 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.remove(testCasePanel)
             allTestCasePanel.updateUI()
         }
+    }
+
+    /**
+     * Method to show notification that there are no tests to verify
+     */
+    private fun showEmptyTests() {
+        NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
+            TestGenieBundle.message("emptyTestCasesTitle"),
+            TestGenieBundle.message("emptyTestCasesText"),
+            NotificationType.ERROR
+        ).notify(project)
     }
 
     /**

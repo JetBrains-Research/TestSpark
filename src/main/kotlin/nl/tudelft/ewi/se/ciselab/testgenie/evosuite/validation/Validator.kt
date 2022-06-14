@@ -311,7 +311,9 @@ class Validator(
                 DefaultCoverageFileProvider(virtualFile.path)
             )
 
-        manager.chooseSuitesBundle(CoverageSuitesBundle(coverageSuite))
+        ApplicationManager.getApplication().invokeLater {
+            manager.chooseSuitesBundle(CoverageSuitesBundle(coverageSuite))
+        }
     }
 
     private fun getCoverageRunner(file: VirtualFile): CoverageRunner? {
