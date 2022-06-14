@@ -149,7 +149,17 @@ class TestCaseDisplayService(private val project: Project) {
                 defaultEditorColor = textFieldEditor.background
             }
             textFieldEditor.setOneLineMode(false)
-            testCasePanel.add(textFieldEditor, BorderLayout.CENTER)
+
+            // Add test case title
+            val middlePanel = JPanel()
+            middlePanel.layout = BoxLayout(middlePanel, BoxLayout.Y_AXIS)
+
+            val testCaseTitle = JLabel(testCase.testName)
+
+            middlePanel.add(testCaseTitle)
+            middlePanel.add(textFieldEditor)
+
+            testCasePanel.add(middlePanel, BorderLayout.CENTER)
 
             // Create "Remove"  button to remove the test from cache
             val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel, testCodeFormatted)
