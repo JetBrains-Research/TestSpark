@@ -364,6 +364,12 @@ class TestCaseDisplayService(private val project: Project) {
         Validator(project, testJob, edits).validateSuite()
     }
 
+    /**
+     * Toggles check boxes so that they are either all selected or all not selected,
+     *  depending on the provided parameter.
+     *
+     *  @param selected whether the check boxes have to be selected or not
+     */
     private fun toggleAllCheckboxes(selected: Boolean) {
         testCasePanels.forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
