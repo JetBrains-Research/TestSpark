@@ -305,7 +305,7 @@ class TestCaseDisplayService(private val project: Project) {
         scheduleTelemetry(selectedTestCases)
 
         // Remove the selected test cases from the cache and the tool window UI
-        removeTestCases(selectedTestCasePanels)
+        removeSelectedTestCases(selectedTestCasePanels)
 
         contentManager!!.removeContent(content!!, true)
         ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
@@ -537,7 +537,7 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param selectedTestCasePanels the panels of the selected tests
      */
-    private fun removeTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
         selectedTestCasePanels.forEach {
             val testCaseName: String = it.key
             val testCasePanel = it.value
@@ -554,7 +554,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun removeAllTestCases() {
         val tests = testCasePanels.toMap()
-        removeTestCases(tests)
+        removeSelectedTestCases(tests)
     }
 
     /**
