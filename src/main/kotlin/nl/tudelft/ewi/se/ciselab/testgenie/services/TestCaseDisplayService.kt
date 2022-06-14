@@ -205,7 +205,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @param name name of the test whose editor should be highlighted
      */
     fun highlightTestCase(name: String) {
-        val editor = testCasePanels[name]!!.getComponent(1) as EditorTextField
+        val editor = getEditor(name) ?: return
         if (!editor.background.equals(defaultEditorColor)) {
             return
         }
@@ -235,14 +235,13 @@ class TestCaseDisplayService(private val project: Project) {
     fun markFailingTestCases(names: Set<String>) {
         for (testCase in testCasePanels) {
             if (names.contains(testCase.key)) {
-                val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
+                val editor = getEditor(testCase.key) ?: return
                 val highlightColor = Color(255, 0, 0, 90)
-                val textFieldEditor = (editor as EditorTextField)
-                defaultBorder = textFieldEditor.border
-                textFieldEditor.border = BorderFactory.createLineBorder(highlightColor, 3)
+                defaultBorder = editor.border
+                editor.border = BorderFactory.createLineBorder(highlightColor, 3)
             } else {
-                val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
-                (editor as EditorTextField).border = JBUI.Borders.empty()
+                val editor = getEditor(testCase.key) ?: return
+                editor.border = JBUI.Borders.empty()
             }
         }
     }
@@ -268,7 +267,7 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
-            .map { testCasePanels[it]!!.getComponent(1) as EditorTextField }
+            .map { getEditor(it)!! }
             .map { it.document.text }
 
         // Show chooser dialog to select test file
@@ -314,6 +313,18 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
+     * Retrieve the editor corresponding to a particular test case
+     *
+     * @param testCase the name of the test case
+     * @return the editor corresponding to the test case, or null if it does not exist
+     */
+    private fun getEditor(testCase: String): EditorTextField? {
+        val middlePanelComponent = testCasePanels[testCase]?.getComponent(1) ?: return null
+        val middlePanel = middlePanelComponent as JPanel
+        return middlePanel.getComponent(1) as EditorTextField
+    }
+
+    /**
      * Returns a pair of most-recent edit of
      * a test, containing the test name and test code
      */
@@ -322,7 +333,7 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
 
         val lastEditsOfSelectedTestCases = selectedTestCases.associateWith {
-            (testCasePanels[it]!!.getComponent(1) as EditorTextField).document.text
+            getEditor(it)!!.document.text
         }
 
         val lastEditsOfEditedAndSelectedTestCases =
@@ -524,7 +535,7 @@ class TestCaseDisplayService(private val project: Project) {
         val telemetryService = project.service<TestGenieTelemetryService>()
         telemetryService.scheduleTestCasesForTelemetry(
             selectedTestCases.map {
-                val modified = (testCasePanels[it]!!.getComponent(1) as EditorTextField).text
+                val modified = getEditor(it)!!.text
                 val original = originalTestCases[it]!!
 
                 TestGenieTelemetryService.ModifiedTestCase(original, modified)
