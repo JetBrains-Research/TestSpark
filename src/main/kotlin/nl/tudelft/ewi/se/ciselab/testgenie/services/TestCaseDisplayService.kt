@@ -92,6 +92,10 @@ class TestCaseDisplayService(private val project: Project) {
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
     }
 
+    fun makeValidatedButtonAvailable() {
+        validateButton.isEnabled = true
+    }
+
     /**
      * Creates the complete panel in the "Generated Tests" tab,
      * and adds the "Generated Tests" tab to the sidebar tool window.
@@ -332,6 +336,7 @@ class TestCaseDisplayService(private val project: Project) {
         val testJob = testJob ?: return
         val edits = getEditedTests()
         val activeTests = getActiveTests()
+        validateButton.isEnabled = false
         Validator(project, testJob, activeTests, edits).validateSuite()
     }
 
