@@ -369,6 +369,7 @@ class TestCaseDisplayService(private val project: Project) {
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
+        testsSelected = if (selected) testCasePanels.size else 0
     }
 
     /**
