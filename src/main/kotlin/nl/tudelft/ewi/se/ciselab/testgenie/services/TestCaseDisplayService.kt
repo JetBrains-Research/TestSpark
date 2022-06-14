@@ -453,12 +453,16 @@ class TestCaseDisplayService(private val project: Project) {
             project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                     .testGenerationResult(test.testName, false, editor)
 
+            // Update the number of selected test cases if necessary
+            if ((testCasePanel.getComponent(0) as JCheckBox).isSelected) testsSelected -= 1
+
             // Remove the test from the panels
             testCasePanels.remove(test.testName)
 
             // Update the UI
             allTestCasePanel.remove(testCasePanel)
             allTestCasePanel.updateUI()
+            updateTestsSelectedLabel()
         }
         return removeFromCacheButton
     }
