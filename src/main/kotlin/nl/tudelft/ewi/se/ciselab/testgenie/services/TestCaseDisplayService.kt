@@ -265,6 +265,8 @@ class TestCaseDisplayService(private val project: Project) {
         val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
+        println("Selected tests: ${selectedTestCases.size}")
+
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
             .map { getEditor(it)!! }
@@ -306,10 +308,8 @@ class TestCaseDisplayService(private val project: Project) {
         // Remove the selected test cases from the cache and the tool window UI
         removeSelectedTestCases(selectedTestCasePanels)
 
-        contentManager!!.removeContent(content!!, true)
-        ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
-        val coverageVisualisationService = project.service<CoverageVisualisationService>()
-        coverageVisualisationService.closeToolWindowTab()
+        // Close the tool window and remove the UI content
+        closeToolWindow()
     }
 
     /**
@@ -397,6 +397,16 @@ class TestCaseDisplayService(private val project: Project) {
         // Focus on generated tests tab and open toolWindow if not opened already
         contentManager!!.setSelectedContent(content!!)
         toolWindowManager.show()
+    }
+
+    /**
+     * Closes the tool window and destroys the content of the tab.
+     */
+    private fun closeToolWindow() {
+        contentManager!!.removeContent(content!!, true)
+        ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
+        val coverageVisualisationService = project.service<CoverageVisualisationService>()
+        coverageVisualisationService.closeToolWindowTab()
     }
 
     /**
