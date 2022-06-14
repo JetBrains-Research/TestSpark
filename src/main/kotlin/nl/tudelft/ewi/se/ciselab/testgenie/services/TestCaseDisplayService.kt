@@ -51,6 +51,7 @@ class TestCaseDisplayService(private val project: Project) {
     private val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
     private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
+    private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
@@ -81,6 +82,7 @@ class TestCaseDisplayService(private val project: Project) {
         topButtons.add(validateButton)
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
+        topButtons.add(removeAllButton)
         mainPanel.add(topButtons, BorderLayout.NORTH)
 
         mainPanel.add(scrollPane, BorderLayout.CENTER)
@@ -90,6 +92,7 @@ class TestCaseDisplayService(private val project: Project) {
         validateButton.addActionListener { validateTests() }
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
+        removeAllButton.addActionListener { removeAllTestCases()}
     }
 
     /**
@@ -544,6 +547,11 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.remove(testCasePanel)
             allTestCasePanel.updateUI()
         }
+    }
+
+    private fun removeAllTestCases() {
+        val tests = testCasePanels.toMap()
+        removeTestCases(tests)
     }
 
     /**
