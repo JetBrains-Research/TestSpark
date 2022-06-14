@@ -161,8 +161,6 @@ class TestCaseDisplayService(private val project: Project) {
             addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox)
 
             // Add "Remove" and "Reset" buttons to the test case panel
-            val topButtons = JPanel()
-            topButtons.layout = FlowLayout(FlowLayout.TRAILING)
             resetButton.addActionListener {
                 WriteCommandAction.runWriteCommandAction(project) {
                     document.setText(testCodeFormatted)
@@ -171,18 +169,18 @@ class TestCaseDisplayService(private val project: Project) {
                     textFieldEditor.editor!!.markupModel.removeAllHighlighters()
                 }
             }
-            topButtons.add(removeFromCacheButton)
-            topButtons.add(resetButton)
-            testCasePanel.add(topButtons, BorderLayout.NORTH)
+            val bottomPanel = JPanel()
+            bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
             val bottomButtons = JPanel()
             bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
             bottomButtons.add(removeFromCacheButton)
             bottomButtons.add(resetButton)
-            testCasePanel.add(bottomButtons, BorderLayout.SOUTH)
+            bottomPanel.add(bottomButtons)
+            bottomPanel.add(Box.createRigidArea(Dimension(0, 25)))
+            testCasePanel.add(bottomPanel, BorderLayout.SOUTH)
 
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
-            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 25)))
             allTestCasePanel.add(testCasePanel)
             testCasePanels[testCase.testName] = testCasePanel
         }
