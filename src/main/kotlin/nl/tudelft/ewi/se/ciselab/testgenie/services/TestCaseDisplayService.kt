@@ -33,7 +33,6 @@ import java.awt.Color
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
-import java.awt.Font
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -60,7 +59,7 @@ class TestCaseDisplayService(private val project: Project) {
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
-            allTestCasePanel, JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        allTestCasePanel, JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
     )
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private var originalTestCases: HashMap<String, String> = HashMap()
@@ -147,7 +146,7 @@ class TestCaseDisplayService(private val project: Project) {
             // Toggle coverage when checkbox is clicked
             checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-                        .testGenerationResult(testCase.testName, checkbox.isSelected, editor)
+                    .testGenerationResult(testCase.testName, checkbox.isSelected, editor)
 
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
@@ -225,7 +224,7 @@ class TestCaseDisplayService(private val project: Project) {
         }
         val settingsProjectState = project.service<SettingsProjectService>().state
         val highlightColor =
-                Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
+            Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
     }
@@ -283,14 +282,14 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
-                .map { getEditor(it)!! }
-                .map { it.document.text }
+            .map { getEditor(it)!! }
+            .map { it.document.text }
 
         // Show chooser dialog to select test file
         val chooser = TreeClassChooserFactory.getInstance(project)
-                .createProjectScopeChooser(
-                        "Insert Test Cases into Class"
-                )
+            .createProjectScopeChooser(
+                "Insert Test Cases into Class"
+            )
 
         // Warning: The following code is extremely cursed.
         // It is a workaround for an oversight in the IntelliJ TreeJavaClassChooserDialog.
@@ -344,16 +343,16 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun getEditedTests(): HashMap<String, String> {
         val selectedTestCases =
-                testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
+            testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
 
         val lastEditsOfSelectedTestCases = selectedTestCases.associateWith {
             getEditor(it)!!.document.text
         }
 
         val lastEditsOfEditedAndSelectedTestCases =
-                lastEditsOfSelectedTestCases.filter {
-                    it.value != originalTestCases[it.key]
-                }
+            lastEditsOfSelectedTestCases.filter {
+                it.value != originalTestCases[it.key]
+            }
 
         return HashMap(lastEditsOfEditedAndSelectedTestCases)
     }
@@ -398,9 +397,9 @@ class TestCaseDisplayService(private val project: Project) {
         WriteCommandAction.runWriteCommandAction(project) {
             testCaseComponents.forEach {
                 PsiDocumentManager.getInstance(project).getDocument(selectedClass.containingFile)!!.insertString(
-                        selectedClass.rBrace!!.textRange.startOffset,
-                        // Fix Windows line separators
-                        it.replace("\r\n", "\n")
+                    selectedClass.rBrace!!.textRange.startOffset,
+                    // Fix Windows line separators
+                    it.replace("\r\n", "\n")
                 )
             }
         }
@@ -421,7 +420,7 @@ class TestCaseDisplayService(private val project: Project) {
         // If there is no generated tests tab, make it
         val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
         content = contentFactory.createContent(
-                mainPanel, TestGenieLabelsBundle.defaultValue("generatedTests"), true
+            mainPanel, TestGenieLabelsBundle.defaultValue("generatedTests"), true
         )
         contentManager!!.addContent(content!!)
 
@@ -449,10 +448,10 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createRemoveButton(
-            test: CompactTestCase,
-            editor: Editor,
-            testCasePanel: JPanel,
-            testCodeFormatted: String
+        test: CompactTestCase,
+        editor: Editor,
+        testCasePanel: JPanel,
+        testCodeFormatted: String
     ): JButton {
         val removeFromCacheButton = JButton("Remove")
         removeFromCacheButton.addActionListener {
@@ -461,7 +460,7 @@ class TestCaseDisplayService(private val project: Project) {
 
             // Remove the highlighting of the test
             project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-                    .testGenerationResult(test.testName, false, editor)
+                .testGenerationResult(test.testName, false, editor)
 
             // Update the number of selected test cases if necessary
             if ((testCasePanel.getComponent(0) as JCheckBox).isSelected) testsSelected -= 1
@@ -548,10 +547,10 @@ class TestCaseDisplayService(private val project: Project) {
      * @param checkbox the checkbox to select the test
      */
     private fun addListenerToTestDocument(
-            document: Document,
-            resetButton: JButton,
-            textFieldEditor: EditorTextField,
-            checkbox: JCheckBox
+        document: Document,
+        resetButton: JButton,
+        textFieldEditor: EditorTextField,
+        checkbox: JCheckBox
     ) {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
@@ -560,38 +559,38 @@ class TestCaseDisplayService(private val project: Project) {
                 // add border highlight
                 val settingsProjectState = project.service<SettingsProjectService>().state
                 val borderColor = Color(
-                        settingsProjectState.colorRed,
-                        settingsProjectState.colorGreen,
-                        settingsProjectState.colorBlue
+                    settingsProjectState.colorRed,
+                    settingsProjectState.colorGreen,
+                    settingsProjectState.colorBlue
                 )
                 textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
                 // add line highlighting
                 if (event.newRange.startOffset + 1 >= document.textLength ||
-                        event.newRange.endOffset >= document.textLength
+                    event.newRange.endOffset >= document.textLength
                 ) {
                     return
                 }
                 val newLine = event.newFragment.contains('\n')
                 val startLine = document.getLineNumber(
-                        event.newRange.startOffset +
-                                (if (newLine) 1 else 0)
+                    event.newRange.startOffset +
+                        (if (newLine) 1 else 0)
                 )
                 val endLine = document.getLineNumber(event.newRange.endOffset)
                 for (lineNumber in startLine..endLine) {
                     textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                            if (newLine) DiffColors.DIFF_INSERTED else DiffColors.DIFF_MODIFIED,
-                            lineNumber,
-                            HighlighterLayer.FIRST
+                        if (newLine) DiffColors.DIFF_INSERTED else DiffColors.DIFF_MODIFIED,
+                        lineNumber,
+                        HighlighterLayer.FIRST
                     )
                 }
 
                 // Highlight if line has been deleted
                 if (event.oldFragment.contains('\n')) {
                     textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                            DiffColors.DIFF_MODIFIED,
-                            endLine,
-                            HighlighterLayer.FIRST
+                        DiffColors.DIFF_MODIFIED,
+                        endLine,
+                        HighlighterLayer.FIRST
                     )
                 }
 
@@ -609,12 +608,12 @@ class TestCaseDisplayService(private val project: Project) {
     private fun scheduleTelemetry(selectedTestCases: List<String>) {
         val telemetryService = project.service<TestGenieTelemetryService>()
         telemetryService.scheduleTestCasesForTelemetry(
-                selectedTestCases.map {
-                    val modified = getEditor(it)!!.text
-                    val original = originalTestCases[it]!!
+            selectedTestCases.map {
+                val modified = getEditor(it)!!.text
+                val original = originalTestCases[it]!!
 
-                    TestGenieTelemetryService.ModifiedTestCase(original, modified)
-                }.filter { it.modified != it.original }
+                TestGenieTelemetryService.ModifiedTestCase(original, modified)
+            }.filter { it.modified != it.original }
         )
     }
 
@@ -635,8 +634,8 @@ class TestCaseDisplayService(private val project: Project) {
         lazyRunnerButton.addActionListener {
             lazyRunnerButton.isEnabled = false
             cacheLazyPipeline!!
-                    .withoutCache()
-                    .runTestGeneration()
+                .withoutCache()
+                .runTestGeneration()
         }
 
         lazyRunnerButton.alignmentX = Component.CENTER_ALIGNMENT
