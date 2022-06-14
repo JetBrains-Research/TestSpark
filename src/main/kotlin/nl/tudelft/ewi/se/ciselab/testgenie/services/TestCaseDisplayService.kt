@@ -51,6 +51,7 @@ class TestCaseDisplayService(private val project: Project) {
     private val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
     private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
+    private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
@@ -81,6 +82,7 @@ class TestCaseDisplayService(private val project: Project) {
         topButtons.add(validateButton)
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
+        topButtons.add(removeAllButton)
         mainPanel.add(topButtons, BorderLayout.NORTH)
 
         mainPanel.add(scrollPane, BorderLayout.CENTER)
@@ -90,6 +92,7 @@ class TestCaseDisplayService(private val project: Project) {
         validateButton.addActionListener { validateTests() }
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
+        removeAllButton.addActionListener { removeAllTestCases() }
     }
 
     /**
@@ -262,6 +265,8 @@ class TestCaseDisplayService(private val project: Project) {
         val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
+        println("Selected tests: ${selectedTestCases.size}")
+
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
             .map { getEditor(it)!! }
@@ -301,12 +306,10 @@ class TestCaseDisplayService(private val project: Project) {
         scheduleTelemetry(selectedTestCases)
 
         // Remove the selected test cases from the cache and the tool window UI
-        removeTestCases(selectedTestCasePanels)
+        removeSelectedTestCases(selectedTestCasePanels)
 
-        contentManager!!.removeContent(content!!, true)
-        ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
-        val coverageVisualisationService = project.service<CoverageVisualisationService>()
-        coverageVisualisationService.closeToolWindowTab()
+        // Close the tool window and remove the UI content
+        closeToolWindow()
     }
 
     /**
@@ -394,6 +397,16 @@ class TestCaseDisplayService(private val project: Project) {
         // Focus on generated tests tab and open toolWindow if not opened already
         contentManager!!.setSelectedContent(content!!)
         toolWindowManager.show()
+    }
+
+    /**
+     * Closes the tool window and destroys the content of the tab.
+     */
+    private fun closeToolWindow() {
+        contentManager!!.removeContent(content!!, true)
+        ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
+        val coverageVisualisationService = project.service<CoverageVisualisationService>()
+        coverageVisualisationService.closeToolWindowTab()
     }
 
     /**
@@ -545,7 +558,7 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param selectedTestCasePanels the panels of the selected tests
      */
-    private fun removeTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
         selectedTestCasePanels.forEach {
             val testCaseName: String = it.key
             val testCasePanel = it.value
@@ -555,6 +568,15 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.remove(testCasePanel)
             allTestCasePanel.updateUI()
         }
+    }
+
+    /**
+     * Removes all test cases from the cache and tool window UI.
+     */
+    private fun removeAllTestCases() {
+        val tests = testCasePanels.toMap()
+        removeSelectedTestCases(tests)
+        closeToolWindow()
     }
 
     /**
