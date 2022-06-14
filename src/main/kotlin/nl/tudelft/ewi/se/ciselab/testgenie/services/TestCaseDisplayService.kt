@@ -237,7 +237,7 @@ class TestCaseDisplayService(private val project: Project) {
             }
         }
         val scroll = scrollPane.verticalScrollBar
-        scroll.value = (scroll.minimum + scroll.maximum) * sum / testCasePanels.values.sumOf { x -> x.height }
+        scroll.value = (scroll.minimum + scroll.maximum) * sum / allTestCasePanel.height
     }
 
     /**
