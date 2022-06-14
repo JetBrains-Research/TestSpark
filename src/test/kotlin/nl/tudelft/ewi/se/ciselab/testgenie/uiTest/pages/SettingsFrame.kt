@@ -102,7 +102,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for seed label
     val seedLabel
-        get() = jLabel(byXpath("//div[@text='Seed(random if left empty) ']"))
+        get() = jLabel(byXpath("//div[@text='Seed (random if left empty)']"))
 
     // Action for seed text field
     val seedTextField
@@ -110,11 +110,11 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for configuration id label
     val configurationIdLabel
-        get() = jLabel(byXpath("//div[@text='Select configuration id (null if left empty) ']"))
+        get() = jLabel(byXpath("//div[@text='Select configuration id (null if left empty)']"))
 
     // Action for configuration id text field
     val configurationIdField
-        get() = textField(byXpath("//div[@tooltiptext='Label that identifies the used configuration of EvoSuite. This is only done when running experiments.']"))
+        get() = textField(byXpath("//div[@tooltiptext='Label that identifies the used configuration of EvoSuite. This is only done when running experiments']"))
 
     // Action for Execute tests in a sandbox environment checkbox
     val executeTestsCheckbox
@@ -134,7 +134,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for Flaky tests checkbox
     val flakyTestCheckBox
-        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Flaky tests']"))
+        get() = checkBox(byXpath("//div[@class='JCheckBox' and @text='Verify that generated tests pass']"))
 
     // Action for separator of coverage
     val coverageSeparator
