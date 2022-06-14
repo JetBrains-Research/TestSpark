@@ -26,7 +26,7 @@ class SettingsEvoSuiteComponent {
     private var sandboxCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("sandbox"))
     private var assertionsCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("assertionCreation"))
     private var clientOnThreadCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("debug"))
-    private var junitCheckCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("flaky"))
+    private var junitCheckCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("junitCheck"))
     private var minimizeCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("minimize"))
 
     // Criterion selection checkboxes
