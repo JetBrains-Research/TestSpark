@@ -33,6 +33,7 @@ import java.awt.Color
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
+import java.awt.Font
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -52,6 +53,9 @@ class TestCaseDisplayService(private val project: Project) {
     private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
     private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
+
+    private val testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
+    private val testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
@@ -79,6 +83,7 @@ class TestCaseDisplayService(private val project: Project) {
 
         val topButtons = JPanel()
         topButtons.layout = FlowLayout(FlowLayout.TRAILING)
+        topButtons.add(testsSelectedLabel)
         topButtons.add(validateButton)
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
@@ -142,6 +147,7 @@ class TestCaseDisplayService(private val project: Project) {
             checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                     .testGenerationResult(testCase.testName, checkbox.isSelected, editor)
+
             }
 
             // Add an editor to modify the test source code
@@ -196,6 +202,9 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
             testCasePanels[testCase.testName] = testCasePanel
+
+            // Update the number of selected tests (all tests are selected by default)
+            updateTestsSelectedLabel(testCasePanels.size)
         }
     }
 
@@ -355,6 +364,10 @@ class TestCaseDisplayService(private val project: Project) {
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
+    }
+
+    private fun updateTestsSelectedLabel(selected: Int) {
+        testsSelectedLabel.text = String.format(testsSelectedText, selected, testCasePanels.size)
     }
 
     /**
