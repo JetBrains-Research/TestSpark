@@ -195,6 +195,8 @@ class TestCaseDisplayService(private val project: Project) {
      */
     fun highlightTestCase(name: String) {
         val myPanel = testCasePanels[name] ?: return
+
+        openToolWindowTab()
         scrollToPanel(myPanel)
 
         val editor = myPanel.getComponent(1) as EditorTextField
@@ -206,6 +208,18 @@ class TestCaseDisplayService(private val project: Project) {
             Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
+    }
+
+    /**
+     * Method to open the toolwindow tab with generated tests if not already open.
+     */
+    private fun openToolWindowTab() {
+        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
+        contentManager = toolWindowManager!!.contentManager
+        if (content != null) {
+            toolWindowManager.show()
+            toolWindowManager.contentManager.setSelectedContent(content!!)
+        }
     }
 
     /**
