@@ -472,6 +472,32 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
+     * Removes the selected tests from the cache and tool window UI.
+     *
+     * @param selectedTestCasePanels the panels of the selected tests
+     */
+    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+        selectedTestCasePanels.forEach {
+            val testCaseName: String = it.key
+            val testCasePanel = it.value
+
+            removeFromCache(originalTestCases[testCaseName]!!)
+            testCasePanels.remove(testCaseName)
+            allTestCasePanel.remove(testCasePanel)
+            allTestCasePanel.updateUI()
+        }
+    }
+
+    /**
+     * Removes all test cases from the cache and tool window UI.
+     */
+    private fun removeAllTestCases() {
+        val tests = testCasePanels.toMap()
+        removeSelectedTestCases(tests)
+        closeToolWindow()
+    }
+
+    /**
      * A helper method to remove a test case from cache.
      *
      * @param testCode the source code of a test
@@ -581,32 +607,6 @@ class TestCaseDisplayService(private val project: Project) {
                     TestGenieTelemetryService.ModifiedTestCase(original, modified)
                 }.filter { it.modified != it.original }
         )
-    }
-
-    /**
-     * Removes the selected tests from the cache and tool window UI.
-     *
-     * @param selectedTestCasePanels the panels of the selected tests
-     */
-    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
-        selectedTestCasePanels.forEach {
-            val testCaseName: String = it.key
-            val testCasePanel = it.value
-
-            removeFromCache(originalTestCases[testCaseName]!!)
-            testCasePanels.remove(testCaseName)
-            allTestCasePanel.remove(testCasePanel)
-            allTestCasePanel.updateUI()
-        }
-    }
-
-    /**
-     * Removes all test cases from the cache and tool window UI.
-     */
-    private fun removeAllTestCases() {
-        val tests = testCasePanels.toMap()
-        removeSelectedTestCases(tests)
-        closeToolWindow()
     }
 
     /**
