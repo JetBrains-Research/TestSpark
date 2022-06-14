@@ -358,6 +358,9 @@ class TestCaseDisplayService(private val project: Project) {
         return HashMap(lastEditsOfEditedAndSelectedTestCases)
     }
 
+    /**
+     * Validates the tests from the cache.
+     */
     private fun validateTests() {
         val testJob = testJob ?: return
         val edits = getEditedTests()
