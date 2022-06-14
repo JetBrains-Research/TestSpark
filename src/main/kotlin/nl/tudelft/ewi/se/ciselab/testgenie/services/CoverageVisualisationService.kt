@@ -27,6 +27,10 @@ class CoverageVisualisationService(private val project: Project) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
     private var contentManager: ContentManager? = null
+    private val textAttribute = TextAttributes()
+    private val tempTextAttributesKey =
+        TextAttributesKey.createTempTextAttributesKey("TestGenieTemp", textAttribute)
+    private val textAttributesKey = TextAttributesKey.createTextAttributesKey("TestGenie", tempTextAttributesKey)
 
     /**
      * Instantiates tab for coverage table and calls function to update coverage.
@@ -65,6 +69,9 @@ class CoverageVisualisationService(private val project: Project) {
             val color = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
             val colorForLines = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
 
+            // Update the color used for highlighting if necessary
+            textAttribute.backgroundColor = colorForLines
+
             editor.markupModel.removeAllHighlighters()
 
             // map of mutant operations -> List of names of tests which cover the mutant
@@ -88,11 +95,6 @@ class CoverageVisualisationService(private val project: Project) {
 
             for (i in linesToCover) {
                 val line = i - 1
-                val textAttribute = TextAttributes()
-                textAttribute.backgroundColor = colorForLines
-                val tempTextAttributesKey =
-                    TextAttributesKey.createTempTextAttributesKey("TestGenieTemp", textAttribute)
-                val textAttributesKey = TextAttributesKey.createTextAttributesKey("TestGenie", tempTextAttributesKey)
 
                 val hl =
                     editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.ADDITIONAL_SYNTAX)
