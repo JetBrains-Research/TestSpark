@@ -493,12 +493,16 @@ class TestCaseDisplayService(private val project: Project) {
      * Removes all test cases from the cache and tool window UI.
      */
     private fun removeAllTestCases() {
+        // Ask the user for the confirmation
         val choice: Int = Messages.showYesNoCancelDialog(
             TestGenieBundle.message("removeAllMessage"),
             TestGenieBundle.message("confirmationTitle"),
             Messages.getQuestionIcon()
         )
+        // Cancel the operation if the user did not press "Yes"
         if (choice != 0) return
+
+        // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()
         removeSelectedTestCases(testCasePanelsToRemove)
     }
