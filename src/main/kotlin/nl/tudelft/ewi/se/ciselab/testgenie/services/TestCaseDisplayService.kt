@@ -1,7 +1,12 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
+import com.intellij.coverage.CoverageDataManager
+import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
@@ -50,10 +55,11 @@ class TestCaseDisplayService(private val project: Project) {
 
     private val mainPanel: JPanel = JPanel()
     private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
-    private val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
     private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
     private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
+    val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
     private var testsSelected: Int = 0
     private val testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
@@ -77,6 +83,9 @@ class TestCaseDisplayService(private val project: Project) {
     private var content: Content? = null
 
     private var testJob: Workspace.TestJob? = null
+    private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
+    private var isJacocoCoverageActive = false
+
     var fileUrl: String = ""
 
     init {
@@ -85,13 +94,15 @@ class TestCaseDisplayService(private val project: Project) {
 
         val topButtons = JPanel()
         topButtons.layout = FlowLayout(FlowLayout.TRAILING)
+
         topButtons.add(testsSelectedLabel)
-        topButtons.add(validateButton)
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
         topButtons.add(removeAllButton)
-        mainPanel.add(topButtons, BorderLayout.NORTH)
+        topButtons.add(validateButton)
+        topButtons.add(toggleJacocoButton)
 
+        mainPanel.add(topButtons, BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
         mainPanel.add(applyButton, BorderLayout.SOUTH)
 
@@ -99,6 +110,15 @@ class TestCaseDisplayService(private val project: Project) {
         validateButton.addActionListener { validateTests() }
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
+        toggleJacocoButton.addActionListener { toggleJacocoCoverage() }
+    }
+
+    fun makeValidatedButtonAvailable() {
+        validateButton.isEnabled = true
+    }
+
+    fun setJacocoReport(coverageSuitesBundle: CoverageSuitesBundle) {
+        currentJacocoCoverageBundle = coverageSuitesBundle
         removeAllButton.addActionListener { removeAllTestCases() }
     }
 
@@ -152,6 +172,9 @@ class TestCaseDisplayService(private val project: Project) {
 
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
+
+                validateButton.isEnabled = testsSelected > 0
+
                 updateTestsSelectedLabel()
             }
 
@@ -332,6 +355,13 @@ class TestCaseDisplayService(private val project: Project) {
         removeSelectedTestCases(selectedTestCasePanels)
     }
 
+    private fun getActiveTests(): Set<String> {
+        val selectedTestCases =
+            testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
+
+        return selectedTestCases.toSet()
+    }
+
     /**
      * Retrieve the editor corresponding to a particular test case
      *
@@ -349,8 +379,7 @@ class TestCaseDisplayService(private val project: Project) {
      * a test, containing the test name and test code
      */
     private fun getEditedTests(): HashMap<String, String> {
-        val selectedTestCases =
-            testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
+        val selectedTestCases = getActiveTests()
 
         val lastEditsOfSelectedTestCases = selectedTestCases.associateWith {
             getEditor(it)!!.document.text
@@ -370,7 +399,33 @@ class TestCaseDisplayService(private val project: Project) {
     private fun validateTests() {
         val testJob = testJob ?: return
         val edits = getEditedTests()
-        Validator(project, testJob, edits).validateSuite()
+        val activeTests = getActiveTests()
+        validateButton.isEnabled = false
+        toggleJacocoButton.isEnabled = false
+        if (activeTests.isEmpty()) {
+            showEmptyTests()
+            return
+        }
+
+        Validator(project, testJob, activeTests, edits).validateSuite()
+    }
+
+    private fun toggleJacocoCoverage() {
+        val manager = CoverageDataManager.getInstance(project)
+        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
+        editor?.markupModel?.removeAllHighlighters()
+
+        if (isJacocoCoverageActive) {
+            manager.chooseSuitesBundle(null)
+            isJacocoCoverageActive = false
+        } else {
+            currentJacocoCoverageBundle.let {
+                ApplicationManager.getApplication().invokeLater {
+                    manager.chooseSuitesBundle(currentJacocoCoverageBundle)
+                    isJacocoCoverageActive = true
+                }
+            }
+        }
     }
 
     /**
@@ -380,6 +435,7 @@ class TestCaseDisplayService(private val project: Project) {
      *  @param selected whether the check boxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean) {
+        toggleJacocoButton.isEnabled = selected
         testCasePanels.forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
@@ -606,6 +662,17 @@ class TestCaseDisplayService(private val project: Project) {
                 checkbox.isSelected = true
             }
         })
+    }
+
+    /**
+     * Method to show notification that there are no tests to verify
+     */
+    private fun showEmptyTests() {
+        NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
+            TestGenieBundle.message("emptyTestCasesTitle"),
+            TestGenieBundle.message("emptyTestCasesText"),
+            NotificationType.ERROR
+        ).notify(project)
     }
 
     /**
