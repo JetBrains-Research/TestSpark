@@ -124,7 +124,13 @@ class QuickAccessParameters(private val project: Project) {
             stoppingCondition, 25, false
         )
         .addTooltip(default(StoppingCondition.MAXTIME.toString()))
-        .addLabeledComponent(customLabel(TestGenieLabelsBundle.defaultValue("searchBudget"), TestGenieToolTipsBundle.defaultValue("initTimeout")), searchBudget, 25, false)
+        .addLabeledComponent(
+            customLabel(
+                TestGenieLabelsBundle.defaultValue("searchBudget"),
+                TestGenieToolTipsBundle.defaultValue("initTimeout")
+            ),
+            searchBudget, 25, false
+        )
         .addComponentToRightColumn(stoppingConditionToolTip, 1)
         // Add `Timeouts` category
         .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("timeouts")), 35)
@@ -241,7 +247,6 @@ class QuickAccessParameters(private val project: Project) {
 
         if (choice == 0) {
             val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
-            val defaultState = QuickAccessParametersState.DefaultState
             state.showCoverage = defaultState.showCoverage
             state.stoppingCondition = defaultState.stoppingCondition
             state.searchBudget = defaultState.searchBudget
