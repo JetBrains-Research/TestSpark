@@ -53,6 +53,10 @@ class TestCaseDisplayService(private val project: Project) {
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
     private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
 
+    private var testsSelected: Int = 0
+    private val testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
+    private val testsSelectedLabel: JLabel = JLabel(testsSelectedText)
+
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
         allTestCasePanel, JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
@@ -79,6 +83,7 @@ class TestCaseDisplayService(private val project: Project) {
 
         val topButtons = JPanel()
         topButtons.layout = FlowLayout(FlowLayout.TRAILING)
+        topButtons.add(testsSelectedLabel)
         topButtons.add(validateButton)
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
@@ -142,6 +147,10 @@ class TestCaseDisplayService(private val project: Project) {
             checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                     .testGenerationResult(testCase.testName, checkbox.isSelected, editor)
+
+                // Update the number of selected tests
+                testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
+                updateTestsSelectedLabel()
             }
 
             // Add an editor to modify the test source code
@@ -165,7 +174,7 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.add(middlePanel, BorderLayout.CENTER)
 
             // Create "Remove"  button to remove the test from cache
-            val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel, testCodeFormatted)
+            val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel)
 
             // Create "Reset" button to reset the changes in the source code of the test
             val resetButton = createResetButton(document, textFieldEditor, testCodeFormatted)
@@ -196,6 +205,10 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
             testCasePanels[testCase.testName] = testCasePanel
+
+            // Update the number of selected tests (all tests are selected by default)
+            testsSelected = testCasePanels.size
+            updateTestsSelectedLabel()
         }
     }
 
@@ -214,6 +227,14 @@ class TestCaseDisplayService(private val project: Project) {
             Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
+    }
+
+    /**
+     * Removes all coverage highlighting from the editor.
+     */
+    private fun removeAllHighlights() {
+        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
+        editor?.markupModel?.removeAllHighlighters()
     }
 
     /**
@@ -307,9 +328,6 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove the selected test cases from the cache and the tool window UI
         removeSelectedTestCases(selectedTestCasePanels)
-
-        // Close the tool window and remove the UI content
-        closeToolWindow()
     }
 
     /**
@@ -344,17 +362,34 @@ class TestCaseDisplayService(private val project: Project) {
         return HashMap(lastEditsOfEditedAndSelectedTestCases)
     }
 
+    /**
+     * Validates the tests from the cache.
+     */
     private fun validateTests() {
         val testJob = testJob ?: return
         val edits = getEditedTests()
         Validator(project, testJob, edits).validateSuite()
     }
 
+    /**
+     * Toggles check boxes so that they are either all selected or all not selected,
+     *  depending on the provided parameter.
+     *
+     *  @param selected whether the check boxes have to be selected or not
+     */
     private fun toggleAllCheckboxes(selected: Boolean) {
         testCasePanels.forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
+        testsSelected = if (selected) testCasePanels.size else 0
+    }
+
+    /**
+     * Updates the label with the number selected tests.
+     */
+    private fun updateTestsSelectedLabel() {
+        testsSelectedLabel.text = String.format(testsSelectedText, testsSelected, testCasePanels.size)
     }
 
     /**
@@ -379,7 +414,6 @@ class TestCaseDisplayService(private val project: Project) {
      * Creates a new toolWindow tab for the coverage visualisation.
      */
     private fun createToolWindowTab() {
-
         // Remove generated tests tab from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
         contentManager = toolWindowManager!!.contentManager
@@ -410,45 +444,71 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Creates a button to remove a test from the cache.
+     * Creates a button to remove a test from the cache and from the UI.
      *
      * @param test the test case
-     * @param editor the editor
+     * @param editor the currently opened editor
      * @param testCasePanel the test case panel
      * @return the created button
      */
-    private fun createRemoveButton(
-        test: CompactTestCase,
-        editor: Editor,
-        testCasePanel: JPanel,
-        testCodeFormatted: String
-    ): JButton {
+    private fun createRemoveButton(test: CompactTestCase, editor: Editor, testCasePanel: JPanel): JButton {
         val removeFromCacheButton = JButton("Remove")
         removeFromCacheButton.addActionListener {
-            removeFromCache(testCodeFormatted)
-
             // Remove the highlighting of the test
             project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                 .testGenerationResult(test.testName, false, editor)
 
-            // Remove the test from the panels
-            testCasePanels.remove(test.testName)
+            // Update the number of selected test cases if necessary
+            if ((testCasePanel.getComponent(0) as JCheckBox).isSelected) testsSelected -= 1
 
-            // Update the UI
-            allTestCasePanel.remove(testCasePanel)
+            // Remove the test case from the cache
+            removeTestCase(test.testName)
+
+            // Update the UI of the tool window tab
             allTestCasePanel.updateUI()
+            updateTestsSelectedLabel()
+
+            // If no more tests are remaining, close the tool window
+            if (testCasePanels.size == 0) closeToolWindow()
         }
         return removeFromCacheButton
     }
 
     /**
-     * A helper method to remove a test case from cache.
+     * Removes the selected tests from the cache, removes all the highlights from the editor and closes the tool window.
+     * This function is called when the user clicks "Apply to test suite" button,
+     *  and it is also called with all test cases as selected when the user clicks "Remove All" button.
      *
-     * @param testCode the source code of a test
+     * @param selectedTestCasePanels the panels of the selected tests
      */
-    private fun removeFromCache(testCode: String) {
-        val cache = project.service<TestCaseCachingService>()
-        cache.invalidateFromCache(fileUrl, testCode)
+    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+        selectedTestCasePanels.forEach { removeTestCase(it.key) }
+        removeAllHighlights()
+        closeToolWindow()
+    }
+
+    /**
+     * Removes all test cases from the cache and tool window UI.
+     */
+    private fun removeAllTestCases() {
+        val testCasePanelsToRemove = testCasePanels.toMap()
+        removeSelectedTestCases(testCasePanelsToRemove)
+    }
+
+    /**
+     * A helper method to remove a test case from the cache and from the UI.
+     *
+     * @param testName the name of the test
+     */
+    private fun removeTestCase(testName: String) {
+        // Remove the test from the cache
+        project.service<TestCaseCachingService>().invalidateFromCache(fileUrl, originalTestCases[testName]!!)
+
+        // Remove the test panel from the UI
+        allTestCasePanel.remove(testCasePanels[testName])
+
+        // Remove the test panel
+        testCasePanels.remove(testName)
     }
 
     /**
@@ -551,34 +611,6 @@ class TestCaseDisplayService(private val project: Project) {
                 TestGenieTelemetryService.ModifiedTestCase(original, modified)
             }.filter { it.modified != it.original }
         )
-    }
-
-    /**
-     * Removes the selected tests from the cache and tool window UI.
-     *
-     * @param selectedTestCasePanels the panels of the selected tests
-     */
-    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
-        selectedTestCasePanels.forEach {
-            val testCaseName: String = it.key
-            val testCasePanel = it.value
-
-            removeFromCache(originalTestCases[testCaseName]!!)
-            testCasePanels.remove(testCaseName)
-            allTestCasePanel.remove(testCasePanel)
-            allTestCasePanel.updateUI()
-        }
-        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
-        editor?.markupModel?.removeAllHighlighters()
-    }
-
-    /**
-     * Removes all test cases from the cache and tool window UI.
-     */
-    private fun removeAllTestCases() {
-        val tests = testCasePanels.toMap()
-        removeSelectedTestCases(tests)
-        closeToolWindow()
     }
 
     /**
