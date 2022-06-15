@@ -51,6 +51,7 @@ class TestCaseDisplayService(private val project: Project) {
     private val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
     private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
+    private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
@@ -81,6 +82,7 @@ class TestCaseDisplayService(private val project: Project) {
         topButtons.add(validateButton)
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
+        topButtons.add(removeAllButton)
         mainPanel.add(topButtons, BorderLayout.NORTH)
 
         mainPanel.add(scrollPane, BorderLayout.CENTER)
@@ -90,6 +92,7 @@ class TestCaseDisplayService(private val project: Project) {
         validateButton.addActionListener { validateTests() }
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
+        removeAllButton.addActionListener { removeAllTestCases() }
     }
 
     /**
@@ -149,7 +152,17 @@ class TestCaseDisplayService(private val project: Project) {
                 defaultEditorColor = textFieldEditor.background
             }
             textFieldEditor.setOneLineMode(false)
-            testCasePanel.add(textFieldEditor, BorderLayout.CENTER)
+
+            // Add test case title
+            val middlePanel = JPanel()
+            middlePanel.layout = BoxLayout(middlePanel, BoxLayout.Y_AXIS)
+
+            val testCaseTitle = JLabel(testCase.testName)
+
+            middlePanel.add(testCaseTitle)
+            middlePanel.add(textFieldEditor)
+
+            testCasePanel.add(middlePanel, BorderLayout.CENTER)
 
             // Create "Remove"  button to remove the test from cache
             val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel, testCodeFormatted)
@@ -161,8 +174,6 @@ class TestCaseDisplayService(private val project: Project) {
             addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox)
 
             // Add "Remove" and "Reset" buttons to the test case panel
-            val topButtons = JPanel()
-            topButtons.layout = FlowLayout(FlowLayout.TRAILING)
             resetButton.addActionListener {
                 WriteCommandAction.runWriteCommandAction(project) {
                     document.setText(testCodeFormatted)
@@ -171,18 +182,18 @@ class TestCaseDisplayService(private val project: Project) {
                     textFieldEditor.editor!!.markupModel.removeAllHighlighters()
                 }
             }
-            topButtons.add(removeFromCacheButton)
-            topButtons.add(resetButton)
-            testCasePanel.add(topButtons, BorderLayout.NORTH)
+            val bottomPanel = JPanel()
+            bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
             val bottomButtons = JPanel()
             bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
             bottomButtons.add(removeFromCacheButton)
             bottomButtons.add(resetButton)
-            testCasePanel.add(bottomButtons, BorderLayout.SOUTH)
+            bottomPanel.add(bottomButtons)
+            bottomPanel.add(Box.createRigidArea(Dimension(0, 25)))
+            testCasePanel.add(bottomPanel, BorderLayout.SOUTH)
 
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
-            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 25)))
             allTestCasePanel.add(testCasePanel)
             testCasePanels[testCase.testName] = testCasePanel
         }
@@ -195,11 +206,10 @@ class TestCaseDisplayService(private val project: Project) {
      */
     fun highlightTestCase(name: String) {
         val myPanel = testCasePanels[name] ?: return
-
         openToolWindowTab()
         scrollToPanel(myPanel)
 
-        val editor = myPanel.getComponent(1) as EditorTextField
+        val editor = getEditor(name) ?: return
         if (!editor.background.equals(defaultEditorColor)) {
             return
         }
@@ -259,14 +269,13 @@ class TestCaseDisplayService(private val project: Project) {
     fun markFailingTestCases(names: Set<String>) {
         for (testCase in testCasePanels) {
             if (names.contains(testCase.key)) {
-                val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
+                val editor = getEditor(testCase.key) ?: return
                 val highlightColor = Color(255, 0, 0, 90)
-                val textFieldEditor = (editor as EditorTextField)
-                defaultBorder = textFieldEditor.border
-                textFieldEditor.border = BorderFactory.createLineBorder(highlightColor, 3)
+                defaultBorder = editor.border
+                editor.border = BorderFactory.createLineBorder(highlightColor, 3)
             } else {
-                val editor = testCasePanels[testCase.key]?.getComponent(1) ?: return
-                (editor as EditorTextField).border = JBUI.Borders.empty()
+                val editor = getEditor(testCase.key) ?: return
+                editor.border = JBUI.Borders.empty()
             }
         }
     }
@@ -290,9 +299,11 @@ class TestCaseDisplayService(private val project: Project) {
         val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
+        println("Selected tests: ${selectedTestCases.size}")
+
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
-            .map { testCasePanels[it]!!.getComponent(1) as EditorTextField }
+            .map { getEditor(it)!! }
             .map { it.document.text }
 
         // Show chooser dialog to select test file
@@ -329,12 +340,22 @@ class TestCaseDisplayService(private val project: Project) {
         scheduleTelemetry(selectedTestCases)
 
         // Remove the selected test cases from the cache and the tool window UI
-        removeTestCases(selectedTestCasePanels)
+        removeSelectedTestCases(selectedTestCasePanels)
 
-        contentManager!!.removeContent(content!!, true)
-        ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
-        val coverageVisualisationService = project.service<CoverageVisualisationService>()
-        coverageVisualisationService.closeToolWindowTab()
+        // Close the tool window and remove the UI content
+        closeToolWindow()
+    }
+
+    /**
+     * Retrieve the editor corresponding to a particular test case
+     *
+     * @param testCase the name of the test case
+     * @return the editor corresponding to the test case, or null if it does not exist
+     */
+    private fun getEditor(testCase: String): EditorTextField? {
+        val middlePanelComponent = testCasePanels[testCase]?.getComponent(1) ?: return null
+        val middlePanel = middlePanelComponent as JPanel
+        return middlePanel.getComponent(1) as EditorTextField
     }
 
     /**
@@ -346,7 +367,7 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
 
         val lastEditsOfSelectedTestCases = selectedTestCases.associateWith {
-            (testCasePanels[it]!!.getComponent(1) as EditorTextField).document.text
+            getEditor(it)!!.document.text
         }
 
         val lastEditsOfEditedAndSelectedTestCases =
@@ -410,6 +431,16 @@ class TestCaseDisplayService(private val project: Project) {
         // Focus on generated tests tab and open toolWindow if not opened already
         contentManager!!.setSelectedContent(content!!)
         toolWindowManager.show()
+    }
+
+    /**
+     * Closes the tool window and destroys the content of the tab.
+     */
+    private fun closeToolWindow() {
+        contentManager!!.removeContent(content!!, true)
+        ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
+        val coverageVisualisationService = project.service<CoverageVisualisationService>()
+        coverageVisualisationService.closeToolWindowTab()
     }
 
     /**
@@ -548,7 +579,7 @@ class TestCaseDisplayService(private val project: Project) {
         val telemetryService = project.service<TestGenieTelemetryService>()
         telemetryService.scheduleTestCasesForTelemetry(
             selectedTestCases.map {
-                val modified = (testCasePanels[it]!!.getComponent(1) as EditorTextField).text
+                val modified = getEditor(it)!!.text
                 val original = originalTestCases[it]!!
 
                 TestGenieTelemetryService.ModifiedTestCase(original, modified)
@@ -561,7 +592,7 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param selectedTestCasePanels the panels of the selected tests
      */
-    private fun removeTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
         selectedTestCasePanels.forEach {
             val testCaseName: String = it.key
             val testCasePanel = it.value
@@ -571,6 +602,17 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.remove(testCasePanel)
             allTestCasePanel.updateUI()
         }
+        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
+        editor?.markupModel?.removeAllHighlighters()
+    }
+
+    /**
+     * Removes all test cases from the cache and tool window UI.
+     */
+    private fun removeAllTestCases() {
+        val tests = testCasePanels.toMap()
+        removeSelectedTestCases(tests)
+        closeToolWindow()
     }
 
     /**
