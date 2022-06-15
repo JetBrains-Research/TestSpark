@@ -1,9 +1,12 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
+import com.intellij.coverage.CoverageDataManager
+import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
@@ -51,9 +54,10 @@ class TestCaseDisplayService(private val project: Project) {
 
     private val mainPanel: JPanel = JPanel()
     private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
-    private val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
     private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
+    val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoShow"))
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
@@ -73,6 +77,9 @@ class TestCaseDisplayService(private val project: Project) {
     private var content: Content? = null
 
     private var testJob: Workspace.TestJob? = null
+    private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
+    private var isJacocoCoverageActive = false
+
     var fileUrl: String = ""
 
     init {
@@ -80,10 +87,13 @@ class TestCaseDisplayService(private val project: Project) {
         mainPanel.layout = BorderLayout()
 
         val topButtons = JPanel()
+        toggleJacocoButton.isEnabled = false
+        validateButton.isEnabled = false
         topButtons.layout = FlowLayout(FlowLayout.TRAILING)
-        topButtons.add(validateButton)
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
+        topButtons.add(validateButton)
+        topButtons.add(toggleJacocoButton)
         mainPanel.add(topButtons, BorderLayout.NORTH)
 
         mainPanel.add(scrollPane, BorderLayout.CENTER)
@@ -93,10 +103,15 @@ class TestCaseDisplayService(private val project: Project) {
         validateButton.addActionListener { validateTests() }
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
+        toggleJacocoButton.addActionListener { toggleJacocoCoverage() }
     }
 
     fun makeValidatedButtonAvailable() {
         validateButton.isEnabled = true
+    }
+
+    fun setJacocoReport(coverageSuitesBundle: CoverageSuitesBundle) {
+        currentJacocoCoverageBundle = coverageSuitesBundle
     }
 
     /**
@@ -365,6 +380,26 @@ class TestCaseDisplayService(private val project: Project) {
         }
 
         Validator(project, testJob, activeTests, edits).validateSuite()
+    }
+
+    private fun toggleJacocoCoverage() {
+        val manager = CoverageDataManager.getInstance(project)
+        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
+        editor?.markupModel?.removeAllHighlighters()
+
+        if (isJacocoCoverageActive) {
+            manager.chooseSuitesBundle(null)
+            toggleJacocoButton.text = TestGenieLabelsBundle.defaultValue("jacocoShow")
+            isJacocoCoverageActive = false
+        } else {
+            currentJacocoCoverageBundle.let {
+                ApplicationManager.getApplication().invokeLater {
+                    manager.chooseSuitesBundle(currentJacocoCoverageBundle)
+                    toggleJacocoButton.text = TestGenieLabelsBundle.defaultValue("jacocoHide")
+                    isJacocoCoverageActive = true
+                }
+            }
+        }
     }
 
     private fun toggleAllCheckboxes(selected: Boolean) {

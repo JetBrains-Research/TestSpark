@@ -311,9 +311,9 @@ class Validator(
                 DefaultCoverageFileProvider(virtualFile.path)
             )
 
-        ApplicationManager.getApplication().invokeLater {
-            manager.chooseSuitesBundle(CoverageSuitesBundle(coverageSuite))
-        }
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+        testCaseDisplayService.setJacocoReport(CoverageSuitesBundle(coverageSuite))
+        testCaseDisplayService.toggleJacocoButton.isEnabled = true
     }
 
     private fun getCoverageRunner(file: VirtualFile): CoverageRunner? {

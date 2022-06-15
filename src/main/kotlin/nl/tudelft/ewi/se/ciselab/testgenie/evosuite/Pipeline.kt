@@ -197,8 +197,10 @@ class Pipeline(
                     }
                 }
             })
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+        testCaseDisplayService.fileUrl = fileUrl
+        testCaseDisplayService.toggleJacocoButton.isEnabled = false
 
-        project.service<TestCaseDisplayService>().fileUrl = fileUrl
         return testResultName
     }
 
