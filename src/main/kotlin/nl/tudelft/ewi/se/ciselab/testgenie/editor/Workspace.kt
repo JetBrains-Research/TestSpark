@@ -174,7 +174,7 @@ class Workspace(private val project: Project) {
      * Utility function that returns the editor for a specific file url,
      * in case it is opened in the IDE
      */
-    private fun editorForFileUrl(fileUrl: String): Editor? {
+    fun editorForFileUrl(fileUrl: String): Editor? {
         val documentManager = FileDocumentManager.getInstance()
         // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
         FileEditorManager.getInstance(project).allEditors.map { it as TextEditor }.map { it.editor }.map {
