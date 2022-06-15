@@ -243,6 +243,10 @@ class TestCaseDisplayService(private val project: Project) {
      * @param name name of the test whose editor should be highlighted
      */
     fun highlightTestCase(name: String) {
+        val myPanel = testCasePanels[name] ?: return
+        openToolWindowTab()
+        scrollToPanel(myPanel)
+
         val editor = getEditor(name) ?: return
         if (!editor.background.equals(defaultEditorColor)) {
             return
@@ -252,6 +256,36 @@ class TestCaseDisplayService(private val project: Project) {
             Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
+    }
+
+    /**
+     * Method to open the toolwindow tab with generated tests if not already open.
+     */
+    private fun openToolWindowTab() {
+        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")
+        contentManager = toolWindowManager!!.contentManager
+        if (content != null) {
+            toolWindowManager.show()
+            toolWindowManager.contentManager.setSelectedContent(content!!)
+        }
+    }
+
+    /**
+     * Scrolls to the highlighted panel.
+     *
+     * @param myPanel the panel to scroll to
+     */
+    private fun scrollToPanel(myPanel: JPanel) {
+        var sum = 0
+        for (panel in testCasePanels.values) {
+            if (panel == myPanel) {
+                break
+            } else {
+                sum += panel.height
+            }
+        }
+        val scroll = scrollPane.verticalScrollBar
+        scroll.value = (scroll.minimum + scroll.maximum) * sum / allTestCasePanel.height
     }
 
     /**
