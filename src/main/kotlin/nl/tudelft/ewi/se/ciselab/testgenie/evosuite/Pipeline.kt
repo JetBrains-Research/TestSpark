@@ -217,6 +217,9 @@ class Pipeline(
             return false
         }
 
+        // retrieve the job of an arbitrary valid test case
+        val testJobInfo = cache.getTestJobInfo(fileUrl, testCases[0].testCode)
+
         val workspace = project.service<Workspace>()
         ApplicationManager.getApplication().invokeLater {
             val report = CompactReport(TestGenerationResultImpl())
@@ -228,7 +231,7 @@ class Pipeline(
             report.testCaseList = testMap
             report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
 
-            workspace.receiveGenerationResult(testResultName, report, this)
+            workspace.receiveGenerationResult(testResultName, report, this, testJobInfo)
         }
 
         return true
