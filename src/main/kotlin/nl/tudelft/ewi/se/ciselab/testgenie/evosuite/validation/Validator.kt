@@ -277,6 +277,8 @@ class Validator(
         val jacocoPath = "$pluginsPath${sep}TestGenie${sep}lib${sep}jacocoagent.jar"
         // construct command
         val jacocoReportPath = "$testValidationRoot${sep}jacoco.exec"
+        // delete old report
+        File(jacocoReportPath).delete()
         val cmd = ArrayList<String>()
         cmd.add(settingsState.javaPath)
         cmd.add("-javaagent:$jacocoPath=destfile=$jacocoReportPath")
@@ -302,7 +304,6 @@ class Validator(
 
         val manager = CoverageDataManager.getInstance(project)
         val virtualFile = LocalFileSystem.getInstance().findFileByPath(jacocoReportPath)!!
-
         val coverageRunner = getCoverageRunner(virtualFile)
 
         val coverageSuite: CoverageSuite = manager

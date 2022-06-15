@@ -57,8 +57,12 @@ class TestCaseDisplayService(private val project: Project) {
     private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
     private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
-    val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
-    val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoShow"))
+    private val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
+
+    private var testsSelected: Int = 0
+    private val testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
+    private val testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
@@ -88,16 +92,16 @@ class TestCaseDisplayService(private val project: Project) {
         mainPanel.layout = BorderLayout()
 
         val topButtons = JPanel()
-        toggleJacocoButton.isEnabled = false
-        validateButton.isEnabled = false
         topButtons.layout = FlowLayout(FlowLayout.TRAILING)
+
+        topButtons.add(testsSelectedLabel)
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
         topButtons.add(removeAllButton)
         topButtons.add(validateButton)
         topButtons.add(toggleJacocoButton)
-        mainPanel.add(topButtons, BorderLayout.NORTH)
 
+        mainPanel.add(topButtons, BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
         mainPanel.add(applyButton, BorderLayout.SOUTH)
 
@@ -164,6 +168,10 @@ class TestCaseDisplayService(private val project: Project) {
             checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                     .testGenerationResult(testCase.testName, checkbox.isSelected, editor)
+
+                // Update the number of selected tests
+                testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
+                updateTestsSelectedLabel()
             }
 
             // Add an editor to modify the test source code
@@ -218,6 +226,10 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
             testCasePanels[testCase.testName] = testCasePanel
+
+            // Update the number of selected tests (all tests are selected by default)
+            testsSelected = testCasePanels.size
+            updateTestsSelectedLabel()
         }
     }
 
@@ -372,11 +384,15 @@ class TestCaseDisplayService(private val project: Project) {
         return HashMap(lastEditsOfEditedAndSelectedTestCases)
     }
 
+    /**
+     * Validates the tests from the cache.
+     */
     private fun validateTests() {
         val testJob = testJob ?: return
         val edits = getEditedTests()
         val activeTests = getActiveTests()
         validateButton.isEnabled = false
+        toggleJacocoButton.isEnabled = false
         if (activeTests.isEmpty()) {
             showEmptyTests()
             return
@@ -392,24 +408,36 @@ class TestCaseDisplayService(private val project: Project) {
 
         if (isJacocoCoverageActive) {
             manager.chooseSuitesBundle(null)
-            toggleJacocoButton.text = TestGenieLabelsBundle.defaultValue("jacocoShow")
             isJacocoCoverageActive = false
         } else {
             currentJacocoCoverageBundle.let {
                 ApplicationManager.getApplication().invokeLater {
                     manager.chooseSuitesBundle(currentJacocoCoverageBundle)
-                    toggleJacocoButton.text = TestGenieLabelsBundle.defaultValue("jacocoHide")
                     isJacocoCoverageActive = true
                 }
             }
         }
     }
 
+    /**
+     * Toggles check boxes so that they are either all selected or all not selected,
+     *  depending on the provided parameter.
+     *
+     *  @param selected whether the check boxes have to be selected or not
+     */
     private fun toggleAllCheckboxes(selected: Boolean) {
         testCasePanels.forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
+        testsSelected = if (selected) testCasePanels.size else 0
+    }
+
+    /**
+     * Updates the label with the number selected tests.
+     */
+    private fun updateTestsSelectedLabel() {
+        testsSelectedLabel.text = String.format(testsSelectedText, testsSelected, testCasePanels.size)
     }
 
     /**
@@ -480,11 +508,15 @@ class TestCaseDisplayService(private val project: Project) {
     ): JButton {
         val removeFromCacheButton = JButton("Remove")
         removeFromCacheButton.addActionListener {
+            // Remove the test case from the cache
             removeFromCache(testCodeFormatted)
 
             // Remove the highlighting of the test
             project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                 .testGenerationResult(test.testName, false, editor)
+
+            // Update the number of selected test cases if necessary
+            if ((testCasePanel.getComponent(0) as JCheckBox).isSelected) testsSelected -= 1
 
             // Remove the test from the panels
             testCasePanels.remove(test.testName)
@@ -492,8 +524,40 @@ class TestCaseDisplayService(private val project: Project) {
             // Update the UI
             allTestCasePanel.remove(testCasePanel)
             allTestCasePanel.updateUI()
+            updateTestsSelectedLabel()
+
+            // If no more tests are remaining, close the tool window
+            if (testCasePanels.size == 0) closeToolWindow()
         }
         return removeFromCacheButton
+    }
+
+    /**
+     * Removes the selected tests from the cache and tool window UI.
+     *
+     * @param selectedTestCasePanels the panels of the selected tests
+     */
+    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+        selectedTestCasePanels.forEach {
+            val testCaseName: String = it.key
+            val testCasePanel = it.value
+
+            removeFromCache(originalTestCases[testCaseName]!!)
+            testCasePanels.remove(testCaseName)
+            allTestCasePanel.remove(testCasePanel)
+            allTestCasePanel.updateUI()
+        }
+        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
+        editor?.markupModel?.removeAllHighlighters()
+    }
+
+    /**
+     * Removes all test cases from the cache and tool window UI.
+     */
+    private fun removeAllTestCases() {
+        val tests = testCasePanels.toMap()
+        removeSelectedTestCases(tests)
+        closeToolWindow()
     }
 
     /**
@@ -565,7 +629,7 @@ class TestCaseDisplayService(private val project: Project) {
                 val newLine = event.newFragment.contains('\n')
                 val startLine = document.getLineNumber(
                     event.newRange.startOffset +
-                            (if (newLine) 1 else 0)
+                        (if (newLine) 1 else 0)
                 )
                 val endLine = document.getLineNumber(event.newRange.endOffset)
                 for (lineNumber in startLine..endLine) {
@@ -592,6 +656,17 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
+     * Method to show notification that there are no tests to verify
+     */
+    private fun showEmptyTests() {
+        NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
+            TestGenieBundle.message("emptyTestCasesTitle"),
+            TestGenieBundle.message("emptyTestCasesText"),
+            NotificationType.ERROR
+        ).notify(project)
+    }
+
+    /**
      * Schedules the telemetry for the selected and modified tests.
      *
      * @param selectedTestCases the test cases selected by the user
@@ -606,45 +681,6 @@ class TestCaseDisplayService(private val project: Project) {
                 TestGenieTelemetryService.ModifiedTestCase(original, modified)
             }.filter { it.modified != it.original }
         )
-    }
-
-    /**
-     * Removes the selected tests from the cache and tool window UI.
-     *
-     * @param selectedTestCasePanels the panels of the selected tests
-     */
-    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
-        selectedTestCasePanels.forEach {
-            val testCaseName: String = it.key
-            val testCasePanel = it.value
-
-            removeFromCache(originalTestCases[testCaseName]!!)
-            testCasePanels.remove(testCaseName)
-            allTestCasePanel.remove(testCasePanel)
-            allTestCasePanel.updateUI()
-        }
-        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
-        editor?.markupModel?.removeAllHighlighters()
-    }
-
-    /**
-     * Removes all test cases from the cache and tool window UI.
-     */
-    private fun removeAllTestCases() {
-        val tests = testCasePanels.toMap()
-        removeSelectedTestCases(tests)
-        closeToolWindow()
-    }
-
-    /**
-     * Method to show notification that there are no tests to verify
-     */
-    private fun showEmptyTests() {
-        NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
-            TestGenieBundle.message("emptyTestCasesTitle"),
-            TestGenieBundle.message("emptyTestCasesText"),
-            NotificationType.ERROR
-        ).notify(project)
     }
 
     /**
