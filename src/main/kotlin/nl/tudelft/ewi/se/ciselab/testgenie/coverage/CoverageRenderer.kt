@@ -79,7 +79,7 @@ class CoverageRenderer(
         }
 
         if (notCoveredMutation.isNotEmpty() && state.criterionWeakMutation) {
-            prePanel.addComponent(JBLabel(" Not killed mutants:"), 10)
+            prePanel.addComponent(JBLabel(" Survived mutants:"), 10)
             for (mutantName in notCoveredMutation) {
                 prePanel.addComponent(
                     JBLabel(mutantName.substringBefore('('))
