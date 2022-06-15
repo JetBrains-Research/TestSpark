@@ -232,7 +232,7 @@ class QuickAccessParameters(private val project: Project) {
     private val addListenerForResetButton: (ActionEvent) -> Unit = {
         val choice: Int = Messages.showYesNoCancelDialog(
             TestGenieBundle.message("resetMessage"),
-            TestGenieBundle.message("resetTitle"),
+            TestGenieBundle.message("confirmationTitle"),
             Messages.getQuestionIcon()
         )
 

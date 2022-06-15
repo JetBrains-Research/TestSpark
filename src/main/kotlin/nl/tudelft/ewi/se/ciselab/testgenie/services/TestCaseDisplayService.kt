@@ -17,6 +17,7 @@ import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
@@ -548,6 +549,16 @@ class TestCaseDisplayService(private val project: Project) {
      * Removes all test cases from the cache and tool window UI.
      */
     private fun removeAllTestCases() {
+        // Ask the user for the confirmation
+        val choice: Int = Messages.showYesNoCancelDialog(
+            TestGenieBundle.message("removeAllMessage"),
+            TestGenieBundle.message("confirmationTitle"),
+            Messages.getQuestionIcon()
+        )
+        // Cancel the operation if the user did not press "Yes"
+        if (choice != 0) return
+
+        // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()
         removeSelectedTestCases(testCasePanelsToRemove)
     }
