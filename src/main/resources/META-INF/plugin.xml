@@ -60,6 +60,9 @@
                            displayType="BALLOON"/>
         <notificationGroup id="Build Execution Error"
                            displayType="BALLOON"/>
+        <notificationGroup id="Validation Result"
+                           displayType="BALLOON"/>
+
     </extensions>
 
     <projectListeners>

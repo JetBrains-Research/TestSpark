@@ -62,12 +62,19 @@ class CoverageVisualisationService(private val project: Project) {
         editor: Editor
     ) {
         // Show in-line coverage only if enabled in settings
-        val quickAccessParametersState = ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
+        val quickAccessParametersState =
+            ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
 
         if (quickAccessParametersState.showCoverage) {
             val settingsProjectState = project.service<SettingsProjectService>().state
-            val color = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
-            val colorForLines = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
+            val color =
+                Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
+            val colorForLines = Color(
+                settingsProjectState.colorRed,
+                settingsProjectState.colorGreen,
+                settingsProjectState.colorBlue,
+                30
+            )
 
             // Update the color used for highlighting if necessary
             textAttribute.backgroundColor = colorForLines
