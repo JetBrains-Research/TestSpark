@@ -59,7 +59,7 @@ class Workspace(private val project: Project) : Disposable {
     }
 
     private val log = Logger.getInstance(this.javaClass)
-    var listenerDisposable: Disposable? = null
+    private var listenerDisposable: Disposable? = null
 
     /**
      * Maps a workspace file to the test generation jobs that were triggered on it.
