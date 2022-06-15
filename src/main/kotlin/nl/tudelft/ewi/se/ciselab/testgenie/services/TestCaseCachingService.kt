@@ -1,6 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
 import com.intellij.openapi.diagnostic.Logger
+import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
 
@@ -14,11 +15,12 @@ class TestCaseCachingService {
      *
      * @param fileUrl the URL of the file that the test cases belong to
      * @param report the report containing the test cases
+     * @param jobInfo the TestJobInfo for this report
      */
-    fun putIntoCache(fileUrl: String, report: CompactReport) {
+    fun putIntoCache(fileUrl: String, report: CompactReport, jobInfo: Workspace.TestJobInfo) {
         log.info("Inserting ${report.testCaseList.size} test cases into cache for $fileUrl")
         val file = getFileTestCaseCache(fileUrl)
-        file.putIntoCache(report)
+        file.putIntoCache(report, jobInfo)
     }
 
     /**
@@ -60,6 +62,17 @@ class TestCaseCachingService {
     }
 
     /**
+     * Retrieve the TestJobInfo for the specified test.
+     *
+     * @param fileUrl the URL of the file that the test cases belong to
+     * @param testCode the code of the test case
+     */
+    fun getTestJobInfo(fileUrl: String, testCode: String): Workspace.TestJobInfo? {
+        val fileTestCaseCache = getFileTestCaseCache(fileUrl)
+        return fileTestCaseCache.getTestJobInfo(testCode)
+    }
+
+    /**
      * Get the file test case cache for the specified file.
      *
      * @param fileUrl the URL of the file
@@ -86,10 +99,11 @@ class TestCaseCachingService {
          * Insert test cases into the file cache.
          *
          * @param report the report containing the test cases
+         * @param jobInfo the TestJobInfo for this test report
          */
-        fun putIntoCache(report: CompactReport) {
+        fun putIntoCache(report: CompactReport, jobInfo: Workspace.TestJobInfo) {
             report.testCaseList.values.forEach { testCase ->
-                val cachedCompactTestCase = CachedCompactTestCase.fromCompactTestCase(testCase, this)
+                val cachedCompactTestCase = CachedCompactTestCase.fromCompactTestCase(testCase, this, jobInfo)
 
                 synchronized(caseIndexLock) {
                     // invalidate existing test with the same code if one exists
@@ -146,6 +160,17 @@ class TestCaseCachingService {
         fun invalidateFromCache(testCode: String) {
             synchronized(caseIndexLock) {
                 caseIndex[testCode]?.invalidate()
+            }
+        }
+
+        /**
+         * Retrieve the TestJobInfo for the specified test.
+         *
+         * @param testCode the code of the test case
+         */
+        fun getTestJobInfo(testCode: String): Workspace.TestJobInfo? {
+            synchronized(caseIndexLock) {
+                return caseIndex[testCode]?.jobInfo
             }
         }
 
@@ -225,6 +250,7 @@ class TestCaseCachingService {
     private class CachedCompactTestCase(
         val testName: String,
         val testCode: String,
+        val jobInfo: Workspace.TestJobInfo,
         private val coveredLines: Set<LineTestCaseCache>,
         private val fileTestCaseCache: FileTestCaseCache
     ) {
@@ -284,15 +310,18 @@ class TestCaseCachingService {
              *
              * @param testCase the compact test case
              * @param fileTestCaseCache the file test case cache (in order to retrieve line cache references)
+             * @param jobInfo the TestJobInfo for this test
              * @return the cached test case
              */
             fun fromCompactTestCase(
                 testCase: CompactTestCase,
-                fileTestCaseCache: FileTestCaseCache
+                fileTestCaseCache: FileTestCaseCache,
+                jobInfo: Workspace.TestJobInfo
             ): CachedCompactTestCase {
                 return CachedCompactTestCase(
                     testCase.testName,
                     testCase.testCode.replace("\r\n", "\n"),
+                    jobInfo,
                     testCase.coveredLines.map {
                         fileTestCaseCache.getLineTestCaseCache(it)
                     }.toSet(),
