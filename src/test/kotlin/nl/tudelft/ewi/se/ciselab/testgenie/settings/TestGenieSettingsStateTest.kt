@@ -44,7 +44,7 @@ class TestGenieSettingsStateTest {
     private fun valueGenerator(): Stream<Arguments> {
         return Stream.of(
             Arguments.of({ settingsState.minimize = !settingsState.minimize }, mutableListOf("-Dalgorithm=DYNAMOSA", "-Dminimize=false")),
-            Arguments.of({ settingsState.junitCheck = !settingsState.junitCheck }, mutableListOf("-Dalgorithm=DYNAMOSA", "-Djunit_check=true")),
+            Arguments.of({ settingsState.junitCheck = !settingsState.junitCheck }, mutableListOf("-Dalgorithm=DYNAMOSA", "-Djunit_check=false")),
             Arguments.of(
                 { settingsState.algorithm = ContentDigestAlgorithm.STEADY_STATE_GA },
                 mutableListOf("-Dalgorithm=STEADY_STATE_GA")
