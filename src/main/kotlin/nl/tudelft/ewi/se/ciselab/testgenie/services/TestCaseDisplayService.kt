@@ -492,7 +492,6 @@ class TestCaseDisplayService(private val project: Project) {
             removeFromCache(originalTestCases[testCaseName]!!)
             testCasePanels.remove(testCaseName)
             allTestCasePanel.remove(testCasePanel)
-            allTestCasePanel.updateUI()
         }
         val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
         editor?.markupModel?.removeAllHighlighters()
