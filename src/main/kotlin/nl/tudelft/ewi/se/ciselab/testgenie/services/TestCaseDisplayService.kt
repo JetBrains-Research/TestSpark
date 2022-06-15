@@ -171,6 +171,9 @@ class TestCaseDisplayService(private val project: Project) {
 
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
+
+                validateButton.isEnabled = testsSelected > 0
+
                 updateTestsSelectedLabel()
             }
 
@@ -431,6 +434,7 @@ class TestCaseDisplayService(private val project: Project) {
      *  @param selected whether the check boxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean) {
+        toggleJacocoButton.isEnabled = selected
         testCasePanels.forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
