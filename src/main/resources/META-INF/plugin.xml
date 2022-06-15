@@ -8,7 +8,6 @@
     <!-- add java functionality. See https://blog.jetbrains.com/platform/2019/06/java-functionality-extracted-as-a-plugin/ for more information -->
     <depends>com.intellij.modules.java</depends>
 
-
     <extensions defaultExtensionNs="com.intellij">
 
         <!-- Project-level services -->
