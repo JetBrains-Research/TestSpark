@@ -243,7 +243,7 @@ class TestCaseDisplayService(private val project: Project) {
             if (panel == myPanel) {
                 break
             } else {
-                sum += panel.height + 25
+                sum += panel.height
             }
         }
         val scroll = scrollPane.verticalScrollBar
