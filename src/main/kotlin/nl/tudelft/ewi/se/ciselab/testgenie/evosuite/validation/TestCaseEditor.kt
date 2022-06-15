@@ -13,22 +13,32 @@ import com.github.javaparser.ast.visitor.Visitable
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import com.intellij.openapi.diagnostic.Logger
 
-class TestCaseEditor(private val text: String, private val edits: HashMap<String, String>) {
+class TestCaseEditor(
+    private val text: String,
+    private val edits: HashMap<String, String>,
+    private val activeTests: Set<String>
+) {
     private val log: Logger = Logger.getInstance(this.javaClass)
 
-    class TestCaseReplacer(private val edits: HashMap<String, BlockStmt>) : ModifierVisitor<Void>() {
+    class TestCaseReplacer(private val edits: HashMap<String, BlockStmt>, private val activeTests: Set<String>) :
+        ModifierVisitor<Void>() {
         private val log: Logger = Logger.getInstance(this.javaClass)
 
         override fun visit(n: MethodDeclaration?, arg: Void?): Visitable {
             val name = n?.name!!
-
             val testName = name.toString()
-            val modifiedBody = edits[testName]
-            if (modifiedBody != null) {
-                log.trace("Test case modified $testName")
-                n.setBody(modifiedBody)
+
+            if (activeTests.contains(testName)) {
+                val modifiedBody = edits[testName]
+                if (modifiedBody != null) {
+                    log.info("Test case modified $testName")
+                    n.setBody(modifiedBody)
+                } else {
+                    log.info("Test case not modified $testName")
+                }
             } else {
-                log.trace("Test case not modified $testName")
+                log.info("Test case not selected by user $testName")
+                n.remove()
             }
 
             return super.visit(n, arg)
@@ -95,17 +105,16 @@ class TestCaseEditor(private val text: String, private val edits: HashMap<String
             map[edit.key] = blockStmt
         }
 
-        val replacer = TestCaseReplacer(map)
+        val replacer = TestCaseReplacer(map, activeTests)
         replacer.visit(unit, null)
 
         val result = unit.toString()
-        log.trace("EDITED TEST SUITE:\n$result")
+        log.debug("EDITED TEST SUITE:\n$result")
 
         return result
     }
 
-    fun editRemoveScaffold(): String {
-        val testClass = edit()
+    fun editRemoveScaffold(testClass: String): String {
         val parser = JavaParser()
         val unit = parser.parse(testClass).result.get()
 
