@@ -256,6 +256,7 @@ class Validator(
         val output = capturer.output.stdout
 
         val junitResult = parseJunitResult(output)
+        showValidationResult(junitResult)
 
         project.messageBus.syncPublisher(VALIDATION_RESULT_TOPIC).validationResult(junitResult)
     }
@@ -345,6 +346,18 @@ class Validator(
             TestGenieBundle.message("compilationFailedNotificationTitle"),
             TestGenieBundle.message("compilationFailedNotificationText"),
             NotificationType.ERROR
+        ).notify(project)
+    }
+
+    /**
+     * Method to show validation results
+     */
+    private fun showValidationResult(junitResult: JUnitResult) {
+        val passed = junitResult.totalTests - junitResult.failedTests
+        NotificationGroupManager.getInstance().getNotificationGroup("Validation Result").createNotification(
+            TestGenieBundle.message("validationResult"),
+            "$passed/${junitResult.totalTests}",
+            NotificationType.INFORMATION
         ).notify(project)
     }
 
