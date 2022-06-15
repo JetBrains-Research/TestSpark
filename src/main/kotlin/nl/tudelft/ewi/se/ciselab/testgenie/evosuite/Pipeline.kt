@@ -194,6 +194,8 @@ class Pipeline(
                         // Revert to previous state
                         val runnerService = project.service<RunnerService>()
                         runnerService.isRunning = false
+                        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+                        testCaseDisplayService.validateButton.isEnabled = true
                     }
                 }
             })

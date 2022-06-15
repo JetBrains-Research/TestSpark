@@ -57,7 +57,7 @@ class TestCaseDisplayService(private val project: Project) {
     private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
     private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
-    private val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
     val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
     private var testsSelected: Int = 0
