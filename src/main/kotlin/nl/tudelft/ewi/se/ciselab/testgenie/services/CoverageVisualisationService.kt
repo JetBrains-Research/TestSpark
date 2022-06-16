@@ -28,9 +28,6 @@ class CoverageVisualisationService(private val project: Project) {
     private var content: Content? = null
     private var contentManager: ContentManager? = null
     private val textAttribute = TextAttributes()
-    private val tempTextAttributesKey =
-        TextAttributesKey.createTempTextAttributesKey("TestGenieTemp", textAttribute)
-    private val textAttributesKey = TextAttributesKey.createTextAttributesKey("TestGenie", tempTextAttributesKey)
 
     /**
      * Instantiates tab for coverage table and calls function to update coverage.
@@ -104,7 +101,7 @@ class CoverageVisualisationService(private val project: Project) {
                 val line = i - 1
 
                 val hl =
-                    editor.markupModel.addLineHighlighter(textAttributesKey, line, HighlighterLayer.ADDITIONAL_SYNTAX)
+                    editor.markupModel.addLineHighlighter(line, HighlighterLayer.ADDITIONAL_SYNTAX, textAttribute)
 
                 val testsCoveringLine =
                     testReport.testCaseList.filter { x -> i in x.value.coveredLines && x.key in selectedTests }
