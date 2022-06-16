@@ -78,7 +78,7 @@ class RunnerService(private val project: Project) {
      * @return true if action can be executed
      */
     fun verify(psiFile: PsiFile): Boolean {
-        if (isEvoSuiteRunning()) return true
+        if (isEvoSuiteRunning()) return false
         return isParsing(psiFile)
     }
 }
