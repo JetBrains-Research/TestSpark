@@ -101,7 +101,9 @@ To generate a test for a class, right-click (with mouse) anywhere within the cla
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the right-hand side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
+Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
+![Quick buttons](readme-images/pngs/selectAll.png)
 
 ### Generating Tests for Methods
 To generate a test for a method, right-click (with mouse) anywhere within the method you want to test or right-click the method name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Method [...]" option:\
@@ -110,7 +112,9 @@ To generate a test for a method, right-click (with mouse) anywhere within the me
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
+Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
+![Quick buttons](readme-images/pngs/selectAll.png)
 
 ### Generating Tests for Lines
 To generate a test for a method, right-click (with mouse) anywhere within the line you want. Note that the line has to contain a statement (e.g. you will not have the option on lines with only method declarations). Under the "TestGenie" option, select "Generate Tests for Line [...]" option:\
@@ -119,7 +123,9 @@ To generate a test for a method, right-click (with mouse) anywhere within the li
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
+Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
+![Quick buttons](readme-images/pngs/selectAll.png)
 
 ### Coverage Table
 Once a test suite is generated, basic statistics about it can be seen in the tool window, `coverage` tab. The statistics include line coverage, branch coverage, weak mutation coverage. The table adjusts dynamically - it only calculates the statistics for the selected tests in the test suite.\
@@ -145,7 +151,13 @@ Before displaying cached tests, they are (in)validated [statically and dynamical
 ![Cached Tests for Method](readme-images/gifs/caching.gif)
 
 ### Test validation
-Tests which are no longer representative of the current state of the code under test are dropped from the cache, as they are no longer valid. We have 2 types of cache validation - static and dynamic validation. Static validation removes tests from cache by analysing the structure of the methods inside a class. If a method is modified, the tests covering it would be invalidated. Furthermore, it ignores whitespace changes, formatting inside a method and also reordering methods inside a class. Dynamic invalidation comes after static invalidation and verifies that all tests in the cache are still valid by running each of them. Failing tests are removed from the cache.
+Tests which are no longer representative of the current state of the code under test are dropped from the cache, as they are no longer valid. We have 2 types of cache validation - static and dynamic validation. Static validation removes tests from cache by analysing the structure of the methods inside a class. If a method is modified, the tests covering it would be invalidated. Furthermore, it ignores whitespace changes, formatting inside a method and also reordering methods inside a class. Dynamic invalidation comes after static invalidation and verifies that all tests in the cache are still valid by running each of them. Failing tests are removed from the cache.\
+On the tool window, in the top corner there exist two buttons: `Validate Tests` and `Toggle Jacoco Report` (greyed out). To validate cached tests, the user can press  `Validate Tests`. Validation is going to happen in the background.\
+![validate](readme-images/pngs/validate.png)\
+Once validated, `Toggle Jacoco Report` becomes clickable. If clicked, a jacoco table with the updated coverage (so, excluding deleted tests) will appear.\
+![jacoco](readme-images/pngs/jacoco.png)\
+![jacoco coverage](readme-images/pngs/jacocoTable.png)
+
 
 ### Accessibility Features
 - The plugin supports changing the color for [coverage visualisation](#coverage-visualisation-1) and [killed mutants visualisation](#killed-mutants-visualisation-1) (one setting for both). To change the color, go to <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> and use the color picker under `Accessibility settings`:\
