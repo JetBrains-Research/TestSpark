@@ -126,7 +126,7 @@ class QuickAccessParameters(private val project: Project) {
         .addTooltip(default(StoppingCondition.MAXTIME.toString()))
         .addLabeledComponent(
             customLabel(
-                TestGenieLabelsBundle.defaultValue("searchBudget"),
+                TestGenieLabelsBundle.defaultValue("searchBudgetParam"),
                 TestGenieToolTipsBundle.defaultValue("initTimeout")
             ),
             searchBudget, 25, false
