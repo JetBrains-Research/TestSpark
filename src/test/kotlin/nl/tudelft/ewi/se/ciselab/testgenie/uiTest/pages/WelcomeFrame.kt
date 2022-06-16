@@ -42,6 +42,7 @@ class WelcomeFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
         waitFor {
             tree.data.hasText(projectName)
         }
+        tree.findText(projectName).doubleClick()
     }
 
     /**
