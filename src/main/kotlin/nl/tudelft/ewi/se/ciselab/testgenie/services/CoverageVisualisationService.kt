@@ -3,7 +3,6 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
