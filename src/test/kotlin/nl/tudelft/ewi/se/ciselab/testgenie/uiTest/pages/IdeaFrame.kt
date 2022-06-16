@@ -8,6 +8,7 @@ import com.intellij.remoterobot.fixtures.DefaultXpath
 import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.WaitForConditionTimeoutException
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import java.awt.event.KeyEvent
@@ -96,9 +97,13 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      * @param projectName name of project
      */
     fun openProjectFile(fileName: String, projectName: String) {
-        with(projectViewTree) {
-            // Wait for file name to be found
-            findText(projectName).rightClick()
+
+        // Wait for file name to be found
+        try {
+            projectViewTree.findText(projectName).rightClick()
+        } catch (e: WaitForConditionTimeoutException) {
+            projectTab.click()
+            projectViewTree.findText(projectName).rightClick()
         }
         findInFilesAction.click()
         findFileFileNameAction.text = fileName
@@ -229,9 +234,13 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      *
      * @param pathToMainFile an array of file tabs that the robot has to (double) click on to open the main file
      */
-    fun openMainFileFromProjectTree(pathToMainFile: List<String>) {
+    fun openMainFileFromProjectTree(pathToMainFile: List<String>, mainClass: String) {
         projectTab.click()
-        pathToMainFile.forEach { projectViewTree.findText(it).doubleClick() }
+        pathToMainFile.forEach {
+            if (!projectViewTree.hasText(mainClass) || mainClass.startsWith(it)) {
+                projectViewTree.findText(it).doubleClick()
+            }
+        }
     }
 
     /**
