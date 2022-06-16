@@ -38,8 +38,9 @@ All the editor classes can be found in `editor` directory.
 
 All the classes that interact with EvoSuite can be found in `evosuite` directory.
 
+- `Pipeline` runs EvoSuite as a separate process in its various modes of operation (class, method, line), includes static validation of the cache and potential retrieval from the cache.
+- `ProjectBuilder` builds the project before running EvoSuite and before validating the tests.
 - `ResultWatcher` listens for the results of the generation process by EvoSuite. Used in conjunction with `Runner`.
-- `Runner` runs EvoSuite as a separate process in its various modes of operation (class, method, line), includes static validation of the cache and potential retrieval from the cache.
 - `SettingsArguments` is used for constructing the arguments and properties for EvoSuite.
 - `TestGenerationResultListener` is a topic interface for sending and receiving test results produced by EvoSuite test generation process.
 
@@ -47,10 +48,10 @@ All the classes that interact with EvoSuite can be found in `evosuite` directory
 
 All the classes related to dynamic cache invalidation can be found in `evosuite/validation` directory.
 
-- `TestCaseEditor.kt` edits the test suite by visiting the test cases and setting the modified body if it has been modified.
-- `ValidationResultListener.kt` is a topic interface for sending and receiving results produced by dynamic cache invalidation.
-- `ValidationToolWindowFactory.kt` creates the tabs and the UI of the TestGenie tool window corresponding to dynamic cache validation.
-- `Validator.kt` performs the actual validation including the compilation of the test files with the provided classpath and running the compiled tests.
+- `TestCaseEditor.kt` edits the test suite by visiting the test cases and setting the modified body if it has been modified. It also removes scaffolding.
+- `ValidationResultListener.kt` is a topic interface for sending and receiving results of test validation.
+- `ValidationToolWindowFactory.kt` creates the tabs and the UI of the tool window corresponding to dynamic test validation.
+- `Validator.kt` validates and calculates the coverage of an optionally edited set of test cases.
 
 ### Helpers
 
