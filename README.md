@@ -29,9 +29,6 @@ TestGenie is an external graphical IntelliJ plugin that integrates EvoSuite into
 - [Test validation](#test-validation-1)
 - [Accessibility features](#accessibility-features-1)
 - [Telemetry](#telemetry-opt-in-1)
-- Assertion generation for selected tests (_to be implemented_)
-- Interactive Learning (_to be implemented_)
-- Smart Variable Name Generation (_to be implemented_)
 
 ### Generating Tests for Classes
 TestGenie uses EvoSuite to automatically generate tests for Java classes. Two clicks are required from the user for the tests to be generated.
@@ -65,15 +62,6 @@ Features which make the plugin more user-friendly. For instance, a color picker 
 
 ### Telemetry (opt-in)
 Opt-in non-intrusive data collection to improve EvoSuite in the future.
-
-### Assertion Generation
-*To be implemented. Currently, not supported*
-
-### Interactive Learning
-*To be implemented. Currently, not supported*
-
-### Smart Variable Name Generation
-*To be implemented. Currently, not supported*
 
 
 ## Installation
