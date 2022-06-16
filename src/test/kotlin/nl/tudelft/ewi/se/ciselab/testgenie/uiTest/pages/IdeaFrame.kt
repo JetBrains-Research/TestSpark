@@ -229,9 +229,13 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      *
      * @param pathToMainFile an array of file tabs that the robot has to (double) click on to open the main file
      */
-    fun openMainFileFromProjectTree(pathToMainFile: List<String>) {
+    fun openMainFileFromProjectTree(pathToMainFile: List<String>, mainClass: String) {
         projectTab.click()
-        pathToMainFile.forEach { projectViewTree.findText(it).doubleClick() }
+        pathToMainFile.forEach {
+            if (!projectViewTree.hasText(mainClass) || mainClass.startsWith(it)) {
+                projectViewTree.findText(it).doubleClick()
+            }
+        }
     }
 
     /**
