@@ -14,6 +14,9 @@ import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
 
+/**
+ * This class builds the project before running EvoSuite and before validating the tests.
+ */
 class ProjectBuilder(private val project: Project) {
     private val log = Logger.getInstance(this::class.java)
 

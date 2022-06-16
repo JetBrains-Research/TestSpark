@@ -13,6 +13,9 @@ import com.github.javaparser.ast.visitor.Visitable
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import com.intellij.openapi.diagnostic.Logger
 
+/**
+ * This class edits the test suite by setting the modified body of each test if it has been modified. It also removes scaffolding.
+ */
 class TestCaseEditor(
     private val text: String,
     private val edits: HashMap<String, String>,
