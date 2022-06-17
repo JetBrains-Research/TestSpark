@@ -153,7 +153,7 @@ class CoverageRenderer(
      * @param r rectangle object
      */
     override fun paint(editor: Editor, g: Graphics, r: Rectangle) {
-        g.fillRect(r.x, r.y, r.width, r.height)
+        g.fillRect(r.x, r.y, r.width * 3 / 2, r.height * 5 / 6)
         g.color = color
     }
 

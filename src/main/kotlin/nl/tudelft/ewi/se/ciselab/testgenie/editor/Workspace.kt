@@ -1,5 +1,7 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.editor
 
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
@@ -11,6 +13,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation.VALIDATION_RESULT_TOPIC
@@ -30,7 +33,7 @@ import org.evosuite.utils.CompactTestCase
  * related to test generation.
  *
  */
-class Workspace(private val project: Project) {
+class Workspace(private val project: Project) : Disposable {
     data class TestJobInfo(
         val fileUrl: String,
         var targetUnit: String,
@@ -56,6 +59,7 @@ class Workspace(private val project: Project) {
     }
 
     private val log = Logger.getInstance(this.javaClass)
+    private var listenerDisposable: Disposable? = null
 
     /**
      * Maps a workspace file to the test generation jobs that were triggered on it.
@@ -105,23 +109,30 @@ class Workspace(private val project: Project) {
             }
         )
 
+        val disposable =
+            Disposer.newDisposable(ApplicationManager.getApplication(), "Workspace.myDocumentListenerDisposable")
+
         // Set event listener for document changes. These are triggered whenever the user changes
         // the contents of the editor.
-        EditorFactory.getInstance().eventMulticaster.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                super.documentChanged(event)
-                val file = FileDocumentManager.getInstance().getFile(event.document) ?: return
-                val fileName = file.presentableUrl
-                val modTs = event.document.modificationStamp
+        EditorFactory.getInstance().eventMulticaster.addDocumentListener(
+            object : DocumentListener {
+                override fun documentChanged(event: DocumentEvent) {
+                    super.documentChanged(event)
+                    val file = FileDocumentManager.getInstance().getFile(event.document) ?: return
+                    val fileName = file.presentableUrl
+                    val modTs = event.document.modificationStamp
 
-                val testJob = lastTestGeneration(fileName) ?: return
+                    val testJob = lastTestGeneration(fileName) ?: return
 
-                if (testJob.info.modificationTS != modTs) {
-                    val editor = editorForVFile(file)
-                    editor?.markupModel?.removeAllHighlighters()
+                    if (testJob.info.modificationTS != modTs) {
+                        val editor = editorForVFile(file)
+                        editor?.markupModel?.removeAllHighlighters()
+                    }
                 }
-            }
-        }) {}
+            },
+            disposable
+        )
+        listenerDisposable = disposable
     }
 
     /**
@@ -256,5 +267,9 @@ class Workspace(private val project: Project) {
 
     private fun lastTestGeneration(fileName: String): TestJob? {
         return testGenerationResults[fileName]?.last()
+    }
+
+    override fun dispose() {
+        listenerDisposable?.let { Disposer.dispose(it) }
     }
 }

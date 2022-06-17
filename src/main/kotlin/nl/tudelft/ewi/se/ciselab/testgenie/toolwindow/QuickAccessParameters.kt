@@ -36,6 +36,9 @@ class QuickAccessParameters(private val project: Project) {
     // Coverage visualisation toggle
     private val showCoverageCheckbox: JCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("showCoverage"))
 
+    // Default state of the quick access parameters
+    private val defaultState = QuickAccessParametersState.DefaultState
+
     // UI elements for EvoSuite parameters
     private val stoppingCondition: ComboBox<StoppingCondition> = ComboBox<StoppingCondition>(StoppingCondition.values())
     private val searchBudget: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
@@ -61,9 +64,9 @@ class QuickAccessParameters(private val project: Project) {
 
     // The tooltip labels
     private val stoppingConditionToolTip =
-        JBLabel(TestGenieToolTipsBundle.defaultValue("default") + "60" + TestGenieToolTipsBundle.defaultValue("seconds"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+        JBLabel(TestGenieToolTipsBundle.defaultValue("default") + "${defaultState.searchBudget} " + TestGenieToolTipsBundle.defaultValue("seconds"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
     private val populationLimitToolTip =
-        JBLabel(TestGenieToolTipsBundle.defaultValue("default") + "50" + TestGenieToolTipsBundle.defaultValue("seconds"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+        JBLabel(TestGenieToolTipsBundle.defaultValue("default") + "${defaultState.population} " + TestGenieToolTipsBundle.defaultValue("seconds"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
 
     // Template strings for "default" tooltips
     private val defaultStr: String = TestGenieLabelsBundle.defaultValue("defaultStr")
@@ -81,7 +84,7 @@ class QuickAccessParameters(private val project: Project) {
 
         // Add an action listener to stopping condition combo box to update the "default" tooltip
         fun updateStoppingConditionTooltip() {
-            stoppingConditionToolTip.text = default("60 ${stoppingCondition.item.units()}")
+            stoppingConditionToolTip.text = default("${defaultState.searchBudget} ${stoppingCondition.item.units()}")
         }
         stoppingConditionToolTip.border = JBUI.Borders.emptyLeft(10)
         stoppingCondition.addActionListener { updateStoppingConditionTooltip() }
@@ -89,7 +92,7 @@ class QuickAccessParameters(private val project: Project) {
 
         // Add an action listener to population limit combo box to update the "default" tooltip
         fun updatePopulationLimitToolTip() {
-            populationLimitToolTip.text = default("50 ${populationLimit.item.toString().toLowerCase()}")
+            populationLimitToolTip.text = default("${defaultState.population} ${populationLimit.item.toString().toLowerCase()}")
         }
         populationLimitToolTip.border = JBUI.Borders.emptyLeft(10)
         populationLimit.addActionListener { updatePopulationLimitToolTip() }
@@ -121,7 +124,13 @@ class QuickAccessParameters(private val project: Project) {
             stoppingCondition, 25, false
         )
         .addTooltip(default(StoppingCondition.MAXTIME.toString()))
-        .addLabeledComponent(customLabel(TestGenieLabelsBundle.defaultValue("searchBudget"), TestGenieToolTipsBundle.defaultValue("initTimeout")), searchBudget, 25, false)
+        .addLabeledComponent(
+            customLabel(
+                TestGenieLabelsBundle.defaultValue("searchBudgetParam"),
+                TestGenieToolTipsBundle.defaultValue("initTimeout")
+            ),
+            searchBudget, 25, false
+        )
         .addComponentToRightColumn(stoppingConditionToolTip, 1)
         // Add `Timeouts` category
         .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("timeouts")), 35)
@@ -132,7 +141,7 @@ class QuickAccessParameters(private val project: Project) {
             ),
             initializationTimeout, 25, false
         )
-        .addTooltip(default("120 " + TestGenieToolTipsBundle.defaultValue("seconds")))
+        .addTooltip(default("${defaultState.initializationTimeout} " + TestGenieToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("minimTimeout"),
@@ -140,7 +149,7 @@ class QuickAccessParameters(private val project: Project) {
             ),
             minimisationTimeout, 20, false
         )
-        .addTooltip(default("60 " + TestGenieToolTipsBundle.defaultValue("seconds")))
+        .addTooltip(default("${defaultState.minimizationTimeout} " + TestGenieToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("assertTimeout"),
@@ -148,7 +157,7 @@ class QuickAccessParameters(private val project: Project) {
             ),
             assertionTimeout, 20, false
         )
-        .addTooltip(default("60 " + TestGenieToolTipsBundle.defaultValue("seconds")))
+        .addTooltip(default("${defaultState.assertionTimeout} " + TestGenieToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("junitTimeout"),
@@ -156,7 +165,7 @@ class QuickAccessParameters(private val project: Project) {
             ),
             junitCheckTimeout, 20, false
         )
-        .addTooltip(default("60 " + TestGenieToolTipsBundle.defaultValue("seconds")))
+        .addTooltip(default("${defaultState.junitCheckTimeout} " + TestGenieToolTipsBundle.defaultValue("seconds")))
         // Add `Genetic Algorithm` section
         .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("geneticAlg")), 35)
         .addLabeledComponent(
@@ -232,13 +241,12 @@ class QuickAccessParameters(private val project: Project) {
     private val addListenerForResetButton: (ActionEvent) -> Unit = {
         val choice: Int = Messages.showYesNoCancelDialog(
             TestGenieBundle.message("resetMessage"),
-            TestGenieBundle.message("resetTitle"),
+            TestGenieBundle.message("confirmationTitle"),
             Messages.getQuestionIcon()
         )
 
         if (choice == 0) {
             val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
-            val defaultState = QuickAccessParametersState.DefaultState
             state.showCoverage = defaultState.showCoverage
             state.stoppingCondition = defaultState.stoppingCondition
             state.searchBudget = defaultState.searchBudget

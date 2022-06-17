@@ -20,7 +20,7 @@ class SettingsArguments(
     private val projectPath: String,
     private val serializeResultPath: String,
     private val classFQN: String,
-    private val baseDir: String
+    baseDir: String
 ) {
     private var command: MutableList<String> = mutableListOf(
         algorithmsToGenerateMap[SettingsApplicationService.getInstance().state!!.algorithm]!!,

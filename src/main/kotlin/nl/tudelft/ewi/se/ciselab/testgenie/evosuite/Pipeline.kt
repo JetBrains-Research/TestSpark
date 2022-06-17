@@ -195,11 +195,15 @@ class Pipeline(
                         // Revert to previous state
                         val runnerService = project.service<RunnerService>()
                         runnerService.isRunning = false
+                        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+                        testCaseDisplayService.validateButton.isEnabled = true
                     }
                 }
             })
+        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+        testCaseDisplayService.fileUrl = fileUrl
+        testCaseDisplayService.toggleJacocoButton.isEnabled = false
 
-        project.service<TestCaseDisplayService>().fileUrl = fileUrl
         return testResultName
     }
 
