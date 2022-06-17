@@ -1,5 +1,6 @@
 package nl.tudelft.ewi.se.ciselab.testgenie.services
 
+import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import org.assertj.core.api.Assertions.assertThat
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.TestInstance
 class TestCaseCachingServiceTest {
 
     private lateinit var testCaseCachingService: TestCaseCachingService
+
+    private val testJobInfo = Workspace.TestJobInfo("", "", 0, "", "")
 
     @BeforeEach
     fun setUp() {
@@ -30,7 +33,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
 
         val result = testCaseCachingService.retrieveFromCache(file, 2, 2)
 
@@ -61,8 +64,8 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
-        testCaseCachingService.putIntoCache(file, report1a)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
+        testCaseCachingService.putIntoCache(file, report1a, testJobInfo)
 
         val result = testCaseCachingService.retrieveFromCache(file, 2, 2)
 
@@ -88,7 +91,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
 
         testCaseCachingService.invalidateFromCache(file, 1, 1)
 
@@ -115,7 +118,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
 
         testCaseCachingService.invalidateFromCache(file, test2.testCode)
 
@@ -142,7 +145,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
         testCaseCachingService.invalidateFromCache(file, "invaid")
 
         val result = testCaseCachingService.retrieveFromCache(file, 2, 2)
@@ -175,7 +178,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
 
         val result = testCaseCachingService.retrieveFromCache(file, 4, 10)
 
@@ -207,7 +210,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
 
         testCaseCachingService.invalidateFromCache(file, 3, 9)
 
@@ -250,8 +253,8 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
-        testCaseCachingService.putIntoCache("file 2", report2)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
+        testCaseCachingService.putIntoCache("file 2", report2, testJobInfo)
 
         val result = testCaseCachingService.retrieveFromCache(file, 4, 10)
 
@@ -296,9 +299,9 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
-        testCaseCachingService.putIntoCache("file 2", report2)
-        testCaseCachingService.putIntoCache(file, report3)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
+        testCaseCachingService.putIntoCache("file 2", report2, testJobInfo)
+        testCaseCachingService.putIntoCache(file, report3, testJobInfo)
 
         val result = testCaseCachingService.retrieveFromCache(file, 4, 10)
 
@@ -322,7 +325,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
 
         val result = testCaseCachingService.retrieveFromCache(file, 1, 10)
 
@@ -345,7 +348,7 @@ class TestCaseCachingServiceTest {
             createPair(test2)
         )
 
-        testCaseCachingService.putIntoCache("aa", report)
+        testCaseCachingService.putIntoCache("aa", report, testJobInfo)
 
         val result = testCaseCachingService.retrieveFromCache("bb", 2, 2)
 
@@ -365,7 +368,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
 
         val result = testCaseCachingService.retrieveFromCache(file, 4, 50)
 
@@ -385,7 +388,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
         testCaseCachingService.invalidateFromCache(file, 4, 50)
         val result = testCaseCachingService.retrieveFromCache(file, 1, 50)
 
@@ -411,7 +414,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
 
         val result = testCaseCachingService.retrieveFromCache(file, 4, 1)
 
@@ -431,7 +434,7 @@ class TestCaseCachingServiceTest {
 
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
         testCaseCachingService.invalidateFromCache(file, 4, 1)
 
         val result = testCaseCachingService.retrieveFromCache(file, 1, 50)
