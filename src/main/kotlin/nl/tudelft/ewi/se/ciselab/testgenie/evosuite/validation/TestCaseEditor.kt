@@ -14,11 +14,25 @@ import com.github.javaparser.ast.visitor.Visitable
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import com.intellij.openapi.diagnostic.Logger
 
-class TestCaseEditor(private val text: String, private val activeTestList: HashMap<String, String>) {
+/**
+ * This class edits the test suite by setting the modified body of each test if it has been modified. It also removes scaffolding.
+ */
+class TestCaseEditor(
+    private val text: String,
+    private val activeTestList: HashMap<String, String>
+) {
     private val log: Logger = Logger.getInstance(this.javaClass)
 
-    class TestCaseReplacer(private val activeTestList: HashMap<String, Pair<BlockStmt, String>>) : ModifierVisitor<Void>() {
+    class TestCaseReplacer(
+        private val activeTestList: HashMap<String, Pair<BlockStmt, String>>
+    ) : ModifierVisitor<Void>() {
         private val log: Logger = Logger.getInstance(this.javaClass)
+
+        private val activeTestNames =
+            activeTestList.entries.associate {
+                it.value.second to it.key
+            }
+
         override fun visit(n: ClassOrInterfaceDeclaration?, arg: Void?): Visitable {
             n ?: return super.visit(n, arg)
 
@@ -41,14 +55,19 @@ class TestCaseEditor(private val text: String, private val activeTestList: HashM
 
         override fun visit(n: MethodDeclaration?, arg: Void?): Visitable {
             val name = n?.name!!
-
             val testName = name.toString()
-            val modifiedBody = activeTestList[testName]
-            if (modifiedBody != null) {
-                log.trace("Test case modified $testName")
-                n.setBody(modifiedBody.first)
+
+            if (activeTestNames.contains(testName)) {
+                val modifiedBody = activeTestList[activeTestNames[testName]]
+                if (modifiedBody != null) {
+                    log.info("Test case modified $testName")
+                    n.setBody(modifiedBody.first)
+                } else {
+                    log.info("Test case not modified $testName")
+                }
             } else {
-                log.trace("Test case not modified $testName")
+                log.info("Test case not selected by user $testName")
+                n.remove()
             }
 
             return super.visit(n, arg)
@@ -119,13 +138,12 @@ class TestCaseEditor(private val text: String, private val activeTestList: HashM
         replacer.visit(unit, null)
 
         val result = unit.toString()
-        log.trace("EDITED TEST SUITE:\n$result")
+        log.debug("EDITED TEST SUITE:\n$result")
 
         return result
     }
 
-    fun editRemoveScaffold(): String {
-        val testClass = edit()
+    fun editRemoveScaffold(testClass: String): String {
         val parser = JavaParser()
         val unit = parser.parse(testClass).result.get()
 
