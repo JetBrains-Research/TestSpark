@@ -17,19 +17,19 @@ class TestGenerationResultListenerImpl(private val project: Project) : TestGener
         val workspace = project.service<Workspace>()
 
         ApplicationManager.getApplication().invokeLater {
-            workspace.receiveGenerationResult(resultName, testReport, null)
+            val jobInfo = workspace.receiveGenerationResult(resultName, testReport)
+            cacheGeneratedTestCases(testReport, fileUrl, jobInfo)
         }
-
-        cacheGeneratedTestCases(testReport, fileUrl)
     }
 
     /**
      * Put the generated test cases into the cache.
      * @param testReport the test report
      * @param fileUrl the file url
+     * @param jobInfo the job info of the generated tests
      */
-    private fun cacheGeneratedTestCases(testReport: CompactReport, fileUrl: String) {
+    private fun cacheGeneratedTestCases(testReport: CompactReport, fileUrl: String, jobInfo: Workspace.TestJobInfo) {
         val cache = project.service<TestCaseCachingService>()
-        cache.putIntoCache(fileUrl, testReport)
+        cache.putIntoCache(fileUrl, testReport, jobInfo)
     }
 }

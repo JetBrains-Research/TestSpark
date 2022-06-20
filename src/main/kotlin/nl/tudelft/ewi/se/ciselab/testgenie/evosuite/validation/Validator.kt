@@ -43,13 +43,12 @@ import javax.tools.ToolProvider
  * Class for validating and calculating the coverage of an optionally
  * edited set of test cases.
  *
- * @param edits a map of test names and their edits
+ * @param tests a map of test names and their code
  */
 class Validator(
     private val project: Project,
-    private val testJob: Workspace.TestJob,
-    private val activeTests: Set<String>,
-    private val edits: HashMap<String, String> // test name, test code
+    private val testJobInfo: Workspace.TestJobInfo,
+    private val tests: HashMap<String, String> // test name, test code
 ) {
     private val logger: Logger = Logger.getInstance(this.javaClass)
     private val settingsState = project.service<SettingsProjectService>().state
@@ -59,14 +58,14 @@ class Validator(
     private val pathSep = File.pathSeparatorChar
 
     fun validateSuite() {
-        val jobName = testJob.info.jobId
+        val jobName = testJobInfo.jobId
 
         logger.info("Validating test suite $jobName")
 
-        val fqn = testJob.info.targetUnit.split('#').first()
+        val fqn = testJobInfo.targetUnit.split('#').first()
         val targetFqn = "${fqn}_ESTest"
 
-        val targetProjectCP = testJob.info.targetClassPath
+        val targetProjectCP = testJobInfo.targetClassPath
 
         val pluginsPath = System.getProperty("idea.plugins.path")
 
@@ -95,9 +94,8 @@ class Validator(
                     try {
                         projectBuilder.runBuild(indicator)
 
-                        val originalTestSuite = testJob.report.testSuiteCode
                         val compilationFiles =
-                            setupCompilationFiles(testValidationDirectory, targetFqn, originalTestSuite)
+                            setupCompilationFiles(testValidationDirectory, targetFqn)
                                 ?: return
 
                         logger.info("Compiling tests...")
@@ -129,8 +127,7 @@ class Validator(
 
     private fun setupCompilationFiles(
         testValidationDirectory: String,
-        targetFqn: String,
-        originalTestSuite: String
+        targetFqn: String
     ): List<File>? {
 
         val baseClassName = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}"
@@ -138,24 +135,15 @@ class Validator(
         val testsPath = "$baseClassName.java"
         val testsFile = File(testsPath)
 
-        val editor = TestCaseEditor(originalTestSuite, edits, activeTests)
+        val editor = TestCaseEditor(testsFile.readText(), tests)
         val editedTests: String?
 
         try {
             editedTests = editor.edit()
-
-            if (edits.size == 0 && activeTests.size == testJob.report.testCaseList.size) {
-                logger.trace("No changes found, resetting files to old state")
-                val testsFileWriter = FileWriter(testsPath, false)
-                testsFileWriter.write(testJob.report.testSuiteCode)
-                testsFileWriter.close()
-                logger.trace("Flushed original tests to $testsPath")
-            } else {
-                val testsFileWriter = FileWriter(testsFile, false)
-                testsFileWriter.write(editedTests)
-                testsFileWriter.close()
-                logger.trace("Flushed edited tests to $testsPath")
-            }
+            val testsFileWriter = FileWriter(testsFile, false)
+            testsFileWriter.write(editedTests)
+            testsFileWriter.close()
+            logger.trace("Flushed tests to $testsPath")
         } catch (e: ParseProblemException) {
             logger.warn("Parsing tests failed - $e")
             showTestsParsingFailed()

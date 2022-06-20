@@ -2,6 +2,7 @@ package nl.tudelft.ewi.se.ciselab.testgenie.evosuite.validation
 
 import com.github.javaparser.JavaParser
 import com.github.javaparser.StaticJavaParser
+import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.NormalAnnotationExpr
@@ -18,24 +19,49 @@ import com.intellij.openapi.diagnostic.Logger
  */
 class TestCaseEditor(
     private val text: String,
-    private val edits: HashMap<String, String>,
-    private val activeTests: Set<String>
+    private val activeTestList: HashMap<String, String>
 ) {
     private val log: Logger = Logger.getInstance(this.javaClass)
 
-    class TestCaseReplacer(private val edits: HashMap<String, BlockStmt>, private val activeTests: Set<String>) :
-        ModifierVisitor<Void>() {
+    class TestCaseReplacer(
+        private val activeTestList: HashMap<String, Pair<BlockStmt, String>>
+    ) : ModifierVisitor<Void>() {
         private val log: Logger = Logger.getInstance(this.javaClass)
+
+        private val activeTestNames =
+            activeTestList.entries.associate {
+                it.value.second to it.key
+            }
+
+        override fun visit(n: ClassOrInterfaceDeclaration?, arg: Void?): Visitable {
+            n ?: return super.visit(n, arg)
+
+            val methods = n.methods.map { it.nameAsString }.toSet()
+
+            for (entry in activeTestList) {
+                if (!methods.contains(entry.value.second)) {
+                    log.info("Test ${entry.key} in cache but not in file, inserting")
+                    val methodDeclaration = n.addMethod(entry.value.second, Modifier.Keyword.PUBLIC)
+                    methodDeclaration.setBody(entry.value.first)
+                    val testAnnotation = NormalAnnotationExpr()
+                    testAnnotation.setName("Test")
+                    testAnnotation.addPair("timeout", "4000")
+                    methodDeclaration.addAnnotation(testAnnotation)
+                }
+            }
+
+            return super.visit(n, arg)
+        }
 
         override fun visit(n: MethodDeclaration?, arg: Void?): Visitable {
             val name = n?.name!!
             val testName = name.toString()
 
-            if (activeTests.contains(testName)) {
-                val modifiedBody = edits[testName]
+            if (activeTestNames.contains(testName)) {
+                val modifiedBody = activeTestList[activeTestNames[testName]]
                 if (modifiedBody != null) {
                     log.info("Test case modified $testName")
-                    n.setBody(modifiedBody)
+                    n.setBody(modifiedBody.first)
                 } else {
                     log.info("Test case not modified $testName")
                 }
@@ -48,13 +74,13 @@ class TestCaseEditor(
         }
     }
 
-    class BodyExtractor : VoidVisitorAdapter<ArrayList<BlockStmt>>() {
-        override fun visit(n: MethodDeclaration?, arg: ArrayList<BlockStmt>) {
+    class BodyExtractor : VoidVisitorAdapter<ArrayList<Pair<BlockStmt, String>>>() {
+        override fun visit(n: MethodDeclaration?, arg: ArrayList<Pair<BlockStmt, String>>) {
             super.visit(n, arg)
 
             val body = n?.body?.get()
             if (body != null) {
-                arg.add(body)
+                arg.add(Pair(body, n.nameAsString))
             }
         }
     }
@@ -92,14 +118,14 @@ class TestCaseEditor(
         val parser = JavaParser()
         val unit = parser.parse(text).result.get()
 
-        val map = HashMap<String, BlockStmt>()
+        val map = HashMap<String, Pair<BlockStmt, String>>()
 
-        for (edit in edits) {
+        for (edit in activeTestList) {
             // hack needed to make java parser parse a method
             val code = "package p; public class c {${edit.value}}"
             val parsedModified = StaticJavaParser.parse(code)
             val extractor = BodyExtractor()
-            val body = ArrayList<BlockStmt>()
+            val body = ArrayList<Pair<BlockStmt, String>>()
             extractor.visit(parsedModified, body)
 
             if (body.isEmpty()) continue
@@ -108,7 +134,7 @@ class TestCaseEditor(
             map[edit.key] = blockStmt
         }
 
-        val replacer = TestCaseReplacer(map, activeTests)
+        val replacer = TestCaseReplacer(map)
         replacer.visit(unit, null)
 
         val result = unit.toString()
