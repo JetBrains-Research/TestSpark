@@ -111,6 +111,7 @@ class TestCaseDisplayService(private val project: Project) {
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
         toggleJacocoButton.addActionListener { toggleJacocoCoverage() }
+        removeAllButton.addActionListener { removeAllTestCases() }
     }
 
     fun makeValidatedButtonAvailable() {
@@ -119,7 +120,6 @@ class TestCaseDisplayService(private val project: Project) {
 
     fun setJacocoReport(coverageSuitesBundle: CoverageSuitesBundle) {
         currentJacocoCoverageBundle = coverageSuitesBundle
-        removeAllButton.addActionListener { removeAllTestCases() }
     }
 
     /**
@@ -409,22 +409,18 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Returns a pair of most-recent edit of
-     * a test, containing the test name and test code
+     * Returns a pair of most-recent edit of selected tests, containing the test name and test code
+     *
+     * @return a pair of each test, containing the test name and test code
      */
-    private fun getEditedTests(): HashMap<String, String> {
+    private fun getCurrentVersionsOfSelectedTests(): HashMap<String, String> {
         val selectedTestCases = getActiveTests()
 
         val lastEditsOfSelectedTestCases = selectedTestCases.associateWith {
             getEditor(it)!!.document.text
         }
 
-        val lastEditsOfEditedAndSelectedTestCases =
-            lastEditsOfSelectedTestCases.filter {
-                it.value != originalTestCases[it.key]
-            }
-
-        return HashMap(lastEditsOfEditedAndSelectedTestCases)
+        return HashMap(lastEditsOfSelectedTestCases)
     }
 
     /**
@@ -432,16 +428,15 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun validateTests() {
         val testJob = testJob ?: return
-        val edits = getEditedTests()
-        val activeTests = getActiveTests()
+        val edits = getCurrentVersionsOfSelectedTests()
         validateButton.isEnabled = false
         toggleJacocoButton.isEnabled = false
-        if (activeTests.isEmpty()) {
+        if (edits.isEmpty()) {
             showEmptyTests()
             return
         }
 
-        Validator(project, testJob, activeTests, edits).validateSuite()
+        Validator(project, testJob.info, edits).validateSuite()
     }
 
     private fun toggleJacocoCoverage() {

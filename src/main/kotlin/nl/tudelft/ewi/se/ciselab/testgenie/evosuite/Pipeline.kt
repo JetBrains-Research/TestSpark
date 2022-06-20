@@ -169,7 +169,6 @@ class Pipeline(
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
-                        projectBuilder.runBuild(indicator)
                         if (!skipCache) {
                             // Check cache
                             val hasCachedTests = tryShowCachedTestCases()
@@ -184,6 +183,8 @@ class Pipeline(
                             indicator.stop()
                             return
                         }
+
+                        projectBuilder.runBuild(indicator)
 
                         runEvoSuite(indicator)
                         indicator.stop()
@@ -220,6 +221,9 @@ class Pipeline(
             return false
         }
 
+        // retrieve the job of an arbitrary valid test case
+        val testJobInfo = cache.getTestJobInfo(fileUrl, testCases[0].testCode)
+
         val workspace = project.service<Workspace>()
         ApplicationManager.getApplication().invokeLater {
             val report = CompactReport(TestGenerationResultImpl())
@@ -231,7 +235,7 @@ class Pipeline(
             report.testCaseList = testMap
             report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
 
-            workspace.receiveGenerationResult(testResultName, report, this)
+            workspace.receiveGenerationResult(testResultName, report, this, testJobInfo)
         }
 
         return true

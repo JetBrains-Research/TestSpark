@@ -153,9 +153,17 @@ class Workspace(private val project: Project) : Disposable {
      * @param testReport the generated test suite
      * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
+     * @return the test job that was generated
      */
-    fun receiveGenerationResult(testResultName: String, testReport: CompactReport, cacheLazyPipeline: Pipeline?) {
-        val jobKey = pendingTestResults.remove(testResultName)!!
+    fun receiveGenerationResult(
+        testResultName: String,
+        testReport: CompactReport,
+        cacheLazyPipeline: Pipeline? = null,
+        cachedJobKey: TestJobInfo? = null
+    ): TestJobInfo {
+        val pendingJobKey = pendingTestResults.remove(testResultName)!!
+
+        val jobKey = cachedJobKey ?: pendingJobKey
 
         val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
         val displayedSet = HashSet<String>()
@@ -171,6 +179,8 @@ class Workspace(private val project: Project) : Disposable {
         } else {
             log.info("No editor opened for received test result")
         }
+
+        return jobKey
     }
 
     /**

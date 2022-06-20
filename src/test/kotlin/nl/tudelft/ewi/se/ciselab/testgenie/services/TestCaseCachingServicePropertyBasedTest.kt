@@ -9,6 +9,7 @@ import net.jqwik.api.Property
 import net.jqwik.api.Provide
 import net.jqwik.api.RandomDistribution
 import net.jqwik.api.lifecycle.BeforeTry
+import nl.tudelft.ewi.se.ciselab.testgenie.editor.Workspace
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingServiceTest.Companion.createPair
 import nl.tudelft.ewi.se.ciselab.testgenie.services.TestCaseCachingServiceTest.Companion.createTriple
 import org.assertj.core.api.Assertions.assertThat
@@ -23,6 +24,8 @@ import java.lang.Integer.min
 class TestCaseCachingServicePropertyBasedTest {
 
     private lateinit var testCaseCachingService: TestCaseCachingService
+
+    private val testJobInfo = Workspace.TestJobInfo("", "", 0, "", "")
 
     @BeforeTry
     fun setUp() {
@@ -41,7 +44,7 @@ class TestCaseCachingServicePropertyBasedTest {
         report.testCaseList = HashMap(testCases.associate { createPair(it) })
         val file = "file"
 
-        testCaseCachingService.putIntoCache(file, report)
+        testCaseCachingService.putIntoCache(file, report, testJobInfo)
 
         val actual = testCaseCachingService.retrieveFromCache(file, lowerBound, upperBound)
         val expected = testCases.filter { it.coveredLines.any { b -> b in lowerBound..upperBound } }
