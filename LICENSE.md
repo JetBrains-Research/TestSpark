@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2022 Computational Intelligence for Software Engineering Lab (CISELab)
+Copyright (c) 2022 Mitchell Olsthoorn, Pouria Derakhshanfar, Annibale Panichella
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
