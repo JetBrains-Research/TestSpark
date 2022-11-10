@@ -56,7 +56,7 @@ class Pipeline(
     private val evosuiteVersion = "1.0.4" // TODO: Figure out a better way to source this
 
     private val sep = File.separatorChar
-    private val pluginsPath = System.getProperty("idea.plugins.path")
+    private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
     private var evoSuitePath = "$pluginsPath${sep}TestGenie${sep}lib${sep}evosuite-$evosuiteVersion.jar"
 
     private val id = UUID.randomUUID().toString()
