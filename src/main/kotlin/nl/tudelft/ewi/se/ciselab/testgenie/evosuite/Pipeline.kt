@@ -114,9 +114,8 @@ class Pipeline(
      */
     fun forLine(selectedLine: Int): Pipeline {
         command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forLine(
-            selectedLine
-        )
-            .build()
+            selectedLine)
+            .build(true)
 
         return this
     }
