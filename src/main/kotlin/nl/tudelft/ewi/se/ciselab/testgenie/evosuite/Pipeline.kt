@@ -53,7 +53,7 @@ class Pipeline(
     private val log = Logger.getInstance(this::class.java)
 
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
-    private val evosuiteVersion = "1.0.4" // TODO: Figure out a better way to source this
+    private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
 
     private val sep = File.separatorChar
     private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
@@ -114,9 +114,8 @@ class Pipeline(
      */
     fun forLine(selectedLine: Int): Pipeline {
         command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forLine(
-            selectedLine
-        )
-            .build()
+            selectedLine)
+            .build(true)
 
         return this
     }
