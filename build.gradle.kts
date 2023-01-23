@@ -6,7 +6,7 @@ import java.util.zip.ZipInputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
-val thunderdomeVersion = "1.0.4"
+val thunderdomeVersion = "1.0.5"
 
 plugins {
     // Java support
@@ -208,7 +208,6 @@ abstract class UpdateEvoSuite : DefaultTask() {
         }
 
         logger.info("Specified evosuite jar not found, downloading release $jarName")
-
         val downloadUrl =
             "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$version/release.zip"
         val stream = try {
