@@ -69,6 +69,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-symbol-solver-core
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test
+    implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
+
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
