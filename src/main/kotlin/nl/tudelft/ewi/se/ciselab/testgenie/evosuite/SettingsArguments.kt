@@ -70,7 +70,7 @@ class SettingsArguments(
     /**
      * Finalizes the parameter construction by applying the user runtime settings
      */
-    fun build(isLineCoverage : Boolean = false): MutableList<String> {
+    fun build(isLineCoverage: Boolean = false): MutableList<String> {
         val toolWindowState = QuickAccessParametersService.getInstance().state
         val settingsState = SettingsApplicationService.getInstance().state
 
@@ -127,7 +127,7 @@ class SettingsArguments(
         private fun createCriterionString(state: SettingsApplicationState, isLineCoverage: Boolean): String {
             val sb = StringBuilder("-Dcriterion=") // e.g "-Dcriterion=BRANCH:WEAKMUTATION",
 
-            if (isLineCoverage){
+            if (isLineCoverage) {
                 sb.append("LINE:")
                 sb.append("BRANCH:")
                 return sb.toString()
