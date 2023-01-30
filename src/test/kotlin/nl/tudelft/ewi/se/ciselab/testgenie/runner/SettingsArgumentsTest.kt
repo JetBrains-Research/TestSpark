@@ -116,10 +116,10 @@ class SettingsArgumentsTest {
             "-Dtest_naming_strategy=COVERAGE",
             "-Dtarget_line=419",
             "-Dalgorithm=DYNAMOSA",
-            "-Dcriterion=LINE:BRANCH"
+            "-Dcriterion=LINE:BRANCH:"
         )
 
-        val actual = settings.build()
+        val actual = settings.build(true)
 
         assertThat(
             actual
