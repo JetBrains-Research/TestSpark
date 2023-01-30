@@ -174,7 +174,7 @@ class CoverageVisualisationService(private val project: Project) {
         }
 
         // If there is no coverage visualisation tab, make it
-        val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
+        val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
             visualisationService.mainPanel, TestGenieLabelsBundle.defaultValue("coverageVisualisation"), true
         )

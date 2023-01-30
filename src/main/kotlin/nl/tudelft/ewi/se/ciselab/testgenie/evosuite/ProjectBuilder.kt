@@ -41,7 +41,7 @@ class ProjectBuilder(private val project: Project) {
 
             val operatingSystem = System.getProperty("os.name")
 
-            if (operatingSystem.toLowerCase().contains("windows")) {
+            if (operatingSystem.lowercase().contains("windows")) {
                 cmd.add("cmd.exe")
                 cmd.add("/c")
             } else {

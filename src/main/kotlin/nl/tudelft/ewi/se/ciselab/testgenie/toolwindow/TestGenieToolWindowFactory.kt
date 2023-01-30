@@ -16,7 +16,7 @@ class TestGenieToolWindowFactory : ToolWindowFactory {
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val quickAccessParameters = QuickAccessParameters(project)
-        val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
+        val contentFactory: ContentFactory = ContentFactory.getInstance()
         val content: Content = contentFactory.createContent(quickAccessParameters.getContent(), TestGenieLabelsBundle.defaultValue("parametersWindow"), false)
         toolWindow.contentManager.addContent(content)
     }
