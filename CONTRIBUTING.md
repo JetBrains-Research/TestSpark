@@ -10,7 +10,7 @@ The plugin configuration file is `plugin.xml` which can be found in `src/main/re
 
 ## Classes
 
-All the classes can be found in `src/main/kotlin/nl/tudelft/ewi/se/ciselab/testgenie` directory.
+All the classes can be found in `src/main/kotlin/org/jetbrains/research/testgenie` directory.
 
 ### Actions
 
@@ -116,7 +116,7 @@ The vast majority of labels, tooltip-texts and messages are saved in their own `
 The tests for TestGenie can be found in `src/test` directory.
 
 - `resources` directory contains dummy projects used for testing the plugin.
-- `kotlin/nl/tudelft/ewi/se/ciselab/testgenie` directory contains the actual tests.
+- `kotlin/org/jetbrains/research/testgenie` directory contains the actual tests.
     - `helpers` directory contains tests for the method descriptor helper (`MethodDescriptorHelperTest`).
     - `runner` directory contains tests for the settings arguments that are used when running EvoSuite (`SettingsArgumentTest`).
     - `services` directory contains tests for the coverage visualisation and caching service classes (`CoverageVisualisationServiceTest`, `TestCaseCachingServicePropertyBasedTest`, `TestCaseCachingServiceTest`).
