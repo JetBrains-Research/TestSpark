@@ -509,7 +509,7 @@ class TestCaseDisplayService(private val project: Project) {
         }
 
         // If there is no generated tests tab, make it
-        val contentFactory: ContentFactory = ContentFactory.SERVICE.getInstance()
+        val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
             mainPanel, TestGenieLabelsBundle.defaultValue("generatedTests"), true
         )

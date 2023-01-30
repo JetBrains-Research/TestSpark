@@ -92,7 +92,7 @@ class QuickAccessParameters(private val project: Project) {
 
         // Add an action listener to population limit combo box to update the "default" tooltip
         fun updatePopulationLimitToolTip() {
-            populationLimitToolTip.text = default("${defaultState.population} ${populationLimit.item.toString().toLowerCase()}")
+            populationLimitToolTip.text = default("${defaultState.population} ${populationLimit.item.toString().lowercase()}")
         }
         populationLimitToolTip.border = JBUI.Borders.emptyLeft(10)
         populationLimit.addActionListener { updatePopulationLimitToolTip() }
