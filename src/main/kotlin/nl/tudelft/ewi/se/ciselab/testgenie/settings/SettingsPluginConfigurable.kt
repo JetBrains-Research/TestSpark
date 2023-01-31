@@ -69,10 +69,10 @@ class SettingsPluginConfigurable(_project: Project) : Configurable {
     override fun apply() {
         val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
         settingsState.javaPath = settingsComponent!!.javaPath
+        settingsState.buildPath = settingsComponent!!.buildPath
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen
         settingsState.colorBlue = settingsComponent!!.colorBlue
-        settingsState.buildPath = settingsComponent!!.buildPath
         settingsState.buildCommand = settingsComponent!!.buildCommand
         settingsState.telemetryEnabled = settingsComponent!!.telemetryEnabled
         if (checkEmptyTelemetryPath(settingsState)) return
