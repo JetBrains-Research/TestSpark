@@ -18,6 +18,7 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
 
     init {
         settingsProjectState.telemetryPath.plus(File.separator).plus(project.name)
+        settingsProjectState.buildPath += File.separator.plus(project.name)
     }
 
     /**
