@@ -6,19 +6,18 @@
 
 
     <description><![CDATA[
-    <p>TestGenie is a plugin for generating unit tests during the development. This plugin natively integrates <a href="https://www.evosuite.org">EvoSuite</a> into the IDE. </p>
+    <p>TestGenie is a plugin for generating unit tests. TestGenie natively integrates <a href="https://www.evosuite.org">EvoSuite</a> into the IDE. </p>
     <ul>
         <li>Supports up to Java 11.</li>
-        <li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage,mutation score.</li>
+        <li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage, mutation score.</li>
         <li>Generates unit tests for capturing failures.</li>
         <li>Generate tests for Java classes, method, and single lines.</li>
     </ul>
 
-    <p>This project is started by <a href="https://se.ewi.tudelft.nl">SERG TU Delft</a> (<a herf="https://www.ciselab.nl">CISELab</a>). Currently under implementation by <a href="https://lp.jetbrains.com/research/ictl/">JetBrains Research (ICTL)</a> for research </p>
+    <p>Initially implemented by <a href="https://www.ciselab.nl">CISELab</a> at <a href="https://se.ewi.tudelft.nl">SERG @ TU Delft</a>, TestGenie is currently developed and maintained by <a href="https://lp.jetbrains.com/research/ictl/">ICTL at JetBrains Research</a>.</p>
       ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
-    <!-- add java functionality. See https://blog.jetbrains.com/platform/2019/06/java-functionality-extracted-as-a-plugin/ for more information -->
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
