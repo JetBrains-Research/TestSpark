@@ -10,7 +10,7 @@ data class SettingsProjectState(
     var colorRed: Int = DefaultSettingsPluginState.colorRed,
     var colorGreen: Int = DefaultSettingsPluginState.colorGreen,
     var colorBlue: Int = DefaultSettingsPluginState.colorBlue,
-    var buildPath: String = DefaultSettingsPluginState.commonBuildPath,
+    var buildPath: String = DefaultSettingsPluginState.buildPath,
     var buildCommand: String = DefaultSettingsPluginState.buildCommand,
     var telemetryEnabled: Boolean = DefaultSettingsPluginState.telemetryEnabled,
     var telemetryPath: String = DefaultSettingsPluginState.telemetryPath
@@ -23,7 +23,7 @@ data class SettingsProjectState(
         val colorRed: Int = TestGenieDefaultsBundle.defaultValue("colorRed").toInt()
         val colorGreen: Int = TestGenieDefaultsBundle.defaultValue("colorGreen").toInt()
         val colorBlue: Int = TestGenieDefaultsBundle.defaultValue("colorBlue").toInt()
-        val commonBuildPath: String = TestGenieDefaultsBundle.defaultValue("commonBuildPath")
+        val buildPath: String = TestGenieDefaultsBundle.defaultValue("buildPath")
         val buildCommand: String = TestGenieDefaultsBundle.defaultValue("buildCommand")
         val telemetryEnabled: Boolean = TestGenieDefaultsBundle.defaultValue("telemetryEnabled").toBoolean()
         val telemetryPath: String = System.getProperty("user.home")
