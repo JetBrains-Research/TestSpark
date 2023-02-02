@@ -29,6 +29,7 @@ class SettingsBuildSystemApplying(_project: Project) {
      */
     fun updateBuildPathAndBuildCommand(settingsProjectState: SettingsProjectState) {
         buildSystem?.let {
+            // TODO add an exception if (buildSystemToBuildPath[buildSystem] == null)
             settingsProjectState.buildPath = buildSystemToBuildPath[buildSystem]!!
             settingsProjectState.buildCommand = buildSystemToBuildCommand[buildSystem]!!
         }
