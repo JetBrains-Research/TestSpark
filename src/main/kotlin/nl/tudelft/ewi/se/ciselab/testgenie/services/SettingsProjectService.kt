@@ -31,11 +31,14 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
     private fun updateBuildPathAndBuildCommand() {
         val buildSystemToBuildPath = mapOf(
             TestGenieDefaultsBundle.defaultValue("maven") to TestGenieDefaultsBundle.defaultValue("mavenBuildPath"),
-            TestGenieDefaultsBundle.defaultValue("gradle") to TestGenieDefaultsBundle.defaultValue("gradleBuildPath"))
+            TestGenieDefaultsBundle.defaultValue("gradle") to TestGenieDefaultsBundle.defaultValue("gradleBuildPath")
+        )
         val buildSystemToBuildCommand = mapOf(
             TestGenieDefaultsBundle.defaultValue("maven") to TestGenieDefaultsBundle.defaultValue("mavenBuildCommand"),
-            TestGenieDefaultsBundle.defaultValue("gradle") to TestGenieDefaultsBundle.defaultValue("gradleBuildCommand"))
-        val buildSystem: String? = ExternalSystemModulePropertyManager.getInstance(project.modules[0]).getExternalSystemId()
+            TestGenieDefaultsBundle.defaultValue("gradle") to TestGenieDefaultsBundle.defaultValue("gradleBuildCommand")
+        )
+        val buildSystem: String? =
+            ExternalSystemModulePropertyManager.getInstance(project.modules[0]).getExternalSystemId()
         buildSystem?.let {
             settingsProjectState.buildPath = buildSystemToBuildPath[buildSystem]!!
             settingsProjectState.buildCommand = buildSystemToBuildCommand[buildSystem]!!
