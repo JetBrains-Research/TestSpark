@@ -3,10 +3,8 @@ package nl.tudelft.ewi.se.ciselab.testgenie.services
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
-import com.intellij.openapi.externalSystem.ExternalSystemModulePropertyManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.modules
-import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
+import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsBuildSystemApplying
 import nl.tudelft.ewi.se.ciselab.testgenie.settings.SettingsProjectState
 import java.io.File
 
@@ -18,31 +16,11 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
 
     private var settingsProjectState: SettingsProjectState = SettingsProjectState()
     private var project: Project = _project
+    private var settingsBuildSystemApplying: SettingsBuildSystemApplying = SettingsBuildSystemApplying(project)
 
     init {
         settingsProjectState.telemetryPath.plus(File.separator).plus(project.name)
-        updateBuildPathAndBuildCommand()
-    }
-
-    /**
-     * TODO add a comment
-     * TODO create class "buildManager"
-     */
-    private fun updateBuildPathAndBuildCommand() {
-        val buildSystemToBuildPath = mapOf(
-            TestGenieDefaultsBundle.defaultValue("maven") to TestGenieDefaultsBundle.defaultValue("mavenBuildPath"),
-            TestGenieDefaultsBundle.defaultValue("gradle") to TestGenieDefaultsBundle.defaultValue("gradleBuildPath")
-        )
-        val buildSystemToBuildCommand = mapOf(
-            TestGenieDefaultsBundle.defaultValue("maven") to TestGenieDefaultsBundle.defaultValue("mavenBuildCommand"),
-            TestGenieDefaultsBundle.defaultValue("gradle") to TestGenieDefaultsBundle.defaultValue("gradleBuildCommand")
-        )
-        val buildSystem: String? =
-            ExternalSystemModulePropertyManager.getInstance(project.modules[0]).getExternalSystemId()
-        buildSystem?.let {
-            settingsProjectState.buildPath = buildSystemToBuildPath[buildSystem]!!
-            settingsProjectState.buildCommand = buildSystemToBuildCommand[buildSystem]!!
-        }
+        settingsBuildSystemApplying.updateBuildPathAndBuildCommand(settingsProjectState)
     }
 
     /**
