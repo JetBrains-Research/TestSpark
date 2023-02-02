@@ -26,6 +26,7 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
 
     /**
      * TODO add a comment
+     * TODO create class "buildManager"
      */
     private fun updateBuildPathAndBuildCommand() {
         val buildSystemToBuildPath = mapOf(
