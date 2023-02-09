@@ -16,6 +16,10 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
 
     private var settingsProjectState: SettingsProjectState = SettingsProjectState()
     private var project: Project = _project
+
+    /**
+     * Structure for fixing the default buildPath and buildCommand depending on project's build system.
+     */
     private var settingsBuildSystemApplying: SettingsBuildSystemApplying = SettingsBuildSystemApplying(project)
 
     init {

@@ -7,13 +7,13 @@ import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieDefaultsBundle
 
 class SettingsBuildSystemApplying(_project: Project) {
     /**
-     * TODO add a comment
+     * To recognize the build system, the ExternalSystemModulePropertyManager class is used.
      */
     private var buildSystem: String? =
         ExternalSystemModulePropertyManager.getInstance(_project.modules[0]).getExternalSystemId()
 
     /**
-     * TODO add a comment
+     * List of build systems.
      */
     private val buildSystemToBuildPath = mapOf(
         TestGenieDefaultsBundle.defaultValue("maven") to TestGenieDefaultsBundle.defaultValue("mavenBuildPath"),
@@ -25,7 +25,7 @@ class SettingsBuildSystemApplying(_project: Project) {
     )
 
     /**
-     * TODO add a comment
+     * Called from SettingsProjectService.
      */
     fun updateBuildPathAndBuildCommand(settingsProjectState: SettingsProjectState) {
         buildSystem?.let {
