@@ -20,7 +20,7 @@ class SettingsProjectService(_project: Project) : PersistentStateComponent<Setti
     private var project: Project = _project
 
     init {
-        settingsProjectState.telemetryPath.plus(File.separator).plus(project.name)
+        settingsProjectState.telemetryPath += File.separator.plus(project.name)
         updateBuildPathAndBuildCommand()
     }
 
