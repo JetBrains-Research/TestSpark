@@ -75,7 +75,7 @@ class SettingsPluginConfigurable(_project: Project) : Configurable {
         settingsState.colorBlue = settingsComponent!!.colorBlue
         settingsState.buildCommand = settingsComponent!!.buildCommand
         settingsState.telemetryEnabled = settingsComponent!!.telemetryEnabled
-        if (checkEmptyTelemetryPath(settingsState)) return
+        resetTelemetryPathIfEmpty(settingsState)
         settingsState.telemetryPath = settingsComponent!!.telemetryPath
     }
 
@@ -83,13 +83,10 @@ class SettingsPluginConfigurable(_project: Project) : Configurable {
      * Check if the telemetry path is empty when telemetry is enabled.
      * If empty, then sets to previous state. Else, keep the new one.
      */
-    private fun checkEmptyTelemetryPath(settingsState: SettingsProjectState): Boolean {
+    private fun resetTelemetryPathIfEmpty(settingsState: SettingsProjectState) {
         if (settingsComponent!!.telemetryEnabled && settingsComponent!!.telemetryPath.isBlank()) {
-            settingsState.telemetryPath = settingsState.telemetryPath
             settingsComponent!!.telemetryPath = settingsState.telemetryPath
-            return true
         }
-        return false
     }
 
     /**
