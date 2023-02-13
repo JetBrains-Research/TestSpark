@@ -190,7 +190,7 @@ class Workspace(private val project: Project) : Disposable {
     fun editorForFileUrl(fileUrl: String): Editor? {
         val documentManager = FileDocumentManager.getInstance()
         // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
-        FileEditorManager.getInstance(project).allEditors.map { it as TextEditor }.map { it.editor }.map {
+        FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
             val currentFile = documentManager.getFile(it.document)
             if (currentFile != null) {
                 if (currentFile.presentableUrl == fileUrl) {
