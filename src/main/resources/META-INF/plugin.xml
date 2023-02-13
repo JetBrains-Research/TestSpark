@@ -2,7 +2,7 @@
 <idea-plugin>
     <id>org.jetbrains.research.testgenie</id>
     <name>TestGenie</name>
-    <vendor>JetBrains</vendor>
+    <vendor>ictl</vendor>
 
 
     <description><![CDATA[
