@@ -51,8 +51,8 @@ class SettingsPluginComponent(_project: Project) {
 
     // Telemetry
     private val telemetryDescription = JLabel(
-        "<html><body>With your permission, TestGenie will send usage statistics to CISELab at " +
-            "the Delft University of Technology in order to help with EvoSuite research. This includes " +
+        "<html><body>With your permission, TestGenie will send usage statistics to Intelligent Collaboration tool lab at " +
+            "the Jetbrains Research in order to help with EvoSuite research. This includes " +
             "information about your usage patterns, such as the tests you generate and the way you " +
             "modify them manually before applying them to a test suite."
     )
