@@ -252,6 +252,7 @@ class Pipeline(
         // construct command
         val cmd = ArrayList<String>()
         cmd.add(settingsProjectState.javaPath)
+        cmd.add("-Djdk.attach.allowAttachSelf=true")
         cmd.add("-jar")
         cmd.add(evoSuitePath)
         cmd.addAll(command)
