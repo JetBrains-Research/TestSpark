@@ -23,6 +23,7 @@ import com.intellij.refactoring.suggested.startOffset
 import nl.tudelft.ewi.se.ciselab.testgenie.evosuite.Pipeline
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
 import nl.tudelft.ewi.se.ciselab.testgenie.services.StaticInvalidationService
+import java.io.File
 
 /**
  * This file contains some useful methods related to GenerateTests actions.
@@ -48,7 +49,17 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
 
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
     val settingsProjectState = project.service<SettingsProjectService>().state
-    val projectClassPath = "$projectPath/" + settingsProjectState.buildPath
+
+    var buildPath = settingsProjectState.buildPath
+
+    if (buildPath.isEmpty()) {
+        // User did not set own path
+        File(projectPath).walk().filter { it.name.endsWith("${psiClass.qualifiedName!!.split('.').last()}.class") }.forEach {
+            buildPath = it.parent.replace("$projectPath/", "")
+        }
+        settingsProjectState.buildPath = buildPath
+    }
+    val projectClassPath = "$projectPath/$buildPath"
 
     val log = Logger.getInstance("GenerateTestsUtils")
 
