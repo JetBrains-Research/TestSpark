@@ -10,8 +10,10 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.task.ProjectTaskManager
 import nl.tudelft.ewi.se.ciselab.testgenie.TestGenieBundle
 import nl.tudelft.ewi.se.ciselab.testgenie.services.SettingsProjectService
+import org.jetbrains.concurrency.Promise
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -36,43 +38,50 @@ class ProjectBuilder(private val project: Project) {
         try {
             indicator.isIndeterminate = true
             indicator.text = TestGenieBundle.message("evosuiteBuildMessage")
-            // Save all open editors
-            val cmd = ArrayList<String>()
-
-            val operatingSystem = System.getProperty("os.name")
-
-            if (operatingSystem.toLowerCase().contains("windows")) {
-                cmd.add("cmd.exe")
-                cmd.add("/c")
+            if (settingsState.buildCommand.isEmpty()) {
+                // User did not put own command line
+                ProjectTaskManager.getInstance(project).buildAllModules() // TODO add buildError message
             } else {
-                cmd.add("sh")
-                cmd.add("-c")
+                // User put own command line
+
+                // Save all open editors
+                val cmd = ArrayList<String>()
+
+                val operatingSystem = System.getProperty("os.name")
+
+                if (operatingSystem.toLowerCase().contains("windows")) {
+                    cmd.add("cmd.exe")
+                    cmd.add("/c")
+                } else {
+                    cmd.add("sh")
+                    cmd.add("-c")
+                }
+
+                cmd.add(settingsState.buildCommand)
+
+                val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
+                log.info("Starting build process with arguments: $cmdString")
+
+                val buildProcess = GeneralCommandLine(cmd)
+                buildProcess.setWorkDirectory(projectPath)
+                val handler = OSProcessHandler(buildProcess)
+                handler.startNotify()
+
+                if (!handler.waitFor(builderTimeout)) {
+                    buildError("Build process exceeded timeout - ${builderTimeout}ms")
+                }
+
+                if (indicator.isCanceled) {
+                    return
+                }
+
+                val exitCode = handler.exitCode
+
+                if (exitCode != 0) {
+                    buildError("exit code $exitCode", "Build failed")
+                }
+                handle.countDown()
             }
-
-            cmd.add(settingsState.buildCommand)
-
-            val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
-            log.info("Starting build process with arguments: $cmdString")
-
-            val buildProcess = GeneralCommandLine(cmd)
-            buildProcess.setWorkDirectory(projectPath)
-            val handler = OSProcessHandler(buildProcess)
-            handler.startNotify()
-
-            if (!handler.waitFor(builderTimeout)) {
-                buildError("Build process exceeded timeout - ${builderTimeout}ms")
-            }
-
-            if (indicator.isCanceled) {
-                return
-            }
-
-            val exitCode = handler.exitCode
-
-            if (exitCode != 0) {
-                buildError("exit code $exitCode", "Build failed")
-            }
-            handle.countDown()
         } catch (e: Exception) {
             (TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
             e.printStackTrace()

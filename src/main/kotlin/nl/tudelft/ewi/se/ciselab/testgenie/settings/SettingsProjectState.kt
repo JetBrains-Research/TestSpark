@@ -24,7 +24,7 @@ data class SettingsProjectState(
         val colorGreen: Int = TestGenieDefaultsBundle.defaultValue("colorGreen").toInt()
         val colorBlue: Int = TestGenieDefaultsBundle.defaultValue("colorBlue").toInt()
         val buildPath: String = TestGenieDefaultsBundle.defaultValue("buildPath")
-        val buildCommand: String = TestGenieDefaultsBundle.defaultValue("buildCommand")
+        const val buildCommand: String = ""
         val telemetryEnabled: Boolean = TestGenieDefaultsBundle.defaultValue("telemetryEnabled").toBoolean()
         val telemetryPath: String = System.getProperty("user.home")
     }
