@@ -3,5 +3,7 @@
 # TestGenie Changelog
 
 ## [Unreleased]
-### Added
-- Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+
+## [0.0.1]
+Includes the first version of unit test generation for a target class, method, or line. Currently only uses EvoSuite for test generation.
+
