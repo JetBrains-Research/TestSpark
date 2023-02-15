@@ -254,9 +254,8 @@ class Pipeline(
         if (settingsProjectState.buildPath.isEmpty()) {
             // User did not set own path
             File(projectPath).walk().filter { it.name.endsWith("${classFQN.split('.').last()}.class") }.forEach {
-                buildPath = it.parent
+                buildPath = it.path.replace("/${classFQN.replace(".", "/")}.class", "")
             }
-            settingsProjectState.buildPath = buildPath.replace("$projectPath/", "")
         }
         command[command.indexOf(projectClassPath)] = buildPath
         key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, buildPath)
