@@ -13,7 +13,6 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import com.intellij.task.ProjectTaskManager
-import org.jetbrains.concurrency.Promise
 import java.util.concurrent.CountDownLatch
 
 /**
