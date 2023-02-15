@@ -249,6 +249,19 @@ class Pipeline(
         if (!settingsApplicationState?.seed.isNullOrBlank()) command.add("-seed=${settingsApplicationState?.seed}")
         if (!settingsApplicationState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsApplicationState?.configurationId}")
 
+        // update build path
+        var buildPath = projectClassPath
+        if (settingsProjectState.buildPath.isEmpty()) {
+            // User did not set own path
+            File(projectPath).walk().filter { it.name.endsWith("${classFQN.split('.').last()}.class") }.forEach {
+                buildPath = it.parent
+            }
+            settingsProjectState.buildPath = buildPath.replace("$projectPath/", "")
+        }
+        command[command.indexOf(projectClassPath)] = buildPath
+        key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, buildPath)
+        log.info("Generating tests for project $projectPath with classpath $buildPath inside the project")
+
         // construct command
         val cmd = ArrayList<String>()
         cmd.add(settingsProjectState.javaPath)
