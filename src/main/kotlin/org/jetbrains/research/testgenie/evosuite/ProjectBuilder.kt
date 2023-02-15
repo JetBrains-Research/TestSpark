@@ -10,9 +10,10 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.util.Ref
+import com.intellij.task.ProjectTaskManager
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
-import com.intellij.task.ProjectTaskManager
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -39,7 +40,16 @@ class ProjectBuilder(private val project: Project) {
             indicator.text = TestGenieBundle.message("evosuiteBuildMessage")
             if (settingsState.buildCommand.isEmpty()) {
                 // User did not put own command line
-                ProjectTaskManager.getInstance(project).buildAllModules() // TODO add buildError message
+                val isBuildFinished: Ref<Boolean> = Ref.create(false)
+                val promise = ProjectTaskManager.getInstance(project).buildAllModules()
+                promise.onSuccess {
+                    isBuildFinished.set(true)
+                }
+                promise.onError {
+                    isBuildFinished.set(true)
+                    buildError("Build process error")
+                }
+                while (!isBuildFinished.get()) {}
             } else {
                 // User put own command line
 
