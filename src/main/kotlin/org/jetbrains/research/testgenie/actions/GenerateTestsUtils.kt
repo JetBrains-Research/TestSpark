@@ -23,7 +23,6 @@ import com.intellij.refactoring.suggested.startOffset
 import org.jetbrains.research.testgenie.evosuite.Pipeline
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
-import java.io.File
 
 /**
  * This file contains some useful methods related to GenerateTests actions.
