@@ -15,6 +15,7 @@ import com.intellij.task.ProjectTaskManager
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
+import com.intellij.util.concurrency.Semaphore
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
@@ -40,16 +41,17 @@ class ProjectBuilder(private val project: Project) {
             indicator.text = TestGenieBundle.message("evosuiteBuildMessage")
             if (settingsState.buildCommand.isEmpty()) {
                 // User did not put own command line
-                val isBuildFinished: Ref<Boolean> = Ref.create(false)
                 val promise = ProjectTaskManager.getInstance(project).buildAllModules()
+                val finished = Semaphore()
+                finished.down()
                 promise.onSuccess {
-                    isBuildFinished.set(true)
+                    finished.up()
                 }
                 promise.onError {
-                    isBuildFinished.set(true)
+                    finished.up()
                     buildError("Build process error")
                 }
-                while (!isBuildFinished.get()) {}
+                finished.waitFor()
             } else {
                 // User put own command line
 
