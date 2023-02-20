@@ -267,7 +267,9 @@ class Pipeline(
                 while (true) {
                     module = ModuleUtil.findModuleForPsiElement(
                         PsiDirectoryFactory.getInstance(project).createDirectory(
-                            LocalFileSystem.getInstance().findFileByIoFile(currentPath.toFile())!!))
+                            LocalFileSystem.getInstance().findFileByIoFile(currentPath.toFile())!!
+                        )
+                    )
                     if (module != null) break
                     currentPath = currentPath.parent
                 }
