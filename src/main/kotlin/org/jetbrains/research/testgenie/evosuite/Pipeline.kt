@@ -9,12 +9,16 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.ModuleUtil
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
+import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.psi.impl.file.PsiDirectoryFactory
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.Util
@@ -30,6 +34,7 @@ import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
 import java.io.File
 import java.nio.charset.Charset
+import java.nio.file.Paths
 import java.util.UUID
 import java.util.regex.Pattern
 
@@ -48,7 +53,8 @@ class Pipeline(
     private val projectClassPath: String,
     private val classFQN: String,
     private val fileUrl: String,
-    private val modTs: Long
+    private val modTs: Long,
+    private val fileModule: Module
 ) {
     private val log = Logger.getInstance(this::class.java)
 
@@ -253,8 +259,21 @@ class Pipeline(
         var buildPath = projectClassPath
         if (settingsProjectState.buildPath.isEmpty()) {
             // User did not set own path
+            // looking for ".class" files
             File(projectPath).walk().filter { it.name.endsWith("${classFQN.split('.').last()}.class") }.forEach {
-                buildPath = it.path.replace("/${classFQN.replace(".", "/")}.class", "")
+                var module: Module?
+                var currentPath = Paths.get(it.path)
+                // get the module of the current ".class" file
+                while (true) {
+                    module = ModuleUtil.findModuleForPsiElement(
+                        PsiDirectoryFactory.getInstance(project).createDirectory(
+                            LocalFileSystem.getInstance().findFileByIoFile(currentPath.toFile())!!))
+                    if (module != null) break
+                    currentPath = currentPath.parent
+                }
+                if (module!! == fileModule) {
+                    buildPath = it.path.replace("/${classFQN.replace(".", "/")}.class", "")
+                }
             }
         }
         command[command.indexOf(projectClassPath)] = buildPath

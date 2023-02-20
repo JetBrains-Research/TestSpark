@@ -6,23 +6,24 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiAnonymousClass
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiCodeBlock
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.PsiStatement
+import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.psi.*
+import com.intellij.psi.impl.file.PsiDirectoryFactory
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import com.intellij.util.containers.stream
 import org.jetbrains.research.testgenie.evosuite.Pipeline
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
+import java.io.File
+import kotlin.streams.toList
 
 /**
  * This file contains some useful methods related to GenerateTests actions.
@@ -44,6 +45,9 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
     val modificationStamp = vFile.modificationStamp
 
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
+    val fileModule = ModuleUtil.findModuleForFile(psiFile)!!
+//    println(ModuleUtil.findModuleForPsiElement(PsiDirectoryFactory.getInstance(project).createDirectory (LocalFileSystem.getInstance().findFileByIoFile(
+//        File("/Users/arksap/Desktop/JB/IdeaProjects/untitled1/module2/submodule1"))!!)))
     val classFQN = psiClass.qualifiedName ?: return null
 
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
@@ -59,7 +63,7 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
     val cacheEndLine: Int = doc.getLineNumber(psiClass.endOffset)
     log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
 
-    return Pipeline(project, projectPath, buildPath, classFQN, fileUrl, modificationStamp).withCacheLines(cacheStartLine, cacheEndLine)
+    return Pipeline(project, projectPath, buildPath, classFQN, fileUrl, modificationStamp, fileModule).withCacheLines(cacheStartLine, cacheEndLine)
 }
 
 /**
