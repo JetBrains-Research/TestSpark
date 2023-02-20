@@ -10,11 +10,11 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.task.ProjectTaskManager
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
 import com.intellij.util.concurrency.Semaphore
+import com.intellij.task.ProjectTaskManager
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
@@ -53,13 +53,12 @@ class ProjectBuilder(private val project: Project) {
                 finished.waitFor()
             } else {
                 // User put own command line
-
                 // Save all open editors
                 val cmd = ArrayList<String>()
 
                 val operatingSystem = System.getProperty("os.name")
 
-                if (operatingSystem.toLowerCase().contains("windows")) {
+                if (operatingSystem.lowercase().contains("windows")) {
                     cmd.add("cmd.exe")
                     cmd.add("/c")
                 } else {
