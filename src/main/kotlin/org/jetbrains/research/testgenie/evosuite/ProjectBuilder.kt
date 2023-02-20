@@ -15,7 +15,6 @@ import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
 import com.intellij.util.concurrency.Semaphore
-import com.intellij.openapi.module.Module
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
