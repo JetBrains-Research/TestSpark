@@ -6,7 +6,6 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
-import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
@@ -45,7 +44,6 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
     val modificationStamp = vFile.modificationStamp
 
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
-    val fileModule = ModuleUtil.findModuleForFile(psiFile)!!
     val classFQN = psiClass.qualifiedName ?: return null
 
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
@@ -61,7 +59,7 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
     val cacheEndLine: Int = doc.getLineNumber(psiClass.endOffset)
     log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
 
-    return Pipeline(project, projectPath, buildPath, classFQN, fileUrl, modificationStamp, fileModule).withCacheLines(
+    return Pipeline(project, projectPath, buildPath, classFQN, fileUrl, modificationStamp).withCacheLines(
         cacheStartLine,
         cacheEndLine
     )
