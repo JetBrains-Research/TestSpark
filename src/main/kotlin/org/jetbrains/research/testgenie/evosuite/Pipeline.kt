@@ -9,10 +9,12 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.util.concurrency.AppExecutorUtil
@@ -253,10 +255,10 @@ class Pipeline(
         var buildPath = projectClassPath
         if (settingsProjectState.buildPath.isEmpty()) {
             // User did not set own path
-            // looking for ".class" files
             buildPath = ""
-            File(projectPath).walk().filter { it.path.endsWith("${classFQN.replace(".", "/")}.class") }.forEach {
-                buildPath += it.path.replace("/${classFQN.replace(".", "/")}.class", "").plus(":")
+            for (module in ModuleManager.getInstance(project).modules) {
+                val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
+                compilerOutputPath ?.let { buildPath += compilerOutputPath.path.plus(":") }
             }
         }
         command[command.indexOf(projectClassPath)] = buildPath
@@ -273,7 +275,6 @@ class Pipeline(
 
         val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
         log.info("Starting EvoSuite with arguments: $cmdString")
-        println(cmdString)
 
         indicator.isIndeterminate = false
         indicator.text = TestGenieBundle.message("evosuiteSearchMessage")
