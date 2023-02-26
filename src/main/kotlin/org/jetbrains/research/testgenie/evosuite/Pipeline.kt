@@ -185,9 +185,8 @@ class Pipeline(
                             return
                         }
 
-                        projectBuilder.runBuild(indicator)
+                        if (projectBuilder.runBuild(indicator)) runEvoSuite(indicator)
 
-                        runEvoSuite(indicator)
                         indicator.stop()
                     } catch (e: Exception) {
                         evosuiteError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
@@ -258,7 +257,7 @@ class Pipeline(
             buildPath = ""
             for (module in ModuleManager.getInstance(project).modules) {
                 val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
-                compilerOutputPath ?.let { buildPath += compilerOutputPath.path.plus(":") }
+                compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
             }
         }
         command[command.indexOf(projectClassPath)] = buildPath
