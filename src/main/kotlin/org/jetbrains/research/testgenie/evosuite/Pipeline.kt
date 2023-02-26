@@ -258,7 +258,7 @@ class Pipeline(
             buildPath = ""
             for (module in ModuleManager.getInstance(project).modules) {
                 val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
-                compilerOutputPath ?.let { buildPath += compilerOutputPath.path.plus(":") }
+                compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
             }
         }
         command[command.indexOf(projectClassPath)] = buildPath

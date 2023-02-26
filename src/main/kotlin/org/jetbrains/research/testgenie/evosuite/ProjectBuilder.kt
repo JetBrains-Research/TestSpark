@@ -47,8 +47,8 @@ class ProjectBuilder(private val project: Project) {
                     finished.up()
                 }
                 promise.onError {
-                    finished.up()
                     buildError("Build process error")
+                    finished.up()
                 }
                 finished.waitFor()
             } else {
