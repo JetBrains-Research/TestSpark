@@ -265,6 +265,7 @@ class Pipeline(
         val evoSuiteProcess = GeneralCommandLine(cmd)
         evoSuiteProcess.charset = Charset.forName("UTF-8")
         evoSuiteProcess.setWorkDirectory(projectPath)
+        var isUnknownClass = false
         val handler = OSProcessHandler(evoSuiteProcess)
 
         // attach process listener for output
@@ -293,6 +294,10 @@ class Pipeline(
                 val coverage =
                     if (coverageMatcher.find()) coverageMatcher.group(1)?.toDouble()?.div(100)
                     else null
+
+                // evosuite error message with unknown class consists this message
+                if (text.contains("Unknown class")) isUnknownClass = true
+
                 if (progress != null && coverage != null) {
                     indicator.fraction = if (progress >= coverage) progress else coverage
                 } else if (progress != null) {
@@ -316,9 +321,13 @@ class Pipeline(
 
         if (!indicator.isCanceled) {
             if (handler.exitCode == 0) {
-                // if process wasn't cancelled, start result watcher
-                AppExecutorUtil.getAppScheduledExecutorService()
-                    .execute(ResultWatcher(project, testResultName, fileUrl))
+                if (isUnknownClass) {
+                    evosuiteError("EvoSuite process error: unknown class, be sure its compilation path is correct")
+                } else {
+                    // if process wasn't cancelled and class was found, start result watcher
+                    AppExecutorUtil.getAppScheduledExecutorService()
+                        .execute(ResultWatcher(project, testResultName, fileUrl))
+                }
             } else {
                 evosuiteError("EvoSuite process exited with non-zero exit code - ${handler.exitCode}")
             }
