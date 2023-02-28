@@ -185,9 +185,8 @@ class Pipeline(
                             return
                         }
 
-                        projectBuilder.runBuild(indicator)
+                        if (projectBuilder.runBuild(indicator)) runEvoSuite(indicator)
 
-                        runEvoSuite(indicator)
                         indicator.stop()
                     } catch (e: Exception) {
                         evosuiteError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
