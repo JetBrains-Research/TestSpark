@@ -31,9 +31,10 @@ class ProjectBuilder(private val project: Project) {
         ApplicationManager.getApplication().saveAll()
     }
 
-    fun runBuild(indicator: ProgressIndicator) {
+    fun runBuild(indicator: ProgressIndicator): Boolean {
         val handle = CountDownLatch(1)
         log.info("Starting build!")
+        var isSuccessful = true
 
         try {
             indicator.isIndeterminate = true
@@ -44,11 +45,16 @@ class ProjectBuilder(private val project: Project) {
                 val finished = Semaphore()
                 finished.down()
                 promise.onSuccess {
+                    if (it.isAborted || it.hasErrors()) {
+                        buildError("Build process error")
+                        isSuccessful = false
+                    }
                     finished.up()
                 }
                 promise.onError {
-                    finished.up()
                     buildError("Build process error")
+                    isSuccessful = false
+                    finished.up()
                 }
                 finished.waitFor()
             } else {
@@ -78,24 +84,28 @@ class ProjectBuilder(private val project: Project) {
 
                 if (!handler.waitFor(builderTimeout)) {
                     buildError("Build process exceeded timeout - ${builderTimeout}ms")
+                    isSuccessful = false
                 }
 
                 if (indicator.isCanceled) {
-                    return
+                    return false
                 }
 
                 val exitCode = handler.exitCode
 
                 if (exitCode != 0) {
                     buildError("exit code $exitCode", "Build failed")
+                    isSuccessful = false
                 }
                 handle.countDown()
             }
         } catch (e: Exception) {
             (TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
             e.printStackTrace()
+            isSuccessful = false
         }
         log.info("Build finished!")
+        return isSuccessful
     }
 
     private fun buildError(msg: String, title: String = TestGenieBundle.message("evosuiteErrorTitle")) {
