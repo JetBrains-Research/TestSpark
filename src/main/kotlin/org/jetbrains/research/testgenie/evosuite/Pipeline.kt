@@ -9,10 +9,12 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.util.concurrency.AppExecutorUtil
@@ -183,9 +185,8 @@ class Pipeline(
                             return
                         }
 
-                        projectBuilder.runBuild(indicator)
+                        if (projectBuilder.runBuild(indicator)) runEvoSuite(indicator)
 
-                        runEvoSuite(indicator)
                         indicator.stop()
                     } catch (e: Exception) {
                         evosuiteError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
@@ -248,6 +249,20 @@ class Pipeline(
     private fun runEvoSuite(indicator: ProgressIndicator) {
         if (!settingsApplicationState?.seed.isNullOrBlank()) command.add("-seed=${settingsApplicationState?.seed}")
         if (!settingsApplicationState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsApplicationState?.configurationId}")
+
+        // update build path
+        var buildPath = projectClassPath
+        if (settingsProjectState.buildPath.isEmpty()) {
+            // User did not set own path
+            buildPath = ""
+            for (module in ModuleManager.getInstance(project).modules) {
+                val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
+                compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
+            }
+        }
+        command[command.indexOf(projectClassPath)] = buildPath
+        key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, buildPath)
+        log.info("Generating tests for project $projectPath with classpath $buildPath inside the project")
 
         // construct command
         val cmd = ArrayList<String>()
