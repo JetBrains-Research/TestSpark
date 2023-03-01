@@ -9,13 +9,13 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiCodeBlock
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiAnonymousClass
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiCodeBlock
 import com.intellij.psi.PsiStatement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
@@ -47,12 +47,10 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
     val classFQN = psiClass.qualifiedName ?: return null
 
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    val settingsProjectState = project.service<SettingsProjectService>().state
-    val projectClassPath = "$projectPath/" + settingsProjectState.buildPath
 
     val log = Logger.getInstance("GenerateTestsUtils")
-
-    log.info("Generating tests for project $projectPath with classpath $projectClassPath")
+    val settingsProjectState = project.service<SettingsProjectService>().state
+    val buildPath = "$projectPath/${settingsProjectState.buildPath}"
 
     log.info("Selected class is $classFQN")
 
@@ -61,8 +59,10 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
     val cacheEndLine: Int = doc.getLineNumber(psiClass.endOffset)
     log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
 
-    return Pipeline(project, projectPath, projectClassPath, classFQN, fileUrl, modificationStamp)
-        .withCacheLines(cacheStartLine, cacheEndLine)
+    return Pipeline(project, projectPath, buildPath, classFQN, fileUrl, modificationStamp).withCacheLines(
+        cacheStartLine,
+        cacheEndLine
+    )
 }
 
 /**
