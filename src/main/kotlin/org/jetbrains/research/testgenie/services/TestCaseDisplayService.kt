@@ -3,8 +3,7 @@ package org.jetbrains.research.testgenie.services
 import com.intellij.coverage.CoverageDataManager
 import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.ide.highlighter.JavaFileType
-import com.intellij.ide.highlighter.ModuleFileType
-import com.intellij.ide.util.*
+import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
@@ -19,11 +18,12 @@ import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiManager
 import com.intellij.refactoring.suggested.newRange
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
@@ -31,34 +31,25 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.ui.JBUI
+import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.evosuite.Pipeline
 import org.jetbrains.research.testgenie.evosuite.validation.Validator
-import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
-import java.awt.BorderLayout
-import java.awt.Color
-import java.awt.Component
-import java.awt.Dimension
-import java.awt.FlowLayout
-import javax.swing.BorderFactory
-import javax.swing.Box
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JPanel
+import java.awt.*
+import javax.swing.*
 import javax.swing.border.Border
+import javax.swing.filechooser.FileNameExtensionFilter
+
 
 class TestCaseDisplayService(private val project: Project) {
 
     private var cacheLazyPipeline: Pipeline? = null
 
     private val mainPanel: JPanel = JPanel()
-    private val existingFileButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("existingFileButton"))
-    private val newFileButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("newFileButton"))
+    private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
     private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
     private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
@@ -66,8 +57,6 @@ class TestCaseDisplayService(private val project: Project) {
     val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
     private var testsSelected: Int = 0
-    private val applyToTestSuiteText: String = "${TestGenieLabelsBundle.defaultValue("applyToTestSuite")}: "
-    private val applyToTestSuiteLabel: JLabel = JLabel(applyToTestSuiteText)
 
     private val testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
     private val testsSelectedLabel: JLabel = JLabel(testsSelectedText)
@@ -109,18 +98,11 @@ class TestCaseDisplayService(private val project: Project) {
         topButtons.add(validateButton)
         topButtons.add(toggleJacocoButton)
 
-        val bottomButtons = JPanel()
-        bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
-        bottomButtons.add(applyToTestSuiteLabel)
-        bottomButtons.add(existingFileButton)
-        bottomButtons.add(newFileButton)
-
         mainPanel.add(topButtons, BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
-        mainPanel.add(bottomButtons, BorderLayout.SOUTH)
+        mainPanel.add(applyButton, BorderLayout.SOUTH)
 
-        existingFileButton.addActionListener { applyTests(true) }
-        newFileButton.addActionListener { applyTests(false) }
+        applyButton.addActionListener { applyTests() }
         validateButton.addActionListener { validateTests() }
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
@@ -350,46 +332,11 @@ class TestCaseDisplayService(private val project: Project) {
         }
     }
 
-    private fun getSelectedClass(): PsiClass? {
-        // Show chooser dialog to select test file
-        val chooser = TreeClassChooserFactory.getInstance(project)
-            .createProjectScopeChooser(
-                "Insert Test Cases into Class"
-            )
-
-        // Warning: The following code is extremely cursed.
-        // It is a workaround for an oversight in the IntelliJ TreeJavaClassChooserDialog.
-        // This is necessary in order to set isShowLibraryContents to false in
-        // the AbstractTreeClassChooserDialog (parent of the TreeJavaClassChooserDialog).
-        // If this is not done, the user can pick a non-project class (e.g. a class from a library).
-        // See https://github.com/ciselab/TestGenie/issues/102
-        // TODO: In the future, this should be replaced with a custom dialog (which can also create new classes).
-        try {
-            val showLibraryContentsField = chooser.javaClass.superclass.getDeclaredField("myIsShowLibraryContents")
-            showLibraryContentsField.isAccessible = true
-            showLibraryContentsField.set(chooser, false)
-        } catch (_: Exception) {
-            // Could not set field
-            // Ignoring the exception is acceptable as this part is not critical
-        }
-        chooser.showDialog()
-
-        // Get the selected class or return if no class was selected
-        return chooser.selected
-    }
-
-    private fun getNewClass(): PsiClass {
-        val chooser = PackageChooserDialog("TODO", project)
-        chooser.show()
-        println(chooser.selectedPackage)
-        TODO()
-    }
-
     /**
      * Show a dialog where the user can select what test class the tests should be applied to,
      * and apply the selected tests to the test class.
      */
-    private fun applyTests(isApplyingToAnExistingFile: Boolean) {
+    private fun applyTests() {
         // Filter the selected test cases
         val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
@@ -401,13 +348,20 @@ class TestCaseDisplayService(private val project: Project) {
             .map { getEditor(it)!! }
             .map { it.document.text }
 
-        if (isApplyingToAnExistingFile) {
-            // Insert test case components into selected class
-            val selectedClass = getSelectedClass() ?: return
-            appendTestsToClass(testCaseComponents, selectedClass)
-        } else {
-            // Insert test case components into a new class
-            appendTestsToClass(testCaseComponents, getNewClass())
+        val fileChooser = JFileChooser(project.basePath)
+        fileChooser.dialogTitle = "Choose a java file or a directory to create a new file:"
+        fileChooser.fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
+        fileChooser.isAcceptAllFileFilterUsed = false
+        fileChooser.fileFilter = FileNameExtensionFilter("Java files and directories", "java")
+
+        val returnValue = fileChooser.showOpenDialog(null)
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            if (fileChooser.selectedFile.isDirectory) {
+                println("You selected the directory: " + fileChooser.selectedFile)
+            } else {
+                println("You selected the file: " + fileChooser.selectedFile)
+                appendTestsToClass(testCaseComponents, (PsiManager.getInstance(project).findFile(LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!) as PsiJavaFile).classes[0])
+            }
         }
 
         // The scheduled tests will be submitted in the background
