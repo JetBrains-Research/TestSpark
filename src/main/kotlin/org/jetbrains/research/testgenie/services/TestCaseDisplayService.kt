@@ -3,7 +3,6 @@ package org.jetbrains.research.testgenie.services
 import com.intellij.coverage.CoverageDataManager
 import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.ide.highlighter.JavaFileType
-import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
@@ -31,15 +30,26 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.ui.JBUI
-import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.evosuite.Pipeline
 import org.jetbrains.research.testgenie.evosuite.validation.Validator
-import java.awt.*
-import javax.swing.*
+import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
+import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.Component
+import java.awt.Dimension
+import java.awt.FlowLayout
+import javax.swing.BorderFactory
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JFileChooser
 import javax.swing.border.Border
 import javax.swing.filechooser.FileNameExtensionFilter
 
@@ -358,8 +368,8 @@ class TestCaseDisplayService(private val project: Project) {
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             if (fileChooser.selectedFile.isDirectory) {
                 println("You selected the directory: " + fileChooser.selectedFile)
+                TODO()
             } else {
-                println("You selected the file: " + fileChooser.selectedFile)
                 appendTestsToClass(testCaseComponents, (PsiManager.getInstance(project).findFile(LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!) as PsiJavaFile).classes[0])
             }
         }
