@@ -3,7 +3,8 @@ package org.jetbrains.research.testgenie.services
 import com.intellij.coverage.CoverageDataManager
 import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.ide.highlighter.JavaFileType
-import com.intellij.ide.util.TreeClassChooserFactory
+import com.intellij.ide.highlighter.ModuleFileType
+import com.intellij.ide.util.*
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
@@ -20,7 +21,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiFileFactory
 import com.intellij.refactoring.suggested.newRange
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
@@ -54,7 +57,8 @@ class TestCaseDisplayService(private val project: Project) {
     private var cacheLazyPipeline: Pipeline? = null
 
     private val mainPanel: JPanel = JPanel()
-    private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
+    private val existingFileButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("existingFileButton"))
+    private val newFileButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("newFileButton"))
     private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
     private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
@@ -62,6 +66,9 @@ class TestCaseDisplayService(private val project: Project) {
     val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
     private var testsSelected: Int = 0
+    private val applyToTestSuiteText: String = "${TestGenieLabelsBundle.defaultValue("applyToTestSuite")}: "
+    private val applyToTestSuiteLabel: JLabel = JLabel(applyToTestSuiteText)
+
     private val testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
     private val testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
@@ -102,11 +109,18 @@ class TestCaseDisplayService(private val project: Project) {
         topButtons.add(validateButton)
         topButtons.add(toggleJacocoButton)
 
+        val bottomButtons = JPanel()
+        bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
+        bottomButtons.add(applyToTestSuiteLabel)
+        bottomButtons.add(existingFileButton)
+        bottomButtons.add(newFileButton)
+
         mainPanel.add(topButtons, BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
-        mainPanel.add(applyButton, BorderLayout.SOUTH)
+        mainPanel.add(bottomButtons, BorderLayout.SOUTH)
 
-        applyButton.addActionListener { applyTests() }
+        existingFileButton.addActionListener { applyTests(true) }
+        newFileButton.addActionListener { applyTests(false) }
         validateButton.addActionListener { validateTests() }
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
@@ -336,22 +350,7 @@ class TestCaseDisplayService(private val project: Project) {
         }
     }
 
-    /**
-     * Show a dialog where the user can select what test class the tests should be applied to,
-     * and apply the selected tests to the test class.
-     */
-    private fun applyTests() {
-        // Filter the selected test cases
-        val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
-        val selectedTestCases = selectedTestCasePanels.map { it.key }
-
-        println("Selected tests: ${selectedTestCases.size}")
-
-        // Get the test case components (source code of the tests)
-        val testCaseComponents = selectedTestCases
-            .map { getEditor(it)!! }
-            .map { it.document.text }
-
+    private fun getSelectedClass(): PsiClass? {
         // Show chooser dialog to select test file
         val chooser = TreeClassChooserFactory.getInstance(project)
             .createProjectScopeChooser(
@@ -376,10 +375,40 @@ class TestCaseDisplayService(private val project: Project) {
         chooser.showDialog()
 
         // Get the selected class or return if no class was selected
-        val selectedClass = chooser.selected ?: return
+        return chooser.selected
+    }
 
-        // Insert test case components into selected class
-        appendTestsToClass(testCaseComponents, selectedClass)
+    private fun getNewClass(): PsiClass {
+        val chooser = PackageChooserDialog("TODO", project)
+        chooser.show()
+        println(chooser.selectedPackage)
+        TODO()
+    }
+
+    /**
+     * Show a dialog where the user can select what test class the tests should be applied to,
+     * and apply the selected tests to the test class.
+     */
+    private fun applyTests(isApplyingToAnExistingFile: Boolean) {
+        // Filter the selected test cases
+        val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+        val selectedTestCases = selectedTestCasePanels.map { it.key }
+
+        println("Selected tests: ${selectedTestCases.size}")
+
+        // Get the test case components (source code of the tests)
+        val testCaseComponents = selectedTestCases
+            .map { getEditor(it)!! }
+            .map { it.document.text }
+
+        if (isApplyingToAnExistingFile) {
+            // Insert test case components into selected class
+            val selectedClass = getSelectedClass() ?: return
+            appendTestsToClass(testCaseComponents, selectedClass)
+        } else {
+            // Insert test case components into a new class
+            appendTestsToClass(testCaseComponents, getNewClass())
+        }
 
         // The scheduled tests will be submitted in the background
         // (they will be checked every 5 minutes and also when the project is closed)
@@ -667,7 +696,7 @@ class TestCaseDisplayService(private val project: Project) {
                 val newLine = event.newFragment.contains('\n')
                 val startLine = document.getLineNumber(
                     event.newRange.startOffset +
-                        (if (newLine) 1 else 0)
+                            (if (newLine) 1 else 0)
                 )
                 val endLine = document.getLineNumber(event.newRange.endOffset)
                 for (lineNumber in startLine..endLine) {
