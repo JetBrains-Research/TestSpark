@@ -53,7 +53,6 @@ import javax.swing.JFileChooser
 import javax.swing.border.Border
 import javax.swing.filechooser.FileNameExtensionFilter
 
-
 class TestCaseDisplayService(private val project: Project) {
 
     private var cacheLazyPipeline: Pipeline? = null
@@ -67,7 +66,6 @@ class TestCaseDisplayService(private val project: Project) {
     val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
     private var testsSelected: Int = 0
-
     private val testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
     private val testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
@@ -370,7 +368,12 @@ class TestCaseDisplayService(private val project: Project) {
                 println("You selected the directory: " + fileChooser.selectedFile)
                 TODO()
             } else {
-                appendTestsToClass(testCaseComponents, (PsiManager.getInstance(project).findFile(LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!) as PsiJavaFile).classes[0])
+                appendTestsToClass(
+                    testCaseComponents,
+                    (PsiManager.getInstance(project).findFile(
+                        LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
+                    ) as PsiJavaFile).classes[0]
+                )
             }
         }
 
