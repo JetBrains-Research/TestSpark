@@ -391,9 +391,11 @@ class TestCaseDisplayService(private val project: Project) {
                     appendTestsToClass(testCaseComponents, psiClass, psiFile)
                 }
             } else {
-                val psiJavaFile: PsiJavaFile = (PsiManager.getInstance(project).findFile(
-                    LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
-                ) as PsiJavaFile)
+                val psiJavaFile: PsiJavaFile = (
+                        PsiManager.getInstance(project).findFile(
+                            LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
+                        ) as PsiJavaFile
+                        )
                 WriteCommandAction.runWriteCommandAction(project) {
                     appendTestsToClass(testCaseComponents, psiJavaFile.classes[0], psiJavaFile)
                 }
@@ -686,7 +688,7 @@ class TestCaseDisplayService(private val project: Project) {
                 }
                 val newLine = event.newFragment.contains('\n')
                 val startLine = document.getLineNumber(
-                    event.newRange.startOffset +
+                event.newRange.startOffset +
                             (if (newLine) 1 else 0)
                 )
                 val endLine = document.getLineNumber(event.newRange.endOffset)
