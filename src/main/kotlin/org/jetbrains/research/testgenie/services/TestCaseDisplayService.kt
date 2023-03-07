@@ -391,10 +391,9 @@ class TestCaseDisplayService(private val project: Project) {
                     appendTestsToClass(testCaseComponents, psiClass, psiFile)
                 }
             } else {
-                val psiJavaFile: PsiJavaFile = (
-                        PsiManager.getInstance(project).findFile(
-                            LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
-                        ) as PsiJavaFile)
+                val psiJavaFile: PsiJavaFile = (PsiManager.getInstance(project).findFile(
+                    LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
+                ) as PsiJavaFile)
                 WriteCommandAction.runWriteCommandAction(project) {
                     appendTestsToClass(testCaseComponents, psiJavaFile.classes[0], psiJavaFile)
                 }
