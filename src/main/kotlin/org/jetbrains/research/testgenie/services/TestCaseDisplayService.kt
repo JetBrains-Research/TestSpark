@@ -15,6 +15,8 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -356,52 +358,66 @@ class TestCaseDisplayService(private val project: Project) {
         val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
-        println("Selected tests: ${selectedTestCases.size}")
-
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
             .map { getEditor(it)!! }
             .map { it.document.text }
 
+        // Set parameters for java files and directories chooser
         val fileChooser = JFileChooser(project.basePath)
-        fileChooser.dialogTitle = "Choose a java file or a directory to create a new file:"
+        fileChooser.dialogTitle = TestGenieLabelsBundle.defaultValue("chooserTitle")
         fileChooser.fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
         fileChooser.isAcceptAllFileFilterUsed = false
-        fileChooser.fileFilter = FileNameExtensionFilter("Java files and directories", "java")
+        fileChooser.fileFilter = FileNameExtensionFilter(TestGenieLabelsBundle.defaultValue("filterDescription"), "java")
 
+        // Show chooser
         val returnValue = fileChooser.showOpenDialog(null)
         if (returnValue == JFileChooser.APPROVE_OPTION) {
+            var virtualFile: VirtualFile? = null
+            var psiClass: PsiClass? = null
+            var psiJavaFile: PsiJavaFile? = null
             if (fileChooser.selectedFile.isDirectory) {
-                val fileName: String = JOptionPane.showInputDialog(
-                    fileChooser,
-                    "Input the name of a new file",
-                    "File name",
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    null,
-                    "",
-                ) as String
-                val virtualFileOfDirectory: VirtualFile =
-                    LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
+                // Get class name from user
+                val className =
+                    JOptionPane.showInputDialog(
+                        fileChooser,
+                        TestGenieLabelsBundle.defaultValue("optionPaneMessage"),
+                        TestGenieLabelsBundle.defaultValue("optionPaneTitle"),
+                        JOptionPane.PLAIN_MESSAGE,
+                        null,
+                        null,
+                        "",
+                    ) as String
+
+                // Create new file and set services of this file
                 WriteCommandAction.runWriteCommandAction(project) {
-                    virtualFileOfDirectory.createChildData(null, "${fileName.split('.')[0]}.java")
-                    val filePath = "${fileChooser.selectedFile.path}/${fileName.split('.')[0]}.java"
-                    val virtualFile: VirtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
-                    val psiFile: PsiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile) as PsiJavaFile)
-                    val psiClass: PsiClass = PsiElementFactory.getInstance(project).createClass(fileName)
-                    psiFile.add(psiClass)
-                    appendTestsToClass(testCaseComponents, psiClass, psiFile)
+                    val virtualFileOfDirectory: VirtualFile =
+                        LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
+                    val fileName = "${className.split('.')[0]}.java"
+                    virtualFileOfDirectory.createChildData(null, fileName)
+                    val filePath = "${fileChooser.selectedFile.path}/$fileName"
+                    virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
+                    psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
+                    psiClass = PsiElementFactory.getInstance(project).createClass(className)
+                    psiJavaFile!!.add(psiClass!!)
                 }
             } else {
-                val psiJavaFile: PsiJavaFile = (
-                    PsiManager.getInstance(project).findFile(
-                        LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!,
-                    ) as PsiJavaFile
-                    )
-                WriteCommandAction.runWriteCommandAction(project) {
-                    appendTestsToClass(testCaseComponents, psiJavaFile.classes[0], psiJavaFile)
-                }
+                // Set services of the chosen file
+                virtualFile = LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
+                psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
+                psiClass = psiJavaFile!!.classes[0]
             }
+
+            // Add tests to the file
+            WriteCommandAction.runWriteCommandAction(project) {
+                appendTestsToClass(testCaseComponents, psiClass!!, psiJavaFile!!)
+            }
+
+            // Open the file after adding
+            FileEditorManager.getInstance(project).openTextEditor(
+                OpenFileDescriptor(project, virtualFile!!),
+                true,
+            )
         }
 
         // The scheduled tests will be submitted in the background
@@ -507,6 +523,7 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param testCaseComponents the test cases to be appended
      * @param selectedClass the class which the test cases should be appended to
+     * @param outputFile the output file for tests
      */
     private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass, outputFile: PsiFile) {
         testCaseComponents.forEach {
