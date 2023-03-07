@@ -76,7 +76,9 @@ class TestCaseDisplayService(private val project: Project) {
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
-        allTestCasePanel, JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        allTestCasePanel,
+        JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
     )
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private var originalTestCases: HashMap<String, String> = HashMap()
@@ -377,7 +379,7 @@ class TestCaseDisplayService(private val project: Project) {
                     JOptionPane.PLAIN_MESSAGE,
                     null,
                     null,
-                    ""
+                    "",
                 ) as String
                 val virtualFileOfDirectory: VirtualFile =
                     LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
@@ -392,10 +394,10 @@ class TestCaseDisplayService(private val project: Project) {
                 }
             } else {
                 val psiJavaFile: PsiJavaFile = (
-                        PsiManager.getInstance(project).findFile(
-                            LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
-                        ) as PsiJavaFile
-                        )
+                    PsiManager.getInstance(project).findFile(
+                        LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!,
+                    ) as PsiJavaFile
+                    )
                 WriteCommandAction.runWriteCommandAction(project) {
                     appendTestsToClass(testCaseComponents, psiJavaFile.classes[0], psiJavaFile)
                 }
@@ -509,12 +511,12 @@ class TestCaseDisplayService(private val project: Project) {
     private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass, outputFile: PsiFile) {
         testCaseComponents.forEach {
             PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(
-                PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
+                PsiDocumentManager.getInstance(project).getDocument(outputFile)!!,
             )
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
-                it.replace("\r\n", "\n")
+                it.replace("\r\n", "\n"),
             )
         }
     }
@@ -533,7 +535,9 @@ class TestCaseDisplayService(private val project: Project) {
         // If there is no generated tests tab, make it
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
-            mainPanel, TestGenieLabelsBundle.defaultValue("generatedTests"), true
+            mainPanel,
+            TestGenieLabelsBundle.defaultValue("generatedTests"),
+            true,
         )
         contentManager!!.addContent(content!!)
 
@@ -604,7 +608,7 @@ class TestCaseDisplayService(private val project: Project) {
         val choice: Int = Messages.showYesNoCancelDialog(
             TestGenieBundle.message("removeAllMessage"),
             TestGenieBundle.message("confirmationTitle"),
-            Messages.getQuestionIcon()
+            Messages.getQuestionIcon(),
         )
         // Cancel the operation if the user did not press "Yes"
         if (choice != 0) return
@@ -665,7 +669,7 @@ class TestCaseDisplayService(private val project: Project) {
         document: Document,
         resetButton: JButton,
         textFieldEditor: EditorTextField,
-        checkbox: JCheckBox
+        checkbox: JCheckBox,
     ) {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
@@ -676,7 +680,7 @@ class TestCaseDisplayService(private val project: Project) {
                 val borderColor = Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
-                    settingsProjectState.colorBlue
+                    settingsProjectState.colorBlue,
                 )
                 textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
@@ -688,15 +692,15 @@ class TestCaseDisplayService(private val project: Project) {
                 }
                 val newLine = event.newFragment.contains('\n')
                 val startLine = document.getLineNumber(
-                event.newRange.startOffset +
-                            (if (newLine) 1 else 0)
+                    event.newRange.startOffset +
+                        (if (newLine) 1 else 0),
                 )
                 val endLine = document.getLineNumber(event.newRange.endOffset)
                 for (lineNumber in startLine..endLine) {
                     textFieldEditor.editor!!.markupModel.addLineHighlighter(
                         if (newLine) DiffColors.DIFF_INSERTED else DiffColors.DIFF_MODIFIED,
                         lineNumber,
-                        HighlighterLayer.FIRST
+                        HighlighterLayer.FIRST,
                     )
                 }
 
@@ -705,7 +709,7 @@ class TestCaseDisplayService(private val project: Project) {
                     textFieldEditor.editor!!.markupModel.addLineHighlighter(
                         DiffColors.DIFF_MODIFIED,
                         endLine,
-                        HighlighterLayer.FIRST
+                        HighlighterLayer.FIRST,
                     )
                 }
 
@@ -722,7 +726,7 @@ class TestCaseDisplayService(private val project: Project) {
         NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
             TestGenieBundle.message("emptyTestCasesTitle"),
             TestGenieBundle.message("emptyTestCasesText"),
-            NotificationType.ERROR
+            NotificationType.ERROR,
         ).notify(project)
     }
 
@@ -739,7 +743,7 @@ class TestCaseDisplayService(private val project: Project) {
                 val original = originalTestCases[it]!!
 
                 TestGenieTelemetryService.ModifiedTestCase(original, modified)
-            }.filter { it.modified != it.original }
+            }.filter { it.modified != it.original },
         )
     }
 
