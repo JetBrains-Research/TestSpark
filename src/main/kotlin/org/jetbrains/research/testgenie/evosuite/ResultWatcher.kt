@@ -2,10 +2,12 @@ package org.jetbrains.research.testgenie.evosuite
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
 import org.evosuite.utils.CompactReport
+import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import java.io.File
 import java.io.FileReader
 
@@ -62,11 +64,21 @@ class ResultWatcher(private val project: Project, private val resultName: String
                         project.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC)
                             .testGenerationResult(testGenerationResult, resultName, fileUrl)
                         log.info("Exiting Watcher thread for $resultName")
+
+                        project.service<TestCaseDisplayService>().importsCode =
+                            getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode)
                         return
                     }
                 }
             }
             Thread.sleep(sleepDurationMillis)
         }
+    }
+
+    // get junit imports from a generated code
+    private fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?): String {
+        testSuiteCode ?: return ""
+        return testSuiteCode.replace("\r\n", "\n").split("\n").filter { it.contains("import".toRegex()) }
+            .filterNot { it.contains("evosuite".toRegex()) }.joinToString("\n").plus("\n")
     }
 }
