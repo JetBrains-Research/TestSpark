@@ -27,9 +27,9 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiElementFactory
 import com.intellij.refactoring.suggested.newRange
+import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
@@ -98,6 +98,9 @@ class TestCaseDisplayService(private val project: Project) {
     private var testJob: Workspace.TestJob? = null
     private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
     private var isJacocoCoverageActive = false
+
+    // Code required of imports for generated tests
+    var importsCode: String = ""
 
     var fileUrl: String = ""
 
@@ -368,7 +371,8 @@ class TestCaseDisplayService(private val project: Project) {
         fileChooser.dialogTitle = TestGenieLabelsBundle.defaultValue("chooserTitle")
         fileChooser.fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
         fileChooser.isAcceptAllFileFilterUsed = false
-        fileChooser.fileFilter = FileNameExtensionFilter(TestGenieLabelsBundle.defaultValue("filterDescription"), "java")
+        fileChooser.fileFilter =
+            FileNameExtensionFilter(TestGenieLabelsBundle.defaultValue("filterDescription"), "java")
 
         // Show chooser
         val returnValue = fileChooser.showOpenDialog(null)
@@ -525,17 +529,26 @@ class TestCaseDisplayService(private val project: Project) {
      * @param selectedClass the class which the test cases should be appended to
      * @param outputFile the output file for tests
      */
-    private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass, outputFile: PsiFile) {
+    private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass, outputFile: PsiJavaFile) {
+        // block document
+        PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(
+            PsiDocumentManager.getInstance(project).getDocument(outputFile)!!,
+        )
+
+        // insert tests to a code
         testCaseComponents.forEach {
-            PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(
-                PsiDocumentManager.getInstance(project).getDocument(outputFile)!!,
-            )
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
                 it.replace("\r\n", "\n"),
             )
         }
+
+        // insert imports to a code
+        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+            outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
+            importsCode,
+        )
     }
 
     /**
