@@ -99,8 +99,9 @@ class TestCaseDisplayService(private val project: Project) {
     private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
     private var isJacocoCoverageActive = false
 
-    // Code required of imports for generated tests
+    // Code required of imports and package for generated tests
     var importsCode: String = ""
+    var packageLine: String = ""
 
     var fileUrl: String = ""
 
@@ -549,6 +550,9 @@ class TestCaseDisplayService(private val project: Project) {
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
             importsCode,
         )
+
+        // insert package to a code
+        outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(0, packageLine)
     }
 
     /**
