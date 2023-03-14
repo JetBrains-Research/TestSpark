@@ -21,7 +21,8 @@ import java.io.FileReader
  * @param resultName result path on which to watch for results
  * @param fileUrl the file url (for caching)
  */
-class ResultWatcher(private val project: Project, private val resultName: String, private val fileUrl: String) : Runnable {
+class ResultWatcher(private val project: Project, private val resultName: String, private val fileUrl: String) :
+    Runnable {
     private val log = Logger.getInstance(ResultWatcher::class.java)
 
     override fun run() {
@@ -65,6 +66,9 @@ class ResultWatcher(private val project: Project, private val resultName: String
                             .testGenerationResult(testGenerationResult, resultName, fileUrl)
                         log.info("Exiting Watcher thread for $resultName")
 
+                        project.service<TestCaseDisplayService>().packageLine =
+                            getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode)
+
                         project.service<TestCaseDisplayService>().importsCode =
                             getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode)
                         return
@@ -78,7 +82,14 @@ class ResultWatcher(private val project: Project, private val resultName: String
     // get junit imports from a generated code
     private fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?): String {
         testSuiteCode ?: return ""
-        return testSuiteCode.replace("\r\n", "\n").split("\n").filter { it.contains("import".toRegex()) }
+        return testSuiteCode.replace("\r\n", "\n").split("\n").filter { it.contains("^import".toRegex()) }
             .filterNot { it.contains("evosuite".toRegex()) }.joinToString("\n").plus("\n")
+    }
+
+    // get package from a generated code
+    private fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
+        testSuiteCode ?: return ""
+        return testSuiteCode.replace("\r\n", "\n").split("\n").filter { it.contains("^package".toRegex()) }
+            .joinToString("\n").plus("\n")
     }
 }
