@@ -55,6 +55,7 @@ class SettingsArgumentsTest {
             "-Dnew_statistics=false",
             "-class",
             "lang.java.Dung",
+            "-Dcatch_undeclared_exceptions=false",
             "-Dtest_naming_strategy=COVERAGE",
             "-Dalgorithm=DYNAMOSA",
             "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH"
@@ -84,6 +85,7 @@ class SettingsArgumentsTest {
             "-Dnew_statistics=false",
             "-class",
             "lang.java.Dung",
+            "-Dcatch_undeclared_exceptions=false",
             "-Dtest_naming_strategy=COVERAGE",
             "-Dtarget_method=dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;",
             "-Dalgorithm=DYNAMOSA",
@@ -113,6 +115,7 @@ class SettingsArgumentsTest {
             "-Dnew_statistics=false",
             "-class",
             "lang.java.Dung",
+            "-Dcatch_undeclared_exceptions=false",
             "-Dtest_naming_strategy=COVERAGE",
             "-Dtarget_line=419",
             "-Dalgorithm=DYNAMOSA",
