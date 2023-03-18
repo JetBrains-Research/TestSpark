@@ -21,7 +21,12 @@ import java.io.FileReader
  * @param resultName result path on which to watch for results
  * @param fileUrl the file url (for caching)
  */
-class ResultWatcher(private val project: Project, private val resultName: String, private val fileUrl: String) :
+class ResultWatcher(
+    private val project: Project,
+    private val resultName: String,
+    private val fileUrl: String,
+    private val classFQN: String,
+) :
     Runnable {
     private val log = Logger.getInstance(ResultWatcher::class.java)
 
@@ -82,14 +87,19 @@ class ResultWatcher(private val project: Project, private val resultName: String
     // get junit imports from a generated code
     private fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?): String {
         testSuiteCode ?: return ""
-        return testSuiteCode.replace("\r\n", "\n").split("\n").filter { it.contains("^import".toRegex()) }
-            .filterNot { it.contains("evosuite".toRegex()) }.joinToString("\n").plus("\n")
+        return testSuiteCode.replace("\r\n", "\n").split("\n").asSequence()
+            .filter { it.contains("^import".toRegex()) }
+            .filterNot { it.contains("evosuite".toRegex()) }
+            .filterNot { it.contains("RunWith".toRegex()) }
+            .filterNot { it.contains(classFQN.toRegex()) }
+            .joinToString("\n").plus("\n")
     }
 
     // get package from a generated code
     private fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
         testSuiteCode ?: return ""
-        return testSuiteCode.replace("\r\n", "\n").split("\n").filter { it.contains("^package".toRegex()) }
+        return testSuiteCode.replace("\r\n", "\n").split("\n")
+            .filter { it.contains("^package".toRegex()) }
             .joinToString("\n").plus("\n")
     }
 }
