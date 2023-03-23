@@ -82,8 +82,9 @@ class EvoSuiteProcessManager(
             val evoSuiteProcess = GeneralCommandLine(cmd)
             evoSuiteProcess.charset = Charset.forName("UTF-8")
             evoSuiteProcess.setWorkDirectory(projectPath)
-            var isUnknownClass = false
             val handler = OSProcessHandler(evoSuiteProcess)
+            var evoSuiteText = ""
+            val errorsList = mutableListOf<EvosuiteError>()
 
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
@@ -97,13 +98,13 @@ class EvoSuiteProcessManager(
                         handler.destroyProcess()
                     }
 
-                    val text = event.text
+                    evoSuiteText = event.text
 
                     val progressMatcher =
-                        Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
-                    val coverageMatcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
+                        Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(evoSuiteText)
+                    val coverageMatcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(evoSuiteText)
 
-                    log.info(text) // kept for debugging purposes
+                    log.info(evoSuiteText) // kept for debugging purposes
 
                     val progress =
                         if (progressMatcher.find()) {
@@ -117,9 +118,6 @@ class EvoSuiteProcessManager(
                         } else {
                             null
                         }
-
-                    // evosuite error message with unknown class consists this message
-                    if (text.contains("Unknown class")) isUnknownClass = true
 
                     if (progress != null && coverage != null) {
                         indicator.fraction = if (progress >= coverage) progress else coverage
@@ -137,28 +135,38 @@ class EvoSuiteProcessManager(
 
             handler.startNotify()
 
-            // treat this as a join handle
-            if (!handler.waitFor(evoSuiteProcessTimeout)) {
-                evosuiteError("EvoSuite process exceeded timeout - ${evoSuiteProcessTimeout}ms")
-            }
+            if (indicator.isCanceled) return
 
-            if (!indicator.isCanceled) {
-                if (handler.exitCode == 0) {
-                    if (isUnknownClass) {
-                        evosuiteError("EvoSuite process error: unknown class, be sure its compilation path is correct")
-                    } else {
-                        // if process wasn't cancelled and class was found, start result watcher
-                        AppExecutorUtil.getAppScheduledExecutorService()
-                            .execute(ResultWatcher(project, testResultName, fileUrl))
-                    }
-                } else {
-                    evosuiteError("EvoSuite process exited with non-zero exit code - ${handler.exitCode}")
+            fillErrorsList(handler, evoSuiteText, errorsList)
+
+            for (error in errorsList) {
+                if (error.isFailed) {
+                    evosuiteErrorDisplay(error.message)
+                    return
                 }
             }
+            // start result watcher
+            AppExecutorUtil.getAppScheduledExecutorService()
+                .execute(ResultWatcher(project, testResultName, fileUrl))
         } catch (e: Exception) {
-            evosuiteError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
+            evosuiteErrorDisplay(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
             e.printStackTrace()
         }
+    }
+
+    private fun fillErrorsList(
+        handler: OSProcessHandler,
+        evoSuiteText: String,
+        errorsList: MutableList<EvosuiteError>,
+    ) {
+        errorsList.add(EvosuiteError(!handler.waitFor(evoSuiteProcessTimeout), "exceeded timeout")) // TODO add timeout
+        errorsList.add(EvosuiteError(handler.exitCode != 0, "exited with non-zero exit code")) // TODO add code
+        errorsList.add(
+            EvosuiteError(
+                evoSuiteText.contains("Unknown class"),
+                "unknown class, be sure its compilation path is correct"
+            )
+        )
     }
 
     /**
@@ -166,7 +174,7 @@ class EvoSuiteProcessManager(
      *
      * @param msg the balloon content to display
      */
-    private fun evosuiteError(msg: String, title: String = TestGenieBundle.message("evosuiteErrorTitle")) {
+    private fun evosuiteErrorDisplay(msg: String, title: String = TestGenieBundle.message("evosuiteErrorTitle")) {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("EvoSuite Execution Error")
             .createNotification(
@@ -176,4 +184,6 @@ class EvoSuiteProcessManager(
             )
             .notify(project)
     }
+
+    data class EvosuiteError(val isFailed: Boolean, val message: String)
 }
