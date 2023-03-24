@@ -84,6 +84,7 @@ class EvoSuiteProcessManager(
             evoSuiteProcess.setWorkDirectory(projectPath)
             val handler = OSProcessHandler(evoSuiteProcess)
             val errorsList = mutableListOf<EvosuiteError>()
+            var evosuiteText = ""
 
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
@@ -99,13 +100,7 @@ class EvoSuiteProcessManager(
 
                     val text = event.text
 
-                    // Unknown class error
-                    errorsList.add(
-                        EvosuiteError(
-                            text.contains("Unknown class"),
-                            "unknown class, be sure its compilation path is correct"
-                        )
-                    )
+                    evosuiteText += "$text\n"
 
                     val progressMatcher =
                         Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
@@ -144,13 +139,17 @@ class EvoSuiteProcessManager(
 
             if (indicator.isCanceled) return
 
-            // Timeout error
+            // fill evoSuite errors
             // TODO add timeout to message
             errorsList.add(EvosuiteError(!handler.waitFor(evoSuiteProcessTimeout), "exceeded timeout"))
-
-            // Non-zero exit code error
             // TODO add code to message
             errorsList.add(EvosuiteError(handler.exitCode != 0, "exited with non-zero exit code"))
+            errorsList.add(
+                EvosuiteError(
+                    evosuiteText.contains("Unknown class"),
+                    "unknown class, be sure its compilation path is correct"
+                )
+            )
 
             // check all errors
             for (error in errorsList) {
