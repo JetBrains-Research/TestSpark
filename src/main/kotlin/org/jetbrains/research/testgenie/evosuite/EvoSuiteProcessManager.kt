@@ -83,7 +83,6 @@ class EvoSuiteProcessManager(
             evoSuiteProcess.charset = Charset.forName("UTF-8")
             evoSuiteProcess.setWorkDirectory(projectPath)
             val handler = OSProcessHandler(evoSuiteProcess)
-            var evoSuiteText = ""
             val errorsList = mutableListOf<EvosuiteError>()
 
             // attach process listener for output
@@ -98,13 +97,21 @@ class EvoSuiteProcessManager(
                         handler.destroyProcess()
                     }
 
-                    evoSuiteText = event.text
+                    val text = event.text
+
+                    // Unknown class error
+                    errorsList.add(
+                        EvosuiteError(
+                            text.contains("Unknown class"),
+                            "unknown class, be sure its compilation path is correct"
+                        )
+                    )
 
                     val progressMatcher =
-                        Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(evoSuiteText)
-                    val coverageMatcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(evoSuiteText)
+                        Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
+                    val coverageMatcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
 
-                    log.info(evoSuiteText) // kept for debugging purposes
+                    log.info(text) // kept for debugging purposes
 
                     val progress =
                         if (progressMatcher.find()) {
@@ -137,14 +144,22 @@ class EvoSuiteProcessManager(
 
             if (indicator.isCanceled) return
 
-            fillErrorsList(handler, evoSuiteText, errorsList)
+            // Timeout error
+            // TODO add timeout to message
+            errorsList.add(EvosuiteError(!handler.waitFor(evoSuiteProcessTimeout), "exceeded timeout"))
 
+            // Non-zero exit code error
+            // TODO add code to message
+            errorsList.add(EvosuiteError(handler.exitCode != 0, "exited with non-zero exit code"))
+
+            // check all errors
             for (error in errorsList) {
                 if (error.isFailed) {
                     evosuiteErrorDisplay(error.message)
                     return
                 }
             }
+
             // start result watcher
             AppExecutorUtil.getAppScheduledExecutorService()
                 .execute(ResultWatcher(project, testResultName, fileUrl))
@@ -152,21 +167,6 @@ class EvoSuiteProcessManager(
             evosuiteErrorDisplay(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
             e.printStackTrace()
         }
-    }
-
-    private fun fillErrorsList(
-        handler: OSProcessHandler,
-        evoSuiteText: String,
-        errorsList: MutableList<EvosuiteError>,
-    ) {
-        errorsList.add(EvosuiteError(!handler.waitFor(evoSuiteProcessTimeout), "exceeded timeout")) // TODO add timeout
-        errorsList.add(EvosuiteError(handler.exitCode != 0, "exited with non-zero exit code")) // TODO add code
-        errorsList.add(
-            EvosuiteError(
-                evoSuiteText.contains("Unknown class"),
-                "unknown class, be sure its compilation path is correct"
-            )
-        )
     }
 
     /**
@@ -185,5 +185,6 @@ class EvoSuiteProcessManager(
             .notify(project)
     }
 
+    // evosuite errors data
     data class EvosuiteError(val isFailed: Boolean, val message: String)
 }
