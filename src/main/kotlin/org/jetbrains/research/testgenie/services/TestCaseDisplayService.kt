@@ -15,6 +15,8 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.fileChooser.FileChooser
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
@@ -48,6 +50,7 @@ import java.awt.Color
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
+import java.util.Locale
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -55,10 +58,8 @@ import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel
-import javax.swing.JFileChooser
 import javax.swing.JOptionPane
 import javax.swing.border.Border
-import javax.swing.filechooser.FileNameExtensionFilter
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -367,63 +368,70 @@ class TestCaseDisplayService(private val project: Project) {
             .map { getEditor(it)!! }
             .map { it.document.text }
 
-        // Set parameters for java files and directories chooser
-        val fileChooser = JFileChooser(project.basePath)
-        fileChooser.dialogTitle = TestGenieLabelsBundle.defaultValue("chooserTitle")
-        fileChooser.fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
-        fileChooser.isAcceptAllFileFilterUsed = false
-        fileChooser.fileFilter =
-            FileNameExtensionFilter(TestGenieLabelsBundle.defaultValue("filterDescription"), "java")
-
-        // Show chooser
-        val returnValue = fileChooser.showOpenDialog(null)
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            var virtualFile: VirtualFile? = null
-            var psiClass: PsiClass? = null
-            var psiJavaFile: PsiJavaFile? = null
-            if (fileChooser.selectedFile.isDirectory) {
-                // Get class name from user
-                val className =
-                    JOptionPane.showInputDialog(
-                        fileChooser,
-                        TestGenieLabelsBundle.defaultValue("optionPaneMessage"),
-                        TestGenieLabelsBundle.defaultValue("optionPaneTitle"),
-                        JOptionPane.PLAIN_MESSAGE,
-                        null,
-                        null,
-                        "",
-                    ) as String
-
-                // Create new file and set services of this file
-                WriteCommandAction.runWriteCommandAction(project) {
-                    val virtualFileOfDirectory: VirtualFile =
-                        LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
-                    val fileName = "${className.split('.')[0]}.java"
-                    virtualFileOfDirectory.createChildData(null, fileName)
-                    val filePath = "${fileChooser.selectedFile.path}/$fileName"
-                    virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
-                    psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
-                    psiClass = PsiElementFactory.getInstance(project).createClass(className)
-                    psiJavaFile!!.add(psiClass!!)
-                }
-            } else {
-                // Set services of the chosen file
-                virtualFile = LocalFileSystem.getInstance().findFileByIoFile(fileChooser.selectedFile)!!
-                psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
-                psiClass = psiJavaFile!!.classes[0]
-            }
-
-            // Add tests to the file
-            WriteCommandAction.runWriteCommandAction(project) {
-                appendTestsToClass(testCaseComponents, psiClass!!, psiJavaFile!!)
-            }
-
-            // Open the file after adding
-            FileEditorManager.getInstance(project).openTextEditor(
-                OpenFileDescriptor(project, virtualFile!!),
-                true,
-            )
+        // Descriptor for choosing folders and java files
+        val descriptor = FileChooserDescriptor(true, true, false, false, false, false)
+        descriptor.withFileFilter { file ->
+            file.isDirectory || (
+                file.extension?.lowercase(Locale.getDefault()) == "java" && (
+                    PsiManager.getInstance(project)
+                        .findFile(file) as PsiJavaFile
+                    ).classes.isNotEmpty()
+                )
         }
+
+        // Chosen file by user
+        val chosenFile = FileChooser.chooseFiles(
+            descriptor,
+            project,
+            LocalFileSystem.getInstance().findFileByPath(project.basePath!!)
+        )[0]
+
+        // Virtual file of a final java file
+        var virtualFile: VirtualFile? = null
+        // PsiClass of a final java file
+        var psiClass: PsiClass? = null
+        // PsiJavaFile of a final java file
+        var psiJavaFile: PsiJavaFile? = null
+        if (chosenFile.isDirectory) {
+            // Get class name from user
+            val className =
+                JOptionPane.showInputDialog(
+                    null,
+                    TestGenieLabelsBundle.defaultValue("optionPaneMessage"),
+                    TestGenieLabelsBundle.defaultValue("optionPaneTitle"),
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    null,
+                    "",
+                ) as String
+
+            // Create new file and set services of this file
+            WriteCommandAction.runWriteCommandAction(project) {
+                val fileName = "${className.split('.')[0]}.java"
+                chosenFile.createChildData(null, fileName)
+                val filePath = "${chosenFile.path}/$fileName"
+                virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
+                psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
+                psiClass = PsiElementFactory.getInstance(project).createClass(className)
+                psiJavaFile!!.add(psiClass!!)
+            }
+        } else {
+            // Set services of the chosen file
+            virtualFile = chosenFile
+            psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
+            psiClass = psiJavaFile!!.classes[0]
+        }
+
+        // Add tests to the file
+        WriteCommandAction.runWriteCommandAction(project) {
+            appendTestsToClass(testCaseComponents, psiClass!!, psiJavaFile!!)
+        }
+
+        // Open the file after adding
+        FileEditorManager.getInstance(project).openTextEditor(
+            OpenFileDescriptor(project, virtualFile!!),
+            true,
+        )
 
         // The scheduled tests will be submitted in the background
         // (they will be checked every 5 minutes and also when the project is closed)
@@ -552,7 +560,8 @@ class TestCaseDisplayService(private val project: Project) {
         )
 
         // insert package to a code
-        outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(0, packageLine)
+        outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
+            .insertString(0, packageLine)
     }
 
     /**
