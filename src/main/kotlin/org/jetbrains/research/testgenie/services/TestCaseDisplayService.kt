@@ -52,7 +52,14 @@ import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.util.Locale
-import javax.swing.*
+import javax.swing.JPanel
+import javax.swing.JButton
+import javax.swing.JLabel
+import javax.swing.BoxLayout
+import javax.swing.BorderFactory
+import javax.swing.JOptionPane
+import javax.swing.JCheckBox
+import javax.swing.Box
 import javax.swing.border.Border
 import kotlin.streams.toList
 
@@ -397,28 +404,39 @@ class TestCaseDisplayService(private val project: Project) {
         var psiClass: PsiClass? = null
         // PsiJavaFile of a final java file
         var psiJavaFile: PsiJavaFile? = null
-        val inputField = JTextField()
         if (chosenFile.isDirectory) {
             // Input new file name
-            val jOptionPane =
-                JOptionPane.showInputDialog(
-                    null,
-                    TestGenieLabelsBundle.defaultValue("optionPaneMessage"),
-                    TestGenieLabelsBundle.defaultValue("optionPaneTitle"),
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    null,
-                    null,
-                )
+            var className: String
+            while (true) {
+                val jOptionPane =
+                    JOptionPane.showInputDialog(
+                        null,
+                        TestGenieLabelsBundle.defaultValue("optionPaneMessage"),
+                        TestGenieLabelsBundle.defaultValue("optionPaneTitle"),
+                        JOptionPane.PLAIN_MESSAGE,
+                        null,
+                        null,
+                        null,
+                    )
 
-            // Cancel button pressed
-            jOptionPane ?: return
+                // Cancel button pressed
+                jOptionPane ?: return
 
-            // Get class name from user
-            val className = jOptionPane as String
+                // Get class name from user
+                className = jOptionPane as String
 
-            // TODO add exception "incorrect class name"
-            if (!Regex("[A-Z][a-zA-Z0-9]*[.java]?").matches(className)) return
+                // Check the correctness of a class name
+                if (Regex("[A-Z][a-zA-Z0-9]*[.java]?").matches(className)) {
+                    break
+                } else {
+                    JOptionPane.showMessageDialog(
+                        null,
+                        TestGenieLabelsBundle.defaultValue("errorWindowMessage"),
+                        TestGenieLabelsBundle.defaultValue("errorWindowTitle"),
+                        JOptionPane.ERROR_MESSAGE
+                    )
+                }
+            }
 
             // Create new file and set services of this file
             WriteCommandAction.runWriteCommandAction(project) {
