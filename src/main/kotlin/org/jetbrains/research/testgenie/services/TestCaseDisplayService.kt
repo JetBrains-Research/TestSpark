@@ -37,6 +37,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
+import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
@@ -51,15 +52,9 @@ import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.util.Locale
-import javax.swing.BorderFactory
-import javax.swing.Box
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JOptionPane
+import javax.swing.*
 import javax.swing.border.Border
+import kotlin.streams.toList
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -370,21 +365,31 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Descriptor for choosing folders and java files
         val descriptor = FileChooserDescriptor(true, true, false, false, false, false)
+
+        // Apply filter with folders and java files with main class
         descriptor.withFileFilter { file ->
             file.isDirectory || (
                 file.extension?.lowercase(Locale.getDefault()) == "java" && (
-                    PsiManager.getInstance(project)
-                        .findFile(file) as PsiJavaFile
-                    ).classes.isNotEmpty()
+                    PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                    ).classes.stream().map { it.name }
+                    .toList()
+                    .contains(
+                        (PsiManager.getInstance(project).findFile(file) as PsiJavaFile).name.removeSuffix(".java")
+                    )
                 )
         }
 
-        // Chosen file by user
-        val chosenFile = FileChooser.chooseFiles(
+        val fileChooser = FileChooser.chooseFiles(
             descriptor,
             project,
             LocalFileSystem.getInstance().findFileByPath(project.basePath!!)
-        )[0]
+        )
+
+        // Cancel button pressed
+        if (fileChooser.isEmpty()) return
+
+        // Chosen files by user
+        val chosenFile = fileChooser[0]
 
         // Virtual file of a final java file
         var virtualFile: VirtualFile? = null
@@ -392,9 +397,10 @@ class TestCaseDisplayService(private val project: Project) {
         var psiClass: PsiClass? = null
         // PsiJavaFile of a final java file
         var psiJavaFile: PsiJavaFile? = null
+        val inputField = JTextField()
         if (chosenFile.isDirectory) {
-            // Get class name from user
-            val className =
+            // Input new file name
+            val jOptionPane =
                 JOptionPane.showInputDialog(
                     null,
                     TestGenieLabelsBundle.defaultValue("optionPaneMessage"),
@@ -402,8 +408,17 @@ class TestCaseDisplayService(private val project: Project) {
                     JOptionPane.PLAIN_MESSAGE,
                     null,
                     null,
-                    "",
-                ) as String
+                    null,
+                )
+
+            // Cancel button pressed
+            jOptionPane ?: return
+
+            // Get class name from user
+            val className = jOptionPane as String
+
+            // TODO add exception "incorrect class name"
+            if (!Regex("[A-Z][a-zA-Z0-9]*[.java]?").matches(className)) return
 
             // Create new file and set services of this file
             WriteCommandAction.runWriteCommandAction(project) {
@@ -419,7 +434,10 @@ class TestCaseDisplayService(private val project: Project) {
             // Set services of the chosen file
             virtualFile = chosenFile
             psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
-            psiClass = psiJavaFile!!.classes[0]
+            psiClass = psiJavaFile!!.classes[
+                psiJavaFile!!.classes.stream().map { it.name }.toList()
+                    .indexOf(psiJavaFile!!.name.removeSuffix(".java"))
+            ]
         }
 
         // Add tests to the file
