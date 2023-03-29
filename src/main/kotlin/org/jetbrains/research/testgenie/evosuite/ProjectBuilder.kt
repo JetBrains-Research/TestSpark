@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.pipeline
+package org.jetbrains.research.testgenie.evosuite
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler

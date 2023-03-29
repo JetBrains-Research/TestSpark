@@ -1,11 +1,9 @@
-package org.jetbrains.research.testgenie.pipeline.evosuite
+package org.jetbrains.research.testgenie.evosuite.generation
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
-import com.intellij.notification.NotificationGroupManager
-import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
@@ -16,7 +14,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.pipeline.ResultWatcher
+import org.jetbrains.research.testgenie.evosuite.ResultWatcher
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import java.io.File
@@ -38,6 +36,8 @@ class EvoSuiteProcessManager(
 
     private val settingsApplicationState = SettingsApplicationService.getInstance().state
     private val settingsProjectState = project.service<SettingsProjectService>().state
+
+    private val evoSuiteErrorManager: EvoSuiteErrorManager = EvoSuiteErrorManager()
 
     /**
      * Executes EvoSuite.
@@ -84,8 +84,6 @@ class EvoSuiteProcessManager(
             evoSuiteProcess.charset = Charset.forName("UTF-8")
             evoSuiteProcess.setWorkDirectory(projectPath)
             val handler = OSProcessHandler(evoSuiteProcess)
-            val errorsList = mutableListOf<EvosuiteError>()
-            var evosuiteText = ""
 
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
@@ -101,7 +99,7 @@ class EvoSuiteProcessManager(
 
                     val text = event.text
 
-                    evosuiteText += "$text\n"
+                    evoSuiteErrorManager.addLineToEvoSuiteOutput(text)
 
                     val progressMatcher =
                         Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
@@ -140,64 +138,15 @@ class EvoSuiteProcessManager(
 
             if (indicator.isCanceled) return
 
-            // fill evoSuite errors
-            // TODO add timeout to message
-            errorsList.add(
-                EvosuiteError(
-                    !handler.waitFor(evoSuiteProcessTimeout),
-                    TestGenieBundle.message("exceededTimeoutMessage")
-                )
-            )
-            // TODO add code to message
-            // add the message of the error or exception from the evosuite output, or the non-zero exit code message otherwise
-            errorsList.add(
-                EvosuiteError(
-                    handler.exitCode != 0,
-                    "Error: (.*)\n".toRegex().find(evosuiteText)?.groupValues?.get(1)
-                        ?: "Exception: (.*)\n".toRegex().find(evosuiteText)?.groupValues?.get(1)
-                        ?: TestGenieBundle.message("nonZeroCodeMessage")
-                )
-            )
-            errorsList.add(
-                EvosuiteError(
-                    evosuiteText.contains("Unknown class"),
-                    TestGenieBundle.message("unknownClassMessage")
-                )
-            )
-
-            // check all errors
-            for (error in errorsList) {
-                if (error.isFailed) {
-                    evosuiteErrorDisplay(error.message)
-                    return
-                }
-            }
+            // evosuite errors check
+            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout)) return
 
             // start result watcher
             AppExecutorUtil.getAppScheduledExecutorService()
                 .execute(ResultWatcher(project, testResultName, fileUrl))
         } catch (e: Exception) {
-            evosuiteErrorDisplay(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
+            evoSuiteErrorManager.display(TestGenieBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()
         }
     }
-
-    /**
-     * Show an EvoSuite execution error balloon.
-     *
-     * @param msg the balloon content to display
-     */
-    private fun evosuiteErrorDisplay(msg: String, title: String = TestGenieBundle.message("evosuiteErrorTitle")) {
-        NotificationGroupManager.getInstance()
-            .getNotificationGroup("EvoSuite Execution Error")
-            .createNotification(
-                title,
-                TestGenieBundle.message("evosuiteErrorCommon") + " " + msg,
-                NotificationType.ERROR
-            )
-            .notify(project)
-    }
-
-    // evosuite errors data
-    data class EvosuiteError(val isFailed: Boolean, val message: String)
 }
