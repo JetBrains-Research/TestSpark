@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.evosuite
+package org.jetbrains.research.testgenie.pipeline
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
@@ -18,6 +18,7 @@ import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
+import org.jetbrains.research.testgenie.pipeline.evosuite.EvoSuiteProcessManager
 import java.io.File
 import java.util.UUID
 
