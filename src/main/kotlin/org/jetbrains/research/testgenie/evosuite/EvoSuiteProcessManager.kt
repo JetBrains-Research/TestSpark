@@ -141,9 +141,22 @@ class EvoSuiteProcessManager(
 
             // fill evoSuite errors
             // TODO add timeout to message
-            errorsList.add(EvosuiteError(!handler.waitFor(evoSuiteProcessTimeout), TestGenieBundle.message("exceededTimeoutMessage")))
+            errorsList.add(
+                EvosuiteError(
+                    !handler.waitFor(evoSuiteProcessTimeout),
+                    TestGenieBundle.message("exceededTimeoutMessage")
+                )
+            )
             // TODO add code to message
-            errorsList.add(EvosuiteError(handler.exitCode != 0, TestGenieBundle.message("nonZeroCodeMessage")))
+            // add the message of the error or exception from the evosuite output, or the non-zero exit code message otherwise
+            errorsList.add(
+                EvosuiteError(
+                    handler.exitCode != 0,
+                    "Error: (.*)\n".toRegex().find(evosuiteText)?.groupValues?.get(1)
+                        ?: "Exception: (.*)\n".toRegex().find(evosuiteText)?.groupValues?.get(1)
+                        ?: TestGenieBundle.message("nonZeroCodeMessage")
+                )
+            )
             errorsList.add(
                 EvosuiteError(
                     evosuiteText.contains("Unknown class"),
