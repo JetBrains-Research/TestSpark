@@ -7,7 +7,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.psi.PsiFile
-import org.jetbrains.research.testgenie.evosuite.Pipeline
+import org.jetbrains.research.testgenie.pipeline.Pipeline
 import org.jetbrains.research.testgenie.services.RunnerService
 
 /**

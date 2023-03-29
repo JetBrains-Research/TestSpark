@@ -20,7 +20,7 @@ import com.intellij.psi.PsiStatement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.jetbrains.research.testgenie.evosuite.Pipeline
+import org.jetbrains.research.testgenie.pipeline.Pipeline
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 

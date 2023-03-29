@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.evosuite.validation
+package org.jetbrains.research.testgenie.pipeline.validation
 
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

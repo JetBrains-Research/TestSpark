@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.evosuite
+package org.jetbrains.research.testgenie.pipeline
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader

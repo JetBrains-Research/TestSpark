@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.evosuite.validation
+package org.jetbrains.research.testgenie.pipeline.validation
 
 import com.intellij.util.messages.Topic
 
