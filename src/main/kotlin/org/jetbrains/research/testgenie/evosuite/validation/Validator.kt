@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.pipeline.validation
+package org.jetbrains.research.testgenie.evosuite.validation
 
 import com.github.javaparser.ParseProblemException
 import com.intellij.coverage.CoverageDataManager
@@ -29,7 +29,7 @@ import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.pipeline.ProjectBuilder
+import org.jetbrains.research.testgenie.evosuite.ProjectBuilder
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import java.io.File

@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.pipeline.validation
+package org.jetbrains.research.testgenie.evosuite.validation
 
 import com.github.javaparser.JavaParser
 import com.github.javaparser.StaticJavaParser

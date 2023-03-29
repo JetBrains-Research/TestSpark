@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.pipeline
+package org.jetbrains.research.testgenie.evosuite
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
@@ -15,10 +15,10 @@ import org.jetbrains.research.testgenie.services.RunnerService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 import org.jetbrains.research.testgenie.services.TestCaseCachingService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
+import org.jetbrains.research.testgenie.evosuite.generation.EvoSuiteProcessManager
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
-import org.jetbrains.research.testgenie.pipeline.evosuite.EvoSuiteProcessManager
 import java.io.File
 import java.util.UUID
 
