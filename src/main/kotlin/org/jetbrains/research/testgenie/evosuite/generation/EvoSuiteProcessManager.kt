@@ -49,6 +49,7 @@ class EvoSuiteProcessManager(
         command: MutableList<String>,
         log: Logger,
         testResultName: String,
+        classFQN: String,
     ) {
         try {
             if (!settingsApplicationState?.seed.isNullOrBlank()) command.add("-seed=${settingsApplicationState?.seed}")
@@ -143,7 +144,7 @@ class EvoSuiteProcessManager(
 
             // start result watcher
             AppExecutorUtil.getAppScheduledExecutorService()
-                .execute(ResultWatcher(project, testResultName, fileUrl))
+                .execute(ResultWatcher(project, testResultName, fileUrl, classFQN))
         } catch (e: Exception) {
             evoSuiteErrorManager.display(TestGenieBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()
