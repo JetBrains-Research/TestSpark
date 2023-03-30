@@ -51,6 +51,7 @@ import java.awt.Color
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
+import java.io.File
 import java.util.Locale
 import javax.swing.JPanel
 import javax.swing.JButton
@@ -405,8 +406,11 @@ class TestCaseDisplayService(private val project: Project) {
         // PsiJavaFile of a final java file
         var psiJavaFile: PsiJavaFile? = null
         if (chosenFile.isDirectory) {
-            // Input new file name
+            // Input new file data
             var className: String
+            var fileName: String
+            var filePath: String
+            // Waiting for correct file name input
             while (true) {
                 val jOptionPane =
                     JOptionPane.showInputDialog(
@@ -425,24 +429,27 @@ class TestCaseDisplayService(private val project: Project) {
                 // Get class name from user
                 className = jOptionPane as String
 
+                // Set file name and file path
+                fileName = "${className.split('.')[0]}.java"
+                filePath = "${chosenFile.path}/$fileName"
+
                 // Check the correctness of a class name
-                if (Regex("[A-Z][a-zA-Z0-9]*[.java]?").matches(className)) {
-                    break
-                } else {
-                    JOptionPane.showMessageDialog(
-                        null,
-                        TestGenieLabelsBundle.defaultValue("errorWindowMessage"),
-                        TestGenieLabelsBundle.defaultValue("errorWindowTitle"),
-                        JOptionPane.ERROR_MESSAGE
-                    )
+                if (!Regex("[A-Z][a-zA-Z0-9]*[.java]?").matches(className)) {
+                    showErrorWindow(TestGenieLabelsBundle.defaultValue("incorrectFileNameMessage"))
+                    continue
                 }
+
+                // Check the existence of a file with this name
+                if (File(filePath).exists()) {
+                    showErrorWindow(TestGenieLabelsBundle.defaultValue("fileAlreadyExistsMessage"))
+                    continue
+                }
+                break
             }
 
             // Create new file and set services of this file
             WriteCommandAction.runWriteCommandAction(project) {
-                val fileName = "${className.split('.')[0]}.java"
                 chosenFile.createChildData(null, fileName)
-                val filePath = "${chosenFile.path}/$fileName"
                 virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className)
@@ -475,6 +482,15 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove the selected test cases from the cache and the tool window UI
         removeSelectedTestCases(selectedTestCasePanels)
+    }
+
+    private fun showErrorWindow(message: String) {
+        JOptionPane.showMessageDialog(
+            null,
+            message,
+            TestGenieLabelsBundle.defaultValue("errorWindowTitle"),
+            JOptionPane.ERROR_MESSAGE
+        )
     }
 
     private fun getActiveTests(): Set<String> {
