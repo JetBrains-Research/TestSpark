@@ -167,7 +167,7 @@ class Pipeline(
                     }
 
                     if (projectBuilder.runBuild(indicator)) {
-                        evoSuiteProcessManager.runEvoSuite(indicator, command, log, testResultName)
+                        evoSuiteProcessManager.runEvoSuite(indicator, command, log, testResultName, classFQN)
                     }
 
                     // Revert to previous state
