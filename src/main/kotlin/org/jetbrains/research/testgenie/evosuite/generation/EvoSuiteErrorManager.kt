@@ -5,7 +5,7 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
-import java.util.*
+import java.util.Locale
 
 class EvoSuiteErrorManager {
     private var output = ""
