@@ -3,10 +3,10 @@ package org.jetbrains.research.testgenie.listener
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectCloseListener
+import com.intellij.openapi.project.ProjectManagerListener
 import org.jetbrains.research.testgenie.services.TestGenieTelemetryService
 
-class ProjectCloseListenerImpl : ProjectCloseListener {
+class ProjectCloseListenerImpl : ProjectManagerListener {
     private val log = Logger.getInstance(this.javaClass)
 
     /**
