@@ -83,7 +83,10 @@
                 topic="org.jetbrains.research.testgenie.evosuite.TestGenerationResultListener"/>
         <listener
                 class="org.jetbrains.research.testgenie.listener.TelemetrySubmitListenerImpl"
-                topic="com.intellij.openapi.project.ProjectManagerListener"/>
+                topic="com.intellij.openapi.startup.ProjectActivity"/>
+        <listener
+                class="org.jetbrains.research.testgenie.listener.ProjectCloseListenerImpl"
+                topic="com.intellij.openapi.project.ProjectCloseListener"/>
     </projectListeners>
 
     <actions>
