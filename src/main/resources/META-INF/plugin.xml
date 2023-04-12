@@ -86,7 +86,7 @@
                 topic="com.intellij.openapi.startup.ProjectActivity"/>
         <listener
                 class="org.jetbrains.research.testgenie.listener.ProjectCloseListenerImpl"
-                topic="com.intellij.openapi.project.ProjectCloseListener"/>
+                topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </projectListeners>
 
     <actions>
