@@ -434,7 +434,7 @@ class TestCaseDisplayService(private val project: Project) {
                 filePath = "${chosenFile.path}/$fileName"
 
                 // Check the correctness of a class name
-                if (!Regex("[A-Z][a-zA-Z0-9]*[.java]?").matches(className)) {
+                if (!Regex("[A-Z][a-zA-Z0-9]*(.java)?").matches(className)) {
                     showErrorWindow(TestGenieLabelsBundle.defaultValue("incorrectFileNameMessage"))
                     continue
                 }
