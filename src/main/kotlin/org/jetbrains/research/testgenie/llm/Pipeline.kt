@@ -9,7 +9,7 @@ class Pipeline(
     private val project: Project,
     private val interestingPsiClasses: Set<PsiClass>,
     private val cut: PsiClass,
-    private val polymorphismRelations: Map<PsiClass,PsiClass>,
+    private val polymorphismRelations: MutableMap<PsiClass,MutableList<PsiClass>>,
     private val modTs: Long,
 ) {
 
@@ -39,6 +39,13 @@ class Pipeline(
             prompt += "\n\n"
 
             prompt += "=== polymorphism relations:\n"
+
+            polymorphismRelations.forEach { entry ->
+                for (currentSubClass in entry.value){
+                    prompt += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
+                }
+
+            }
 
         }
 

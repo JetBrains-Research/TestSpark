@@ -13,7 +13,6 @@ import com.intellij.psi.*
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
-import com.intellij.psi.util.PsiClassUtil
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
@@ -85,7 +84,7 @@ fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.llm.Pi
 
     // Collect interesting classes (i.e., methods that are passed as input arguments to CUT and their super/sub classes)
     var interestingPsiClasses: Set<PsiClass> = mutableSetOf();
-    var polymorphismRelations: Map<PsiClass,PsiClass> = emptyMap();
+    val polymorphismRelations: MutableMap<PsiClass,MutableList<PsiClass>> = mutableMapOf()
     while (psiClassesToVisit.isNotEmpty()){
         val currentPsiClass = psiClassesToVisit.removeFirst()
         interestingPsiClasses += currentPsiClass
@@ -96,10 +95,10 @@ fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.llm.Pi
         val query = ClassInheritorsSearch.search(currentPsiClass, scope,true)
         val detectedSubClasses: Collection<PsiClass> = query.findAll()
         for (currentSubClass: PsiClass in detectedSubClasses){
-            if (! visitedPsiClasses.contains(currentSubClass) &&
-                !psiClassesToVisit.contains(currentSubClass)){
-                psiClassesToVisit.addLast(currentSubClass)
+            if (!polymorphismRelations.contains(currentPsiClass)){
+                polymorphismRelations[currentPsiClass] = ArrayList()
             }
+            polymorphismRelations[currentPsiClass]?.add(currentSubClass)
         }
 
 
