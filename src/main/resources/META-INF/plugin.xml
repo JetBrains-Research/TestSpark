@@ -92,7 +92,7 @@
     <actions>
         <!-- TestGenie actions -->
         <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true"
-               class="org.jetbrains.research.testgenie.actions.GenerateTestsActionGroup">
+               class="com.intellij.openapi.actionSystem.DefaultActionGroup">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <!-- Generate tests for class -->
             <action class="org.jetbrains.research.testgenie.actions.GenerateTestsActionClass"
