@@ -9,3 +9,4 @@ exclude:
     paths:
       - .qodana
       - .gradle
+      - .idea
