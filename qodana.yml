@@ -8,3 +8,5 @@ exclude:
   - name: All
     paths:
       - .qodana
+      - .gradle
+      - .idea
