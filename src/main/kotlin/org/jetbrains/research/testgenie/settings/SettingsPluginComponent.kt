@@ -23,8 +23,8 @@ import javax.swing.JTextField
 /**
  * This class displays and captures changes to the values of the Settings entries.
  */
-class SettingsPluginComponent(_project: Project) {
-    private val project: Project = _project
+class SettingsPluginComponent(project: Project) {
+    private val projectDuplicate: Project = project
 
     var panel: JPanel? = null
 
@@ -84,7 +84,7 @@ class SettingsPluginComponent(_project: Project) {
             telemetryPathChooser.isEditable = telemetryEnabledCheckbox.isSelected
             telemetryPathChooser.isEnabled = telemetryEnabledCheckbox.isSelected
         }
-        val telemetryEnabled = project.service<SettingsProjectService>().state.telemetryEnabled
+        val telemetryEnabled = projectDuplicate.service<SettingsProjectService>().state.telemetryEnabled
         telemetryPathChooser.addBrowseFolderListener(textBrowseFolderListener) // Add the ability to choose folders
         telemetryPathChooser.isEditable = telemetryEnabled
         telemetryPathChooser.isEnabled = telemetryEnabled
