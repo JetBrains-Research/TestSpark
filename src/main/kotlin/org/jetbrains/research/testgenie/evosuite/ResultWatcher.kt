@@ -2,10 +2,12 @@ package org.jetbrains.research.testgenie.evosuite
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
 import org.evosuite.utils.CompactReport
+import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import java.io.File
 import java.io.FileReader
 
@@ -19,7 +21,13 @@ import java.io.FileReader
  * @param resultName result path on which to watch for results
  * @param fileUrl the file url (for caching)
  */
-class ResultWatcher(private val project: Project, private val resultName: String, private val fileUrl: String) : Runnable {
+class ResultWatcher(
+    private val project: Project,
+    private val resultName: String,
+    private val fileUrl: String,
+    private val classFQN: String,
+) :
+    Runnable {
     private val log = Logger.getInstance(ResultWatcher::class.java)
 
     override fun run() {
@@ -62,11 +70,36 @@ class ResultWatcher(private val project: Project, private val resultName: String
                         project.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC)
                             .testGenerationResult(testGenerationResult, resultName, fileUrl)
                         log.info("Exiting Watcher thread for $resultName")
+
+                        project.service<TestCaseDisplayService>().packageLine =
+                            getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode)
+
+                        project.service<TestCaseDisplayService>().importsCode =
+                            getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode)
                         return
                     }
                 }
             }
             Thread.sleep(sleepDurationMillis)
         }
+    }
+
+    // get junit imports from a generated code
+    private fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?): String {
+        testSuiteCode ?: return ""
+        return testSuiteCode.replace("\r\n", "\n").split("\n").asSequence()
+            .filter { it.contains("^import".toRegex()) }
+            .filterNot { it.contains("evosuite".toRegex()) }
+            .filterNot { it.contains("RunWith".toRegex()) }
+            .filterNot { it.contains(classFQN.toRegex()) }
+            .joinToString("\n").plus("\n")
+    }
+
+    // get package from a generated code
+    private fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
+        testSuiteCode ?: return ""
+        return testSuiteCode.replace("\r\n", "\n").split("\n")
+            .filter { it.contains("^package".toRegex()) }
+            .joinToString("\n").plus("\n")
     }
 }

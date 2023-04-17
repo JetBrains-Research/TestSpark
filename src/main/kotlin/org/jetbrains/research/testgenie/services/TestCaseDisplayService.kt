@@ -3,7 +3,6 @@ package org.jetbrains.research.testgenie.services
 import com.intellij.coverage.CoverageDataManager
 import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.ide.highlighter.JavaFileType
-import com.intellij.ide.util.TreeClassChooserFactory
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
@@ -16,17 +15,29 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.fileChooser.FileChooser
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiManager
+import com.intellij.psi.PsiElementFactory
 import com.intellij.refactoring.suggested.newRange
+import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
+import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
@@ -40,13 +51,16 @@ import java.awt.Color
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
-import javax.swing.BorderFactory
-import javax.swing.Box
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
+import java.io.File
+import java.util.Locale
 import javax.swing.JPanel
+import javax.swing.JButton
+import javax.swing.JLabel
+import javax.swing.BoxLayout
+import javax.swing.BorderFactory
+import javax.swing.JOptionPane
+import javax.swing.JCheckBox
+import javax.swing.Box
 import javax.swing.border.Border
 
 class TestCaseDisplayService(private val project: Project) {
@@ -67,7 +81,9 @@ class TestCaseDisplayService(private val project: Project) {
 
     private val allTestCasePanel: JPanel = JPanel()
     private val scrollPane: JBScrollPane = JBScrollPane(
-        allTestCasePanel, JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        allTestCasePanel,
+        JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
     )
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private var originalTestCases: HashMap<String, String> = HashMap()
@@ -85,6 +101,10 @@ class TestCaseDisplayService(private val project: Project) {
     private var testJob: Workspace.TestJob? = null
     private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
     private var isJacocoCoverageActive = false
+
+    // Code required of imports and package for generated tests
+    var importsCode: String = ""
+    var packageLine: String = ""
 
     var fileUrl: String = ""
 
@@ -345,41 +365,115 @@ class TestCaseDisplayService(private val project: Project) {
         val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
-        println("Selected tests: ${selectedTestCases.size}")
-
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
             .map { getEditor(it)!! }
             .map { it.document.text }
 
-        // Show chooser dialog to select test file
-        val chooser = TreeClassChooserFactory.getInstance(project)
-            .createProjectScopeChooser(
-                "Insert Test Cases into Class"
-            )
+        // Descriptor for choosing folders and java files
+        val descriptor = FileChooserDescriptor(true, true, false, false, false, false)
 
-        // Warning: The following code is extremely cursed.
-        // It is a workaround for an oversight in the IntelliJ TreeJavaClassChooserDialog.
-        // This is necessary in order to set isShowLibraryContents to false in
-        // the AbstractTreeClassChooserDialog (parent of the TreeJavaClassChooserDialog).
-        // If this is not done, the user can pick a non-project class (e.g. a class from a library).
-        // See https://github.com/ciselab/TestGenie/issues/102
-        // TODO: In the future, this should be replaced with a custom dialog (which can also create new classes).
-        try {
-            val showLibraryContentsField = chooser.javaClass.superclass.getDeclaredField("myIsShowLibraryContents")
-            showLibraryContentsField.isAccessible = true
-            showLibraryContentsField.set(chooser, false)
-        } catch (_: Exception) {
-            // Could not set field
-            // Ignoring the exception is acceptable as this part is not critical
+        // Apply filter with folders and java files with main class
+        descriptor.withFileFilter { file ->
+            file.isDirectory || (
+                file.extension?.lowercase(Locale.getDefault()) == "java" && (
+                    PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                    ).classes.stream().map { it.name }
+                    .toArray()
+                    .contains(
+                        (PsiManager.getInstance(project).findFile(file) as PsiJavaFile).name.removeSuffix(".java")
+                    )
+                )
         }
-        chooser.showDialog()
 
-        // Get the selected class or return if no class was selected
-        val selectedClass = chooser.selected ?: return
+        val fileChooser = FileChooser.chooseFiles(
+            descriptor,
+            project,
+            LocalFileSystem.getInstance().findFileByPath(project.basePath!!)
+        )
 
-        // Insert test case components into selected class
-        appendTestsToClass(testCaseComponents, selectedClass)
+        // Cancel button pressed
+        if (fileChooser.isEmpty()) return
+
+        // Chosen files by user
+        val chosenFile = fileChooser[0]
+
+        // Virtual file of a final java file
+        var virtualFile: VirtualFile? = null
+        // PsiClass of a final java file
+        var psiClass: PsiClass? = null
+        // PsiJavaFile of a final java file
+        var psiJavaFile: PsiJavaFile? = null
+        if (chosenFile.isDirectory) {
+            // Input new file data
+            var className: String
+            var fileName: String
+            var filePath: String
+            // Waiting for correct file name input
+            while (true) {
+                val jOptionPane =
+                    JOptionPane.showInputDialog(
+                        null,
+                        TestGenieLabelsBundle.defaultValue("optionPaneMessage"),
+                        TestGenieLabelsBundle.defaultValue("optionPaneTitle"),
+                        JOptionPane.PLAIN_MESSAGE,
+                        null,
+                        null,
+                        null,
+                    )
+
+                // Cancel button pressed
+                jOptionPane ?: return
+
+                // Get class name from user
+                className = jOptionPane as String
+
+                // Set file name and file path
+                fileName = "${className.split('.')[0]}.java"
+                filePath = "${chosenFile.path}/$fileName"
+
+                // Check the correctness of a class name
+                if (!Regex("[A-Z][a-zA-Z0-9]*(.java)?").matches(className)) {
+                    showErrorWindow(TestGenieLabelsBundle.defaultValue("incorrectFileNameMessage"))
+                    continue
+                }
+
+                // Check the existence of a file with this name
+                if (File(filePath).exists()) {
+                    showErrorWindow(TestGenieLabelsBundle.defaultValue("fileAlreadyExistsMessage"))
+                    continue
+                }
+                break
+            }
+
+            // Create new file and set services of this file
+            WriteCommandAction.runWriteCommandAction(project) {
+                chosenFile.createChildData(null, fileName)
+                virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
+                psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
+                psiClass = PsiElementFactory.getInstance(project).createClass(className)
+                psiJavaFile!!.add(psiClass!!)
+            }
+        } else {
+            // Set services of the chosen file
+            virtualFile = chosenFile
+            psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
+            psiClass = psiJavaFile!!.classes[
+                psiJavaFile!!.classes.stream().map { it.name }.toArray()
+                    .indexOf(psiJavaFile!!.name.removeSuffix(".java"))
+            ]
+        }
+
+        // Add tests to the file
+        WriteCommandAction.runWriteCommandAction(project) {
+            appendTestsToClass(testCaseComponents, psiClass!!, psiJavaFile!!)
+        }
+
+        // Open the file after adding
+        FileEditorManager.getInstance(project).openTextEditor(
+            OpenFileDescriptor(project, virtualFile!!),
+            true,
+        )
 
         // The scheduled tests will be submitted in the background
         // (they will be checked every 5 minutes and also when the project is closed)
@@ -387,6 +481,15 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove the selected test cases from the cache and the tool window UI
         removeSelectedTestCases(selectedTestCasePanels)
+    }
+
+    private fun showErrorWindow(message: String) {
+        JOptionPane.showMessageDialog(
+            null,
+            message,
+            TestGenieLabelsBundle.defaultValue("errorWindowTitle"),
+            JOptionPane.ERROR_MESSAGE
+        )
     }
 
     private fun getActiveTests(): Set<String> {
@@ -484,17 +587,32 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param testCaseComponents the test cases to be appended
      * @param selectedClass the class which the test cases should be appended to
+     * @param outputFile the output file for tests
      */
-    private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass) {
-        WriteCommandAction.runWriteCommandAction(project) {
-            testCaseComponents.forEach {
-                PsiDocumentManager.getInstance(project).getDocument(selectedClass.containingFile)!!.insertString(
-                    selectedClass.rBrace!!.textRange.startOffset,
-                    // Fix Windows line separators
-                    it.replace("\r\n", "\n")
-                )
-            }
+    private fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClass, outputFile: PsiJavaFile) {
+        // block document
+        PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(
+            PsiDocumentManager.getInstance(project).getDocument(outputFile)!!,
+        )
+
+        // insert tests to a code
+        testCaseComponents.forEach {
+            PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+                selectedClass.rBrace!!.textRange.startOffset,
+                // Fix Windows line separators
+                it.replace("\r\n", "\n"),
+            )
         }
+
+        // insert imports to a code
+        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+            outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
+            importsCode,
+        )
+
+        // insert package to a code
+        outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
+            .insertString(0, packageLine)
     }
 
     /**
@@ -511,7 +629,9 @@ class TestCaseDisplayService(private val project: Project) {
         // If there is no generated tests tab, make it
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
-            mainPanel, TestGenieLabelsBundle.defaultValue("generatedTests"), true
+            mainPanel,
+            TestGenieLabelsBundle.defaultValue("generatedTests"),
+            true,
         )
         contentManager!!.addContent(content!!)
 
@@ -582,7 +702,7 @@ class TestCaseDisplayService(private val project: Project) {
         val choice: Int = Messages.showYesNoCancelDialog(
             TestGenieBundle.message("removeAllMessage"),
             TestGenieBundle.message("confirmationTitle"),
-            Messages.getQuestionIcon()
+            Messages.getQuestionIcon(),
         )
         // Cancel the operation if the user did not press "Yes"
         if (choice != 0) return
@@ -643,7 +763,7 @@ class TestCaseDisplayService(private val project: Project) {
         document: Document,
         resetButton: JButton,
         textFieldEditor: EditorTextField,
-        checkbox: JCheckBox
+        checkbox: JCheckBox,
     ) {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
@@ -654,7 +774,7 @@ class TestCaseDisplayService(private val project: Project) {
                 val borderColor = Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
-                    settingsProjectState.colorBlue
+                    settingsProjectState.colorBlue,
                 )
                 textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
@@ -667,14 +787,14 @@ class TestCaseDisplayService(private val project: Project) {
                 val newLine = event.newFragment.contains('\n')
                 val startLine = document.getLineNumber(
                     event.newRange.startOffset +
-                        (if (newLine) 1 else 0)
+                        (if (newLine) 1 else 0),
                 )
                 val endLine = document.getLineNumber(event.newRange.endOffset)
                 for (lineNumber in startLine..endLine) {
                     textFieldEditor.editor!!.markupModel.addLineHighlighter(
                         if (newLine) DiffColors.DIFF_INSERTED else DiffColors.DIFF_MODIFIED,
                         lineNumber,
-                        HighlighterLayer.FIRST
+                        HighlighterLayer.FIRST,
                     )
                 }
 
@@ -683,7 +803,7 @@ class TestCaseDisplayService(private val project: Project) {
                     textFieldEditor.editor!!.markupModel.addLineHighlighter(
                         DiffColors.DIFF_MODIFIED,
                         endLine,
-                        HighlighterLayer.FIRST
+                        HighlighterLayer.FIRST,
                     )
                 }
 
@@ -700,7 +820,7 @@ class TestCaseDisplayService(private val project: Project) {
         NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
             TestGenieBundle.message("emptyTestCasesTitle"),
             TestGenieBundle.message("emptyTestCasesText"),
-            NotificationType.ERROR
+            NotificationType.ERROR,
         ).notify(project)
     }
 
@@ -717,7 +837,7 @@ class TestCaseDisplayService(private val project: Project) {
                 val original = originalTestCases[it]!!
 
                 TestGenieTelemetryService.ModifiedTestCase(original, modified)
-            }.filter { it.modified != it.original }
+            }.filter { it.modified != it.original },
         )
     }
 

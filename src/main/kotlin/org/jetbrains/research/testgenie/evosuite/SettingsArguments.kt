@@ -27,9 +27,10 @@ class SettingsArguments(
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
         "-base_dir", """"$baseDir"""",
-        "-projectCP", projectClassPath,
+        "-projectCP", projectClassPath, // will be updated after building
         "-Dnew_statistics=false",
         "-class", classFQN,
+        "-Dcatch_undeclared_exceptions=false",
         "-Dtest_naming_strategy=COVERAGE"
     )
 
