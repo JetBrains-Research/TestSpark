@@ -98,7 +98,7 @@ To generate a test for a class, right-click (with mouse) anywhere within the cla
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the right-hand side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice or to a new file.\
 Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
 ![Quick buttons](readme-images/pngs/selectAll.png)
 
@@ -109,7 +109,7 @@ To generate a test for a method, right-click (with mouse) anywhere within the me
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice or to a new file.\
 Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
 ![Quick buttons](readme-images/pngs/selectAll.png)
 
@@ -120,7 +120,7 @@ To generate a test for a method, right-click (with mouse) anywhere within the li
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice or to a new file.\
 Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
 ![Quick buttons](readme-images/pngs/selectAll.png)
 
@@ -173,7 +173,7 @@ The plugin is configured mainly through the Settings menu. The plugin settings c
 ![Plugin Settings](readme-images/pngs/PluginSettings.png)
 
 ### First time configuration
-Before running the plugin for the first time, we highly recommend going to the `Environment settings` section of TestGenie settings. The settings include java 11 path, compilation path (path to compiled code), compilation command. All commands have defaults. However, we recommend especially that you check compilation command. For this command the user requires maven, gradle or any other builder program which can be accessed via command. Leaving this field with a faulty value may cause unintended behaviour.
+Before running the plugin for the first time, we highly recommend going to the `Environment settings` section of TestGenie settings. The settings include java 11 path, compilation path (path to compiled code), compilation command. Java path has default. The remaining settings are determined automatically in the absence of the entered data. If desired, it can manually set the command for compilation or compilation path. Leaving this field with a faulty value may cause unintended behaviour.
 ![Setup](readme-images/pngs/Setup.png)
 
 ### Quick Access Parameters
