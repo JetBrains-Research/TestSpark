@@ -99,6 +99,7 @@ fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.llm.Pi
                 polymorphismRelations[currentPsiClass] = ArrayList()
             }
             polymorphismRelations[currentPsiClass]?.add(currentSubClass)
+            if (!psiClassesToVisit.contains(currentSubClass)){psiClassesToVisit.addLast(currentSubClass)}
         }
 
 
