@@ -20,7 +20,7 @@ class GenerateTestsForClassLLM : AnAction() {
         val project = e.project ?: return
 
         val runnerService = project.service<RunnerService>()
-        if (!runnerService.verify(psiFile)) return
+//        if (!runnerService.verify(psiFile)) return
 
         val llmPipeline: Pipeline= createGPTPipeline(e) ?: return
         llmPipeline.forClass()
