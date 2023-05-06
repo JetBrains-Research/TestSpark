@@ -67,16 +67,19 @@ class EvoSuiteProcessManager(
 
                     // Include extra libraries in classpath
                     val librariesPaths = ModuleRootManager.getInstance(module).orderEntries().librariesOnly().pathsList.pathList
-                    for (lib in librariesPaths){
+                    for (lib in librariesPaths) {
                         // exclude the invalid classpaths
-                        if(buildPath.contains(lib))
+                        if (buildPath.contains(lib)) {
                             continue
-                        if(lib.endsWith(".zip"))
+                        }
+                        if (lib.endsWith(".zip")) {
                             continue
+                        }
                         val basePath = module.project.basePath
-                        if(lib.startsWith(basePath.toString()))
+                        if (lib.startsWith(basePath.toString())) {
                             // add the extra path
                             buildPath += lib.plus(":")
+                        }
                     }
                 }
             }
