@@ -34,6 +34,7 @@ TestGenie is a plugin for generating unit tests. TestGenie natively integrates <
 - [Coverage table](#coverage-table-1)
 - [Coverage visualisation for generated test suite](#coverage-visualisation-1)
 - [Killed mutants visualisation](#killed-mutants-visualisation-1)
+- [Integrating tests into the project](#integrating-tests-into-the-project-1)
 - [Caching tests](#caching-tests-1)
 - [Test validation](#test-validation-1)
 - [Accessibility features](#accessibility-features-1)
@@ -56,6 +57,9 @@ TestGenie offers an option to highlight lines which the generated test suite cov
 
 ### Killed Mutants Visualisation
 TestGenie offers an option to see which mutants were killed and by which tests. Clicking the gutter icon (green rectangle) to the left of the lines allows the user to see which tests cover the line. Clicking a name of a mutant highlights all the tests in the "Generated Tests" tab which cover it.
+
+### Integrating tests into the project
+When the user has decided on a set of tests that he wants to use, it is possible to integrate these tests into the project. To do this, click on the button "Apply to test suite".
 
 ### Caching Tests
 Due to its nature, generating tests with EvoSuite takes time. TestGenie takes steps to address this as
@@ -98,7 +102,7 @@ To generate a test for a class, right-click (with mouse) anywhere within the cla
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the right-hand side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice or to a new file.\
 Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
 ![Quick buttons](readme-images/pngs/selectAll.png)
 
@@ -109,7 +113,7 @@ To generate a test for a method, right-click (with mouse) anywhere within the me
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice or to a new file.\
 Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
 ![Quick buttons](readme-images/pngs/selectAll.png)
 
@@ -120,7 +124,7 @@ To generate a test for a method, right-click (with mouse) anywhere within the li
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
 ![Generated Tests](readme-images/gifs/testsAppear.gif)\
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
+You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice or to a new file.\
 Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
 ![Quick buttons](readme-images/pngs/selectAll.png)
 
@@ -141,6 +145,12 @@ For mutation visualisation to work, you must have [coverage visualisation](#cove
 ![Turn on Mutation](readme-images/pngs/turnOnMutation.png)\
 Once tests are generated, the same gutter from [`Coverage Visualisation`](#coverage-visualisation-1) can be used to show which mutants are covered by the current test suite and which ones are not. For mutants covered, the mutant can be clicked. Clicking the mutant will highlight all the tests that kill the mutant. Mutation visualisation adjusts dynamically - it only shows results for the tests that are selected in the TestGenie tab.\
 ![Mutation Coverage](readme-images/gifs/mutationHighlight.gif)
+
+### Integrating tests into the project
+The tests can be added to an existing file:
+![Tests adding to an exiting file](readme-images/gifs/addingToAnExistingFile.gif)\
+Or to a new file:
+![Tests adding to a new file](readme-images/gifs/addingToANewFile.gif)
 
 ### Caching Tests
 When a user initially generates tests for a class, this will take some time, as the EvoSuite backend needs to be invoked. Then, if a user generates tests for a single method in this class, Test-Genie will look in its cache and find the tests that were previously generated for the entire class, and will instantly display them to the user rather than invoking EvoSuite again.\
@@ -173,7 +183,7 @@ The plugin is configured mainly through the Settings menu. The plugin settings c
 ![Plugin Settings](readme-images/pngs/PluginSettings.png)
 
 ### First time configuration
-Before running the plugin for the first time, we highly recommend going to the `Environment settings` section of TestGenie settings. The settings include java 11 path, compilation path (path to compiled code), compilation command. All commands have defaults. However, we recommend especially that you check compilation command. For this command the user requires maven, gradle or any other builder program which can be accessed via command. Leaving this field with a faulty value may cause unintended behaviour.
+Before running the plugin for the first time, we highly recommend going to the `Environment settings` section of TestGenie settings. The settings include java 11 path, compilation path (path to compiled code), compilation command. Java path has default. The remaining settings are determined automatically in the absence of the entered data. If desired, it can manually set the command for compilation or compilation path. Leaving this field with a faulty value may cause unintended behaviour.
 ![Setup](readme-images/pngs/Setup.png)
 
 ### Quick Access Parameters
