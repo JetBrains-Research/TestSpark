@@ -62,8 +62,9 @@ TestGenie offers an option to see which mutants were killed and by which tests. 
 When the user has decided on a set of tests that he wants to use, it is possible to integrate these tests into the project. To do this, click on the button "Apply to test suite".
 
 The tests can be added to an existing file:
-
+![Tests adding to an exiting file](readme-images/gifs/addingToAnExistingFile.gif)\
 Or to a new file:
+![Tests adding to a new file](readme-images/gifs/addingToANewFile.gif)
 
 ### Caching Tests
 Due to its nature, generating tests with EvoSuite takes time. TestGenie takes steps to address this as
