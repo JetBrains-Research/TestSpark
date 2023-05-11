@@ -34,6 +34,7 @@ TestGenie is a plugin for generating unit tests. TestGenie natively integrates <
 - [Coverage table](#coverage-table-1)
 - [Coverage visualisation for generated test suite](#coverage-visualisation-1)
 - [Killed mutants visualisation](#killed-mutants-visualisation-1)
+- [Integrating tests into the project](#integrating-tests-into-the-project)
 - [Caching tests](#caching-tests-1)
 - [Test validation](#test-validation-1)
 - [Accessibility features](#accessibility-features-1)
@@ -56,6 +57,13 @@ TestGenie offers an option to highlight lines which the generated test suite cov
 
 ### Killed Mutants Visualisation
 TestGenie offers an option to see which mutants were killed and by which tests. Clicking the gutter icon (green rectangle) to the left of the lines allows the user to see which tests cover the line. Clicking a name of a mutant highlights all the tests in the "Generated Tests" tab which cover it.
+
+### Integrating tests into the project
+When the user has decided on a set of tests that he wants to use, it is possible to integrate these tests into the project. To do this, click on the button "Apply to test suite".
+
+The tests can be added to an existing file:
+
+Or to a new file:
 
 ### Caching Tests
 Due to its nature, generating tests with EvoSuite takes time. TestGenie takes steps to address this as
