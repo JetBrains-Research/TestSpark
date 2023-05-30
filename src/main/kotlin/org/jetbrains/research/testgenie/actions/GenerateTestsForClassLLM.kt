@@ -3,10 +3,8 @@ package org.jetbrains.research.testgenie.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.components.service
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testgenie.llm.Pipeline
-import org.jetbrains.research.testgenie.services.RunnerService
 
 class GenerateTestsForClassLLM : AnAction() {
     /**
@@ -16,14 +14,10 @@ class GenerateTestsForClassLLM : AnAction() {
      */
     override fun actionPerformed(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-
         val project = e.project ?: return
 
-        val runnerService = project.service<RunnerService>()
-//        if (!runnerService.verify(psiFile)) return
-
-        val llmPipeline: Pipeline= createGPTPipeline(e) ?: return
-        llmPipeline.forClass()
-        TODO("Not yet implemented")
+        val llmPipeline: Pipeline = createGPTPipeline(e) ?: return
+        llmPipeline.forClass().runTestGeneration()
+        TODO("Next steps after sending requests to LLM")
     }
 }
