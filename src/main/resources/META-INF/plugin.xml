@@ -64,6 +64,11 @@
                 instance="org.jetbrains.research.testgenie.settings.SettingsEvoSuiteConfigurable"
                 id="TestGenieSettings.evosuite"
                 displayName="EvoSuite"/>
+        <applicationConfigurable
+                parentId="TestGenieSettings"
+                instance="org.jetbrains.research.testgenie.settings.SettingsLLMConfigurable"
+                id="TestGenieSettings.llm"
+                displayName="Large Language Models"/>
 
         <!-- Notifications -->
         <notificationGroup id="EvoSuite Execution Error"
