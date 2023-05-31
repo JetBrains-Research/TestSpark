@@ -59,7 +59,15 @@ class Pipeline(
     }
 
     fun runTestGeneration() {
-        llmRequest.request(prompt)
-        TODO("Not yet implemented")
+        // Send request to LLM
+        val originalResponse = llmRequest.request(prompt)
+
+        // Check if response is not empty
+        if (originalResponse.isBlank()){
+            LLMErrorManager.displayEmptyTests(project)
+            return
+        }
+
+        TODO("Parse generated tests + Run and validate tests + collect execution results")
     }
 }

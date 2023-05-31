@@ -79,6 +79,8 @@
                            displayType="BALLOON"/>
         <notificationGroup id="Validation Result"
                            displayType="BALLOON"/>
+        <notificationGroup id="LLM Error"
+                           displayType="BALLOON"/>
 
     </extensions>
 

@@ -71,12 +71,12 @@ fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.llm.Pi
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return null
     val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
-    val fileUrl = vFile.presentableUrl
+//    val fileUrl = vFile.presentableUrl
     val modificationStamp = vFile.modificationStamp
 
 
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
-    val classFQN = psiClass.qualifiedName ?: return null
+//    val classFQN = psiClass.qualifiedName ?: return null
 
     var psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(psiClass))
     var visitedPsiClasses: Set<PsiClass> = mutableSetOf()
