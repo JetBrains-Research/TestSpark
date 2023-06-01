@@ -15,10 +15,10 @@ import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
-import org.jetbrains.research.testgenie.evosuite.Pipeline
-import org.jetbrains.research.testgenie.evosuite.validation.VALIDATION_RESULT_TOPIC
-import org.jetbrains.research.testgenie.evosuite.validation.ValidationResultListener
-import org.jetbrains.research.testgenie.evosuite.validation.Validator
+import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
+import org.jetbrains.research.testgenie.tools.evosuite.validation.VALIDATION_RESULT_TOPIC
+import org.jetbrains.research.testgenie.tools.evosuite.validation.ValidationResultListener
+import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 import org.jetbrains.research.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
 import org.jetbrains.research.testgenie.services.CoverageSelectionToggleListener
 import org.jetbrains.research.testgenie.services.CoverageVisualisationService
@@ -156,10 +156,10 @@ class Workspace(private val project: Project) : Disposable {
      * @return the test job that was generated
      */
     fun receiveGenerationResult(
-        testResultName: String,
-        testReport: CompactReport,
-        cacheLazyPipeline: Pipeline? = null,
-        cachedJobKey: TestJobInfo? = null
+            testResultName: String,
+            testReport: CompactReport,
+            cacheLazyPipeline: Pipeline? = null,
+            cachedJobKey: TestJobInfo? = null
     ): TestJobInfo {
         val pendingJobKey = pendingTestResults.remove(testResultName)!!
 
