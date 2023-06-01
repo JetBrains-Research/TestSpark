@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.llm
+package org.jetbrains.research.testgenie.llm.error
 
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType

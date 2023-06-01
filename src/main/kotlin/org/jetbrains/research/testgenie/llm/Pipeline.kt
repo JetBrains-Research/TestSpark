@@ -3,9 +3,10 @@ package org.jetbrains.research.testgenie.llm
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.actions.getSignatureString
+import org.jetbrains.research.testgenie.llm.error.LLMErrorManager
+import org.jetbrains.research.testgenie.llm.generation.LLMRequest
 
 private var prompt = "";
-private val llmRequest = LLMRequest()
 
 
 class Pipeline(
@@ -60,10 +61,10 @@ class Pipeline(
 
     fun runTestGeneration() {
         // Send request to LLM
-        val originalResponse = llmRequest.request(prompt)
+        val generatedTestSuite = LLMRequest().request(prompt)
 
         // Check if response is not empty
-        if (originalResponse.isBlank()){
+        if (generatedTestSuite.isEmpty()){
             LLMErrorManager.displayEmptyTests(project)
             return
         }
