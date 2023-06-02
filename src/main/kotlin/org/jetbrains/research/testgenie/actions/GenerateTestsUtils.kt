@@ -75,13 +75,13 @@ fun PsiMethod.getSignatureString(): String {
     return text.substring(0, bodyStart).replace('\n', ' ').trim()
 }
 
-fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.llm.Pipeline? {
+fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.llm.Pipeline? {
     val project: Project = e.project ?: return null
 
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return null
     val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
-//    val fileUrl = vFile.presentableUrl
+    val fileUrl = vFile.presentableUrl
     val modificationStamp = vFile.modificationStamp
 
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
@@ -138,8 +138,15 @@ fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         }
     }
 
+    val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+    val settingsProjectState = project.service<SettingsProjectService>().state
+    val buildPath = "$projectPath/${settingsProjectState.buildPath}"
+
     return org.jetbrains.research.testgenie.tools.llm.Pipeline(
         project,
+        projectPath,
+        buildPath,
+        fileUrl,
         interestingPsiClasses,
         psiClass,
         polymorphismRelations,

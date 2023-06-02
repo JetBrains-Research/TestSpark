@@ -1,20 +1,35 @@
 package org.jetbrains.research.testgenie.tools.llm
 
+import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
+import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.getSignatureString
-import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testgenie.tools.llm.generation.LLMRequest
+import org.jetbrains.research.testgenie.tools.evosuite.ProjectBuilder
+import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
 
 private var prompt = ""
 
+
+
 class Pipeline(
     private val project: Project,
+    private val projectPath: String,
+    private val projectClassPath: String,
+    private val fileUrl: String,
     private val interestingPsiClasses: Set<PsiClass>,
     private val cut: PsiClass,
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     private val modTs: Long,
 ) {
+
+    private val log = Logger.getInstance(this::class.java)
+
+    private val processManager =
+        LLMProcessManager(project, projectPath, projectClassPath, fileUrl)
 
     // TODO("Removed unused input parameters. needs o be refactored after finalizing the implementation")
 
@@ -61,14 +76,29 @@ class Pipeline(
     }
 
     fun runTestGeneration() {
-        // Send request to LLM
-        val generatedTestSuite = LLMRequest().request(prompt)
+        val projectBuilder = ProjectBuilder(project)
 
-        // Check if response is not empty
-        if (generatedTestSuite.isEmpty()) {
-            LLMErrorManager.displayEmptyTests(project)
-            return
-        }
+        ProgressManager.getInstance()
+            .run(object : Task.Backgroundable(project, TestGenieBundle.message("testGenerationMessage")){
+                override fun run(indicator: ProgressIndicator) {
+
+                    if (indicator.isCanceled) {
+                        indicator.stop()
+                        return
+                    }
+
+
+                    if (projectBuilder.runBuild(indicator)) {
+                        processManager.runLLMTestGenerator(indicator,prompt,log)
+                    }
+
+
+                }
+
+            })
+
+
+
 
         TODO("Parse generated tests + Run and validate tests + collect execution results")
     }
