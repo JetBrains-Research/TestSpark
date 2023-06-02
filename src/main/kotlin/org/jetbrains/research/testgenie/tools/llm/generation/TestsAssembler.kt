@@ -2,6 +2,9 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
+import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
+import org.jetbrains.research.testgenie.tools.llm.test.TestLine
+import org.jetbrains.research.testgenie.tools.llm.test.TestLineType
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 
 
@@ -51,8 +54,58 @@ class TestsAssembler(
                 it.groupValues[0]
             }.toSet()
 
-            // ToDo(Process rawText and add test cases)
 
+            val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
+            testSet.removeAt(0)
+
+            testSet.forEach {
+                val rawTest = "@Test$it"
+                val currentTest = TestCaseGeneratedByLLM()
+
+                // Get expected Exception
+                if (rawTest.startsWith("@Test(expected =")){
+                    currentTest.expectedException = rawTest
+                        .split(")")[0]
+                            .trim()
+                }
+
+                // Get unexpected exceptions
+                val interestingPartOfSignature = rawTest
+                    .split("public void")[1]
+                        .split("{")[0]
+                            .split("()")[1]
+                                .trim()
+                if(interestingPartOfSignature.contains("throws")){
+                    currentTest.throwsException = interestingPartOfSignature
+                        .split("throws")[1]
+                            .trim()
+                }
+
+                // Get test's name
+                currentTest.name = rawTest
+                    .split("public void ")[1]
+                        .split("()")[0]
+                            .trim()
+
+                // Get test's body
+                val testBody = rawTest.split("{")[1].trim()
+                val lines = testBody.split("\n").toMutableList()
+                lines.removeLast()
+                lines.forEach{rawLine ->
+                    val line = rawLine.trim()
+
+                    val type:TestLineType = when{
+                        line.startsWith("//") -> TestLineType.COMMENT
+                        line.isBlank() -> TestLineType.BREAK
+                        line.lowercase().startsWith("assert") -> TestLineType.ASSERTION
+                        else -> TestLineType.CODE
+                    }
+
+                    currentTest.lines.add(TestLine(type,line))
+                }
+
+                testSuite.testCases.add(currentTest)
+            }
             return testSuite
         }
     }
