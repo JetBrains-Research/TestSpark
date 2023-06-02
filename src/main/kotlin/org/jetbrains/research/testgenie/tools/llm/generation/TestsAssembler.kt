@@ -8,6 +8,11 @@ import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 //private var rawText: String = ""
 private var rawText = ""
 
+val importPattern = Regex(
+    pattern = "^import\\s+(static\\s)?((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
+    options = setOf(RegexOption.MULTILINE)
+)
+
 val numberOfTestsPattern = Regex(
     pattern = "^Number of test cases are: (\\d+)\$",
     options = setOf(RegexOption.IGNORE_CASE)
@@ -40,7 +45,13 @@ class TestsAssembler(
     companion object {
         fun returnTestSuite(): TestSuiteGeneratedByLLM {
             val testSuite = TestSuiteGeneratedByLLM()
-            // ToDo(Process rawText and add all of the information in the testSuite)
+
+            // save imports
+            testSuite.imports = importPattern.findAll(rawText,0).map {
+                it.groupValues[0]
+            }.toSet()
+
+            // ToDo(Process rawText and add test cases)
 
             return testSuite
         }
