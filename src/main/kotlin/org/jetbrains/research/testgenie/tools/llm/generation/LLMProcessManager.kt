@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.tools.llm.generation;
+package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -10,12 +10,12 @@ import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 
-class LLMProcessManager (
-        private val project:Project,
-        private val projectPath: String,
-        private val projectClassPath: String,
-        private val fileUrl: String
-){
+class LLMProcessManager(
+    private val project: Project,
+    private val projectPath: String,
+    private val projectClassPath: String,
+    private val fileUrl: String
+) {
 
     private val settingsProjectState = project.service<SettingsProjectService>().state
 
@@ -23,7 +23,7 @@ class LLMProcessManager (
         indicator: ProgressIndicator,
         prompt: String,
         log: Logger,
-    ){
+    ) {
 
         // update build path
         var buildPath = projectClassPath
@@ -38,7 +38,7 @@ class LLMProcessManager (
         indicator.text = TestGenieBundle.message("searchMessage")
 
         // Send request to LLM
-        val generatedTestSuite = LLMRequest().request(prompt,indicator)
+        val generatedTestSuite = LLMRequest().request(prompt, indicator)
 
         // Check if response is not empty
         if (generatedTestSuite.isEmpty()) {

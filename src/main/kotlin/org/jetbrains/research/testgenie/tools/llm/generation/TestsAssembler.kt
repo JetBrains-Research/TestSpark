@@ -7,8 +7,7 @@ import org.jetbrains.research.testgenie.tools.llm.test.TestLine
 import org.jetbrains.research.testgenie.tools.llm.test.TestLineType
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 
-
-//private var rawText: String = ""
+// private var rawText: String = ""
 private var rawText = ""
 
 val importPattern = Regex(
@@ -16,17 +15,7 @@ val importPattern = Regex(
     options = setOf(RegexOption.MULTILINE)
 )
 
-val numberOfTestsPattern = Regex(
-    pattern = "^Number of test cases are: (\\d+)\$",
-    options = setOf(RegexOption.IGNORE_CASE)
-)
-
-//var activeTestCase: TestCaseGeneratedByLLM = TestCaseGeneratedByLLM(),
-//var importsPassed: Boolean = false,
-//var inATest: Boolean = false
-
 var lastTestCount = 0
-
 
 class TestsAssembler(
     val indicator: ProgressIndicator,
@@ -37,7 +26,7 @@ class TestsAssembler(
         rawText = rawText.plus(text)
         val generatedTestsCount = rawText.split("@Test").size - 1
 
-        if(lastTestCount != generatedTestsCount){
+        if (lastTestCount != generatedTestsCount) {
             indicator.text = "Generating test #$generatedTestsCount"
             lastTestCount = generatedTestsCount
         }
@@ -50,10 +39,9 @@ class TestsAssembler(
             val testSuite = TestSuiteGeneratedByLLM()
 
             // save imports
-            testSuite.imports = importPattern.findAll(rawText,0).map {
+            testSuite.imports = importPattern.findAll(rawText, 0).map {
                 it.groupValues[0]
             }.toSet()
-
 
             val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
             testSet.removeAt(0)
@@ -63,45 +51,45 @@ class TestsAssembler(
                 val currentTest = TestCaseGeneratedByLLM()
 
                 // Get expected Exception
-                if (rawTest.startsWith("@Test(expected =")){
+                if (rawTest.startsWith("@Test(expected =")) {
                     currentTest.expectedException = rawTest
                         .split(")")[0]
-                            .trim()
+                        .trim()
                 }
 
                 // Get unexpected exceptions
                 val interestingPartOfSignature = rawTest
                     .split("public void")[1]
-                        .split("{")[0]
-                            .split("()")[1]
-                                .trim()
-                if(interestingPartOfSignature.contains("throws")){
+                    .split("{")[0]
+                    .split("()")[1]
+                    .trim()
+                if (interestingPartOfSignature.contains("throws")) {
                     currentTest.throwsException = interestingPartOfSignature
                         .split("throws")[1]
-                            .trim()
+                        .trim()
                 }
 
                 // Get test's name
                 currentTest.name = rawTest
                     .split("public void ")[1]
-                        .split("()")[0]
-                            .trim()
+                    .split("()")[0]
+                    .trim()
 
                 // Get test's body
                 val testBody = rawTest.split("{")[1].trim()
                 val lines = testBody.split("\n").toMutableList()
                 lines.removeLast()
-                lines.forEach{rawLine ->
+                lines.forEach { rawLine ->
                     val line = rawLine.trim()
 
-                    val type:TestLineType = when{
+                    val type: TestLineType = when {
                         line.startsWith("//") -> TestLineType.COMMENT
                         line.isBlank() -> TestLineType.BREAK
                         line.lowercase().startsWith("assert") -> TestLineType.ASSERTION
                         else -> TestLineType.CODE
                     }
 
-                    currentTest.lines.add(TestLine(type,line))
+                    currentTest.lines.add(TestLine(type, line))
                 }
 
                 testSuite.testCases.add(currentTest)

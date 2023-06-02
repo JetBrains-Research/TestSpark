@@ -13,8 +13,6 @@ import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
 
 private var prompt = ""
 
-
-
 class Pipeline(
     private val project: Project,
     private val projectPath: String,
@@ -49,7 +47,7 @@ class Pipeline(
         // prompt: signature of methods in the classes used by CUT
         prompt += "Here are the method signatures of classes used by the class under test. Only use these signatures for creating objects, not your own ideas.\n"
         for (interestingPsiClass: PsiClass in interestingPsiClasses) {
-            if (interestingPsiClass.qualifiedName!!.startsWith("java")){
+            if (interestingPsiClass.qualifiedName!!.startsWith("java")) {
                 continue
             }
             val interestingPsiClassQN = interestingPsiClass.qualifiedName
@@ -79,7 +77,7 @@ class Pipeline(
         val projectBuilder = ProjectBuilder(project)
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestGenieBundle.message("testGenerationMessage")){
+            .run(object : Task.Backgroundable(project, TestGenieBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
 
                     if (indicator.isCanceled) {
@@ -87,18 +85,11 @@ class Pipeline(
                         return
                     }
 
-
                     if (projectBuilder.runBuild(indicator)) {
-                        processManager.runLLMTestGenerator(indicator,prompt,log)
+                        processManager.runLLMTestGenerator(indicator, prompt, log)
                     }
-
-
                 }
-
             })
-
-
-
 
         TODO("Parse generated tests + Run and validate tests + collect execution results")
     }
