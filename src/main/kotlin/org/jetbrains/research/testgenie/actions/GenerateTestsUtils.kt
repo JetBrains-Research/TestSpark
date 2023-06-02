@@ -9,14 +9,23 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.*
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiAnonymousClass
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiCodeBlock
+import com.intellij.psi.PsiStatement
+import com.intellij.psi.PsiField
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.jetbrains.research.testgenie.evosuite.Pipeline
+import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 
@@ -60,12 +69,13 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
         cacheEndLine
     )
 }
+
 fun PsiMethod.getSignatureString(): String {
     val bodyStart = body?.startOffsetInParent ?: this.textLength
     return text.substring(0, bodyStart).replace('\n', ' ').trim()
 }
 
-fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.llm.Pipeline? {
+fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.llm.Pipeline? {
     val project: Project = e.project ?: return null
 
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
@@ -74,41 +84,41 @@ fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.llm.Pi
 //    val fileUrl = vFile.presentableUrl
     val modificationStamp = vFile.modificationStamp
 
-
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
 //    val classFQN = psiClass.qualifiedName ?: return null
 
     var psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(psiClass))
     var visitedPsiClasses: Set<PsiClass> = mutableSetOf()
 
-
     // Collect interesting classes (i.e., methods that are passed as input arguments to CUT and their super/sub classes)
-    var interestingPsiClasses: Set<PsiClass> = mutableSetOf();
-    val polymorphismRelations: MutableMap<PsiClass,MutableList<PsiClass>> = mutableMapOf()
-    while (psiClassesToVisit.isNotEmpty()){
+    var interestingPsiClasses: Set<PsiClass> = mutableSetOf()
+    val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
+    while (psiClassesToVisit.isNotEmpty()) {
         val currentPsiClass = psiClassesToVisit.removeFirst()
         interestingPsiClasses += currentPsiClass
 
         // Analyze the subclasses
 
         val scope = GlobalSearchScope.allScope(project)
-        val query = ClassInheritorsSearch.search(currentPsiClass, scope,true)
+        val query = ClassInheritorsSearch.search(currentPsiClass, scope, true)
         val detectedSubClasses: Collection<PsiClass> = query.findAll()
-        for (currentSubClass: PsiClass in detectedSubClasses){
-            if (!polymorphismRelations.contains(currentPsiClass)){
+        for (currentSubClass: PsiClass in detectedSubClasses) {
+            if (!polymorphismRelations.contains(currentPsiClass)) {
                 polymorphismRelations[currentPsiClass] = ArrayList()
             }
             polymorphismRelations[currentPsiClass]?.add(currentSubClass)
-            if (!psiClassesToVisit.contains(currentSubClass)){psiClassesToVisit.addLast(currentSubClass)}
+            if (!psiClassesToVisit.contains(currentSubClass)) {
+                psiClassesToVisit.addLast(currentSubClass)
+            }
         }
 
-
         // Analyze the input parameters to the main class and its super classes
-        for (field: PsiField in currentPsiClass.allFields){
-            val fileName = field.type.presentableText+".java"
+        for (field: PsiField in currentPsiClass.allFields) {
+            val fileName = field.type.presentableText + ".java"
 
-            val detectedVirtualFiles = FilenameIndex.getVirtualFilesByName(fileName,GlobalSearchScope.allScope(project))
-            if (detectedVirtualFiles.isEmpty()){
+            val detectedVirtualFiles =
+                FilenameIndex.getVirtualFilesByName(fileName, GlobalSearchScope.allScope(project))
+            if (detectedVirtualFiles.isEmpty()) {
                 println("file $fileName could not be found")
                 continue
             }
@@ -119,17 +129,23 @@ fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.llm.Pi
             val detectedPsiClass = classElements.elementAt(0)
 
 //            getImmediateSubClasses(psiClass);
-            if (visitedPsiClasses.contains(detectedPsiClass)){continue}
-            if (!psiClassesToVisit.contains(detectedPsiClass)){psiClassesToVisit.addLast(detectedPsiClass)}
+            if (visitedPsiClasses.contains(detectedPsiClass)) {
+                continue
+            }
+            if (!psiClassesToVisit.contains(detectedPsiClass)) {
+                psiClassesToVisit.addLast(detectedPsiClass)
+            }
         }
     }
 
-
-
-
-    return org.jetbrains.research.testgenie.llm.Pipeline(project, interestingPsiClasses, psiClass, polymorphismRelations, modificationStamp)
+    return org.jetbrains.research.testgenie.tools.llm.Pipeline(
+        project,
+        interestingPsiClasses,
+        psiClass,
+        polymorphismRelations,
+        modificationStamp
+    )
 }
-
 
 /**
  * Gets the class on which the user has clicked (the click has to be inside the contents of the class).

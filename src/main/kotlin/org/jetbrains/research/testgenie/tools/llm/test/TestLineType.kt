@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.llm.test
+package org.jetbrains.research.testgenie.tools.llm.test
 
 enum class TestLineType {
     CODE, BREAK, COMMENT, ASSERTION

@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.llm.test
+package org.jetbrains.research.testgenie.tools.llm.test
 
 data class TestCaseGeneratedByLLM(
     val name: String = "",
@@ -23,5 +23,4 @@ data class TestCaseGeneratedByLLM(
         result = 31 * result + lines.contentHashCode()
         return result
     }
-
 }

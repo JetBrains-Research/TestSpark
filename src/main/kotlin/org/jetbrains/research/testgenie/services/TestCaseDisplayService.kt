@@ -42,8 +42,8 @@ import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.evosuite.Pipeline
-import org.jetbrains.research.testgenie.evosuite.validation.Validator
+import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
+import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
 import java.awt.BorderLayout

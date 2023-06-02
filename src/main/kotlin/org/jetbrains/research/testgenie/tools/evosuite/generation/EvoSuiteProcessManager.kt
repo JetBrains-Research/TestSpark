@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.evosuite.generation
+package org.jetbrains.research.testgenie.tools.evosuite.generation
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
@@ -14,7 +14,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.evosuite.ResultWatcher
+import org.jetbrains.research.testgenie.tools.evosuite.ResultWatcher
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import java.io.File

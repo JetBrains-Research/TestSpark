@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.llm.error
+package org.jetbrains.research.testgenie.tools.llm.error
 
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -7,7 +7,7 @@ import org.jetbrains.research.testgenie.TestGenieBundle
 
 class LLMErrorManager {
 
-    fun displayMissingTokenNotification( project: Project) {
+    fun displayMissingTokenNotification(project: Project) {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("LLM Error")
             .createNotification(

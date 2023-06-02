@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.evosuite
+package org.jetbrains.research.testgenie.tools.evosuite
 
 import org.jetbrains.research.testgenie.services.QuickAccessParametersService
 import org.jetbrains.research.testgenie.services.SettingsApplicationService

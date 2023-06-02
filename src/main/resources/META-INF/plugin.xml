@@ -45,7 +45,7 @@
                     factoryClass="org.jetbrains.research.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
         <toolWindow id="TestGenie Validator" secondary="true" anchor="bottom"
-                    factoryClass="org.jetbrains.research.testgenie.evosuite.validation.ValidationToolWindowFactory"/>
+                    factoryClass="org.jetbrains.research.testgenie.tools.evosuite.validation.ValidationToolWindowFactory"/>
 
         <!-- Application-level services -->
         <applicationService
@@ -87,7 +87,7 @@
     <projectListeners>
         <listener
                 class="org.jetbrains.research.testgenie.listener.TestGenerationResultListenerImpl"
-                topic="org.jetbrains.research.testgenie.evosuite.TestGenerationResultListener"/>
+                topic="org.jetbrains.research.testgenie.tools.evosuite.TestGenerationResultListener"/>
         <listener
                 class="org.jetbrains.research.testgenie.listener.TelemetrySubmitListenerImpl"
                 topic="com.intellij.openapi.project.ProjectManagerListener"/>

@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.evosuite
+package org.jetbrains.research.testgenie.tools.evosuite
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
@@ -15,7 +15,7 @@ import org.jetbrains.research.testgenie.services.RunnerService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 import org.jetbrains.research.testgenie.services.TestCaseCachingService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
-import org.jetbrains.research.testgenie.evosuite.generation.EvoSuiteProcessManager
+import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProcessManager
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase

@@ -2,9 +2,9 @@ package org.jetbrains.research.testgenie.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import org.jetbrains.research.testgenie.llm.error.LLMErrorManager
-import org.jetbrains.research.testgenie.llm.Pipeline
-import org.jetbrains.research.testgenie.llm.SettingsArguments
+import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testgenie.tools.llm.Pipeline
+import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 
 class GenerateTestsForClassLLM : AnAction() {
     /**
@@ -15,7 +15,7 @@ class GenerateTestsForClassLLM : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
 
-        if(!SettingsArguments.isTokenSet()){
+        if (!SettingsArguments.isTokenSet()) {
             LLMErrorManager().displayMissingTokenNotification(project)
             return
         }

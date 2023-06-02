@@ -1,13 +1,12 @@
-package org.jetbrains.research.testgenie.llm
+package org.jetbrains.research.testgenie.tools.llm
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.actions.getSignatureString
-import org.jetbrains.research.testgenie.llm.error.LLMErrorManager
-import org.jetbrains.research.testgenie.llm.generation.LLMRequest
+import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testgenie.tools.llm.generation.LLMRequest
 
-private var prompt = "";
-
+private var prompt = ""
 
 class Pipeline(
     private val project: Project,
@@ -45,7 +44,6 @@ class Pipeline(
                 prompt += " - ${currentPsiMethod.getSignatureString()}\n"
             }
             prompt += "\n\n"
-
         }
 
         // prompt: add polymorphism relations between involved classes
@@ -56,7 +54,7 @@ class Pipeline(
             }
         }
 
-        return prompt;
+        return prompt
     }
 
     fun runTestGeneration() {
@@ -64,7 +62,7 @@ class Pipeline(
         val generatedTestSuite = LLMRequest().request(prompt)
 
         // Check if response is not empty
-        if (generatedTestSuite.isEmpty()){
+        if (generatedTestSuite.isEmpty()) {
             LLMErrorManager.displayEmptyTests(project)
             return
         }

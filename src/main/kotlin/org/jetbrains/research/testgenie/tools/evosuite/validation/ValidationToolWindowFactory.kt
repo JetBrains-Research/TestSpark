@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.evosuite.validation
+package org.jetbrains.research.testgenie.tools.evosuite.validation
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
