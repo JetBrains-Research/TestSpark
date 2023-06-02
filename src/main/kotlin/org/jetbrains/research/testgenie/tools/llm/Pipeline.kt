@@ -41,7 +41,7 @@ class Pipeline(
     private fun generatePrompt(): String {
         // prompt: start the request
         var prompt =
-            "Generate unit tests in Java for class ${cut.qualifiedName} to achieve 100% line coverage for this class.\nDont use @Before and @After test methods.\n"
+            "Generate unit tests in Java for class ${cut.qualifiedName} to achieve 100% line coverage for this class.\nDont use @Before and @After test methods.\nMake tests as atomic as possible.\n"
 
         // prompt: source code
         prompt += "The source code of class under test is as follows:\n ${cut.text}\n"
