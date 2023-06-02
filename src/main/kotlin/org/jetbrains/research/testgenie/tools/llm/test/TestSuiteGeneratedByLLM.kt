@@ -5,7 +5,6 @@ data class TestSuiteGeneratedByLLM(
     private var testCases: Set<TestCaseGeneratedByLLM> = emptySet()
 ) {
 
-
     fun isEmpty(): Boolean {
         return testCases.isEmpty()
     }

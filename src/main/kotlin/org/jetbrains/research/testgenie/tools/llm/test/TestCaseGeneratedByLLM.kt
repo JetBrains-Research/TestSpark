@@ -23,5 +23,4 @@ data class TestCaseGeneratedByLLM(
         result = 31 * result + lines.contentHashCode()
         return result
     }
-
 }

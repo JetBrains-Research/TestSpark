@@ -7,7 +7,7 @@ import org.jetbrains.research.testgenie.TestGenieBundle
 
 class LLMErrorManager {
 
-    fun displayMissingTokenNotification( project: Project) {
+    fun displayMissingTokenNotification(project: Project) {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("LLM Error")
             .createNotification(

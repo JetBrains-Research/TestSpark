@@ -10,7 +10,11 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.jetbrains.research.testgenie.actions.*
+import org.jetbrains.research.testgenie.actions.calculateLinesToInvalidate
+import org.jetbrains.research.testgenie.actions.createEvoSuitePipeline
+import org.jetbrains.research.testgenie.actions.createGPTPipeline
+import org.jetbrains.research.testgenie.actions.getSurroundingLine
+import org.jetbrains.research.testgenie.actions.getSurroundingMethod
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager

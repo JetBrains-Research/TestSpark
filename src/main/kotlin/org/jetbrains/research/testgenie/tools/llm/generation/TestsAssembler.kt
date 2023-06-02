@@ -4,12 +4,12 @@ import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 
 class TestsAssembler(
-        val testSuite: TestSuiteGeneratedByLLM = TestSuiteGeneratedByLLM(),
-        var activeTestCase: TestCaseGeneratedByLLM = TestCaseGeneratedByLLM()
+    val testSuite: TestSuiteGeneratedByLLM = TestSuiteGeneratedByLLM(),
+    var activeTestCase: TestCaseGeneratedByLLM = TestCaseGeneratedByLLM()
 ) {
 
-    fun receiveResponse(word: String){
+    fun receiveResponse(word: String) {
         print(word)
-        //ToDo(Needs to be implemented)
+        // ToDo(Needs to be implemented)
     }
 }

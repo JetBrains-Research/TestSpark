@@ -15,7 +15,7 @@ class GenerateTestsForClassLLM : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
 
-        if(!SettingsArguments.isTokenSet()){
+        if (!SettingsArguments.isTokenSet()) {
             LLMErrorManager().displayMissingTokenNotification(project)
             return
         }

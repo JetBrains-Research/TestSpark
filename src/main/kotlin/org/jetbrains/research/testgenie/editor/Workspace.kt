@@ -156,10 +156,10 @@ class Workspace(private val project: Project) : Disposable {
      * @return the test job that was generated
      */
     fun receiveGenerationResult(
-            testResultName: String,
-            testReport: CompactReport,
-            cacheLazyPipeline: Pipeline? = null,
-            cachedJobKey: TestJobInfo? = null
+        testResultName: String,
+        testReport: CompactReport,
+        cacheLazyPipeline: Pipeline? = null,
+        cachedJobKey: TestJobInfo? = null
     ): TestJobInfo {
         val pendingJobKey = pendingTestResults.remove(testResultName)!!
 

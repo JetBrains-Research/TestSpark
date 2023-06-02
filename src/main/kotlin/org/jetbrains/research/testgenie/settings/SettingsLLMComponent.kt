@@ -47,6 +47,4 @@ class SettingsLLMComponent {
         set(newText) {
             grazieUserTokenField.text = newText
         }
-
-
 }
