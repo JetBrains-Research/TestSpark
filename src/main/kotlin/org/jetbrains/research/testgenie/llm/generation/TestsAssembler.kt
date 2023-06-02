@@ -9,6 +9,7 @@ class TestsAssembler(
 ) {
 
     fun receiveResponse(word: String){
+        print(word)
         //ToDo(Needs to be implemented)
     }
 }

@@ -3,12 +3,10 @@ package org.jetbrains.research.testgenie.actions
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
-import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
-import org.jetbrains.research.testgenie.services.RunnerService
+import org.jetbrains.research.testgenie.tools.Manager
 
 /**
  * This class contains all the logic related to generating tests for a class.
@@ -22,17 +20,7 @@ class GenerateTestsActionClass : AnAction() {
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun actionPerformed(e: AnActionEvent) {
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-
-        val project = e.project ?: return
-
-        val runnerService = project.service<RunnerService>()
-        if (!runnerService.verify(psiFile)) return
-
-        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-
-        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
-        evoSuitePipeline.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
+        Manager.generateTestsForClass(e)
     }
 
     /**
