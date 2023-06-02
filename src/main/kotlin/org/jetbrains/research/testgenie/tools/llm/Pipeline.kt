@@ -1,10 +1,10 @@
-package org.jetbrains.research.testgenie.llm
+package org.jetbrains.research.testgenie.tools.llm
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.actions.getSignatureString
-import org.jetbrains.research.testgenie.llm.error.LLMErrorManager
-import org.jetbrains.research.testgenie.llm.generation.LLMRequest
+import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testgenie.tools.llm.generation.LLMRequest
 
 private var prompt = ""
 

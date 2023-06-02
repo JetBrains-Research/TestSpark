@@ -65,7 +65,7 @@ fun PsiMethod.getSignatureString(): String {
     return text.substring(0, bodyStart).replace('\n', ' ').trim()
 }
 
-fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.llm.Pipeline? {
+fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.llm.Pipeline? {
     val project: Project = e.project ?: return null
 
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
@@ -127,7 +127,7 @@ fun createGPTPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.llm.Pi
 
 
 
-    return org.jetbrains.research.testgenie.llm.Pipeline(project, interestingPsiClasses, psiClass, polymorphismRelations, modificationStamp)
+    return org.jetbrains.research.testgenie.tools.llm.Pipeline(project, interestingPsiClasses, psiClass, polymorphismRelations, modificationStamp)
 }
 
 

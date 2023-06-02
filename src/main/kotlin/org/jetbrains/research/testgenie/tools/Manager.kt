@@ -12,8 +12,8 @@ import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.jetbrains.research.testgenie.actions.*
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
-import org.jetbrains.research.testgenie.llm.SettingsArguments
-import org.jetbrains.research.testgenie.llm.error.LLMErrorManager
+import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
+import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.services.RunnerService
 import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 
@@ -42,7 +42,7 @@ class Manager {
                 return
             }
 
-            val llmPipeline: org.jetbrains.research.testgenie.llm.Pipeline = createGPTPipeline(e) ?: return
+            val llmPipeline: org.jetbrains.research.testgenie.tools.llm.Pipeline = createGPTPipeline(e) ?: return
             llmPipeline.forClass().runTestGeneration()
 
             // TODO do it in parallel

@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.llm
+package org.jetbrains.research.testgenie.tools.llm
 
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
 

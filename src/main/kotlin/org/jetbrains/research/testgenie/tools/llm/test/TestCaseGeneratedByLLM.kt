@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.llm.test
+package org.jetbrains.research.testgenie.tools.llm.test
 
 data class TestCaseGeneratedByLLM(
     val name: String = "",
