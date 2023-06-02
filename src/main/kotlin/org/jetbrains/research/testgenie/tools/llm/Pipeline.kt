@@ -34,6 +34,9 @@ class Pipeline(
         // prompt: signature of methods in the classes used by CUT
         prompt += "Here are the method signatures of classes used by the class under test. Only use these signatures for creating objects, not your own ideas.\n"
         for (interestingPsiClass: PsiClass in interestingPsiClasses) {
+            if (interestingPsiClass.qualifiedName!!.startsWith("java")){
+                continue
+            }
             val interestingPsiClassQN = interestingPsiClass.qualifiedName
             if (interestingPsiClassQN.equals(cut.qualifiedName)) {
                 continue
