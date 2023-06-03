@@ -1,8 +1,8 @@
 package org.jetbrains.research.testgenie.tools.llm.test
 
 data class TestSuiteGeneratedByLLM(
-    private var imports: Set<String> = emptySet(),
-    private var testCases: Set<TestCaseGeneratedByLLM> = emptySet()
+    var imports: Set<String> = emptySet(),
+    var testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf()
 ) {
 
     fun isEmpty(): Boolean {

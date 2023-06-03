@@ -12,7 +12,7 @@ import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.jetbrains.research.testgenie.actions.calculateLinesToInvalidate
 import org.jetbrains.research.testgenie.actions.createEvoSuitePipeline
-import org.jetbrains.research.testgenie.actions.createGPTPipeline
+import org.jetbrains.research.testgenie.actions.createLLMPipeline
 import org.jetbrains.research.testgenie.actions.getSurroundingLine
 import org.jetbrains.research.testgenie.actions.getSurroundingMethod
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
@@ -46,7 +46,7 @@ class Manager {
                 return
             }
 
-            val llmPipeline: org.jetbrains.research.testgenie.tools.llm.Pipeline = createGPTPipeline(e) ?: return
+            val llmPipeline: org.jetbrains.research.testgenie.tools.llm.Pipeline = createLLMPipeline(e) ?: return
             llmPipeline.forClass().runTestGeneration()
 
             // TODO do it in parallel

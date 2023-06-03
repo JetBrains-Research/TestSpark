@@ -1,9 +1,10 @@
 package org.jetbrains.research.testgenie.tools.llm.test
 
 data class TestCaseGeneratedByLLM(
-    val name: String = "",
-    val expectedException: String = "",
-    val lines: Array<TestLine> = emptyArray()
+    var name: String = "",
+    var expectedException: String = "",
+    var throwsException: String = "",
+    var lines: MutableList<TestLine> = mutableListOf()
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -14,13 +15,13 @@ data class TestCaseGeneratedByLLM(
 
         if (name != other.name) return false
         if (expectedException != other.expectedException) return false
-        return lines.contentEquals(other.lines)
+        return lines == other.lines
     }
 
     override fun hashCode(): Int {
         var result = name.hashCode()
         result = 31 * result + expectedException.hashCode()
-        result = 31 * result + lines.contentHashCode()
+        result = 31 * result + arrayListOf(lines).hashCode()
         return result
     }
 }

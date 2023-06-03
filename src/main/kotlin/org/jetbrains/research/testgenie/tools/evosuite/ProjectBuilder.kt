@@ -38,7 +38,7 @@ class ProjectBuilder(private val project: Project) {
 
         try {
             indicator.isIndeterminate = true
-            indicator.text = TestGenieBundle.message("evosuiteBuildMessage")
+            indicator.text = TestGenieBundle.message("buildMessage")
             if (settingsState.buildCommand.isEmpty()) {
                 // User did not put own command line
                 val promise = ProjectTaskManager.getInstance(project).buildAllModules()

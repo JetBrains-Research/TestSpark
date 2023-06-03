@@ -149,7 +149,7 @@ class Pipeline(
         val projectBuilder = ProjectBuilder(project)
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestGenieBundle.message("evosuiteTestGenerationMessage")) {
+            .run(object : Task.Backgroundable(project, TestGenieBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     if (!skipCache) {
                         // Check cache

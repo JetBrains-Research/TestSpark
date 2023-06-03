@@ -80,7 +80,7 @@ class EvoSuiteProcessManager(
             log.info("Starting EvoSuite with arguments: $cmdString")
 
             indicator.isIndeterminate = false
-            indicator.text = TestGenieBundle.message("evosuiteSearchMessage")
+            indicator.text = TestGenieBundle.message("searchMessage")
             val evoSuiteProcess = GeneralCommandLine(cmd)
             evoSuiteProcess.charset = Charset.forName("UTF-8")
             evoSuiteProcess.setWorkDirectory(projectPath)

@@ -20,7 +20,7 @@ class GenerateTestsForClassLLM : AnAction() {
             return
         }
 
-        val llmPipeline: Pipeline = createGPTPipeline(e) ?: return
+        val llmPipeline: Pipeline = createLLMPipeline(e) ?: return
         llmPipeline.forClass().runTestGeneration()
         TODO("Next steps after collecting tests")
     }
