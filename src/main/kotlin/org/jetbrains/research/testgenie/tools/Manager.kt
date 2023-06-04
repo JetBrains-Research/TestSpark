@@ -42,8 +42,7 @@ class Manager {
             val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
             evoSuitePipeline.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
 
-            AppExecutorUtil.getAppScheduledExecutorService()
-                    .execute(Display(e))
+            AppExecutorUtil.getAppScheduledExecutorService().execute(Display(e))
 
             // Llm
 
