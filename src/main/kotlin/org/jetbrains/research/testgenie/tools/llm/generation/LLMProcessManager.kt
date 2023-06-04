@@ -14,7 +14,7 @@ class LLMProcessManager(
     private val project: Project,
     private val projectPath: String,
     private val projectClassPath: String,
-    private val fileUrl: String
+    private val fileUrl: String,
 ) {
 
     private val settingsProjectState = project.service<SettingsProjectService>().state
@@ -24,7 +24,6 @@ class LLMProcessManager(
         prompt: String,
         log: Logger,
     ) {
-
         // update build path
         var buildPath = projectClassPath
         if (settingsProjectState.buildPath.isEmpty()) {

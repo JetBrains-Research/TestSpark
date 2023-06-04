@@ -34,7 +34,7 @@ class EvoSuiteErrorManager {
         if (!handler.waitFor(evoSuiteProcessTimeout)) {
             display(
                 getExceededTimeoutMessage(evoSuiteProcessTimeout),
-                project
+                project,
             )
             return false
         }
@@ -64,7 +64,7 @@ class EvoSuiteErrorManager {
             .createNotification(
                 TestGenieBundle.message("evosuiteErrorTitle"),
                 getCommonErrorMessage(message),
-                NotificationType.ERROR
+                NotificationType.ERROR,
             )
             .notify(project)
     }

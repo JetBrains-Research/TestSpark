@@ -4,7 +4,7 @@ data class TestCaseGeneratedByLLM(
     var name: String = "",
     var expectedException: String = "",
     var throwsException: String = "",
-    var lines: MutableList<TestLine> = mutableListOf()
+    var lines: MutableList<TestLine> = mutableListOf(),
 ) {
 
     override fun equals(other: Any?): Boolean {

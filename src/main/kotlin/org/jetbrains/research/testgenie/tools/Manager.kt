@@ -10,6 +10,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.actions.calculateLinesToInvalidate
 import org.jetbrains.research.testgenie.actions.createEvoSuitePipeline
 import org.jetbrains.research.testgenie.actions.createLLMPipeline
@@ -19,7 +20,9 @@ import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.services.RunnerService
+import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
+import org.jetbrains.research.testgenie.tools.evosuite.TEST_GENERATION_RESULT_TOPIC
 
 class Manager {
 
@@ -38,6 +41,9 @@ class Manager {
 
             val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
             evoSuitePipeline.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
+
+            AppExecutorUtil.getAppScheduledExecutorService()
+                    .execute(Display(e))
 
             // Llm
 
@@ -109,6 +115,25 @@ class Manager {
 
             // TODO add implementation here
             // TODO do it in parallel
+        }
+    }
+}
+
+private class Display(e: AnActionEvent) : Runnable {
+    val event: AnActionEvent = e
+    override fun run() {
+        val sleepDurationMillis: Long = 2000
+        while (true) {
+            if (event.project!!.service<TestCaseDisplayService>().testGenerationResult == null) {
+                Thread.sleep(sleepDurationMillis)
+                continue
+            }
+            event.project!!.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC).testGenerationResult(
+                event.project!!.service<TestCaseDisplayService>().testGenerationResult!!,
+                event.project!!.service<TestCaseDisplayService>().resultName,
+                event.project!!.service<TestCaseDisplayService>().fileUrl,
+            )
+            return
         }
     }
 }

@@ -103,11 +103,13 @@ class TestCaseDisplayService(private val project: Project) {
     private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
     private var isJacocoCoverageActive = false
 
+    var testGenerationResult: CompactReport? = null
+    var resultName: String = ""
+    var fileUrl: String = ""
+
     // Code required of imports and package for generated tests
     var importsCode: String = ""
     var packageLine: String = ""
-
-    var fileUrl: String = ""
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -382,7 +384,7 @@ class TestCaseDisplayService(private val project: Project) {
                     ).classes.stream().map { it.name }
                     .toList()
                     .contains(
-                        (PsiManager.getInstance(project).findFile(file) as PsiJavaFile).name.removeSuffix(".java")
+                        (PsiManager.getInstance(project).findFile(file) as PsiJavaFile).name.removeSuffix(".java"),
                     )
                 )
         }
@@ -390,7 +392,7 @@ class TestCaseDisplayService(private val project: Project) {
         val fileChooser = FileChooser.chooseFiles(
             descriptor,
             project,
-            LocalFileSystem.getInstance().findFileByPath(project.basePath!!)
+            LocalFileSystem.getInstance().findFileByPath(project.basePath!!),
         )
 
         // Cancel button pressed
@@ -461,7 +463,7 @@ class TestCaseDisplayService(private val project: Project) {
             psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
             psiClass = psiJavaFile!!.classes[
                 psiJavaFile!!.classes.stream().map { it.name }.toList()
-                    .indexOf(psiJavaFile!!.name.removeSuffix(".java"))
+                    .indexOf(psiJavaFile!!.name.removeSuffix(".java")),
             ]
         }
 
@@ -489,7 +491,7 @@ class TestCaseDisplayService(private val project: Project) {
             null,
             message,
             TestGenieLabelsBundle.defaultValue("errorWindowTitle"),
-            JOptionPane.ERROR_MESSAGE
+            JOptionPane.ERROR_MESSAGE,
         )
     }
 

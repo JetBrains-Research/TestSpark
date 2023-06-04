@@ -12,7 +12,7 @@ private var rawText = ""
 
 val importPattern = Regex(
     pattern = "^import\\s+(static\\s)?((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
-    options = setOf(RegexOption.MULTILINE)
+    options = setOf(RegexOption.MULTILINE),
 )
 
 var lastTestCount = 0
