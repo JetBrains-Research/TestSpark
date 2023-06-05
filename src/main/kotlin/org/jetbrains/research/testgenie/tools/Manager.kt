@@ -27,22 +27,23 @@ class Manager {
             display(e)
         }
 
-        fun display(e: AnActionEvent) = AppExecutorUtil.getAppScheduledExecutorService().execute(Display(e))
+        fun display(e: AnActionEvent) = AppExecutorUtil.getAppScheduledExecutorService().execute(Display(e, tools))
     }
 }
 
-private class Display(e: AnActionEvent) : Runnable {
+private class Display(e: AnActionEvent, t: List<Tool>) : Runnable {
     val event: AnActionEvent = e
+    val tools: List<Tool> = t
     override fun run() {
         val sleepDurationMillis: Long = 2000
         while (true) {
-            // TODO fix if
-            if (event.project!!.service<TestCaseDisplayService>().testGenerationResult == null) {
+            if (event.project!!.service<TestCaseDisplayService>().testGenerationResultList.size != tools.size) {
                 Thread.sleep(sleepDurationMillis)
                 continue
             }
+            // TODO merge testGenerationResult array
             event.project!!.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC).testGenerationResult(
-                event.project!!.service<TestCaseDisplayService>().testGenerationResult!!,
+                event.project!!.service<TestCaseDisplayService>().testGenerationResultList[0]!!,
                 event.project!!.service<TestCaseDisplayService>().resultName,
                 event.project!!.service<TestCaseDisplayService>().fileUrl,
             )

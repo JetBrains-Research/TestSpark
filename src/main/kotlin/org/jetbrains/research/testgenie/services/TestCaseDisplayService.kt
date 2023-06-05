@@ -103,7 +103,9 @@ class TestCaseDisplayService(private val project: Project) {
     private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
     private var isJacocoCoverageActive = false
 
-    var testGenerationResult: CompactReport? = null
+    // Result processing
+    // TODO change CompactReport to TestResult
+    var testGenerationResultList: MutableList<CompactReport?> = mutableListOf()
     var resultName: String = ""
     var fileUrl: String = ""
 

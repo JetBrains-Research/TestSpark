@@ -89,7 +89,5 @@ class Pipeline(
                     }
                 }
             })
-
-//        TODO("Parse generated tests + Run and validate tests + collect execution results")
     }
 }
