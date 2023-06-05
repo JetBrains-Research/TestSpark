@@ -119,15 +119,6 @@
                     description="Generate tests for the selected line using TestGenie">
                 <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="L" keymap="$default"/>
             </action>
-
-
-            <!-- Generate tests for class using LLM-->
-            <action class="org.jetbrains.research.testgenie.actions.GenerateTestsForClassLLM"
-                    id="TestGenie.TestGenieActions.GenerateTestsForClassLLM"
-                    text="Generate Tests For Class (LLM)"
-                    description="Generate tests for the selected class using TestGenie (LLM version)">
-<!--                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="" keymap="$default"/>-->
-            </action>
         </group>
     </actions>
 </idea-plugin>

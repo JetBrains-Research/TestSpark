@@ -19,12 +19,12 @@ import com.intellij.openapi.diagnostic.Logger
  */
 class TestCaseEditor(
     private val text: String,
-    private val activeTestList: HashMap<String, String>
+    private val activeTestList: HashMap<String, String>,
 ) {
     private val log: Logger = Logger.getInstance(this.javaClass)
 
     class TestCaseReplacer(
-        private val activeTestList: HashMap<String, Pair<BlockStmt, String>>
+        private val activeTestList: HashMap<String, Pair<BlockStmt, String>>,
     ) : ModifierVisitor<Void>() {
         private val log: Logger = Logger.getInstance(this.javaClass)
 
@@ -114,7 +114,6 @@ class TestCaseEditor(
     }
 
     fun edit(): String {
-
         val parser = JavaParser()
         val unit = parser.parse(text).result.get()
 

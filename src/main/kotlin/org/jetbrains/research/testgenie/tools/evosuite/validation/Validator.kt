@@ -48,7 +48,7 @@ import javax.tools.ToolProvider
 class Validator(
     private val project: Project,
     private val testJobInfo: Workspace.TestJobInfo,
-    private val tests: HashMap<String, String> // test name, test code
+    private val tests: HashMap<String, String>, // test name, test code
 ) {
     private val logger: Logger = Logger.getInstance(this.javaClass)
     private val settingsState = project.service<SettingsProjectService>().state
@@ -127,9 +127,8 @@ class Validator(
 
     private fun setupCompilationFiles(
         testValidationDirectory: String,
-        targetFqn: String
+        targetFqn: String,
     ): List<File>? {
-
         val baseClassName = "$testValidationDirectory$sep${targetFqn.replace('.', sep)}"
         // flush test edits to file
         val testsPath = "$baseClassName.java"
@@ -179,7 +178,12 @@ class Validator(
         val compilationUnits = fileManager.getJavaFileObjectsFromFiles(files)
 
         val task = compiler.getTask(
-            null, fileManager, null, optionList, null, compilationUnits
+            null,
+            fileManager,
+            null,
+            optionList,
+            null,
+            compilationUnits,
         )
 
         val compiled = task.call()
@@ -233,7 +237,9 @@ class Validator(
             val contentManager: ContentManager = window.contentManager
             contentManager.removeAllContents(true)
             val content: Content = contentManager.factory.createContent(
-                console.component, TestGenieLabelsBundle.defaultValue("junitRun"), false
+                console.component,
+                TestGenieLabelsBundle.defaultValue("junitRun"),
+                false,
             )
             contentManager.addContent(content)
         }
@@ -297,8 +303,10 @@ class Validator(
 
         val coverageSuite: CoverageSuite = manager
             .addExternalCoverageSuite(
-                virtualFile.name, virtualFile.timeStamp, coverageRunner,
-                DefaultCoverageFileProvider(virtualFile.path)
+                virtualFile.name,
+                virtualFile.timeStamp,
+                coverageRunner,
+                DefaultCoverageFileProvider(virtualFile.path),
             )
 
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
@@ -322,7 +330,7 @@ class Validator(
         NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
             TestGenieBundle.message("compilationFailedNotificationTitle"),
             TestGenieBundle.message("compilationFailedNotificationText"),
-            NotificationType.ERROR
+            NotificationType.ERROR,
         ).notify(project)
     }
 
@@ -333,7 +341,7 @@ class Validator(
         NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
             TestGenieBundle.message("compilationFailedNotificationTitle"),
             TestGenieBundle.message("compilationFailedNotificationText"),
-            NotificationType.ERROR
+            NotificationType.ERROR,
         ).notify(project)
     }
 
@@ -345,7 +353,7 @@ class Validator(
         NotificationGroupManager.getInstance().getNotificationGroup("Validation Result").createNotification(
             TestGenieBundle.message("validationResult"),
             "$passed/${junitResult.totalTests}",
-            NotificationType.INFORMATION
+            NotificationType.INFORMATION,
         ).notify(project)
     }
 
@@ -353,7 +361,6 @@ class Validator(
 
     companion object {
         fun parseJunitResult(cap: String): JUnitResult {
-
             val output = cap.trimEnd()
             val resultString = output.substring(output.lastIndexOf("\n")).trim()
 

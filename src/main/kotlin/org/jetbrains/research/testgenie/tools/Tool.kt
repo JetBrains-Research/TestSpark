@@ -1,4 +1,9 @@
 package org.jetbrains.research.testgenie.tools
 
-class Tool {
+import com.intellij.openapi.actionSystem.AnActionEvent
+
+interface Tool {
+    fun generateTestsForClass(e: AnActionEvent)
+    fun generateTestsForMethod(e: AnActionEvent)
+    fun generateTestsForLine(e: AnActionEvent)
 }
