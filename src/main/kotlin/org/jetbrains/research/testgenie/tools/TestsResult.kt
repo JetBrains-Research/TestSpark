@@ -7,6 +7,7 @@ import org.evosuite.utils.CompactTestCase
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 
 class TestsResult {
+    // TODO think about list of fields
     var UUT: String = ""
     var testSuiteCode: String = ""
     var testScaffoldCode: String = ""
