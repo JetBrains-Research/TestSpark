@@ -82,18 +82,17 @@ class Manager {
             }
         }
 
-        fun display(e: AnActionEvent, indexes: List<Int>) = AppExecutorUtil.getAppScheduledExecutorService().execute(Display(e, tools, indexes))
+        fun display(e: AnActionEvent, indexes: List<Int>) = AppExecutorUtil.getAppScheduledExecutorService().execute(Display(e, indexes))
     }
 }
 
-private class Display(e: AnActionEvent, t: List<Tool>, i: List<Int>) : Runnable {
+private class Display(e: AnActionEvent, i: List<Int>) : Runnable {
     val event: AnActionEvent = e
-    val tools: List<Tool> = t
     val indexes: List<Int> = i
     override fun run() {
         val sleepDurationMillis: Long = 2000
         while (true) {
-            if (event.project!!.service<TestCaseDisplayService>().testGenerationResultList.size != tools.size) {
+            if (event.project!!.service<TestCaseDisplayService>().testGenerationResultList.size != indexes.size) {
                 Thread.sleep(sleepDurationMillis)
                 continue
             }
