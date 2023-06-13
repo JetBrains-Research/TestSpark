@@ -19,7 +19,7 @@ import org.jetbrains.research.testgenie.services.RunnerService
 import org.jetbrains.research.testgenie.tools.Tool
 import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 
-class EvoSuite : Tool {
+class EvoSuite(override val name: String = "EvoSuite") : Tool {
     override fun generateTestsForClass(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
         val project = e.project ?: return

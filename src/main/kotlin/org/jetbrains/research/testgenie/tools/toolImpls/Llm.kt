@@ -6,7 +6,7 @@ import org.jetbrains.research.testgenie.tools.Tool
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 
-class Llm : Tool {
+class Llm(override val name: String = "Llm") : Tool {
     override fun generateTestsForClass(e: AnActionEvent) {
         val project = e.project ?: return
         if (!SettingsArguments.isTokenSet()) {

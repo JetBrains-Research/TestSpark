@@ -66,7 +66,7 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
 
     return Pipeline(project, projectPath, buildPath, classFQN, fileUrl, modificationStamp).withCacheLines(
         cacheStartLine,
-        cacheEndLine
+        cacheEndLine,
     )
 }
 
@@ -150,7 +150,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         interestingPsiClasses,
         psiClass,
         polymorphismRelations,
-        modificationStamp
+        modificationStamp,
     )
 }
 
@@ -339,9 +339,13 @@ private fun withinElement(psiElement: PsiElement, caret: Caret): Boolean {
  * @return the display name of the PSI class
  */
 fun getClassDisplayName(psiClass: PsiClass): String {
-    return if (psiClass.isInterface) "Interface ${psiClass.qualifiedName}"
-    else if (isAbstractClass(psiClass)) "Abstract Class ${psiClass.qualifiedName}"
-    else "Class ${psiClass.qualifiedName}"
+    return if (psiClass.isInterface) {
+        "Interface ${psiClass.qualifiedName}"
+    } else if (isAbstractClass(psiClass)) {
+        "Abstract Class ${psiClass.qualifiedName}"
+    } else {
+        "Class ${psiClass.qualifiedName}"
+    }
 }
 
 /**
@@ -352,8 +356,71 @@ fun getClassDisplayName(psiClass: PsiClass): String {
  * @return the display name of the PSI method
  */
 fun getMethodDisplayName(psiMethod: PsiMethod): String {
-    return if (isDefaultConstructor(psiMethod)) "Default Constructor"
-    else if (psiMethod.isConstructor) "Constructor"
-    else if (isMethodDefault(psiMethod)) "Default Method ${psiMethod.name}"
-    else "Method ${psiMethod.name}"
+    return if (isDefaultConstructor(psiMethod)) {
+        "Default Constructor"
+    } else if (psiMethod.isConstructor) {
+        "Constructor"
+    } else if (isMethodDefault(psiMethod)) {
+        "Default Method ${psiMethod.name}"
+    } else {
+        "Method ${psiMethod.name}"
+    }
+}
+
+/**
+ * Makes the action visible only if a class has been selected.
+ * It also updates the action name depending on which class has been selected.
+ *
+ * @param e an action event that contains useful information and corresponds to the action invoked by the user
+ * @param name a name of the test generator
+ */
+fun updateForClass(e: AnActionEvent, name: String) {
+    e.presentation.isEnabledAndVisible = false
+
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+
+    val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
+
+    e.presentation.isEnabledAndVisible = true
+    e.presentation.text = "Generate Tests For ${getClassDisplayName(psiClass)} by $name"
+}
+
+/**
+ * Makes the action visible only if a method has been selected.
+ * It also updates the action name depending on which method has been selected.
+ *
+ * @param e an action event that contains useful information and corresponds to the action invoked by the user
+ * @param name a name of the test generator
+ */
+fun updateForMethod(e: AnActionEvent, name: String) {
+    e.presentation.isEnabledAndVisible = false
+
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+
+    val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
+
+    e.presentation.isEnabledAndVisible = true
+    e.presentation.text = "Generate Tests For ${getMethodDisplayName(psiMethod)} by $name"
+}
+
+/**
+ * Makes the action visible only if a line has been selected.
+ * It also updates the action name depending on which line has been selected.
+ *
+ * @param e an action event that contains useful information and corresponds to the action invoked by the user
+ * @param name a name of the test generator
+ */
+fun updateForLine(e: AnActionEvent, name: String) {
+    e.presentation.isEnabledAndVisible = false
+
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+
+    val line: Int = getSurroundingLine(psiFile, caret)?.plus(1)
+        ?: return // lines in the editor and in EvoSuite are one-based
+
+    e.presentation.isEnabledAndVisible = true
+    e.presentation.text = "Generate Tests For Line $line by $name"
 }

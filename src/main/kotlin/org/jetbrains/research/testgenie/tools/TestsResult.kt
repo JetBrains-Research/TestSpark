@@ -34,6 +34,6 @@ class TestsResult {
     }
 
     constructor(testSuiteGeneratedByLLM: TestSuiteGeneratedByLLM) {
-        // TODO add better transformation
+        TODO("add better transformation")
     }
 }
