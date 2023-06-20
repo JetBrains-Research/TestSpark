@@ -62,7 +62,6 @@ import javax.swing.JOptionPane
 import javax.swing.JCheckBox
 import javax.swing.Box
 import javax.swing.border.Border
-import kotlin.streams.toList
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -384,7 +383,7 @@ class TestCaseDisplayService(private val project: Project) {
                 file.extension?.lowercase(Locale.getDefault()) == "java" && (
                     PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
                     ).classes.stream().map { it.name }
-                    .toList()
+                    .toArray()
                     .contains(
                         (PsiManager.getInstance(project).findFile(file) as PsiJavaFile).name.removeSuffix(".java"),
                     )
@@ -438,7 +437,7 @@ class TestCaseDisplayService(private val project: Project) {
                 filePath = "${chosenFile.path}/$fileName"
 
                 // Check the correctness of a class name
-                if (!Regex("[A-Z][a-zA-Z0-9]*[.java]?").matches(className)) {
+                if (!Regex("[A-Z][a-zA-Z0-9]*(.java)?").matches(className)) {
                     showErrorWindow(TestGenieLabelsBundle.defaultValue("incorrectFileNameMessage"))
                     continue
                 }
@@ -456,7 +455,7 @@ class TestCaseDisplayService(private val project: Project) {
                 chosenFile.createChildData(null, fileName)
                 virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
-                psiClass = PsiElementFactory.getInstance(project).createClass(className)
+                psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
                 psiJavaFile!!.add(psiClass!!)
             }
         } else {
@@ -464,7 +463,7 @@ class TestCaseDisplayService(private val project: Project) {
             virtualFile = chosenFile
             psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
             psiClass = psiJavaFile!!.classes[
-                psiJavaFile!!.classes.stream().map { it.name }.toList()
+                psiJavaFile!!.classes.stream().map { it.name }.toArray()
                     .indexOf(psiJavaFile!!.name.removeSuffix(".java")),
             ]
         }
