@@ -65,15 +65,11 @@ class ResultWatcher(
                         val reader = JsonReader(FileReader("$testResultDirectory$pathname"))
 
                         val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
-
-                        log.info("Publishing test generation result to ${TEST_GENERATION_RESULT_TOPIC.displayName}")
-                        project.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC)
-                            .testGenerationResult(testGenerationResult, resultName, fileUrl)
-                        log.info("Exiting Watcher thread for $resultName")
-
+                        project.service<TestCaseDisplayService>().testGenerationResultList.add(testGenerationResult)
+                        project.service<TestCaseDisplayService>().resultName = resultName
+                        project.service<TestCaseDisplayService>().fileUrl = fileUrl
                         project.service<TestCaseDisplayService>().packageLine =
                             getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode)
-
                         project.service<TestCaseDisplayService>().importsCode =
                             getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode)
                         return

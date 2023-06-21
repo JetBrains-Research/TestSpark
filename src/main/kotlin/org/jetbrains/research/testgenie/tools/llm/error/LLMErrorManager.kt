@@ -12,7 +12,7 @@ class LLMErrorManager {
             .getNotificationGroup("LLM Error")
             .createNotification(
                 TestGenieBundle.message("missingToken"),
-                NotificationType.WARNING
+                NotificationType.WARNING,
             )
             .notify(project)
     }
@@ -23,7 +23,7 @@ class LLMErrorManager {
                 .getNotificationGroup("LLM Error")
                 .createNotification(
                     TestGenieBundle.message("emptyResponse"),
-                    NotificationType.ERROR
+                    NotificationType.ERROR,
                 )
                 .notify(project)
         }

@@ -1,114 +1,114 @@
 package org.jetbrains.research.testgenie.tools
 
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Caret
-import com.intellij.openapi.editor.Document
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiMethod
-import com.intellij.refactoring.suggested.endOffset
-import com.intellij.refactoring.suggested.startOffset
-import org.jetbrains.research.testgenie.actions.calculateLinesToInvalidate
-import org.jetbrains.research.testgenie.actions.createEvoSuitePipeline
-import org.jetbrains.research.testgenie.actions.createLLMPipeline
-import org.jetbrains.research.testgenie.actions.getSurroundingLine
-import org.jetbrains.research.testgenie.actions.getSurroundingMethod
-import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
-import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
-import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testgenie.services.RunnerService
-import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
+import com.intellij.util.concurrency.AppExecutorUtil
+import org.evosuite.utils.CompactReport
+import org.jetbrains.research.testgenie.services.TestCaseDisplayService
+import org.jetbrains.research.testgenie.tools.evosuite.TEST_GENERATION_RESULT_TOPIC
+import org.jetbrains.research.testgenie.tools.toolImpls.EvoSuite
+import org.jetbrains.research.testgenie.tools.toolImpls.Llm
 
 class Manager {
 
     companion object {
+        val tools: List<Tool> = listOf(EvoSuite(), Llm())
         fun generateTestsForClass(e: AnActionEvent) {
-            // EvoSuite
-
-            val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-
-            val project = e.project ?: return
-
-            val runnerService = project.service<RunnerService>()
-            if (!runnerService.verify(psiFile)) return
-
-            val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-
-            val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
-            evoSuitePipeline.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
-
-            // Llm
-
-            if (!SettingsArguments.isTokenSet()) {
-                LLMErrorManager().displayMissingTokenNotification(project)
-                return
-            }
-
-            val llmPipeline: org.jetbrains.research.testgenie.tools.llm.Pipeline = createLLMPipeline(e) ?: return
-            llmPipeline.forClass().runTestGeneration()
-
-            // TODO do it in parallel
+            for (tool: Tool in tools) tool.generateTestsForClass(e)
+            display(e, (tools.indices).toList())
         }
 
         fun generateTestsForMethod(e: AnActionEvent) {
-            // EvoSuite
-
-            val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-            val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-
-            val project = e.project ?: return
-            val runnerService = project.service<RunnerService>()
-            if (!runnerService.verify(psiFile)) return
-
-            val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
-            val methodDescriptor = generateMethodDescriptor(psiMethod)
-
-            val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return
-            val cacheStartLine: Int = doc.getLineNumber(psiMethod.startOffset)
-            val cacheEndLine: Int = doc.getLineNumber(psiMethod.endOffset)
-            val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-
-            val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
-            evoSuitePipeline
-                .forMethod(methodDescriptor)
-                .withCacheLines(cacheStartLine, cacheEndLine)
-                .invalidateCache(linesToInvalidateFromCache)
-                .runTestGeneration()
-
-            // Llm
-
-            // TODO add implementation here
-            // TODO do it in parallel
+            for (tool: Tool in tools) tool.generateTestsForMethod(e)
+            display(e, (tools.indices).toList())
         }
 
         fun generateTestsForLine(e: AnActionEvent) {
-            // EvoSuite
-
-            val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-            val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-
-            val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)
-                ?: return // lines in the editor and in EvoSuite are one-based
-
-            val project = e.project ?: return
-            val runnerService = project.service<RunnerService>()
-            if (!runnerService.verify(psiFile)) return
-
-            val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-
-            val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
-            evoSuitePipeline
-                .forLine(selectedLine)
-                .withCacheLines(selectedLine - 1, selectedLine - 1)
-                .invalidateCache(linesToInvalidateFromCache)
-                .runTestGeneration()
-
-            // Llm
-
-            // TODO add implementation here
-            // TODO do it in parallel
+            for (tool: Tool in tools) tool.generateTestsForLine(e)
+            display(e, (tools.indices).toList())
         }
+
+        fun generateTestsForClassByEvoSuite(e: AnActionEvent) {
+            for (index in tools.indices) {
+                if (tools[index].name == EvoSuite().name) {
+                    tools[index].generateTestsForClass(e)
+                    display(e, listOf(index))
+                }
+            }
+        }
+
+        fun generateTestsForClassByLlm(e: AnActionEvent) {
+            for (index in tools.indices) {
+                if (tools[index].name == Llm().name) {
+                    tools[index].generateTestsForClass(e)
+                    display(e, listOf(index))
+                }
+            }
+        }
+
+        fun generateTestsForMethodByEvoSuite(e: AnActionEvent) {
+            for (index in tools.indices) {
+                if (tools[index].name == EvoSuite().name) {
+                    tools[index].generateTestsForMethod(e)
+                    display(e, listOf(index))
+                }
+            }
+        }
+
+        fun generateTestsForMethodByLlm(e: AnActionEvent) {
+            for (index in tools.indices) {
+                if (tools[index].name == Llm().name) {
+                    tools[index].generateTestsForMethod(e)
+                    display(e, listOf(index))
+                }
+            }
+        }
+
+        fun generateTestsForLineByEvoSuite(e: AnActionEvent) {
+            for (index in tools.indices) {
+                if (tools[index].name == EvoSuite().name) {
+                    tools[index].generateTestsForLine(e)
+                    display(e, listOf(index))
+                }
+            }
+        }
+
+        fun generateTestsForLineByLlm(e: AnActionEvent) {
+            for (index in tools.indices) {
+                if (tools[index].name == Llm().name) {
+                    tools[index].generateTestsForLine(e)
+                    display(e, listOf(index))
+                }
+            }
+        }
+
+        fun display(e: AnActionEvent, indexes: List<Int>) = AppExecutorUtil.getAppScheduledExecutorService().execute(Display(e, indexes))
+    }
+}
+
+private class Display(e: AnActionEvent, i: List<Int>) : Runnable {
+    val event: AnActionEvent = e
+    val indexes: List<Int> = i
+    override fun run() {
+        val sleepDurationMillis: Long = 2000
+        while (true) {
+            if (event.project!!.service<TestCaseDisplayService>().testGenerationResultList.size != indexes.size) {
+                Thread.sleep(sleepDurationMillis)
+                continue
+            }
+            event.project!!.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC).testGenerationResult(
+                getMergeResult(indexes),
+                event.project!!.service<TestCaseDisplayService>().resultName,
+                event.project!!.service<TestCaseDisplayService>().fileUrl,
+            )
+            return
+        }
+    }
+
+    private fun getMergeResult(indexes: List<Int>): CompactReport {
+        if (indexes.size == 1) {
+            return event.project!!.service<TestCaseDisplayService>().testGenerationResultList[indexes[0]]!!
+        }
+        TODO("implement merge")
     }
 }

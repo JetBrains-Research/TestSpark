@@ -8,13 +8,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
+import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 
 class LLMProcessManager(
     private val project: Project,
     private val projectPath: String,
     private val projectClassPath: String,
-    private val fileUrl: String
+    private val fileUrl: String,
 ) {
 
     private val settingsProjectState = project.service<SettingsProjectService>().state
@@ -24,7 +25,6 @@ class LLMProcessManager(
         prompt: String,
         log: Logger,
     ) {
-
         // update build path
         var buildPath = projectClassPath
         if (settingsProjectState.buildPath.isEmpty()) {
@@ -45,5 +45,8 @@ class LLMProcessManager(
             LLMErrorManager.displayEmptyTests(project)
             return
         }
+
+        // TODO add generatedTestSuite to list
+        project.service<TestCaseDisplayService>().testGenerationResultList.add(null)
     }
 }

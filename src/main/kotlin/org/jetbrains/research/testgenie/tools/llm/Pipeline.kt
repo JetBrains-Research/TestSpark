@@ -79,7 +79,6 @@ class Pipeline(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
-
                     if (indicator.isCanceled) {
                         indicator.stop()
                         return
@@ -90,7 +89,5 @@ class Pipeline(
                     }
                 }
             })
-
-        TODO("Parse generated tests + Run and validate tests + collect execution results")
     }
 }

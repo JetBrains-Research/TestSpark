@@ -3,7 +3,9 @@ package org.jetbrains.research.testgenie.tools.evosuite.validation
 import com.intellij.util.messages.Topic
 
 val VALIDATION_RESULT_TOPIC: Topic<ValidationResultListener> = Topic.create(
-    "VALIDATION_RESULT_TOPIC", ValidationResultListener::class.java, Topic.BroadcastDirection.TO_PARENT
+    "VALIDATION_RESULT_TOPIC",
+    ValidationResultListener::class.java,
+    Topic.BroadcastDirection.TO_PARENT,
 )
 
 /**
