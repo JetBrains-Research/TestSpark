@@ -141,6 +141,8 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
     val settingsProjectState = project.service<SettingsProjectService>().state
     val buildPath = "$projectPath/${settingsProjectState.buildPath}"
+    val packageList = psiClass.qualifiedName.toString().split(".").toMutableList()
+    packageList.removeLast()
 
     return org.jetbrains.research.testgenie.tools.llm.Pipeline(
         project,
@@ -149,6 +151,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         fileUrl,
         interestingPsiClasses,
         psiClass,
+        packageList.joinToString("."),
         polymorphismRelations,
         modificationStamp,
     )

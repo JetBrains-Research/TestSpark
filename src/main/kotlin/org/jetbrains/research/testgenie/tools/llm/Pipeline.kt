@@ -5,11 +5,14 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.getSignatureString
 import org.jetbrains.research.testgenie.tools.evosuite.ProjectBuilder
 import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
+import java.io.File
+import java.util.*
 
 private var prompt = ""
 
@@ -20,11 +23,21 @@ class Pipeline(
     private val fileUrl: String,
     private val interestingPsiClasses: Set<PsiClass>,
     private val cut: PsiClass,
+    private val packageName: String,
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     private val modTs: Long,
 ) {
 
     private val log = Logger.getInstance(this::class.java)
+
+    private val sep = File.separatorChar
+
+    private val id = UUID.randomUUID().toString()
+    private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
+    private val testResultName = "test_gen_result_$id"
+
+    private val resultPath = "$testResultDirectory$testResultName"
+
 
     private val processManager =
         LLMProcessManager(project, projectPath, projectClassPath, fileUrl)
@@ -69,6 +82,8 @@ class Pipeline(
                 prompt += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
             }
         }
+        // Make sure that LLM does not provide extra information other than the test file
+        prompt += "put the generated test between ```"
 
         return prompt
     }
@@ -85,7 +100,7 @@ class Pipeline(
                     }
 
                     if (projectBuilder.runBuild(indicator)) {
-                        processManager.runLLMTestGenerator(indicator, prompt, log)
+                        processManager.runLLMTestGenerator(indicator, prompt, log, resultPath,packageName)
                     }
                 }
             })
