@@ -2,6 +2,8 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiJavaFile
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.llm.test.TestLine
 import org.jetbrains.research.testgenie.tools.llm.test.TestLineType
@@ -35,8 +37,11 @@ class TestsAssembler(
     }
 
     companion object {
-        fun returnTestSuite(): TestSuiteGeneratedByLLM {
+        fun returnTestSuite(packageName: String): TestSuiteGeneratedByLLM {
             val testSuite = TestSuiteGeneratedByLLM()
+            rawText = rawText.split("```")[1]
+
+            testSuite.packageString = packageName
 
             // save imports
             testSuite.imports = importPattern.findAll(rawText, 0).map {
@@ -76,9 +81,23 @@ class TestsAssembler(
                     .trim()
 
                 // Get test's body
-                val testBody = rawTest.split("{")[1].trim()
+                // remove opening bracket
+                var testBody: String = rawTest.split("{")[1].trim()
+
+                // remove closing bracket
+
+                val tempList = testBody.split("}").toMutableList()
+                tempList.removeLast()
+
+                if (testSuite.testCases.size == testSet.size - 1){
+                    // it is the last test. So we should remove another closing bracket
+                    tempList.removeLast()
+                }
+
+                testBody = tempList.joinToString("}")
+
+                // Save each line
                 val lines = testBody.split("\n").toMutableList()
-                lines.removeLast()
                 lines.forEach { rawLine ->
                     val line = rawLine.trim()
 
