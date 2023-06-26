@@ -9,6 +9,7 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
+import org.jetbrains.research.testgenie.tools.TestCoverageCollector
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestLineType
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
@@ -23,7 +24,7 @@ class LLMProcessManager(
     private val fileUrl: String,
 ) {
     private val settingsProjectState = project.service<SettingsProjectService>().state
-    private var finalPathAddress:String = ""
+    private var finalPathAddress: String = ""
 
     fun runLLMTestGenerator(
         indicator: ProgressIndicator,
@@ -56,30 +57,29 @@ class LLMProcessManager(
         // Save the generated TestSuite into a temp file
         finalPathAddress = "$resultPath${File.separatorChar}"
         generatedTestSuite.packageString.split(".").forEach { directory ->
-            finalPathAddress+="$directory${File.separatorChar}"
+            finalPathAddress += "$directory${File.separatorChar}"
         }
         saveGeneratedTests(generatedTestSuite)
 
-        // TODO add generatedTestSuite to list
-        project.service<TestCaseDisplayService>().testGenerationResultList.add(null)
+        // TODO move this operation to Manager
+        // TODO work with null value
+        project.service<TestCaseDisplayService>().testGenerationResultList.add(TestCoverageCollector(indicator, project).collect(finalPathAddress))
     }
 
-
-    private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM){
+    private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM) {
         Path(finalPathAddress).createDirectories()
 
         val testFile = File("$finalPathAddress${File.separatorChar}generatedTest.java")
         testFile.createNewFile()
-        println("Save test in file "+ testFile.absolutePath)
-
-
+        println("Save test in file " + testFile.absolutePath)
 
         // Add package
-        if (generatedTestSuite.packageString.isNotBlank())
+        if (generatedTestSuite.packageString.isNotBlank()) {
             testFile.appendText("package ${generatedTestSuite.packageString};\n")
+        }
 
         // add imports
-        generatedTestSuite.imports.forEach{ importedElement ->
+        generatedTestSuite.imports.forEach { importedElement ->
             testFile.appendText("import $importedElement\n")
         }
 
@@ -92,7 +92,7 @@ class LLMProcessManager(
             testFile.appendText("\t@Test")
 
             // add expectedException if it exists
-            if(testCase.expectedException.isNotBlank()){
+            if (testCase.expectedException.isNotBlank()) {
                 testFile.appendText("(expected = ${testCase.expectedException})")
             }
 
@@ -100,7 +100,7 @@ class LLMProcessManager(
             testFile.appendText("\n\tpublic void ${testCase.name}() ")
 
             // add throws exception if exists
-            if(testCase.throwsException.isNotBlank()){
+            if (testCase.throwsException.isNotBlank()) {
                 testFile.appendText("throws ${testCase.throwsException}")
             }
 
@@ -109,17 +109,16 @@ class LLMProcessManager(
 
             // write each line
             testCase.lines.forEach { line ->
-                when(line.type){
+                when (line.type) {
                     TestLineType.BREAK -> testFile.appendText("\t\t\n")
                     else -> testFile.appendText("\t\t${line.text}\n")
                 }
             }
-            //close test case
+            // close test case
             testFile.appendText("\t}\n")
         }
 
         // close the test class
         testFile.appendText("}")
-
     }
 }
