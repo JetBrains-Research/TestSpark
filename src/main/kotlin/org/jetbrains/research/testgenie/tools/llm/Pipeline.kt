@@ -38,7 +38,6 @@ class Pipeline(
 
     private val resultPath = "$testResultDirectory$testResultName"
 
-
     private val processManager =
         LLMProcessManager(project, projectPath, projectClassPath, fileUrl)
 
@@ -100,7 +99,7 @@ class Pipeline(
                     }
 
                     if (projectBuilder.runBuild(indicator)) {
-                        processManager.runLLMTestGenerator(indicator, prompt, log, resultPath,packageName)
+                        processManager.runLLMTestGenerator(indicator, prompt, log, resultPath, packageName)
                     }
                 }
             })
