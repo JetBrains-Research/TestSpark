@@ -93,9 +93,15 @@ class TestCoverageCollector(
                 jacocoCLIDir,
                 "report",
                 "${javaFile.parentFile.absolutePath}/jacoco-$it.exec",
-                "--classfiles",
-                buildPath
             )
+
+            buildPath.split(":").forEach { cp ->
+                if (cp.trim().isNotEmpty() && cp.trim().isNotBlank()) {
+                    command.add("--classfiles")
+                    command.add(cp)
+                }
+            }
+
             sourceRoots.forEach { root ->
                 command.add("--sourcefiles")
                 command.add(root.path)
@@ -130,6 +136,6 @@ class TestCoverageCollector(
 
     private fun getLibrary(libraryName: String): String {
         val pluginsPath = System.getProperty("idea.plugins.path")
-        return "$pluginsPath${sep}TestGenie${sep}lib${sep}/$libraryName"
+        return "$pluginsPath${sep}TestGenie${sep}lib${sep}$libraryName"
     }
 }
