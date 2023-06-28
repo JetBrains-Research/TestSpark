@@ -86,11 +86,11 @@ class LLMProcessManager(
 
         // add imports
         generatedTestSuite.imports.forEach { importedElement ->
-            testFile.appendText("import $importedElement\n")
+            testFile.appendText("$importedElement\n")
         }
 
         // open the test class
-        testFile.appendText("public class generatedTest{\n\n")
+        testFile.appendText("public class GeneratedTest{\n\n")
 
         // print each test
         generatedTestSuite.testCases.forEach { testCase ->
@@ -99,7 +99,7 @@ class LLMProcessManager(
 
             // add expectedException if it exists
             if (testCase.expectedException.isNotBlank()) {
-                testFile.appendText("(expected = ${testCase.expectedException})")
+                testFile.appendText("${testCase.expectedException.replace("@Test","")})")
             }
 
             // start writing the test signature
