@@ -25,6 +25,7 @@ class LLMProcessManager(
 ) {
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private var finalPathAddress: String = ""
+    private var testFileName: String = "GeneratedTest.java"
 
     fun runLLMTestGenerator(
         indicator: ProgressIndicator,
@@ -57,19 +58,24 @@ class LLMProcessManager(
         // Save the generated TestSuite into a temp file
         finalPathAddress = "$resultPath${File.separatorChar}"
         generatedTestSuite.packageString.split(".").forEach { directory ->
-            finalPathAddress += "$directory${File.separatorChar}"
+            if (directory.isNotBlank()) finalPathAddress += "$directory${File.separatorChar}"
         }
         saveGeneratedTests(generatedTestSuite)
 
         // TODO move this operation to Manager
         // TODO work with null value
-        project.service<TestCaseDisplayService>().testGenerationResultList.add(TestCoverageCollector(indicator, project).collect(finalPathAddress))
+        project.service<TestCaseDisplayService>().testGenerationResultList.add(
+            TestCoverageCollector(
+                indicator,
+                project
+            ).collect("$finalPathAddress$testFileName")
+        )
     }
 
     private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM) {
         Path(finalPathAddress).createDirectories()
 
-        val testFile = File("$finalPathAddress${File.separatorChar}generatedTest.java")
+        val testFile = File("$finalPathAddress${File.separatorChar}$testFileName")
         testFile.createNewFile()
         println("Save test in file " + testFile.absolutePath)
 
