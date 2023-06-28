@@ -2,13 +2,10 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
-import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
@@ -23,28 +20,19 @@ import kotlin.io.path.createDirectories
 
 class LLMProcessManager(
     private val project: Project,
-    private val projectPath: String,
     private val projectClassPath: String,
-    private val fileUrl: String,
 ) {
     private val settingsProjectState = project.service<SettingsProjectService>().state
-    private var finalPathAddress: String = ""
     private var testFileName: String = "GeneratedTest.java"
+    private val log = Logger.getInstance(this::class.java)
 
     fun runLLMTestGenerator(
         indicator: ProgressIndicator,
         prompt: String,
-        log: Logger,
         resultPath: String,
         packageName: String,
         cut: PsiClass
     ) {
-
-        // source path
-        val CUTFile = cut.containingFile.virtualFile
-        val CUTModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(CUTFile)!!
-        val sourceRoots = ModuleRootManager.getInstance(CUTModule).getSourceRoots(false)
-
         // update build path
         var buildPath = projectClassPath
         if (settingsProjectState.buildPath.isEmpty()) {
@@ -67,36 +55,38 @@ class LLMProcessManager(
         }
 
         // Save the generated TestSuite into a temp file
-        finalPathAddress = "$resultPath${File.separatorChar}"
-        generatedTestSuite.packageString.split(".").forEach { directory ->
-            if (directory.isNotBlank()) finalPathAddress += "$directory${File.separatorChar}"
-        }
-        saveGeneratedTests(generatedTestSuite)
+        val generatedTestPath:String = saveGeneratedTests(generatedTestSuite, resultPath)
 
         // TODO move this operation to Manager
         // TODO work with null value
-
+        // Collect coverage information for each generated test method
+        // and display it
         project.service<TestCaseDisplayService>().testGenerationResultList.add(
             TestCoverageCollector(
                 indicator,
-                project
-            ).collect(
+                project,
                 resultPath,
-                "$finalPathAddress$testFileName",
+                File("$generatedTestPath$testFileName"),
+                generatedTestSuite.packageString,
                 buildPath,
                 generatedTestSuite.testCases.map { it.name },
-                generatedTestSuite.packageString,
-                sourceRoots
-            )
+                cut
+            ).collect()
         )
     }
 
-    private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM) {
-        Path(finalPathAddress).createDirectories()
+    private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): String {
+        // Generate the final path for the generated tests
+        var generatedTestPath = "$resultPath${File.separatorChar}"
+        generatedTestSuite.packageString.split(".").forEach { directory ->
+            if (directory.isNotBlank()) generatedTestPath += "$directory${File.separatorChar}"
+        }
+        Path(generatedTestPath).createDirectories()
 
-        val testFile = File("$finalPathAddress${File.separatorChar}$testFileName")
+        // Start creating the test file
+        val testFile = File("$generatedTestPath${File.separatorChar}$testFileName")
         testFile.createNewFile()
-        println("Save test in file " + testFile.absolutePath)
+        log.info("Save test in file " + testFile.absolutePath)
 
         // Add package
         if (generatedTestSuite.packageString.isNotBlank()) {
@@ -145,5 +135,7 @@ class LLMProcessManager(
 
         // close the test class
         testFile.appendText("}")
+
+        return generatedTestPath
     }
 }

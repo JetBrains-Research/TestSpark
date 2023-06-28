@@ -20,7 +20,6 @@ class Pipeline(
     private val project: Project,
     private val projectPath: String,
     private val projectClassPath: String,
-    private val fileUrl: String,
     private val interestingPsiClasses: Set<PsiClass>,
     private val cut: PsiClass,
     private val packageName: String,
@@ -39,7 +38,7 @@ class Pipeline(
     private val resultPath = "$testResultDirectory$testResultName"
 
     private val processManager =
-        LLMProcessManager(project, projectPath, projectClassPath, fileUrl)
+        LLMProcessManager(project, projectClassPath)
 
     // TODO("Removed unused input parameters. needs o be refactored after finalizing the implementation")
 
@@ -99,7 +98,7 @@ class Pipeline(
                     }
 
                     if (projectBuilder.runBuild(indicator)) {
-                        processManager.runLLMTestGenerator(indicator, prompt, log, resultPath, packageName, cut)
+                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cut,)
                     }
                 }
             })

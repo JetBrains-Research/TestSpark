@@ -2,34 +2,43 @@ package org.jetbrains.research.testgenie.tools
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import org.evosuite.utils.CompactReport
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiClass
 import java.io.File
 
 class TestCoverageCollector(
     private val indicator: ProgressIndicator,
-    private val project: Project,
+    project: Project,
+    private val resultPath: String,
+    private val generatedTestFile: File,
+    private val generatedTestPackage: String,
+    private val projectBuildPath: String,
+    private val testMethodNames: List<String>,
+    cut: PsiClass
 ) {
     private val sep = File.separatorChar
-    private val pathSep = File.pathSeparatorChar
     private val junitTimeout: Long = 12000000 // TODO: Source from config
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
+    // source path
+    private val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(
+        cut.containingFile.virtualFile
+    )!!
+    private val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
 
-    fun collect(
-        resultPath: String,
-        classpath: String,
-        buildPath: String,
-        testCasesNames: List<String>,
-        packageString: String,
-        sourceRoots: Array<VirtualFile>
-    ): CompactReport? {
-        val javaFile = File(classpath)
-        if (!javaFile.exists()) return null
-        if (!compilation(javaFile, buildPath)) return null
-        runJacoco(javaFile, buildPath, resultPath, testCasesNames, packageString, sourceRoots)
+    fun collect(): CompactReport? {
+        // The test file cannot be null
+        if (!generatedTestFile.exists()) return null
+        // compile the test file
+        if (!compilation(generatedTestFile, projectBuildPath)) return null
+        // run Jacoco on the compiled test file
+        runJacoco()
+        // Collect the Jacoco resul;ts and return the compact report
         return getCompactReport()
     }
 
@@ -55,59 +64,53 @@ class TestCoverageCollector(
         return File(classFilePath).exists()
     }
 
-    private fun runJacoco(
-        javaFile: File,
-        buildPath: String,
-        resultPath: String,
-        testCasesNames: List<String>,
-        packageString: String,
-        sourceRoots: Array<VirtualFile>
-    ) {
+    private fun runJacoco() {
         indicator.text = "Running jacoco"
 
+        val className = generatedTestFile.name.split('.')[0]
         // find the proper javac
         val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
-
-        val className = javaFile.name.split('.')[0]
+        // JaCoCo libs
         val jacocoAgentDir = getLibrary("jacocoagent.jar")
         val jacocoCLIDir = getLibrary("jacococli.jar")
 
-        testCasesNames.forEach {
-            //java -javaagent:"$jacocoAgentDir=destfile=$generatedTestDir/jacoco2.exec,append=false" -cp "$baseDirs:$generatedTestDir:$libDir/JUnitRunner.jar" org.example.SingleJUnitTestRunner "org.jetbrains.person.$testFileName#testConstructor"
-            // run jacoco
+        // Execute each test method separately
+        testMethodNames.forEach {
+            // run the test method with jacoco agent
             runCommandLine(
                 arrayListOf(
                     javaRunner.absolutePath,
-                    "-javaagent:$jacocoAgentDir=destfile=${javaFile.parentFile.absolutePath}/jacoco-$it.exec,append=false",
+                    "-javaagent:$jacocoAgentDir=destfile=${generatedTestFile.parentFile.absolutePath}/jacoco-$it.exec,append=false",
                     "-cp",
-                    "${getPath(buildPath)}${getLibrary("JUnitRunner-1.0.jar")}:$resultPath",
+                    "${getPath(projectBuildPath)}${getLibrary("JUnitRunner-1.0.jar")}:$resultPath",
                     "org.jetbrains.research.SingleJUnitTestRunner",
-                    "$packageString.$className#$it"
+                    "$generatedTestPackage.$className#$it"
                 ),
             )
 
-            // java -jar $jacocoCLIAgent report “$generatedTestDir/jacoco2.exec” --classfiles “$compiledClasses” --sourcefiles “/Users/Pourina.Derakhshanfar/repos/TestAssignment/src/main/java”--xml “$generatedTestDir/jacoco2.xml”
+            // Prepare the command for generating the Jacoco report
             val command = mutableListOf(
                 javaRunner.absolutePath,
                 "-jar",
                 jacocoCLIDir,
                 "report",
-                "${javaFile.parentFile.absolutePath}/jacoco-$it.exec",
+                "${generatedTestFile.parentFile.absolutePath}/jacoco-$it.exec",
             )
-
-            buildPath.split(":").forEach { cp ->
+            // for each classpath
+            projectBuildPath.split(":").forEach { cp ->
                 if (cp.trim().isNotEmpty() && cp.trim().isNotBlank()) {
                     command.add("--classfiles")
                     command.add(cp)
                 }
             }
-
+            // for each source folder
             sourceRoots.forEach { root ->
                 command.add("--sourcefiles")
                 command.add(root.path)
             }
+            // generate XML report
             command.add("--xml")
-            command.add("${javaFile.parentFile.absolutePath}/jacoco-$it.xml")
+            command.add("${generatedTestFile.parentFile.absolutePath}/jacoco-$it.xml")
 
             runCommandLine(command as ArrayList<String>)
         }
