@@ -99,7 +99,7 @@ class Pipeline(
                     }
 
                     if (projectBuilder.runBuild(indicator)) {
-                        processManager.runLLMTestGenerator(indicator, prompt, log, resultPath, packageName)
+                        processManager.runLLMTestGenerator(indicator, prompt, log, resultPath, packageName, cut)
                     }
                 }
             })

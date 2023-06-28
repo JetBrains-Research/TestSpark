@@ -2,10 +2,14 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
+import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
@@ -33,7 +37,14 @@ class LLMProcessManager(
         log: Logger,
         resultPath: String,
         packageName: String,
+        cut: PsiClass
     ) {
+
+        // source path
+        val CUTFile = cut.containingFile.virtualFile
+        val CUTModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(CUTFile)!!
+        val sourceRoots = ModuleRootManager.getInstance(CUTModule).getSourceRoots(false)
+
         // update build path
         var buildPath = projectClassPath
         if (settingsProjectState.buildPath.isEmpty()) {
@@ -64,11 +75,19 @@ class LLMProcessManager(
 
         // TODO move this operation to Manager
         // TODO work with null value
+
         project.service<TestCaseDisplayService>().testGenerationResultList.add(
             TestCoverageCollector(
                 indicator,
                 project
-            ).collect("$finalPathAddress$testFileName", buildPath)
+            ).collect(
+                resultPath,
+                "$finalPathAddress$testFileName",
+                buildPath,
+                generatedTestSuite.testCases.map { it.name },
+                generatedTestSuite.packageString,
+                sourceRoots
+            )
         )
     }
 
@@ -99,7 +118,7 @@ class LLMProcessManager(
 
             // add expectedException if it exists
             if (testCase.expectedException.isNotBlank()) {
-                testFile.appendText("${testCase.expectedException.replace("@Test","")})")
+                testFile.appendText("${testCase.expectedException.replace("@Test", "")})")
             }
 
             // start writing the test signature
