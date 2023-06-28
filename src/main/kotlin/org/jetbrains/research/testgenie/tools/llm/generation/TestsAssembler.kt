@@ -51,7 +51,7 @@ class TestsAssembler(
             val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
             testSet.removeAt(0)
 
-            testSet.forEach {
+            testSet.forEach ca@{
                 val rawTest = "@Test$it"
                 val currentTest = TestCaseGeneratedByLLM()
 
@@ -63,6 +63,10 @@ class TestsAssembler(
                 }
 
                 // Get unexpected exceptions
+                if (!rawTest.contains("public void")) {
+                    println("WARNING: The raw Test does not contain public void:\n $rawTest")
+                    return@ca
+                }
                 val interestingPartOfSignature = rawTest
                     .split("public void")[1]
                     .split("{")[0]
@@ -89,9 +93,13 @@ class TestsAssembler(
                 val tempList = testBody.split("}").toMutableList()
                 tempList.removeLast()
 
-                if (testSuite.testCases.size == testSet.size - 1){
+                if (testSuite.testCases.size == testSet.size - 1) {
                     // it is the last test. So we should remove another closing bracket
-                    tempList.removeLast()
+                    if (tempList.isNotEmpty()) {
+                        tempList.removeLast()
+                    } else {
+                        println("WARNING: the final test does not have to brackets:\n $testBody")
+                    }
                 }
 
                 testBody = tempList.joinToString("}")
