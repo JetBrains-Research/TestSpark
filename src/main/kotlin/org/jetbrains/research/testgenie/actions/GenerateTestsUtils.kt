@@ -148,7 +148,6 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         project,
         projectPath,
         buildPath,
-        fileUrl,
         interestingPsiClasses,
         psiClass,
         packageList.joinToString("."),
