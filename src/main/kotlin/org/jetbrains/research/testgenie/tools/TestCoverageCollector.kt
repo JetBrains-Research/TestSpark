@@ -5,7 +5,9 @@ import com.intellij.execution.process.OSProcessHandler
 import com.intellij.openapi.progress.ProgressIndicator
 import org.evosuite.utils.CompactReport
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import java.io.File
+import java.nio.file.Files
 
 class TestCoverageCollector(
     private val indicator: ProgressIndicator,
@@ -15,35 +17,35 @@ class TestCoverageCollector(
     private val pathSep = File.pathSeparatorChar
     private val junitTimeout: Long = 12000000 // TODO: Source from config
 
-    fun collect(classpath: String): CompactReport? {
+    fun collect(classpath: String, buildPath: String): CompactReport? {
         val javaFile = File(classpath)
         if (!javaFile.exists()) return null
-        if (!compilation(javaFile)) return null
+        if (!compilation(javaFile, buildPath)) return null
         runJacoco(javaFile)
         return getCompactReport()
     }
 
-    private fun compilation(javaFile: File): Boolean {
+    private fun compilation(javaFile: File, buildPath: String): Boolean {
         indicator.text = "Compilation tests checking"
 
+        // find the proper javac
+        val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
+        val javaCompile = File(javaHomeDirectory.path).walk().filter {it.name.equals("javac") && it.isFile}.first()
         // compile file
         runCommandLine(
             arrayListOf(
-                "javac",
+                javaCompile.absolutePath,
+                "-cp",
+                getPath(buildPath),
                 javaFile.absolutePath
             )
-        ) // TODO change "javac" to ProjectRootManager.getInstance(project).projectSdk.homeDirectory
+        )
 
         // create .class file path
         val classFilePath = javaFile.absolutePath.replace(".java", ".class")
 
         // check is .class file exists
-        val result = File(classFilePath).exists()
-
-        // remove .class file
-        if (result) runCommandLine(arrayListOf("rm", classFilePath))
-
-        return result
+        return File(classFilePath).exists()
     }
 
     private fun runJacoco(javaFile: File) {
@@ -71,12 +73,12 @@ class TestCoverageCollector(
         handler.waitFor(junitTimeout)
     }
 
-    private fun getPath(): String {
+    private fun getPath(buildPath: String): String {
         // create the path for the command
         val pluginsPath = System.getProperty("idea.plugins.path")
         val junitPath = "$pluginsPath${sep}TestGenie${sep}lib${sep}junit-4.13.jar"
-        val standaloneRuntimePath = "$pluginsPath${sep}TestGenie${sep}lib${sep}standalone-runtime.jar"
+        val mockitoPath = "$pluginsPath${sep}TestGenie${sep}lib${sep}mockito-core-5.0.0.jar"
         val hamcrestPath = "$pluginsPath${sep}TestGenie${sep}lib${sep}hamcrest-core-1.3.jar"
-        return ""
+        return "$junitPath:$hamcrestPath:$mockitoPath:$buildPath"
     }
 }

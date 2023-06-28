@@ -68,7 +68,7 @@ class LLMProcessManager(
             TestCoverageCollector(
                 indicator,
                 project
-            ).collect("$finalPathAddress$testFileName")
+            ).collect("$finalPathAddress$testFileName", buildPath)
         )
     }
 
