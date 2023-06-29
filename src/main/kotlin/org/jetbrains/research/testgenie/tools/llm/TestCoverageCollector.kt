@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.data
+package org.jetbrains.research.testgenie.tools.llm
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
@@ -9,6 +9,8 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
+import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.data.TestCase
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
 
@@ -31,7 +33,7 @@ class TestCoverageCollector(
         cut.containingFile.virtualFile
     )!!
     private val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
-//    private val report = Report()
+    private val report = Report()
 
     fun collect(): Report? {
         // the test file cannot be null
@@ -40,9 +42,18 @@ class TestCoverageCollector(
         if (!compilation(generatedTestFile, projectBuildPath)) return null
         // run Jacoco on the compiled test file
         runJacoco()
-        // collect the Jacoco results and return the compact report
-        TODO("implement it")
-//        return report
+
+        // TODO remove it :)
+        report.testCaseList["mySuperFunction"] = TestCase(
+            "mySuperFunction", "" +
+                    "@Test(timeout = 4000)\n" +
+                    "public void mySuperFunction() throws Throwable  {\n" +
+                    "   System.out.println(\"Here is my super mega function!!!\");\n" +
+                    "}", setOf(3, 4, 5), setOf(), setOf()
+        )
+
+        // collect the Jacoco results and return the report
+        return report
     }
 
     private fun compilation(javaFile: File, buildPath: String): Boolean {
