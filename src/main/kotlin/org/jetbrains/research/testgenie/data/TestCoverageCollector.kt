@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.tools
+package org.jetbrains.research.testgenie.data
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
@@ -10,6 +10,7 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
+import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
 
 class TestCoverageCollector(
@@ -19,27 +20,30 @@ class TestCoverageCollector(
     private val generatedTestFile: File,
     private val generatedTestPackage: String,
     private val projectBuildPath: String,
-    private val testMethodNames: List<String>,
+    private val testCases: MutableList<TestCaseGeneratedByLLM>,
     cut: PsiClass
 ) {
     private val sep = File.separatorChar
     private val junitTimeout: Long = 12000000 // TODO: Source from config
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
+
     // source path
     private val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(
         cut.containingFile.virtualFile
     )!!
     private val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
+//    private val compactReport = CompactReport()
 
     fun collect(): CompactReport? {
-        // The test file cannot be null
+        // the test file cannot be null
         if (!generatedTestFile.exists()) return null
         // compile the test file
         if (!compilation(generatedTestFile, projectBuildPath)) return null
         // run Jacoco on the compiled test file
         runJacoco()
-        // Collect the Jacoco resul;ts and return the compact report
-        return getCompactReport()
+        // collect the Jacoco results and return the compact report
+        TODO("implement it")
+//        return compactReport
     }
 
     private fun compilation(javaFile: File, buildPath: String): Boolean {
@@ -75,12 +79,15 @@ class TestCoverageCollector(
         val jacocoCLIDir = getLibrary("jacococli.jar")
 
         // Execute each test method separately
-        testMethodNames.forEach {
+        testCases.map { it.name }.forEach {
+            // name of .exec and .xml files
+            val dataFileName = "${generatedTestFile.parentFile.absolutePath}/jacoco-$it"
+
             // run the test method with jacoco agent
             runCommandLine(
                 arrayListOf(
                     javaRunner.absolutePath,
-                    "-javaagent:$jacocoAgentDir=destfile=${generatedTestFile.parentFile.absolutePath}/jacoco-$it.exec,append=false",
+                    "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false",
                     "-cp",
                     "${getPath(projectBuildPath)}${getLibrary("JUnitRunner-1.0.jar")}:$resultPath",
                     "org.jetbrains.research.SingleJUnitTestRunner",
@@ -94,8 +101,9 @@ class TestCoverageCollector(
                 "-jar",
                 jacocoCLIDir,
                 "report",
-                "${generatedTestFile.parentFile.absolutePath}/jacoco-$it.exec",
+                "$dataFileName.exec",
             )
+
             // for each classpath
             projectBuildPath.split(":").forEach { cp ->
                 if (cp.trim().isNotEmpty() && cp.trim().isNotBlank()) {
@@ -103,21 +111,25 @@ class TestCoverageCollector(
                     command.add(cp)
                 }
             }
+
             // for each source folder
             sourceRoots.forEach { root ->
                 command.add("--sourcefiles")
                 command.add(root.path)
             }
+
             // generate XML report
             command.add("--xml")
-            command.add("${generatedTestFile.parentFile.absolutePath}/jacoco-$it.xml")
+            command.add("$dataFileName.xml")
+
+            // save data to TestGenerationResult
+//            saveData(it, "$dataFileName.xml")
 
             runCommandLine(command as ArrayList<String>)
         }
     }
 
-    private fun getCompactReport(): CompactReport {
-        indicator.text = "Coverage data computing"
+    private fun saveData(testName: String, xmlFileName: String) {
         TODO("implement it")
     }
 
