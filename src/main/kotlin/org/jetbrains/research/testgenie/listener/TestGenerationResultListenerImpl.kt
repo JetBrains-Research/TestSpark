@@ -7,12 +7,12 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.evosuite.TestGenerationResultListener
 import org.jetbrains.research.testgenie.services.TestCaseCachingService
-import org.evosuite.utils.CompactReport
+import org.jetbrains.research.testgenie.data.Report
 
 class TestGenerationResultListenerImpl(private val project: Project) : TestGenerationResultListener {
     private val log = Logger.getInstance(this.javaClass)
 
-    override fun testGenerationResult(testReport: CompactReport, resultName: String, fileUrl: String) {
+    override fun testGenerationResult(testReport: Report, resultName: String, fileUrl: String) {
         log.info("Received test result for $resultName")
         val workspace = project.service<Workspace>()
 
@@ -28,7 +28,7 @@ class TestGenerationResultListenerImpl(private val project: Project) : TestGener
      * @param fileUrl the file url
      * @param jobInfo the job info of the generated tests
      */
-    private fun cacheGeneratedTestCases(testReport: CompactReport, fileUrl: String, jobInfo: Workspace.TestJobInfo) {
+    private fun cacheGeneratedTestCases(testReport: Report, fileUrl: String, jobInfo: Workspace.TestJobInfo) {
         val cache = project.service<TestCaseCachingService>()
         cache.putIntoCache(fileUrl, testReport, jobInfo)
     }

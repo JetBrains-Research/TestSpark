@@ -19,6 +19,8 @@ import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProces
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
+import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.data.TestCase
 import java.io.File
 import java.util.UUID
 
@@ -204,8 +206,8 @@ class Pipeline(
 
         val workspace = project.service<Workspace>()
         ApplicationManager.getApplication().invokeLater {
-            val report = CompactReport(TestGenerationResultImpl())
-            val testMap = hashMapOf<String, CompactTestCase>()
+            val report = Report(CompactReport(TestGenerationResultImpl()))
+            val testMap = hashMapOf<String, TestCase>()
             testCases.forEach {
                 testMap[it.testName] = it
             }

@@ -4,7 +4,6 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
-import org.evosuite.utils.CompactReport
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectFileIndex
@@ -32,9 +31,9 @@ class TestCoverageCollector(
         cut.containingFile.virtualFile
     )!!
     private val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
-//    private val compactReport = CompactReport()
+//    private val report = Report()
 
-    fun collect(): CompactReport? {
+    fun collect(): Report? {
         // the test file cannot be null
         if (!generatedTestFile.exists()) return null
         // compile the test file
@@ -43,7 +42,7 @@ class TestCoverageCollector(
         runJacoco()
         // collect the Jacoco results and return the compact report
         TODO("implement it")
-//        return compactReport
+//        return report
     }
 
     private fun compilation(javaFile: File, buildPath: String): Boolean {

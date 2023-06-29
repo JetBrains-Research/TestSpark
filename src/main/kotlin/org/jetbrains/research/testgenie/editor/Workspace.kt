@@ -23,8 +23,8 @@ import org.jetbrains.research.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
 import org.jetbrains.research.testgenie.services.CoverageSelectionToggleListener
 import org.jetbrains.research.testgenie.services.CoverageVisualisationService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
-import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
+import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.data.TestCase
 
 /**
  * Workspace state service
@@ -44,10 +44,10 @@ class Workspace(private val project: Project) : Disposable {
 
     class TestJob(
         val info: TestJobInfo,
-        val report: CompactReport,
+        val report: Report,
         val selectedTests: HashSet<String>,
     ) {
-        private fun getSelectedTests(): List<CompactTestCase> {
+        private fun getSelectedTests(): List<TestCase> {
             return report.testCaseList.filter { selectedTests.contains(it.key) }.map { it.value }
         }
 
@@ -157,7 +157,7 @@ class Workspace(private val project: Project) : Disposable {
      */
     fun receiveGenerationResult(
         testResultName: String,
-        testReport: CompactReport,
+        testReport: Report,
         cacheLazyPipeline: Pipeline? = null,
         cachedJobKey: TestJobInfo? = null
     ): TestJobInfo {
@@ -258,7 +258,7 @@ class Workspace(private val project: Project) : Disposable {
     private fun updateCoverage(
         linesToCover: Set<Int>,
         selectedTests: HashSet<String>,
-        testCaseList: CompactReport,
+        testCaseList: Report,
         editor: Editor
     ) {
         val visualizationService = project.service<CoverageVisualisationService>()

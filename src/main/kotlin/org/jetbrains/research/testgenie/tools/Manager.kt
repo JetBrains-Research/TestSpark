@@ -3,7 +3,7 @@ package org.jetbrains.research.testgenie.tools
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.util.concurrency.AppExecutorUtil
-import org.evosuite.utils.CompactReport
+import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.evosuite.TEST_GENERATION_RESULT_TOPIC
 import org.jetbrains.research.testgenie.tools.toolImpls.EvoSuite
@@ -105,7 +105,7 @@ private class Display(e: AnActionEvent, i: List<Int>) : Runnable {
         }
     }
 
-    private fun getMergeResult(indexes: List<Int>): CompactReport {
+    private fun getMergeResult(indexes: List<Int>): Report {
         if (indexes.size == 1) {
             return event.project!!.service<TestCaseDisplayService>().testGenerationResultList[indexes[0]]!!
         }

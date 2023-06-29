@@ -6,7 +6,10 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
+import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
+import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.data.TestCase
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import java.io.File
 import java.io.FileReader
@@ -65,7 +68,11 @@ class ResultWatcher(
                         val reader = JsonReader(FileReader("$testResultDirectory$pathname"))
 
                         val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
-                        project.service<TestCaseDisplayService>().testGenerationResultList.add(testGenerationResult)
+                        project.service<TestCaseDisplayService>().testGenerationResultList.add(
+                            Report(
+                                testGenerationResult
+                            )
+                        )
                         project.service<TestCaseDisplayService>().resultName = resultName
                         project.service<TestCaseDisplayService>().fileUrl = fileUrl
                         project.service<TestCaseDisplayService>().packageLine =

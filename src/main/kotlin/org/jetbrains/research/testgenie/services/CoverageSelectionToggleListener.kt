@@ -10,7 +10,7 @@ val COVERAGE_SELECTION_TOGGLE_TOPIC: Topic<CoverageSelectionToggleListener> = To
 /**
  * Topic interface for sending and receiving test results produced by evosuite
  *
- * Subscribers to this topic will receive a CompactReport whenever the plugin triggers a test
+ * Subscribers to this topic will receive a Report whenever the plugin triggers a test
  * generation job with testgenie.evosuite.Runner
  */
 interface CoverageSelectionToggleListener {

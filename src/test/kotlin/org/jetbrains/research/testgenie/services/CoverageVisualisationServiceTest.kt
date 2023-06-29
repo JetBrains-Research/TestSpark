@@ -13,6 +13,7 @@ import org.evosuite.result.MutationInfo
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.shaded.org.mockito.Mockito
 import org.evosuite.utils.CompactReport
+import org.jetbrains.research.testgenie.data.Report
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -76,16 +77,16 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
         branchCoverage: String,
         mutationCoverage: String
     ) {
-        val compactReport = CompactReport(TestGenerationResultImpl())
-        compactReport.UUT = className
-        compactReport.allCoveredLines = coveredLinesSet
-        compactReport.allUncoveredLines = uncoveredLinesSet
-        compactReport.allCoveredBranches = coveredBranchesSet
-        compactReport.allUncoveredBranches = uncoveredBranchesSet
-        compactReport.allCoveredMutation = coveredMutationSet
-        compactReport.allUncoveredMutation = uncoveredMutationSet
+        val report = Report(CompactReport(TestGenerationResultImpl()))
+        report.UUT = className
+        report.allCoveredLines = coveredLinesSet
+        report.allUncoveredLines = uncoveredLinesSet
+        report.allCoveredBranches = coveredBranchesSet
+        report.allUncoveredBranches = uncoveredBranchesSet
+        report.allCoveredMutation = coveredMutationSet
+        report.allUncoveredMutation = uncoveredMutationSet
 
-        coverageVisualisationService.showCoverage(compactReport, myEditor)
+        coverageVisualisationService.showCoverage(report, myEditor)
         assertThat(className).isEqualTo(coverageToolWindowDisplayService.data[0])
         assertThat(lineCoverage).isEqualTo(coverageToolWindowDisplayService.data[1])
         assertThat(branchCoverage).isEqualTo(coverageToolWindowDisplayService.data[2])
@@ -94,7 +95,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
 
     @Test
     fun createToolWindowTabTestSingleContent() {
-        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()), myEditor)
+        coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())), myEditor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
 
         // Verify only 1 content is created
@@ -103,7 +104,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
 
     @Test
     fun createToolWindowTabTestContent() {
-        coverageVisualisationService.showCoverage(CompactReport(TestGenerationResultImpl()), myEditor)
+        coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())), myEditor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
         val content = toolWindow.contentManager.getContent(0)!!
         assertThat(content.displayName).isEqualTo("Coverage")

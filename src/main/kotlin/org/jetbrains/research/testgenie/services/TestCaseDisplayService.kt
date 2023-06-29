@@ -44,8 +44,8 @@ import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
-import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
+import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.data.TestCase
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Component
@@ -103,8 +103,7 @@ class TestCaseDisplayService(private val project: Project) {
     private var isJacocoCoverageActive = false
 
     // Result processing
-    // TODO change CompactReport to TestResult
-    var testGenerationResultList: MutableList<CompactReport?> = mutableListOf()
+    var testGenerationResultList: MutableList<Report?> = mutableListOf()
     var resultName: String = ""
     var fileUrl: String = ""
 
@@ -172,7 +171,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @param editor editor instance where coverage should be
      *               visualized
      */
-    private fun displayTestCases(testReport: CompactReport, editor: Editor) {
+    private fun displayTestCases(testReport: Report, editor: Editor) {
         allTestCasePanel.removeAll()
         testCasePanels.clear()
         testReport.testCaseList.values.forEach {
@@ -662,7 +661,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @param testCasePanel the test case panel
      * @return the created button
      */
-    private fun createRemoveButton(test: CompactTestCase, editor: Editor, testCasePanel: JPanel): JButton {
+    private fun createRemoveButton(test: TestCase, editor: Editor, testCasePanel: JPanel): JButton {
         val removeFromCacheButton = JButton("Remove")
         removeFromCacheButton.addActionListener {
             // Remove the highlighting of the test

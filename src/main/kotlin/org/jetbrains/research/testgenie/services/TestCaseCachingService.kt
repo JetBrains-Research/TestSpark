@@ -2,8 +2,10 @@ package org.jetbrains.research.testgenie.services
 
 import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
+import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.data.TestCase
+import kotlin.streams.toList
 
 class TestCaseCachingService {
     private val log: Logger = Logger.getInstance(this.javaClass)
@@ -17,7 +19,7 @@ class TestCaseCachingService {
      * @param report the report containing the test cases
      * @param jobInfo the TestJobInfo for this report
      */
-    fun putIntoCache(fileUrl: String, report: CompactReport, jobInfo: Workspace.TestJobInfo) {
+    fun putIntoCache(fileUrl: String, report: Report, jobInfo: Workspace.TestJobInfo) {
         log.info("Inserting ${report.testCaseList.size} test cases into cache for $fileUrl")
         val file = getFileTestCaseCache(fileUrl)
         file.putIntoCache(report, jobInfo)
@@ -31,9 +33,9 @@ class TestCaseCachingService {
      * @param lineTo the end of the range
      * @return a list of test cases
      */
-    fun retrieveFromCache(fileUrl: String, lineFrom: Int, lineTo: Int): List<CompactTestCase> {
+    fun retrieveFromCache(fileUrl: String, lineFrom: Int, lineTo: Int): List<TestCase> {
         val fileTestCaseCache = getFileTestCaseCache(fileUrl)
-        val result = fileTestCaseCache.retrieveFromCache(lineFrom, lineTo)
+        val result = fileTestCaseCache.retrieveFromCache(lineFrom, lineTo).stream().map { TestCase(it) }.toList()
         log.info("Retrieved ${result.size} test cases from cache for $fileUrl")
         return result
     }
@@ -101,7 +103,7 @@ class TestCaseCachingService {
          * @param report the report containing the test cases
          * @param jobInfo the TestJobInfo for this test report
          */
-        fun putIntoCache(report: CompactReport, jobInfo: Workspace.TestJobInfo) {
+        fun putIntoCache(report: Report, jobInfo: Workspace.TestJobInfo) {
             report.testCaseList.values.forEach { testCase ->
                 val cachedCompactTestCase = CachedCompactTestCase.fromCompactTestCase(testCase, this, jobInfo)
 
@@ -314,7 +316,7 @@ class TestCaseCachingService {
              * @return the cached test case
              */
             fun fromCompactTestCase(
-                testCase: CompactTestCase,
+                testCase: TestCase,
                 fileTestCaseCache: FileTestCaseCache,
                 jobInfo: Workspace.TestJobInfo
             ): CachedCompactTestCase {
