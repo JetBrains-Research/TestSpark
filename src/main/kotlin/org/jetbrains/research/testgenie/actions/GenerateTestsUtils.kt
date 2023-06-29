@@ -85,10 +85,12 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
     val modificationStamp = vFile.modificationStamp
 
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
-//    val classFQN = psiClass.qualifiedName ?: return null
+    val classFQN = psiClass.qualifiedName ?: return null
+    val fileUrl = vFile.presentableUrl
 
     var psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(psiClass))
     var visitedPsiClasses: Set<PsiClass> = mutableSetOf()
+
 
     // Collect interesting classes (i.e., methods that are passed as input arguments to CUT and their super/sub classes)
     var interestingPsiClasses: Set<PsiClass> = mutableSetOf()
@@ -153,6 +155,8 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         packageList.joinToString("."),
         polymorphismRelations,
         modificationStamp,
+        fileUrl,
+        classFQN
     )
 }
 
@@ -276,8 +280,9 @@ private fun isAbstractClass(psiClass: PsiClass): Boolean {
     }
 
     // check if a class is noted as abstract in the text
-    if(psiClass.text.replace(" ","")
-        .contains("abstractclass${psiClass.name}", ignoreCase = true)){
+    if (psiClass.text.replace(" ", "")
+            .contains("abstractclass${psiClass.name}", ignoreCase = true)
+    ) {
         return true
     }
 

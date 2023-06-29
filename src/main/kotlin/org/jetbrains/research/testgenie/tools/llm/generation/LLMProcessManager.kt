@@ -69,7 +69,7 @@ class LLMProcessManager(
                 generatedTestSuite.packageString,
                 buildPath,
                 generatedTestSuite.testCases,
-                cut
+                cut,
             ).collect()
         )
     }

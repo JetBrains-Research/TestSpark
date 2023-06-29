@@ -53,7 +53,7 @@ class TestCoverageCollector(
         )
 
         // collect the Jacoco results and return the report
-        return report
+        return report.normalized()
     }
 
     private fun compilation(javaFile: File, buildPath: String): Boolean {

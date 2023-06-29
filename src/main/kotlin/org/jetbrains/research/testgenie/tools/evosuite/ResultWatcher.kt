@@ -68,6 +68,7 @@ class ResultWatcher(
                         val reader = JsonReader(FileReader("$testResultDirectory$pathname"))
 
                         val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
+                        // TODO move all interactions with TestCaseDisplayService to Manager
                         project.service<TestCaseDisplayService>().testGenerationResultList.add(
                             Report(
                                 testGenerationResult

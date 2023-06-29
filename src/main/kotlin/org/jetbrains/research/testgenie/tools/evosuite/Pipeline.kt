@@ -18,7 +18,6 @@ import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProcessManager
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
 import java.io.File
@@ -52,6 +51,7 @@ class Pipeline(
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
     private val testResultName = "test_gen_result_$id"
 
+    // TODO move all interactions with Workspace to Manager
     var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
@@ -175,11 +175,13 @@ class Pipeline(
                     // Revert to previous state
                     val runnerService = project.service<RunnerService>()
                     runnerService.isRunning = false
+                    // TODO move all interactions with TestCaseDisplayService to Manager
                     val testCaseDisplayService = project.service<TestCaseDisplayService>()
                     testCaseDisplayService.validateButton.isEnabled = true
                     indicator.stop()
                 }
             })
+        // TODO move all interactions with TestCaseDisplayService to Manager
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
         testCaseDisplayService.fileUrl = fileUrl
         testCaseDisplayService.toggleJacocoButton.isEnabled = false

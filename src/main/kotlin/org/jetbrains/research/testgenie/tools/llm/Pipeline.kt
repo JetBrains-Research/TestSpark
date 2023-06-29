@@ -1,5 +1,6 @@
 package org.jetbrains.research.testgenie.tools.llm
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -10,6 +11,8 @@ import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.getClassDisplayName
 import org.jetbrains.research.testgenie.actions.getSignatureString
+import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.evosuite.ProjectBuilder
 import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
 import java.io.File
@@ -20,12 +23,14 @@ private var prompt = ""
 class Pipeline(
     private val project: Project,
     private val projectPath: String,
-    private val projectClassPath: String,
+    projectClassPath: String,
     private val interestingPsiClasses: Set<PsiClass>,
     private val cut: PsiClass,
     private val packageName: String,
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
-    private val modTs: Long,
+    modTs: Long,
+    fileUrl: String,
+    classFQN: String
 ) {
 
     private val log = Logger.getInstance(this::class.java)
@@ -37,6 +42,9 @@ class Pipeline(
     private val testResultName = "test_gen_result_$id"
 
     private val resultPath = "$testResultDirectory$testResultName"
+
+    // TODO move all interactions with Workspace to Manager
+    var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
     private val processManager =
         LLMProcessManager(project, projectClassPath)
@@ -70,7 +78,7 @@ class Pipeline(
             prompt += "=== methods in ${getClassDisplayName(interestingPsiClass)}:\n"
             for (currentPsiMethod in interestingPsiClass.allMethods) {
                 // Skip java methods
-                if (currentPsiMethod.containingClass!!.qualifiedName!!.startsWith("java")){
+                if (currentPsiMethod.containingClass!!.qualifiedName!!.startsWith("java")) {
                     continue
                 }
                 prompt += " - ${currentPsiMethod.getSignatureString()}\n"
@@ -92,6 +100,13 @@ class Pipeline(
     }
 
     fun runTestGeneration() {
+        // TODO move all interactions with Workspace to Manager
+        val workspace = project.service<Workspace>()
+        workspace.addPendingResult(testResultName, key)
+
+        // TODO move all interactions with TestCaseDisplayService to Manager
+        project.service<TestCaseDisplayService>().resultName = testResultName
+
         val projectBuilder = ProjectBuilder(project)
 
         ProgressManager.getInstance()
@@ -103,7 +118,7 @@ class Pipeline(
                     }
 
                     if (projectBuilder.runBuild(indicator)) {
-                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cut,)
+                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cut)
                     }
                 }
             })

@@ -27,4 +27,9 @@ class Report {
     }
 
     constructor()
+
+    fun normalized(): Report {
+        allCoveredLines = testCaseList.values.map { it.coveredLines }.flatten().toSet()
+        return this
+    }
 }
