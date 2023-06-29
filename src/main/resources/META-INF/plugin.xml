@@ -99,26 +99,26 @@
                class="org.jetbrains.research.testgenie.actions.GenerateTestsActionGroup">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <!-- Generate tests for class -->
-            <action class="org.jetbrains.research.testgenie.actions.common.GenerateTestsActionClassCommon"
-                    id="TestGenie.TestGenieActions.GenerateTestsForClass"
-                    text="Generate Tests For Class"
-                    description="Generate tests for the selected class using TestGenie">
-                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="C" keymap="$default"/>
-            </action>
-            <!-- Generate tests for method -->
-            <action class="org.jetbrains.research.testgenie.actions.common.GenerateTestsActionMethodCommon"
-                    id="TestGenie.TestGenieActions.GenerateTestsForMethod"
-                    text="Generate Tests For Method"
-                    description="Generate tests for the selected method using TestGenie">
-                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="M" keymap="$default"/>
-            </action>
-            <!-- Generate tests for lines -->
-            <action class="org.jetbrains.research.testgenie.actions.common.GenerateTestsActionLineCommon"
-                    id="TestGenie.TestGenieActions.GenerateTestsForLine"
-                    text="Generate Tests For Line"
-                    description="Generate tests for the selected line using TestGenie">
-                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="L" keymap="$default"/>
-            </action>
+<!--            <action class="org.jetbrains.research.testgenie.actions.common.GenerateTestsActionClassCommon"-->
+<!--                    id="TestGenie.TestGenieActions.GenerateTestsForClass"-->
+<!--                    text="Generate Tests For Class"-->
+<!--                    description="Generate tests for the selected class using TestGenie">-->
+<!--                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="C" keymap="$default"/>-->
+<!--            </action>-->
+<!--            &lt;!&ndash; Generate tests for method &ndash;&gt;-->
+<!--            <action class="org.jetbrains.research.testgenie.actions.common.GenerateTestsActionMethodCommon"-->
+<!--                    id="TestGenie.TestGenieActions.GenerateTestsForMethod"-->
+<!--                    text="Generate Tests For Method"-->
+<!--                    description="Generate tests for the selected method using TestGenie">-->
+<!--                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="M" keymap="$default"/>-->
+<!--            </action>-->
+<!--            &lt;!&ndash; Generate tests for lines &ndash;&gt;-->
+<!--            <action class="org.jetbrains.research.testgenie.actions.common.GenerateTestsActionLineCommon"-->
+<!--                    id="TestGenie.TestGenieActions.GenerateTestsForLine"-->
+<!--                    text="Generate Tests For Line"-->
+<!--                    description="Generate tests for the selected line using TestGenie">-->
+<!--                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="L" keymap="$default"/>-->
+<!--            </action>-->
             <!-- Generate tests for class using LLM-->
             <action class="org.jetbrains.research.testgenie.actions.llm.GenerateTestsActionClassLlm"
                     id="TestGenie.TestGenieActions.GenerateTestsForClassLlm"
@@ -132,11 +132,11 @@
                     description="Generate tests for the selected class using TestGenie (EvoSuite version)">
             </action>
             <!-- Generate tests for method using LLM-->
-            <action class="org.jetbrains.research.testgenie.actions.llm.GenerateTestsActionMethodLlm"
-                    id="TestGenie.TestGenieActions.GenerateTestsForMethodLlm"
-                    text="Generate Tests For Method (LLM)"
-                    description="Generate tests for the selected method using TestGenie (LLM version)">
-            </action>
+<!--            <action class="org.jetbrains.research.testgenie.actions.llm.GenerateTestsActionMethodLlm"-->
+<!--                    id="TestGenie.TestGenieActions.GenerateTestsForMethodLlm"-->
+<!--                    text="Generate Tests For Method (LLM)"-->
+<!--                    description="Generate tests for the selected method using TestGenie (LLM version)">-->
+<!--            </action>-->
             <!-- Generate tests for method using EvoSuite-->
             <action class="org.jetbrains.research.testgenie.actions.evosuite.GenerateTestsActionMethodEvosuite"
                     id="TestGenie.TestGenieActions.GenerateTestsForMethodEvosuite"
@@ -144,11 +144,11 @@
                     description="Generate tests for the selected method using TestGenie (EvoSuite version)">
             </action>
             <!-- Generate tests for line using LLM-->
-            <action class="org.jetbrains.research.testgenie.actions.llm.GenerateTestsActionLineLlm"
-                    id="TestGenie.TestGenieActions.GenerateTestsForLineLLM"
-                    text="Generate Tests For Line (LLM)"
-                    description="Generate tests for the selected line using TestGenie (LLM version)">
-            </action>
+<!--            <action class="org.jetbrains.research.testgenie.actions.llm.GenerateTestsActionLineLlm"-->
+<!--                    id="TestGenie.TestGenieActions.GenerateTestsForLineLLM"-->
+<!--                    text="Generate Tests For Line (LLM)"-->
+<!--                    description="Generate tests for the selected line using TestGenie (LLM version)">-->
+<!--            </action>-->
             <!-- Generate tests for line using EvoSuite-->
             <action class="org.jetbrains.research.testgenie.actions.evosuite.GenerateTestsActionLineEvosuite"
                     id="TestGenie.TestGenieActions.GenerateTestsForLineEvosuite"
