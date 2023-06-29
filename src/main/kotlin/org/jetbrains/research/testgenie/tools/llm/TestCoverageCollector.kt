@@ -43,15 +43,6 @@ class TestCoverageCollector(
         // run Jacoco on the compiled test file
         runJacoco()
 
-        // TODO remove it :)
-        report.testCaseList["mySuperFunction"] = TestCase(
-            "mySuperFunction", "" +
-                    "@Test(timeout = 4000)\n" +
-                    "public void mySuperFunction() throws Throwable  {\n" +
-                    "   System.out.println(\"Here is my super mega function!!!\");\n" +
-                    "}", setOf(3, 4, 5), setOf(), setOf()
-        )
-
         // collect the Jacoco results and return the report
         return report.normalized()
     }
@@ -89,9 +80,9 @@ class TestCoverageCollector(
         val jacocoCLIDir = getLibrary("jacococli.jar")
 
         // Execute each test method separately
-        testCases.map { it.name }.forEach {
+        for (testCase in testCases) {
             // name of .exec and .xml files
-            val dataFileName = "${generatedTestFile.parentFile.absolutePath}/jacoco-$it"
+            val dataFileName = "${generatedTestFile.parentFile.absolutePath}/jacoco-${testCase.name}"
 
             // run the test method with jacoco agent
             runCommandLine(
@@ -101,7 +92,7 @@ class TestCoverageCollector(
                     "-cp",
                     "${getPath(projectBuildPath)}${getLibrary("JUnitRunner-1.0.jar")}:$resultPath",
                     "org.jetbrains.research.SingleJUnitTestRunner",
-                    "$generatedTestPackage.$className#$it"
+                    "$generatedTestPackage.$className#${testCase.name}"
                 ),
             )
 
@@ -133,14 +124,16 @@ class TestCoverageCollector(
             command.add("$dataFileName.xml")
 
             // save data to TestGenerationResult
-//            saveData(it, "$dataFileName.xml")
+            saveData(testCase, "$dataFileName.xml")
 
             runCommandLine(command as ArrayList<String>)
         }
     }
 
-    private fun saveData(testName: String, xmlFileName: String) {
-        TODO("implement it")
+    private fun saveData(testCase: TestCaseGeneratedByLLM, xmlFileName: String) {
+        report.testCaseList[testCase.name] = TestCase(
+            testCase.name, testCase.toString(), setOf(), setOf(), setOf()
+        )
     }
 
     private fun runCommandLine(cmd: ArrayList<String>) {
