@@ -24,4 +24,40 @@ data class TestCaseGeneratedByLLM(
         result = 31 * result + arrayListOf(lines).hashCode()
         return result
     }
+
+    override fun toString(): String {
+        var testFullText = ""
+
+        // Add test annotation
+        testFullText += "\t@Test"
+
+        // add expectedException if it exists
+        if (expectedException.isNotBlank()) {
+            testFullText += "${expectedException.replace("@Test", "")})"
+        }
+
+        // start writing the test signature
+        testFullText += "\n\tpublic void ${name}() "
+
+        // add throws exception if exists
+        if (throwsException.isNotBlank()) {
+            testFullText += "throws ${throwsException}"
+        }
+
+        // start writing the test lines
+        testFullText += "{\n"
+
+        // write each line
+        lines.forEach { line ->
+            testFullText += when (line.type) {
+                TestLineType.BREAK -> "\t\t\n"
+                else -> "\t\t${line.text}\n"
+            }
+        }
+
+        // close test case
+        testFullText += "\t}\n"
+
+        return testFullText
+    }
 }

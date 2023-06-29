@@ -27,41 +27,10 @@ data class TestSuiteGeneratedByLLM(
         testFullText += "public class GeneratedTest{\n\n"
 
         // Add each test
-        testCases.forEach { testCase ->
-            // Add test annotation
-            testFullText += "\t@Test"
-
-            // add expectedException if it exists
-            if (testCase.expectedException.isNotBlank()) {
-                testFullText += "${testCase.expectedException.replace("@Test", "")})"
-            }
-
-            // start writing the test signature
-            testFullText += "\n\tpublic void ${testCase.name}() "
-
-            // add throws exception if exists
-            if (testCase.throwsException.isNotBlank()) {
-                testFullText += "throws ${testCase.throwsException}"
-            }
-
-            // start writing the test lines
-            testFullText += "{\n"
-
-            // write each line
-            testCase.lines.forEach { line ->
-                testFullText += when (line.type) {
-                    TestLineType.BREAK -> "\t\t\n"
-                    else -> "\t\t${line.text}\n"
-                }
-            }
-
-            // close test case
-            testFullText += "\t}\n"
-        }
+        testCases.forEach { testCase -> testFullText += "$testCase\n" }
 
         // close the test class
         testFullText += "}"
-
 
         return testFullText
     }
