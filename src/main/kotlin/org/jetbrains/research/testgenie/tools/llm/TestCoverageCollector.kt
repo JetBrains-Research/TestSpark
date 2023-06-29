@@ -131,8 +131,10 @@ class TestCoverageCollector(
     }
 
     private fun saveData(testCase: TestCaseGeneratedByLLM, xmlFileName: String) {
+        // TODO extract the data from the xmlFileName
+        val setOfLines = setOf<Int>()
         report.testCaseList[testCase.name] = TestCase(
-            testCase.name, testCase.toString(), setOf(), setOf(), setOf()
+            testCase.name, testCase.toString(), setOfLines, setOf(), setOf()
         )
     }
 
