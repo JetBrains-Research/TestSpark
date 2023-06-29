@@ -81,7 +81,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return null
     val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
-    val fileUrl = vFile.presentableUrl
+
     val modificationStamp = vFile.modificationStamp
 
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
@@ -274,6 +274,13 @@ private fun isAbstractClass(psiClass: PsiClass): Boolean {
             return true
         }
     }
+
+    // check if a class is noted as abstract in the text
+    if(psiClass.text.replace(" ","")
+        .contains("abstractclass${psiClass.name}", ignoreCase = true)){
+        return true
+    }
+
     return false
 }
 
