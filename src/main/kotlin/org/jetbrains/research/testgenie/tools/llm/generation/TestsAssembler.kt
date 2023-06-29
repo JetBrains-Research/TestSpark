@@ -2,15 +2,13 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiJavaFile
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.llm.test.TestLine
 import org.jetbrains.research.testgenie.tools.llm.test.TestLineType
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 
-// private var rawText: String = ""
-private var rawText = ""
+
+var rawText = ""
 
 val importPattern = Regex(
     pattern = "^import\\s+(static\\s)?((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
@@ -34,6 +32,10 @@ class TestsAssembler(
         }
 
         log.debug(rawText)
+    }
+
+    fun getLLMResponse(): String{
+        return rawText
     }
 
     companion object {

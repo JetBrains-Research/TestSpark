@@ -12,7 +12,6 @@ import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.data.TestCoverageCollector
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testgenie.tools.llm.test.TestLineType
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 import java.io.File
 import kotlin.io.path.Path
@@ -25,6 +24,7 @@ class LLMProcessManager(
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private var testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
+    private var maximumTries = 3
 
     fun runLLMTestGenerator(
         indicator: ProgressIndicator,
@@ -46,13 +46,18 @@ class LLMProcessManager(
         indicator.text = TestGenieBundle.message("searchMessage")
 
         // Send request to LLM
-        val generatedTestSuite: TestSuiteGeneratedByLLM = LLMRequest().request(prompt, indicator, packageName)
+        val requestManager = LLMRequestManager()
+        val generatedTestSuite: TestSuiteGeneratedByLLM = requestManager.request(prompt, indicator, packageName)
 
         // Check if response is not empty
         if (generatedTestSuite.isEmpty()) {
             LLMErrorManager.displayEmptyTests(project)
             return
         }
+//        var numberOfTries = 0
+//        while (numberOfTries<maximumTries){
+//
+//        }
 
         // Save the generated TestSuite into a temp file
         val generatedTestPath:String = saveGeneratedTests(generatedTestSuite, resultPath)
