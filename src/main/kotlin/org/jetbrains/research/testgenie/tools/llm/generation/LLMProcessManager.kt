@@ -83,58 +83,11 @@ class LLMProcessManager(
         }
         Path(generatedTestPath).createDirectories()
 
-        // Start creating the test file
+        // Save the generated test suite to the file
         val testFile = File("$generatedTestPath${File.separatorChar}$testFileName")
         testFile.createNewFile()
         log.info("Save test in file " + testFile.absolutePath)
-
-        // Add package
-        if (generatedTestSuite.packageString.isNotBlank()) {
-            testFile.appendText("package ${generatedTestSuite.packageString};\n")
-        }
-
-        // add imports
-        generatedTestSuite.imports.forEach { importedElement ->
-            testFile.appendText("$importedElement\n")
-        }
-
-        // open the test class
-        testFile.appendText("public class GeneratedTest{\n\n")
-
-        // print each test
-        generatedTestSuite.testCases.forEach { testCase ->
-            // Add test annotation
-            testFile.appendText("\t@Test")
-
-            // add expectedException if it exists
-            if (testCase.expectedException.isNotBlank()) {
-                testFile.appendText("${testCase.expectedException.replace("@Test", "")})")
-            }
-
-            // start writing the test signature
-            testFile.appendText("\n\tpublic void ${testCase.name}() ")
-
-            // add throws exception if exists
-            if (testCase.throwsException.isNotBlank()) {
-                testFile.appendText("throws ${testCase.throwsException}")
-            }
-
-            // start writing the test lines
-            testFile.appendText("{\n")
-
-            // write each line
-            testCase.lines.forEach { line ->
-                when (line.type) {
-                    TestLineType.BREAK -> testFile.appendText("\t\t\n")
-                    else -> testFile.appendText("\t\t${line.text}\n")
-                }
-            }
-            // close test case
-            testFile.appendText("\t}\n")
-        }
-
-        // close the test class
-        testFile.appendText("}")
+        testFile.writeText(generatedTestSuite.toString())
 
         return generatedTestPath
     }
