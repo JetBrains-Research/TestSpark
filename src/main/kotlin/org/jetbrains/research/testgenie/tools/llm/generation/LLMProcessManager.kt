@@ -71,8 +71,7 @@ class LLMProcessManager(
             cut,
         ).collect()
 
-        println(report == null)
-        println(generatedTestSuite.toString())
+        report ?: println(generatedTestSuite.toString())
 
         project.service<TestCaseDisplayService>().testGenerationResultList.add(report)
     }
