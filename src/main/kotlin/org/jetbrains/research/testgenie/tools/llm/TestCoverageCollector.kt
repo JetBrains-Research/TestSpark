@@ -92,7 +92,7 @@ class TestCoverageCollector(
                     "-cp",
                     "${getPath(projectBuildPath)}${getLibrary("JUnitRunner-1.0.jar")}:$resultPath",
                     "org.jetbrains.research.SingleJUnitTestRunner",
-                    "$generatedTestPackage.$className#${testCase.name}"
+                    "$generatedTestPackage$className#${testCase.name}"
                 ),
             )
 

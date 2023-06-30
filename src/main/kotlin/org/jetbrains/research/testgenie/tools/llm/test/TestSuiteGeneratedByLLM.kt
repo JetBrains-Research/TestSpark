@@ -34,4 +34,11 @@ data class TestSuiteGeneratedByLLM(
 
         return testFullText
     }
+
+    fun getPrintablePackageString(): String{
+        return when{
+            packageString.isEmpty() || packageString.isBlank() -> ""
+            else -> "$packageString."
+        }
+    }
 }

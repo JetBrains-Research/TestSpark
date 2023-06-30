@@ -66,7 +66,7 @@ class LLMProcessManager(
                 project,
                 resultPath,
                 File("$generatedTestPath$testFileName"),
-                generatedTestSuite.packageString,
+                generatedTestSuite.getPrintablePackageString(),
                 buildPath,
                 generatedTestSuite.testCases,
                 cut,
