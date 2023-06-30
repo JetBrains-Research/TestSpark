@@ -123,10 +123,10 @@ class TestCoverageCollector(
             command.add("--xml")
             command.add("$dataFileName.xml")
 
+            runCommandLine(command as ArrayList<String>)
+
             // save data to TestGenerationResult
             saveData(testCase, "$dataFileName.xml")
-
-            runCommandLine(command as ArrayList<String>)
         }
     }
 
