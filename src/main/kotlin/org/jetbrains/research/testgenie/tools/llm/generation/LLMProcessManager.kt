@@ -54,24 +54,27 @@ class LLMProcessManager(
         }
 
         // Save the generated TestSuite into a temp file
-        val generatedTestPath:String = saveGeneratedTests(generatedTestSuite, resultPath)
+        val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
 
         // TODO move this operation to Manager
         // TODO work with null value
         // Collect coverage information for each generated test method
         // and display it
-        project.service<TestCaseDisplayService>().testGenerationResultList.add(
-            TestCoverageCollector(
-                indicator,
-                project,
-                resultPath,
-                File("$generatedTestPath$testFileName"),
-                generatedTestSuite.getPrintablePackageString(),
-                buildPath,
-                generatedTestSuite.testCases,
-                cut,
-            ).collect()
-        )
+        val report = TestCoverageCollector(
+            indicator,
+            project,
+            resultPath,
+            File("$generatedTestPath$testFileName"),
+            generatedTestSuite.getPrintablePackageString(),
+            buildPath,
+            generatedTestSuite.testCases,
+            cut,
+        ).collect()
+
+        println(report == null)
+        println(generatedTestSuite.toString())
+
+        project.service<TestCaseDisplayService>().testGenerationResultList.add(report)
     }
 
     private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): String {
