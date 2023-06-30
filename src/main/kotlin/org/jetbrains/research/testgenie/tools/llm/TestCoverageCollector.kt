@@ -1,7 +1,5 @@
 package org.jetbrains.research.testgenie.tools.llm
 
-import com.gitlab.mvysny.konsumexml.childInt
-import com.gitlab.mvysny.konsumexml.childrenInt
 import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
@@ -12,14 +10,10 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
-import kotlinx.serialization.Serializer
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
-import org.xml.sax.InputSource
 import java.io.File
-import java.io.StringReader
-import javax.xml.parsers.DocumentBuilderFactory
 
 class TestCoverageCollector(
     private val indicator: ProgressIndicator,
@@ -142,7 +136,7 @@ class TestCoverageCollector(
         File(xmlFileName).readText().konsumeXml().apply {
             child("report") {
                 child("sessioninfo") {}
-                child("package") {
+                children("package") {
                     child("class") {
                         children("method") {
                             children("counter") {}

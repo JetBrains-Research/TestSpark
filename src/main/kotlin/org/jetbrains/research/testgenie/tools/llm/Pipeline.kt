@@ -22,7 +22,6 @@ private var prompt = ""
 
 class Pipeline(
     private val project: Project,
-    private val projectPath: String,
     projectClassPath: String,
     private val interestingPsiClasses: Set<PsiClass>,
     private val cut: PsiClass,

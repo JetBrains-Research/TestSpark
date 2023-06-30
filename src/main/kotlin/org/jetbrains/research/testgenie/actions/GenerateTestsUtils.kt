@@ -148,7 +148,6 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
 
     return org.jetbrains.research.testgenie.tools.llm.Pipeline(
         project,
-        projectPath,
         buildPath,
         interestingPsiClasses,
         psiClass,
