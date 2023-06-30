@@ -134,16 +134,16 @@ class TestCoverageCollector(
     private fun saveData(testCase: TestCaseGeneratedByLLM, xmlFileName: String) {
         val setOfLines = mutableSetOf<Int>()
         File(xmlFileName).readText().konsumeXml().apply {
-            child("report") {
-                child("sessioninfo") {}
+            children("report") {
+                children("sessioninfo") {}
                 children("package") {
-                    child("class") {
+                    children("class") {
                         children("method") {
                             children("counter") {}
                         }
                         children("counter") {}
                     }
-                    child("sourcefile") {
+                    children("sourcefile") {
                         children("line") {
                             if (this.attributes.getValue("mi") == "0") {
                                 setOfLines.add(this.attributes.getValue("nr").toInt())
