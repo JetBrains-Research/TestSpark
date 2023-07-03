@@ -33,7 +33,7 @@ class LLMProcessManager(
         resultPath: String,
         packageName: String,
         cut: PsiClass,
-        classFQN: String
+        classFQN: String,
     ) {
         // update build path
         var buildPath = projectClassPath

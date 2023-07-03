@@ -23,7 +23,7 @@ class TestCoverageCollector(
     private val generatedTestPackage: String,
     private val projectBuildPath: String,
     private val testCases: MutableList<TestCaseGeneratedByLLM>,
-    cut: PsiClass
+    cut: PsiClass,
 ) {
     private val sep = File.separatorChar
     private val junitTimeout: Long = 12000000 // TODO: Source from config
@@ -31,7 +31,7 @@ class TestCoverageCollector(
 
     // source path
     private val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(
-        cut.containingFile.virtualFile
+        cut.containingFile.virtualFile,
     )!!
     private val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
     private val report = Report()
@@ -59,8 +59,8 @@ class TestCoverageCollector(
                 javaCompile.absolutePath,
                 "-cp",
                 getPath(buildPath),
-                javaFile.absolutePath
-            )
+                javaFile.absolutePath,
+            ),
         )
 
         // create .class file path
@@ -93,7 +93,7 @@ class TestCoverageCollector(
                     "-cp",
                     "${getPath(projectBuildPath)}${getLibrary("JUnitRunner-1.0.jar")}:$resultPath",
                     "org.jetbrains.research.SingleJUnitTestRunner",
-                    "$generatedTestPackage$className#${testCase.name}"
+                    "$generatedTestPackage$className#${testCase.name}",
                 ),
             )
 
@@ -132,6 +132,7 @@ class TestCoverageCollector(
     }
 
     private fun saveData(testCase: TestCaseGeneratedByLLM, xmlFileName: String) {
+        indicator.text = "Test cases saving"
         val setOfLines = mutableSetOf<Int>()
         File(xmlFileName).readText().konsumeXml().apply {
             children("report") {
@@ -157,7 +158,11 @@ class TestCoverageCollector(
             }
         }
         report.testCaseList[testCase.name] = TestCase(
-            testCase.name, testCase.toString(), setOfLines, setOf(), setOf()
+            testCase.name,
+            testCase.toString(),
+            setOfLines,
+            setOf(),
+            setOf(),
         )
     }
 
