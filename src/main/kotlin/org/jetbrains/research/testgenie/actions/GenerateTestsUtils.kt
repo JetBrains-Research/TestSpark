@@ -88,12 +88,12 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
     val classFQN = psiClass.qualifiedName ?: return null
     val fileUrl = vFile.presentableUrl
 
-    var psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(psiClass))
-    var visitedPsiClasses: Set<PsiClass> = mutableSetOf()
+    val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(psiClass))
+    val visitedPsiClasses: MutableSet<PsiClass> = mutableSetOf()
 
 
     // Collect interesting classes (i.e., methods that are passed as input arguments to CUT and their super/sub classes)
-    var interestingPsiClasses: Set<PsiClass> = mutableSetOf()
+    var interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
     val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
     while (psiClassesToVisit.isNotEmpty()) {
         val currentPsiClass = psiClassesToVisit.removeFirst()
@@ -138,6 +138,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
                 psiClassesToVisit.addLast(detectedPsiClass)
             }
         }
+        visitedPsiClasses.add(currentPsiClass)
     }
 
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
