@@ -30,7 +30,7 @@ import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 
 /**
- * This file contains some useful methods related to GenerateTests actions.
+ * This file contains some useful methods and values related to GenerateTests actions.
  */
 
 /**
@@ -437,4 +437,40 @@ fun updateForLine(e: AnActionEvent, name: String) {
 
     e.presentation.isEnabledAndVisible = true
     e.presentation.text = "Generate Tests For Line $line by $name"
+}
+
+
+
+val importPattern = Regex(
+    pattern = "^import\\s+(static\\s)?((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
+    options = setOf(RegexOption.MULTILINE),
+)
+
+val packagePattern = Regex(
+    pattern = "^package\\s+((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
+    options = setOf(RegexOption.MULTILINE),
+)
+
+fun getClassFullText(cl: PsiClass): String{
+    var fullText = "";
+    val fileText = cl.containingFile.text
+
+    // get package
+    packagePattern.findAll(fileText, 0).map {
+        it.groupValues[0]
+    }.forEach {
+        fullText += "$it\n\n"
+    }
+
+    // get imports
+    importPattern.findAll(fileText, 0).map {
+        it.groupValues[0]
+    }.forEach {
+        fullText += "$it\n"
+    }
+
+    // Add class code
+    fullText += cl.text
+
+    return fullText
 }

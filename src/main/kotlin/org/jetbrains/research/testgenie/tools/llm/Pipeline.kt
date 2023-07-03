@@ -10,6 +10,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.getClassDisplayName
+import org.jetbrains.research.testgenie.actions.getClassFullText
 import org.jetbrains.research.testgenie.actions.getSignatureString
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
@@ -61,7 +62,7 @@ class Pipeline(
             "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\nDont use @Before and @After test methods.\nMake tests as atomic as possible.\nAll tests should be for JUnit 4.\nIn case of mocking, use Mockito 5. But, do not use mocking for all tests.\n"
 
         // prompt: source code
-        prompt += "The source code of class under test is as follows:\n ${cut.text}\n"
+        prompt += "The source code of class under test is as follows:\n```\n${getClassFullText(cut)}\n```\n"
 
         // prompt: signature of methods in the classes used by CUT
         prompt += "Here are the method signatures of classes used by the class under test. Only use these signatures for creating objects, not your own ideas.\n"
