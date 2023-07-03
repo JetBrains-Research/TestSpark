@@ -41,4 +41,15 @@ data class TestSuiteGeneratedByLLM(
             else -> "$packageString."
         }
     }
+
+    fun reformat(): TestSuiteGeneratedByLLM {
+        testCases.forEach {
+            it.reformat()
+        }
+
+        // remove empty test cases
+        testCases.removeIf { testCase -> testCase.isEmpty() }
+
+        return this
+    }
 }

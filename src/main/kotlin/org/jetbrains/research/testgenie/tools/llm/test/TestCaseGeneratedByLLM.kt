@@ -17,6 +17,9 @@ data class TestCaseGeneratedByLLM(
         if (expectedException != other.expectedException) return false
         return lines == other.lines
     }
+    fun isEmpty(): Boolean {
+        return (lines.size == 0)
+    }
 
     override fun hashCode(): Int {
         var result = name.hashCode()
@@ -59,5 +62,15 @@ data class TestCaseGeneratedByLLM(
         testFullText += "\t}\n"
 
         return testFullText
+    }
+
+    fun reformat() {
+        for (index in lines.indices.reversed()){
+            if (lines[index].type == TestLineType.BREAK){
+                lines.removeAt(index)
+            }else{
+                break
+            }
+        }
     }
 }
