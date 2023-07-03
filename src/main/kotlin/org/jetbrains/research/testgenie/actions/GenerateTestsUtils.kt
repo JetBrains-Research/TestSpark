@@ -91,9 +91,8 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
     val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(psiClass))
     val visitedPsiClasses: MutableSet<PsiClass> = mutableSetOf()
 
-
     // Collect interesting classes (i.e., methods that are passed as input arguments to CUT and their super/sub classes)
-    var interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
+    val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
     val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
     while (psiClassesToVisit.isNotEmpty()) {
         val currentPsiClass = psiClassesToVisit.removeFirst()
@@ -156,7 +155,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         polymorphismRelations,
         modificationStamp,
         fileUrl,
-        classFQN
+        classFQN,
     )
 }
 
@@ -439,8 +438,6 @@ fun updateForLine(e: AnActionEvent, name: String) {
     e.presentation.text = "Generate Tests For Line $line by $name"
 }
 
-
-
 val importPattern = Regex(
     pattern = "^import\\s+(static\\s)?((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
     options = setOf(RegexOption.MULTILINE),
@@ -451,8 +448,8 @@ val packagePattern = Regex(
     options = setOf(RegexOption.MULTILINE),
 )
 
-fun getClassFullText(cl: PsiClass): String{
-    var fullText = "";
+fun getClassFullText(cl: PsiClass): String {
+    var fullText = ""
     val fileText = cl.containingFile.text
 
     // get package

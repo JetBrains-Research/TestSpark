@@ -29,8 +29,8 @@ class Pipeline(
     private val packageName: String,
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     modTs: Long,
-    fileUrl: String,
-    private val classFQN: String
+    private val fileUrl: String,
+    private val classFQN: String,
 ) {
 
     private val log = Logger.getInstance(this::class.java)
@@ -122,5 +122,7 @@ class Pipeline(
                     }
                 }
             })
+
+        project.service<TestCaseDisplayService>().fileUrl = fileUrl
     }
 }

@@ -472,18 +472,18 @@ class TestCaseDisplayService(private val project: Project) {
             appendTestsToClass(testCaseComponents, psiClass!!, psiJavaFile!!)
         }
 
-        // Open the file after adding
-        FileEditorManager.getInstance(project).openTextEditor(
-            OpenFileDescriptor(project, virtualFile!!),
-            true,
-        )
-
         // The scheduled tests will be submitted in the background
         // (they will be checked every 5 minutes and also when the project is closed)
         scheduleTelemetry(selectedTestCases)
 
         // Remove the selected test cases from the cache and the tool window UI
         removeSelectedTestCases(selectedTestCasePanels)
+
+        // Open the file after adding
+        FileEditorManager.getInstance(project).openTextEditor(
+            OpenFileDescriptor(project, virtualFile!!),
+            true,
+        )
     }
 
     private fun showErrorWindow(message: String) {
