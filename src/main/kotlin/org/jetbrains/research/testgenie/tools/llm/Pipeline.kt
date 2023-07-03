@@ -29,7 +29,7 @@ class Pipeline(
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     modTs: Long,
     fileUrl: String,
-    classFQN: String
+    private val classFQN: String
 ) {
 
     private val log = Logger.getInstance(this::class.java)
@@ -117,7 +117,7 @@ class Pipeline(
                     }
 
                     if (projectBuilder.runBuild(indicator)) {
-                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cut)
+                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cut, classFQN)
                     }
                 }
             })

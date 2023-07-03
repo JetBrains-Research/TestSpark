@@ -13,6 +13,8 @@ import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.llm.TestCoverageCollector
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -30,7 +32,8 @@ class LLMProcessManager(
         prompt: String,
         resultPath: String,
         packageName: String,
-        cut: PsiClass
+        cut: PsiClass,
+        classFQN: String
     ) {
         // update build path
         var buildPath = projectClassPath
@@ -74,6 +77,10 @@ class LLMProcessManager(
         report ?: println(generatedTestSuite.toString())
 
         project.service<TestCaseDisplayService>().testGenerationResultList.add(report)
+        project.service<TestCaseDisplayService>().packageLine =
+            getPackageFromTestSuiteCode(generatedTestSuite.toString())
+        project.service<TestCaseDisplayService>().importsCode =
+            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN)
     }
 
     private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): String {
