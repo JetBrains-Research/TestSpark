@@ -1,5 +1,7 @@
 package org.jetbrains.research.testgenie.tools.llm.generation
 
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
@@ -44,6 +46,14 @@ class LLMProcessManager(
                 val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
                 compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
             }
+        }
+
+
+        if (buildPath.isEmpty() || buildPath.isBlank()){
+            NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
+                "Build path is Empty!", "Please make sure that IDEA recognizes all of your module or enter proper build path in settings.", NotificationType.ERROR
+            ).notify(project)
+            return
         }
         indicator.text = TestGenieBundle.message("searchMessage")
 
