@@ -19,7 +19,6 @@ import java.awt.Dimension
 import java.awt.Font
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
-import java.awt.Insets
 import java.awt.event.ActionEvent
 import javax.swing.JCheckBox
 import javax.swing.JSpinner
@@ -218,11 +217,11 @@ class QuickAccessParameters(private val project: Project) {
 
         val gbc = GridBagConstraints()
         gbc.anchor = GridBagConstraints.WEST
-        gbc.insets = Insets(10, 0, 10, 5)
+        gbc.insets = JBUI.insets(10, 0, 10, 5)
         buttons.add(saveButton, gbc)
 
         gbc.weightx = 1.0
-        gbc.insets = Insets(10, 0, 10, 0)
+        gbc.insets = JBUI.insets(10, 0)
         buttons.add(resetButton, gbc)
 
         buttons.preferredSize = Dimension(500, 30)
