@@ -20,7 +20,6 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -712,13 +711,16 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun removeAllTestCases() {
         // Ask the user for the confirmation
-        val choice: Int = Messages.showYesNoCancelDialog(
+        val choice = JOptionPane.showConfirmDialog(
+            null,
             TestGenieBundle.message("removeAllMessage"),
             TestGenieBundle.message("confirmationTitle"),
-            Messages.getQuestionIcon(),
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
         )
+
         // Cancel the operation if the user did not press "Yes"
-        if (choice != 0) return
+        if (choice == JOptionPane.NO_OPTION) return
 
         // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()

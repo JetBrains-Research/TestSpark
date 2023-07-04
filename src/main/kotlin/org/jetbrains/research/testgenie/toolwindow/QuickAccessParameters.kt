@@ -21,13 +21,14 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.event.ActionEvent
-import javax.swing.JButton
 import javax.swing.JCheckBox
-import javax.swing.JComponent
-import javax.swing.JLabel
-import javax.swing.JPanel
 import javax.swing.JSpinner
 import javax.swing.SpinnerNumberModel
+import javax.swing.JButton
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JComponent
+import javax.swing.JOptionPane
 
 /**
  * This class stores the main panel and the UI of the "Parameters" tool window tab.
@@ -119,17 +120,21 @@ class QuickAccessParameters(private val project: Project) {
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("budgetType"),
-                TestGenieToolTipsBundle.defaultValue("budgetType")
+                TestGenieToolTipsBundle.defaultValue("budgetType"),
             ),
-            stoppingCondition, 25, false
+            stoppingCondition,
+            25,
+            false,
         )
         .addTooltip(default(StoppingCondition.MAXTIME.toString()))
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("searchBudgetParam"),
-                TestGenieToolTipsBundle.defaultValue("initTimeout")
+                TestGenieToolTipsBundle.defaultValue("initTimeout"),
             ),
-            searchBudget, 25, false
+            searchBudget,
+            25,
+            false,
         )
         .addComponentToRightColumn(stoppingConditionToolTip, 1)
         // Add `Timeouts` category
@@ -137,33 +142,41 @@ class QuickAccessParameters(private val project: Project) {
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("initTimeout"),
-                TestGenieToolTipsBundle.defaultValue("initTimeout")
+                TestGenieToolTipsBundle.defaultValue("initTimeout"),
             ),
-            initializationTimeout, 25, false
+            initializationTimeout,
+            25,
+            false,
         )
         .addTooltip(default("${defaultState.initializationTimeout} " + TestGenieToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("minimTimeout"),
-                TestGenieToolTipsBundle.defaultValue("minimTimeout")
+                TestGenieToolTipsBundle.defaultValue("minimTimeout"),
             ),
-            minimisationTimeout, 20, false
+            minimisationTimeout,
+            20,
+            false,
         )
         .addTooltip(default("${defaultState.minimizationTimeout} " + TestGenieToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("assertTimeout"),
-                TestGenieToolTipsBundle.defaultValue("assertTimeout")
+                TestGenieToolTipsBundle.defaultValue("assertTimeout"),
             ),
-            assertionTimeout, 20, false
+            assertionTimeout,
+            20,
+            false,
         )
         .addTooltip(default("${defaultState.assertionTimeout} " + TestGenieToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("junitTimeout"),
-                TestGenieToolTipsBundle.defaultValue("junitTimeout")
+                TestGenieToolTipsBundle.defaultValue("junitTimeout"),
             ),
-            junitCheckTimeout, 20, false
+            junitCheckTimeout,
+            20,
+            false,
         )
         .addTooltip(default("${defaultState.junitCheckTimeout} " + TestGenieToolTipsBundle.defaultValue("seconds")))
         // Add `Genetic Algorithm` section
@@ -171,17 +184,21 @@ class QuickAccessParameters(private val project: Project) {
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("populationLim"),
-                TestGenieToolTipsBundle.defaultValue("populationLim")
+                TestGenieToolTipsBundle.defaultValue("populationLim"),
             ),
-            populationLimit, 25, false
+            populationLimit,
+            25,
+            false,
         )
         .addTooltip(default(TestGenieToolTipsBundle.defaultValue("individuals")))
         .addLabeledComponent(
             customLabel(
                 TestGenieLabelsBundle.defaultValue("population"),
-                TestGenieToolTipsBundle.defaultValue("population")
+                TestGenieToolTipsBundle.defaultValue("population"),
             ),
-            population, 20, false
+            population,
+            20,
+            false,
         )
         .addComponentToRightColumn(populationLimitToolTip, 1)
         // Add Save and Reset buttons and a link to open TestGenie settings
@@ -239,13 +256,15 @@ class QuickAccessParameters(private val project: Project) {
      *
      */
     private val addListenerForResetButton: (ActionEvent) -> Unit = {
-        val choice: Int = Messages.showYesNoCancelDialog(
+        val choice = JOptionPane.showConfirmDialog(
+            null,
             TestGenieBundle.message("resetMessage"),
             TestGenieBundle.message("confirmationTitle"),
-            Messages.getQuestionIcon()
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
         )
 
-        if (choice == 0) {
+        if (choice == JOptionPane.YES_OPTION) {
             val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
             state.showCoverage = defaultState.showCoverage
             state.stoppingCondition = defaultState.stoppingCondition
