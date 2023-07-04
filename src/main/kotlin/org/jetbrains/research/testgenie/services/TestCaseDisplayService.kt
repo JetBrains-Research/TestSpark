@@ -67,20 +67,20 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var cacheLazyPipeline: Pipeline? = null
 
-    private val mainPanel: JPanel = JPanel()
-    private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
-    private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
-    private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
-    private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
-    val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
-    val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
+    private var mainPanel: JPanel = JPanel()
+    private var applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
+    private var selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
+    private var deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
+    private var removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
+    var validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    var toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
     private var testsSelected: Int = 0
-    private val testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
-    private val testsSelectedLabel: JLabel = JLabel(testsSelectedText)
+    private var testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
+    private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
-    private val allTestCasePanel: JPanel = JPanel()
-    private val scrollPane: JBScrollPane = JBScrollPane(
+    private var allTestCasePanel: JPanel = JPanel()
+    private var scrollPane: JBScrollPane = JBScrollPane(
         allTestCasePanel,
         JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
@@ -135,6 +135,14 @@ class TestCaseDisplayService(private val project: Project) {
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
         toggleJacocoButton.addActionListener { toggleJacocoCoverage() }
         removeAllButton.addActionListener { removeAllTestCases() }
+    }
+
+    fun clean() {
+        removeSelectedTestCases(testCasePanels.toMap())
+        testsSelected = 0
+        testCasePanels = HashMap()
+        originalTestCases = HashMap()
+        testGenerationResultList = mutableListOf()
     }
 
     fun makeValidatedButtonAvailable() {
@@ -647,7 +655,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Closes the tool window and destroys the content of the tab.
      */
     private fun closeToolWindow() {
-        contentManager!!.removeContent(content!!, true)
+        contentManager?.removeContent(content!!, true)
         ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
         val coverageVisualisationService = project.service<CoverageVisualisationService>()
         coverageVisualisationService.closeToolWindowTab()

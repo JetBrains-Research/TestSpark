@@ -86,7 +86,7 @@ class Pipeline(
     fun forMethod(methodDescriptor: String): Pipeline {
         command =
             SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forMethod(
-                methodDescriptor
+                methodDescriptor,
             ).build()
 
         // attach method desc. to target unit key
@@ -101,7 +101,7 @@ class Pipeline(
      */
     fun forLine(selectedLine: Int): Pipeline {
         command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forLine(
-            selectedLine
+            selectedLine,
         ).build(true)
 
         return this
@@ -146,6 +146,8 @@ class Pipeline(
     fun runTestGeneration(): String {
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
+
+        project.service<TestCaseDisplayService>().clean()
 
         val workspace = project.service<Workspace>()
         workspace.addPendingResult(testResultName, key)

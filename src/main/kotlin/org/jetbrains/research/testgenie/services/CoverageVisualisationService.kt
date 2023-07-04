@@ -55,7 +55,7 @@ class CoverageVisualisationService(private val project: Project) {
         linesToCover: Set<Int>,
         selectedTests: HashSet<String>,
         testReport: Report,
-        editor: Editor
+        editor: Editor,
     ) {
         // Show in-line coverage only if enabled in settings
         val quickAccessParametersState =
@@ -69,7 +69,7 @@ class CoverageVisualisationService(private val project: Project) {
                 settingsProjectState.colorRed,
                 settingsProjectState.colorGreen,
                 settingsProjectState.colorBlue,
-                30
+                30,
             )
 
             // Update the color used for highlighting if necessary
@@ -115,7 +115,7 @@ class CoverageVisualisationService(private val project: Project) {
                     mutationCoveredLine,
                     mutationNotCoveredLine,
                     mapMutantsToTests,
-                    project
+                    project,
                 )
             }
         }
@@ -127,7 +127,6 @@ class CoverageVisualisationService(private val project: Project) {
      * @param testReport the generated tests summary
      */
     private fun fillToolWindowContents(testReport: Report) {
-
         // Calculate line coverage
         val coveredLines = testReport.allCoveredLines.size
         val allLines = testReport.allUncoveredLines.size + coveredLines
@@ -176,7 +175,9 @@ class CoverageVisualisationService(private val project: Project) {
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
-            visualisationService.mainPanel, TestGenieLabelsBundle.defaultValue("coverageVisualisation"), true
+            visualisationService.mainPanel,
+            TestGenieLabelsBundle.defaultValue("coverageVisualisation"),
+            true,
         )
         contentManager!!.addContent(content!!)
     }
@@ -185,6 +186,6 @@ class CoverageVisualisationService(private val project: Project) {
      * Closes the toolWindow tab for the coverage visualisation
      */
     fun closeToolWindowTab() {
-        contentManager!!.removeContent(content!!, true)
+        contentManager?.removeContent(content!!, true)
     }
 }

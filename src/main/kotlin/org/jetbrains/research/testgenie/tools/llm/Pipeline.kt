@@ -9,9 +9,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
-import org.jetbrains.research.testgenie.actions.getClassDisplayName
-import org.jetbrains.research.testgenie.actions.getClassFullText
-import org.jetbrains.research.testgenie.actions.getSignatureString
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.ProjectBuilder
@@ -25,10 +22,10 @@ private var prompt = ""
 class Pipeline(
     private val project: Project,
     projectClassPath: String,
-    private val interestingPsiClasses: Set<PsiClass>,
+    interestingPsiClasses: Set<PsiClass>,
     private val cut: PsiClass,
     private val packageName: String,
-    private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
+    polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     modTs: Long,
     private val fileUrl: String,
     private val classFQN: String,
@@ -47,7 +44,7 @@ class Pipeline(
     // TODO move all interactions with Workspace to Manager
     var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
-    private val promptManager = PromptManager(cut, interestingPsiClasses,polymorphismRelations)
+    private val promptManager = PromptManager(cut, interestingPsiClasses, polymorphismRelations)
 
     private val processManager =
         LLMProcessManager(project, projectClassPath)
@@ -65,6 +62,7 @@ class Pipeline(
         workspace.addPendingResult(testResultName, key)
 
         // TODO move all interactions with TestCaseDisplayService to Manager
+        project.service<TestCaseDisplayService>().clean()
         project.service<TestCaseDisplayService>().resultName = testResultName
 
         val projectBuilder = ProjectBuilder(project)

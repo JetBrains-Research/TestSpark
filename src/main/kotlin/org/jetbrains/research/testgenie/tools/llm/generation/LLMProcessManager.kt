@@ -48,10 +48,11 @@ class LLMProcessManager(
             }
         }
 
-
-        if (buildPath.isEmpty() || buildPath.isBlank()){
+        if (buildPath.isEmpty() || buildPath.isBlank()) {
             NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-                "Build path is Empty!", "Please make sure that IDEA recognizes all of your module or enter proper build path in settings.", NotificationType.ERROR
+                "Build path is Empty!",
+                "Please make sure that IDEA recognizes all of your module or enter proper build path in settings.",
+                NotificationType.ERROR,
             ).notify(project)
             return
         }
