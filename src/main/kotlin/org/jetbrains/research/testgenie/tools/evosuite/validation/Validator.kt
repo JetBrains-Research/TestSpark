@@ -94,21 +94,21 @@ class Validator(
                     try {
                         projectBuilder.runBuild(indicator)
 
-//                        val compilationFiles =
-//                            setupCompilationFiles(testValidationDirectory, targetFqn)
-//                                ?: return
-//
-//                        logger.info("Compiling tests...")
-//                        val successfulCompilation = compileTests(classpath, compilationFiles)
-//
-//                        if (!successfulCompilation) {
-//                            logger.warn("Compilation failed")
-//                            showTestsCompilationFailed()
-//                            return
-//                        }
-//                        logger.info("Compilation successful!")
-//                        logger.info("Executing tests...")
-//                        indicator.text = TestGenieBundle.message("validationRunning")
+                        val compilationFiles =
+                            setupCompilationFiles(testValidationDirectory, targetFqn)
+                                ?: return
+
+                        logger.info("Compiling tests...")
+                        val successfulCompilation = compileTests(classpath, compilationFiles)
+
+                        if (!successfulCompilation) {
+                            logger.warn("Compilation failed")
+                            showTestsCompilationFailed()
+                            return
+                        }
+                        logger.info("Compilation successful!")
+                        logger.info("Executing tests...")
+                        indicator.text = TestGenieBundle.message("validationRunning")
 
                         runTests(indicator, classpath, targetFqn)
                         runTestsWithCoverage(indicator, classpath, targetFqn, testValidationRoot)
