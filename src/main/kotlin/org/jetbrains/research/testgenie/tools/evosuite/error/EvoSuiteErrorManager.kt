@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.tools.evosuite.generation
+package org.jetbrains.research.testgenie.tools.evosuite.error
 
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager

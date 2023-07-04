@@ -29,7 +29,7 @@ import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.tools.evosuite.ProjectBuilder
+import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import java.io.File

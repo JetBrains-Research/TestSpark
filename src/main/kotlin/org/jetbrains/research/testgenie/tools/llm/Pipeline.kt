@@ -14,7 +14,7 @@ import org.jetbrains.research.testgenie.actions.getClassFullText
 import org.jetbrains.research.testgenie.actions.getSignatureString
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
-import org.jetbrains.research.testgenie.tools.evosuite.ProjectBuilder
+import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
 import java.io.File
 import java.util.*

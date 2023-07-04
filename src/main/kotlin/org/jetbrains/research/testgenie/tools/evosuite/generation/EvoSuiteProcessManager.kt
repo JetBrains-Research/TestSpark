@@ -17,6 +17,7 @@ import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.evosuite.ResultWatcher
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
+import org.jetbrains.research.testgenie.tools.evosuite.error.EvoSuiteErrorManager
 import java.io.File
 import java.nio.charset.Charset
 import java.util.regex.Pattern

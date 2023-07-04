@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.tools.evosuite
+package org.jetbrains.research.testgenie.tools
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
@@ -100,7 +100,7 @@ class ProjectBuilder(private val project: Project) {
                 handle.countDown()
             }
         } catch (e: Exception) {
-            (TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
+            buildError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
             e.printStackTrace()
             isSuccessful = false
         }
@@ -110,7 +110,9 @@ class ProjectBuilder(private val project: Project) {
 
     private fun buildError(msg: String, title: String = TestGenieBundle.message("evosuiteErrorTitle")) {
         NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-            title, msg, NotificationType.ERROR
+            title,
+            msg,
+            NotificationType.ERROR,
         ).notify(project)
     }
 }

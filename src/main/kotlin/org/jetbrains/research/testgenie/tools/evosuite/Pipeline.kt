@@ -20,6 +20,7 @@ import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import java.io.File
 import java.util.UUID
 
