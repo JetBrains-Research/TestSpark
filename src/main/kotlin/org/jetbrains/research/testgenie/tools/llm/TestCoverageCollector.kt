@@ -58,7 +58,7 @@ class TestCoverageCollector(
     }
 
     private fun compilation(javaFile: File, buildPath: String): Boolean {
-        indicator.text = "Compilation tests checking"
+        indicator.text = TestGenieBundle.message("compilationTestsChecking")
 
         // find the proper javac
         val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()
@@ -80,7 +80,7 @@ class TestCoverageCollector(
     }
 
     private fun runJacoco() {
-        indicator.text = "Running jacoco"
+        indicator.text = TestGenieBundle.message("runningJacoco")
 
         val className = generatedTestFile.name.split('.')[0]
         // find the proper javac
@@ -141,7 +141,7 @@ class TestCoverageCollector(
     }
 
     private fun saveData(testCase: TestCaseGeneratedByLLM, xmlFileName: String) {
-        indicator.text = "Test cases saving"
+        indicator.text = TestGenieBundle.message("testCasesSaving")
         val setOfLines = mutableSetOf<Int>()
         File(xmlFileName).readText().konsumeXml().apply {
             children("report") {

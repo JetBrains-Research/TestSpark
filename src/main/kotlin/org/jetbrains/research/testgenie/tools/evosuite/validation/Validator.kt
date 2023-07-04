@@ -266,7 +266,7 @@ class Validator(
         testFqn: String,
         testValidationRoot: String,
     ) {
-        indicator.text = "Calculating coverage"
+        indicator.text = TestGenieBundle.message("calculatingCoverage")
 
         val pluginsPath = System.getProperty("idea.plugins.path")
         val jacocoPath = "$pluginsPath${sep}TestGenie${sep}lib${sep}jacocoagent.jar"

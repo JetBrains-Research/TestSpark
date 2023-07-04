@@ -2,6 +2,7 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
+import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.importPattern
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.llm.test.TestLine
@@ -22,7 +23,7 @@ class TestsAssembler(
         val generatedTestsCount = rawText.split("@Test").size - 1
 
         if (lastTestCount != generatedTestsCount) {
-            indicator.text = "Generating test #$generatedTestsCount"
+            indicator.text = TestGenieBundle.message("generatingTestNumber") + generatedTestsCount
             lastTestCount = generatedTestsCount
         }
 
