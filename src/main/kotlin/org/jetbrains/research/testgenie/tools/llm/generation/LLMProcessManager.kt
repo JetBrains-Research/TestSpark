@@ -1,7 +1,5 @@
 package org.jetbrains.research.testgenie.tools.llm.generation
 
-import com.intellij.notification.NotificationGroupManager
-import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
@@ -28,6 +26,7 @@ class LLMProcessManager(
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private var testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
+    private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     fun runLLMTestGenerator(
         indicator: ProgressIndicator,
@@ -49,11 +48,7 @@ class LLMProcessManager(
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
-            NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-                "Build path is Empty!",
-                "Please make sure that IDEA recognizes all of your module or enter proper build path in settings.",
-                NotificationType.ERROR,
-            ).notify(project)
+            llmErrorManager.display(TestGenieBundle.message("emptyBuildPath"), project)
             return
         }
         indicator.text = TestGenieBundle.message("searchMessage")
@@ -63,7 +58,7 @@ class LLMProcessManager(
 
         // Check if response is not empty
         if (generatedTestSuite.isEmpty()) {
-            LLMErrorManager.displayEmptyTests(project)
+            llmErrorManager.display(TestGenieBundle.message("emptyResponse"), project)
             return
         }
 
@@ -71,9 +66,7 @@ class LLMProcessManager(
         val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
 
         // TODO move this operation to Manager
-        // TODO work with null value
-        // Collect coverage information for each generated test method
-        // and display it
+        // Collect coverage information for each generated test method and display it
         val report = TestCoverageCollector(
             indicator,
             project,
@@ -83,9 +76,8 @@ class LLMProcessManager(
             buildPath,
             generatedTestSuite.testCases,
             cut,
+            llmErrorManager,
         ).collect()
-
-        report ?: println(generatedTestSuite.toString())
 
         project.service<TestCaseDisplayService>().testGenerationResultList.add(report)
         project.service<TestCaseDisplayService>().packageLine =

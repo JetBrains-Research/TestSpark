@@ -104,9 +104,9 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
         }
     }
 
-    private fun getMergeResult(numberOfUsedTool: Int): Report {
+    private fun getMergeResult(numberOfUsedTool: Int): Report? {
         if (numberOfUsedTool == 1) {
-            return event.project!!.service<TestCaseDisplayService>().testGenerationResultList[0]!!
+            return event.project!!.service<TestCaseDisplayService>().testGenerationResultList[0]
         }
         TODO("implement merge")
     }

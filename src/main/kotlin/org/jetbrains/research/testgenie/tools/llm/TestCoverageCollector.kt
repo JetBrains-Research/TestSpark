@@ -10,20 +10,23 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
+import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
 
 class TestCoverageCollector(
     private val indicator: ProgressIndicator,
-    project: Project,
+    private val project: Project,
     private val resultPath: String,
     private val generatedTestFile: File,
     private val generatedTestPackage: String,
     private val projectBuildPath: String,
     private val testCases: MutableList<TestCaseGeneratedByLLM>,
     cut: PsiClass,
+    private val llmErrorManager: LLMErrorManager,
 ) {
     private val sep = File.separatorChar
     private val junitTimeout: Long = 12000000 // TODO: Source from config
@@ -38,9 +41,15 @@ class TestCoverageCollector(
 
     fun collect(): Report? {
         // the test file cannot be null
-        if (!generatedTestFile.exists()) return null
+        if (!generatedTestFile.exists()) {
+            llmErrorManager.display(TestGenieBundle.message("badGrazieResponse"), project)
+            return null
+        }
         // compile the test file
-        if (!compilation(generatedTestFile, projectBuildPath)) return null
+        if (!compilation(generatedTestFile, projectBuildPath)) {
+            llmErrorManager.displayWarning(TestGenieBundle.message("invalidGrazieResult"), project)
+            return null
+        }
         // run Jacoco on the compiled test file
         runJacoco()
 

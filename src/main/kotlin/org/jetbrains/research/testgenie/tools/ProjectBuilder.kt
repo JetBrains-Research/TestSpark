@@ -46,13 +46,13 @@ class ProjectBuilder(private val project: Project) {
                 finished.down()
                 promise.onSuccess {
                     if (it.isAborted || it.hasErrors()) {
-                        buildError("Build process error")
+                        displayError("Build process error")
                         isSuccessful = false
                     }
                     finished.up()
                 }
                 promise.onError {
-                    buildError("Build process error")
+                    displayError("Build process error")
                     isSuccessful = false
                     finished.up()
                 }
@@ -83,7 +83,7 @@ class ProjectBuilder(private val project: Project) {
                 handler.startNotify()
 
                 if (!handler.waitFor(builderTimeout)) {
-                    buildError("Build process exceeded timeout - ${builderTimeout}ms")
+                    displayError("Build process exceeded timeout - ${builderTimeout}ms")
                     isSuccessful = false
                 }
 
@@ -94,13 +94,13 @@ class ProjectBuilder(private val project: Project) {
                 val exitCode = handler.exitCode
 
                 if (exitCode != 0) {
-                    buildError("exit code $exitCode", "Build failed")
+                    displayError("exit code $exitCode", "Build failed")
                     isSuccessful = false
                 }
                 handle.countDown()
             }
         } catch (e: Exception) {
-            buildError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
+            displayError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
             e.printStackTrace()
             isSuccessful = false
         }
@@ -108,7 +108,7 @@ class ProjectBuilder(private val project: Project) {
         return isSuccessful
     }
 
-    private fun buildError(msg: String, title: String = TestGenieBundle.message("evosuiteErrorTitle")) {
+    private fun displayError(msg: String, title: String = TestGenieBundle.message("buildErrorTitle")) {
         NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
             title,
             msg,
