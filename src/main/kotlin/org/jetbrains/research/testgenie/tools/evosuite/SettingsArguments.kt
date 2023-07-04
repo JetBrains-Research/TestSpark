@@ -20,7 +20,7 @@ class SettingsArguments(
     private val projectPath: String,
     private val serializeResultPath: String,
     private val classFQN: String,
-    baseDir: String
+    baseDir: String,
 ) {
     private var command: MutableList<String> = mutableListOf(
         algorithmsToGenerateMap[SettingsApplicationService.getInstance().state!!.algorithm]!!,
@@ -31,7 +31,7 @@ class SettingsArguments(
         "-Dnew_statistics=false",
         "-class", classFQN,
         "-Dcatch_undeclared_exceptions=false",
-        "-Dtest_naming_strategy=COVERAGE"
+        "-Dtest_naming_strategy=COVERAGE",
     )
 
     /**
@@ -46,8 +46,8 @@ class SettingsArguments(
     fun forMethod(method: String): SettingsArguments {
         command.addAll(
             listOf(
-                "-Dtarget_method=$method"
-            )
+                "-Dtarget_method=$method",
+            ),
         )
         return this
     }
@@ -62,8 +62,8 @@ class SettingsArguments(
     fun forLine(line: Int): SettingsArguments {
         command.addAll(
             listOf(
-                "-Dtarget_line=$line"
-            )
+                "-Dtarget_line=$line",
+            ),
         )
         return this
     }
@@ -116,7 +116,7 @@ class SettingsArguments(
             ContentDigestAlgorithm.MU_PLUS_LAMBDA_EA to generateSuite,
             ContentDigestAlgorithm.MU_LAMBDA_EA to generateSuite,
             ContentDigestAlgorithm.NSGAII to generateSuite,
-            ContentDigestAlgorithm.SPEA2 to generateSuite
+            ContentDigestAlgorithm.SPEA2 to generateSuite,
         )
 
         /**

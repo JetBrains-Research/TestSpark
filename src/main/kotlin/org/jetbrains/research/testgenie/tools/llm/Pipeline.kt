@@ -1,7 +1,6 @@
 package org.jetbrains.research.testgenie.tools.llm
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -15,7 +14,7 @@ import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testgenie.tools.llm.generation.PromptManager
 import java.io.File
-import java.util.*
+import java.util.UUID
 
 private var prompt = ""
 
@@ -30,9 +29,6 @@ class Pipeline(
     private val fileUrl: String,
     private val classFQN: String,
 ) {
-
-    private val log = Logger.getInstance(this::class.java)
-
     private val sep = File.separatorChar
 
     private val id = UUID.randomUUID().toString()
@@ -46,10 +42,7 @@ class Pipeline(
 
     private val promptManager = PromptManager(cut, interestingPsiClasses, polymorphismRelations)
 
-    private val processManager =
-        LLMProcessManager(project, projectClassPath)
-
-    // TODO("Removed unused input parameters. needs o be refactored after finalizing the implementation")
+    private val processManager = LLMProcessManager(project, projectClassPath)
 
     fun forClass(): Pipeline {
         prompt = promptManager.generatePrompt()

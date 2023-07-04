@@ -39,7 +39,7 @@ class Workspace(private val project: Project) : Disposable {
         var targetUnit: String,
         val modificationTS: Long,
         val jobId: String,
-        val targetClassPath: String
+        val targetClassPath: String,
     )
 
     class TestJob(
@@ -97,7 +97,7 @@ class Workspace(private val project: Project) : Disposable {
                         updateCoverage(testJob.getSelectedLines(), testJob.selectedTests, testJob.report, editor)
                     }
                 }
-            }
+            },
         )
 
         connection.subscribe(
@@ -106,7 +106,7 @@ class Workspace(private val project: Project) : Disposable {
                 override fun validationResult(junitResult: Validator.JUnitResult) {
                     showValidationResult(junitResult)
                 }
-            }
+            },
         )
 
         val disposable =
@@ -130,7 +130,7 @@ class Workspace(private val project: Project) : Disposable {
                     }
                 }
             },
-            disposable
+            disposable,
         )
         listenerDisposable = disposable
     }
@@ -159,7 +159,7 @@ class Workspace(private val project: Project) : Disposable {
         testResultName: String,
         testReport: Report,
         cacheLazyPipeline: Pipeline? = null,
-        cachedJobKey: TestJobInfo? = null
+        cachedJobKey: TestJobInfo? = null,
     ): TestJobInfo {
         val pendingJobKey = pendingTestResults.remove(testResultName)!!
 
@@ -259,7 +259,7 @@ class Workspace(private val project: Project) : Disposable {
         linesToCover: Set<Int>,
         selectedTests: HashSet<String>,
         testCaseList: Report,
-        editor: Editor
+        editor: Editor,
     ) {
         val visualizationService = project.service<CoverageVisualisationService>()
         visualizationService.updateCoverage(linesToCover, selectedTests, testCaseList, editor)
