@@ -44,8 +44,9 @@
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="org.jetbrains.research.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
-        <toolWindow id="TestGenie Validator" secondary="true" anchor="bottom"
-                    factoryClass="org.jetbrains.research.testgenie.tools.evosuite.validation.ValidationToolWindowFactory"/>
+<!--        TODO uncomment after the validator fixing-->
+<!--        <toolWindow id="TestGenie Validator" secondary="true" anchor="bottom"-->
+<!--                    factoryClass="org.jetbrains.research.testgenie.tools.evosuite.validation.ValidationToolWindowFactory"/>-->
 
         <!-- Application-level services -->
         <applicationService

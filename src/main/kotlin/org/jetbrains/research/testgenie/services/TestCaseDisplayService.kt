@@ -122,8 +122,10 @@ class TestCaseDisplayService(private val project: Project) {
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
         topButtons.add(removeAllButton)
-        topButtons.add(validateButton)
-        topButtons.add(toggleJacocoButton)
+
+//        TODO uncomment after the validator fixing
+//        topButtons.add(validateButton)
+//        topButtons.add(toggleJacocoButton)
 
         mainPanel.add(topButtons, BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
