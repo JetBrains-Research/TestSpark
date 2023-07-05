@@ -7,6 +7,7 @@ import org.jetbrains.research.testgenie.actions.getSignatureString
 
 class PromptManager(
     private val cut: PsiClass,
+    private val classesToTest: MutableList<PsiClass>,
     private val interestingPsiClasses: Set<PsiClass>,
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
 ) {
@@ -20,7 +21,21 @@ class PromptManager(
         // prompt: source code
         prompt += "The source code of class under test is as follows:\n```\n${getClassFullText(cut)}\n```\n"
 
-        // prompt: signature of methods in the classes used by CUT
+         // print information about  super classes of CUT
+        for (i in 2 .. classesToTest.size){
+            val subClass = classesToTest[i-2]
+            val superClass = classesToTest[i-1]
+
+            prompt += "${getClassDisplayName(subClass)} extends ${getClassDisplayName(superClass)}. The source code of ${getClassDisplayName(superClass)} is:\n```\n${
+                getClassFullText(
+                    superClass
+                )
+            }\n" +
+                    "```\n"
+        }
+
+
+         // prompt: signature of methods in the classes used by CUT
         prompt += "Here are the method signatures of classes used by the class under test. Only use these signatures for creating objects, not your own ideas.\n"
         for (interestingPsiClass: PsiClass in interestingPsiClasses) {
             if (interestingPsiClass.qualifiedName!!.startsWith("java")) {

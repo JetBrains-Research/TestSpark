@@ -22,7 +22,7 @@ class Pipeline(
     private val project: Project,
     projectClassPath: String,
     interestingPsiClasses: Set<PsiClass>,
-    private val classesToTest: List<PsiClass>,
+    private val classesToTest: MutableList<PsiClass>,
     private val packageName: String,
     polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     modTs: Long,
@@ -31,7 +31,7 @@ class Pipeline(
 ) {
     private val sep = File.separatorChar
 
-    private  val cut = classesToTest.get(0)
+    private  val cut = classesToTest[0]
 
     private val id = UUID.randomUUID().toString()
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
@@ -42,7 +42,7 @@ class Pipeline(
     // TODO move all interactions with Workspace to Manager
     var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
-    private val promptManager = PromptManager(cut, interestingPsiClasses, polymorphismRelations)
+    private val promptManager = PromptManager(cut, classesToTest, interestingPsiClasses, polymorphismRelations)
 
     private val processManager = LLMProcessManager(project, projectClassPath)
 
