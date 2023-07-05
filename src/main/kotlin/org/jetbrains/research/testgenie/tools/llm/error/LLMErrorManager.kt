@@ -6,6 +6,8 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
 
 class LLMErrorManager {
+    fun createRequestErrorMessage(code: Int): String = TestGenieBundle.message("requestError") + " " + code.toString()
+
     fun display(message: String, project: Project) {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("LLM Execution Error")

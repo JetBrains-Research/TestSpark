@@ -54,7 +54,10 @@ class LLMProcessManager(
         indicator.text = TestGenieBundle.message("searchMessage")
 
         // Send request to LLM
-        val generatedTestSuite: TestSuiteGeneratedByLLM = LLMRequest().request(prompt, indicator, packageName)
+        val generatedTestSuite: TestSuiteGeneratedByLLM? = LLMRequest().request(prompt, indicator, packageName, project, llmErrorManager)
+
+        // Error during the request
+        generatedTestSuite ?: return
 
         // Check if response is not empty
         if (generatedTestSuite.isEmpty()) {
