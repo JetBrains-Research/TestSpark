@@ -22,7 +22,7 @@ class Pipeline(
     private val project: Project,
     projectClassPath: String,
     interestingPsiClasses: Set<PsiClass>,
-    private val cut: PsiClass,
+    private val classesToTest: List<PsiClass>,
     private val packageName: String,
     polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     modTs: Long,
@@ -30,6 +30,8 @@ class Pipeline(
     private val classFQN: String,
 ) {
     private val sep = File.separatorChar
+
+    private  val cut = classesToTest.get(0)
 
     private val id = UUID.randomUUID().toString()
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
