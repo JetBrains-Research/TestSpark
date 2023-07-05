@@ -5,6 +5,7 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
+import java.util.Locale
 
 class EvoSuiteErrorManager {
     private var output = ""
@@ -46,10 +47,20 @@ class EvoSuiteErrorManager {
         }
 
         // unknown class error
-        if (output.contains("Unknown class")) {
+        if (output.contains(TestGenieBundle.message("unknownClassError"))) {
             display(TestGenieBundle.message("unknownClassMessage"), project)
             return false
         }
+
+        // error while initializing target class
+        if (output.contains(TestGenieBundle.message("errorWhileInitializingTargetClass"))) {
+            display(
+                TestGenieBundle.message("errorWhileInitializingTargetClass").lowercase(Locale.getDefault()),
+                project
+            )
+            return false
+        }
+
         return true
     }
 

@@ -10,6 +10,7 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
+import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.util.Key
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.TestGenieBundle
@@ -64,6 +65,23 @@ class EvoSuiteProcessManager(
                 for (module in ModuleManager.getInstance(project).modules) {
                     val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
                     compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
+
+                    // Include extra libraries in classpath
+                    val librariesPaths = ModuleRootManager.getInstance(module).orderEntries().librariesOnly().pathsList.pathList
+                    for (lib in librariesPaths) {
+                        // exclude the invalid classpaths
+                        if (buildPath.contains(lib)) {
+                            continue
+                        }
+                        if (lib.endsWith(".zip")) {
+                            continue
+                        }
+                        val basePath = module.project.basePath
+                        if (lib.startsWith(basePath.toString())) {
+                            // add the extra path
+                            buildPath += lib.plus(":")
+                        }
+                    }
                 }
             }
             command[command.indexOf(projectClassPath)] = buildPath

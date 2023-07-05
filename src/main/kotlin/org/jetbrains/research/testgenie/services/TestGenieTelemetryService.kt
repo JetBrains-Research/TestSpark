@@ -16,8 +16,8 @@ import java.io.File.separator
 import java.text.SimpleDateFormat
 import java.util.Date
 
-class TestGenieTelemetryService(_project: Project) {
-    private val project: Project = _project
+class TestGenieTelemetryService(project: Project) {
+    private val projectDuplicate: Project = project
 
     private val modifiedTestCases = mutableListOf<ModifiedTestCase>()
     private val modifiedTestCasesLock = Object()
@@ -26,7 +26,7 @@ class TestGenieTelemetryService(_project: Project) {
     private val dateFormatter: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
 
     private val telemetryEnabled: Boolean
-        get() = project.service<SettingsProjectService>().state.telemetryEnabled
+        get() = projectDuplicate.service<SettingsProjectService>().state.telemetryEnabled
 
     /**
      * Adds test cases to the list of test cases scheduled for telemetry.
@@ -64,7 +64,7 @@ class TestGenieTelemetryService(_project: Project) {
         }
 
         ApplicationManager.getApplication().runReadAction {
-            val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseSerializable(project) }
+            val testCasesToSubmit = rawTestCasesToSubmit.map { it.convertToModifiedTestCaseSerializable(projectDuplicate) }
 
             log.info("Submitting ${testCasesToSubmit.size} test cases to a file")
 
@@ -83,7 +83,7 @@ class TestGenieTelemetryService(_project: Project) {
      */
     private fun writeTelemetryToFile(json: String) {
         // Get the telemetry path
-        var dirName: String = project.service<SettingsProjectService>().state.telemetryPath
+        var dirName: String = projectDuplicate.service<SettingsProjectService>().state.telemetryPath
         if (!dirName.endsWith(separator)) dirName = dirName.plus(separator)
 
         // Create the directory if it does not exist

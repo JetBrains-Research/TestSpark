@@ -11,10 +11,9 @@ import java.io.File
  * This class is responsible for storing the project-level settings persistently. It uses SettingsProjectState class for that.
  */
 @State(name = "SettingsProjectState", storages = [Storage("TestGeniePluginSettings.xml")])
-class SettingsProjectService(_project: Project) : PersistentStateComponent<SettingsProjectState> {
+class SettingsProjectService(project: Project) : PersistentStateComponent<SettingsProjectState> {
 
     private var settingsProjectState: SettingsProjectState = SettingsProjectState()
-    private var project: Project = _project
 
     init {
         settingsProjectState.telemetryPath += File.separator.plus(project.name)
