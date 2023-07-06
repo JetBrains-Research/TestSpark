@@ -14,7 +14,6 @@ class Report {
     var allUncoveredMutation: Set<MutationInfo> = setOf()
     var testCaseList: HashMap<String, TestCase> = hashMapOf()
 
-
     constructor(compactReport: CompactReport) {
         UUT = compactReport.UUT
         allCoveredLines = compactReport.allCoveredLines

@@ -47,13 +47,13 @@ class ProjectBuilder(private val project: Project) {
                 finished.down()
                 promise.onSuccess {
                     if (it.isAborted || it.hasErrors()) {
-                        errorProcess("Build process error")
+                        errorProcess()
                         isSuccessful = false
                     }
                     finished.up()
                 }
                 promise.onError {
-                    errorProcess("Build process error")
+                    errorProcess()
                     isSuccessful = false
                     finished.up()
                 }
@@ -84,7 +84,7 @@ class ProjectBuilder(private val project: Project) {
                 handler.startNotify()
 
                 if (!handler.waitFor(builderTimeout)) {
-                    errorProcess("Build process exceeded timeout - ${builderTimeout}ms")
+                    errorProcess()
                     isSuccessful = false
                 }
 
@@ -95,13 +95,13 @@ class ProjectBuilder(private val project: Project) {
                 val exitCode = handler.exitCode
 
                 if (exitCode != 0) {
-                    errorProcess("exit code $exitCode", "Build failed")
+                    errorProcess()
                     isSuccessful = false
                 }
                 handle.countDown()
             }
         } catch (e: Exception) {
-            errorProcess(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
+            errorProcess()
             e.printStackTrace()
             isSuccessful = false
         }
@@ -109,11 +109,11 @@ class ProjectBuilder(private val project: Project) {
         return isSuccessful
     }
 
-    private fun errorProcess(msg: String, title: String = TestGenieBundle.message("buildErrorTitle")) {
+    private fun errorProcess() {
         project.service<Workspace>().errorOccurred()
         NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-            title,
-            msg,
+            TestGenieBundle.message("buildErrorTitle"),
+            TestGenieBundle.message("commonBuildErrorMessage"),
             NotificationType.ERROR,
         ).notify(project)
     }

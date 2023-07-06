@@ -25,11 +25,8 @@ class PromptManager(
             val subClass = classesToTest[i - 2]
             val superClass = classesToTest[i - 1]
 
-            prompt += "${getClassDisplayName(subClass)} extends ${getClassDisplayName(superClass)}. The source code of ${getClassDisplayName(superClass)} is:\n```\n${
-                getClassFullText(
-                    superClass,
-                )
-            }\n" +
+            prompt += "${getClassDisplayName(subClass)} extends ${getClassDisplayName(superClass)}. " +
+                "The source code of ${getClassDisplayName(superClass)} is:\n```\n${getClassFullText(superClass)}\n" +
                 "```\n"
         }
 

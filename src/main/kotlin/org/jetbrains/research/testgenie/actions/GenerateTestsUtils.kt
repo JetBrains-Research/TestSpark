@@ -294,13 +294,8 @@ private fun isAbstractClass(psiClass: PsiClass): Boolean {
     }
 
     // check if a class is noted as abstract in the text
-    if (psiClass.text.replace(" ", "")
-            .contains("abstractclass${psiClass.name}", ignoreCase = true)
-    ) {
-        return true
-    }
-
-    return false
+    return psiClass.text.replace(" ", "")
+        .contains("abstractclass${psiClass.name}", ignoreCase = true)
 }
 
 /**
