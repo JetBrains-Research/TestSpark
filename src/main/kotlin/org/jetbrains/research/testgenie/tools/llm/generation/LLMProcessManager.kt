@@ -28,7 +28,7 @@ class LLMProcessManager(
     private var testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
-    private val llmRequestManager = LLMRequest()
+    private val llmRequestManager = LLMRequestManager()
 
     fun runLLMTestGenerator(
         indicator: ProgressIndicator,
