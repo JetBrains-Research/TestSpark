@@ -3,6 +3,7 @@ package org.jetbrains.research.testgenie.tools.llm
 import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
+import com.intellij.execution.process.ScriptRunnerUtil
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
@@ -34,17 +35,18 @@ class TestCoverageCollector(
     private val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
     private val report = Report()
 
-    fun collect(): Report? {
+
+    fun generatedTestFileIsValid(): Boolean{
         // the test file cannot be null
         if (!generatedTestFile.exists()) {
             llmErrorManager.errorProcess(TestGenieBundle.message("badGrazieResponse"), project)
-            return null
+            return false
         }
-        // compile the test file
-        if (!compilation(generatedTestFile, projectBuildPath)) {
-            llmErrorManager.warningProcess(TestGenieBundle.message("invalidGrazieResult"), project)
-            return null
-        }
+        return true
+    }
+
+    fun collect(): Report? {
+
         // run Jacoco on the compiled test file
         runJacoco()
 
@@ -52,26 +54,26 @@ class TestCoverageCollector(
         return report.normalized()
     }
 
-    private fun compilation(javaFile: File, buildPath: String): Boolean {
+    fun compile(): Pair<Boolean,String> {
         indicator.text = TestGenieBundle.message("compilationTestsChecking")
 
         // find the proper javac
         val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()
         // compile file
-        runCommandLine(
+        val errorMsg = runCommandLine(
             arrayListOf(
                 javaCompile.absolutePath,
                 "-cp",
-                getPath(buildPath),
-                javaFile.absolutePath,
+                getPath(projectBuildPath),
+                generatedTestFile.absolutePath
             ),
         )
 
         // create .class file path
-        val classFilePath = javaFile.absolutePath.replace(".java", ".class")
+        val classFilePath = generatedTestFile.absolutePath.replace(".java", ".class")
 
         // check is .class file exists
-        return File(classFilePath).exists()
+        return Pair(File(classFilePath).exists(),errorMsg)
     }
 
     private fun runJacoco() {
@@ -170,11 +172,9 @@ class TestCoverageCollector(
         )
     }
 
-    private fun runCommandLine(cmd: ArrayList<String>) {
+    private fun runCommandLine(cmd: ArrayList<String>): String {
         val compilationProcess = GeneralCommandLine(cmd)
-        val handler = OSProcessHandler(compilationProcess)
-        handler.startNotify()
-        handler.waitFor(junitTimeout)
+        return ScriptRunnerUtil.getProcessOutput(compilationProcess, ScriptRunnerUtil.STDERR_OUTPUT_KEY_FILTER,30000)
     }
 
     private fun getPath(buildPath: String): String {

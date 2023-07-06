@@ -8,6 +8,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import org.jetbrains.research.testgenie.TestGenieBundle
+import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.llm.TestCoverageCollector
@@ -27,6 +28,7 @@ class LLMProcessManager(
     private var testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
+    private val llmRequestManager= LLMRequest()
 
     fun runLLMTestGenerator(
         indicator: ProgressIndicator,
@@ -53,34 +55,63 @@ class LLMProcessManager(
             return
         }
         indicator.text = TestGenieBundle.message("searchMessage")
+        // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
 
-        // Send request to LLM
-        val generatedTestSuite: TestSuiteGeneratedByLLM? = LLMRequest().request(prompt, indicator, packageName, project, llmErrorManager)
 
-        // Error during the request
-        generatedTestSuite ?: return
+        // Send the first request to LLM
+        var generatedTestSuite: TestSuiteGeneratedByLLM? = llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
+        var generatedTestsArePassing = false
 
-        // Check if response is not empty
-        if (generatedTestSuite.isEmpty()) {
-            llmErrorManager.errorProcess(TestGenieBundle.message("emptyResponse"), project)
-            return
+        var report: Report? = Report()
+        var requestsCount = 0
+        val MAX_REQUESTS = 3
+        while (!generatedTestsArePassing){
+
+            if (requestsCount >= MAX_REQUESTS){
+                llmErrorManager.errorProcess(TestGenieBundle.message("invalidGrazieResult"), project)
+                break
+            }
+            // Check if response is not empty
+            if (generatedTestSuite == null) {
+                llmErrorManager.errorProcess(TestGenieBundle.message("emptyResponse"), project)
+                requestsCount ++
+                generatedTestSuite = llmRequestManager.request("You have provided an empty answer! please answer my previous question with the same formats",indicator,packageName,project,llmErrorManager)
+                continue
+            }
+
+            // Save the generated TestSuite into a temp file
+            val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
+            if(!File(generatedTestPath).exists()){
+                llmErrorManager.errorProcess(TestGenieBundle.message("savingTestFileIssue"), project)
+            }
+
+
+            // TODO move this operation to Manager
+            // Collect coverage information for each generated test method and display it
+            val coverageCollector = TestCoverageCollector(
+                indicator,
+                project,
+                resultPath,
+                File("$generatedTestPath$testFileName"),
+                generatedTestSuite.getPrintablePackageString(),
+                buildPath,
+                generatedTestSuite.testCases,
+                cutModule,
+                llmErrorManager,
+            )
+
+            // compile the test file
+            val compilationResult = coverageCollector.compile()
+            if (!compilationResult.first) {
+                llmErrorManager.warningProcess(TestGenieBundle.message("compilationError"), project)
+                requestsCount ++
+                generatedTestSuite = llmRequestManager.request("I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed etsts between ```",indicator,packageName,project,llmErrorManager)
+                continue
+            }
+
+            generatedTestsArePassing= true
+            report = coverageCollector.collect()
         }
-
-        // Save the generated TestSuite into a temp file
-        val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
-
-        // Collect coverage information for each generated test method and display it
-        val report = TestCoverageCollector(
-            indicator,
-            project,
-            resultPath,
-            File("$generatedTestPath$testFileName"),
-            generatedTestSuite.getPrintablePackageString(),
-            buildPath,
-            generatedTestSuite.testCases,
-            cutModule,
-            llmErrorManager,
-        ).collect()
 
         // Error during the collecting
         report ?: return
