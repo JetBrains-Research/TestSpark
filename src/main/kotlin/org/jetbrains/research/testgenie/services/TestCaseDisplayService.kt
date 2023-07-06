@@ -74,7 +74,7 @@ class TestCaseDisplayService(private val project: Project) {
     var validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
     var toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
-    private var testsSelected: Int = 0
+    var testsSelected: Int = 0
     private var testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
     private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
@@ -84,8 +84,8 @@ class TestCaseDisplayService(private val project: Project) {
         JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
     )
-    private var testCasePanels: HashMap<String, JPanel> = HashMap()
-    private var originalTestCases: HashMap<String, String> = HashMap()
+    var testCasePanels: HashMap<String, JPanel> = HashMap()
+    var originalTestCases: HashMap<String, String> = HashMap()
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
@@ -136,14 +136,6 @@ class TestCaseDisplayService(private val project: Project) {
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
         toggleJacocoButton.addActionListener { toggleJacocoCoverage() }
         removeAllButton.addActionListener { removeAllTestCases() }
-    }
-
-    fun clean() {
-        removeSelectedTestCases(testCasePanels.toMap())
-        testsSelected = 0
-        testCasePanels = HashMap()
-        originalTestCases = HashMap()
-        testGenerationResultList = mutableListOf()
     }
 
     fun makeValidatedButtonAvailable() {
@@ -700,7 +692,7 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param selectedTestCasePanels the panels of the selected tests
      */
-    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+    fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
         selectedTestCasePanels.forEach { removeTestCase(it.key) }
         removeAllHighlights()
         closeToolWindow()

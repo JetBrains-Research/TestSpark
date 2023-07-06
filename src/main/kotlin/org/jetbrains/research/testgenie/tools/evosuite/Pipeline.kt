@@ -147,7 +147,7 @@ class Pipeline(
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
-        project.service<TestCaseDisplayService>().clean()
+        project.service<Workspace>().clean()
 
         val workspace = project.service<Workspace>()
         workspace.addPendingResult(testResultName, key)

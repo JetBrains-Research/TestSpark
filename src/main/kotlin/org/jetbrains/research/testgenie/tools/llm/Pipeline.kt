@@ -59,7 +59,7 @@ class Pipeline(
         workspace.addPendingResult(testResultName, key)
 
         // TODO move all interactions with TestCaseDisplayService to Manager
-        project.service<TestCaseDisplayService>().clean()
+        project.service<Workspace>().clean()
         project.service<TestCaseDisplayService>().resultName = testResultName
 
         val projectBuilder = ProjectBuilder(project)
@@ -73,11 +73,9 @@ class Pipeline(
                     }
 
                     if (projectBuilder.runBuild(indicator)) {
-                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cutModule, classFQN)
+                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cutModule, classFQN, fileUrl)
                     }
                 }
             })
-
-        project.service<TestCaseDisplayService>().fileUrl = fileUrl
     }
 }

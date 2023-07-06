@@ -3,8 +3,10 @@ package org.jetbrains.research.testgenie.tools.evosuite.error
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
+import org.jetbrains.research.testgenie.editor.Workspace
 import java.util.Locale
 
 class EvoSuiteErrorManager {
@@ -33,7 +35,7 @@ class EvoSuiteErrorManager {
     ): Boolean {
         // exceeded timeout error
         if (!handler.waitFor(evoSuiteProcessTimeout)) {
-            display(
+            errorProcess(
                 getExceededTimeoutMessage(evoSuiteProcessTimeout),
                 project,
             )
@@ -42,21 +44,21 @@ class EvoSuiteErrorManager {
 
         // non zero exit code error
         if (handler.exitCode != 0) {
-            display(getEvoSuiteNonZeroExitCodeMessage(output), project)
+            errorProcess(getEvoSuiteNonZeroExitCodeMessage(output), project)
             return false
         }
 
         // unknown class error
         if (output.contains(TestGenieBundle.message("unknownClassError"))) {
-            display(TestGenieBundle.message("unknownClassMessage"), project)
+            errorProcess(TestGenieBundle.message("unknownClassMessage"), project)
             return false
         }
 
         // error while initializing target class
         if (output.contains(TestGenieBundle.message("errorWhileInitializingTargetClass"))) {
-            display(
+            errorProcess(
                 TestGenieBundle.message("errorWhileInitializingTargetClass").lowercase(Locale.getDefault()),
-                project
+                project,
             )
             return false
         }
@@ -69,7 +71,8 @@ class EvoSuiteErrorManager {
      *
      * @param message the balloon content to display
      */
-    fun display(message: String, project: Project) {
+    fun errorProcess(message: String, project: Project) {
+        project.service<Workspace>().errorOccurred()
         NotificationGroupManager.getInstance()
             .getNotificationGroup("EvoSuite Execution Error")
             .createNotification(

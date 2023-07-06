@@ -165,7 +165,7 @@ class EvoSuiteProcessManager(
             AppExecutorUtil.getAppScheduledExecutorService()
                 .execute(ResultWatcher(project, testResultName, fileUrl, classFQN))
         } catch (e: Exception) {
-            evoSuiteErrorManager.display(TestGenieBundle.message("evosuiteErrorMessage").format(e.message), project)
+            evoSuiteErrorManager.errorProcess(TestGenieBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()
         }
     }

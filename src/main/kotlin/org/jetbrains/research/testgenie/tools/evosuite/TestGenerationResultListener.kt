@@ -16,5 +16,5 @@ val TEST_GENERATION_RESULT_TOPIC: Topic<TestGenerationResultListener> = Topic.cr
  * generation job with testgenie.evosuite.Runner
  */
 interface TestGenerationResultListener {
-    fun testGenerationResult(testReport: Report?, resultName: String, fileUrl: String)
+    fun testGenerationResult(testReport: Report, resultName: String, fileUrl: String)
 }

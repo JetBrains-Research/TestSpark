@@ -15,6 +15,7 @@ import org.jetbrains.research.testgenie.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
 import com.intellij.util.concurrency.Semaphore
 import com.intellij.task.ProjectTaskManager
+import org.jetbrains.research.testgenie.editor.Workspace
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
@@ -46,13 +47,13 @@ class ProjectBuilder(private val project: Project) {
                 finished.down()
                 promise.onSuccess {
                     if (it.isAborted || it.hasErrors()) {
-                        displayError("Build process error")
+                        errorProcess("Build process error")
                         isSuccessful = false
                     }
                     finished.up()
                 }
                 promise.onError {
-                    displayError("Build process error")
+                    errorProcess("Build process error")
                     isSuccessful = false
                     finished.up()
                 }
@@ -83,7 +84,7 @@ class ProjectBuilder(private val project: Project) {
                 handler.startNotify()
 
                 if (!handler.waitFor(builderTimeout)) {
-                    displayError("Build process exceeded timeout - ${builderTimeout}ms")
+                    errorProcess("Build process exceeded timeout - ${builderTimeout}ms")
                     isSuccessful = false
                 }
 
@@ -94,13 +95,13 @@ class ProjectBuilder(private val project: Project) {
                 val exitCode = handler.exitCode
 
                 if (exitCode != 0) {
-                    displayError("exit code $exitCode", "Build failed")
+                    errorProcess("exit code $exitCode", "Build failed")
                     isSuccessful = false
                 }
                 handle.countDown()
             }
         } catch (e: Exception) {
-            displayError(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
+            errorProcess(TestGenieBundle.message("evosuiteErrorMessage").format(e.message))
             e.printStackTrace()
             isSuccessful = false
         }
@@ -108,7 +109,8 @@ class ProjectBuilder(private val project: Project) {
         return isSuccessful
     }
 
-    private fun displayError(msg: String, title: String = TestGenieBundle.message("buildErrorTitle")) {
+    private fun errorProcess(msg: String, title: String = TestGenieBundle.message("buildErrorTitle")) {
+        project.service<Workspace>().errorOccurred()
         NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
             title,
             msg,

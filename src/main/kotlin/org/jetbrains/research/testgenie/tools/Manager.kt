@@ -4,13 +4,13 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.evosuite.TEST_GENERATION_RESULT_TOPIC
 import org.jetbrains.research.testgenie.tools.toolImpls.EvoSuite
 import org.jetbrains.research.testgenie.tools.toolImpls.Llm
 
 class Manager {
-
     companion object {
         val tools: List<Tool> = listOf(EvoSuite(), Llm())
         fun generateTestsForClass(e: AnActionEvent) {
@@ -92,6 +92,8 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
         val sleepDurationMillis: Long = 2000
         while (true) {
             if (event.project!!.service<TestCaseDisplayService>().testGenerationResultList.size != numberOfUsedTool) {
+                // there is some error during the process running
+                if (event.project!!.service<Workspace>().isErrorOccurred()) return
                 Thread.sleep(sleepDurationMillis)
                 continue
             }
@@ -104,9 +106,9 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
         }
     }
 
-    private fun getMergeResult(numberOfUsedTool: Int): Report? {
+    private fun getMergeResult(numberOfUsedTool: Int): Report {
         if (numberOfUsedTool == 1) {
-            return event.project!!.service<TestCaseDisplayService>().testGenerationResultList[0]
+            return event.project!!.service<TestCaseDisplayService>().testGenerationResultList[0]!!
         }
         TODO("implement merge")
     }

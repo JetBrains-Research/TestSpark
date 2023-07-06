@@ -12,8 +12,7 @@ class PromptManager(
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
 ) {
 
-
-     fun generatePrompt(): String {
+    fun generatePrompt(): String {
         // prompt: start the request
         var prompt =
             "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\nDont use @Before and @After test methods.\nMake tests as atomic as possible.\nAll tests should be for JUnit 4.\nIn case of mocking, use Mockito 5. But, do not use mocking for all tests.\n"
@@ -21,21 +20,20 @@ class PromptManager(
         // prompt: source code
         prompt += "The source code of class under test is as follows:\n```\n${getClassFullText(cut)}\n```\n"
 
-         // print information about  super classes of CUT
-        for (i in 2 .. classesToTest.size){
-            val subClass = classesToTest[i-2]
-            val superClass = classesToTest[i-1]
+        // print information about  super classes of CUT
+        for (i in 2..classesToTest.size) {
+            val subClass = classesToTest[i - 2]
+            val superClass = classesToTest[i - 1]
 
             prompt += "${getClassDisplayName(subClass)} extends ${getClassDisplayName(superClass)}. The source code of ${getClassDisplayName(superClass)} is:\n```\n${
                 getClassFullText(
-                    superClass
+                    superClass,
                 )
             }\n" +
-                    "```\n"
+                "```\n"
         }
 
-
-         // prompt: signature of methods in the classes used by CUT
+        // prompt: signature of methods in the classes used by CUT
         prompt += "Here are the method signatures of classes used by the class under test. Only use these signatures for creating objects, not your own ideas.\n"
         for (interestingPsiClass: PsiClass in interestingPsiClasses) {
             if (interestingPsiClass.qualifiedName!!.startsWith("java")) {
@@ -69,6 +67,4 @@ class PromptManager(
 
         return prompt
     }
-
-
 }

@@ -13,10 +13,10 @@ class Llm(override val name: String = "Llm") : Tool {
     override fun generateTestsForClass(e: AnActionEvent) {
         val project = e.project ?: return
         if (!SettingsArguments.isTokenSet()) {
-            llmErrorManager.displayWarning(TestGenieBundle.message("missingToken"), project)
+            llmErrorManager.warningProcess(TestGenieBundle.message("missingToken"), project)
             return
         }
-        val llmPipeline: org.jetbrains.research.testgenie.tools.llm.Pipeline = createLLMPipeline(e) ?: return
+        val llmPipeline: org.jetbrains.research.testgenie.tools.llm.Pipeline = createLLMPipeline(e)
         llmPipeline.forClass().runTestGeneration()
     }
 

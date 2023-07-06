@@ -17,6 +17,7 @@ data class TestCaseGeneratedByLLM(
         if (expectedException != other.expectedException) return false
         return lines == other.lines
     }
+
     fun isEmpty(): Boolean {
         return (lines.size == 0)
     }
@@ -40,11 +41,11 @@ data class TestCaseGeneratedByLLM(
         }
 
         // start writing the test signature
-        testFullText += "\n\tpublic void ${name}() "
+        testFullText += "\n\tpublic void $name() "
 
         // add throws exception if exists
         if (throwsException.isNotBlank()) {
-            testFullText += "throws ${throwsException}"
+            testFullText += "throws $throwsException"
         }
 
         // start writing the test lines
@@ -65,10 +66,10 @@ data class TestCaseGeneratedByLLM(
     }
 
     fun reformat() {
-        for (index in lines.indices.reversed()){
-            if (lines[index].type == TestLineType.BREAK){
+        for (index in lines.indices.reversed()) {
+            if (lines[index].type == TestLineType.BREAK) {
                 lines.removeAt(index)
-            }else{
+            } else {
                 break
             }
         }

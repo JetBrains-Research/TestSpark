@@ -61,6 +61,8 @@ class Workspace(private val project: Project) : Disposable {
     private val log = Logger.getInstance(this.javaClass)
     private var listenerDisposable: Disposable? = null
 
+    private var isErrorOccurred = false
+
     /**
      * Maps a workspace file to the test generation jobs that were triggered on it.
      * Currently, the file key is represented by its presentableUrl
@@ -133,6 +135,25 @@ class Workspace(private val project: Project) : Disposable {
             disposable,
         )
         listenerDisposable = disposable
+    }
+
+    fun isErrorOccurred() = isErrorOccurred
+
+    fun errorOccurred() {
+        isErrorOccurred = true
+    }
+
+    private fun errorClear() {
+        isErrorOccurred = false
+    }
+
+    fun clean() {
+        project.service<TestCaseDisplayService>().removeSelectedTestCases(project.service<TestCaseDisplayService>().testCasePanels.toMap())
+        project.service<TestCaseDisplayService>().testsSelected = 0
+        project.service<TestCaseDisplayService>().testCasePanels = HashMap()
+        project.service<TestCaseDisplayService>().originalTestCases = HashMap()
+        project.service<TestCaseDisplayService>().testGenerationResultList = mutableListOf()
+        errorClear()
     }
 
     /**

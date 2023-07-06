@@ -21,28 +21,28 @@ import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 
 class EvoSuite(override val name: String = "EvoSuite") : Tool {
     override fun generateTestsForClass(e: AnActionEvent) {
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-        val project = e.project ?: return
+        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+        val project = e.project!!
         val runnerService = project.service<RunnerService>()
         if (!runnerService.verify(psiFile)) return
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
+        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e)
         evoSuitePipeline.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
     }
 
     override fun generateTestsForMethod(e: AnActionEvent) {
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val project = e.project ?: return
         val runnerService = project.service<RunnerService>()
         if (!runnerService.verify(psiFile)) return
-        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
+        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
         val methodDescriptor = generateMethodDescriptor(psiMethod)
-        val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return
+        val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile)!!
         val cacheStartLine: Int = doc.getLineNumber(psiMethod.startOffset)
         val cacheEndLine: Int = doc.getLineNumber(psiMethod.endOffset)
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
+        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e)
         evoSuitePipeline
             .forMethod(methodDescriptor)
             .withCacheLines(cacheStartLine, cacheEndLine)
@@ -51,15 +51,15 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
     }
 
     override fun generateTestsForLine(e: AnActionEvent) {
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)
             ?: return // lines in the editor and in EvoSuite are one-based
-        val project = e.project ?: return
+        val project = e.project!!
         val runnerService = project.service<RunnerService>()
         if (!runnerService.verify(psiFile)) return
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e) ?: return
+        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e)
         evoSuitePipeline
             .forLine(selectedLine)
             .withCacheLines(selectedLine - 1, selectedLine - 1)

@@ -38,17 +38,17 @@ import org.jetbrains.research.testgenie.services.StaticInvalidationService
  * @param e an action event that contains useful information and corresponds to the action invoked by the user
  * @return the created (EvoSuite) Pipeline, null if some information is missing or if there is no surrounding class
  */
-fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
-    val project: Project = e.project ?: return null
+fun createEvoSuitePipeline(e: AnActionEvent): Pipeline {
+    val project: Project = e.project!!
 
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return null
-    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
+    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
     val fileUrl = vFile.presentableUrl
     val modificationStamp = vFile.modificationStamp
 
-    val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
-    val classFQN = psiClass.qualifiedName ?: return null
+    val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
+    val classFQN = psiClass.qualifiedName!!
 
     val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
@@ -58,7 +58,7 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
 
     log.info("Selected class is $classFQN")
 
-    val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
+    val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile)!!
     val cacheStartLine: Int = doc.getLineNumber(psiClass.startOffset)
     val cacheEndLine: Int = doc.getLineNumber(psiClass.endOffset)
     log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
@@ -74,17 +74,17 @@ fun PsiMethod.getSignatureString(): String {
     return text.substring(0, bodyStart).replace('\n', ' ').trim()
 }
 
-fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.llm.Pipeline? {
-    val project: Project = e.project ?: return null
+fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.llm.Pipeline {
+    val project: Project = e.project!!
 
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return null
-    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
+    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
 
     val modificationStamp = vFile.modificationStamp
 
-    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
-    val classFQN = cutPsiClass.qualifiedName ?: return null
+    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
+    val classFQN = cutPsiClass.qualifiedName!!
     val fileUrl = vFile.presentableUrl
 
     val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
@@ -182,7 +182,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
  * @param caret the current (primary) caret that did the click
  * @return PsiClass element if it has been found, null otherwise
  */
-fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass? {
+fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass {
     // Get the classes of the PSI file
     val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
 
@@ -195,7 +195,7 @@ fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass? {
             surroundingClass = psiClass
         }
     }
-    return surroundingClass
+    return surroundingClass!!
 }
 
 /**
@@ -408,7 +408,7 @@ fun updateForClass(e: AnActionEvent, name: String) {
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
-    val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return
+    val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
 
     e.presentation.isEnabledAndVisible = true
     e.presentation.text = "Generate Tests For ${getClassDisplayName(psiClass)} by $name"

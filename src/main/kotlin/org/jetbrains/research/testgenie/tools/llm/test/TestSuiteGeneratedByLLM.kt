@@ -10,16 +10,16 @@ data class TestSuiteGeneratedByLLM(
         return testCases.isEmpty()
     }
 
-    override fun toString(): String{
+    override fun toString(): String {
         var testFullText = ""
 
         // Add package
-        if(packageString.isNotBlank()){
+        if (packageString.isNotBlank()) {
             testFullText += "package $packageString;\n"
         }
 
         // add imports
-        imports.forEach{ importedElement ->
+        imports.forEach { importedElement ->
             testFullText += "$importedElement\n"
         }
 
@@ -35,8 +35,8 @@ data class TestSuiteGeneratedByLLM(
         return testFullText
     }
 
-    fun getPrintablePackageString(): String{
-        return when{
+    fun getPrintablePackageString(): String {
+        return when {
             packageString.isEmpty() || packageString.isBlank() -> ""
             else -> "$packageString."
         }

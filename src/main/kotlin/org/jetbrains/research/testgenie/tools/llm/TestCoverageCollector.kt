@@ -37,12 +37,12 @@ class TestCoverageCollector(
     fun collect(): Report? {
         // the test file cannot be null
         if (!generatedTestFile.exists()) {
-            llmErrorManager.display(TestGenieBundle.message("badGrazieResponse"), project)
+            llmErrorManager.errorProcess(TestGenieBundle.message("badGrazieResponse"), project)
             return null
         }
         // compile the test file
         if (!compilation(generatedTestFile, projectBuildPath)) {
-            llmErrorManager.displayWarning(TestGenieBundle.message("invalidGrazieResult"), project)
+            llmErrorManager.warningProcess(TestGenieBundle.message("invalidGrazieResult"), project)
             return null
         }
         // run Jacoco on the compiled test file

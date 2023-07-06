@@ -35,6 +35,7 @@ class LLMProcessManager(
         packageName: String,
         cutModule: Module,
         classFQN: String,
+        fileUrl: String,
     ) {
         // update build path
         var buildPath = projectClassPath
@@ -48,7 +49,7 @@ class LLMProcessManager(
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
-            llmErrorManager.display(TestGenieBundle.message("emptyBuildPath"), project)
+            llmErrorManager.errorProcess(TestGenieBundle.message("emptyBuildPath"), project)
             return
         }
         indicator.text = TestGenieBundle.message("searchMessage")
@@ -61,14 +62,13 @@ class LLMProcessManager(
 
         // Check if response is not empty
         if (generatedTestSuite.isEmpty()) {
-            llmErrorManager.display(TestGenieBundle.message("emptyResponse"), project)
+            llmErrorManager.errorProcess(TestGenieBundle.message("emptyResponse"), project)
             return
         }
 
         // Save the generated TestSuite into a temp file
         val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
 
-        // TODO move this operation to Manager
         // Collect coverage information for each generated test method and display it
         val report = TestCoverageCollector(
             indicator,
@@ -82,11 +82,16 @@ class LLMProcessManager(
             llmErrorManager,
         ).collect()
 
+        // Error during the collecting
+        report ?: return
+
+        // TODO move this operation to Manager
         project.service<TestCaseDisplayService>().testGenerationResultList.add(report)
         project.service<TestCaseDisplayService>().packageLine =
             getPackageFromTestSuiteCode(generatedTestSuite.toString())
         project.service<TestCaseDisplayService>().importsCode =
             getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN)
+        project.service<TestCaseDisplayService>().fileUrl = fileUrl
     }
 
     private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): String {
