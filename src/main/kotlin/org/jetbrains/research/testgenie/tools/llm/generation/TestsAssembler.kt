@@ -13,7 +13,7 @@ class TestsAssembler(
     val indicator: ProgressIndicator,
 ) {
     private val log: Logger = Logger.getInstance(this.javaClass)
-    private var rawText = ""
+    var rawText = ""
     private var lastTestCount = 0
     fun receiveResponse(text: String) {
         // Collect the response and update the progress bar
@@ -114,4 +114,7 @@ class TestsAssembler(
         }
         return testSuite
     }
+
+
+
 }

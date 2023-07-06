@@ -110,7 +110,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
     }
 
     // Collect interesting classes (i.e., methods that are passed as input arguments to CUT)
-    val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
+    val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf(cutPsiClass)
 
     var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
 
@@ -135,6 +135,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(tempListOfClasses) }
         interestingPsiClasses.addAll(tempListOfClasses)
     }
+
 
     // Collect polymorphism Relations in identified interesting classes
     val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
