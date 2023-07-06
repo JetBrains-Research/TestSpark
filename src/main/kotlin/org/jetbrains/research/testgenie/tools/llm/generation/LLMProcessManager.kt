@@ -16,6 +16,7 @@ import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -29,6 +30,7 @@ class LLMProcessManager(
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val llmRequestManager = LLMRequestManager()
+    private val maxRequests = SettingsArguments.maxLLMRequest()
 
     fun runLLMTestGenerator(
         indicator: ProgressIndicator,
@@ -63,9 +65,9 @@ class LLMProcessManager(
 
         var report: Report? = Report()
         var requestsCount = 0
-        val MAX_REQUESTS = 3
+
         while (!generatedTestsArePassing) {
-            if (requestsCount >= MAX_REQUESTS) {
+            if (requestsCount >= maxRequests) {
                 llmErrorManager.errorProcess(TestGenieBundle.message("invalidGrazieResult"), project)
                 break
             }

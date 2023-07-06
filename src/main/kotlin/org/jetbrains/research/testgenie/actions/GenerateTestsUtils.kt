@@ -27,6 +27,7 @@ import com.intellij.refactoring.suggested.startOffset
 import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
+import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 
 /**
  * This file contains some useful methods and values related to GenerateTests actions.
@@ -91,8 +92,8 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
 
     val classesToTest = mutableListOf<PsiClass>()
     // check if cut has any none java super class
-    val maxPolymorphismDepth = 3
-    val maxParametersDepth = 3
+    val maxPolymorphismDepth = SettingsArguments.maxPolyDepth()
+    val maxParametersDepth = SettingsArguments.maxInputParamsDepth()
 
     var currentPsiClass = cutPsiClass
     for (index in 0 until maxPolymorphismDepth) {
