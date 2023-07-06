@@ -26,6 +26,7 @@ TestGenie is a plugin for generating unit tests. TestGenie natively integrates <
 
 
 ## Features
+[//]: # (TODO add validation to the list)
 <!-- What features are supported by the plugin? -->
 - [EvoSuite is installed with the plugin](#installation)
 - [Automatic test generation for classes](#generating-tests-for-classes-1)
@@ -34,8 +35,8 @@ TestGenie is a plugin for generating unit tests. TestGenie natively integrates <
 - [Coverage table](#coverage-table-1)
 - [Coverage visualisation for generated test suite](#coverage-visualisation-1)
 - [Killed mutants visualisation](#killed-mutants-visualisation-1)
+- [Integrating tests into the project](#integrating-tests-into-the-project-1)
 - [Caching tests](#caching-tests-1)
-- [Test validation](#test-validation-1)
 - [Accessibility features](#accessibility-features-1)
 - [Telemetry](#telemetry-opt-in-1)
 
@@ -56,6 +57,9 @@ TestGenie offers an option to highlight lines which the generated test suite cov
 
 ### Killed Mutants Visualisation
 TestGenie offers an option to see which mutants were killed and by which tests. Clicking the gutter icon (green rectangle) to the left of the lines allows the user to see which tests cover the line. Clicking a name of a mutant highlights all the tests in the "Generated Tests" tab which cover it.
+
+### Integrating tests into the project
+When the user has decided on a set of tests that he wants to use, it is possible to integrate these tests into the project. To do this, click on the button "Apply to test suite".
 
 ### Caching Tests
 Due to its nature, generating tests with EvoSuite takes time. TestGenie takes steps to address this as
@@ -97,9 +101,11 @@ To generate a test for a class, right-click (with mouse) anywhere within the cla
  EvoSuite going to run in the background and generate tests. While EvoSuite is running, a progress bar in the bottom right-hand corner of the IDE:\
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the right-hand side of the IDE:\
-![Generated Tests](readme-images/gifs/testsAppear.gif)\
+![Generated Tests](readme-images/gifs/testsAppear.gif)
+
+[//]: # (TODO add information about validation)
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
-Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
+Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests and removing (deleting) them. The user also has an overview of how many tests they currently have selected.\
 ![Quick buttons](readme-images/pngs/selectAll.png)
 
 ### Generating Tests for Methods
@@ -108,9 +114,11 @@ To generate a test for a method, right-click (with mouse) anywhere within the me
  EvoSuite going to run in the background and generate tests. While EvoSuite is running, a progress bar in the bottom right-hand corner of the IDE:\
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
-![Generated Tests](readme-images/gifs/testsAppear.gif)\
+![Generated Tests](readme-images/gifs/testsAppear.gif)
+
+[//]: # (TODO add information about validation)
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
-Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
+Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests and removing (deleting) them. The user also has an overview of how many tests they currently have selected.\
 ![Quick buttons](readme-images/pngs/selectAll.png)
 
 ### Generating Tests for Lines
@@ -119,9 +127,11 @@ To generate a test for a method, right-click (with mouse) anywhere within the li
  EvoSuite going to run in the background and generate tests. While EvoSuite is running, a progress bar in the bottom right-hand corner of the IDE:\
 ![Progress bar](readme-images/pngs/ProgressBar.jpg)\
 Once the tests are generated, they can be accessed in the "TestGenie" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:\
-![Generated Tests](readme-images/gifs/testsAppear.gif)\
+![Generated Tests](readme-images/gifs/testsAppear.gif)
+
+[//]: # (TODO add information about validation)
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
-Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, removing (deleting) all tests, and [validating them.](#test-validation-1). The user also has an overview of how many tests they currently have selected.\
+Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests and removing (deleting) them. The user also has an overview of how many tests they currently have selected.\
 ![Quick buttons](readme-images/pngs/selectAll.png)
 
 ### Coverage Table
@@ -142,19 +152,27 @@ For mutation visualisation to work, you must have [coverage visualisation](#cove
 Once tests are generated, the same gutter from [`Coverage Visualisation`](#coverage-visualisation-1) can be used to show which mutants are covered by the current test suite and which ones are not. For mutants covered, the mutant can be clicked. Clicking the mutant will highlight all the tests that kill the mutant. Mutation visualisation adjusts dynamically - it only shows results for the tests that are selected in the TestGenie tab.\
 ![Mutation Coverage](readme-images/gifs/mutationHighlight.gif)
 
+### Integrating tests into the project
+The tests can be added to an existing file:
+![Tests adding to an exiting file](readme-images/gifs/addingToAnExistingFile.gif)\
+Or to a new file:
+![Tests adding to a new file](readme-images/gifs/addingToANewFile.gif)
+
 ### Caching Tests
-When a user initially generates tests for a class, this will take some time, as the EvoSuite backend needs to be invoked. Then, if a user generates tests for a single method in this class, Test-Genie will look in its cache and find the tests that were previously generated for the entire class, and will instantly display them to the user rather than invoking EvoSuite again.\
-Before displaying cached tests, they are (in)validated [statically and dynamically](#test-validation-1).\
+When a user initially generates tests for a class, this will take some time, as the EvoSuite backend needs to be invoked. Then, if a user generates tests for a single method in this class, Test-Genie will look in its cache and find the tests that were previously generated for the entire class, and will instantly display them to the user rather than invoking EvoSuite again.
+
+[//]: # ( Before displaying cached tests, they are &#40;in&#41;validated [statically and dynamically]&#40;#test-validation-1&#41;.\ )
+
 ![Cached Tests for Method](readme-images/gifs/caching.gif)
 
-### Test validation
-Tests which are no longer representative of the current state of the code under test are dropped from the cache, as they are no longer valid. We have 2 types of cache validation - static and dynamic validation. Static validation removes tests from cache by analysing the structure of the methods inside a class. If a method is modified, the tests covering it would be invalidated. Furthermore, it ignores whitespace changes, formatting inside a method and also reordering methods inside a class. Dynamic invalidation comes after static invalidation and verifies that all tests in the cache are still valid by running each of them. Failing tests are removed from the cache.\
-On the tool window, in the top corner there exist two buttons: `Validate Tests` and `Toggle Jacoco Report` (greyed out). To validate cached tests, the user can press  `Validate Tests`. Validation is going to happen in the background.\
-![validate](readme-images/pngs/validate.png)\
-Once validated, `Toggle Jacoco Report` becomes clickable. If clicked, a jacoco table with the updated coverage (so, excluding deleted tests) will appear.\
-![jacoco](readme-images/pngs/jacoco.png)\
-![jacoco coverage](readme-images/pngs/jacocoTable.png)
-
+[//]: # (TODO uncomment after the validator fixing)
+[//]: # (### Test validation)
+[//]: # (Tests which are no longer representative of the current state of the code under test are dropped from the cache, as they are no longer valid. We have 2 types of cache validation - static and dynamic validation. Static validation removes tests from cache by analysing the structure of the methods inside a class. If a method is modified, the tests covering it would be invalidated. Furthermore, it ignores whitespace changes, formatting inside a method and also reordering methods inside a class. Dynamic invalidation comes after static invalidation and verifies that all tests in the cache are still valid by running each of them. Failing tests are removed from the cache.\)
+[//]: # (On the tool window, in the top corner there exist two buttons: `Validate Tests` and `Toggle Jacoco Report` &#40;greyed out&#41;. To validate cached tests, the user can press  `Validate Tests`. Validation is going to happen in the background.\)
+[//]: # (![validate]&#40;readme-images/pngs/validate.png&#41;\)
+[//]: # (Once validated, `Toggle Jacoco Report` becomes clickable. If clicked, a jacoco table with the updated coverage &#40;so, excluding deleted tests&#41; will appear.\)
+[//]: # (![jacoco]&#40;readme-images/pngs/jacoco.png&#41;\)
+[//]: # (![jacoco coverage]&#40;readme-images/pngs/jacocoTable.png&#41;)
 
 ### Accessibility Features
 - The plugin supports changing the color for [coverage visualisation](#coverage-visualisation-1) and [killed mutants visualisation](#killed-mutants-visualisation-1) (one setting for both). To change the color, go to <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> and use the color picker under `Accessibility settings`:\

@@ -44,8 +44,9 @@
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="org.jetbrains.research.testgenie.toolwindow.TestGenieToolWindowFactory"/>
 
-        <toolWindow id="TestGenie Validator" secondary="true" anchor="bottom"
-                    factoryClass="org.jetbrains.research.testgenie.tools.evosuite.validation.ValidationToolWindowFactory"/>
+<!--        TODO uncomment after the validator fixing-->
+<!--        <toolWindow id="TestGenie Validator" secondary="true" anchor="bottom"-->
+<!--                    factoryClass="org.jetbrains.research.testgenie.tools.evosuite.validation.ValidationToolWindowFactory"/>-->
 
         <!-- Application-level services -->
         <applicationService
@@ -79,7 +80,7 @@
                            displayType="BALLOON"/>
         <notificationGroup id="Validation Result"
                            displayType="BALLOON"/>
-        <notificationGroup id="LLM Error"
+        <notificationGroup id="LLM Execution Error"
                            displayType="BALLOON"/>
 
     </extensions>
@@ -90,13 +91,16 @@
                 topic="org.jetbrains.research.testgenie.tools.evosuite.TestGenerationResultListener"/>
         <listener
                 class="org.jetbrains.research.testgenie.listener.TelemetrySubmitListenerImpl"
+                topic="com.intellij.openapi.startup.ProjectActivity"/>
+        <listener
+                class="org.jetbrains.research.testgenie.listener.ProjectCloseListenerImpl"
                 topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </projectListeners>
 
     <actions>
         <!-- TestGenie actions -->
         <group id="TestGenie.TestGenieActions" text="TestGenie" description="Actions related to TestGenie" popup="true"
-               class="org.jetbrains.research.testgenie.actions.GenerateTestsActionGroup">
+               class="com.intellij.openapi.actionSystem.DefaultActionGroup">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <!-- Generate tests for class -->
 <!--            <action class="org.jetbrains.research.testgenie.actions.common.GenerateTestsActionClassCommon"-->

@@ -4,7 +4,9 @@ import com.intellij.util.messages.Topic
 import org.jetbrains.research.testgenie.data.Report
 
 val TEST_GENERATION_RESULT_TOPIC: Topic<TestGenerationResultListener> = Topic.create(
-    "TEST_GENERATION_RESULT_TOPIC", TestGenerationResultListener::class.java, Topic.BroadcastDirection.TO_PARENT
+    "TEST_GENERATION_RESULT_TOPIC",
+    TestGenerationResultListener::class.java,
+    Topic.BroadcastDirection.TO_PARENT,
 )
 
 /**
@@ -14,5 +16,5 @@ val TEST_GENERATION_RESULT_TOPIC: Topic<TestGenerationResultListener> = Topic.cr
  * generation job with testgenie.evosuite.Runner
  */
 interface TestGenerationResultListener {
-    fun testGenerationResult(testReport: Report, resultName: String, fileUrl: String)
+    fun testGenerationResult(testReport: Report?, resultName: String, fileUrl: String)
 }

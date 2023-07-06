@@ -6,10 +6,10 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
-import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testgenie.data.Report
-import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import java.io.File
 import java.io.FileReader
@@ -68,41 +68,19 @@ class ResultWatcher(
                         val reader = JsonReader(FileReader("$testResultDirectory$pathname"))
 
                         val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
-                        project.service<TestCaseDisplayService>().testGenerationResultList.add(
-                            Report(
-                                testGenerationResult
-                            )
-                        )
+                        // TODO move all interactions with TestCaseDisplayService to Manager
+                        project.service<TestCaseDisplayService>().testGenerationResultList.add(Report(testGenerationResult))
                         project.service<TestCaseDisplayService>().resultName = resultName
                         project.service<TestCaseDisplayService>().fileUrl = fileUrl
                         project.service<TestCaseDisplayService>().packageLine =
                             getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode)
                         project.service<TestCaseDisplayService>().importsCode =
-                            getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode)
+                            getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN)
                         return
                     }
                 }
             }
             Thread.sleep(sleepDurationMillis)
         }
-    }
-
-    // get junit imports from a generated code
-    private fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?): String {
-        testSuiteCode ?: return ""
-        return testSuiteCode.replace("\r\n", "\n").split("\n").asSequence()
-            .filter { it.contains("^import".toRegex()) }
-            .filterNot { it.contains("evosuite".toRegex()) }
-            .filterNot { it.contains("RunWith".toRegex()) }
-            .filterNot { it.contains(classFQN.toRegex()) }
-            .joinToString("\n").plus("\n")
-    }
-
-    // get package from a generated code
-    private fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
-        testSuiteCode ?: return ""
-        return testSuiteCode.replace("\r\n", "\n").split("\n")
-            .filter { it.contains("^package".toRegex()) }
-            .joinToString("\n").plus("\n")
     }
 }

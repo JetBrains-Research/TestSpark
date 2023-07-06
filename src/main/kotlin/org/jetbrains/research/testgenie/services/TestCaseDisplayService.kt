@@ -20,7 +20,6 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -67,20 +66,20 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var cacheLazyPipeline: Pipeline? = null
 
-    private val mainPanel: JPanel = JPanel()
-    private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
-    private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
-    private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
-    private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
-    val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
-    val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
+    private var mainPanel: JPanel = JPanel()
+    private var applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
+    private var selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
+    private var deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
+    private var removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
+    var validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    var toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
     private var testsSelected: Int = 0
-    private val testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
-    private val testsSelectedLabel: JLabel = JLabel(testsSelectedText)
+    private var testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
+    private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
-    private val allTestCasePanel: JPanel = JPanel()
-    private val scrollPane: JBScrollPane = JBScrollPane(
+    private var allTestCasePanel: JPanel = JPanel()
+    private var scrollPane: JBScrollPane = JBScrollPane(
         allTestCasePanel,
         JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
@@ -122,8 +121,10 @@ class TestCaseDisplayService(private val project: Project) {
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
         topButtons.add(removeAllButton)
-        topButtons.add(validateButton)
-        topButtons.add(toggleJacocoButton)
+
+//        TODO uncomment after the validator fixing
+//        topButtons.add(validateButton)
+//        topButtons.add(toggleJacocoButton)
 
         mainPanel.add(topButtons, BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
@@ -135,6 +136,14 @@ class TestCaseDisplayService(private val project: Project) {
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
         toggleJacocoButton.addActionListener { toggleJacocoCoverage() }
         removeAllButton.addActionListener { removeAllTestCases() }
+    }
+
+    fun clean() {
+        removeSelectedTestCases(testCasePanels.toMap())
+        testsSelected = 0
+        testCasePanels = HashMap()
+        originalTestCases = HashMap()
+        testGenerationResultList = mutableListOf()
     }
 
     fun makeValidatedButtonAvailable() {
@@ -472,18 +481,18 @@ class TestCaseDisplayService(private val project: Project) {
             appendTestsToClass(testCaseComponents, psiClass!!, psiJavaFile!!)
         }
 
-        // Open the file after adding
-        FileEditorManager.getInstance(project).openTextEditor(
-            OpenFileDescriptor(project, virtualFile!!),
-            true,
-        )
-
         // The scheduled tests will be submitted in the background
         // (they will be checked every 5 minutes and also when the project is closed)
         scheduleTelemetry(selectedTestCases)
 
         // Remove the selected test cases from the cache and the tool window UI
         removeSelectedTestCases(selectedTestCasePanels)
+
+        // Open the file after adding
+        FileEditorManager.getInstance(project).openTextEditor(
+            OpenFileDescriptor(project, virtualFile!!),
+            true,
+        )
     }
 
     private fun showErrorWindow(message: String) {
@@ -603,7 +612,7 @@ class TestCaseDisplayService(private val project: Project) {
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
-                it.replace("\r\n", "\n"),
+                it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
             )
         }
 
@@ -647,7 +656,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Closes the tool window and destroys the content of the tab.
      */
     private fun closeToolWindow() {
-        contentManager!!.removeContent(content!!, true)
+        contentManager?.removeContent(content!!, true)
         ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
         val coverageVisualisationService = project.service<CoverageVisualisationService>()
         coverageVisualisationService.closeToolWindowTab()
@@ -702,13 +711,16 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun removeAllTestCases() {
         // Ask the user for the confirmation
-        val choice: Int = Messages.showYesNoCancelDialog(
+        val choice = JOptionPane.showConfirmDialog(
+            null,
             TestGenieBundle.message("removeAllMessage"),
             TestGenieBundle.message("confirmationTitle"),
-            Messages.getQuestionIcon(),
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
         )
+
         // Cancel the operation if the user did not press "Yes"
-        if (choice != 0) return
+        if (choice == JOptionPane.NO_OPTION) return
 
         // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()

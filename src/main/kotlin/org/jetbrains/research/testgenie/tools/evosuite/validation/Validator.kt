@@ -12,7 +12,6 @@ import com.intellij.execution.process.CapturingProcessAdapter
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
@@ -23,13 +22,9 @@ import com.intellij.openapi.util.Comparing
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.ui.content.Content
-import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testgenie.TestGenieBundle
-import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.tools.evosuite.ProjectBuilder
+import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import java.io.File
@@ -94,21 +89,21 @@ class Validator(
                     try {
                         projectBuilder.runBuild(indicator)
 
-//                        val compilationFiles =
-//                            setupCompilationFiles(testValidationDirectory, targetFqn)
-//                                ?: return
-//
-//                        logger.info("Compiling tests...")
-//                        val successfulCompilation = compileTests(classpath, compilationFiles)
-//
-//                        if (!successfulCompilation) {
-//                            logger.warn("Compilation failed")
-//                            showTestsCompilationFailed()
-//                            return
-//                        }
-//                        logger.info("Compilation successful!")
-//                        logger.info("Executing tests...")
-//                        indicator.text = TestGenieBundle.message("validationRunning")
+                        val compilationFiles =
+                            setupCompilationFiles(testValidationDirectory, targetFqn)
+                                ?: return
+
+                        logger.info("Compiling tests...")
+                        val successfulCompilation = compileTests(classpath, compilationFiles)
+
+                        if (!successfulCompilation) {
+                            logger.warn("Compilation failed")
+                            showTestsCompilationFailed()
+                            return
+                        }
+                        logger.info("Compilation successful!")
+                        logger.info("Executing tests...")
+                        indicator.text = TestGenieBundle.message("validationRunning")
 
                         runTests(indicator, classpath, targetFqn)
                         runTestsWithCoverage(indicator, classpath, targetFqn, testValidationRoot)
@@ -230,19 +225,21 @@ class Validator(
         // attach another listener for parsing process results
         handler.addProcessListener(capturer)
         handler.startNotify()
-        val manager: ToolWindowManager = ToolWindowManager.getInstance(project)
 
-        ApplicationManager.getApplication().invokeLater {
-            val window = manager.getToolWindow("TestGenie Validator")!!
-            val contentManager: ContentManager = window.contentManager
-            contentManager.removeAllContents(true)
-            val content: Content = contentManager.factory.createContent(
-                console.component,
-                TestGenieLabelsBundle.defaultValue("junitRun"),
-                false,
-            )
-            contentManager.addContent(content)
-        }
+//        TODO uncomment after the validator fixing
+//        val manager: ToolWindowManager = ToolWindowManager.getInstance(project)
+//
+//        ApplicationManager.getApplication().invokeLater {
+//            val window = manager.getToolWindow("TestGenie Validator")!!
+//            val contentManager: ContentManager = window.contentManager
+//            contentManager.removeAllContents(true)
+//            val content: Content = contentManager.factory.createContent(
+//                console.component,
+//                TestGenieLabelsBundle.defaultValue("junitRun"),
+//                false,
+//            )
+//            contentManager.addContent(content)
+//        }
 
         // treat this as a join handle
         handler.waitFor(junitTimeout)
@@ -266,7 +263,7 @@ class Validator(
         testFqn: String,
         testValidationRoot: String,
     ) {
-        indicator.text = "Calculating coverage"
+        indicator.text = TestGenieBundle.message("calculatingCoverage")
 
         val pluginsPath = System.getProperty("idea.plugins.path")
         val jacocoPath = "$pluginsPath${sep}TestGenie${sep}lib${sep}jacocoagent.jar"

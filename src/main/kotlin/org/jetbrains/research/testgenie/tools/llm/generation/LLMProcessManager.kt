@@ -2,17 +2,19 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
-import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
-import org.jetbrains.research.testgenie.data.TestCoverageCollector
+import org.jetbrains.research.testgenie.tools.llm.TestCoverageCollector
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -24,14 +26,15 @@ class LLMProcessManager(
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private var testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
-    private var maximumTries = 3
+    private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     fun runLLMTestGenerator(
         indicator: ProgressIndicator,
         prompt: String,
         resultPath: String,
         packageName: String,
-        cut: PsiClass
+        cutModule: Module,
+        classFQN: String,
     ) {
         // update build path
         var buildPath = projectClassPath
@@ -43,41 +46,47 @@ class LLMProcessManager(
                 compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
             }
         }
+
+        if (buildPath.isEmpty() || buildPath.isBlank()) {
+            llmErrorManager.display(TestGenieBundle.message("emptyBuildPath"), project)
+            return
+        }
         indicator.text = TestGenieBundle.message("searchMessage")
 
         // Send request to LLM
-        val requestManager = LLMRequestManager()
-        val generatedTestSuite: TestSuiteGeneratedByLLM = requestManager.request(prompt, indicator, packageName)
+        val generatedTestSuite: TestSuiteGeneratedByLLM? = LLMRequest().request(prompt, indicator, packageName, project, llmErrorManager)
+
+        // Error during the request
+        generatedTestSuite ?: return
 
         // Check if response is not empty
         if (generatedTestSuite.isEmpty()) {
-            LLMErrorManager.displayEmptyTests(project)
+            llmErrorManager.display(TestGenieBundle.message("emptyResponse"), project)
             return
         }
-//        var numberOfTries = 0
-//        while (numberOfTries<maximumTries){
-//
-//        }
 
         // Save the generated TestSuite into a temp file
-        val generatedTestPath:String = saveGeneratedTests(generatedTestSuite, resultPath)
+        val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
 
         // TODO move this operation to Manager
-        // TODO work with null value
-        // Collect coverage information for each generated test method
-        // and display it
-        project.service<TestCaseDisplayService>().testGenerationResultList.add(
-            TestCoverageCollector(
-                indicator,
-                project,
-                resultPath,
-                File("$generatedTestPath$testFileName"),
-                generatedTestSuite.packageString,
-                buildPath,
-                generatedTestSuite.testCases,
-                cut
-            ).collect()
-        )
+        // Collect coverage information for each generated test method and display it
+        val report = TestCoverageCollector(
+            indicator,
+            project,
+            resultPath,
+            File("$generatedTestPath$testFileName"),
+            generatedTestSuite.getPrintablePackageString(),
+            buildPath,
+            generatedTestSuite.testCases,
+            cutModule,
+            llmErrorManager,
+        ).collect()
+
+        project.service<TestCaseDisplayService>().testGenerationResultList.add(report)
+        project.service<TestCaseDisplayService>().packageLine =
+            getPackageFromTestSuiteCode(generatedTestSuite.toString())
+        project.service<TestCaseDisplayService>().importsCode =
+            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN)
     }
 
     private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): String {

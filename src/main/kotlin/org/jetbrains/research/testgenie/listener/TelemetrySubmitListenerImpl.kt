@@ -3,7 +3,7 @@ package org.jetbrains.research.testgenie.listener
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManagerListener
+import com.intellij.openapi.startup.ProjectActivity
 import org.jetbrains.research.testgenie.services.TestGenieTelemetryService
 import java.util.Timer
 import java.util.TimerTask
@@ -12,7 +12,7 @@ import java.util.TimerTask
  * This class is responsible for scheduling potential submissions of telemetry into a file, which is done every 5 minutes,
  *   as well as attempting to do it when the project is closed.
  */
-class TelemetrySubmitListenerImpl : ProjectManagerListener {
+class TelemetrySubmitListenerImpl : ProjectActivity {
     private val log = Logger.getInstance(this.javaClass)
 
     /**
@@ -21,7 +21,7 @@ class TelemetrySubmitListenerImpl : ProjectManagerListener {
      *
      * @param project the current project
      */
-    override fun projectOpened(project: Project) {
+    override suspend fun execute(project: Project) {
         val timer = Timer()
         timer.scheduleAtFixedRate(
             object : TimerTask() {
@@ -37,18 +37,8 @@ class TelemetrySubmitListenerImpl : ProjectManagerListener {
                     project.service<TestGenieTelemetryService>().submitTelemetry()
                 }
             },
-            300000, 300000
+            300000,
+            300000,
         )
-    }
-
-    /**
-     * Attempts to submit the telemetry into a file when the project is closed.
-     *
-     * @param project the current project
-     */
-    override fun projectClosing(project: Project) {
-        log.info("Checking generated telemetry for the project ${project.name} before closing...")
-
-        project.service<TestGenieTelemetryService>().submitTelemetry()
     }
 }

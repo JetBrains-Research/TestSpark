@@ -15,24 +15,24 @@ class Manager {
         val tools: List<Tool> = listOf(EvoSuite(), Llm())
         fun generateTestsForClass(e: AnActionEvent) {
             for (tool: Tool in tools) tool.generateTestsForClass(e)
-            display(e, (tools.indices).toList())
+            display(e, tools.size)
         }
 
         fun generateTestsForMethod(e: AnActionEvent) {
             for (tool: Tool in tools) tool.generateTestsForMethod(e)
-            display(e, (tools.indices).toList())
+            display(e, tools.size)
         }
 
         fun generateTestsForLine(e: AnActionEvent) {
             for (tool: Tool in tools) tool.generateTestsForLine(e)
-            display(e, (tools.indices).toList())
+            display(e, tools.size)
         }
 
         fun generateTestsForClassByEvoSuite(e: AnActionEvent) {
             for (index in tools.indices) {
                 if (tools[index].name == EvoSuite().name) {
                     tools[index].generateTestsForClass(e)
-                    display(e, listOf(index))
+                    display(e, 1)
                 }
             }
         }
@@ -41,7 +41,7 @@ class Manager {
             for (index in tools.indices) {
                 if (tools[index].name == Llm().name) {
                     tools[index].generateTestsForClass(e)
-                    display(e, listOf(index))
+                    display(e, 1)
                 }
             }
         }
@@ -50,7 +50,7 @@ class Manager {
             for (index in tools.indices) {
                 if (tools[index].name == EvoSuite().name) {
                     tools[index].generateTestsForMethod(e)
-                    display(e, listOf(index))
+                    display(e, 1)
                 }
             }
         }
@@ -59,7 +59,7 @@ class Manager {
             for (index in tools.indices) {
                 if (tools[index].name == Llm().name) {
                     tools[index].generateTestsForMethod(e)
-                    display(e, listOf(index))
+                    display(e, 1)
                 }
             }
         }
@@ -68,7 +68,7 @@ class Manager {
             for (index in tools.indices) {
                 if (tools[index].name == EvoSuite().name) {
                     tools[index].generateTestsForLine(e)
-                    display(e, listOf(index))
+                    display(e, 1)
                 }
             }
         }
@@ -77,27 +77,26 @@ class Manager {
             for (index in tools.indices) {
                 if (tools[index].name == Llm().name) {
                     tools[index].generateTestsForLine(e)
-                    display(e, listOf(index))
+                    display(e, 1)
                 }
             }
         }
 
-        fun display(e: AnActionEvent, indexes: List<Int>) = AppExecutorUtil.getAppScheduledExecutorService().execute(Display(e, indexes))
+        fun display(e: AnActionEvent, numberOfUsedTool: Int) =
+            AppExecutorUtil.getAppScheduledExecutorService().execute(Display(e, numberOfUsedTool))
     }
 }
 
-private class Display(e: AnActionEvent, i: List<Int>) : Runnable {
-    val event: AnActionEvent = e
-    val indexes: List<Int> = i
+private class Display(private val event: AnActionEvent, private val numberOfUsedTool: Int) : Runnable {
     override fun run() {
         val sleepDurationMillis: Long = 2000
         while (true) {
-            if (event.project!!.service<TestCaseDisplayService>().testGenerationResultList.size != indexes.size) {
+            if (event.project!!.service<TestCaseDisplayService>().testGenerationResultList.size != numberOfUsedTool) {
                 Thread.sleep(sleepDurationMillis)
                 continue
             }
             event.project!!.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC).testGenerationResult(
-                getMergeResult(indexes),
+                getMergeResult(numberOfUsedTool),
                 event.project!!.service<TestCaseDisplayService>().resultName,
                 event.project!!.service<TestCaseDisplayService>().fileUrl,
             )
@@ -105,9 +104,9 @@ private class Display(e: AnActionEvent, i: List<Int>) : Runnable {
         }
     }
 
-    private fun getMergeResult(indexes: List<Int>): Report {
-        if (indexes.size == 1) {
-            return event.project!!.service<TestCaseDisplayService>().testGenerationResultList[indexes[0]]!!
+    private fun getMergeResult(numberOfUsedTool: Int): Report? {
+        if (numberOfUsedTool == 1) {
+            return event.project!!.service<TestCaseDisplayService>().testGenerationResultList[0]
         }
         TODO("implement merge")
     }

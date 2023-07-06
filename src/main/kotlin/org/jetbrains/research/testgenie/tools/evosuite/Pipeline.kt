@@ -18,9 +18,9 @@ import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProcessManager
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import java.io.File
 import java.util.UUID
 
@@ -52,6 +52,7 @@ class Pipeline(
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
     private val testResultName = "test_gen_result_$id"
 
+    // TODO move all interactions with Workspace to Manager
     var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
@@ -85,7 +86,7 @@ class Pipeline(
     fun forMethod(methodDescriptor: String): Pipeline {
         command =
             SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forMethod(
-                methodDescriptor
+                methodDescriptor,
             ).build()
 
         // attach method desc. to target unit key
@@ -100,7 +101,7 @@ class Pipeline(
      */
     fun forLine(selectedLine: Int): Pipeline {
         command = SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forLine(
-            selectedLine
+            selectedLine,
         ).build(true)
 
         return this
@@ -146,6 +147,8 @@ class Pipeline(
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
+        project.service<TestCaseDisplayService>().clean()
+
         val workspace = project.service<Workspace>()
         workspace.addPendingResult(testResultName, key)
         val projectBuilder = ProjectBuilder(project)
@@ -175,11 +178,13 @@ class Pipeline(
                     // Revert to previous state
                     val runnerService = project.service<RunnerService>()
                     runnerService.isRunning = false
+                    // TODO move all interactions with TestCaseDisplayService to Manager
                     val testCaseDisplayService = project.service<TestCaseDisplayService>()
                     testCaseDisplayService.validateButton.isEnabled = true
                     indicator.stop()
                 }
             })
+        // TODO move all interactions with TestCaseDisplayService to Manager
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
         testCaseDisplayService.fileUrl = fileUrl
         testCaseDisplayService.toggleJacocoButton.isEnabled = false

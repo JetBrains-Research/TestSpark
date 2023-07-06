@@ -6,26 +6,27 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
 
 class LLMErrorManager {
+    fun createRequestErrorMessage(code: Int): String = TestGenieBundle.message("requestError") + " " + code.toString()
 
-    fun displayMissingTokenNotification(project: Project) {
+    fun display(message: String, project: Project) {
         NotificationGroupManager.getInstance()
-            .getNotificationGroup("LLM Error")
+            .getNotificationGroup("LLM Execution Error")
             .createNotification(
-                TestGenieBundle.message("missingToken"),
-                NotificationType.WARNING,
+                TestGenieBundle.message("llmErrorTitle"),
+                message,
+                NotificationType.ERROR,
             )
             .notify(project)
     }
 
-    companion object {
-        fun displayEmptyTests(project: Project) {
-            NotificationGroupManager.getInstance()
-                .getNotificationGroup("LLM Error")
-                .createNotification(
-                    TestGenieBundle.message("emptyResponse"),
-                    NotificationType.ERROR,
-                )
-                .notify(project)
-        }
+    fun displayWarning(message: String, project: Project) {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("LLM Execution Error")
+            .createNotification(
+                TestGenieBundle.message("llmWarningTitle"),
+                message,
+                NotificationType.WARNING,
+            )
+            .notify(project)
     }
 }

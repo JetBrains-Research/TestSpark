@@ -12,7 +12,9 @@ import org.jetbrains.research.testgenie.data.Report
 class TestGenerationResultListenerImpl(private val project: Project) : TestGenerationResultListener {
     private val log = Logger.getInstance(this.javaClass)
 
-    override fun testGenerationResult(testReport: Report, resultName: String, fileUrl: String) {
+    override fun testGenerationResult(testReport: Report?, resultName: String, fileUrl: String) {
+        testReport ?: return
+
         log.info("Received test result for $resultName")
         val workspace = project.service<Workspace>()
 
