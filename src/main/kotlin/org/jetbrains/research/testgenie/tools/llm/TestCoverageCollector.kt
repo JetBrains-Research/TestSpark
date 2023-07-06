@@ -2,7 +2,6 @@ package org.jetbrains.research.testgenie.tools.llm
 
 import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ScriptRunnerUtil
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
@@ -12,41 +11,27 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
-import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
 
 class TestCoverageCollector(
     private val indicator: ProgressIndicator,
-    private val project: Project,
+    project: Project,
     private val resultPath: String,
     private val generatedTestFile: File,
     private val generatedTestPackage: String,
     private val projectBuildPath: String,
     private val testCases: MutableList<TestCaseGeneratedByLLM>,
     cutModule: Module,
-    private val llmErrorManager: LLMErrorManager,
 ) {
     private val sep = File.separatorChar
-    private val junitTimeout: Long = 12000000 // TODO: Source from config
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
     // source path
     private val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
     private val report = Report()
 
-
-    fun generatedTestFileIsValid(): Boolean{
-        // the test file cannot be null
-        if (!generatedTestFile.exists()) {
-            llmErrorManager.errorProcess(TestGenieBundle.message("badGrazieResponse"), project)
-            return false
-        }
-        return true
-    }
-
-    fun collect(): Report? {
-
+    fun collect(): Report {
         // run Jacoco on the compiled test file
         runJacoco()
 
@@ -54,7 +39,7 @@ class TestCoverageCollector(
         return report.normalized()
     }
 
-    fun compile(): Pair<Boolean,String> {
+    fun compile(): Pair<Boolean, String> {
         indicator.text = TestGenieBundle.message("compilationTestsChecking")
 
         // find the proper javac
@@ -65,7 +50,7 @@ class TestCoverageCollector(
                 javaCompile.absolutePath,
                 "-cp",
                 getPath(projectBuildPath),
-                generatedTestFile.absolutePath
+                generatedTestFile.absolutePath,
             ),
         )
 
@@ -73,7 +58,7 @@ class TestCoverageCollector(
         val classFilePath = generatedTestFile.absolutePath.replace(".java", ".class")
 
         // check is .class file exists
-        return Pair(File(classFilePath).exists(),errorMsg)
+        return Pair(File(classFilePath).exists(), errorMsg)
     }
 
     private fun runJacoco() {
@@ -174,7 +159,7 @@ class TestCoverageCollector(
 
     private fun runCommandLine(cmd: ArrayList<String>): String {
         val compilationProcess = GeneralCommandLine(cmd)
-        return ScriptRunnerUtil.getProcessOutput(compilationProcess, ScriptRunnerUtil.STDERR_OUTPUT_KEY_FILTER,30000)
+        return ScriptRunnerUtil.getProcessOutput(compilationProcess, ScriptRunnerUtil.STDERR_OUTPUT_KEY_FILTER, 30000)
     }
 
     private fun getPath(buildPath: String): String {

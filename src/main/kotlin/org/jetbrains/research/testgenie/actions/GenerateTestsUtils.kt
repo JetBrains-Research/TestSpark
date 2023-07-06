@@ -136,7 +136,6 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         interestingPsiClasses.addAll(tempListOfClasses)
     }
 
-
     // Collect polymorphism Relations in identified interesting classes
     val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
     interestingPsiClasses.forEach { currentInterestingClass ->
