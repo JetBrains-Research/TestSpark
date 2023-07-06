@@ -7,9 +7,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
@@ -25,7 +23,7 @@ class TestCoverageCollector(
     private val generatedTestPackage: String,
     private val projectBuildPath: String,
     private val testCases: MutableList<TestCaseGeneratedByLLM>,
-    cut: PsiClass,
+    cutModule: Module,
     private val llmErrorManager: LLMErrorManager,
 ) {
     private val sep = File.separatorChar
@@ -33,9 +31,6 @@ class TestCoverageCollector(
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
     // source path
-    private val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(
-        cut.containingFile.virtualFile,
-    )!!
     private val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
     private val report = Report()
 

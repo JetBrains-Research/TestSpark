@@ -2,11 +2,11 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
-import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
@@ -33,7 +33,7 @@ class LLMProcessManager(
         prompt: String,
         resultPath: String,
         packageName: String,
-        cut: PsiClass,
+        cutModule: Module,
         classFQN: String,
     ) {
         // update build path
@@ -78,7 +78,7 @@ class LLMProcessManager(
             generatedTestSuite.getPrintablePackageString(),
             buildPath,
             generatedTestSuite.testCases,
-            cut,
+            cutModule,
             llmErrorManager,
         ).collect()
 

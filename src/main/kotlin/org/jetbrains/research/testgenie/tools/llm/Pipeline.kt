@@ -6,6 +6,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
+import com.intellij.openapi.module.Module
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.editor.Workspace
@@ -22,7 +23,8 @@ class Pipeline(
     private val project: Project,
     projectClassPath: String,
     interestingPsiClasses: Set<PsiClass>,
-    private val classesToTest: MutableList<PsiClass>,
+    classesToTest: MutableList<PsiClass>,
+    private val cutModule: Module,
     private val packageName: String,
     polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     modTs: Long,
@@ -31,7 +33,7 @@ class Pipeline(
 ) {
     private val sep = File.separatorChar
 
-    private  val cut = classesToTest[0]
+    private val cut = classesToTest[0]
 
     private val id = UUID.randomUUID().toString()
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
@@ -71,7 +73,7 @@ class Pipeline(
                     }
 
                     if (projectBuilder.runBuild(indicator)) {
-                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cut, classFQN)
+                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cutModule, classFQN)
                     }
                 }
             })

@@ -7,6 +7,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
@@ -94,15 +95,15 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
     val maxParametersDepth = 3
 
     var currentPsiClass = cutPsiClass
-    for (index in 0 until maxPolymorphismDepth){
-
-        if(!classesToTest.contains(currentPsiClass)){
+    for (index in 0 until maxPolymorphismDepth) {
+        if (!classesToTest.contains(currentPsiClass)) {
             classesToTest.add(currentPsiClass)
         }
 
-        if(currentPsiClass.superClass == null ||
+        if (currentPsiClass.superClass == null ||
             currentPsiClass.superClass!!.qualifiedName == null ||
-            currentPsiClass.superClass!!.qualifiedName!!.startsWith("java.")){
+            currentPsiClass.superClass!!.qualifiedName!!.startsWith("java.")
+        ) {
             break
         }
         currentPsiClass = currentPsiClass.superClass!!
@@ -111,9 +112,9 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
     // Collect interesting classes (i.e., methods that are passed as input arguments to CUT)
     val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
 
-    var currentLevelClasses =  mutableListOf<PsiClass>().apply { addAll(classesToTest) }
+    var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
 
-    repeat(maxParametersDepth){
+    repeat(maxParametersDepth) {
         val tempListOfClasses = mutableListOf<PsiClass>()
 
         currentLevelClasses.forEach { classIt ->
@@ -123,13 +124,15 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
                         if (!tempListOfClasses.contains(it) &&
                             !interestingPsiClasses.contains(it) &&
                             it.qualifiedName != null &&
-                            !it.qualifiedName!!.startsWith("java."))
-                                tempListOfClasses.add(it)
+                            !it.qualifiedName!!.startsWith("java.")
+                        ) {
+                            tempListOfClasses.add(it)
+                        }
                     }
                 }
             }
         }
-        currentLevelClasses =  mutableListOf<PsiClass>().apply { addAll(tempListOfClasses) }
+        currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(tempListOfClasses) }
         interestingPsiClasses.addAll(tempListOfClasses)
     }
 
@@ -140,7 +143,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         val query = ClassInheritorsSearch.search(currentInterestingClass, scope, false)
         val detectedSubClasses: Collection<PsiClass> = query.findAll()
 
-        detectedSubClasses.forEach {detectedSubClass ->
+        detectedSubClasses.forEach { detectedSubClass ->
             if (!polymorphismRelations.contains(currentInterestingClass)) {
                 polymorphismRelations[currentInterestingClass] = ArrayList()
             }
@@ -162,6 +165,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         buildPath,
         interestingPsiClasses,
         classesToTest,
+        ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!,
         packageList.joinToString("."),
         polymorphismRelations,
         modificationStamp,
