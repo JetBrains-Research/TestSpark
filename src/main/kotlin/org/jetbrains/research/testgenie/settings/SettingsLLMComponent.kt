@@ -16,11 +16,11 @@ class SettingsLLMComponent {
     // Grazie Token
     private var grazieUserTokenField = JTextField(30)
     // Maximum number of LLM requests
-    private var maxLLMRequestsField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxLLMRequest,1,20))
+    private var maxLLMRequestsField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxLLMRequest, 1, 20))
     // The depth of input parameters used in class under tests
-    private var maxInputParamsDepthField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxInputParamsDepth,1,5))
+    private var maxInputParamsDepthField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxInputParamsDepth, 1, 5))
     // Maximum polymorphism depth
-    private var maxPolyDepthField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth,1,5))
+    private var maxPolyDepthField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
 
     init {
         // Adds the panel components
