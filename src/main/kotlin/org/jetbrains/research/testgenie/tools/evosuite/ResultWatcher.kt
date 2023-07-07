@@ -2,15 +2,14 @@ package org.jetbrains.research.testgenie.tools.evosuite
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testgenie.data.Report
-import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.saveData
 import java.io.File
 import java.io.FileReader
 
@@ -68,14 +67,9 @@ class ResultWatcher(
                         val reader = JsonReader(FileReader("$testResultDirectory$pathname"))
 
                         val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
-                        // TODO move all interactions with Workspace to Manager
-                        project.service<Workspace>().testGenerationData.testGenerationResultList.add(Report(testGenerationResult))
-                        project.service<Workspace>().testGenerationData.resultName = resultName
-                        project.service<Workspace>().testGenerationData.fileUrl = fileUrl
-                        project.service<Workspace>().testGenerationData.packageLine =
-                            getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode)
-                        project.service<Workspace>().testGenerationData.importsCode =
-                            getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN)
+
+                        saveData(project, Report(testGenerationResult), resultName, fileUrl, getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode), getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN))
+
                         return
                     }
                 }

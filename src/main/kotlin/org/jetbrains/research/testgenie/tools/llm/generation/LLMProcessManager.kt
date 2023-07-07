@@ -9,7 +9,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.Report
-import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.tools.llm.TestCoverageCollector
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
@@ -17,6 +16,7 @@ import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
+import org.jetbrains.research.testgenie.tools.saveData
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -40,6 +40,7 @@ class LLMProcessManager(
         cutModule: Module,
         classFQN: String,
         fileUrl: String,
+        testResultName: String,
     ) {
         // update build path
         var buildPath = projectClassPath
@@ -114,13 +115,7 @@ class LLMProcessManager(
         // Error during the collecting
         report ?: return
 
-        // TODO move this operation to Manager
-        project.service<Workspace>().testGenerationData.testGenerationResultList.add(report)
-        project.service<Workspace>().testGenerationData.packageLine =
-            getPackageFromTestSuiteCode(generatedTestSuite.toString())
-        project.service<Workspace>().testGenerationData.importsCode =
-            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN)
-        project.service<Workspace>().testGenerationData.fileUrl = fileUrl
+        saveData(project, report, testResultName, fileUrl, getPackageFromTestSuiteCode(generatedTestSuite.toString()), getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN))
     }
 
     private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): String {

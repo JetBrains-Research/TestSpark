@@ -70,7 +70,7 @@ class Pipeline(
                     }
 
                     if (projectBuilder.runBuild(indicator)) {
-                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cutModule, classFQN, fileUrl)
+                        processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cutModule, classFQN, fileUrl, testResultName)
                     }
                 }
             })
