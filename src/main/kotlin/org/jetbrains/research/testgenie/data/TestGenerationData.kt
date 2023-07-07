@@ -1,6 +1,9 @@
 package org.jetbrains.research.testgenie.data
 
+import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 
 class TestGenerationData {
     // Result processing
@@ -25,7 +28,7 @@ class TestGenerationData {
      */
     var pendingTestResults: HashMap<String, Workspace.TestJobInfo> = HashMap()
 
-    fun clear() {
+    fun clear(project: Project) {
         testGenerationResultList.clear()
         resultName = ""
         fileUrl = ""
@@ -34,5 +37,7 @@ class TestGenerationData {
         isErrorOccurred = false
         testGenerationResults.clear()
         pendingTestResults.clear()
+
+        project.service<TestCaseDisplayService>().clear()
     }
 }

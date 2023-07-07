@@ -43,7 +43,7 @@ fun getKey(fileUrl: String, classFQN: String, modTs: Long, testResultName: Strin
 
 fun clearDataBeforeTestGeneration(project: Project, key: Workspace.TestJobInfo, testResultName: String) {
     val workspace = project.service<Workspace>()
-    workspace.testGenerationData.clear()
+    workspace.testGenerationData.clear(project)
     workspace.testGenerationData.pendingTestResults[testResultName] = key
 }
 

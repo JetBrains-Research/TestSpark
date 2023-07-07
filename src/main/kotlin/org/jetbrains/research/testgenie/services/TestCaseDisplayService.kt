@@ -706,6 +706,10 @@ class TestCaseDisplayService(private val project: Project) {
         // Cancel the operation if the user did not press "Yes"
         if (choice == JOptionPane.NO_OPTION) return
 
+        clear()
+    }
+
+    fun clear() {
         // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()
         removeSelectedTestCases(testCasePanelsToRemove)
