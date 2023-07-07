@@ -23,6 +23,7 @@ class TestCoverageCollector(
     private val projectBuildPath: String,
     private val testCases: MutableList<TestCaseGeneratedByLLM>,
     cutModule: Module,
+    private val fileNameFQN: String,
 ) {
     private val sep = File.separatorChar
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
@@ -125,6 +126,7 @@ class TestCoverageCollector(
     private fun saveData(testCase: TestCaseGeneratedByLLM, xmlFileName: String) {
         indicator.text = TestGenieBundle.message("testCasesSaving")
         val setOfLines = mutableSetOf<Int>()
+        var isCorrectSourceFile: Boolean
         File(xmlFileName).readText().konsumeXml().apply {
             children("report") {
                 children("sessioninfo") {}
@@ -136,8 +138,9 @@ class TestCoverageCollector(
                         children("counter") {}
                     }
                     children("sourcefile") {
+                        isCorrectSourceFile = this.attributes.getValue("name") == fileNameFQN
                         children("line") {
-                            if (this.attributes.getValue("mi") == "0") {
+                            if (isCorrectSourceFile && this.attributes.getValue("mi") == "0") {
                                 setOfLines.add(this.attributes.getValue("nr").toInt())
                             }
                         }

@@ -46,11 +46,6 @@ class LLMProcessManager(
         if (settingsProjectState.buildPath.isEmpty()) {
             // User did not set own path
             buildPath = getBuildPath(project)
-//            for (module in ModuleManager.getInstance(project).modules) {
-//                val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
-//                compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
-
-//            }
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
@@ -97,6 +92,7 @@ class LLMProcessManager(
                 buildPath,
                 generatedTestSuite.testCases,
                 cutModule,
+                fileUrl.split(File.separatorChar).last(),
             )
 
             // compile the test file
