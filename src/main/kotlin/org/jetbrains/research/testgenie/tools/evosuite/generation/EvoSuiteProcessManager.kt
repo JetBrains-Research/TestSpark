@@ -14,10 +14,10 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.util.Key
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.TestGenieBundle
-import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.evosuite.ResultWatcher
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
+import org.jetbrains.research.testgenie.tools.cancelPendingResult
 import org.jetbrains.research.testgenie.tools.evosuite.error.EvoSuiteErrorManager
 import java.io.File
 import java.nio.charset.Charset
@@ -111,8 +111,7 @@ class EvoSuiteProcessManager(
                     if (indicator.isCanceled) {
                         log.info("Cancelling search")
 
-                        val workspace = project.service<Workspace>()
-                        workspace.cancelPendingResult(testResultName)
+                        cancelPendingResult(project, testResultName)
 
                         handler.destroyProcess()
                     }

@@ -134,17 +134,6 @@ class Workspace(private val project: Project) : Disposable {
     }
 
     /**
-     * @param testResultName the test result job id, which is also its file name
-     */
-    fun addPendingResult(testResultName: String, jobKey: TestJobInfo) {
-        testGenerationData.pendingTestResults[testResultName] = jobKey
-    }
-
-    fun cancelPendingResult(id: String) {
-        testGenerationData.pendingTestResults.remove(id)
-    }
-
-    /**
      * Updates the state after the action of publishing results.
      *
      * @param testResultName the test result job id which was received

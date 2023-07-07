@@ -1,6 +1,5 @@
 package org.jetbrains.research.testgenie.tools.llm
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -9,8 +8,9 @@ import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.openapi.module.Module
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
-import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.ProjectBuilder
+import org.jetbrains.research.testgenie.tools.clearDataBeforeTestGeneration
+import org.jetbrains.research.testgenie.tools.getKey
 import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testgenie.tools.llm.generation.PromptManager
 import java.io.File
@@ -40,8 +40,7 @@ class Pipeline(
 
     private val resultPath = "$testResultDirectory$testResultName"
 
-    // TODO move all interactions with Workspace to Manager
-    var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
+    var key = getKey(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
     private val promptManager = PromptManager(cut, classesToTest, interestingPsiClasses, polymorphismRelations)
 
@@ -53,11 +52,7 @@ class Pipeline(
     }
 
     fun runTestGeneration() {
-        // TODO move all interactions with Workspace to Manager
-        val workspace = project.service<Workspace>()
-        workspace.testGenerationData.clear()
-        workspace.testGenerationData.resultName = testResultName
-        workspace.addPendingResult(testResultName, key)
+        clearDataBeforeTestGeneration(project, key, testResultName)
 
         val projectBuilder = ProjectBuilder(project)
 

@@ -10,17 +10,18 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.Util
-import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.RunnerService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 import org.jetbrains.research.testgenie.services.TestCaseCachingService
-import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProcessManager
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
 import org.jetbrains.research.testgenie.tools.ProjectBuilder
+import org.jetbrains.research.testgenie.tools.clearDataBeforeTestGeneration
+import org.jetbrains.research.testgenie.tools.getKey
+import org.jetbrains.research.testgenie.tools.receiveGenerationResult
 import java.io.File
 import java.util.UUID
 
@@ -52,8 +53,7 @@ class Pipeline(
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
     private val testResultName = "test_gen_result_$id"
 
-    // TODO move all interactions with Workspace to Manager
-    var key = Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
+    var key = getKey(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
     private var baseDir = "$testResultDirectory$testResultName-validation"
@@ -90,7 +90,7 @@ class Pipeline(
             ).build()
 
         // attach method desc. to target unit key
-        key = Workspace.TestJobInfo(fileUrl, "$classFQN#$methodDescriptor", modTs, testResultName, projectClassPath)
+        key = getKey(fileUrl, "$classFQN#$methodDescriptor", modTs, testResultName, projectClassPath)
 
         return this
     }
@@ -147,10 +147,8 @@ class Pipeline(
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
-        project.service<Workspace>().testGenerationData.clear()
+        clearDataBeforeTestGeneration(project, key, testResultName)
 
-        val workspace = project.service<Workspace>()
-        workspace.addPendingResult(testResultName, key)
         val projectBuilder = ProjectBuilder(project)
 
         ProgressManager.getInstance()
@@ -178,16 +176,18 @@ class Pipeline(
                     // Revert to previous state
                     val runnerService = project.service<RunnerService>()
                     runnerService.isRunning = false
-                    // TODO move all interactions with TestCaseDisplayService to Manager
-                    val testCaseDisplayService = project.service<TestCaseDisplayService>()
-                    testCaseDisplayService.validateButton.isEnabled = true
+
+                    // TODO uncomment after the validator fixing
+//                    val testCaseDisplayService = project.service<TestCaseDisplayService>()
+//                    testCaseDisplayService.validateButton.isEnabled = true
+
                     indicator.stop()
                 }
             })
-        // TODO move all interactions with TestCaseDisplayService to Manager
-        val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.toggleJacocoButton.isEnabled = false
-        project.service<Workspace>().testGenerationData.fileUrl = fileUrl
+
+        // TODO uncomment after the validator fixing
+//        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+//        testCaseDisplayService.toggleJacocoButton.isEnabled = false
 
         return testResultName
     }
@@ -209,7 +209,6 @@ class Pipeline(
         // retrieve the job of an arbitrary valid test case
         val testJobInfo = cache.getTestJobInfo(fileUrl, testCases[0].testCode)
 
-        val workspace = project.service<Workspace>()
         ApplicationManager.getApplication().invokeLater {
             val report = Report(CompactReport(TestGenerationResultImpl()))
             val testMap = hashMapOf<String, TestCase>()
@@ -220,7 +219,7 @@ class Pipeline(
             report.testCaseList = testMap
             report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
 
-            workspace.receiveGenerationResult(testResultName, report, this, testJobInfo)
+            receiveGenerationResult(project, testResultName, report, this, testJobInfo)
         }
 
         return true
