@@ -11,7 +11,6 @@ import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
-import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import java.io.File
 import java.io.FileReader
 

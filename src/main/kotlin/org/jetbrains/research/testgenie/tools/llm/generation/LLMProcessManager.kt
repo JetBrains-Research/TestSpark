@@ -11,7 +11,6 @@ import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.SettingsProjectService
-import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.llm.TestCoverageCollector
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
