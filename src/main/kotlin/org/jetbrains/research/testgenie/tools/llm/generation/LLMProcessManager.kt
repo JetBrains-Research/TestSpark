@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.llm.TestCoverageCollector
@@ -115,12 +116,12 @@ class LLMProcessManager(
         report ?: return
 
         // TODO move this operation to Manager
-        project.service<TestCaseDisplayService>().testGenerationResultList.add(report)
-        project.service<TestCaseDisplayService>().packageLine =
+        project.service<Workspace>().testGenerationData.testGenerationResultList.add(report)
+        project.service<Workspace>().testGenerationData.packageLine =
             getPackageFromTestSuiteCode(generatedTestSuite.toString())
-        project.service<TestCaseDisplayService>().importsCode =
+        project.service<Workspace>().testGenerationData.importsCode =
             getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN)
-        project.service<TestCaseDisplayService>().fileUrl = fileUrl
+        project.service<Workspace>().testGenerationData.fileUrl = fileUrl
     }
 
     private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): String {

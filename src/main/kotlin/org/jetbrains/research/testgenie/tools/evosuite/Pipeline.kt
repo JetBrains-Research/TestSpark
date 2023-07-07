@@ -147,7 +147,7 @@ class Pipeline(
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
-        project.service<Workspace>().clean()
+        project.service<Workspace>().testGenerationData.clear()
 
         val workspace = project.service<Workspace>()
         workspace.addPendingResult(testResultName, key)
@@ -186,8 +186,8 @@ class Pipeline(
             })
         // TODO move all interactions with TestCaseDisplayService to Manager
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.fileUrl = fileUrl
         testCaseDisplayService.toggleJacocoButton.isEnabled = false
+        project.service<Workspace>().testGenerationData.fileUrl = fileUrl
 
         return testResultName
     }

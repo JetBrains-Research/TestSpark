@@ -101,15 +101,6 @@ class TestCaseDisplayService(private val project: Project) {
     private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
     private var isJacocoCoverageActive = false
 
-    // Result processing
-    var testGenerationResultList: MutableList<Report?> = mutableListOf()
-    var resultName: String = ""
-    var fileUrl: String = ""
-
-    // Code required of imports and package for generated tests
-    var importsCode: String = ""
-    var packageLine: String = ""
-
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
@@ -175,6 +166,7 @@ class TestCaseDisplayService(private val project: Project) {
     private fun displayTestCases(testReport: Report, editor: Editor) {
         allTestCasePanel.removeAll()
         testCasePanels.clear()
+        originalTestCases.clear()
         testReport.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
@@ -316,7 +308,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Removes all coverage highlighting from the editor.
      */
     private fun removeAllHighlights() {
-        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
+        val editor = project.service<Workspace>().editorForFileUrl(project.service<Workspace>().testGenerationData.fileUrl)
         editor?.markupModel?.removeAllHighlighters()
     }
 
@@ -548,7 +540,7 @@ class TestCaseDisplayService(private val project: Project) {
 
     private fun toggleJacocoCoverage() {
         val manager = CoverageDataManager.getInstance(project)
-        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
+        val editor = project.service<Workspace>().editorForFileUrl(project.service<Workspace>().testGenerationData.fileUrl)
         editor?.markupModel?.removeAllHighlighters()
 
         if (isJacocoCoverageActive) {
@@ -611,12 +603,12 @@ class TestCaseDisplayService(private val project: Project) {
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            importsCode,
+            project.service<Workspace>().testGenerationData.importsCode,
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
-            .insertString(0, packageLine)
+            .insertString(0, project.service<Workspace>().testGenerationData.packageLine)
     }
 
     /**
@@ -726,7 +718,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun removeTestCase(testName: String) {
         // Remove the test from the cache
-        project.service<TestCaseCachingService>().invalidateFromCache(fileUrl, originalTestCases[testName]!!)
+        project.service<TestCaseCachingService>().invalidateFromCache(project.service<Workspace>().testGenerationData.fileUrl, originalTestCases[testName]!!)
 
         // Remove the test panel from the UI
         allTestCasePanel.remove(testCasePanels[testName])

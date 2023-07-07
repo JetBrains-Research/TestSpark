@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
@@ -68,13 +69,13 @@ class ResultWatcher(
                         val reader = JsonReader(FileReader("$testResultDirectory$pathname"))
 
                         val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
-                        // TODO move all interactions with TestCaseDisplayService to Manager
-                        project.service<TestCaseDisplayService>().testGenerationResultList.add(Report(testGenerationResult))
-                        project.service<TestCaseDisplayService>().resultName = resultName
-                        project.service<TestCaseDisplayService>().fileUrl = fileUrl
-                        project.service<TestCaseDisplayService>().packageLine =
+                        // TODO move all interactions with Workspace to Manager
+                        project.service<Workspace>().testGenerationData.testGenerationResultList.add(Report(testGenerationResult))
+                        project.service<Workspace>().testGenerationData.resultName = resultName
+                        project.service<Workspace>().testGenerationData.fileUrl = fileUrl
+                        project.service<Workspace>().testGenerationData.packageLine =
                             getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode)
-                        project.service<TestCaseDisplayService>().importsCode =
+                        project.service<Workspace>().testGenerationData.importsCode =
                             getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN)
                         return
                     }

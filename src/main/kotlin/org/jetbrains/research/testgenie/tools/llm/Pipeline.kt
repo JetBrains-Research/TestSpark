@@ -10,7 +10,6 @@ import com.intellij.openapi.module.Module
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testgenie.tools.llm.generation.PromptManager
@@ -56,11 +55,9 @@ class Pipeline(
     fun runTestGeneration() {
         // TODO move all interactions with Workspace to Manager
         val workspace = project.service<Workspace>()
+        workspace.testGenerationData.clear()
+        workspace.testGenerationData.resultName = testResultName
         workspace.addPendingResult(testResultName, key)
-
-        // TODO move all interactions with TestCaseDisplayService to Manager
-        project.service<Workspace>().clean()
-        project.service<TestCaseDisplayService>().resultName = testResultName
 
         val projectBuilder = ProjectBuilder(project)
 

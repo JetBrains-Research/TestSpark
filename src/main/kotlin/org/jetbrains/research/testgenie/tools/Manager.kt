@@ -5,7 +5,6 @@ import com.intellij.openapi.components.service
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.tools.evosuite.TEST_GENERATION_RESULT_TOPIC
 import org.jetbrains.research.testgenie.tools.toolImpls.EvoSuite
 import org.jetbrains.research.testgenie.tools.toolImpls.Llm
@@ -91,7 +90,7 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
     override fun run() {
         val sleepDurationMillis: Long = 2000
         while (true) {
-            if (event.project!!.service<TestCaseDisplayService>().testGenerationResultList.size != numberOfUsedTool) {
+            if (event.project!!.service<Workspace>().testGenerationData.testGenerationResultList.size != numberOfUsedTool) {
                 // there is some error during the process running
                 if (event.project!!.service<Workspace>().isErrorOccurred()) return
                 Thread.sleep(sleepDurationMillis)
@@ -99,8 +98,8 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
             }
             event.project!!.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC).testGenerationResult(
                 getMergeResult(numberOfUsedTool),
-                event.project!!.service<TestCaseDisplayService>().resultName,
-                event.project!!.service<TestCaseDisplayService>().fileUrl,
+                event.project!!.service<Workspace>().testGenerationData.resultName,
+                event.project!!.service<Workspace>().testGenerationData.fileUrl,
             )
             return
         }
@@ -108,7 +107,7 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
 
     private fun getMergeResult(numberOfUsedTool: Int): Report {
         if (numberOfUsedTool == 1) {
-            return event.project!!.service<TestCaseDisplayService>().testGenerationResultList[0]!!
+            return event.project!!.service<Workspace>().testGenerationData.testGenerationResultList[0]!!
         }
         TODO("implement merge")
     }

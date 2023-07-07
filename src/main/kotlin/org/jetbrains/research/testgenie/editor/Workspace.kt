@@ -25,6 +25,7 @@ import org.jetbrains.research.testgenie.services.CoverageVisualisationService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.data.TestGenerationData
 
 /**
  * Workspace state service
@@ -61,18 +62,7 @@ class Workspace(private val project: Project) : Disposable {
     private val log = Logger.getInstance(this.javaClass)
     private var listenerDisposable: Disposable? = null
 
-    private var isErrorOccurred = false
-
-    /**
-     * Maps a workspace file to the test generation jobs that were triggered on it.
-     * Currently, the file key is represented by its presentableUrl
-     */
-    private val testGenerationResults: HashMap<String, ArrayList<TestJob>> = HashMap()
-
-    /**
-     * Maps a test generation job id to its corresponding test job information
-     */
-    private var pendingTestResults: HashMap<String, TestJobInfo> = HashMap()
+    var testGenerationData = TestGenerationData()
 
     init {
         val connection = project.messageBus.connect()
@@ -85,7 +75,7 @@ class Workspace(private val project: Project) : Disposable {
                 override fun testGenerationResult(testName: String, selected: Boolean, editor: Editor) {
                     val vFile = vFileForDocument(editor.document) ?: return
                     val fileKey = vFile.presentableUrl
-                    val testJob = testGenerationResults[fileKey]?.last() ?: return
+                    val testJob = testGenerationData.testGenerationResults[fileKey]?.last() ?: return
                     val modTs = editor.document.modificationStamp
 
                     if (selected) {
@@ -137,34 +127,21 @@ class Workspace(private val project: Project) : Disposable {
         listenerDisposable = disposable
     }
 
-    fun isErrorOccurred() = isErrorOccurred
+    fun isErrorOccurred() = testGenerationData.isErrorOccurred
 
     fun errorOccurred() {
-        isErrorOccurred = true
-    }
-
-    private fun errorClear() {
-        isErrorOccurred = false
-    }
-
-    fun clean() {
-        project.service<TestCaseDisplayService>().removeSelectedTestCases(project.service<TestCaseDisplayService>().testCasePanels.toMap())
-        project.service<TestCaseDisplayService>().testsSelected = 0
-        project.service<TestCaseDisplayService>().testCasePanels = HashMap()
-        project.service<TestCaseDisplayService>().originalTestCases = HashMap()
-        project.service<TestCaseDisplayService>().testGenerationResultList = mutableListOf()
-        errorClear()
+        testGenerationData.isErrorOccurred = true
     }
 
     /**
      * @param testResultName the test result job id, which is also its file name
      */
     fun addPendingResult(testResultName: String, jobKey: TestJobInfo) {
-        pendingTestResults[testResultName] = jobKey
+        testGenerationData.pendingTestResults[testResultName] = jobKey
     }
 
     fun cancelPendingResult(id: String) {
-        pendingTestResults.remove(id)
+        testGenerationData.pendingTestResults.remove(id)
     }
 
     /**
@@ -182,11 +159,11 @@ class Workspace(private val project: Project) : Disposable {
         cacheLazyPipeline: Pipeline? = null,
         cachedJobKey: TestJobInfo? = null,
     ): TestJobInfo {
-        val pendingJobKey = pendingTestResults.remove(testResultName)!!
+        val pendingJobKey = testGenerationData.pendingTestResults.remove(testResultName)!!
 
         val jobKey = cachedJobKey ?: pendingJobKey
 
-        val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
+        val resultsForFile = testGenerationData.testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
         val displayedSet = HashSet<String>()
         displayedSet.addAll(testReport.testCaseList.keys)
 
@@ -287,7 +264,7 @@ class Workspace(private val project: Project) : Disposable {
     }
 
     private fun lastTestGeneration(fileName: String): TestJob? {
-        return testGenerationResults[fileName]?.last()
+        return testGenerationData.testGenerationResults[fileName]?.last()
     }
 
     override fun dispose() {
