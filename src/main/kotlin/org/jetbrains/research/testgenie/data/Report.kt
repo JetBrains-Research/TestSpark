@@ -5,6 +5,7 @@ import org.evosuite.result.MutationInfo
 import org.evosuite.utils.CompactReport
 
 class Report {
+    // Fields were created based on the fields in org.evosuite.utils.CompactReport for easier transformation
     var UUT: String = ""
     var allCoveredLines: Set<Int> = setOf()
     var allUncoveredLines: Set<Int> = setOf()
@@ -14,6 +15,9 @@ class Report {
     var allUncoveredMutation: Set<MutationInfo> = setOf()
     var testCaseList: HashMap<String, TestCase> = hashMapOf()
 
+    /**
+     * Transformation CompactReport to Report
+     */
     constructor(compactReport: CompactReport) {
         UUT = compactReport.UUT
         allCoveredLines = compactReport.allCoveredLines
@@ -27,6 +31,9 @@ class Report {
 
     constructor()
 
+    /**
+     * AllCoveredLines update
+     */
     fun normalized(): Report {
         allCoveredLines = testCaseList.values.map { it.coveredLines }.flatten().toSet()
         return this

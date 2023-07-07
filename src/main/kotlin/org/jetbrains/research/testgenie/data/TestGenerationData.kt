@@ -17,15 +17,11 @@ class TestGenerationData {
 
     var isErrorOccurred = false
 
-    /**
-     * Maps a workspace file to the test generation jobs that were triggered on it.
-     * Currently, the file key is represented by its presentableUrl
-     */
+    // Maps a workspace file to the test generation jobs that were triggered on it.
+    // Currently, the file key is represented by its presentableUrl
     var testGenerationResults: HashMap<String, ArrayList<Workspace.TestJob>> = HashMap()
 
-    /**
-     * Maps a test generation job id to its corresponding test job information
-     */
+    // Maps a test generation job id to its corresponding test job information
     var pendingTestResults: HashMap<String, Workspace.TestJobInfo> = HashMap()
 
     fun clear(project: Project) {
