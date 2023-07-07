@@ -3,13 +3,12 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.CompilerModuleExtension
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.services.SettingsProjectService
+import org.jetbrains.research.testgenie.tools.getBuildPath
 import org.jetbrains.research.testgenie.tools.llm.TestCoverageCollector
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
@@ -46,11 +45,12 @@ class LLMProcessManager(
         var buildPath = projectClassPath
         if (settingsProjectState.buildPath.isEmpty()) {
             // User did not set own path
-            buildPath = ""
-            for (module in ModuleManager.getInstance(project).modules) {
-                val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
-                compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
-            }
+            buildPath = getBuildPath(project)
+//            for (module in ModuleManager.getInstance(project).modules) {
+//                val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
+//                compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
+
+//            }
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {

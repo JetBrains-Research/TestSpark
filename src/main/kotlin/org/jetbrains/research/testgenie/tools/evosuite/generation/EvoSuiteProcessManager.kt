@@ -6,11 +6,8 @@ import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.CompilerModuleExtension
-import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.util.Key
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.TestGenieBundle
@@ -19,6 +16,7 @@ import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.tools.cancelPendingResult
 import org.jetbrains.research.testgenie.tools.evosuite.error.EvoSuiteErrorManager
+import org.jetbrains.research.testgenie.tools.getBuildPath
 import java.io.File
 import java.nio.charset.Charset
 import java.util.regex.Pattern
@@ -61,28 +59,7 @@ class EvoSuiteProcessManager(
             var buildPath = projectClassPath
             if (settingsProjectState.buildPath.isEmpty()) {
                 // User did not set own path
-                buildPath = ""
-                for (module in ModuleManager.getInstance(project).modules) {
-                    val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
-                    compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
-
-                    // Include extra libraries in classpath
-                    val librariesPaths = ModuleRootManager.getInstance(module).orderEntries().librariesOnly().pathsList.pathList
-                    for (lib in librariesPaths) {
-                        // exclude the invalid classpaths
-                        if (buildPath.contains(lib)) {
-                            continue
-                        }
-                        if (lib.endsWith(".zip")) {
-                            continue
-                        }
-                        val basePath = module.project.basePath
-                        if (lib.startsWith(basePath.toString())) {
-                            // add the extra path
-                            buildPath += lib.plus(":")
-                        }
-                    }
-                }
+                buildPath = getBuildPath(project)
             }
             command[command.indexOf(projectClassPath)] = buildPath
             log.info("Generating tests for project $projectPath with classpath $buildPath inside the project")
