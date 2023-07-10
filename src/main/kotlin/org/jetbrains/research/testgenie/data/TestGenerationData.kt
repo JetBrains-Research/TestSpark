@@ -25,6 +25,8 @@ class TestGenerationData {
     var pendingTestResults: HashMap<String, Workspace.TestJobInfo> = HashMap()
 
     fun clear(project: Project) {
+        project.service<TestCaseDisplayService>().clear()
+
         testGenerationResultList.clear()
         resultName = ""
         fileUrl = ""
@@ -33,7 +35,5 @@ class TestGenerationData {
         isErrorOccurred = false
         testGenerationResults.clear()
         pendingTestResults.clear()
-
-        project.service<TestCaseDisplayService>().clear()
     }
 }
