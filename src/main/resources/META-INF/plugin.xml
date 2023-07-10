@@ -17,6 +17,25 @@
     <p>Initially implemented by <a href="https://www.ciselab.nl">CISELab</a> at <a href="https://se.ewi.tudelft.nl">SERG @ TU Delft</a>, TestGenie is currently developed and maintained by <a href="https://lp.jetbrains.com/research/ictl/">ICTL at JetBrains Research</a>.</p>
       ]]></description>
 
+    <change-notes><![CDATA[
+        <h4>0.0.3</h4>
+            <ul>
+                <li>Fix some bugs</li>
+            </ul>
+
+        <h4>0.0.2</h4>
+            <ul>
+                <li>Improved test generation by aborting incomplete project builds and ensuring successful project builds before test generation begins</li>
+                <li>Catching Evosuite errors related to unknown classes by checking for incorrect input of .class files</li>
+                <li>Automatic creation of test files with the automatic addition includes and package lines</li>
+                <li>Error checking for target class initialization</li>
+                <li>Compatibility with IDEA 231.*</li>
+                <li>Add automated project build</li>
+                <li>Add compiled classes detector</li>
+            </ul>
+    ]]>
+    </change-notes>
+
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
 
