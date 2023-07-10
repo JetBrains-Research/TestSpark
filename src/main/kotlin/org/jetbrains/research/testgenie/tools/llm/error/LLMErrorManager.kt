@@ -23,7 +23,6 @@ class LLMErrorManager {
     }
 
     fun warningProcess(message: String, project: Project) {
-        project.service<Workspace>().errorOccurred()
         NotificationGroupManager.getInstance()
             .getNotificationGroup("LLM Execution Error")
             .createNotification(
