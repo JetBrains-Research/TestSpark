@@ -11,12 +11,13 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
 
 class TestCoverageCollector(
     private val indicator: ProgressIndicator,
-    project: Project,
+    private val project: Project,
     private val resultPath: String,
     private val generatedTestFile: File,
     private val generatedTestPackage: String,
@@ -117,6 +118,11 @@ class TestCoverageCollector(
             command.add("$dataFileName.xml")
 
             runCommandLine(command as ArrayList<String>)
+
+            // check if XML report is produced
+            if(!File("$dataFileName.xml").exists()){
+                LLMErrorManager().errorProcess("Something went wrong with generating Jacoco report.",project)
+            }
 
             // save data to TestGenerationResult
             saveData(testCase, "$dataFileName.xml")

@@ -8,6 +8,7 @@ import com.intellij.openapi.roots.ModuleRootManager
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
+import java.io.File
 
 // get junit imports from a generated code
 fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String): String {
@@ -81,12 +82,16 @@ fun getBuildPath(project: Project): String {
             if (lib.endsWith(".zip")) {
                 continue
             }
-            buildPath += lib.plus(":")
-//            val basePath = module.project.basePath
-//            if (lib.startsWith(basePath.toString())) {
-//                // add the extra path
 
-//            }
+            // remove junit and hamcrest libraries, since we use our own libraries
+            val pathArray = lib.split(File.separatorChar)
+            val libFileName = pathArray[pathArray.size-1]
+            if(libFileName.startsWith("junit") ||
+                libFileName.startsWith("hamcrest")){
+                continue
+            }
+
+            buildPath += lib.plus(":")
         }
     }
     return buildPath
