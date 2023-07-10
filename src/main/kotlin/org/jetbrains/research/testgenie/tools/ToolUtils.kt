@@ -85,9 +85,10 @@ fun getBuildPath(project: Project): String {
 
             // remove junit and hamcrest libraries, since we use our own libraries
             val pathArray = lib.split(File.separatorChar)
-            val libFileName = pathArray[pathArray.size-1]
-            if(libFileName.startsWith("junit") ||
-                libFileName.startsWith("hamcrest")){
+            val libFileName = pathArray[pathArray.size - 1]
+            if (libFileName.startsWith("junit") ||
+                libFileName.startsWith("hamcrest")
+            ) {
                 continue
             }
 

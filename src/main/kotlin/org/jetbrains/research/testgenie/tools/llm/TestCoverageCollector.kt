@@ -120,8 +120,8 @@ class TestCoverageCollector(
             runCommandLine(command as ArrayList<String>)
 
             // check if XML report is produced
-            if(!File("$dataFileName.xml").exists()){
-                LLMErrorManager().errorProcess("Something went wrong with generating Jacoco report.",project)
+            if (!File("$dataFileName.xml").exists()) {
+                LLMErrorManager().errorProcess("Something went wrong with generating Jacoco report.", project)
             }
 
             // save data to TestGenerationResult
