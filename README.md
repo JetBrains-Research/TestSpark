@@ -8,13 +8,13 @@
 ## Description
 
 <!-- Plugin description -->
-TestGenie is a plugin for generating unit tests. TestGenie natively integrates <a href="https://www.evosuite.org">EvoSuite</a> into the IDE.
-    <ul>
-        <li>Supports up to Java 11.</li>
-        <li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage, mutation score.</li>
-        <li>Generates unit tests for capturing failures.</li>
-        <li>Generate tests for Java classes, method, and single lines.</li>
-    </ul>
+TestGenie is a plugin for generating unit tests.
+<ul>
+<li>Uses <a href="https://www.evosuite.org">EvoSuite</a> and <a href="https://openai.com/gpt-4">GPT-4</a> for unit tests generation.</li>
+<li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage, mutation score.</li>
+<li>Generates unit tests for capturing failures.</li>
+<li>Generate tests for Java classes, method, and single lines.</li>
+</ul>
 
 <p>Initially implemented by <a href="https://www.ciselab.nl">CISELab</a> at <a href="https://se.ewi.tudelft.nl">SERG @ TU Delft</a>, TestGenie is currently developed and maintained by <a href="https://lp.jetbrains.com/research/ictl/">ICTL at JetBrains Research</a>.</p>
 
@@ -28,7 +28,7 @@ TestGenie is a plugin for generating unit tests. TestGenie natively integrates <
 ## Features
 [//]: # (TODO add validation to the list)
 <!-- What features are supported by the plugin? -->
-- [EvoSuite is installed with the plugin](#installation)
+- [Installation](#installation)
 - [Automatic test generation for classes](#generating-tests-for-classes-1)
 - [Automatic test generation for methods](#generating-tests-for-methods)
 - [Automatic test generation for lines](#generating-tests-for-lines-1)
@@ -41,7 +41,7 @@ TestGenie is a plugin for generating unit tests. TestGenie natively integrates <
 - [Telemetry](#telemetry-opt-in-1)
 
 ### Generating Tests for Classes
-TestGenie uses EvoSuite to automatically generate tests for Java classes. Two clicks are required from the user for the tests to be generated.
+TestGenie uses EvoSuite and GPT-4 to automatically generate tests for Java classes. Two clicks are required from the user for the tests to be generated.
 
 ### Generating Tests for Methods
 TestGenie uses EvoSuite to automatically generate tests for Java methods. Two clicks are required from the user for the tests to be generated.
@@ -80,10 +80,10 @@ Opt-in non-intrusive data collection to improve EvoSuite in the future.
 ## Installation
 
 - Using IDE built-in plugin system:
-  
+
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "TestGenie"</kbd> >
   <kbd>Install Plugin</kbd>
-  
+
 - Manually:
 
   Download the [latest release](https://github.com/ciselab/TestGenie/releases/latest) and install it manually using
@@ -96,7 +96,7 @@ Opt-in non-intrusive data collection to improve EvoSuite in the future.
 If you are running the plugin for the first time, checkout the [`First time configuration`](#first-time-configuration) section.
 
 ### Generating Tests for Classes
-To generate a test for a class, right-click (with mouse) anywhere within the class you want to test or right-click the class name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Class [...]" option:
+To generate a test for a class, right-click (with mouse) anywhere within the class you want to test or right-click the class name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Class [...] by GPT-4/EvoSuite" option:
 
 ![Test generation for classes](readme-images/gifs/testClass.gif)
 
@@ -113,7 +113,7 @@ Additionally, the top row of the tool window has buttons for selecting all tests
 
 ![Quick buttons](readme-images/pngs/selectAll.png)
 ### Generating Tests for Methods
-To generate a test for a method, right-click (with mouse) anywhere within the method you want to test or right-click the method name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Method [...]" option:
+To generate a test for a method, right-click (with mouse) anywhere within the method you want to test or right-click the method name itself (note that when using multiple cursors only the last one will count). Under the "TestGenie" option, select "Generate Tests for Method [...] by EvoSuite" option:
 
 ![Test generation for methods](readme-images/gifs/testMethod.gif)
 
@@ -131,7 +131,7 @@ Additionally, the top row of the tool window has buttons for selecting all tests
 
 ![Quick buttons](readme-images/pngs/selectAll.png)
 ### Generating Tests for Lines
-To generate a test for a method, right-click (with mouse) anywhere within the line you want. Note that the line has to contain a statement (e.g. you will not have the option on lines with only method declarations). Under the "TestGenie" option, select "Generate Tests for Line [...]" option:
+To generate a test for a method, right-click (with mouse) anywhere within the line you want. Note that the line has to contain a statement (e.g. you will not have the option on lines with only method declarations). Under the "TestGenie" option, select "Generate Tests for Line [...] by EvoSuite" option:
 
 ![Test generation for methods](readme-images/gifs/testLine.gif)
 
@@ -218,26 +218,34 @@ The plugin is configured mainly through the Settings menu. The plugin settings c
 
 ![Plugin Settings](readme-images/pngs/PluginSettings.png)
 ### First time configuration
-Before running the plugin for the first time, we highly recommend going to the `Environment settings` section of TestGenie settings. The settings include java 11 path, compilation path (path to compiled code), compilation command. All commands have defaults. However, we recommend especially that you check compilation command. For this command the user requires maven, gradle or any other builder program which can be accessed via command. Leaving this field with a faulty value may cause unintended behaviour.
+Before running the plugin for the first time, we highly recommend going to the `Environment settings` section of TestGenie settings. The settings include compilation path (path to compiled code) and compilation command. Both commands have defaults. However, we recommend especially that you check compilation command. For this command the user requires maven, gradle or any other builder program which can be accessed via command. Leaving this field with a faulty value may cause unintended behaviour.
 
 ![Setup](readme-images/pngs/Setup.png)
 
+Also, the parameters for the generators have to be configured. Check [EvoSuite Parameters](#evosuite-parameters) and [LLM Parameters](#llm-parameters).
+
+### EvoSuite Parameters
+<!-- How to use Advanced Parameters Settings entry? Where to find it? What can be changed? --> 
+The settings submenu <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> > <kbd>EvoSuite</kbd> allows the user to tweak EvoSuite parameters to their liking.\
+At the moment EvoSuite can be executed only with Java 11 or less, so if the user has a more modern version by default, it is necessary to download Java 11 and set the path to the java file.\
+EvoSuite has hundreds of parameters, not all can be packed in a settings menu. However, the most commonly used and rational settings were added here:
+
+![EvoSuite Settings](readme-images/pngs/EvoSuiteSettings.png)
+
+### LLM Parameters
+TODO ADD TEXT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 ### Quick Access Parameters
 <!-- How to use Quick Access Parameters tab? Where to find it? What can be changed? --> 
-Some parameters for tweaking EvoSuite are used so often, that going to the settings menu gets annoying. That why these parameters were added (exclusively) to the Quick Access Panel of the TestGenie tool window (`Parameters` tab). These are settings so common/useful that they deserved their own spot:
+Some parameters are used so often, that going to the settings menu gets annoying. That why these parameters were added (exclusively) to the Quick Access Panel of the TestGenie tool window (`Parameters` tab). These are settings so common/useful that they deserved their own spot:
 
 ![Quick Access](readme-images/gifs/QuickAccess.gif)
 <span style="color:crimson; font-size:150%; font-weight:bold">:exclamation: Pro tip: don't forget to hit the "save" button at the bottom. :exclamation:</span>
 
-### Advanced Parameters
-<!-- How to use Advanced Parameters Settings entry? Where to find it? What can be changed? --> 
-The settings submenu <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> > <kbd>EvoSuite</kbd> allows the user to tweak EvoSuite parameters to their liking. EvoSuite has hundreds of parameters, not all can be packed in a settings menu. However, the most commonly used and rational settings were added here:
-
-![EvoSuite Settings](readme-images/pngs/EvoSuiteSettings.png)
 
 ## Contribution
 <!-- How to contribute to the plugin -->
-The plugin is Open-Source and  publicly hosted on github. Anyone can look into the code and suggest changes. You can find the plugin page [here](https://github.com/ciselab/TestGenie). 
+The plugin is Open-Source and  publicly hosted on github. Anyone can look into the code and suggest changes. You can find the plugin page [here](https://github.com/ciselab/TestGenie).
 ## Licence
 <!-- Which licence does the plugin have -->
 
