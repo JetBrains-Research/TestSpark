@@ -227,13 +227,22 @@ Also, the parameters for the generators have to be configured. Check [EvoSuite P
 ### EvoSuite Parameters
 <!-- How to use Advanced Parameters Settings entry? Where to find it? What can be changed? --> 
 The settings submenu <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestGenie</kbd> > <kbd>EvoSuite</kbd> allows the user to tweak EvoSuite parameters to their liking.\
-At the moment EvoSuite can be executed only with Java 11 or less, so if the user has a more modern version by default, it is necessary to download Java 11 and set the path to the java file.\
+At the moment EvoSuite can be executed only with Java 11, so if the user has a more modern version by default, it is necessary to download Java 11 and set the path to the java file.
+
+![Java Setup](readme-images/pngs/JavaSetup.png)
+
 EvoSuite has hundreds of parameters, not all can be packed in a settings menu. However, the most commonly used and rational settings were added here:
 
 ![EvoSuite Settings](readme-images/pngs/EvoSuiteSettings.png)
 
 ### LLM Parameters
-TODO ADD TEXT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Users have to set their own token for Grazie Platform, the plugin does not provide a default option.
+
+![LLM Token](readme-images/pngs/LLMToken.png)
+
+TALK ABOUT THESE PARAMETERS HERE
+
+![LLM Settings](readme-images/pngs/LLMSettings.png)
 
 ### Quick Access Parameters
 <!-- How to use Quick Access Parameters tab? Where to find it? What can be changed? --> 
