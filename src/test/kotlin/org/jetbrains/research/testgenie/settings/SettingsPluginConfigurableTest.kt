@@ -29,7 +29,6 @@ class SettingsPluginConfigurableTest {
     private lateinit var fixture: CodeInsightTestFixture
     private lateinit var settingsApplicationState: SettingsApplicationState
 
-
     @BeforeEach
     fun setUp() {
         val projectBuilder: TestFixtureBuilder<IdeaProjectTestFixture> =
