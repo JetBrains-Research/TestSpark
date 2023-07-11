@@ -240,7 +240,7 @@ Users have to set their own token for Grazie Platform, the plugin does not provi
 
 ![LLM Token](readme-images/pngs/LLMToken.png)
 
-TALK ABOUT THESE PARAMETERS HERE
+In addition to the token, users are recommended to configure settings for the LLM process.
 
 ![LLM Settings](readme-images/pngs/LLMSettings.png)
 
