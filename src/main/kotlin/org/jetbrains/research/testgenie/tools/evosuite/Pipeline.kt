@@ -19,8 +19,8 @@ import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
 import org.jetbrains.research.testgenie.tools.ProjectBuilder
-import org.jetbrains.research.testgenie.tools.clearDataBeforeTestGeneration
 import org.jetbrains.research.testgenie.tools.getKey
+import org.jetbrains.research.testgenie.tools.clearDataBeforeTestGeneration
 import org.jetbrains.research.testgenie.tools.receiveGenerationResult
 import java.io.File
 import java.util.UUID
@@ -147,6 +147,8 @@ class Pipeline(
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
+        val hasCachedTests = !skipCache && tryShowCachedTestCases()
+
         clearDataBeforeTestGeneration(project, key, testResultName)
 
         val projectBuilder = ProjectBuilder(project)
@@ -154,14 +156,9 @@ class Pipeline(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
-                    if (!skipCache) {
-                        // Check cache
-                        val hasCachedTests = tryShowCachedTestCases()
-                        if (hasCachedTests) {
-                            log.info("Found cached tests")
-                            indicator.stop()
-                            return
-                        }
+                    if (hasCachedTests) {
+                        indicator.stop()
+                        return
                     }
 
                     if (indicator.isCanceled) {
@@ -220,6 +217,8 @@ class Pipeline(
             report.allCoveredLines = testCases.map { it.coveredLines }.flatten().toSet()
 
             receiveGenerationResult(project, testResultName, report, this, testJobInfo)
+
+            project.service<RunnerService>().isRunning = false
         }
 
         return true
