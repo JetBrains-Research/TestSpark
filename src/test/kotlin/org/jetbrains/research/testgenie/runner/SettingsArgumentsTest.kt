@@ -6,7 +6,7 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
-import org.jetbrains.research.testgenie.evosuite.SettingsArguments
+import org.jetbrains.research.testgenie.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.settings.SettingsApplicationState
 import org.assertj.core.api.Assertions.assertThat

@@ -42,6 +42,9 @@ class SettingsEvoSuiteComponent {
     private var criterionMethodNoExceptionCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("criterionMethodNoExc"))
     private var criterionCBranchCheckBox = JCheckBox(TestGenieLabelsBundle.defaultValue("criterionCBranch"))
 
+    // Java path
+    private var javaPathTextField = JTextField()
+
     init {
 
         // Adds the panel components
@@ -56,6 +59,8 @@ class SettingsEvoSuiteComponent {
      */
     private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
+            .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("javaSettings")))
+            .addLabeledComponent(JBLabel(TestGenieLabelsBundle.defaultValue("javaPath")), javaPathTextField, 10, false)
             .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("generalSettings")))
             // EvoSuite "input" options (e.g. text, number)
             // Important settings like algorithm selection, seed selection
@@ -95,6 +100,8 @@ class SettingsEvoSuiteComponent {
         clientOnThreadCheckBox.toolTipText = TestGenieToolTipsBundle.defaultValue("debug")
         junitCheckCheckBox.toolTipText = TestGenieToolTipsBundle.defaultValue("junit")
         criterionSeparator.toolTipText = TestGenieToolTipsBundle.defaultValue("criterion")
+
+        javaPathTextField.toolTipText = TestGenieToolTipsBundle.defaultValue("javaPath")
     }
 
     /**
@@ -107,6 +114,12 @@ class SettingsEvoSuiteComponent {
     }
 
     // Settings "changers"
+
+    var javaPath: String
+        get() = javaPathTextField.text
+        set(newConfig) {
+            javaPathTextField.text = newConfig
+        }
 
     var sandbox: Boolean
         get() = sandboxCheckBox.isSelected

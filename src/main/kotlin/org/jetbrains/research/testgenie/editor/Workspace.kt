@@ -15,16 +15,17 @@ import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
-import org.jetbrains.research.testgenie.evosuite.Pipeline
-import org.jetbrains.research.testgenie.evosuite.validation.VALIDATION_RESULT_TOPIC
-import org.jetbrains.research.testgenie.evosuite.validation.ValidationResultListener
-import org.jetbrains.research.testgenie.evosuite.validation.Validator
+import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
+import org.jetbrains.research.testgenie.tools.evosuite.validation.VALIDATION_RESULT_TOPIC
+import org.jetbrains.research.testgenie.tools.evosuite.validation.ValidationResultListener
+import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 import org.jetbrains.research.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
 import org.jetbrains.research.testgenie.services.CoverageSelectionToggleListener
 import org.jetbrains.research.testgenie.services.CoverageVisualisationService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
-import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
+import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.data.TestGenerationData
 
 /**
  * Workspace state service
@@ -39,15 +40,15 @@ class Workspace(private val project: Project) : Disposable {
         var targetUnit: String,
         val modificationTS: Long,
         val jobId: String,
-        val targetClassPath: String
+        val targetClassPath: String,
     )
 
     class TestJob(
         val info: TestJobInfo,
-        val report: CompactReport,
+        val report: Report,
         val selectedTests: HashSet<String>,
     ) {
-        private fun getSelectedTests(): List<CompactTestCase> {
+        private fun getSelectedTests(): List<TestCase> {
             return report.testCaseList.filter { selectedTests.contains(it.key) }.map { it.value }
         }
 
@@ -61,16 +62,7 @@ class Workspace(private val project: Project) : Disposable {
     private val log = Logger.getInstance(this.javaClass)
     private var listenerDisposable: Disposable? = null
 
-    /**
-     * Maps a workspace file to the test generation jobs that were triggered on it.
-     * Currently, the file key is represented by its presentableUrl
-     */
-    private val testGenerationResults: HashMap<String, ArrayList<TestJob>> = HashMap()
-
-    /**
-     * Maps a test generation job id to its corresponding test job information
-     */
-    private var pendingTestResults: HashMap<String, TestJobInfo> = HashMap()
+    var testGenerationData = TestGenerationData()
 
     init {
         val connection = project.messageBus.connect()
@@ -83,7 +75,7 @@ class Workspace(private val project: Project) : Disposable {
                 override fun testGenerationResult(testName: String, selected: Boolean, editor: Editor) {
                     val vFile = vFileForDocument(editor.document) ?: return
                     val fileKey = vFile.presentableUrl
-                    val testJob = testGenerationResults[fileKey]?.last() ?: return
+                    val testJob = testGenerationData.testGenerationResults[fileKey]?.last() ?: return
                     val modTs = editor.document.modificationStamp
 
                     if (selected) {
@@ -97,7 +89,7 @@ class Workspace(private val project: Project) : Disposable {
                         updateCoverage(testJob.getSelectedLines(), testJob.selectedTests, testJob.report, editor)
                     }
                 }
-            }
+            },
         )
 
         connection.subscribe(
@@ -106,7 +98,7 @@ class Workspace(private val project: Project) : Disposable {
                 override fun validationResult(junitResult: Validator.JUnitResult) {
                     showValidationResult(junitResult)
                 }
-            }
+            },
         )
 
         val disposable =
@@ -130,20 +122,15 @@ class Workspace(private val project: Project) : Disposable {
                     }
                 }
             },
-            disposable
+            disposable,
         )
         listenerDisposable = disposable
     }
 
-    /**
-     * @param testResultName the test result job id, which is also its file name
-     */
-    fun addPendingResult(testResultName: String, jobKey: TestJobInfo) {
-        pendingTestResults[testResultName] = jobKey
-    }
+    fun isErrorOccurred() = testGenerationData.isErrorOccurred
 
-    fun cancelPendingResult(id: String) {
-        pendingTestResults.remove(id)
+    fun errorOccurred() {
+        testGenerationData.isErrorOccurred = true
     }
 
     /**
@@ -157,15 +144,15 @@ class Workspace(private val project: Project) : Disposable {
      */
     fun receiveGenerationResult(
         testResultName: String,
-        testReport: CompactReport,
+        testReport: Report,
         cacheLazyPipeline: Pipeline? = null,
-        cachedJobKey: TestJobInfo? = null
+        cachedJobKey: TestJobInfo? = null,
     ): TestJobInfo {
-        val pendingJobKey = pendingTestResults.remove(testResultName)!!
+        val pendingJobKey = testGenerationData.pendingTestResults.remove(testResultName)!!
 
         val jobKey = cachedJobKey ?: pendingJobKey
 
-        val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
+        val resultsForFile = testGenerationData.testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
         val displayedSet = HashSet<String>()
         displayedSet.addAll(testReport.testCaseList.keys)
 
@@ -258,15 +245,15 @@ class Workspace(private val project: Project) : Disposable {
     private fun updateCoverage(
         linesToCover: Set<Int>,
         selectedTests: HashSet<String>,
-        testCaseList: CompactReport,
-        editor: Editor
+        testCaseList: Report,
+        editor: Editor,
     ) {
         val visualizationService = project.service<CoverageVisualisationService>()
         visualizationService.updateCoverage(linesToCover, selectedTests, testCaseList, editor)
     }
 
     private fun lastTestGeneration(fileName: String): TestJob? {
-        return testGenerationResults[fileName]?.last()
+        return testGenerationData.testGenerationResults[fileName]?.last()
     }
 
     override fun dispose() {
