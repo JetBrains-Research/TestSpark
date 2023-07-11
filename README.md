@@ -67,8 +67,8 @@ much as technically feasible by caching all generated test cases that the user h
 immediately. This then allows TestGenie to instantly show those tests later, when the user decides to
 generate tests for a method or class that those unapplied tests also covered.
 
-### Test validation
-To assure that the cached tests are still valid, we have static and dynamic validation which are run before showing any cached tests.
+[//]: # (### Test validation)
+[//]: # (To assure that the cached tests are still valid, we have static and dynamic validation which are run before showing any cached tests.)
 
 ### Accessibility Features
 Features which make the plugin more user-friendly. For instance, a color picker for coverage visualisation.
