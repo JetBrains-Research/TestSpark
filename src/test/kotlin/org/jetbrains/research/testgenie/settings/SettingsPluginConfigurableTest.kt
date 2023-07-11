@@ -8,6 +8,7 @@ import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.assertj.core.api.Assertions.assertThat
+import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
@@ -21,9 +22,13 @@ import java.util.stream.Stream
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettingsPluginConfigurableTest {
     private lateinit var settingsConfigurable: SettingsPluginConfigurable
+    private lateinit var settingsEvoConfigurable: SettingsEvoSuiteConfigurable
     private lateinit var settingsComponent: SettingsPluginComponent
+    private lateinit var settingsEvoComponent: SettingsEvoSuiteComponent
     private lateinit var settingsState: SettingsProjectState
     private lateinit var fixture: CodeInsightTestFixture
+    private lateinit var settingsApplicationState: SettingsApplicationState
+
 
     @BeforeEach
     fun setUp() {
@@ -38,8 +43,17 @@ class SettingsPluginConfigurableTest {
 
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
+
+        settingsEvoConfigurable = SettingsEvoSuiteConfigurable()
+        settingsEvoConfigurable.createComponent()
+        settingsEvoConfigurable.reset()
+
+        settingsEvoComponent = settingsEvoConfigurable.settingsComponent!!
+
         settingsComponent = settingsConfigurable.settingsComponent!!
         settingsState = fixture.project.service<SettingsProjectService>().state
+
+        settingsApplicationState = SettingsApplicationService.getInstance().state!!
     }
 
     @AfterEach
@@ -74,27 +88,27 @@ class SettingsPluginConfigurableTest {
     @Test
     @Order(1)
     fun testIsModifiedJavaPath() {
-        settingsComponent.javaPath = "this is modified: first"
-        assertThat(settingsConfigurable.isModified).isTrue
-        assertThat(settingsComponent.javaPath).isNotEqualTo(settingsState.javaPath)
+        settingsApplicationState.javaPath = "this is modified: first"
+        assertThat(settingsEvoConfigurable.isModified).isTrue
+        assertThat(settingsEvoComponent.javaPath).isNotEqualTo(settingsApplicationState.javaPath)
     }
 
     @Order(4)
     @Test
     fun testResetJavaPath() {
-        val oldValue = settingsComponent.javaPath
-        settingsComponent.javaPath = "this is modified: second"
-        settingsConfigurable.reset()
-        assertThat(oldValue).isEqualTo(settingsComponent.javaPath)
+        val oldValue = settingsEvoComponent.javaPath
+        settingsEvoComponent.javaPath = "this is modified: second"
+        settingsEvoConfigurable.reset()
+        assertThat(oldValue).isEqualTo(settingsEvoComponent.javaPath)
     }
 
     @Test
     fun testApplyJavaPath() {
-        val oldValue = settingsComponent.javaPath
-        settingsComponent.javaPath = "this is modified: third"
+        val oldValue = settingsApplicationState.javaPath
+        settingsApplicationState.javaPath = "this is modified: third"
         settingsConfigurable.apply()
-        assertThat(oldValue).isNotEqualTo(settingsComponent.javaPath)
-        assertThat(oldValue).isNotEqualTo(settingsState.javaPath)
+        assertThat(oldValue).isNotEqualTo(settingsApplicationState.javaPath)
+        assertThat(oldValue).isNotEqualTo(settingsApplicationState.javaPath)
     }
 
     private fun intValueGenerator(): Stream<Arguments> {
