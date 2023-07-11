@@ -15,7 +15,6 @@ import java.awt.Color
 import java.awt.Dimension
 import javax.swing.JCheckBox
 import javax.swing.JColorChooser
-import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
