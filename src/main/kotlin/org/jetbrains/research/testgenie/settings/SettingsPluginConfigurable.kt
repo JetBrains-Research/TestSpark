@@ -32,7 +32,6 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
      */
     override fun reset() {
         val settingsState: SettingsProjectState = projectDuplicate.service<SettingsProjectService>().state
-        settingsComponent!!.javaPath = settingsState.javaPath
         settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
         settingsComponent!!.colorGreen = settingsState.colorGreen
@@ -52,8 +51,8 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: SettingsProjectState = projectDuplicate.service<SettingsProjectService>().state
-        var modified: Boolean = settingsComponent!!.javaPath != settingsState.javaPath
-        modified = modified or (settingsComponent!!.buildPath != settingsState.buildPath)
+//        var modified: Boolean = settingsComponent!!.javaPath != settingsState.javaPath
+        var modified: Boolean = settingsComponent!!.buildPath != settingsState.buildPath
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
         modified = modified or (settingsComponent!!.colorGreen != settingsState.colorGreen)
         modified = modified or (settingsComponent!!.colorBlue != settingsState.colorBlue)
@@ -68,7 +67,6 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
      */
     override fun apply() {
         val settingsState: SettingsProjectState = projectDuplicate.service<SettingsProjectService>().state
-        settingsState.javaPath = settingsComponent!!.javaPath
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen
         settingsState.colorBlue = settingsComponent!!.colorBlue
@@ -103,9 +101,9 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
      *
      *  @return preferred UI component
      */
-    override fun getPreferredFocusedComponent(): JComponent {
-        return settingsComponent!!.getPreferredFocusedComponent()
-    }
+//    override fun getPreferredFocusedComponent(): JComponent {
+//        return settingsComponent!!.getPreferredFocusedComponent()
+//    }
 
     /**
      * Disposes the UI resources. It is called when a user closes the Settings dialog.

@@ -40,9 +40,6 @@ class SettingsPluginComponent(project: Project) {
             "existing test suites. They are not meant to replace writing tests manually."
     )
 
-    // Environment options (Java path)
-    private var javaPathTextField = JTextField()
-
     // BuildPath options
     private var buildPathTextField = JTextField()
 
@@ -99,7 +96,7 @@ class SettingsPluginComponent(project: Project) {
             .addComponent(pluginDescription)
             .addComponent(pluginDescriptionDisclaimer, 15)
             .addComponent(JXTitledSeparator(TestGenieLabelsBundle.defaultValue("environmentSettings")), 15)
-            .addLabeledComponent(JBLabel(TestGenieLabelsBundle.defaultValue("javaPath")), javaPathTextField, 10, false)
+//            .addLabeledComponent(JBLabel(TestGenieLabelsBundle.defaultValue("javaPath")), javaPathTextField, 10, false)
             // Add buildPath option
             .addLabeledComponent(JBLabel(TestGenieLabelsBundle.defaultValue("buildPath")), buildPathTextField, 10, false)
             // Add buildPath option
@@ -154,8 +151,6 @@ class SettingsPluginComponent(project: Project) {
 
         // Set colorPicker to wrap around dimensions
         colorPicker.preferredSize = Dimension(width ?: 100, height ?: 400)
-
-        javaPathTextField.toolTipText = TestGenieToolTipsBundle.defaultValue("javaPath")
     }
 
     /**
@@ -163,17 +158,17 @@ class SettingsPluginComponent(project: Project) {
      *
      * @return preferred UI component
      */
-    fun getPreferredFocusedComponent(): JComponent {
-        return javaPathTextField
-    }
+//    fun getPreferredFocusedComponent(): JComponent {
+//        return javaPathTextField
+//    }
 
     // Settings "changers"
 
-    var javaPath: String
-        get() = javaPathTextField.text
-        set(newConfig) {
-            javaPathTextField.text = newConfig
-        }
+//    var javaPath: String
+//        get() = javaPathTextField.text
+//        set(newConfig) {
+//            javaPathTextField.text = newConfig
+//        }
 
     var buildPath: String
         get() = buildPathTextField.text

@@ -66,7 +66,7 @@ class EvoSuiteProcessManager(
 
             // construct command
             val cmd = ArrayList<String>()
-            cmd.add(settingsProjectState.javaPath)
+            cmd.add(settingsApplicationState!!.javaPath)
             cmd.add("-Djdk.attach.allowAttachSelf=true")
             cmd.add("-jar")
             cmd.add(evoSuitePath)

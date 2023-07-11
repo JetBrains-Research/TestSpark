@@ -6,6 +6,7 @@ import org.jetbrains.research.testgenie.TestGenieDefaultsBundle
  * This class is the actual data class that stores the values of the EvoSuite Settings entries.
  */
 data class SettingsApplicationState(
+    var javaPath: String = SettingsProjectState.DefaultSettingsPluginState.javaPath,
     var sandbox: Boolean = DefaultSettingsApplicationState.sandbox,
     var assertions: Boolean = DefaultSettingsApplicationState.assertions,
     var seed: String = DefaultSettingsApplicationState.seed,

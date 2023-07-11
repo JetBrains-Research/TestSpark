@@ -24,6 +24,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
@@ -47,6 +48,7 @@ class Validator(
 ) {
     private val logger: Logger = Logger.getInstance(this.javaClass)
     private val settingsState = project.service<SettingsProjectService>().state
+    private val settingsApplicationState = SettingsApplicationService.getInstance().state
     private val junitTimeout: Long = 12000000 // TODO: Source from config
 
     private val sep = File.separatorChar
@@ -202,7 +204,7 @@ class Validator(
 
         // construct command
         val cmd = ArrayList<String>()
-        cmd.add(settingsState.javaPath)
+        cmd.add(settingsApplicationState!!.javaPath)
         cmd.add("-cp")
         cmd.add(classpath)
         cmd.add("org.junit.runner.JUnitCore")
@@ -272,7 +274,7 @@ class Validator(
         // delete old report
         File(jacocoReportPath).delete()
         val cmd = ArrayList<String>()
-        cmd.add(settingsState.javaPath)
+        cmd.add(settingsApplicationState!!.javaPath)
         cmd.add("-javaagent:$jacocoPath=destfile=$jacocoReportPath")
         cmd.add("-cp")
         cmd.add(classpath)
