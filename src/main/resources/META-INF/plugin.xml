@@ -6,7 +6,25 @@
 
 
     <description><![CDATA[
-    <p>TestGenie is a plugin for generating unit tests. TestGenie natively integrates <a href="https://www.evosuite.org">EvoSuite</a> into the IDE. </p>
+    <p>TestGenie is a plugin for generating unit tests. TestGenie natively integrates different AI-based test generation tools and techniques in the IDE. </p>
+
+    <p> TestGenie currently supports two test generation strategies:</p>
+    <ul>
+        <li>LLM-based test generation (using Grazie platform)</li>
+        <li>Local search-based test generation (using <a href="https://www.evosuite.org">EvoSuite</a>)</li>
+    </ul>
+
+    <h4>LLM-based test generation</h4>
+    <p>For this type of test generation, TestGenie uses Grazie platform APIs to send request to different Large Language Models. Currently, we use GPT-4.</p>
+    <p>This feature needs a Grazie platform token, which means that at this point it can be used by JetBrains employees. We are working on making it available for all users in the near future.</p>
+    <ul>
+        <li>Supports Java (any version).</li>
+        <li>Generates unit tests for capturing failures.</li>
+        <li>Generate tests for Java classes</li>
+    </ul>
+
+    <h4>Local search-based test generation</h4>
+    <p>For this type of test generation, TestGenie uses <a href="https://www.evosuite.org">EvoSuite</a>, which is the  most powerful search-based local test generator. </p>
     <ul>
         <li>Supports up to Java 11.</li>
         <li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage, mutation score.</li>
