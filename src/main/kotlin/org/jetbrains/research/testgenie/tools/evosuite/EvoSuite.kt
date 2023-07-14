@@ -4,65 +4,52 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
-import com.intellij.openapi.editor.Document
-import com.intellij.psi.PsiDocumentManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
-import com.intellij.refactoring.suggested.endOffset
-import com.intellij.refactoring.suggested.startOffset
-import org.jetbrains.research.testgenie.actions.calculateLinesToInvalidate
-import org.jetbrains.research.testgenie.actions.createEvoSuitePipeline
+import org.jetbrains.research.testgenie.actions.createPipeline
 import org.jetbrains.research.testgenie.actions.getSurroundingLine
 import org.jetbrains.research.testgenie.actions.getSurroundingMethod
+import org.jetbrains.research.testgenie.data.CodeType
+import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.services.RunnerService
+import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.tools.Tool
+import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProcessManager
 
 class EvoSuite(override val name: String = "EvoSuite") : Tool {
+    private fun getEvoSuiteProcessManager(e: AnActionEvent): EvoSuiteProcessManager {
+        val project: Project = e.project!!
+        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        val settingsProjectState = project.service<SettingsProjectService>().state
+        val buildPath = "$projectPath/${settingsProjectState.buildPath}"
+        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
+        val fileUrl = vFile.presentableUrl
+        val modificationStamp = vFile.modificationStamp
+        return EvoSuiteProcessManager(project, projectPath, buildPath, fileUrl, modificationStamp)
+    }
+
     override fun generateTestsForClass(e: AnActionEvent) {
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val project = e.project!!
-        val runnerService = project.service<RunnerService>()
-        if (runnerService.isGeneratorRunning()) return
-        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e)
-        evoSuitePipeline.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
+        if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.CLASS))
     }
 
     override fun generateTestsForMethod(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val project = e.project!!
-        val runnerService = project.service<RunnerService>()
-        if (runnerService.isGeneratorRunning()) return
+        if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
         val methodDescriptor = generateMethodDescriptor(psiMethod)
-        val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile)!!
-        val cacheStartLine: Int = doc.getLineNumber(psiMethod.startOffset)
-        val cacheEndLine: Int = doc.getLineNumber(psiMethod.endOffset)
-        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e)
-        evoSuitePipeline
-            .forMethod(methodDescriptor)
-            .withCacheLines(cacheStartLine, cacheEndLine)
-            .invalidateCache(linesToInvalidateFromCache)
-            .runTestGeneration()
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.METHOD, methodDescriptor))
     }
 
     override fun generateTestsForLine(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)
-            ?: return // lines in the editor and in EvoSuite are one-based
-        val project = e.project!!
-        val runnerService = project.service<RunnerService>()
-        if (runnerService.isGeneratorRunning()) return
-        val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
-        val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e)
-        evoSuitePipeline
-            .forLine(selectedLine)
-            .withCacheLines(selectedLine - 1, selectedLine - 1)
-            .invalidateCache(linesToInvalidateFromCache)
-            .runTestGeneration()
+        val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
+        if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.LINE, selectedLine))
     }
 }

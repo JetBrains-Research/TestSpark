@@ -52,7 +52,7 @@ class Pipeline(
     }
 
     fun runTestGeneration() {
-        clearDataBeforeTestGeneration(project, key, testResultName)
+        clearDataBeforeTestGeneration(project, testResultName)
 
         val projectBuilder = ProjectBuilder(project)
 

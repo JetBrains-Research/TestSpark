@@ -1,6 +1,7 @@
 package org.jetbrains.research.testgenie.tools
 
 import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -10,7 +11,8 @@ import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.Util
 import org.jetbrains.research.testgenie.services.RunnerService
-import org.jetbrains.research.testgenie.data.CodeType
+import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
 import java.util.UUID
@@ -26,25 +28,29 @@ class Pipeline(
 ) {
     private val sep = File.separatorChar
 
+    private val log = Logger.getInstance(this::class.java)
+
     private val id = UUID.randomUUID().toString()
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
     private val testResultName = "test_gen_result_$id"
     private var baseDir = "$testResultDirectory$testResultName-validation"
 
-    private val resultPath = "$testResultDirectory$testResultName"
+    private val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
-    var key = getKey(fileUrl, classFQN, modTs, testResultName, projectClassPath)
+    private val resultPath = "$testResultDirectory$testResultName"
 
     init {
         Util.makeTmp()
         Util.makeDir(baseDir)
+
+        project.service<Workspace>().key = getKey(fileUrl, classFQN, modTs, testResultName, projectClassPath)
     }
 
     /**
      * Builds the project and launches generation on a separate thread.
      */
-    fun runTestGeneration(processManager: ProcessManager, codeType: CodeType) {
-        clearDataBeforeTestGeneration(project, key, testResultName)
+    fun runTestGeneration(processManager: ProcessManager, codeType: CodeTypeAndAdditionData) {
+        clearDataBeforeTestGeneration(project, testResultName)
 
         val projectBuilder = ProjectBuilder(project)
 
@@ -61,11 +67,14 @@ class Pipeline(
                             indicator,
                             codeType,
                             resultPath,
+                            serializeResultPath,
                             packageName,
                             cutModule,
                             classFQN,
                             fileUrl,
                             testResultName,
+                            baseDir,
+                            log,
                         )
                     }
 

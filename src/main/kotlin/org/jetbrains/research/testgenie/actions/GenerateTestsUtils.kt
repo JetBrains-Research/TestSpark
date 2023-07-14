@@ -24,22 +24,13 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
+import org.jetbrains.research.testgenie.tools.Pipeline
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
+import com.intellij.openapi.module.Module
 
-/**
- * This file contains some useful methods and values related to GenerateTests actions.
- */
-
-/**
- * Extracts the required information from an action event and creates an (EvoSuite) Pipeline.
- *
- * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @return the created (EvoSuite) Pipeline, null if some information is missing or if there is no surrounding class
- */
-fun createEvoSuitePipeline(e: AnActionEvent): Pipeline {
+fun createPipeline(e: AnActionEvent): Pipeline {
     val project: Project = e.project!!
 
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
@@ -59,15 +50,10 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline {
 
     log.info("Selected class is $classFQN")
 
-    val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile)!!
-    val cacheStartLine: Int = doc.getLineNumber(psiClass.startOffset)
-    val cacheEndLine: Int = doc.getLineNumber(psiClass.endOffset)
-    log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
+    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
+    val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
 
-    return Pipeline(project, projectPath, buildPath, classFQN, fileUrl, modificationStamp).withCacheLines(
-        cacheStartLine,
-        cacheEndLine,
-    )
+    return Pipeline(project, projectPath, cutModule, buildPath, modificationStamp, classFQN, fileUrl)
 }
 
 fun PsiMethod.getSignatureString(): String {

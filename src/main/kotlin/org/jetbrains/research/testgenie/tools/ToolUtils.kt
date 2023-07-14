@@ -7,7 +7,6 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 import java.io.File
 
 // get junit imports from a generated code
@@ -45,20 +44,10 @@ fun saveData(project: Project, report: Report, resultName: String, fileUrl: Stri
 fun getKey(fileUrl: String, classFQN: String, modTs: Long, testResultName: String, projectClassPath: String): Workspace.TestJobInfo =
     Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
-fun clearDataBeforeTestGeneration(project: Project, key: Workspace.TestJobInfo, testResultName: String) {
+fun clearDataBeforeTestGeneration(project: Project, testResultName: String) {
     val workspace = project.service<Workspace>()
     workspace.testGenerationData.clear(project)
-    workspace.testGenerationData.pendingTestResults[testResultName] = key
-}
-
-fun receiveGenerationResult(
-    project: Project,
-    testResultName: String,
-    report: Report,
-    cacheLazyPipeline: Pipeline? = null,
-    cachedJobKey: Workspace.TestJobInfo? = null,
-) {
-    project.service<Workspace>().receiveGenerationResult(testResultName, report, cacheLazyPipeline, cachedJobKey)
+    workspace.testGenerationData.pendingTestResults[testResultName] = project.service<Workspace>().key!!
 }
 
 fun cancelPendingResult(project: Project, testResultName: String) {

@@ -41,13 +41,11 @@ import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
 import java.awt.BorderLayout
 import java.awt.Color
-import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
@@ -63,8 +61,6 @@ import javax.swing.Box
 import javax.swing.border.Border
 
 class TestCaseDisplayService(private val project: Project) {
-
-    private var cacheLazyPipeline: Pipeline? = null
 
     private var mainPanel: JPanel = JPanel()
     private var applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
@@ -147,11 +143,9 @@ class TestCaseDisplayService(private val project: Project) {
      * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
      */
-    fun showGeneratedTests(testJob: Workspace.TestJob, editor: Editor, cacheLazyPipeline: Pipeline?) {
+    fun showGeneratedTests(testJob: Workspace.TestJob, editor: Editor) {
         this.testJob = testJob
-        this.cacheLazyPipeline = cacheLazyPipeline
         displayTestCases(testJob.report, editor)
-        displayLazyRunnerButton()
         createToolWindowTab()
     }
 
@@ -842,34 +836,5 @@ class TestCaseDisplayService(private val project: Project) {
                 TestGenieTelemetryService.ModifiedTestCase(original, modified)
             }.filter { it.modified != it.original },
         )
-    }
-
-    /**
-     * Display the button to actually invoke EvoSuite if the tests are cached.
-     */
-    private fun displayLazyRunnerButton() {
-        cacheLazyPipeline ?: return
-
-        val lazyRunnerPanel = JPanel()
-        lazyRunnerPanel.layout = BoxLayout(lazyRunnerPanel, BoxLayout.Y_AXIS)
-        val lazyRunnerLabel = JLabel("Showing previously generated test cases from the cache.")
-        lazyRunnerLabel.alignmentX = Component.CENTER_ALIGNMENT
-        lazyRunnerPanel.add(lazyRunnerLabel)
-
-        val lazyRunnerButton = JButton("Generate new tests")
-
-        lazyRunnerButton.addActionListener {
-            lazyRunnerButton.isEnabled = false
-            cacheLazyPipeline!!
-                .withoutCache()
-                .runTestGeneration()
-        }
-
-        lazyRunnerButton.alignmentX = Component.CENTER_ALIGNMENT
-        lazyRunnerPanel.add(lazyRunnerButton)
-
-        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 50)))
-        allTestCasePanel.add(lazyRunnerPanel)
-        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 50)))
     }
 }

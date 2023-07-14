@@ -254,7 +254,7 @@ class TestCaseCachingService {
         val testCode: String,
         val jobInfo: Workspace.TestJobInfo,
         private val coveredLines: Set<LineTestCaseCache>,
-        private val fileTestCaseCache: FileTestCaseCache
+        private val fileTestCaseCache: FileTestCaseCache,
     ) {
         /**
          * Convert this cached test case back to a compact test case.
@@ -268,7 +268,7 @@ class TestCaseCachingService {
                 coveredLines.map { it.lineNumber }.toSet(),
                 // empty mutation and branch coverage as this is not calculated dynamically
                 setOf(),
-                setOf()
+                setOf(),
             )
         }
 
@@ -318,7 +318,7 @@ class TestCaseCachingService {
             fun fromCompactTestCase(
                 testCase: TestCase,
                 fileTestCaseCache: FileTestCaseCache,
-                jobInfo: Workspace.TestJobInfo
+                jobInfo: Workspace.TestJobInfo,
             ): CachedCompactTestCase {
                 return CachedCompactTestCase(
                     testCase.testName,
@@ -327,7 +327,7 @@ class TestCaseCachingService {
                     testCase.coveredLines.map {
                         fileTestCaseCache.getLineTestCaseCache(it)
                     }.toSet(),
-                    fileTestCaseCache
+                    fileTestCaseCache,
                 )
             }
         }
