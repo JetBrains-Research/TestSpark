@@ -9,7 +9,6 @@ import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.tools.getBuildPath
-import org.jetbrains.research.testgenie.tools.llm.TestCoverageCollector
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
@@ -81,7 +80,6 @@ class LLMProcessManager(
                 llmErrorManager.errorProcess(TestGenieBundle.message("savingTestFileIssue"), project)
             }
 
-            // TODO move this operation to Manager
             // Collect coverage information for each generated test method and display it
             val coverageCollector = TestCoverageCollector(
                 indicator,

@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.tools.toolImpls
+package org.jetbrains.research.testgenie.tools.evosuite
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -17,14 +17,13 @@ import org.jetbrains.research.testgenie.actions.getSurroundingMethod
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.services.RunnerService
 import org.jetbrains.research.testgenie.tools.Tool
-import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 
 class EvoSuite(override val name: String = "EvoSuite") : Tool {
     override fun generateTestsForClass(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val project = e.project!!
         val runnerService = project.service<RunnerService>()
-        if (!runnerService.verify(psiFile)) return
+        if (runnerService.isGeneratorRunning()) return
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
         val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e)
         evoSuitePipeline.forClass().invalidateCache(linesToInvalidateFromCache).runTestGeneration()
@@ -33,9 +32,9 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
     override fun generateTestsForMethod(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val project = e.project ?: return
+        val project = e.project!!
         val runnerService = project.service<RunnerService>()
-        if (!runnerService.verify(psiFile)) return
+        if (runnerService.isGeneratorRunning()) return
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
         val methodDescriptor = generateMethodDescriptor(psiMethod)
         val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile)!!
@@ -57,7 +56,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             ?: return // lines in the editor and in EvoSuite are one-based
         val project = e.project!!
         val runnerService = project.service<RunnerService>()
-        if (!runnerService.verify(psiFile)) return
+        if (runnerService.isGeneratorRunning()) return
         val linesToInvalidateFromCache = calculateLinesToInvalidate(psiFile)
         val evoSuitePipeline: Pipeline = createEvoSuitePipeline(e)
         evoSuitePipeline

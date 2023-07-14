@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.tools.llm
+package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.execution.configurations.GeneralCommandLine

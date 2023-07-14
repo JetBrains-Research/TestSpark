@@ -15,6 +15,7 @@ class TestGenerationData {
     var importsCode: String = ""
     var packageLine: String = ""
 
+    // TODO move to a separate service
     var isErrorOccurred = false
 
     // Maps a workspace file to the test generation jobs that were triggered on it.

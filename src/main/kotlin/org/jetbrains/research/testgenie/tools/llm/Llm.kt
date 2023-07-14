@@ -1,10 +1,9 @@
-package org.jetbrains.research.testgenie.tools.toolImpls
+package org.jetbrains.research.testgenie.tools.llm
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.createLLMPipeline
 import org.jetbrains.research.testgenie.tools.Tool
-import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 
 class Llm(override val name: String = "Llm") : Tool {
@@ -16,7 +15,7 @@ class Llm(override val name: String = "Llm") : Tool {
             llmErrorManager.errorProcess(TestGenieBundle.message("missingToken"), project)
             return
         }
-        val llmPipeline: org.jetbrains.research.testgenie.tools.llm.Pipeline = createLLMPipeline(e)
+        val llmPipeline: Pipeline = createLLMPipeline(e)
         llmPipeline.forClass().runTestGeneration()
     }
 

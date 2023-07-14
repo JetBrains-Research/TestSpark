@@ -5,7 +5,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.tools.evosuite.TestGenerationResultListener
+import org.jetbrains.research.testgenie.tools.TestGenerationResultListener
 import org.jetbrains.research.testgenie.services.TestCaseCachingService
 import org.jetbrains.research.testgenie.data.Report
 

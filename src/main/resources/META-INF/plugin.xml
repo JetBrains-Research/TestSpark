@@ -117,6 +117,8 @@
                 displayName="Large Language Models"/>
 
         <!-- Notifications -->
+        <notificationGroup id="Execution Error"
+                           displayType="BALLOON"/>
         <notificationGroup id="EvoSuite Execution Error"
                            displayType="BALLOON"/>
         <notificationGroup id="Test Validation Error"
@@ -133,7 +135,7 @@
     <projectListeners>
         <listener
                 class="org.jetbrains.research.testgenie.listener.TestGenerationResultListenerImpl"
-                topic="org.jetbrains.research.testgenie.tools.evosuite.TestGenerationResultListener"/>
+                topic="org.jetbrains.research.testgenie.tools.TestGenerationResultListener"/>
         <listener
                 class="org.jetbrains.research.testgenie.listener.TelemetrySubmitListenerImpl"
                 topic="com.intellij.openapi.startup.ProjectActivity"/>

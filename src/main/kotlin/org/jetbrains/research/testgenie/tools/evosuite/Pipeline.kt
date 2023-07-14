@@ -140,10 +140,8 @@ class Pipeline(
 
     /**
      * Builds the project and launches EvoSuite on a separate thread.
-     *
-     * @return the path to which results will be (eventually) saved
      */
-    fun runTestGeneration(): String {
+    fun runTestGeneration() {
         log.info("Starting build and EvoSuite task")
         log.info("EvoSuite results will be saved to $serializeResultPath")
 
@@ -185,8 +183,6 @@ class Pipeline(
         // TODO uncomment after the validator fixing
 //        val testCaseDisplayService = project.service<TestCaseDisplayService>()
 //        testCaseDisplayService.toggleJacocoButton.isEnabled = false
-
-        return testResultName
     }
 
     /**

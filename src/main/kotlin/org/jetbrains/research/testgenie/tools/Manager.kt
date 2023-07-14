@@ -5,9 +5,8 @@ import com.intellij.openapi.components.service
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.tools.evosuite.TEST_GENERATION_RESULT_TOPIC
-import org.jetbrains.research.testgenie.tools.toolImpls.EvoSuite
-import org.jetbrains.research.testgenie.tools.toolImpls.Llm
+import org.jetbrains.research.testgenie.tools.evosuite.EvoSuite
+import org.jetbrains.research.testgenie.tools.llm.Llm
 
 class Manager {
     companion object {
