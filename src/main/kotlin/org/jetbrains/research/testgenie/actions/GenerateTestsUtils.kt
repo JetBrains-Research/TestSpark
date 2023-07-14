@@ -53,7 +53,7 @@ fun createPipeline(e: AnActionEvent): Pipeline {
     val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
     val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
 
-    return Pipeline(project, projectPath, cutModule, buildPath, modificationStamp, classFQN, fileUrl)
+    return Pipeline(project, projectPath, cutModule, buildPath, modificationStamp, fileUrl, classFQN)
 }
 
 fun PsiMethod.getSignatureString(): String {

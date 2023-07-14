@@ -51,7 +51,19 @@ class EvoSuiteProcessManager(
      *
      * @param indicator the progress indicator
      */
-    override fun runTestGenerator(indicator: ProgressIndicator, codeType: CodeTypeAndAdditionData, resultPath: String, serializeResultPath: String, packageName: String, cutModule: Module, classFQN: String, fileUrl: String, testResultName: String, baseDir: String, log: Logger) {
+    override fun runTestGenerator(
+        indicator: ProgressIndicator,
+        codeType: CodeTypeAndAdditionData,
+        resultPath: String,
+        serializeResultPath: String,
+        packageName: String,
+        cutModule: Module,
+        classFQN: String,
+        fileUrl: String,
+        testResultName: String,
+        baseDir: String,
+        log: Logger,
+    ) {
         try {
             // get command
             val command = when (codeType.type!!) {
@@ -60,6 +72,7 @@ class EvoSuiteProcessManager(
                     project.service<Workspace>().key = getKey(fileUrl, "$classFQN#${codeType.objectDescription}", modificationStamp, testResultName, projectClassPath)
                     SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forMethod(codeType.objectDescription).build()
                 }
+
                 CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
             }
 
