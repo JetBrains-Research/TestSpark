@@ -9,6 +9,7 @@ interface ProcessManager {
     fun runTestGenerator(
         indicator: ProgressIndicator,
         codeType: CodeTypeAndAdditionData,
+        projectClassPath: String,
         resultPath: String,
         serializeResultPath: String,
         packageName: String,

@@ -30,8 +30,6 @@ import java.util.regex.Pattern
 class EvoSuiteProcessManager(
     private val project: Project,
     private val projectPath: String,
-    private val projectClassPath: String,
-    private val fileUrl: String,
     private val modificationStamp: Long,
 ) : ProcessManager {
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
@@ -54,6 +52,7 @@ class EvoSuiteProcessManager(
     override fun runTestGenerator(
         indicator: ProgressIndicator,
         codeType: CodeTypeAndAdditionData,
+        projectClassPath: String,
         resultPath: String,
         serializeResultPath: String,
         packageName: String,

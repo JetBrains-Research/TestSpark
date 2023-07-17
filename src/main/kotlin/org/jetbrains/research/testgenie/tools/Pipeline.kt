@@ -82,6 +82,7 @@ class Pipeline(
                         processManager.runTestGenerator(
                             indicator,
                             codeType,
+                            projectClassPath,
                             resultPath,
                             serializeResultPath,
                             packageName,

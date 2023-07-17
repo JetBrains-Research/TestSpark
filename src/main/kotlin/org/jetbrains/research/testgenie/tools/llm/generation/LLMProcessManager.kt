@@ -24,7 +24,6 @@ import kotlin.io.path.createDirectories
 
 class LLMProcessManager(
     private val project: Project,
-    private val projectClassPath: String,
     classesToTest: MutableList<PsiClass>,
     interestingPsiClasses: MutableSet<PsiClass>,
     polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
@@ -42,6 +41,7 @@ class LLMProcessManager(
     override fun runTestGenerator(
         indicator: ProgressIndicator,
         codeType: CodeTypeAndAdditionData,
+        projectClassPath: String,
         resultPath: String,
         serializeResultPath: String,
         packageName: String,

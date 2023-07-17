@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testgenie.TestGenieBundle
@@ -24,7 +23,6 @@ class Llm(override val name: String = "Llm") : Tool {
 
     private fun getLLMProcessManager(e: AnActionEvent): LLMProcessManager {
         val project: Project = e.project!!
-        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
         val classesToTest = mutableListOf<PsiClass>()
         // check if cut has any none java super class
@@ -52,7 +50,7 @@ class Llm(override val name: String = "Llm") : Tool {
         val interestingPsiClasses = getInterestingPsiClasses(cutPsiClass, classesToTest)
         val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cutPsiClass)
 
-        return LLMProcessManager(project, projectClassPath, classesToTest, interestingPsiClasses, polymorphismRelations)
+        return LLMProcessManager(project, classesToTest, interestingPsiClasses, polymorphismRelations)
     }
 
     override fun generateTestsForClass(e: AnActionEvent) {

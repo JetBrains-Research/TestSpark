@@ -21,13 +21,12 @@ import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProces
 class EvoSuite(override val name: String = "EvoSuite") : Tool {
     private fun getEvoSuiteProcessManager(e: AnActionEvent): EvoSuiteProcessManager {
         val project: Project = e.project!!
-        val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val settingsProjectState = project.service<SettingsProjectService>().state
-        val buildPath = "$projectPath/${settingsProjectState.buildPath}"
+        val buildPath = "$projectClassPath/${settingsProjectState.buildPath}"
         val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
-        val fileUrl = vFile.presentableUrl
         val modificationStamp = vFile.modificationStamp
-        return EvoSuiteProcessManager(project, projectPath, buildPath, fileUrl, modificationStamp)
+        return EvoSuiteProcessManager(project, buildPath, modificationStamp)
     }
 
     override fun generateTestsForClass(e: AnActionEvent) {
