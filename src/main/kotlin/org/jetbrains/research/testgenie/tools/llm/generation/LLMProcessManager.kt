@@ -5,7 +5,9 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
+import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.tools.getBuildPath
@@ -15,6 +17,7 @@ import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.saveData
+import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -22,23 +25,30 @@ import kotlin.io.path.createDirectories
 class LLMProcessManager(
     private val project: Project,
     private val projectClassPath: String,
-) {
+    classesToTest: MutableList<PsiClass>,
+    interestingPsiClasses: MutableSet<PsiClass>,
+    polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
+) : ProcessManager {
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private var testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val llmRequestManager = LLMRequestManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
+    private val prompt = PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePrompt()
 
-    fun runLLMTestGenerator(
+    override fun runTestGenerator(
         indicator: ProgressIndicator,
-        prompt: String,
+        codeType: CodeTypeAndAdditionData,
         resultPath: String,
+        serializeResultPath: String,
         packageName: String,
         cutModule: Module,
         classFQN: String,
         fileUrl: String,
         testResultName: String,
+        baseDir: String,
+        log: Logger,
     ) {
         // update build path
         var buildPath = projectClassPath

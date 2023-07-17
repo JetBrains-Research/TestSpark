@@ -18,17 +18,17 @@ import com.intellij.psi.PsiCodeBlock
 import com.intellij.psi.PsiStatement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 import org.jetbrains.research.testgenie.tools.Pipeline
-import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import com.intellij.openapi.module.Module
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.searches.ClassInheritorsSearch
+import com.intellij.psi.util.PsiTypesUtil
+import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 
 fun createPipeline(e: AnActionEvent): Pipeline {
     val project: Project = e.project!!
@@ -42,18 +42,18 @@ fun createPipeline(e: AnActionEvent): Pipeline {
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
     val classFQN = psiClass.qualifiedName!!
 
-    val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+    val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
     val log = Logger.getInstance("GenerateTestsUtils")
     val settingsProjectState = project.service<SettingsProjectService>().state
-    val buildPath = "$projectPath/${settingsProjectState.buildPath}"
+    val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
 
     log.info("Selected class is $classFQN")
 
     val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
     val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
 
-    return Pipeline(project, projectPath, cutModule, buildPath, modificationStamp, fileUrl, classFQN)
+    return Pipeline(project, projectClassPath, cutModule, packageName, modificationStamp, fileUrl, classFQN)
 }
 
 fun PsiMethod.getSignatureString(): String {
@@ -61,7 +61,7 @@ fun PsiMethod.getSignatureString(): String {
     return text.substring(0, bodyStart).replace('\n', ' ').trim()
 }
 
-fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.llm.Pipeline {
+fun createLLMPipeline(e: AnActionEvent): Pipeline {
     val project: Project = e.project!!
 
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
@@ -71,37 +71,24 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
     val modificationStamp = vFile.modificationStamp
 
     val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
+    val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
     val classFQN = cutPsiClass.qualifiedName!!
     val fileUrl = vFile.presentableUrl
 
-    val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
+    val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+    val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
+    packageList.removeLast()
 
-    val classesToTest = mutableListOf<PsiClass>()
-    // check if cut has any none java super class
-    val maxPolymorphismDepth = SettingsArguments.maxPolyDepth()
-    val maxParametersDepth = SettingsArguments.maxInputParamsDepth()
+    return Pipeline(project, projectClassPath, cutModule, packageList.joinToString("."), modificationStamp, fileUrl, classFQN)
+}
 
-    var currentPsiClass = cutPsiClass
-    for (index in 0 until maxPolymorphismDepth) {
-        if (!classesToTest.contains(currentPsiClass)) {
-            classesToTest.add(currentPsiClass)
-        }
-
-        if (currentPsiClass.superClass == null ||
-            currentPsiClass.superClass!!.qualifiedName == null ||
-            currentPsiClass.superClass!!.qualifiedName!!.startsWith("java.")
-        ) {
-            break
-        }
-        currentPsiClass = currentPsiClass.superClass!!
-    }
-
-    // Collect interesting classes (i.e., methods that are passed as input arguments to CUT)
+// Collect interesting classes (i.e., methods that are passed as input arguments to CUT)
+fun getInterestingPsiClasses(cutPsiClass: PsiClass, classesToTest: MutableList<PsiClass>): MutableSet<PsiClass> {
     val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf(cutPsiClass)
 
     var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
 
-    repeat(maxParametersDepth) {
+    repeat(SettingsArguments.maxInputParamsDepth()) {
         val tempListOfClasses = mutableListOf<PsiClass>()
 
         currentLevelClasses.forEach { classIt ->
@@ -123,8 +110,15 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         interestingPsiClasses.addAll(tempListOfClasses)
     }
 
-    // Collect polymorphism Relations in identified interesting classes
+    return interestingPsiClasses
+}
+
+// Collect polymorphism Relations in identified interesting classes
+fun getPolymorphismRelations(project: Project, interestingPsiClasses: MutableSet<PsiClass>, cutPsiClass: PsiClass): MutableMap<PsiClass, MutableList<PsiClass>> {
     val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
+
+    val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
+
     interestingPsiClasses.forEach { currentInterestingClass ->
         val scope = GlobalSearchScope.projectScope(project)
         val query = ClassInheritorsSearch.search(currentInterestingClass, scope, false)
@@ -141,24 +135,7 @@ fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.
         }
     }
 
-    val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    val settingsProjectState = project.service<SettingsProjectService>().state
-    val buildPath = "$projectPath/${settingsProjectState.buildPath}"
-    val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
-    packageList.removeLast()
-
-    return org.jetbrains.research.testgenie.tools.llm.Pipeline(
-        project,
-        buildPath,
-        interestingPsiClasses,
-        classesToTest,
-        ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!,
-        packageList.joinToString("."),
-        polymorphismRelations,
-        modificationStamp,
-        fileUrl,
-        classFQN,
-    )
+    return polymorphismRelations
 }
 
 /**

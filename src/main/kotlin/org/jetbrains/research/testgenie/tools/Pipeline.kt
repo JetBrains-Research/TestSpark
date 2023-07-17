@@ -21,7 +21,7 @@ class Pipeline(
     projectClassPath: String,
     private val cutModule: Module,
     private val packageName: String,
-    modTs: Long,
+    modificationStamp: Long,
     private val fileUrl: String,
     private val classFQN: String,
 ) {
@@ -42,7 +42,7 @@ class Pipeline(
         Util.makeTmp()
         Util.makeDir(baseDir)
 
-        project.service<Workspace>().key = getKey(fileUrl, classFQN, modTs, testResultName, projectClassPath)
+        project.service<Workspace>().key = getKey(fileUrl, classFQN, modificationStamp, testResultName, projectClassPath)
     }
 
     /**

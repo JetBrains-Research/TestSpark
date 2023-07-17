@@ -8,10 +8,9 @@ import org.jetbrains.research.testgenie.actions.getSignatureString
 class PromptManager(
     private val cut: PsiClass,
     private val classesToTest: MutableList<PsiClass>,
-    private val interestingPsiClasses: Set<PsiClass>,
+    private val interestingPsiClasses: MutableSet<PsiClass>,
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
 ) {
-
     fun generatePrompt(): String {
         // prompt: start the request
         var prompt =
