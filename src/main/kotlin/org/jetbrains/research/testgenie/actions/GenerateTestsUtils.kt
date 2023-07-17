@@ -3,11 +3,9 @@ package org.jetbrains.research.testgenie.actions
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
@@ -24,7 +22,6 @@ import com.intellij.refactoring.suggested.startOffset
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 import org.jetbrains.research.testgenie.tools.Pipeline
-import com.intellij.openapi.module.Module
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
@@ -33,27 +30,12 @@ import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 fun createPipeline(e: AnActionEvent): Pipeline {
     val project: Project = e.project!!
 
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
-    val fileUrl = vFile.presentableUrl
-    val modificationStamp = vFile.modificationStamp
-
-    val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
-    val classFQN = psiClass.qualifiedName!!
-
     val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
-    val log = Logger.getInstance("GenerateTestsUtils")
     val settingsProjectState = project.service<SettingsProjectService>().state
     val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
 
-    log.info("Selected class is $classFQN")
-
-    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
-    val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
-
-    return Pipeline(project, projectClassPath, cutModule, packageName, modificationStamp, fileUrl, classFQN)
+    return Pipeline(e, packageName)
 }
 
 fun PsiMethod.getSignatureString(): String {
@@ -62,24 +44,17 @@ fun PsiMethod.getSignatureString(): String {
 }
 
 fun createLLMPipeline(e: AnActionEvent): Pipeline {
-    val project: Project = e.project!!
-
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
-
-    val modificationStamp = vFile.modificationStamp
 
     val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
-    val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
-    val classFQN = cutPsiClass.qualifiedName!!
-    val fileUrl = vFile.presentableUrl
 
-    val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
     val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
     packageList.removeLast()
 
-    return Pipeline(project, projectClassPath, cutModule, packageList.joinToString("."), modificationStamp, fileUrl, classFQN)
+    val packageName = packageList.joinToString(".")
+
+    return Pipeline(e, packageName)
 }
 
 // Collect interesting classes (i.e., methods that are passed as input arguments to CUT)

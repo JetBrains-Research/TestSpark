@@ -1,15 +1,22 @@
 package org.jetbrains.research.testgenie.tools
 
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
-import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiFile
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.Util
+import org.jetbrains.research.testgenie.actions.getSurroundingClass
 import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
@@ -17,15 +24,14 @@ import java.io.File
 import java.util.UUID
 
 class Pipeline(
-    private val project: Project,
-    projectClassPath: String,
-    private val cutModule: Module,
+    e: AnActionEvent,
     private val packageName: String,
-    modificationStamp: Long,
-    private val fileUrl: String,
-    private val classFQN: String,
 ) {
+    private val project = e.project!!
+
     private val sep = File.separatorChar
+
+    private val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
     private val log = Logger.getInstance(this::class.java)
 
@@ -37,6 +43,17 @@ class Pipeline(
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
 
     private val resultPath = "$testResultDirectory$testResultName"
+
+    private val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
+    private val fileUrl = vFile.presentableUrl
+    private val modificationStamp = vFile.modificationStamp
+
+    private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+    private val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
+    private val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
+    private val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
+
+    private val classFQN = cutPsiClass.qualifiedName!!
 
     init {
         Util.makeTmp()

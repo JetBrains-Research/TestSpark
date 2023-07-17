@@ -11,7 +11,7 @@ class PromptManager(
     private val interestingPsiClasses: MutableSet<PsiClass>,
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
 ) {
-    fun generatePrompt(): String {
+    fun generatePromptForClass(): String {
         // prompt: start the request
         var prompt =
             "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\nDont use @Before and @After test methods.\nMake tests as atomic as possible.\nAll tests should be for JUnit 4.\nIn case of mocking, use Mockito 5. But, do not use mocking for all tests.\n"

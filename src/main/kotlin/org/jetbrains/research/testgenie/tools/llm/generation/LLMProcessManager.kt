@@ -35,7 +35,9 @@ class LLMProcessManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val llmRequestManager = LLMRequestManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
-    private val prompt = PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePrompt()
+
+    // TODO fix, when llm will generate tests for methods and lines
+    private val prompt = PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePromptForClass()
 
     override fun runTestGenerator(
         indicator: ProgressIndicator,
