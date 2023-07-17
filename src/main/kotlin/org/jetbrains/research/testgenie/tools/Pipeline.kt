@@ -10,7 +10,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.Util
-import org.jetbrains.research.testgenie.services.RunnerService
 import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
@@ -77,10 +76,6 @@ class Pipeline(
                             log,
                         )
                     }
-
-                    // Revert to previous state
-                    val runnerService = project.service<RunnerService>()
-                    runnerService.isRunning = false
 
                     indicator.stop()
                 }

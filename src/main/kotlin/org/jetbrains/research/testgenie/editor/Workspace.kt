@@ -128,12 +128,6 @@ class Workspace(private val project: Project) : Disposable {
         listenerDisposable = disposable
     }
 
-    fun isErrorOccurred() = testGenerationData.isErrorOccurred
-
-    fun errorOccurred() {
-        testGenerationData.isErrorOccurred = true
-    }
-
     /**
      * Updates the state after the action of publishing results.
      *

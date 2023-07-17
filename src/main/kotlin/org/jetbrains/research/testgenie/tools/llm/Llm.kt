@@ -3,7 +3,7 @@ package org.jetbrains.research.testgenie.tools.llm
 import com.intellij.openapi.actionSystem.AnActionEvent
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.createLLMPipeline
-import org.jetbrains.research.testgenie.tools.Tool
+import org.jetbrains.research.testgenie.tools.template.Tool
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 
 class Llm(override val name: String = "Llm") : Tool {

@@ -58,7 +58,7 @@ class LLMProcessManager(
         var generatedTestSuite: TestSuiteGeneratedByLLM? = llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
         var generatedTestsArePassing = false
 
-        var report: Report? = Report()
+        var report: Report? = null
         var requestsCount = 0
 
         while (!generatedTestsArePassing) {

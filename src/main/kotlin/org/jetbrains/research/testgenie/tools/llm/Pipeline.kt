@@ -1,5 +1,6 @@
 package org.jetbrains.research.testgenie.tools.llm
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -8,6 +9,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.openapi.module.Module
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import org.jetbrains.research.testgenie.tools.clearDataBeforeTestGeneration
 import org.jetbrains.research.testgenie.tools.getKey
@@ -40,11 +42,13 @@ class Pipeline(
 
     private val resultPath = "$testResultDirectory$testResultName"
 
-    var key = getKey(fileUrl, classFQN, modTs, testResultName, projectClassPath)
-
     private val promptManager = PromptManager(cut, classesToTest, interestingPsiClasses, polymorphismRelations)
 
     private val processManager = LLMProcessManager(project, projectClassPath)
+
+    init {
+        project.service<Workspace>().key = getKey(fileUrl, classFQN, modTs, testResultName, projectClassPath)
+    }
 
     fun forClass(): Pipeline {
         prompt = promptManager.generatePrompt()
@@ -67,6 +71,8 @@ class Pipeline(
                     if (projectBuilder.runBuild(indicator)) {
                         processManager.runLLMTestGenerator(indicator, prompt, resultPath, packageName, cutModule, classFQN, fileUrl, testResultName)
                     }
+
+                    indicator.stop()
                 }
             })
     }

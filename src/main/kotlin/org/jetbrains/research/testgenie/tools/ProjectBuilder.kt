@@ -15,7 +15,7 @@ import org.jetbrains.research.testgenie.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
 import com.intellij.util.concurrency.Semaphore
 import com.intellij.task.ProjectTaskManager
-import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.ErrorService
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
@@ -110,7 +110,7 @@ class ProjectBuilder(private val project: Project) {
     }
 
     private fun errorProcess() {
-        project.service<Workspace>().errorOccurred()
+        project.service<ErrorService>().errorOccurred()
         NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
             TestGenieBundle.message("buildErrorTitle"),
             TestGenieBundle.message("commonBuildErrorMessage"),

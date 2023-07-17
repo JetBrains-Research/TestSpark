@@ -6,10 +6,11 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
-import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.ErrorService
+import org.jetbrains.research.testgenie.tools.template.error.ErrorManager
 import java.util.Locale
 
-class EvoSuiteErrorManager {
+class EvoSuiteErrorManager : ErrorManager {
     private var output = ""
 
     fun addLineToEvoSuiteOutput(line: String) {
@@ -71,14 +72,30 @@ class EvoSuiteErrorManager {
      *
      * @param message the balloon content to display
      */
-    fun errorProcess(message: String, project: Project) {
-        project.service<Workspace>().errorOccurred()
+    override fun errorProcess(message: String, project: Project) {
+        project.service<ErrorService>().errorOccurred()
         NotificationGroupManager.getInstance()
             .getNotificationGroup("EvoSuite Execution Error")
             .createNotification(
                 TestGenieBundle.message("evosuiteErrorTitle"),
                 getCommonErrorMessage(message),
                 NotificationType.ERROR,
+            )
+            .notify(project)
+    }
+
+    /**
+     * Show an EvoSuite execution warning balloon.
+     *
+     * @param message the balloon content to display
+     */
+    override fun warningProcess(message: String, project: Project) {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("EvoSuite Execution Error")
+            .createNotification(
+                TestGenieBundle.message("evosuiteErrorTitle"),
+                getCommonErrorMessage(message),
+                NotificationType.WARNING,
             )
             .notify(project)
     }

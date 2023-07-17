@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.tools
+package org.jetbrains.research.testgenie.tools.template
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 

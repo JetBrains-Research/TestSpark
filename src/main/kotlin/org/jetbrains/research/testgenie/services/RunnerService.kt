@@ -9,7 +9,7 @@ import org.jetbrains.research.testgenie.TestGenieBundle
  * Service used for the sole purpose to limit TestGenie to generate tests only once at a time.
  */
 class RunnerService(private val project: Project) {
-    var isRunning: Boolean = false
+    private var isRunning: Boolean = false
 
     /**
      * Method to show notification that test generation is already running.
@@ -23,6 +23,10 @@ class RunnerService(private val project: Project) {
                 NotificationType.WARNING,
             )
             .notify(project)
+    }
+
+    fun clear() {
+        isRunning = false
     }
 
     /**

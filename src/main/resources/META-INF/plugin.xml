@@ -85,6 +85,8 @@
                 serviceImplementation="org.jetbrains.research.testgenie.services.TestGenieTelemetryService"/>
         <projectService
                 serviceImplementation="org.jetbrains.research.testgenie.services.RunnerService"/>
+        <projectService
+                serviceImplementation="org.jetbrains.research.testgenie.services.ErrorService"/>
 
         <toolWindow id="TestGenie" secondary="true" anchor="right"
                     factoryClass="org.jetbrains.research.testgenie.toolwindow.TestGenieToolWindowFactory"/>

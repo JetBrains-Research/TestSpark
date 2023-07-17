@@ -5,13 +5,15 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
-import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.ErrorService
+import org.jetbrains.research.testgenie.tools.template.error.ErrorManager
 
-class LLMErrorManager {
+class LLMErrorManager : ErrorManager {
     fun createRequestErrorMessage(code: Int): String = TestGenieBundle.message("requestError") + " " + code.toString()
 
-    fun errorProcess(message: String, project: Project) {
-        project.service<Workspace>().errorOccurred()
+    override fun errorProcess(message: String, project: Project) {
+        project.service<ErrorService>().errorOccurred()
+
         NotificationGroupManager.getInstance()
             .getNotificationGroup("LLM Execution Error")
             .createNotification(
@@ -22,7 +24,7 @@ class LLMErrorManager {
             .notify(project)
     }
 
-    fun warningProcess(message: String, project: Project) {
+    override fun warningProcess(message: String, project: Project) {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("LLM Execution Error")
             .createNotification(

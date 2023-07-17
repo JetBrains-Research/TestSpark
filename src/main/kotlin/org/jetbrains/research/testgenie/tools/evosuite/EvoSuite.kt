@@ -14,9 +14,8 @@ import org.jetbrains.research.testgenie.actions.getSurroundingMethod
 import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
-import org.jetbrains.research.testgenie.services.RunnerService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
-import org.jetbrains.research.testgenie.tools.Tool
+import org.jetbrains.research.testgenie.tools.template.Tool
 import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProcessManager
 
 class EvoSuite(override val name: String = "EvoSuite") : Tool {
@@ -32,14 +31,12 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
     }
 
     override fun generateTestsForClass(e: AnActionEvent) {
-        if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
         createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.CLASS))
     }
 
     override fun generateTestsForMethod(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
         val methodDescriptor = generateMethodDescriptor(psiMethod)
         createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.METHOD, methodDescriptor))
@@ -49,7 +46,6 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
-        if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
         createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.LINE, selectedLine))
     }
 }
