@@ -113,7 +113,7 @@ class LLMProcessManager(
             if (!compilationResult.first) {
                 llmErrorManager.warningProcess(TestGenieBundle.message("compilationError"), project)
                 requestsCount++
-                generatedTestSuite = llmRequestManager.request("I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed etsts between ```", indicator, packageName, project, llmErrorManager)
+                generatedTestSuite = llmRequestManager.request("I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```", indicator, packageName, project, llmErrorManager)
                 continue
             }
 
