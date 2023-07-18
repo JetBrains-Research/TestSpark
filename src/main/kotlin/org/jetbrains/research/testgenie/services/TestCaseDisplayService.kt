@@ -191,10 +191,7 @@ class TestCaseDisplayService(private val project: Project) {
             // Add an editor to modify the test source code
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val textFieldEditor = EditorTextField(document, project, JavaFileType.INSTANCE)
-            // Set the default editor color to the one the editor was created with (only done once)
-            if (defaultEditorColor == null) {
-                defaultEditorColor = textFieldEditor.background
-            }
+
             textFieldEditor.setOneLineMode(false)
 
             // Add test case title
@@ -258,12 +255,11 @@ class TestCaseDisplayService(private val project: Project) {
         scrollToPanel(myPanel)
 
         val editor = getEditor(name) ?: return
-        if (!editor.background.equals(defaultEditorColor)) {
-            return
-        }
         val settingsProjectState = project.service<SettingsProjectService>().state
         val highlightColor =
             Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
+        if (editor.background.equals(highlightColor)) return
+        defaultEditorColor = editor.background
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
     }
