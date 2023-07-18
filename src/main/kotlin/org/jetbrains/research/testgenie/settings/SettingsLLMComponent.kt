@@ -15,10 +15,13 @@ class SettingsLLMComponent {
 
     // Grazie Token
     private var grazieUserTokenField = JTextField(30)
+
     // Maximum number of LLM requests
     private var maxLLMRequestsField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxLLMRequest, 1, 20))
+
     // The depth of input parameters used in class under tests
     private var maxInputParamsDepthField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxInputParamsDepth, 1, 5))
+
     // Maximum polymorphism depth
     private var maxPolyDepthField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
 
@@ -47,25 +50,25 @@ class SettingsLLMComponent {
                 JBLabel(TestGenieLabelsBundle.defaultValue("grazieToken")),
                 grazieUserTokenField,
                 10,
-                false
+                false,
             )
             .addLabeledComponent(
                 JBLabel(TestGenieLabelsBundle.defaultValue("parametersDepth")),
                 maxInputParamsDepthField,
                 10,
-                false
+                false,
             )
             .addLabeledComponent(
                 JBLabel(TestGenieLabelsBundle.defaultValue("maximumPolyDepth")),
                 maxPolyDepthField,
                 10,
-                false
+                false,
             )
             .addLabeledComponent(
                 JBLabel(TestGenieLabelsBundle.defaultValue("maximumNumberOfRequests")),
                 maxLLMRequestsField,
                 10,
-                false
+                false,
             )
             .addComponentFillVertically(JPanel(), 0)
             .panel

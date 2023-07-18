@@ -6,10 +6,10 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
-import org.jetbrains.research.testgenie.tools.evosuite.SettingsArguments
+import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.settings.SettingsApplicationState
-import org.assertj.core.api.Assertions.assertThat
+import org.jetbrains.research.testgenie.tools.evosuite.SettingsArguments
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -58,20 +58,24 @@ class SettingsArgumentsTest {
             "-Dcatch_undeclared_exceptions=false",
             "-Dtest_naming_strategy=COVERAGE",
             "-Dalgorithm=DYNAMOSA",
-            "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH"
+            "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH",
         )
 
         val actual = settings.build()
 
         assertThat(
-            actual
+            actual,
         ).isEqualTo(command)
     }
 
     @Test
     fun testCommandForMethod() {
         val settings = SettingsArguments(
-            "project/classpath", "project", "serializepath", "lang.java.Dung", "basedir"
+            "project/classpath",
+            "project",
+            "serializepath",
+            "lang.java.Dung",
+            "basedir",
         ).forMethod("dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;")
         val command = mutableListOf(
             "-generateMOSuite",
@@ -89,13 +93,13 @@ class SettingsArgumentsTest {
             "-Dtest_naming_strategy=COVERAGE",
             "-Dtarget_method=dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;",
             "-Dalgorithm=DYNAMOSA",
-            "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH"
+            "-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH",
         )
 
         val actual = settings.build()
 
         assertThat(
-            actual
+            actual,
         ).isEqualTo(command)
     }
 
@@ -119,13 +123,13 @@ class SettingsArgumentsTest {
             "-Dtest_naming_strategy=COVERAGE",
             "-Dtarget_line=419",
             "-Dalgorithm=DYNAMOSA",
-            "-Dcriterion=LINE:BRANCH:"
+            "-Dcriterion=LINE:BRANCH:",
         )
 
         val actual = settings.build(true)
 
         assertThat(
-            actual
+            actual,
         ).isEqualTo(command)
     }
 
@@ -145,7 +149,7 @@ class SettingsArgumentsTest {
         val criterion = settings.build().last()
 
         assertThat(
-            "-Dcriterion=LINE"
+            "-Dcriterion=LINE",
         ).isEqualTo(criterion)
     }
 
@@ -161,7 +165,7 @@ class SettingsArgumentsTest {
         val criterion = settings.build().last()
 
         assertThat(
-            criterion
+            criterion,
         ).isEqualTo("-Dcriterion=OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH")
     }
 
@@ -172,7 +176,7 @@ class SettingsArgumentsTest {
         val criterion = settings.build().last()
 
         assertThat(
-            criterion
+            criterion,
         ).isEqualTo("-Dcriterion=LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH")
     }
 }

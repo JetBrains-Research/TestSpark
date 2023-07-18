@@ -80,7 +80,7 @@ class StaticInvalidationService(private val project: Project) {
     private fun validateMethod(
         signature: String,
         body: Pair<ArrayList<PsiElement>, Set<Int>>,
-        methods: HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>>
+        methods: HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>>,
     ): Set<Int> {
         val savedBody = methods[signature]
 
@@ -115,7 +115,7 @@ class StaticInvalidationService(private val project: Project) {
     private fun validateClass(
         filePath: String,
         methods: HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>>,
-        className: String
+        className: String,
     ): MutableSet<Int> {
         val linesToDiscard = mutableSetOf<Int>()
 

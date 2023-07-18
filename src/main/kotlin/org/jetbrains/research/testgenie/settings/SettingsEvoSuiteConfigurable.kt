@@ -102,7 +102,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
         if (settingsComponent!!.seed != "" && seed == null) {
             Messages.showErrorDialog(
                 "Seed parameter is not of numeric type. Therefore, it will not be saved. However, the rest of the parameters have been successfully saved.",
-                "Incorrect Numeric Type For Seed"
+                "Incorrect Numeric Type For Seed",
             )
             return
         }

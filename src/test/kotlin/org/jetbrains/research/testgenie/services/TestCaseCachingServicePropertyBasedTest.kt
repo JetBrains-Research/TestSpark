@@ -9,14 +9,14 @@ import net.jqwik.api.Property
 import net.jqwik.api.Provide
 import net.jqwik.api.RandomDistribution
 import net.jqwik.api.lifecycle.BeforeTry
-import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.services.TestCaseCachingServiceTest.Companion.createPair
-import org.jetbrains.research.testgenie.services.TestCaseCachingServiceTest.Companion.createTriple
 import org.assertj.core.api.Assertions.assertThat
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.TestCaseCachingServiceTest.Companion.createPair
+import org.jetbrains.research.testgenie.services.TestCaseCachingServiceTest.Companion.createTriple
 import org.junit.jupiter.api.TestInstance
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -36,7 +36,7 @@ class TestCaseCachingServicePropertyBasedTest {
     @Property
     fun singleFileMultipleLines(
         @ForAll("compactTestCaseGenerator") testCases: List<TestCase>,
-        @ForAll("lineRangeGenerator") lineRange: Pair<Int, Int>
+        @ForAll("lineRangeGenerator") lineRange: Pair<Int, Int>,
     ) {
         val lowerBound = lineRange.first
         val upperBound = lineRange.second
@@ -55,7 +55,7 @@ class TestCaseCachingServicePropertyBasedTest {
                 createTriple(it)
             }
             .containsExactlyInAnyOrder(
-                *expected.map2Array { createTriple(it) }
+                *expected.map2Array { createTriple(it) },
             )
     }
 
@@ -76,7 +76,7 @@ class TestCaseCachingServicePropertyBasedTest {
         val compactTestCaseArbitrary = Combinators.combine(
             testNameArbitrary,
             testCodeArbitrary,
-            lineNumberArbitrary.set()
+            lineNumberArbitrary.set(),
         )
             .`as` { name, code, lineNumbers ->
                 TestCase(name, code, lineNumbers, setOf(), setOf())

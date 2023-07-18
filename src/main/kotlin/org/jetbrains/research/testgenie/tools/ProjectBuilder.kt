@@ -10,12 +10,12 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.task.ProjectTaskManager
+import com.intellij.util.concurrency.Semaphore
 import org.jetbrains.research.testgenie.TestGenieBundle
+import org.jetbrains.research.testgenie.services.ErrorService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
-import com.intellij.util.concurrency.Semaphore
-import com.intellij.task.ProjectTaskManager
-import org.jetbrains.research.testgenie.services.ErrorService
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.

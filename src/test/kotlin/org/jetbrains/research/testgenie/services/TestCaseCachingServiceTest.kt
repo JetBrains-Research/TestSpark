@@ -1,11 +1,11 @@
 package org.jetbrains.research.testgenie.services
 
-import org.jetbrains.research.testgenie.editor.Workspace
 import org.assertj.core.api.Assertions.assertThat
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -29,7 +29,7 @@ class TestCaseCachingServiceTest {
         val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
-            createPair(test2)
+            createPair(test2),
         )
 
         val file = "file"
@@ -44,7 +44,7 @@ class TestCaseCachingServiceTest {
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1),
-                createTriple(test2)
+                createTriple(test2),
             )
     }
 
@@ -55,12 +55,12 @@ class TestCaseCachingServiceTest {
         val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
-            createPair(test2)
+            createPair(test2),
         )
         val report1a = Report(CompactReport(TestGenerationResultImpl()))
         val test1a = TestCase("a2", "aa", setOf(1, 2, 3), setOf(), setOf())
         report1a.testCaseList = hashMapOf(
-            createPair(test1a)
+            createPair(test1a),
         )
 
         val file = "file"
@@ -76,7 +76,7 @@ class TestCaseCachingServiceTest {
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1a),
-                createTriple(test2)
+                createTriple(test2),
             )
     }
 
@@ -87,7 +87,7 @@ class TestCaseCachingServiceTest {
         val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
-            createPair(test2)
+            createPair(test2),
         )
 
         val file = "file"
@@ -103,7 +103,7 @@ class TestCaseCachingServiceTest {
                 createTriple(it)
             }
             .containsExactlyInAnyOrder(
-                createTriple(test2)
+                createTriple(test2),
             )
     }
 
@@ -114,7 +114,7 @@ class TestCaseCachingServiceTest {
         val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
-            createPair(test2)
+            createPair(test2),
         )
 
         val file = "file"
@@ -130,7 +130,7 @@ class TestCaseCachingServiceTest {
                 createTriple(it)
             }
             .containsExactlyInAnyOrder(
-                createTriple(test1)
+                createTriple(test1),
             )
     }
 
@@ -141,7 +141,7 @@ class TestCaseCachingServiceTest {
         val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
-            createPair(test2)
+            createPair(test2),
         )
 
         val file = "file"
@@ -157,7 +157,7 @@ class TestCaseCachingServiceTest {
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1),
-                createTriple(test2)
+                createTriple(test2),
             )
     }
 
@@ -174,7 +174,7 @@ class TestCaseCachingServiceTest {
             createPair(test2),
             createPair(test3),
             createPair(test4),
-            createPair(test5)
+            createPair(test5),
         )
 
         val file = "file"
@@ -189,7 +189,7 @@ class TestCaseCachingServiceTest {
             }
             .containsExactlyInAnyOrder(
                 createTriple(test3),
-                createTriple(test4)
+                createTriple(test4),
             )
     }
 
@@ -206,7 +206,7 @@ class TestCaseCachingServiceTest {
             createPair(test2),
             createPair(test3),
             createPair(test4),
-            createPair(test5)
+            createPair(test5),
         )
 
         val file = "file"
@@ -223,7 +223,7 @@ class TestCaseCachingServiceTest {
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1),
-                createTriple(test5)
+                createTriple(test5),
             )
     }
 
@@ -240,7 +240,7 @@ class TestCaseCachingServiceTest {
             createPair(test2),
             createPair(test3),
             createPair(test4),
-            createPair(test5)
+            createPair(test5),
         )
 
         val report2 = Report(CompactReport(TestGenerationResultImpl()))
@@ -249,7 +249,7 @@ class TestCaseCachingServiceTest {
             createPair(TestCase("0b", "bb", setOf(2, 3), setOf(), setOf())),
             createPair(TestCase("0c", "cc", setOf(1, 4), setOf(), setOf())),
             createPair(TestCase("0d", "dd", setOf(8), setOf(), setOf())),
-            createPair(TestCase("0e", "ee", setOf(11), setOf(), setOf()))
+            createPair(TestCase("0e", "ee", setOf(11), setOf(), setOf())),
         )
 
         val file = "file"
@@ -265,7 +265,7 @@ class TestCaseCachingServiceTest {
             }
             .containsExactlyInAnyOrder(
                 createTriple(test3),
-                createTriple(test4)
+                createTriple(test4),
             )
     }
 
@@ -280,7 +280,7 @@ class TestCaseCachingServiceTest {
             createPair(test1),
             createPair(test2),
             createPair(test3),
-            createPair(test5)
+            createPair(test5),
         )
 
         val report2 = Report(CompactReport(TestGenerationResultImpl()))
@@ -289,13 +289,13 @@ class TestCaseCachingServiceTest {
             createPair(TestCase("0b", "bb", setOf(2, 3), setOf(), setOf())),
             createPair(TestCase("0c", "cc", setOf(1, 4), setOf(), setOf())),
             createPair(TestCase("0d", "dd", setOf(8), setOf(), setOf())),
-            createPair(TestCase("0e", "ee", setOf(11), setOf(), setOf()))
+            createPair(TestCase("0e", "ee", setOf(11), setOf(), setOf())),
         )
 
         val report3 = Report(CompactReport(TestGenerationResultImpl()))
         val test4 = TestCase("d", "dd", setOf(8), setOf(), setOf())
         report3.testCaseList = hashMapOf(
-            createPair(test4)
+            createPair(test4),
         )
 
         val file = "file"
@@ -312,7 +312,7 @@ class TestCaseCachingServiceTest {
             }
             .containsExactlyInAnyOrder(
                 createTriple(test3),
-                createTriple(test4)
+                createTriple(test4),
             )
     }
 
@@ -321,7 +321,7 @@ class TestCaseCachingServiceTest {
         val report = Report(CompactReport(TestGenerationResultImpl()))
         val test1 = TestCase("a", "aa", setOf(4, 5), setOf(), setOf())
         report.testCaseList = hashMapOf(
-            createPair(test1)
+            createPair(test1),
         )
 
         val file = "file"
@@ -335,7 +335,7 @@ class TestCaseCachingServiceTest {
                 createTriple(it)
             }
             .containsExactlyInAnyOrder(
-                createTriple(test1)
+                createTriple(test1),
             )
     }
 
@@ -346,7 +346,7 @@ class TestCaseCachingServiceTest {
         val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
-            createPair(test2)
+            createPair(test2),
         )
 
         testCaseCachingService.putIntoCache("aa", report, testJobInfo)
@@ -364,7 +364,7 @@ class TestCaseCachingServiceTest {
         val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
-            createPair(test2)
+            createPair(test2),
         )
 
         val file = "file"
@@ -384,7 +384,7 @@ class TestCaseCachingServiceTest {
         val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
-            createPair(test2)
+            createPair(test2),
         )
 
         val file = "file"
@@ -399,7 +399,7 @@ class TestCaseCachingServiceTest {
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1),
-                createTriple(test2)
+                createTriple(test2),
             )
     }
 
@@ -410,7 +410,7 @@ class TestCaseCachingServiceTest {
         val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
-            createPair(test2)
+            createPair(test2),
         )
 
         val file = "file"
@@ -430,7 +430,7 @@ class TestCaseCachingServiceTest {
         val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
-            createPair(test2)
+            createPair(test2),
         )
 
         val file = "file"
@@ -446,7 +446,7 @@ class TestCaseCachingServiceTest {
             }
             .containsExactlyInAnyOrder(
                 createTriple(test1),
-                createTriple(test2)
+                createTriple(test2),
             )
     }
 

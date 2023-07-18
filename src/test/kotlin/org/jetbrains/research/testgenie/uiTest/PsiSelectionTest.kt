@@ -7,11 +7,11 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.jetbrains.research.testgenie.uiTest.pages.IdeaFrame
 import org.jetbrains.research.testgenie.uiTest.pages.WelcomeFrame
 import org.jetbrains.research.testgenie.uiTest.utils.RemoteRobotExtension
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -65,8 +65,8 @@ class PsiSelectionTest {
             assertThat(
                 find<ComponentFixture>(
                     byXpath("//div[@text='TestGenie']//div[contains(@text, '$text')]"),
-                    Duration.ofSeconds(3)
-                ).isShowing
+                    Duration.ofSeconds(3),
+                ).isShowing,
             ).isTrue
         }
     }
@@ -122,7 +122,7 @@ class PsiSelectionTest {
         actionGroupIsVisible: Boolean,
         classIsVisible: Boolean,
         methodIsVisible: Boolean,
-        lineIsVisible: Boolean
+        lineIsVisible: Boolean,
     ) {
         // Click on the PSI element
         waitFor(Duration.ofSeconds(7)) {
@@ -204,7 +204,7 @@ class PsiSelectionTest {
         // Line 29
         Arguments.of("Salame", actionClassText.plus("BuonaPizza"), actionMethodText.plus("selencaGliIngredienti"), actionLineText.plus(29), true, true, true, true),
         // Line 31
-        Arguments.of("Appetito", actionClassText, actionMethodText, actionLineText, false, false, false, false)
+        Arguments.of("Appetito", actionClassText, actionMethodText, actionLineText, false, false, false, false),
     )
 
     @AfterAll

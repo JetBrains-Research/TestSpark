@@ -6,9 +6,9 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
-import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -144,7 +144,7 @@ class SettingsEvoSuiteConfigurableTest {
         oldValue: Boolean,
         function: () -> Unit,
         component: () -> Boolean,
-        state: () -> Boolean
+        state: () -> Boolean,
     ) {
         function()
         assertThat(settingsConfigurable.isModified).isTrue
@@ -163,80 +163,80 @@ class SettingsEvoSuiteConfigurableTest {
                 settingsComponent.junitCheck,
                 { settingsComponent.junitCheck = !settingsComponent.junitCheck },
                 { settingsComponent.junitCheck },
-                { settingsState.junitCheck }
+                { settingsState.junitCheck },
             ),
             Arguments.of(
                 settingsComponent.assertions,
                 { settingsComponent.assertions = !settingsComponent.assertions },
                 { settingsComponent.assertions },
-                { settingsState.assertions }
+                { settingsState.assertions },
             ),
             Arguments.of(
                 settingsComponent.clientOnThread,
                 { settingsComponent.clientOnThread = !settingsComponent.clientOnThread },
                 { settingsComponent.clientOnThread },
-                { settingsState.clientOnThread }
+                { settingsState.clientOnThread },
             ),
             Arguments.of(
                 settingsComponent.criterionBranch,
                 { settingsComponent.criterionBranch = !settingsComponent.criterionBranch },
                 { settingsComponent.criterionBranch },
-                { settingsState.criterionBranch }
+                { settingsState.criterionBranch },
             ),
             Arguments.of(
                 settingsComponent.criterionCBranch,
                 { settingsComponent.criterionCBranch = !settingsComponent.criterionCBranch },
                 { settingsComponent.criterionCBranch },
-                { settingsState.criterionCBranch }
+                { settingsState.criterionCBranch },
             ),
             Arguments.of(
                 settingsState.criterionException,
                 { settingsComponent.criterionException = !settingsComponent.criterionException },
                 { settingsComponent.criterionException },
-                { settingsState.criterionException }
+                { settingsState.criterionException },
             ),
             Arguments.of(
                 settingsComponent.criterionLine,
                 { settingsComponent.criterionLine = !settingsComponent.criterionLine },
                 { settingsComponent.criterionLine },
-                { settingsState.criterionLine }
+                { settingsState.criterionLine },
             ),
             Arguments.of(
                 settingsComponent.criterionMethod,
                 { settingsComponent.criterionMethod = !settingsComponent.criterionMethod },
                 { settingsComponent.criterionMethod },
-                { settingsState.criterionMethod }
+                { settingsState.criterionMethod },
             ),
             Arguments.of(
                 settingsComponent.criterionMethodNoException,
                 { settingsComponent.criterionMethodNoException = !settingsComponent.criterionMethodNoException },
                 { settingsComponent.criterionMethodNoException },
-                { settingsState.criterionMethodNoException }
+                { settingsState.criterionMethodNoException },
             ),
             Arguments.of(
                 settingsComponent.criterionOutput,
                 { settingsComponent.criterionOutput = !settingsComponent.criterionOutput },
                 { settingsComponent.criterionOutput },
-                { settingsState.criterionOutput }
+                { settingsState.criterionOutput },
             ),
             Arguments.of(
                 settingsComponent.criterionWeakMutation,
                 { settingsComponent.criterionWeakMutation = !settingsComponent.criterionWeakMutation },
                 { settingsComponent.criterionWeakMutation },
-                { settingsState.criterionWeakMutation }
+                { settingsState.criterionWeakMutation },
             ),
             Arguments.of(
                 settingsComponent.minimize,
                 { settingsComponent.minimize = !settingsComponent.minimize },
                 { settingsComponent.minimize },
-                { settingsState.minimize }
+                { settingsState.minimize },
             ),
             Arguments.of(
                 settingsComponent.sandbox,
                 { settingsComponent.sandbox = !settingsComponent.sandbox },
                 { settingsComponent.sandbox },
-                { settingsState.sandbox }
-            )
+                { settingsState.sandbox },
+            ),
         )
     }
 }

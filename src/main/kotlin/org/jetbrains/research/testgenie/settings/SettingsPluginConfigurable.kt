@@ -39,9 +39,9 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
         settingsComponent!!.buildCommand = settingsState.buildCommand
         settingsComponent!!.telemetryEnabled = settingsState.telemetryEnabled
         settingsComponent!!.telemetryPath =
-            if (settingsState.telemetryPath.endsWith(projectDuplicate.name))
+            if (settingsState.telemetryPath.endsWith(projectDuplicate.name)) {
                 settingsState.telemetryPath
-            else settingsState.telemetryPath.plus(File.separator).plus(projectDuplicate.name)
+            } else settingsState.telemetryPath.plus(File.separator).plus(projectDuplicate.name)
     }
 
     /**

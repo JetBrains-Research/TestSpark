@@ -9,13 +9,13 @@ class TestCase(
     var testCode: String,
     var coveredLines: Set<Int>,
     var coveredBranches: Set<BranchInfo>,
-    var coveredMutants: Set<MutationInfo>
+    var coveredMutants: Set<MutationInfo>,
 ) {
     constructor(compactTestCase: CompactTestCase) : this(
         compactTestCase.testName,
         compactTestCase.testCode,
         compactTestCase.coveredLines,
         compactTestCase.coveredBranches,
-        compactTestCase.coveredMutants
+        compactTestCase.coveredMutants,
     )
 }

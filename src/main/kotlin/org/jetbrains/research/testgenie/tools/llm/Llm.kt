@@ -13,10 +13,10 @@ import org.jetbrains.research.testgenie.actions.getPolymorphismRelations
 import org.jetbrains.research.testgenie.actions.getSurroundingClass
 import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
-import org.jetbrains.research.testgenie.tools.template.Tool
-import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.Pipeline
+import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
+import org.jetbrains.research.testgenie.tools.template.Tool
 
 class Llm(override val name: String = "Llm") : Tool {
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()

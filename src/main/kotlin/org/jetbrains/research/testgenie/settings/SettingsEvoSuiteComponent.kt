@@ -3,9 +3,9 @@ package org.jetbrains.research.testgenie.settings
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
+import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.TestGenieToolTipsBundle
-import org.jdesktop.swingx.JXTitledSeparator
 import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JPanel

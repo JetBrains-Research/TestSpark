@@ -6,9 +6,9 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
-import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
+import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
@@ -68,7 +68,7 @@ class SettingsPluginConfigurableTest {
         oldValue: Int,
         function: () -> Unit,
         component: () -> Int,
-        state: () -> Int
+        state: () -> Int,
     ) {
         function()
         assertThat(settingsConfigurable.isModified).isTrue
@@ -116,20 +116,20 @@ class SettingsPluginConfigurableTest {
                 settingsComponent.colorBlue,
                 { settingsComponent.colorBlue += 20 },
                 { settingsComponent.colorBlue },
-                { settingsState.colorBlue }
+                { settingsState.colorBlue },
             ),
             Arguments.of(
                 settingsComponent.colorRed,
                 { settingsComponent.colorRed += 30 },
                 { settingsComponent.colorRed },
-                { settingsState.colorRed }
+                { settingsState.colorRed },
             ),
             Arguments.of(
                 settingsComponent.colorGreen,
                 { settingsComponent.colorGreen += 10 },
                 { settingsComponent.colorGreen },
-                { settingsState.colorGreen }
-            )
+                { settingsState.colorGreen },
+            ),
         )
     }
 }

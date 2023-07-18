@@ -15,7 +15,8 @@ import org.jetbrains.research.testgenie.uiTest.customfixtures.jSpinner
 
 @FixtureName("Quick Access Parameters")
 @DefaultXpath(
-    "type", "//div[@accessiblename='Parameters Tool Window']"
+    "type",
+    "//div[@accessiblename='Parameters Tool Window']",
 )
 class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     CommonContainerFixture(remoteRobot, remoteComponent) {
@@ -283,8 +284,10 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
      */
     fun getTitles(): List<JLabelFixture> {
         return listOf(
-            title, searchBudgetSeparator,
-            timeoutsSeparator, geneticAlgorithmSeparator
+            title,
+            searchBudgetSeparator,
+            timeoutsSeparator,
+            geneticAlgorithmSeparator,
         )
     }
 
@@ -295,9 +298,14 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
      */
     fun getUIElementLabels(): List<JLabelFixture> {
         return listOf(
-            searchBudgetTypeLabel, searchBudgetValueLabel, initializationTimeoutLabel,
-            minimizationTimeoutLabel, assertionTimeoutLabel, jUnitCheckTimeoutLabel,
-            populationLimitLabel, populationValueLabel
+            searchBudgetTypeLabel,
+            searchBudgetValueLabel,
+            initializationTimeoutLabel,
+            minimizationTimeoutLabel,
+            assertionTimeoutLabel,
+            jUnitCheckTimeoutLabel,
+            populationLimitLabel,
+            populationValueLabel,
         )
     }
 
@@ -326,9 +334,12 @@ class QuickAccessParametersFixtures(remoteRobot: RemoteRobot, remoteComponent: R
      */
     fun getJSpinners(): List<JSpinnerFixture> {
         return listOf(
-            searchBudgetValueSpinner, initializationTimeoutSpinner,
-            minimizationTimeoutSpinner, assertionTimeoutSpinner,
-            jUnitCheckTimeoutSpinner, populationValueSpinner
+            searchBudgetValueSpinner,
+            initializationTimeoutSpinner,
+            minimizationTimeoutSpinner,
+            assertionTimeoutSpinner,
+            jUnitCheckTimeoutSpinner,
+            populationValueSpinner,
         )
     }
 }

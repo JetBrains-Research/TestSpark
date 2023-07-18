@@ -26,9 +26,9 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElementFactory
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiElementFactory
 import com.intellij.refactoring.suggested.newRange
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
@@ -40,24 +40,24 @@ import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
-import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
 import java.util.Locale
-import javax.swing.JPanel
-import javax.swing.JButton
-import javax.swing.JLabel
-import javax.swing.BoxLayout
 import javax.swing.BorderFactory
-import javax.swing.JOptionPane
-import javax.swing.JCheckBox
 import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JLabel
+import javax.swing.JOptionPane
+import javax.swing.JPanel
 import javax.swing.border.Border
 
 class TestCaseDisplayService(private val project: Project) {

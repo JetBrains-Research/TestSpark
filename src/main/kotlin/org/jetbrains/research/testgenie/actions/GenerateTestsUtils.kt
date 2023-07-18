@@ -8,23 +8,23 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiAnonymousClass
-import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiCodeBlock
-import com.intellij.psi.PsiStatement
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiStatement
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 import org.jetbrains.research.testgenie.tools.Pipeline
-import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.search.searches.ClassInheritorsSearch
-import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 
 fun createPipeline(e: AnActionEvent): Pipeline {

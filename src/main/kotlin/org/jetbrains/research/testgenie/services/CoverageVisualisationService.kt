@@ -74,8 +74,7 @@ class CoverageVisualisationService(private val project: Project) {
 
         if (quickAccessParametersState.showCoverage) {
             val settingsProjectState = project.service<SettingsProjectService>().state
-            val color =
-                Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
+            val color = Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
             val colorForLines = Color(
                 settingsProjectState.colorRed,
                 settingsProjectState.colorGreen,

@@ -15,17 +15,17 @@ import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
-import org.jetbrains.research.testgenie.tools.evosuite.validation.VALIDATION_RESULT_TOPIC
-import org.jetbrains.research.testgenie.tools.evosuite.validation.ValidationResultListener
-import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
-import org.jetbrains.research.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
-import org.jetbrains.research.testgenie.services.CoverageSelectionToggleListener
-import org.jetbrains.research.testgenie.services.CoverageVisualisationService
-import org.jetbrains.research.testgenie.services.TestCaseDisplayService
-import org.jetbrains.research.testgenie.services.ErrorService
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
 import org.jetbrains.research.testgenie.data.TestGenerationData
+import org.jetbrains.research.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
+import org.jetbrains.research.testgenie.services.CoverageSelectionToggleListener
+import org.jetbrains.research.testgenie.services.CoverageVisualisationService
+import org.jetbrains.research.testgenie.services.ErrorService
+import org.jetbrains.research.testgenie.services.TestCaseDisplayService
+import org.jetbrains.research.testgenie.tools.evosuite.validation.VALIDATION_RESULT_TOPIC
+import org.jetbrains.research.testgenie.tools.evosuite.validation.ValidationResultListener
+import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 
 /**
  * Workspace state service

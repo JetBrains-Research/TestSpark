@@ -15,8 +15,8 @@ import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.services.SettingsProjectService
-import org.jetbrains.research.testgenie.tools.template.Tool
 import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProcessManager
+import org.jetbrains.research.testgenie.tools.template.Tool
 
 class EvoSuite(override val name: String = "EvoSuite") : Tool {
     private fun getEvoSuiteProcessManager(e: AnActionEvent): EvoSuiteProcessManager {
