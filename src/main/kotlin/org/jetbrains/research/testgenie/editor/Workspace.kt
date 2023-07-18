@@ -22,6 +22,7 @@ import org.jetbrains.research.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
 import org.jetbrains.research.testgenie.services.CoverageSelectionToggleListener
 import org.jetbrains.research.testgenie.services.CoverageVisualisationService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
+import org.jetbrains.research.testgenie.services.ErrorService
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
 import org.jetbrains.research.testgenie.data.TestGenerationData
@@ -126,6 +127,13 @@ class Workspace(private val project: Project) : Disposable {
             disposable,
         )
         listenerDisposable = disposable
+    }
+
+    fun clear(project: Project) {
+        project.service<TestCaseDisplayService>().clear()
+        project.service<ErrorService>().clear()
+        project.service<CoverageVisualisationService>().clear()
+        testGenerationData.clear()
     }
 
     /**

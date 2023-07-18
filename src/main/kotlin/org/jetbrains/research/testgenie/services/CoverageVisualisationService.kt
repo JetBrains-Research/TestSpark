@@ -28,6 +28,15 @@ class CoverageVisualisationService(private val project: Project) {
     private var contentManager: ContentManager? = null
     private val textAttribute = TextAttributes()
 
+    private val listOfEditorsWithHighlighters: MutableSet<Editor> = mutableSetOf()
+
+    fun clear() {
+        for (editor in listOfEditorsWithHighlighters) {
+            editor.markupModel.removeAllHighlighters()
+        }
+        listOfEditorsWithHighlighters.clear()
+    }
+
     /**
      * Instantiates tab for coverage table and calls function to update coverage.
      *
@@ -57,6 +66,8 @@ class CoverageVisualisationService(private val project: Project) {
         testReport: Report,
         editor: Editor,
     ) {
+        listOfEditorsWithHighlighters.add(editor)
+
         // Show in-line coverage only if enabled in settings
         val quickAccessParametersState =
             ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
@@ -74,8 +85,6 @@ class CoverageVisualisationService(private val project: Project) {
 
             // Update the color used for highlighting if necessary
             textAttribute.backgroundColor = colorForLines
-
-            editor.markupModel.removeAllHighlighters()
 
             // map of mutant operations -> List of names of tests which cover the mutant
             val mapMutantsToTests = HashMap<String, MutableList<String>>()
