@@ -32,6 +32,7 @@ import com.intellij.psi.PsiManager
 import com.intellij.refactoring.suggested.newRange
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
@@ -40,6 +41,7 @@ import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
+import org.jetbrains.research.testgenie.TestGenieToolTipsBundle
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
 import org.jetbrains.research.testgenie.editor.Workspace
@@ -257,7 +259,7 @@ class TestCaseDisplayService(private val project: Project) {
         val editor = getEditor(name) ?: return
         val settingsProjectState = project.service<SettingsProjectService>().state
         val highlightColor =
-            Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
+            JBColor(TestGenieToolTipsBundle.defaultValue("colorName"), Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30))
         if (editor.background.equals(highlightColor)) return
         defaultEditorColor = editor.background
         editor.background = highlightColor
@@ -322,7 +324,7 @@ class TestCaseDisplayService(private val project: Project) {
         for (testCase in testCasePanels) {
             if (names.contains(testCase.key)) {
                 val editor = getEditor(testCase.key) ?: return
-                val highlightColor = Color(255, 0, 0, 90)
+                val highlightColor = JBColor(TestGenieToolTipsBundle.defaultValue("colorName"), Color(255, 0, 0, 90))
                 defaultBorder = editor.border
                 editor.border = BorderFactory.createLineBorder(highlightColor, 3)
             } else {
@@ -764,11 +766,11 @@ class TestCaseDisplayService(private val project: Project) {
 
                 // add border highlight
                 val settingsProjectState = project.service<SettingsProjectService>().state
-                val borderColor = Color(
+                val borderColor = JBColor(TestGenieToolTipsBundle.defaultValue("colorName"), Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
                     settingsProjectState.colorBlue,
-                )
+                ))
                 textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
                 // add line highlighting
