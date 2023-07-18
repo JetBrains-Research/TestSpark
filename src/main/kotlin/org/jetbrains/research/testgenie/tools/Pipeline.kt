@@ -92,6 +92,7 @@ class Pipeline(
                             testResultName,
                             baseDir,
                             log,
+                            modificationStamp,
                         )
                     }
 

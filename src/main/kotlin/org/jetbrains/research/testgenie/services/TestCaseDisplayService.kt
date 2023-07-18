@@ -766,11 +766,14 @@ class TestCaseDisplayService(private val project: Project) {
 
                 // add border highlight
                 val settingsProjectState = project.service<SettingsProjectService>().state
-                val borderColor = JBColor(TestGenieToolTipsBundle.defaultValue("colorName"), Color(
-                    settingsProjectState.colorRed,
-                    settingsProjectState.colorGreen,
-                    settingsProjectState.colorBlue,
-                ))
+                val borderColor = JBColor(
+                    TestGenieToolTipsBundle.defaultValue("colorName"),
+                    Color(
+                        settingsProjectState.colorRed,
+                        settingsProjectState.colorGreen,
+                        settingsProjectState.colorBlue,
+                    ),
+                )
                 textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
                 // add line highlighting

@@ -19,5 +19,6 @@ interface ProcessManager {
         testResultName: String,
         baseDir: String,
         log: Logger,
+        modificationStamp: Long,
     )
 }

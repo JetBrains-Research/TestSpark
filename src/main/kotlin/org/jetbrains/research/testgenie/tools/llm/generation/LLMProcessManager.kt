@@ -5,13 +5,15 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
+import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
 import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.tools.getBuildPath
 import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.getKey
 import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
@@ -24,9 +26,7 @@ import kotlin.io.path.createDirectories
 
 class LLMProcessManager(
     private val project: Project,
-    classesToTest: MutableList<PsiClass>,
-    interestingPsiClasses: MutableSet<PsiClass>,
-    polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
+    private val prompt: String,
 ) : ProcessManager {
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private var testFileName: String = "GeneratedTest.java"
@@ -34,9 +34,6 @@ class LLMProcessManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val llmRequestManager = LLMRequestManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
-
-    // TODO fix, when llm will generate tests for methods and lines
-    private val prompt = PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePromptForClass()
 
     override fun runTestGenerator(
         indicator: ProgressIndicator,
@@ -51,7 +48,12 @@ class LLMProcessManager(
         testResultName: String,
         baseDir: String,
         log: Logger,
+        modificationStamp: Long,
     ) {
+        if (codeType.type == CodeType.METHOD) {
+            project.service<Workspace>().key = getKey(fileUrl, "$classFQN#${codeType.objectDescription}", modificationStamp, testResultName, projectClassPath)
+        }
+
         // update build path
         var buildPath = projectClassPath
         if (settingsProjectState.buildPath.isEmpty()) {
@@ -90,6 +92,7 @@ class LLMProcessManager(
             val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
             if (!File(generatedTestPath).exists()) {
                 llmErrorManager.errorProcess(TestGenieBundle.message("savingTestFileIssue"), project)
+                break
             }
 
             // Collect coverage information for each generated test method and display it

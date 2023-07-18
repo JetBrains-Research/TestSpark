@@ -30,7 +30,6 @@ import java.util.regex.Pattern
 class EvoSuiteProcessManager(
     private val project: Project,
     private val projectPath: String,
-    private val modificationStamp: Long,
 ) : ProcessManager {
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
     private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
@@ -62,6 +61,7 @@ class EvoSuiteProcessManager(
         testResultName: String,
         baseDir: String,
         log: Logger,
+        modificationStamp: Long,
     ) {
         try {
             // get command

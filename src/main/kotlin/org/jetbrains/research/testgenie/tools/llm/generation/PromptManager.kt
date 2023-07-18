@@ -12,9 +12,21 @@ class PromptManager(
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
 ) {
     fun generatePromptForClass(): String {
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\n" + getCommonPromptPart()
+    }
+
+    fun generatePromptForMethod(methodDescriptor: String): String {
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for method $methodDescriptor.\n" + getCommonPromptPart()
+    }
+
+    fun generatePromptForLine(lineNumber: Int): String {
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: \"${getClassFullText(cut).split("\n")[lineNumber - 1]}\" on line number $lineNumber.\n" + getCommonPromptPart()
+    }
+
+    private fun getCommonPromptPart(): String {
         // prompt: start the request
         var prompt =
-            "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\nDont use @Before and @After test methods.\nMake tests as atomic as possible.\nAll tests should be for JUnit 4.\nIn case of mocking, use Mockito 5. But, do not use mocking for all tests.\n"
+            "Dont use @Before and @After test methods.\nMake tests as atomic as possible.\nAll tests should be for JUnit 4.\nIn case of mocking, use Mockito 5. But, do not use mocking for all tests.\n"
 
         // prompt: source code
         prompt += "The source code of class under test is as follows:\n```\n${getClassFullText(cut)}\n```\n"

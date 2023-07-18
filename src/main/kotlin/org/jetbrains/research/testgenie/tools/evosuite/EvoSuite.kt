@@ -24,9 +24,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val settingsProjectState = project.service<SettingsProjectService>().state
         val buildPath = "$projectClassPath/${settingsProjectState.buildPath}"
-        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
-        val modificationStamp = vFile.modificationStamp
-        return EvoSuiteProcessManager(project, buildPath, modificationStamp)
+        return EvoSuiteProcessManager(project, buildPath)
     }
 
     override fun generateTestsForClass(e: AnActionEvent) {
@@ -37,8 +35,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
-        val methodDescriptor = generateMethodDescriptor(psiMethod)
-        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.METHOD, methodDescriptor))
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.METHOD, generateMethodDescriptor(psiMethod)))
     }
 
     override fun generateTestsForLine(e: AnActionEvent) {

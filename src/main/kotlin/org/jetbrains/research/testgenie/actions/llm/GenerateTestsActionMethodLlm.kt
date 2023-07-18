@@ -2,7 +2,7 @@ package org.jetbrains.research.testgenie.actions.llm
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import org.jetbrains.research.testgenie.actions.updateForLine
+import org.jetbrains.research.testgenie.actions.updateForMethod
 import org.jetbrains.research.testgenie.tools.Manager
 
 class GenerateTestsActionMethodLlm : AnAction() {
@@ -13,5 +13,5 @@ class GenerateTestsActionMethodLlm : AnAction() {
      */
     override fun actionPerformed(e: AnActionEvent) = Manager.generateTestsForMethodByLlm(e)
 
-    override fun update(e: AnActionEvent) = updateForLine(e, "GPT-4")
+    override fun update(e: AnActionEvent) = updateForMethod(e, "GPT-4")
 }
