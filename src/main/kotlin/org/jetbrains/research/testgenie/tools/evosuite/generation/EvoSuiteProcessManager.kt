@@ -17,11 +17,11 @@ import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
-import org.jetbrains.research.testgenie.tools.cancelPendingResult
 import org.jetbrains.research.testgenie.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testgenie.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testgenie.tools.getBuildPath
 import org.jetbrains.research.testgenie.tools.getKey
+import org.jetbrains.research.testgenie.tools.indicatorIsCanceled
 import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
 import java.nio.charset.Charset
@@ -64,6 +64,8 @@ class EvoSuiteProcessManager(
         modificationStamp: Long,
     ) {
         try {
+            if (indicatorIsCanceled(project, indicator)) return
+
             // get command
             val command = when (codeType.type!!) {
                 CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).build()
@@ -108,12 +110,9 @@ class EvoSuiteProcessManager(
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (indicator.isCanceled) {
-                        log.info("Cancelling search")
-
-                        cancelPendingResult(project, testResultName)
-
+                    if (indicatorIsCanceled(project, indicator)) {
                         handler.destroyProcess()
+                        return
                     }
 
                     val text = event.text
@@ -147,18 +146,18 @@ class EvoSuiteProcessManager(
                         indicator.fraction = coverage
                     }
 
-                    if (indicator.fraction == 1.0 && indicator.text != TestGenieBundle.message("evosuitePostProcessMessage")) {
-                        indicator.text = TestGenieBundle.message("evosuitePostProcessMessage")
+                    if (indicator.fraction == 1.0 && indicator.text != TestGenieBundle.message("testCasesSaving")) {
+                        indicator.text = TestGenieBundle.message("testCasesSaving")
                     }
                 }
             })
 
             handler.startNotify()
 
-            if (indicator.isCanceled) return
+            if (indicatorIsCanceled(project, indicator)) return
 
             // evosuite errors check
-            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout)) return
+            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return
 
             // start result watcher
             AppExecutorUtil.getAppScheduledExecutorService()

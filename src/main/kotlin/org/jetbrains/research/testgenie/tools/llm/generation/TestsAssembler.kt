@@ -2,20 +2,25 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.importPattern
+import org.jetbrains.research.testgenie.tools.indicatorIsCanceled
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.llm.test.TestLine
 import org.jetbrains.research.testgenie.tools.llm.test.TestLineType
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 
 class TestsAssembler(
+    val project: Project,
     val indicator: ProgressIndicator,
 ) {
     private val log: Logger = Logger.getInstance(this.javaClass)
     var rawText = ""
     private var lastTestCount = 0
     fun receiveResponse(text: String) {
+        if (indicatorIsCanceled(project, indicator)) return
+
         // Collect the response and update the progress bar
         rawText = rawText.plus(text)
         val generatedTestsCount = rawText.split("@Test").size - 1

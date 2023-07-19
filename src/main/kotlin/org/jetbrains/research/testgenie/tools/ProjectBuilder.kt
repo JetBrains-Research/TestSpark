@@ -110,11 +110,12 @@ class ProjectBuilder(private val project: Project) {
     }
 
     private fun errorProcess() {
-        project.service<ErrorService>().errorOccurred()
-        NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-            TestGenieBundle.message("buildErrorTitle"),
-            TestGenieBundle.message("commonBuildErrorMessage"),
-            NotificationType.ERROR,
-        ).notify(project)
+        if (project.service<ErrorService>().errorOccurred()) {
+            NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
+                TestGenieBundle.message("buildErrorTitle"),
+                TestGenieBundle.message("commonBuildErrorMessage"),
+                NotificationType.ERROR,
+            ).notify(project)
+        }
     }
 }

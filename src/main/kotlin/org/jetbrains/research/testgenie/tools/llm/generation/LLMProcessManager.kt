@@ -10,15 +10,12 @@ import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.ErrorService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
-import org.jetbrains.research.testgenie.tools.getBuildPath
-import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testgenie.tools.getKey
-import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.*
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testgenie.tools.saveData
 import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
 import kotlin.io.path.Path
@@ -50,6 +47,8 @@ class LLMProcessManager(
         log: Logger,
         modificationStamp: Long,
     ) {
+        if (indicatorIsCanceled(project, indicator)) return
+
         if (codeType.type == CodeType.METHOD) {
             project.service<Workspace>().key = getKey(fileUrl, "$classFQN#${codeType.objectDescription}", modificationStamp, testResultName, projectClassPath)
         }
@@ -76,15 +75,17 @@ class LLMProcessManager(
         var requestsCount = 0
 
         while (!generatedTestsArePassing) {
+            if (indicatorIsCanceled(project, indicator)) return
+
             if (requestsCount >= maxRequests) {
                 llmErrorManager.errorProcess(TestGenieBundle.message("invalidGrazieResult"), project)
                 break
             }
             // Check if response is not empty
             if (generatedTestSuite == null) {
-                llmErrorManager.errorProcess(TestGenieBundle.message("emptyResponse"), project)
+                llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
                 requestsCount++
-                generatedTestSuite = llmRequestManager.request("You have provided an empty answer! please answer my previous question with the same formats", indicator, packageName, project, llmErrorManager)
+                generatedTestSuite = llmRequestManager.request("You have provided an empty answer! Please answer my previous question with the same formats", indicator, packageName, project, llmErrorManager)
                 continue
             }
 
@@ -121,10 +122,12 @@ class LLMProcessManager(
             report = coverageCollector.collect()
         }
 
-        // Error during the collecting
-        report ?: return
+        if (indicatorIsCanceled(project, indicator)) return
 
-        saveData(project, report, testResultName, fileUrl, getPackageFromTestSuiteCode(generatedTestSuite.toString()), getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN))
+        // Error during the collecting
+        if (project.service<ErrorService>().isErrorOccurred()) return
+
+        saveData(project, report!!, testResultName, fileUrl, getPackageFromTestSuiteCode(generatedTestSuite.toString()), getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN))
     }
 
     private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): String {

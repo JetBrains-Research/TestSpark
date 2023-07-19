@@ -12,16 +12,16 @@ class LLMErrorManager : ErrorManager {
     fun createRequestErrorMessage(code: Int): String = TestGenieBundle.message("requestError") + " " + code.toString()
 
     override fun errorProcess(message: String, project: Project) {
-        project.service<ErrorService>().errorOccurred()
-
-        NotificationGroupManager.getInstance()
-            .getNotificationGroup("LLM Execution Error")
-            .createNotification(
-                TestGenieBundle.message("llmErrorTitle"),
-                message,
-                NotificationType.ERROR,
-            )
-            .notify(project)
+        if (project.service<ErrorService>().errorOccurred()) {
+            NotificationGroupManager.getInstance()
+                .getNotificationGroup("LLM Execution Error")
+                .createNotification(
+                    TestGenieBundle.message("llmErrorTitle"),
+                    message,
+                    NotificationType.ERROR,
+                )
+                .notify(project)
+        }
     }
 
     override fun warningProcess(message: String, project: Project) {

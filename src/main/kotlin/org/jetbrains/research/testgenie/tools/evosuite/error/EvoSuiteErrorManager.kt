@@ -4,9 +4,11 @@ import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
+import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.ErrorService
+import org.jetbrains.research.testgenie.tools.indicatorIsCanceled
 import org.jetbrains.research.testgenie.tools.template.error.ErrorManager
 import java.util.Locale
 
@@ -33,7 +35,10 @@ class EvoSuiteErrorManager : ErrorManager {
         handler: OSProcessHandler,
         project: Project,
         evoSuiteProcessTimeout: Long,
+        indicator: ProgressIndicator,
     ): Boolean {
+        if (indicatorIsCanceled(project, indicator)) return false
+
         // exceeded timeout error
         if (!handler.waitFor(evoSuiteProcessTimeout)) {
             errorProcess(
@@ -73,15 +78,16 @@ class EvoSuiteErrorManager : ErrorManager {
      * @param message the balloon content to display
      */
     override fun errorProcess(message: String, project: Project) {
-        project.service<ErrorService>().errorOccurred()
-        NotificationGroupManager.getInstance()
-            .getNotificationGroup("EvoSuite Execution Error")
-            .createNotification(
-                TestGenieBundle.message("evosuiteErrorTitle"),
-                getCommonErrorMessage(message),
-                NotificationType.ERROR,
-            )
-            .notify(project)
+        if (project.service<ErrorService>().errorOccurred()) {
+            NotificationGroupManager.getInstance()
+                .getNotificationGroup("EvoSuite Execution Error")
+                .createNotification(
+                    TestGenieBundle.message("evosuiteErrorTitle"),
+                    getCommonErrorMessage(message),
+                    NotificationType.ERROR,
+                )
+                .notify(project)
+        }
     }
 
     /**

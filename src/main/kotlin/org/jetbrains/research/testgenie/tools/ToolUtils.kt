@@ -2,11 +2,13 @@ package org.jetbrains.research.testgenie.tools
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.ErrorService
 import java.io.File
 
 // get junit imports from a generated code
@@ -50,10 +52,6 @@ fun clearDataBeforeTestGeneration(project: Project, testResultName: String) {
     workspace.testGenerationData.pendingTestResults[testResultName] = project.service<Workspace>().key!!
 }
 
-fun cancelPendingResult(project: Project, testResultName: String) {
-    project.service<Workspace>().testGenerationData.pendingTestResults.remove(testResultName)
-}
-
 fun getBuildPath(project: Project): String {
     var buildPath = ""
 
@@ -85,4 +83,14 @@ fun getBuildPath(project: Project): String {
         }
     }
     return buildPath
+}
+
+fun indicatorIsCanceled(project: Project, indicator: ProgressIndicator): Boolean {
+    if (project.service<ErrorService>().isErrorOccurred()) return true
+    if (indicator.isCanceled) {
+        project.service<ErrorService>().errorOccurred()
+        indicator.stop()
+        return true
+    }
+    return false
 }

@@ -4,8 +4,10 @@ class ErrorService {
     private var isErrorOccurred: Boolean = false
     fun isErrorOccurred() = isErrorOccurred
 
-    fun errorOccurred() {
+    fun errorOccurred(): Boolean {
+        if (isErrorOccurred()) return false
         isErrorOccurred = true
+        return true
     }
 
     fun clear() {

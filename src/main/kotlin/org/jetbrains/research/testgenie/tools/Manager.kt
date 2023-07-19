@@ -108,7 +108,7 @@ class Manager {
 
 private class Display(private val event: AnActionEvent, private val numberOfUsedTool: Int) : Runnable {
     override fun run() {
-        val sleepDurationMillis: Long = 2000
+        val sleepDurationMillis: Long = 1000
         while (true) {
             if (event.project!!.service<Workspace>().testGenerationData.testGenerationResultList.size != numberOfUsedTool) {
                 // there is some error during the process running
