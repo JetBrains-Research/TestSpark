@@ -5,7 +5,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.importPattern
-import org.jetbrains.research.testgenie.tools.indicatorIsCanceled
+import org.jetbrains.research.testgenie.tools.processStopped
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.llm.test.TestLine
 import org.jetbrains.research.testgenie.tools.llm.test.TestLineType
@@ -19,7 +19,7 @@ class TestsAssembler(
     var rawText = ""
     private var lastTestCount = 0
     fun receiveResponse(text: String) {
-        if (indicatorIsCanceled(project, indicator)) return
+        if (processStopped(project, indicator)) return
 
         // Collect the response and update the progress bar
         rawText = rawText.plus(text)

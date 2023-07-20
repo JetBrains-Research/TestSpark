@@ -21,7 +21,7 @@ import org.jetbrains.research.testgenie.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testgenie.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testgenie.tools.getBuildPath
 import org.jetbrains.research.testgenie.tools.getKey
-import org.jetbrains.research.testgenie.tools.indicatorIsCanceled
+import org.jetbrains.research.testgenie.tools.processStopped
 import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
 import java.nio.charset.Charset
@@ -64,7 +64,7 @@ class EvoSuiteProcessManager(
         modificationStamp: Long,
     ) {
         try {
-            if (indicatorIsCanceled(project, indicator)) return
+            if (processStopped(project, indicator)) return
 
             // get command
             val command = when (codeType.type!!) {
@@ -110,7 +110,7 @@ class EvoSuiteProcessManager(
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (indicatorIsCanceled(project, indicator)) {
+                    if (processStopped(project, indicator)) {
                         handler.destroyProcess()
                         return
                     }
@@ -154,7 +154,7 @@ class EvoSuiteProcessManager(
 
             handler.startNotify()
 
-            if (indicatorIsCanceled(project, indicator)) return
+            if (processStopped(project, indicator)) return
 
             // evosuite errors check
             if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return

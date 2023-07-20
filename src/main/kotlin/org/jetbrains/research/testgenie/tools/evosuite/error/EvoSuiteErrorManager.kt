@@ -8,7 +8,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.services.ErrorService
-import org.jetbrains.research.testgenie.tools.indicatorIsCanceled
+import org.jetbrains.research.testgenie.tools.processStopped
 import org.jetbrains.research.testgenie.tools.template.error.ErrorManager
 import java.util.Locale
 
@@ -37,7 +37,7 @@ class EvoSuiteErrorManager : ErrorManager {
         evoSuiteProcessTimeout: Long,
         indicator: ProgressIndicator,
     ): Boolean {
-        if (indicatorIsCanceled(project, indicator)) return false
+        if (processStopped(project, indicator)) return false
 
         // exceeded timeout error
         if (!handler.waitFor(evoSuiteProcessTimeout)) {

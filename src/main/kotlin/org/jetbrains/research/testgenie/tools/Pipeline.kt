@@ -73,10 +73,10 @@ class Pipeline(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
-                    if (indicatorIsCanceled(project, indicator)) return
+                    if (processStopped(project, indicator)) return
 
                     if (projectBuilder.runBuild(indicator)) {
-                        if (indicatorIsCanceled(project, indicator)) return
+                        if (processStopped(project, indicator)) return
 
                         processManager.runTestGenerator(
                             indicator,
@@ -95,7 +95,7 @@ class Pipeline(
                         )
                     }
 
-                    if (indicatorIsCanceled(project, indicator)) return
+                    if (processStopped(project, indicator)) return
 
                     indicator.stop()
                 }
