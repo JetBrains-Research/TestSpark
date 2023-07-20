@@ -30,17 +30,37 @@ class CoverageVisualisationService(private val project: Project) {
     private var contentManager: ContentManager? = null
     private val textAttribute = TextAttributes()
 
-    private val listOfEditorsWithHighlighters: MutableSet<Editor> = mutableSetOf()
+    private var currentHighlightedData: HighlightedData? = null
+
+    /**
+     * Represents highlighted data in the editor.
+     *
+     * @property linesToCover a set of line numbers to be highlighted as coverage lines
+     * @property selectedTests a set of selected test names
+     * @property testReport the test report associated with the highlighted data
+     * @property editor the editor instance where the data is highlighted
+     */
+    data class HighlightedData(
+        val linesToCover: Set<Int>,
+        val selectedTests: HashSet<String>,
+        val testReport: Report,
+        val editor: Editor,
+    )
 
     /**
      * Clears all highlighters from the list of editors.
      */
     fun clear() {
-        for (editor in listOfEditorsWithHighlighters) {
-            editor.markupModel.removeAllHighlighters()
-        }
-        listOfEditorsWithHighlighters.clear()
+        currentHighlightedData ?: return
+        currentHighlightedData!!.editor.markupModel.removeAllHighlighters()
     }
+
+    /**
+     * Retrieves the current highlighted data.
+     *
+     * @return The current highlighted data, or null if there is no highlighted data.
+     */
+    fun getCurrentHighlightedData(): HighlightedData? = currentHighlightedData
 
     /**
      * Instantiates tab for coverage table and calls function to update coverage.
@@ -71,7 +91,8 @@ class CoverageVisualisationService(private val project: Project) {
         testReport: Report,
         editor: Editor,
     ) {
-        listOfEditorsWithHighlighters.add(editor)
+        currentHighlightedData = HighlightedData(linesToCover, selectedTests, testReport, editor)
+        clear()
 
         // Show in-line coverage only if enabled in settings
         val quickAccessParametersState =

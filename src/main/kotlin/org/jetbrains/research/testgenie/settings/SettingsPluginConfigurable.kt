@@ -3,6 +3,7 @@ package org.jetbrains.research.testgenie.settings
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testgenie.services.CoverageVisualisationService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import java.io.File
 import javax.swing.JComponent
@@ -12,10 +13,9 @@ import javax.swing.JComponent
  * It interacts with the SettingsPluginComponent, TestGenieSettingsService and TestGenieSettingsState.
  * It provides controller functionality for the TestGenieSettingsState.
  */
-class SettingsPluginConfigurable(project: Project) : Configurable {
+class SettingsPluginConfigurable(val project: Project) : Configurable {
 
     var settingsComponent: SettingsPluginComponent? = null
-    private var projectDuplicate: Project = project
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
@@ -23,7 +23,7 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
      * @return the panel used for displaying settings
      */
     override fun createComponent(): JComponent? {
-        settingsComponent = SettingsPluginComponent(projectDuplicate)
+        settingsComponent = SettingsPluginComponent(project)
         return settingsComponent!!.panel
     }
 
@@ -31,7 +31,7 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: SettingsProjectState = projectDuplicate.service<SettingsProjectService>().state
+        val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
         settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
         settingsComponent!!.colorGreen = settingsState.colorGreen
@@ -39,9 +39,9 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
         settingsComponent!!.buildCommand = settingsState.buildCommand
         settingsComponent!!.telemetryEnabled = settingsState.telemetryEnabled
         settingsComponent!!.telemetryPath =
-            if (settingsState.telemetryPath.endsWith(projectDuplicate.name)) {
+            if (settingsState.telemetryPath.endsWith(project.name)) {
                 settingsState.telemetryPath
-            } else settingsState.telemetryPath.plus(File.separator).plus(projectDuplicate.name)
+            } else settingsState.telemetryPath.plus(File.separator).plus(project.name)
     }
 
     /**
@@ -50,7 +50,7 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: SettingsProjectState = projectDuplicate.service<SettingsProjectService>().state
+        val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
 //        var modified: Boolean = settingsComponent!!.javaPath != settingsState.javaPath
         var modified: Boolean = settingsComponent!!.buildPath != settingsState.buildPath
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
@@ -66,7 +66,7 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: SettingsProjectState = projectDuplicate.service<SettingsProjectService>().state
+        val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen
         settingsState.colorBlue = settingsComponent!!.colorBlue
@@ -75,6 +75,17 @@ class SettingsPluginConfigurable(project: Project) : Configurable {
         settingsState.telemetryEnabled = settingsComponent!!.telemetryEnabled
         resetTelemetryPathIfEmpty(settingsState)
         settingsState.telemetryPath = settingsComponent!!.telemetryPath
+
+        // update coverage visualisation
+        val coverageVisualisationService = project.service<CoverageVisualisationService>()
+        val currentHighlightedData = coverageVisualisationService.getCurrentHighlightedData()
+        currentHighlightedData ?: return
+        coverageVisualisationService.updateCoverage(
+            currentHighlightedData.linesToCover,
+            currentHighlightedData.selectedTests,
+            currentHighlightedData.testReport,
+            currentHighlightedData.editor,
+        )
     }
 
     /**
