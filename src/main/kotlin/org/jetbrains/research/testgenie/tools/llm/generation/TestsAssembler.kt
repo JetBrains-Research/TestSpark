@@ -5,11 +5,11 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.importPattern
-import org.jetbrains.research.testgenie.tools.processStopped
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.llm.test.TestLine
 import org.jetbrains.research.testgenie.tools.llm.test.TestLineType
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testgenie.tools.processStopped
 
 class TestsAssembler(
     val project: Project,
