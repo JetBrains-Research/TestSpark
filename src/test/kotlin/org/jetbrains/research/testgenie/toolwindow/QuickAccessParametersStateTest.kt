@@ -4,8 +4,8 @@ import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.impl.LightTempDirTestFixtureImpl
-import org.jetbrains.research.testgenie.TestGenieDefaultsBundle
 import org.assertj.core.api.Assertions.assertThat
+import org.jetbrains.research.testgenie.TestGenieDefaultsBundle
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -50,19 +50,19 @@ class QuickAccessParametersStateTest {
     private fun valueGenerator(): Stream<Arguments> = Stream.of(
         Arguments.of(
             { state.stoppingCondition = StoppingCondition.MAXFITNESSEVALUATIONS },
-            mutableListOf("-Dstopping_condition=MAXFITNESSEVALUATIONS")
+            mutableListOf("-Dstopping_condition=MAXFITNESSEVALUATIONS"),
         ),
         Arguments.of(
             { state.searchBudget = 42 },
-            mutableListOf("-Dsearch_budget=42")
+            mutableListOf("-Dsearch_budget=42"),
         ),
         Arguments.of(
             { state.initializationTimeout = 69 },
-            mutableListOf("-Dinitialization_timeout=69")
+            mutableListOf("-Dinitialization_timeout=69"),
         ),
         Arguments.of(
             { state.minimizationTimeout = 256 },
-            mutableListOf("-Dminimization_timeout=256")
+            mutableListOf("-Dminimization_timeout=256"),
         ),
         Arguments.of(
             { state.assertionTimeout = 61 },
@@ -71,16 +71,16 @@ class QuickAccessParametersStateTest {
 
         Arguments.of(
             { state.junitCheckTimeout = 59 },
-            mutableListOf("-Djunit_check_timeout=59")
+            mutableListOf("-Djunit_check_timeout=59"),
         ),
         Arguments.of(
             { state.populationLimit = PopulationLimit.STATEMENTS },
-            mutableListOf("-Dpopulation_limit=STATEMENTS")
+            mutableListOf("-Dpopulation_limit=STATEMENTS"),
         ),
         Arguments.of(
             { state.population = 128 },
-            mutableListOf("-Dpopulation=128")
-        )
+            mutableListOf("-Dpopulation=128"),
+        ),
     )
 
     @Test

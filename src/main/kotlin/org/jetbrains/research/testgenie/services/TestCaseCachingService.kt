@@ -1,10 +1,10 @@
 package org.jetbrains.research.testgenie.services
 
 import com.intellij.openapi.diagnostic.Logger
-import org.jetbrains.research.testgenie.editor.Workspace
 import org.evosuite.utils.CompactTestCase
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.editor.Workspace
 import kotlin.streams.toList
 
 class TestCaseCachingService {

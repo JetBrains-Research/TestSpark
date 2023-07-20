@@ -42,7 +42,7 @@ class CoverageRenderer(
     private val coveredMutation: List<String>,
     private val notCoveredMutation: List<String>,
     private val mapMutantsToTests: HashMap<String, MutableList<String>>,
-    private val project: Project
+    private val project: Project,
 ) :
     ActiveGutterRenderer, LineMarkerRendererEx {
 
@@ -62,7 +62,7 @@ class CoverageRenderer(
             prePanel.addComponent(
                 ActionLink(testName) {
                     highlightInToolwindow(testName)
-                }
+                },
             )
         }
 
@@ -73,7 +73,7 @@ class CoverageRenderer(
                 prePanel.addComponent(
                     ActionLink(mutantName.substringBefore('(')) {
                         highlightMutantsInToolwindow(mutantName, mapMutantsToTests)
-                    }
+                    },
                 )
             }
         }
@@ -82,7 +82,7 @@ class CoverageRenderer(
             prePanel.addComponent(JBLabel(" Survived mutants:"), 10)
             for (mutantName in notCoveredMutation) {
                 prePanel.addComponent(
-                    JBLabel(mutantName.substringBefore('('))
+                    JBLabel(mutantName.substringBefore('(')),
                 )
             }
         }
@@ -90,7 +90,7 @@ class CoverageRenderer(
         val panel = JBScrollPane(
             prePanel.addVerticalGap(10).panel,
             JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-            JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+            JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
         )
 
         panel.preferredSize = Dimension(panel.preferredSize.width, 400.coerceAtMost(panel.preferredSize.height))
@@ -104,7 +104,7 @@ class CoverageRenderer(
             HintManager.HIDE_BY_ANY_KEY or HintManager.HIDE_BY_TEXT_CHANGE or HintManager.HIDE_BY_OTHER_HINT or HintManager.HIDE_BY_SCROLLING,
             -1,
             false,
-            HintHint(editor, point)
+            HintHint(editor, point),
         )
     }
 

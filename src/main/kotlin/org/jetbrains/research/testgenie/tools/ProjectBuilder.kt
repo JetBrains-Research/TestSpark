@@ -10,12 +10,12 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.task.ProjectTaskManager
+import com.intellij.util.concurrency.Semaphore
 import org.jetbrains.research.testgenie.TestGenieBundle
+import org.jetbrains.research.testgenie.services.ErrorService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
-import com.intellij.util.concurrency.Semaphore
-import com.intellij.task.ProjectTaskManager
-import org.jetbrains.research.testgenie.services.ErrorService
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
@@ -32,6 +32,12 @@ class ProjectBuilder(private val project: Project) {
         ApplicationManager.getApplication().saveAll()
     }
 
+    /**
+     * Runs the build process.
+     *
+     * @param indicator The progress indicator to show the build progress.
+     * @return True if the build is successful, false otherwise.
+     */
     fun runBuild(indicator: ProgressIndicator): Boolean {
         val handle = CountDownLatch(1)
         log.info("Starting build!")
@@ -110,11 +116,12 @@ class ProjectBuilder(private val project: Project) {
     }
 
     private fun errorProcess() {
-        project.service<ErrorService>().errorOccurred()
-        NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-            TestGenieBundle.message("buildErrorTitle"),
-            TestGenieBundle.message("commonBuildErrorMessage"),
-            NotificationType.ERROR,
-        ).notify(project)
+        if (project.service<ErrorService>().errorOccurred()) {
+            NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
+                TestGenieBundle.message("buildErrorTitle"),
+                TestGenieBundle.message("commonBuildErrorMessage"),
+                NotificationType.ERROR,
+            ).notify(project)
+        }
     }
 }

@@ -12,7 +12,7 @@ data class SettingsProjectState(
     var buildPath: String = DefaultSettingsPluginState.buildPath,
     var buildCommand: String = DefaultSettingsPluginState.buildCommand,
     var telemetryEnabled: Boolean = DefaultSettingsPluginState.telemetryEnabled,
-    var telemetryPath: String = DefaultSettingsPluginState.telemetryPath
+    var telemetryPath: String = DefaultSettingsPluginState.telemetryPath,
 ) {
     /**
      * Default values of SettingsProjectState.

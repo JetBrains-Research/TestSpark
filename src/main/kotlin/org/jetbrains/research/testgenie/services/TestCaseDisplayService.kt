@@ -26,12 +26,13 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElementFactory
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiElementFactory
 import com.intellij.refactoring.suggested.newRange
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
@@ -40,24 +41,25 @@ import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
-import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
+import org.jetbrains.research.testgenie.TestGenieToolTipsBundle
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
 import java.util.Locale
-import javax.swing.JPanel
-import javax.swing.JButton
-import javax.swing.JLabel
-import javax.swing.BoxLayout
 import javax.swing.BorderFactory
-import javax.swing.JOptionPane
-import javax.swing.JCheckBox
 import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JLabel
+import javax.swing.JOptionPane
+import javax.swing.JPanel
 import javax.swing.border.Border
 
 class TestCaseDisplayService(private val project: Project) {
@@ -125,10 +127,21 @@ class TestCaseDisplayService(private val project: Project) {
         removeAllButton.addActionListener { removeAllTestCases() }
     }
 
+    /**
+     * Enables the validated button.
+     *
+     * This method sets the enabled state of the validated button to true,
+     * allowing users to interact with it.
+     */
     fun makeValidatedButtonAvailable() {
         validateButton.isEnabled = true
     }
 
+    /**
+     * Sets the JaCoCo report for the coverage suites bundle.
+     *
+     * @param coverageSuitesBundle The coverage suites bundle to set the JaCoCo report for.
+     */
     fun setJacocoReport(coverageSuitesBundle: CoverageSuitesBundle) {
         currentJacocoCoverageBundle = coverageSuitesBundle
     }
@@ -191,10 +204,7 @@ class TestCaseDisplayService(private val project: Project) {
             // Add an editor to modify the test source code
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val textFieldEditor = EditorTextField(document, project, JavaFileType.INSTANCE)
-            // Set the default editor color to the one the editor was created with (only done once)
-            if (defaultEditorColor == null) {
-                defaultEditorColor = textFieldEditor.background
-            }
+
             textFieldEditor.setOneLineMode(false)
 
             // Add test case title
@@ -258,12 +268,11 @@ class TestCaseDisplayService(private val project: Project) {
         scrollToPanel(myPanel)
 
         val editor = getEditor(name) ?: return
-        if (!editor.background.equals(defaultEditorColor)) {
-            return
-        }
         val settingsProjectState = project.service<SettingsProjectService>().state
         val highlightColor =
-            Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
+            JBColor(TestGenieToolTipsBundle.defaultValue("colorName"), Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30))
+        if (editor.background.equals(highlightColor)) return
+        defaultEditorColor = editor.background
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
     }
@@ -326,7 +335,7 @@ class TestCaseDisplayService(private val project: Project) {
         for (testCase in testCasePanels) {
             if (names.contains(testCase.key)) {
                 val editor = getEditor(testCase.key) ?: return
-                val highlightColor = Color(255, 0, 0, 90)
+                val highlightColor = JBColor(TestGenieToolTipsBundle.defaultValue("colorName"), Color(255, 0, 0, 90))
                 defaultBorder = editor.border
                 editor.border = BorderFactory.createLineBorder(highlightColor, 3)
             } else {
@@ -482,6 +491,11 @@ class TestCaseDisplayService(private val project: Project) {
         )
     }
 
+    /**
+     * Retrieves the names of the active test cases.
+     *
+     * @return a set of strings representing the names of the active test cases.
+     */
     private fun getActiveTests(): Set<String> {
         val selectedTestCases =
             testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
@@ -532,6 +546,13 @@ class TestCaseDisplayService(private val project: Project) {
         Validator(project, testJob.info, edits).validateSuite()
     }
 
+    /**
+     * Toggles the Jacoco coverage for the current project and file.
+     * If Jacoco coverage is active, it will be deactivated.
+     * If Jacoco coverage is inactive, it will be activated using the current Jacoco coverage bundle.
+     *
+     * @throws IllegalStateException if the project or file is not set.
+     */
     private fun toggleJacocoCoverage() {
         val manager = CoverageDataManager.getInstance(project)
         val editor = project.service<Workspace>().editorForFileUrl(project.service<Workspace>().testGenerationData.fileUrl)
@@ -768,10 +789,13 @@ class TestCaseDisplayService(private val project: Project) {
 
                 // add border highlight
                 val settingsProjectState = project.service<SettingsProjectService>().state
-                val borderColor = Color(
-                    settingsProjectState.colorRed,
-                    settingsProjectState.colorGreen,
-                    settingsProjectState.colorBlue,
+                val borderColor = JBColor(
+                    TestGenieToolTipsBundle.defaultValue("colorName"),
+                    Color(
+                        settingsProjectState.colorRed,
+                        settingsProjectState.colorGreen,
+                        settingsProjectState.colorBlue,
+                    ),
                 )
                 textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 

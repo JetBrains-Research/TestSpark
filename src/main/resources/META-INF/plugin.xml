@@ -185,11 +185,11 @@
                     description="Generate tests for the selected class using TestGenie (EvoSuite version)">
             </action>
             <!-- Generate tests for method using LLM-->
-<!--            <action class="org.jetbrains.research.testgenie.actions.llm.GenerateTestsActionMethodLlm"-->
-<!--                    id="TestGenie.TestGenieActions.GenerateTestsForMethodLlm"-->
-<!--                    text="Generate Tests For Method (LLM)"-->
-<!--                    description="Generate tests for the selected method using TestGenie (LLM version)">-->
-<!--            </action>-->
+            <action class="org.jetbrains.research.testgenie.actions.llm.GenerateTestsActionMethodLlm"
+                    id="TestGenie.TestGenieActions.GenerateTestsForMethodLlm"
+                    text="Generate Tests For Method (LLM)"
+                    description="Generate tests for the selected method using TestGenie (LLM version)">
+            </action>
             <!-- Generate tests for method using EvoSuite-->
             <action class="org.jetbrains.research.testgenie.actions.evosuite.GenerateTestsActionMethodEvosuite"
                     id="TestGenie.TestGenieActions.GenerateTestsForMethodEvosuite"
@@ -197,11 +197,11 @@
                     description="Generate tests for the selected method using TestGenie (EvoSuite version)">
             </action>
             <!-- Generate tests for line using LLM-->
-<!--            <action class="org.jetbrains.research.testgenie.actions.llm.GenerateTestsActionLineLlm"-->
-<!--                    id="TestGenie.TestGenieActions.GenerateTestsForLineLLM"-->
-<!--                    text="Generate Tests For Line (LLM)"-->
-<!--                    description="Generate tests for the selected line using TestGenie (LLM version)">-->
-<!--            </action>-->
+            <action class="org.jetbrains.research.testgenie.actions.llm.GenerateTestsActionLineLlm"
+                    id="TestGenie.TestGenieActions.GenerateTestsForLineLLM"
+                    text="Generate Tests For Line (LLM)"
+                    description="Generate tests for the selected line using TestGenie (LLM version)">
+            </action>
             <!-- Generate tests for line using EvoSuite-->
             <action class="org.jetbrains.research.testgenie.actions.evosuite.GenerateTestsActionLineEvosuite"
                     id="TestGenie.TestGenieActions.GenerateTestsForLineEvosuite"

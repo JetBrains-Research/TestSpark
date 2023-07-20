@@ -7,10 +7,12 @@ import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.ui.JBColor
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
+import org.jetbrains.research.testgenie.TestGenieToolTipsBundle
 import org.jetbrains.research.testgenie.coverage.CoverageRenderer
 import org.jetbrains.research.testgenie.data.Report
 import java.awt.Color
@@ -27,6 +29,18 @@ class CoverageVisualisationService(private val project: Project) {
     private var content: Content? = null
     private var contentManager: ContentManager? = null
     private val textAttribute = TextAttributes()
+
+    private val listOfEditorsWithHighlighters: MutableSet<Editor> = mutableSetOf()
+
+    /**
+     * Clears all highlighters from the list of editors.
+     */
+    fun clear() {
+        for (editor in listOfEditorsWithHighlighters) {
+            editor.markupModel.removeAllHighlighters()
+        }
+        listOfEditorsWithHighlighters.clear()
+    }
 
     /**
      * Instantiates tab for coverage table and calls function to update coverage.
@@ -57,25 +71,27 @@ class CoverageVisualisationService(private val project: Project) {
         testReport: Report,
         editor: Editor,
     ) {
+        listOfEditorsWithHighlighters.add(editor)
+
         // Show in-line coverage only if enabled in settings
         val quickAccessParametersState =
             ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
 
         if (quickAccessParametersState.showCoverage) {
             val settingsProjectState = project.service<SettingsProjectService>().state
-            val color =
-                Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
-            val colorForLines = Color(
-                settingsProjectState.colorRed,
-                settingsProjectState.colorGreen,
-                settingsProjectState.colorBlue,
-                30,
+            val color = JBColor(TestGenieToolTipsBundle.defaultValue("colorName"), Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue))
+            val colorForLines = JBColor(
+                TestGenieToolTipsBundle.defaultValue("colorName"),
+                Color(
+                    settingsProjectState.colorRed,
+                    settingsProjectState.colorGreen,
+                    settingsProjectState.colorBlue,
+                    30,
+                ),
             )
 
             // Update the color used for highlighting if necessary
             textAttribute.backgroundColor = colorForLines
-
-            editor.markupModel.removeAllHighlighters()
 
             // map of mutant operations -> List of names of tests which cover the mutant
             val mapMutantsToTests = HashMap<String, MutableList<String>>()

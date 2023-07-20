@@ -26,7 +26,7 @@ TestGenie is a plugin for generating unit tests.
 
 
 ## Features
-[//]: # (TODO add validation to the list)
+[//]: # (TODO add validation and caching to the list)
 <!-- What features are supported by the plugin? -->
 - [Installation](#installation)
 - [Automatic test generation for classes](#generating-tests-for-classes-1)
@@ -36,7 +36,6 @@ TestGenie is a plugin for generating unit tests.
 - [Coverage visualisation for generated test suite](#coverage-visualisation-1)
 - [Killed mutants visualisation](#killed-mutants-visualisation-1)
 - [Integrating tests into the project](#integrating-tests-into-the-project-1)
-- [Caching tests](#caching-tests-1)
 - [Accessibility features](#accessibility-features-1)
 - [Telemetry](#telemetry-opt-in-1)
 
@@ -61,11 +60,11 @@ TestGenie offers an option to see which mutants were killed and by which tests. 
 ### Integrating tests into the project
 When the user has decided on a set of tests that he wants to use, it is possible to integrate these tests into the project. To do this, click on the button "Apply to test suite".
 
-### Caching Tests
-Due to its nature, generating tests with EvoSuite takes time. TestGenie takes steps to address this as
-much as technically feasible by caching all generated test cases that the user has decided not to apply
-immediately. This then allows TestGenie to instantly show those tests later, when the user decides to
-generate tests for a method or class that those unapplied tests also covered.
+[//]: # (### Caching Tests)
+[//]: # (Due to its nature, generating tests with EvoSuite takes time. TestGenie takes steps to address this as)
+[//]: # (much as technically feasible by caching all generated test cases that the user has decided not to apply)
+[//]: # (immediately. This then allows TestGenie to instantly show those tests later, when the user decides to)
+[//]: # (generate tests for a method or class that those unapplied tests also covered.)
 
 [//]: # (### Test validation)
 [//]: # (To assure that the cached tests are still valid, we have static and dynamic validation which are run before showing any cached tests.)
@@ -185,11 +184,12 @@ Or to a new file:
 
 ![Tests adding to a new file](readme-images/gifs/addingToANewFile.gif)
 
-### Caching Tests
-When a user initially generates tests for a class, this will take some time, as the EvoSuite backend needs to be invoked. Then, if a user generates tests for a single method in this class, Test-Genie will look in its cache and find the tests that were previously generated for the entire class, and will instantly display them to the user rather than invoking EvoSuite again.
+[//]: # (TODO uncomment after the caching fixing)
+[//]: # (### Caching Tests)
+[//]: # (When a user initially generates tests for a class, this will take some time, as the EvoSuite backend needs to be invoked. Then, if a user generates tests for a single method in this class, Test-Genie will look in its cache and find the tests that were previously generated for the entire class, and will instantly display them to the user rather than invoking EvoSuite again.)
 
 [//]: # ( Before displaying cached tests, they are &#40;in&#41;validated [statically and dynamically]&#40;#test-validation-1&#41;.\ )
-![Cached Tests for Method](readme-images/gifs/caching.gif)
+[//]: # (![Cached Tests for Method]&#40;readme-images/gifs/caching.gif&#41;)
 
 [//]: # (TODO uncomment after the validator fixing)
 [//]: # (### Test validation)

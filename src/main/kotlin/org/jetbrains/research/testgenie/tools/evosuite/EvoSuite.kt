@@ -12,39 +12,42 @@ import org.jetbrains.research.testgenie.actions.createPipeline
 import org.jetbrains.research.testgenie.actions.getSurroundingLine
 import org.jetbrains.research.testgenie.actions.getSurroundingMethod
 import org.jetbrains.research.testgenie.data.CodeType
-import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
+import org.jetbrains.research.testgenie.data.FragmentToTestDada
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.services.SettingsProjectService
-import org.jetbrains.research.testgenie.tools.template.Tool
 import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProcessManager
+import org.jetbrains.research.testgenie.tools.template.Tool
 
+/**
+ * Represents the EvoSuite class, which is a tool used to generate tests for Java code.
+ * Implements the Tool interface.
+ *
+ * @param name The name of the EvoSuite tool.
+ */
 class EvoSuite(override val name: String = "EvoSuite") : Tool {
     private fun getEvoSuiteProcessManager(e: AnActionEvent): EvoSuiteProcessManager {
         val project: Project = e.project!!
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val settingsProjectState = project.service<SettingsProjectService>().state
         val buildPath = "$projectClassPath/${settingsProjectState.buildPath}"
-        val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
-        val modificationStamp = vFile.modificationStamp
-        return EvoSuiteProcessManager(project, buildPath, modificationStamp)
+        return EvoSuiteProcessManager(project, buildPath)
     }
 
     override fun generateTestsForClass(e: AnActionEvent) {
-        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.CLASS))
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestDada(CodeType.CLASS))
     }
 
     override fun generateTestsForMethod(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
-        val methodDescriptor = generateMethodDescriptor(psiMethod)
-        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.METHOD, methodDescriptor))
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestDada(CodeType.METHOD, generateMethodDescriptor(psiMethod)))
     }
 
     override fun generateTestsForLine(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
-        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), CodeTypeAndAdditionData(CodeType.LINE, selectedLine))
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestDada(CodeType.LINE, selectedLine))
     }
 }

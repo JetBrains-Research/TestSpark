@@ -17,12 +17,18 @@ import com.intellij.psi.PsiFile
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.Util
 import org.jetbrains.research.testgenie.actions.getSurroundingClass
-import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
+import org.jetbrains.research.testgenie.data.FragmentToTestDada
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
 import java.util.UUID
 
+/**
+ * Pipeline class represents a pipeline for running the test generation process.
+ *
+ * @param e The AnActionEvent instance that triggered the pipeline.
+ * @param packageName The name of the package where the target class resides.
+ */
 class Pipeline(
     e: AnActionEvent,
     private val packageName: String,
@@ -65,7 +71,7 @@ class Pipeline(
     /**
      * Builds the project and launches generation on a separate thread.
      */
-    fun runTestGeneration(processManager: ProcessManager, codeType: CodeTypeAndAdditionData) {
+    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestDada) {
         clearDataBeforeTestGeneration(project, testResultName)
 
         val projectBuilder = ProjectBuilder(project)
@@ -73,12 +79,11 @@ class Pipeline(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestGenieBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
-                    if (indicator.isCanceled) {
-                        indicator.stop()
-                        return
-                    }
+                    if (processStopped(project, indicator)) return
 
                     if (projectBuilder.runBuild(indicator)) {
+                        if (processStopped(project, indicator)) return
+
                         processManager.runTestGenerator(
                             indicator,
                             codeType,
@@ -92,8 +97,11 @@ class Pipeline(
                             testResultName,
                             baseDir,
                             log,
+                            modificationStamp,
                         )
                     }
+
+                    if (processStopped(project, indicator)) return
 
                     indicator.stop()
                 }

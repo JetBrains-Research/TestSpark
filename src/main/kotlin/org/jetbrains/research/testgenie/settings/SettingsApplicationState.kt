@@ -26,7 +26,7 @@ data class SettingsApplicationState(
     var grazieUserToken: String = DefaultSettingsApplicationState.grazieUserToken,
     var maxLLMRequest: Int = DefaultSettingsApplicationState.maxLLMRequest,
     var maxInputParamsDepth: Int = DefaultSettingsApplicationState.maxInputParamsDepth,
-    var maxPolyDepth: Int = DefaultSettingsApplicationState.maxPolyDepth
+    var maxPolyDepth: Int = DefaultSettingsApplicationState.maxPolyDepth,
 ) {
 
     /**

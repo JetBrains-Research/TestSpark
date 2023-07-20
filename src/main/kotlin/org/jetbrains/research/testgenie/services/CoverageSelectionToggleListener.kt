@@ -4,7 +4,9 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.util.messages.Topic
 
 val COVERAGE_SELECTION_TOGGLE_TOPIC: Topic<CoverageSelectionToggleListener> = Topic.create(
-    "COVERAGE_SELECTION_TOGGLE_TOPIC", CoverageSelectionToggleListener::class.java, Topic.BroadcastDirection.TO_PARENT
+    "COVERAGE_SELECTION_TOGGLE_TOPIC",
+    CoverageSelectionToggleListener::class.java,
+    Topic.BroadcastDirection.TO_PARENT,
 )
 
 /**

@@ -1,11 +1,10 @@
 package org.jetbrains.research.testgenie.data
 
-import com.intellij.openapi.components.service
-import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.services.ErrorService
-import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 
+/**
+ * Data with test generation results that include additional information beyond the test cases themselves.
+ */
 class TestGenerationData {
     // Result processing
     var testGenerationResultList: MutableList<Report?> = mutableListOf()
@@ -23,10 +22,10 @@ class TestGenerationData {
     // Maps a test generation job id to its corresponding test job information
     var pendingTestResults: HashMap<String, Workspace.TestJobInfo> = HashMap()
 
-    fun clear(project: Project) {
-        project.service<TestCaseDisplayService>().clear()
-        project.service<ErrorService>().clear()
-
+    /**
+     * Cleaning all old data before new test generation.
+     */
+    fun clear() {
         testGenerationResultList.clear()
         resultName = ""
         fileUrl = ""
