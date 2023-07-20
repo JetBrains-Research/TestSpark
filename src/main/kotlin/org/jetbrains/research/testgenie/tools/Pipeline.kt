@@ -23,6 +23,12 @@ import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
 import java.util.UUID
 
+/**
+ * Pipeline class represents a pipeline for running the test generation process.
+ *
+ * @param e The AnActionEvent instance that triggered the pipeline.
+ * @param packageName The name of the package where the target class resides.
+ */
 class Pipeline(
     e: AnActionEvent,
     private val packageName: String,

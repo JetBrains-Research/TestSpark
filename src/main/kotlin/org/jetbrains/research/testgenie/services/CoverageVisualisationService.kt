@@ -32,6 +32,9 @@ class CoverageVisualisationService(private val project: Project) {
 
     private val listOfEditorsWithHighlighters: MutableSet<Editor> = mutableSetOf()
 
+    /**
+     * Clears all highlighters from the list of editors.
+     */
     fun clear() {
         for (editor in listOfEditorsWithHighlighters) {
             editor.markupModel.removeAllHighlighters()

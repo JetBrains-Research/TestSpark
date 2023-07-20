@@ -130,6 +130,12 @@ class Workspace(private val project: Project) : Disposable {
         listenerDisposable = disposable
     }
 
+    /**
+     * Clears the given project's test-related data, including test case display,
+     * error service, coverage visualization, and test generation data.
+     *
+     * @param project the project to clear the test-related data for
+     */
     fun clear(project: Project) {
         project.service<TestCaseDisplayService>().clear()
         project.service<ErrorService>().clear()
@@ -235,6 +241,11 @@ class Workspace(private val project: Project) : Disposable {
         visualizationService.showCoverage(testJob.report, editor)
     }
 
+    /**
+     * Shows the validation result by marking failing test cases.
+     *
+     * @param validationResult The JUnit result of the validation.
+     */
     private fun showValidationResult(validationResult: Validator.JUnitResult) {
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
         testCaseDisplayService.markFailingTestCases(validationResult.failedTestNames)
@@ -255,10 +266,19 @@ class Workspace(private val project: Project) : Disposable {
         visualizationService.updateCoverage(linesToCover, selectedTests, testCaseList, editor)
     }
 
+    /**
+     * Retrieves the last test job from the test generation results for a given file.
+     *
+     * @param fileName The name of the file for which to retrieve the last test job.
+     * @return The last test job generated for the specified file, or null if no test job is found.
+     */
     private fun lastTestGeneration(fileName: String): TestJob? {
         return testGenerationData.testGenerationResults[fileName]?.last()
     }
 
+    /**
+     * Disposes the listenerDisposable if it is not null.
+     */
     override fun dispose() {
         listenerDisposable?.let { Disposer.dispose(it) }
     }

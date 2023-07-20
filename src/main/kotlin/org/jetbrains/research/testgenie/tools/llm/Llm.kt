@@ -22,6 +22,11 @@ import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testgenie.tools.llm.generation.PromptManager
 import org.jetbrains.research.testgenie.tools.template.Tool
 
+/**
+ * The Llm class represents a tool called "Llm" that is used to generate tests for Java code.
+ *
+ * @param name The name of the tool. Default value is "Llm".
+ */
 class Llm(override val name: String = "Llm") : Tool {
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
@@ -65,6 +70,13 @@ class Llm(override val name: String = "Llm") : Tool {
         return LLMProcessManager(project, prompt)
     }
 
+    /**
+     * Checks if the token is set.
+     *
+     * @param project The project for error processing.
+     *
+     * @return True if the token is set, false otherwise.
+     */
     private fun isCorrectToken(project: Project): Boolean {
         if (!SettingsArguments.isTokenSet()) {
             llmErrorManager.errorProcess(TestGenieBundle.message("missingToken"), project)
@@ -73,12 +85,24 @@ class Llm(override val name: String = "Llm") : Tool {
         return true
     }
 
+    /**
+     * Generates tests for a given class.
+     *
+     * @param e the AnActionEvent object containing information about the action event
+     * @throws IllegalArgumentException if the project in the AnActionEvent object is null
+     */
     override fun generateTestsForClass(e: AnActionEvent) {
         if (!isCorrectToken(e.project!!)) return
         val codeType = FragmentToTestDada(CodeType.CLASS)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 
+    /**
+     * Generates tests for a given method.
+     *
+     * @param e The AnActionEvent that triggered the method generation.
+     * @throws IllegalStateException if the project or the surrounding method is null.
+     */
     override fun generateTestsForMethod(e: AnActionEvent) {
         if (!isCorrectToken(e.project!!)) return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
@@ -88,6 +112,11 @@ class Llm(override val name: String = "Llm") : Tool {
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 
+    /**
+     * Generates tests for a specific line of code.
+     *
+     * @param e The AnActionEvent that triggered the generation of tests.
+     */
     override fun generateTestsForLine(e: AnActionEvent) {
         if (!isCorrectToken(e.project!!)) return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!

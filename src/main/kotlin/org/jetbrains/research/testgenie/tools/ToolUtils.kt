@@ -11,7 +11,13 @@ import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.ErrorService
 import java.io.File
 
-// get junit imports from a generated code
+/**
+ * Retrieves the imports code from a given test suite code.
+ *
+ * @param testSuiteCode The test suite code from which to extract the imports code. If null, an empty string is returned.
+ * @param classFQN The fully qualified name of the class to be excluded from the imports code. It will not be included in the result.
+ * @return The imports code extracted from the test suite code. If no imports are found or the result is empty after filtering, an empty string is returned.
+ */
 fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String): String {
     testSuiteCode ?: return ""
     val result = testSuiteCode.replace("\r\n", "\n").split("\n").asSequence()
@@ -24,6 +30,12 @@ fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String): S
     return result
 }
 
+/**
+ * Retrieves the package declaration from the given test suite code.
+ *
+ * @param testSuiteCode The generated code of the test suite.
+ * @return The package declaration extracted from the test suite code, or an empty string if no package declaration was found.
+ */
 // get package from a generated code
 fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
     testSuiteCode ?: return ""
@@ -34,6 +46,16 @@ fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
     return result
 }
 
+/**
+ * Saves the data related to test generation in the specified project's workspace.
+ *
+ * @param project The project in which the test generation data will be saved.
+ * @param report The report object to be added to the test generation result list.
+ * @param resultName The name of the test generation result.
+ * @param fileUrl The URL of the file where the test generation data will be saved.
+ * @param packageLine The package declaration line of the test generation data.
+ * @param importsCode The import statements code of the test generation data.
+ */
 fun saveData(project: Project, report: Report, resultName: String, fileUrl: String, packageLine: String, importsCode: String) {
     val workspace = project.service<Workspace>()
     workspace.testGenerationData.testGenerationResultList.add(report)
@@ -43,15 +65,37 @@ fun saveData(project: Project, report: Report, resultName: String, fileUrl: Stri
     workspace.testGenerationData.importsCode = importsCode
 }
 
+/**
+ * Retrieves the key for a test job in the workspace.
+ *
+ * @param fileUrl The URL of the file associated with the test job.
+ * @param classFQN The fully qualified name of the class associated with the test job.
+ * @param modTs The modification timestamp of the file associated with the test job.
+ * @param testResultName The name of the test result associated with the test job.
+ * @param projectClassPath The classpath of the project associated with the test job.
+ * @return The test job information containing the provided parameters.
+ */
 fun getKey(fileUrl: String, classFQN: String, modTs: Long, testResultName: String, projectClassPath: String): Workspace.TestJobInfo =
     Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
 
+/**
+ * Clears the data before test generation for a specific test result.
+ *
+ * @param project The project for which the test generation data needs to be cleared.
+ * @param testResultName The name of the test result for which the data needs to be cleared.
+ */
 fun clearDataBeforeTestGeneration(project: Project, testResultName: String) {
     val workspace = project.service<Workspace>()
     workspace.clear(project)
     workspace.testGenerationData.pendingTestResults[testResultName] = project.service<Workspace>().key!!
 }
 
+/**
+ * Retrieves the build path for the given project.
+ *
+ * @param project the project for which to retrieve the build path
+ * @return the build path as a string
+ */
 fun getBuildPath(project: Project): String {
     var buildPath = ""
 
@@ -85,6 +129,14 @@ fun getBuildPath(project: Project): String {
     return buildPath
 }
 
+/**
+ * Checks if the process has been stopped.
+ *
+ * @param project the project in which the process is running
+ * @param indicator the progress indicator for tracking the progress of the process
+ *
+ * @return true if the process has been stopped, false otherwise
+ */
 fun processStopped(project: Project, indicator: ProgressIndicator): Boolean {
     if (project.service<ErrorService>().isErrorOccurred()) return true
     if (indicator.isCanceled) {

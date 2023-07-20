@@ -18,6 +18,12 @@ import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.tools.evosuite.generation.EvoSuiteProcessManager
 import org.jetbrains.research.testgenie.tools.template.Tool
 
+/**
+ * Represents the EvoSuite class, which is a tool used to generate tests for Java code.
+ * Implements the Tool interface.
+ *
+ * @param name The name of the EvoSuite tool.
+ */
 class EvoSuite(override val name: String = "EvoSuite") : Tool {
     private fun getEvoSuiteProcessManager(e: AnActionEvent): EvoSuiteProcessManager {
         val project: Project = e.project!!

@@ -27,6 +27,12 @@ import java.io.File
 import java.nio.charset.Charset
 import java.util.regex.Pattern
 
+/**
+ * This class manages the execution of EvoSuite, a test generation tool.
+ *
+ * @param project the project in which the tests will be generated
+ * @param projectPath the path to the project directory
+ */
 class EvoSuiteProcessManager(
     private val project: Project,
     private val projectPath: String,

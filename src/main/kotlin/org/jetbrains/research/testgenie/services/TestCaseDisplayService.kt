@@ -127,10 +127,21 @@ class TestCaseDisplayService(private val project: Project) {
         removeAllButton.addActionListener { removeAllTestCases() }
     }
 
+    /**
+     * Enables the validated button.
+     *
+     * This method sets the enabled state of the validated button to true,
+     * allowing users to interact with it.
+     */
     fun makeValidatedButtonAvailable() {
         validateButton.isEnabled = true
     }
 
+    /**
+     * Sets the JaCoCo report for the coverage suites bundle.
+     *
+     * @param coverageSuitesBundle The coverage suites bundle to set the JaCoCo report for.
+     */
     fun setJacocoReport(coverageSuitesBundle: CoverageSuitesBundle) {
         currentJacocoCoverageBundle = coverageSuitesBundle
     }
@@ -480,6 +491,11 @@ class TestCaseDisplayService(private val project: Project) {
         )
     }
 
+    /**
+     * Retrieves the names of the active test cases.
+     *
+     * @return a set of strings representing the names of the active test cases.
+     */
     private fun getActiveTests(): Set<String> {
         val selectedTestCases =
             testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
@@ -530,6 +546,13 @@ class TestCaseDisplayService(private val project: Project) {
         Validator(project, testJob.info, edits).validateSuite()
     }
 
+    /**
+     * Toggles the Jacoco coverage for the current project and file.
+     * If Jacoco coverage is active, it will be deactivated.
+     * If Jacoco coverage is inactive, it will be activated using the current Jacoco coverage bundle.
+     *
+     * @throws IllegalStateException if the project or file is not set.
+     */
     private fun toggleJacocoCoverage() {
         val manager = CoverageDataManager.getInstance(project)
         val editor = project.service<Workspace>().editorForFileUrl(project.service<Workspace>().testGenerationData.fileUrl)

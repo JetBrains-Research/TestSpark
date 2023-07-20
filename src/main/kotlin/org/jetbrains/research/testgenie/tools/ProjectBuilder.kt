@@ -32,6 +32,12 @@ class ProjectBuilder(private val project: Project) {
         ApplicationManager.getApplication().saveAll()
     }
 
+    /**
+     * Runs the build process.
+     *
+     * @param indicator The progress indicator to show the build progress.
+     * @return True if the build is successful, false otherwise.
+     */
     fun runBuild(indicator: ProgressIndicator): Boolean {
         val handle = CountDownLatch(1)
         log.info("Starting build!")
