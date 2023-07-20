@@ -7,15 +7,20 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.CodeType
-import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
+import org.jetbrains.research.testgenie.data.FragmentToTestDada
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.ErrorService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
-import org.jetbrains.research.testgenie.tools.*
+import org.jetbrains.research.testgenie.tools.getBuildPath
+import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.getKey
+import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.indicatorIsCanceled
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testgenie.tools.saveData
 import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
 import kotlin.io.path.Path
@@ -34,7 +39,7 @@ class LLMProcessManager(
 
     override fun runTestGenerator(
         indicator: ProgressIndicator,
-        codeType: CodeTypeAndAdditionData,
+        codeType: FragmentToTestDada,
         projectClassPath: String,
         resultPath: String,
         serializeResultPath: String,

@@ -60,6 +60,7 @@ class Workspace(private val project: Project) : Disposable {
     }
 
     private val log = Logger.getInstance(this.javaClass)
+
     private var listenerDisposable: Disposable? = null
 
     var testGenerationData = TestGenerationData()

@@ -2,6 +2,9 @@ package org.jetbrains.research.testgenie.data
 
 import org.jetbrains.research.testgenie.editor.Workspace
 
+/**
+ * Data with test generation results that include additional information beyond the test cases themselves.
+ */
 class TestGenerationData {
     // Result processing
     var testGenerationResultList: MutableList<Report?> = mutableListOf()
@@ -19,6 +22,9 @@ class TestGenerationData {
     // Maps a test generation job id to its corresponding test job information
     var pendingTestResults: HashMap<String, Workspace.TestJobInfo> = HashMap()
 
+    /**
+     * Cleaning all old data before new test generation.
+     */
     fun clear() {
         testGenerationResultList.clear()
         resultName = ""

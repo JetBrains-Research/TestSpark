@@ -17,7 +17,7 @@ import com.intellij.psi.PsiFile
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.Util
 import org.jetbrains.research.testgenie.actions.getSurroundingClass
-import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
+import org.jetbrains.research.testgenie.data.FragmentToTestDada
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
@@ -65,7 +65,7 @@ class Pipeline(
     /**
      * Builds the project and launches generation on a separate thread.
      */
-    fun runTestGeneration(processManager: ProcessManager, codeType: CodeTypeAndAdditionData) {
+    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestDada) {
         clearDataBeforeTestGeneration(project, testResultName)
 
         val projectBuilder = ProjectBuilder(project)

@@ -13,7 +13,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.CodeType
-import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
+import org.jetbrains.research.testgenie.data.FragmentToTestDada
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
@@ -50,7 +50,7 @@ class EvoSuiteProcessManager(
      */
     override fun runTestGenerator(
         indicator: ProgressIndicator,
-        codeType: CodeTypeAndAdditionData,
+        codeType: FragmentToTestDada,
         projectClassPath: String,
         resultPath: String,
         serializeResultPath: String,

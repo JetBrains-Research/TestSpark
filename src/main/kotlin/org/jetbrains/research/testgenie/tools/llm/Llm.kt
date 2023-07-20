@@ -15,7 +15,7 @@ import org.jetbrains.research.testgenie.actions.getSurroundingClass
 import org.jetbrains.research.testgenie.actions.getSurroundingLine
 import org.jetbrains.research.testgenie.actions.getSurroundingMethod
 import org.jetbrains.research.testgenie.data.CodeType
-import org.jetbrains.research.testgenie.data.CodeTypeAndAdditionData
+import org.jetbrains.research.testgenie.data.FragmentToTestDada
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
@@ -25,7 +25,7 @@ import org.jetbrains.research.testgenie.tools.template.Tool
 class Llm(override val name: String = "Llm") : Tool {
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
-    private fun getLLMProcessManager(e: AnActionEvent, codeType: CodeTypeAndAdditionData): LLMProcessManager {
+    private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestDada): LLMProcessManager {
         val project: Project = e.project!!
 
         val classesToTest = mutableListOf<PsiClass>()
@@ -75,7 +75,7 @@ class Llm(override val name: String = "Llm") : Tool {
 
     override fun generateTestsForClass(e: AnActionEvent) {
         if (!isCorrectToken(e.project!!)) return
-        val codeType = CodeTypeAndAdditionData(CodeType.CLASS)
+        val codeType = FragmentToTestDada(CodeType.CLASS)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 
@@ -84,7 +84,7 @@ class Llm(override val name: String = "Llm") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
-        val codeType = CodeTypeAndAdditionData(CodeType.METHOD, generateMethodDescriptor(psiMethod))
+        val codeType = FragmentToTestDada(CodeType.METHOD, generateMethodDescriptor(psiMethod))
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 
@@ -93,7 +93,7 @@ class Llm(override val name: String = "Llm") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
-        val codeType = CodeTypeAndAdditionData(CodeType.LINE, selectedLine)
+        val codeType = FragmentToTestDada(CodeType.LINE, selectedLine)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 }
