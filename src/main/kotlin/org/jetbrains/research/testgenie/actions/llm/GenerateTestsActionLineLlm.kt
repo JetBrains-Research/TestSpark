@@ -1,5 +1,6 @@
 package org.jetbrains.research.testgenie.actions.llm
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import org.jetbrains.research.testgenie.actions.updateForLine
@@ -25,4 +26,11 @@ class GenerateTestsActionLineLlm : AnAction() {
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
     override fun update(e: AnActionEvent) = updateForLine(e, "GPT-4")
+
+    /**
+     * AnAction.getActionUpdateThread() implementation.
+     *
+     * @return ActionUpdateThread.BGT
+     */
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 }
