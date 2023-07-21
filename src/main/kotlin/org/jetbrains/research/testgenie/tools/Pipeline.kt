@@ -3,7 +3,6 @@ package org.jetbrains.research.testgenie.tools
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
