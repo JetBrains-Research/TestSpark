@@ -153,6 +153,7 @@ class LLMProcessManager(
             // compile the test file
             val compilationResult = coverageCollector.compile()
             if (!compilationResult.first) {
+                log.info("Incorrect result: \n$generatedTestSuite")
                 llmErrorManager.warningProcess(TestGenieBundle.message("compilationError"), project)
                 requestsCount++
                 generatedTestSuite = llmRequestManager.request("I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```", indicator, packageName, project, llmErrorManager)
