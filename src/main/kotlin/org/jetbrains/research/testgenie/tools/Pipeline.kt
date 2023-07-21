@@ -39,8 +39,6 @@ class Pipeline(
 
     private val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
-    private val log = Logger.getInstance(this::class.java)
-
     private val id = UUID.randomUUID().toString()
     private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testGenieResults$sep"
     private val testResultName = "test_gen_result_$id"
@@ -96,7 +94,6 @@ class Pipeline(
                             fileUrl,
                             testResultName,
                             baseDir,
-                            log,
                             modificationStamp,
                         )
                     }

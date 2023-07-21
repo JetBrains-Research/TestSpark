@@ -7,7 +7,7 @@ import org.jetbrains.research.testgenie.actions.updateForLine
 import org.jetbrains.research.testgenie.tools.Manager
 
 /**
- * This class contains all the logic related to generating tests for a class by EvoSuite.
+ * This class contains all the logic related to generating tests for a line by EvoSuite.
  * No actual generation happens in this class, rather it is responsible for displaying the action option to the user when it is available,
  *   getting the information about the selected line and passing it to Pipeline.
  */
