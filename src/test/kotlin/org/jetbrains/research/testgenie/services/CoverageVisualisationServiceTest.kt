@@ -16,7 +16,6 @@ import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testgenie.data.Report
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -93,8 +92,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
         assertThat(mutationCoverage).isEqualTo(coverageToolWindowDisplayService.data[3])
     }
 
-    @Test
-    fun createToolWindowTabTestSingleContent() {
+    fun testCreateToolWindowTabTestSingleContent() {
         coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())), myEditor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
 
@@ -102,8 +100,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
         assertThat(toolWindow.contentManager.contents.size).isEqualTo(1)
     }
 
-    @Test
-    fun createToolWindowTabTestContent() {
+    fun testCreateToolWindowTabTestContent() {
         coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())), myEditor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
         val content = toolWindow.contentManager.getContent(0)!!

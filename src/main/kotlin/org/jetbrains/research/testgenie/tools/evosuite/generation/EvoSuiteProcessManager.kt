@@ -37,6 +37,8 @@ class EvoSuiteProcessManager(
     private val project: Project,
     private val projectPath: String,
 ) : ProcessManager {
+    private val log = Logger.getInstance(this::class.java)
+
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
     private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
 
@@ -66,7 +68,6 @@ class EvoSuiteProcessManager(
         fileUrl: String,
         testResultName: String,
         baseDir: String,
-        log: Logger,
         modificationStamp: Long,
     ) {
         try {

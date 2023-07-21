@@ -63,7 +63,6 @@ class LLMProcessManager(
      * @param fileUrl The URL of the file being tested.
      * @param testResultName The name of the test result.
      * @param baseDir The base directory of the project.
-     * @param log The logger to log any messages.
      * @param modificationStamp The modification stamp of the file being tested.
      */
     override fun runTestGenerator(
@@ -78,9 +77,10 @@ class LLMProcessManager(
         fileUrl: String,
         testResultName: String,
         baseDir: String,
-        log: Logger,
         modificationStamp: Long,
     ) {
+        log.info("LLM test generation begins")
+
         if (processStopped(project, indicator)) return
 
         if (codeType.type == CodeType.METHOD) {
@@ -103,12 +103,17 @@ class LLMProcessManager(
 
         // Send the first request to LLM
         var generatedTestSuite: TestSuiteGeneratedByLLM? = llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
+
+        log.info("Generated tests suite received")
+
         var generatedTestsArePassing = false
 
         var report: Report? = null
         var requestsCount = 0
 
         while (!generatedTestsArePassing) {
+            log.info("New iterations of requests")
+
             if (processStopped(project, indicator)) return
 
             if (requestsCount >= maxRequests) {
@@ -122,6 +127,8 @@ class LLMProcessManager(
                 generatedTestSuite = llmRequestManager.request("You have provided an empty answer! Please answer my previous question with the same formats", indicator, packageName, project, llmErrorManager)
                 continue
             }
+
+            log.info("Result is now empty")
 
             // Save the generated TestSuite into a temp file
             val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
@@ -152,6 +159,8 @@ class LLMProcessManager(
                 continue
             }
 
+            log.info("Result is compilable")
+
             generatedTestsArePassing = true
             report = coverageCollector.collect()
         }
@@ -160,6 +169,8 @@ class LLMProcessManager(
 
         // Error during the collecting
         if (project.service<ErrorService>().isErrorOccurred()) return
+
+        log.info("Result is ready")
 
         saveData(project, report!!, testResultName, fileUrl, getPackageFromTestSuiteCode(generatedTestSuite.toString()), getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN))
     }

@@ -1,6 +1,5 @@
 package org.jetbrains.research.testgenie.tools.template.generation
 
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import org.jetbrains.research.testgenie.data.FragmentToTestDada
@@ -23,7 +22,6 @@ interface ProcessManager {
      * @param fileUrl The URL of the file that contains the code fragment.
      * @param testResultName The name of the test result.
      * @param baseDir The base directory of the project.
-     * @param log The logger to log the progress and errors.
      * @param modificationStamp The modification stamp of the code fragment file.
      */
     fun runTestGenerator(
@@ -38,7 +36,6 @@ interface ProcessManager {
         fileUrl: String,
         testResultName: String,
         baseDir: String,
-        log: Logger,
         modificationStamp: Long,
     )
 }

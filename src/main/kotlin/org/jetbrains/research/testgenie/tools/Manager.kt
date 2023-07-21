@@ -2,6 +2,7 @@ package org.jetbrains.research.testgenie.tools
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
@@ -170,6 +171,8 @@ class Manager {
  * @param numberOfUsedTool The number of test generation tools used.
  */
 private class Display(private val event: AnActionEvent, private val numberOfUsedTool: Int) : Runnable {
+    private val log = Logger.getInstance(this::class.java)
+
     override fun run() {
         // waiting time after each iteration
         val sleepDurationMillis: Long = 1000
@@ -180,9 +183,13 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
             if (event.project!!.service<Workspace>().testGenerationData.testGenerationResultList.size != numberOfUsedTool) {
                 // there is some error during the process running
                 if (event.project!!.service<ErrorService>().isErrorOccurred()) break
+                log.info("Found ${event.project!!.service<Workspace>().testGenerationData.testGenerationResultList.size} number of results")
+                log.info("Waiting for other generation results")
                 Thread.sleep(sleepDurationMillis)
                 continue
             }
+
+            log.info("Found all $numberOfUsedTool generation results")
 
             // sends result to Workspace
             event.project!!.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC).testGenerationResult(
@@ -204,6 +211,8 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
      * @return The merged report containing the results of the test generation process.
      */
     private fun getMergeResult(numberOfUsedTool: Int): Report {
+        log.info("Merging $numberOfUsedTool generation results")
+
         if (numberOfUsedTool == 1) {
             return event.project!!.service<Workspace>().testGenerationData.testGenerationResultList[0]!!
         }

@@ -1,9 +1,11 @@
 package org.jetbrains.research.testgenie.tools.llm.generation
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.actions.getClassDisplayName
 import org.jetbrains.research.testgenie.actions.getClassFullText
 import org.jetbrains.research.testgenie.actions.getSignatureString
+import org.jetbrains.research.testgenie.tools.evosuite.generation.ResultWatcher
 
 /**
  * A class that manages prompts for generating unit tests.
@@ -20,6 +22,8 @@ class PromptManager(
     private val interestingPsiClasses: MutableSet<PsiClass>,
     private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
 ) {
+    private val log = Logger.getInstance(ResultWatcher::class.java)
+
     /**
      * Generates a prompt for generating unit tests in Java for a given class.
      *
@@ -103,6 +107,8 @@ class PromptManager(
         }
         // Make sure that LLM does not provide extra information other than the test file
         prompt += "put the generated test between ```"
+
+        log.info("Prompt is:\n$prompt")
 
         return prompt
     }

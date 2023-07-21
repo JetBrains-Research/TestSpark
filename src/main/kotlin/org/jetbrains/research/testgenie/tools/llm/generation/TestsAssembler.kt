@@ -137,6 +137,8 @@ class TestsAssembler(
             }
 
             testSuite.testCases.add(currentTest)
+
+            log.info("New test case: $currentTest")
         }
         return testSuite
     }

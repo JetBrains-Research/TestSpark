@@ -3,6 +3,7 @@ package org.jetbrains.research.testgenie.tools.evosuite
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
@@ -25,6 +26,8 @@ import org.jetbrains.research.testgenie.tools.template.Tool
  * @param name The name of the EvoSuite tool.
  */
 class EvoSuite(override val name: String = "EvoSuite") : Tool {
+    private val log = Logger.getInstance(this::class.java)
+
     private fun getEvoSuiteProcessManager(e: AnActionEvent): EvoSuiteProcessManager {
         val project: Project = e.project!!
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
@@ -34,10 +37,12 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
     }
 
     override fun generateTestsForClass(e: AnActionEvent) {
+        log.info("Starting tests generation for class by EvoSuite")
         createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestDada(CodeType.CLASS))
     }
 
     override fun generateTestsForMethod(e: AnActionEvent) {
+        log.info("Starting tests generation for method by EvoSuite")
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
@@ -45,6 +50,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
     }
 
     override fun generateTestsForLine(e: AnActionEvent) {
+        log.info("Starting tests generation for line by EvoSuite")
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
