@@ -40,20 +40,7 @@ data class TestSuiteGeneratedByLLM(
      * @return A string representing the test file.
      */
     override fun toString(): String {
-        var testFullText = ""
-
-        // Add package
-        if (packageString.isNotBlank()) {
-            testFullText += "package $packageString;\n"
-        }
-
-        // add imports
-        imports.forEach { importedElement ->
-            testFullText += "$importedElement\n"
-        }
-
-        // open the test class
-        testFullText += "public class GeneratedTest{\n\n"
+        var testFullText = printUpperPart()
 
         // Add each test
         testCases.forEach { testCase -> testFullText += "$testCase\n" }
@@ -63,6 +50,48 @@ data class TestSuiteGeneratedByLLM(
 
         return testFullText
     }
+
+    /**
+     * Returns the full text of the test suite (excluding the expected exception).
+     *
+     * @return the full text of the test suite (excluding the expected exception) as a string.
+     */
+    fun toStringWithoutExpectedException() :String{
+        var testFullText = printUpperPart()
+
+        // Add each test (exclude expected exception)
+        testCases.forEach { testCase -> testFullText += "${testCase.toStringWithoutExpectedException()}\n" }
+
+        // close the test class
+        testFullText += "}"
+
+        return testFullText
+    }
+
+    /**
+     * Returns the upper part of test suite (package name, imports, and test class name) as a string.
+     *
+     * @return the upper part of test suite (package name, imports, and test class name) as a string.
+     */
+    private fun printUpperPart(): String{
+        var testText = ""
+
+        // Add package
+        if (packageString.isNotBlank()) {
+            testText += "package $packageString;\n"
+        }
+
+        // add imports
+        imports.forEach { importedElement ->
+            testText += "$importedElement\n"
+        }
+
+        // open the test class
+        testText += "public class GeneratedTest{\n\n"
+
+        return testText
+    }
+
 
     /**
      * Returns a printable package string.

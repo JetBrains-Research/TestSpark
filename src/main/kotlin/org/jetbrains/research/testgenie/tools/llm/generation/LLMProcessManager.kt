@@ -141,6 +141,7 @@ class LLMProcessManager(
             val coverageCollector = TestCoverageCollector(
                 indicator,
                 project,
+                classFQN,
                 resultPath,
                 File("$generatedTestPath$testFileName"),
                 generatedTestSuite.getPrintablePackageString(),
@@ -195,7 +196,7 @@ class LLMProcessManager(
         val testFile = File("$generatedTestPath${File.separatorChar}$testFileName")
         testFile.createNewFile()
         log.info("Save test in file " + testFile.absolutePath)
-        testFile.writeText(generatedTestSuite.toString())
+        testFile.writeText(generatedTestSuite.toStringWithoutExpectedException())
 
         return generatedTestPath
     }
