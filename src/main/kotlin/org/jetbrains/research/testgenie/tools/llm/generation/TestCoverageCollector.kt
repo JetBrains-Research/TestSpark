@@ -183,7 +183,7 @@ class TestCoverageCollector(
      * @return a set of lines that are covered in CUT during the exception happening.
      */
     private fun collectLinesCoveredDuringException(testExecutionError: String): Set<Int> {
-        if (testExecutionError.isBlank()){
+        if (testExecutionError.isBlank()) {
             return emptySet()
         }
 
@@ -194,9 +194,9 @@ class TestCoverageCollector(
         frames.removeFirst()
 
         frames.forEach { frame ->
-            if (frame.contains(classFQN)){
-                val coveredLineNumber = frame.split(":")[1].replace(")","").toIntOrNull()
-                if (coveredLineNumber != null){
+            if (frame.contains(classFQN)) {
+                val coveredLineNumber = frame.split(":")[1].replace(")", "").toIntOrNull()
+                if (coveredLineNumber != null) {
                     result.add(coveredLineNumber)
                 }
             }
@@ -244,7 +244,6 @@ class TestCoverageCollector(
 
         // Add lines that Jacoco might have missed because of its limitation during the exception
         setOfLines.addAll(linesCoveredDuringTheException[testCase.name]!!)
-
 
         report.testCaseList[testCase.name] = TestCase(
             testCase.name,

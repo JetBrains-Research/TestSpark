@@ -56,7 +56,7 @@ data class TestSuiteGeneratedByLLM(
      *
      * @return the full text of the test suite (excluding the expected exception) as a string.
      */
-    fun toStringWithoutExpectedException() :String{
+    fun toStringWithoutExpectedException(): String {
         var testFullText = printUpperPart()
 
         // Add each test (exclude expected exception)
@@ -73,7 +73,7 @@ data class TestSuiteGeneratedByLLM(
      *
      * @return the upper part of test suite (package name, imports, and test class name) as a string.
      */
-    private fun printUpperPart(): String{
+    private fun printUpperPart(): String {
         var testText = ""
 
         // Add package
@@ -91,7 +91,6 @@ data class TestSuiteGeneratedByLLM(
 
         return testText
     }
-
 
     /**
      * Returns a printable package string.

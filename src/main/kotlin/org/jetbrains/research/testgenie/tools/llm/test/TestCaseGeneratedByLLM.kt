@@ -71,7 +71,7 @@ data class TestCaseGeneratedByLLM(
      *
      * @return The string representation of the test case (excluding the expected exception).
      */
-    fun toStringWithoutExpectedException() :String{
+    fun toStringWithoutExpectedException(): String {
         return printTestBody(initiateTestString(false))
     }
 
@@ -81,7 +81,7 @@ data class TestCaseGeneratedByLLM(
      * @param includeExpectedException a boolean value to indicate whether the expected exception should be included.
      * @return a string containing the upper part of the test case.
      */
-    private fun initiateTestString(includeExpectedException: Boolean): String{
+    private fun initiateTestString(includeExpectedException: Boolean): String {
         var testText = ""
 
         // Add test annotation
@@ -89,7 +89,8 @@ data class TestCaseGeneratedByLLM(
 
         // add expectedException if it exists
         if (expectedException.isNotBlank() &&
-            includeExpectedException) {
+            includeExpectedException
+        ) {
             testText += "${expectedException.replace("@Test", "")})"
         }
 
@@ -102,7 +103,7 @@ data class TestCaseGeneratedByLLM(
      * @param testInitiatedText a string containing the upper part of the test case.
      * @return a string containing the body of test case
      */
-    private fun printTestBody(testInitiatedText: String): String{
+    private fun printTestBody(testInitiatedText: String): String {
         var testFullText = testInitiatedText
 
         // start writing the test signature

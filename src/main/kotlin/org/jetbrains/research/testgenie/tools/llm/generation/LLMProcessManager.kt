@@ -84,7 +84,13 @@ class LLMProcessManager(
         if (processStopped(project, indicator)) return
 
         if (codeType.type == CodeType.METHOD) {
-            project.service<Workspace>().key = getKey(fileUrl, "$classFQN#${codeType.objectDescription}", modificationStamp, testResultName, projectClassPath)
+            project.service<Workspace>().key = getKey(
+                fileUrl,
+                "$classFQN#${codeType.objectDescription}",
+                modificationStamp,
+                testResultName,
+                projectClassPath
+            )
         }
 
         // update build path
@@ -102,7 +108,8 @@ class LLMProcessManager(
         // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
 
         // Send the first request to LLM
-        var generatedTestSuite: TestSuiteGeneratedByLLM? = llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
+        var generatedTestSuite: TestSuiteGeneratedByLLM? =
+            llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
 
         log.info("Generated tests suite received")
 
@@ -124,7 +131,13 @@ class LLMProcessManager(
             if (generatedTestSuite == null || generatedTestSuite.testCases.isEmpty()) {
                 llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
                 requestsCount++
-                generatedTestSuite = llmRequestManager.request("You have provided an empty answer! Please answer my previous question with the same formats", indicator, packageName, project, llmErrorManager)
+                generatedTestSuite = llmRequestManager.request(
+                    "You have provided an empty answer! Please answer my previous question with the same formats",
+                    indicator,
+                    packageName,
+                    project,
+                    llmErrorManager
+                )
                 continue
             }
 
@@ -157,7 +170,13 @@ class LLMProcessManager(
                 log.info("Incorrect result: \n$generatedTestSuite")
                 llmErrorManager.warningProcess(TestGenieBundle.message("compilationError"), project)
                 requestsCount++
-                generatedTestSuite = llmRequestManager.request("I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```", indicator, packageName, project, llmErrorManager)
+                generatedTestSuite = llmRequestManager.request(
+                    "I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```",
+                    indicator,
+                    packageName,
+                    project,
+                    llmErrorManager
+                )
                 continue
             }
 
@@ -174,7 +193,14 @@ class LLMProcessManager(
 
         log.info("Result is ready")
 
-        saveData(project, report!!, testResultName, fileUrl, getPackageFromTestSuiteCode(generatedTestSuite.toString()), getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN))
+        saveData(
+            project,
+            report!!,
+            testResultName,
+            fileUrl,
+            getPackageFromTestSuiteCode(generatedTestSuite.toString()),
+            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN)
+        )
     }
 
     /**
