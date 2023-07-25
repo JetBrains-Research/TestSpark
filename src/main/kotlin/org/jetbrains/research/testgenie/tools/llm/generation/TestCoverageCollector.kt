@@ -123,7 +123,7 @@ class TestCoverageCollector(
                     javaRunner.absolutePath,
                     "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false",
                     "-cp",
-                    "${getPath(projectBuildPath)}${getLibrary("JUnitRunner-1.0.jar")}:$resultPath",
+                    "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:$resultPath",
                     "org.jetbrains.research.SingleJUnitTestRunner",
                     "$generatedTestPackage$className#${testCase.name}",
                 ),
