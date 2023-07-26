@@ -63,15 +63,48 @@ data class TestCaseGeneratedByLLM(
      * @return The string representation of the test case.
      */
     override fun toString(): String {
-        var testFullText = ""
+        return printTestBody(initiateTestString(true))
+    }
+
+    /**
+     * Returns a string representation of the method's test case (excluding the expected exception).
+     *
+     * @return The string representation of the test case (excluding the expected exception).
+     */
+    fun toStringWithoutExpectedException(): String {
+        return printTestBody(initiateTestString(false))
+    }
+
+    /**
+     * Initiate the string of test case
+     *
+     * @param includeExpectedException a boolean value to indicate whether the expected exception should be included.
+     * @return a string containing the upper part of the test case.
+     */
+    private fun initiateTestString(includeExpectedException: Boolean): String {
+        var testText = ""
 
         // Add test annotation
-        testFullText += "\t@Test"
+        testText += "\t@Test"
 
         // add expectedException if it exists
-        if (expectedException.isNotBlank()) {
-            testFullText += "${expectedException.replace("@Test", "")})"
+        if (expectedException.isNotBlank() &&
+            includeExpectedException
+        ) {
+            testText += "${expectedException.replace("@Test", "")})"
         }
+
+        return testText
+    }
+
+    /**
+     * return a full test case body
+     *
+     * @param testInitiatedText a string containing the upper part of the test case.
+     * @return a string containing the body of test case
+     */
+    private fun printTestBody(testInitiatedText: String): String {
+        var testFullText = testInitiatedText
 
         // start writing the test signature
         testFullText += "\n\tpublic void $name() "
