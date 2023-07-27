@@ -124,7 +124,7 @@ class TestCoverageCollector(
             val testExecutionError = runCommandLine(
                 arrayListOf(
                     javaRunner.absolutePath,
-                    "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false",
+                    "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${classFQN}",
                     "-cp",
                     "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:$resultPath",
                     "org.jetbrains.research.SingleJUnitTestRunner",
