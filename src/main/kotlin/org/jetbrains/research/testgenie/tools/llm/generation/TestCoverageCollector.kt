@@ -7,6 +7,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testgenie.TestGenieBundle
@@ -38,7 +39,7 @@ class TestCoverageCollector(
     private val generatedTestPackage: String,
     private val projectBuildPath: String,
     private val testCases: MutableList<TestCaseGeneratedByLLM>,
-    cutModule: Module,
+    private val cutModule: Module,
     private val fileNameFQN: String,
 ) {
     private val log = Logger.getInstance(this::class.java)
@@ -112,9 +113,6 @@ class TestCoverageCollector(
         val jacocoAgentDir = getLibrary("jacocoagent.jar")
         val jacocoCLIDir = getLibrary("jacococli.jar")
 
-        // class files black list in case of duplicate classes in report
-        val classFilesBlackList = mutableSetOf<String>()
-
         // Execute each test method separately
         for (testCase in testCases) {
             // name of .exec and .xml files
@@ -124,7 +122,7 @@ class TestCoverageCollector(
             val testExecutionError = runCommandLine(
                 arrayListOf(
                     javaRunner.absolutePath,
-                    "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${classFQN}",
+                    "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=$classFQN",
                     "-cp",
                     "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:$resultPath",
                     "org.jetbrains.research.SingleJUnitTestRunner",
@@ -135,59 +133,39 @@ class TestCoverageCollector(
             // collect lines covered during the exception
             linesCoveredDuringTheException[testCase.name] = collectLinesCoveredDuringException(testExecutionError)
 
-            var reportGenerated = false
+            // Prepare the command for generating the Jacoco report
+            val command = mutableListOf(
+                javaRunner.absolutePath,
+                "-jar",
+                jacocoCLIDir,
+                "report",
+                "$dataFileName.exec",
+            )
 
-            while (!reportGenerated &&
-                classFilesBlackList.size < projectBuildPath.split(":").size
-            ) {
+            // for classpath containing cut
+            command.add("--classfiles")
+            command.add(CompilerModuleExtension.getInstance(cutModule)?.compilerOutputPath!!.path)
 
-                // Prepare the command for generating the Jacoco report
-                val command = mutableListOf(
-                    javaRunner.absolutePath,
-                    "-jar",
-                    jacocoCLIDir,
-                    "report",
-                    "$dataFileName.exec",
-                )
-
-                // for each classpath
-                projectBuildPath.split(":").forEach { cp ->
-                    if (cp.isNotBlank() &&
-                        cp !in classFilesBlackList
-                    ) {
-                        command.add("--classfiles")
-                        command.add(cp)
-                    }
-                }
-
-                // for each source folder
-                sourceRoots.forEach { root ->
-                    command.add("--sourcefiles")
-                    command.add(root.path)
-                }
-
-                // generate XML report
-                command.add("--xml")
-                command.add("$dataFileName.xml")
-
-                log.info("Runs command: ${command.joinToString(" ")}")
-
-                val reportGenerationError = runCommandLine(command as ArrayList<String>)
-
-                // check if XML report is produced
-                if (!File("$dataFileName.xml").exists()) {
-                    classFilesBlackList.add(detectDuplicatedCLass(reportGenerationError))
-                    continue
-                }
-
-                log.info("xml file exists")
-                reportGenerated = true
+            // for each source folder
+            sourceRoots.forEach { root ->
+                command.add("--sourcefiles")
+                command.add(root.path)
             }
 
+            // generate XML report
+            command.add("--xml")
+            command.add("$dataFileName.xml")
+
+            log.info("Runs command: ${command.joinToString(" ")}")
+
+            val reportGenerationError = runCommandLine(command as ArrayList<String>)
+
+            // check if XML report is produced
             if (!File("$dataFileName.xml").exists()) {
                 LLMErrorManager().errorProcess("Something went wrong with generating Jacoco report.", project)
                 return
             }
+            log.info("xml file exists")
 
             // save data to TestGenerationResult
             saveData(testCase, "$dataFileName.xml")
