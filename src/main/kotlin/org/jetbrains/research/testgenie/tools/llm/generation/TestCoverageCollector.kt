@@ -7,6 +7,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testgenie.TestGenieBundle
@@ -38,7 +39,7 @@ class TestCoverageCollector(
     private val generatedTestPackage: String,
     private val projectBuildPath: String,
     private val testCases: MutableList<TestCaseGeneratedByLLM>,
-    cutModule: Module,
+    private val cutModule: Module,
     private val fileNameFQN: String,
 ) {
     private val log = Logger.getInstance(this::class.java)
@@ -121,7 +122,7 @@ class TestCoverageCollector(
             val testExecutionError = runCommandLine(
                 arrayListOf(
                     javaRunner.absolutePath,
-                    "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false",
+                    "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=$classFQN",
                     "-cp",
                     "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:$resultPath",
                     "org.jetbrains.research.SingleJUnitTestRunner",
@@ -141,13 +142,9 @@ class TestCoverageCollector(
                 "$dataFileName.exec",
             )
 
-            // for each classpath
-            projectBuildPath.split(":").forEach { cp ->
-                if (cp.trim().isNotEmpty() && cp.trim().isNotBlank()) {
-                    command.add("--classfiles")
-                    command.add(cp)
-                }
-            }
+            // for classpath containing cut
+            command.add("--classfiles")
+            command.add(CompilerModuleExtension.getInstance(cutModule)?.compilerOutputPath!!.path)
 
             // for each source folder
             sourceRoots.forEach { root ->
@@ -159,16 +156,15 @@ class TestCoverageCollector(
             command.add("--xml")
             command.add("$dataFileName.xml")
 
-            runCommandLine(command as ArrayList<String>)
-
             log.info("Runs command: ${command.joinToString(" ")}")
+
+            val reportGenerationError = runCommandLine(command as ArrayList<String>)
 
             // check if XML report is produced
             if (!File("$dataFileName.xml").exists()) {
                 LLMErrorManager().errorProcess("Something went wrong with generating Jacoco report.", project)
                 return
             }
-
             log.info("xml file exists")
 
             // save data to TestGenerationResult
