@@ -2,6 +2,7 @@ package org.jetbrains.research.testgenie.tools.llm
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
@@ -17,6 +18,7 @@ import org.jetbrains.research.testgenie.actions.getSurroundingMethod
 import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.FragmentToTestDada
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
+import org.jetbrains.research.testgenie.tools.evosuite.generation.ResultWatcher
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testgenie.tools.llm.generation.PromptManager
@@ -28,6 +30,8 @@ import org.jetbrains.research.testgenie.tools.template.Tool
  * @param name The name of the tool. Default value is "Llm".
  */
 class Llm(override val name: String = "Llm") : Tool {
+    private val log = Logger.getInstance(ResultWatcher::class.java)
+
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestDada): LLMProcessManager {
@@ -66,6 +70,8 @@ class Llm(override val name: String = "Llm") : Tool {
 
             CodeType.LINE -> PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePromptForLine(codeType.objectIndex)
         }
+
+        log.info("Prompt is:\n$prompt")
 
         return LLMProcessManager(project, prompt)
     }

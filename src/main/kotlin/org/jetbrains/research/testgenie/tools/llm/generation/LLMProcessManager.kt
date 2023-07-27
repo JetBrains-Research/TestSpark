@@ -141,7 +141,7 @@ class LLMProcessManager(
                 continue
             }
 
-            log.info("Result is now empty")
+            log.info("Result is not empty")
 
             // Save the generated TestSuite into a temp file
             val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)

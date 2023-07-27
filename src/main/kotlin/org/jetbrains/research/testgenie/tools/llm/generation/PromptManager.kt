@@ -20,8 +20,6 @@ class PromptManager(
         private val interestingPsiClasses: MutableSet<PsiClass>,
         private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
 ) {
-    private val log = Logger.getInstance(ResultWatcher::class.java)
-
     // prompt: start the request
     private val header = "Dont use @Before and @After test methods.\n" +
             "Make tests as atomic as possible.\n" +
@@ -49,7 +47,7 @@ class PromptManager(
     fun generatePromptForMethod(methodDescriptor: String): String {
         return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for method $methodDescriptor.\n" +
                 header +
-                "The source code of method under test is as follows:\n```\n${getMethodFullText(cut, methodDescriptor.split("(")[0])}\n```\n" +
+                "The source code of method under test is as follows:\n```\n${getMethodFullText(cut, methodDescriptor)}\n```\n" +
                 getCommonPromptPart()
     }
 
@@ -60,10 +58,9 @@ class PromptManager(
      * @return the generated prompt string
      */
     fun generatePromptForLine(lineNumber: Int): String {
-        val lineCode: String = getClassFullText(cut).split("\n")[lineNumber - 1]
-        return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: `$lineCode` on line number $lineNumber.\n" +
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: `${getClassFullText(cut).split("\n")[lineNumber - 1]}` on line number $lineNumber.\n" +
                 header +
-                "The source code of method this the chosen line under test is as follows:\n```\n${getMethodFullText(cut, getMethodName(cut, lineCode))}\n```\n" +
+                "The source code of method this the chosen line under test is as follows:\n```\n${getMethodFullText(cut, getMethodName(cut, lineNumber))}\n```\n" +
                 getCommonPromptPart()
     }
 
@@ -116,8 +113,6 @@ class PromptManager(
         }
         // Make sure that LLM does not provide extra information other than the test file
         prompt += "put the generated test between ```"
-
-        log.info("Prompt is:\n$prompt")
 
         return prompt
     }

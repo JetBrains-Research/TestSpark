@@ -22,10 +22,12 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
+import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 import org.jetbrains.research.testgenie.tools.Pipeline
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
+import java.awt.im.spi.InputMethodDescriptor
 
 fun createPipeline(e: AnActionEvent): Pipeline {
     val project: Project = e.project!!
@@ -427,17 +429,46 @@ fun getClassFullText(cl: PsiClass): String {
     return fullText
 }
 
-
-fun getMethodFullText(psiClass: PsiClass, methodName: String): String {
+/**
+ * Returns the full text of a method in a given PsiClass that matches the provided method descriptor.
+ *
+ * @param psiClass the PsiClass in which to search for the method
+ * @param methodDescriptor the descriptor of the method to find
+ * @return the full text of the matching method, or an empty string if no match is found
+ */
+fun getMethodFullText(psiClass: PsiClass, methodDescriptor: String): String {
     for (currentPsiMethod in psiClass.allMethods) {
-        if (currentPsiMethod.name == methodName) return currentPsiMethod.text
+        if (generateMethodDescriptor(currentPsiMethod) == methodDescriptor) return currentPsiMethod.text
     }
     return ""
 }
 
-fun getMethodName(psiClass: PsiClass, codeLine: String): String {
+/**
+ * Returns the name of the method in the specified `psiClass` that corresponds to the given `lineNumber`.
+ *
+ * @param psiClass The PsiClass for which to find the method.
+ * @param lineNumber The line number for which to find the corresponding method.
+ * @return The name of the method that corresponds to the given line number, or an empty string if no method is found.
+ */
+fun getMethodName(psiClass: PsiClass, lineNumber: Int): String {
     for (currentPsiMethod in psiClass.allMethods) {
-
+        if (isLineInPsiMethod(currentPsiMethod, lineNumber)) return generateMethodDescriptor(currentPsiMethod)
     }
     return ""
+}
+
+/**
+ * Checks if the given line number is within the range of the specified PsiMethod.
+ *
+ * @param method The PsiMethod to check.
+ * @param lineNumber The line number to check.
+ * @return `true` if the line number is within the range of the method, `false` otherwise.
+ */
+private fun isLineInPsiMethod(method: PsiMethod, lineNumber: Int): Boolean {
+    val psiFile = method.containingFile ?: return false
+    val document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
+    val textRange = method.textRange
+    val startLine = document.getLineNumber(textRange.startOffset) + 1
+    val endLine = document.getLineNumber(textRange.endOffset) + 1
+    return lineNumber in startLine..endLine
 }
