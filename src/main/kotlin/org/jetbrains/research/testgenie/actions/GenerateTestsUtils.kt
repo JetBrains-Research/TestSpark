@@ -16,17 +16,12 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
-import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 import org.jetbrains.research.testgenie.tools.Pipeline
-import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 
 fun createPipeline(e: AnActionEvent): Pipeline {
     val project: Project = e.project!!
@@ -56,62 +51,6 @@ fun createLLMPipeline(e: AnActionEvent): Pipeline {
     val packageName = packageList.joinToString(".")
 
     return Pipeline(e, packageName)
-}
-
-// Collect interesting classes (i.e., methods that are passed as input arguments to CUT)
-fun getInterestingPsiClasses(cutPsiClass: PsiClass, classesToTest: MutableList<PsiClass>): MutableSet<PsiClass> {
-    val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf(cutPsiClass)
-
-    var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
-
-    repeat(SettingsArguments.maxInputParamsDepth()) {
-        val tempListOfClasses = mutableListOf<PsiClass>()
-
-        currentLevelClasses.forEach { classIt ->
-            classIt.methods.forEach { methodIt ->
-                methodIt.parameterList.parameters.forEach { paramIt ->
-                    PsiTypesUtil.getPsiClass(paramIt.type)?.let {
-                        if (!tempListOfClasses.contains(it) &&
-                            !interestingPsiClasses.contains(it) &&
-                            it.qualifiedName != null &&
-                            !it.qualifiedName!!.startsWith("java.")
-                        ) {
-                            tempListOfClasses.add(it)
-                        }
-                    }
-                }
-            }
-        }
-        currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(tempListOfClasses) }
-        interestingPsiClasses.addAll(tempListOfClasses)
-    }
-
-    return interestingPsiClasses
-}
-
-// Collect polymorphism Relations in identified interesting classes
-fun getPolymorphismRelations(project: Project, interestingPsiClasses: MutableSet<PsiClass>, cutPsiClass: PsiClass): MutableMap<PsiClass, MutableList<PsiClass>> {
-    val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
-
-    val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
-
-    interestingPsiClasses.forEach { currentInterestingClass ->
-        val scope = GlobalSearchScope.projectScope(project)
-        val query = ClassInheritorsSearch.search(currentInterestingClass, scope, false)
-        val detectedSubClasses: Collection<PsiClass> = query.findAll()
-
-        detectedSubClasses.forEach { detectedSubClass ->
-            if (!polymorphismRelations.contains(currentInterestingClass)) {
-                polymorphismRelations[currentInterestingClass] = ArrayList()
-            }
-            polymorphismRelations[currentInterestingClass]?.add(detectedSubClass)
-            if (!psiClassesToVisit.contains(detectedSubClass)) {
-                psiClassesToVisit.addLast(detectedSubClass)
-            }
-        }
-    }
-
-    return polymorphismRelations
 }
 
 /**
@@ -397,77 +336,3 @@ val packagePattern = Regex(
     pattern = "^package\\s+((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
     options = setOf(RegexOption.MULTILINE),
 )
-
-/**
- * Returns the full text of a given class including the package, imports, and class code.
- *
- * @param cl The PsiClass object representing the class.
- * @return The full text of the class.
- */
-fun getClassFullText(cl: PsiClass): String {
-    var fullText = ""
-    val fileText = cl.containingFile.text
-
-    // get package
-    packagePattern.findAll(fileText, 0).map {
-        it.groupValues[0]
-    }.forEach {
-        fullText += "$it\n\n"
-    }
-
-    // get imports
-    importPattern.findAll(fileText, 0).map {
-        it.groupValues[0]
-    }.forEach {
-        fullText += "$it\n"
-    }
-
-    // Add class code
-    fullText += cl.text
-
-    return fullText
-}
-
-/**
- * Returns the full text of a method in a given PsiClass that matches the provided method descriptor.
- *
- * @param psiClass the PsiClass in which to search for the method
- * @param methodDescriptor the descriptor of the method to find
- * @return the full text of the matching method, or an empty string if no match is found
- */
-fun getMethodFullText(psiClass: PsiClass, methodDescriptor: String): String {
-    for (currentPsiMethod in psiClass.allMethods) {
-        if (generateMethodDescriptor(currentPsiMethod) == methodDescriptor) return currentPsiMethod.text
-    }
-    return ""
-}
-
-/**
- * Returns the name of the method in the specified `psiClass` that corresponds to the given `lineNumber`.
- *
- * @param psiClass The PsiClass for which to find the method.
- * @param lineNumber The line number for which to find the corresponding method.
- * @return The name of the method that corresponds to the given line number, or an empty string if no method is found.
- */
-fun getMethodName(psiClass: PsiClass, lineNumber: Int): String {
-    for (currentPsiMethod in psiClass.allMethods) {
-        if (isLineInPsiMethod(currentPsiMethod, lineNumber)) return generateMethodDescriptor(currentPsiMethod)
-    }
-    return ""
-}
-
-/**
- * Checks if the given line number is within the range of the specified PsiMethod.
- *
- * @param method The PsiMethod to check.
- * @param lineNumber The line number to check.
- * @return `true` if the line number is within the range of the method, `false` otherwise.
- */
-private fun isLineInPsiMethod(method: PsiMethod, lineNumber: Int): Boolean {
-    val psiFile = method.containingFile ?: return false
-    val document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
-    val textRange = method.textRange
-    val startLine = document.getLineNumber(textRange.startOffset) + 1
-    val endLine = document.getLineNumber(textRange.endOffset) + 1
-    return lineNumber in startLine..endLine
-}

@@ -10,8 +10,6 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.createLLMPipeline
-import org.jetbrains.research.testgenie.actions.getInterestingPsiClasses
-import org.jetbrains.research.testgenie.actions.getPolymorphismRelations
 import org.jetbrains.research.testgenie.actions.getSurroundingClass
 import org.jetbrains.research.testgenie.actions.getSurroundingLine
 import org.jetbrains.research.testgenie.actions.getSurroundingMethod
@@ -60,15 +58,12 @@ class Llm(override val name: String = "Llm") : Tool {
             currentPsiClass = currentPsiClass.superClass!!
         }
 
-        val interestingPsiClasses = getInterestingPsiClasses(cutPsiClass, classesToTest)
-        val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cutPsiClass)
-
         val prompt = when (codeType.type!!) {
-            CodeType.CLASS -> PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePromptForClass()
+            CodeType.CLASS -> PromptManager(project, classesToTest[0], classesToTest).generatePromptForClass()
             CodeType.METHOD ->
-                PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePromptForMethod(codeType.objectDescription)
+                PromptManager(project, classesToTest[0], classesToTest).generatePromptForMethod(codeType.objectDescription)
 
-            CodeType.LINE -> PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePromptForLine(codeType.objectIndex)
+            CodeType.LINE -> PromptManager(project, classesToTest[0], classesToTest).generatePromptForLine(codeType.objectIndex)
         }
 
         log.info("Prompt is:\n$prompt")
