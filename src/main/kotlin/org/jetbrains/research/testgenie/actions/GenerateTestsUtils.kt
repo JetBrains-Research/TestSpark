@@ -336,3 +336,33 @@ val packagePattern = Regex(
     pattern = "^package\\s+((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
     options = setOf(RegexOption.MULTILINE),
 )
+
+/**
+ * Returns the full text of a given class including the package, imports, and class code.
+ *
+ * @param cl The PsiClass object representing the class.
+ * @return The full text of the class.
+ */
+fun getClassFullText(cl: PsiClass): String {
+    var fullText = ""
+    val fileText = cl.containingFile.text
+
+    // get package
+    packagePattern.findAll(fileText, 0).map {
+        it.groupValues[0]
+    }.forEach {
+        fullText += "$it\n\n"
+    }
+
+    // get imports
+    importPattern.findAll(fileText, 0).map {
+        it.groupValues[0]
+    }.forEach {
+        fullText += "$it\n"
+    }
+
+    // Add class code
+    fullText += cl.text
+
+    return fullText
+}

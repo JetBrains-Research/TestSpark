@@ -8,9 +8,8 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testgenie.actions.getClassDisplayName
+import org.jetbrains.research.testgenie.actions.getClassFullText
 import org.jetbrains.research.testgenie.actions.getSignatureString
-import org.jetbrains.research.testgenie.actions.importPattern
-import org.jetbrains.research.testgenie.actions.packagePattern
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 
@@ -159,7 +158,7 @@ class PromptManager(
 
         var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
 
-        repeat(SettingsArguments.maxInputParamsDepth()) {
+        repeat(SettingsArguments.maxInputParamsDepth(project)) {
             val tempListOfClasses = mutableSetOf<PsiClass>()
 
             currentLevelClasses.forEach { classIt ->
@@ -212,36 +211,6 @@ class PromptManager(
         }
 
         return polymorphismRelations
-    }
-
-    /**
-     * Returns the full text of a given class including the package, imports, and class code.
-     *
-     * @param cl The PsiClass object representing the class.
-     * @return The full text of the class.
-     */
-    private fun getClassFullText(cl: PsiClass): String {
-        var fullText = ""
-        val fileText = cl.containingFile.text
-
-        // get package
-        packagePattern.findAll(fileText, 0).map {
-            it.groupValues[0]
-        }.forEach {
-            fullText += "$it\n\n"
-        }
-
-        // get imports
-        importPattern.findAll(fileText, 0).map {
-            it.groupValues[0]
-        }.forEach {
-            fullText += "$it\n"
-        }
-
-        // Add class code
-        fullText += cl.text
-
-        return fullText
     }
 
     /**

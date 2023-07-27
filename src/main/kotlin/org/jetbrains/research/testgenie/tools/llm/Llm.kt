@@ -2,6 +2,7 @@ package org.jetbrains.research.testgenie.tools.llm
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
@@ -15,6 +16,7 @@ import org.jetbrains.research.testgenie.actions.getSurroundingLine
 import org.jetbrains.research.testgenie.actions.getSurroundingMethod
 import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.FragmentToTestDada
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
 import org.jetbrains.research.testgenie.tools.evosuite.generation.ResultWatcher
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
@@ -37,7 +39,7 @@ class Llm(override val name: String = "Llm") : Tool {
 
         val classesToTest = mutableListOf<PsiClass>()
         // check if cut has any none java super class
-        val maxPolymorphismDepth = SettingsArguments.maxPolyDepth()
+        val maxPolymorphismDepth = SettingsArguments.maxPolyDepth(project)
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
@@ -68,7 +70,7 @@ class Llm(override val name: String = "Llm") : Tool {
 
         log.info("Prompt is:\n$prompt")
 
-        return LLMProcessManager(project, prompt)
+        return LLMProcessManager(project, prompt, cutPsiClass)
     }
 
     /**

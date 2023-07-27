@@ -22,6 +22,10 @@ class TestGenerationData {
     // Maps a test generation job id to its corresponding test job information
     var pendingTestResults: HashMap<String, Workspace.TestJobInfo> = HashMap()
 
+    // changing parameters with a large prompt
+    var polyDepthReducing: Int = 0
+    var inputParamsDepthReducing: Int = 0
+
     /**
      * Cleaning all old data before new test generation.
      */
@@ -33,5 +37,7 @@ class TestGenerationData {
         packageLine = ""
         testGenerationResults.clear()
         pendingTestResults.clear()
+        polyDepthReducing = 0
+        inputParamsDepthReducing = 0
     }
 }

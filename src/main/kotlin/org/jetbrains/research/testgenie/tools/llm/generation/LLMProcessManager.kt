@@ -5,7 +5,9 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
+import org.jetbrains.research.testgenie.actions.getClassFullText
 import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.FragmentToTestDada
 import org.jetbrains.research.testgenie.data.Report
@@ -41,6 +43,7 @@ import kotlin.io.path.createDirectories
 class LLMProcessManager(
     private val project: Project,
     private val prompt: String,
+    private val cutPsiClass: PsiClass,
 ) : ProcessManager {
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private var testFileName: String = "GeneratedTest.java"
@@ -107,7 +110,7 @@ class LLMProcessManager(
         indicator.text = TestGenieBundle.message("searchMessage")
 
         // Prompt size checking
-        if (!isPromptLengthWithinLimit(prompt)) {
+        if (!isPromptLengthWithinLimit(getClassFullText(cutPsiClass))) {
             llmErrorManager.errorProcess(TestGenieBundle.message("tooLongPrompt"), project)
             return
         }
@@ -133,6 +136,32 @@ class LLMProcessManager(
                 llmErrorManager.errorProcess(TestGenieBundle.message("invalidGrazieResult"), project)
                 break
             }
+
+            // TODO move thi loop to PromptManager
+            // Too big prompt processing
+            if (!isPromptLengthWithinLimit(prompt)) {
+                llmErrorManager.warningProcess(TestGenieBundle.message("promptReduction"), project)
+
+                // depth of polygons reducing
+                if (SettingsArguments.maxPolyDepth(project) > 0) {
+                    project.service<Workspace>().testGenerationData.polyDepthReducing++
+                    indicator.text = TestGenieBundle.message("polyDepthReducing") + SettingsArguments.maxPolyDepth(project).toString()
+                    generatedTestSuite = llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
+                    continue
+                }
+
+                // depth of input params
+                if (SettingsArguments.maxInputParamsDepth(project) > 0) {
+                    project.service<Workspace>().testGenerationData.inputParamsDepthReducing++
+                    indicator.text = TestGenieBundle.message("inputParamsDepthReducing") + SettingsArguments.maxPolyDepth(project).toString()
+                    generatedTestSuite = llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
+                    continue
+                }
+
+                llmErrorManager.errorProcess(TestGenieBundle.message("tooLongPrompt"), project)
+                break
+            }
+
             // Check if response is not empty
             if (generatedTestSuite == null || generatedTestSuite.testCases.isEmpty()) {
                 llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
