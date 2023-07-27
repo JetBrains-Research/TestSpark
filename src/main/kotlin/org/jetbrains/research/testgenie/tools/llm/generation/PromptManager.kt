@@ -1,12 +1,11 @@
 package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.psi.PsiClass
-import org.jetbrains.research.testgenie.actions.getMethodFullText
 import org.jetbrains.research.testgenie.actions.getClassDisplayName
 import org.jetbrains.research.testgenie.actions.getClassFullText
+import org.jetbrains.research.testgenie.actions.getMethodFullText
 import org.jetbrains.research.testgenie.actions.getMethodName
 import org.jetbrains.research.testgenie.actions.getSignatureString
-
 
 /**
  * A class that manages prompts for generating unit tests.
