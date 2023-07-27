@@ -89,7 +89,7 @@ class LLMProcessManager(
                 "$classFQN#${codeType.objectDescription}",
                 modificationStamp,
                 testResultName,
-                projectClassPath
+                projectClassPath,
             )
         }
 
@@ -136,7 +136,7 @@ class LLMProcessManager(
                     indicator,
                     packageName,
                     project,
-                    llmErrorManager
+                    llmErrorManager,
                 )
                 continue
             }
@@ -175,7 +175,7 @@ class LLMProcessManager(
                     indicator,
                     packageName,
                     project,
-                    llmErrorManager
+                    llmErrorManager,
                 )
                 continue
             }
@@ -199,7 +199,7 @@ class LLMProcessManager(
             testResultName,
             fileUrl,
             getPackageFromTestSuiteCode(generatedTestSuite.toString()),
-            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN)
+            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN),
         )
     }
 

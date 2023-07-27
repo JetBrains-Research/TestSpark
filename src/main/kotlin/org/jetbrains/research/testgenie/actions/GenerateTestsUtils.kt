@@ -27,7 +27,6 @@ import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
 import org.jetbrains.research.testgenie.tools.Pipeline
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
-import java.awt.im.spi.InputMethodDescriptor
 
 fun createPipeline(e: AnActionEvent): Pipeline {
     val project: Project = e.project!!
