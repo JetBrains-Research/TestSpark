@@ -112,6 +112,9 @@ class TestCoverageCollector(
         val jacocoAgentDir = getLibrary("jacocoagent.jar")
         val jacocoCLIDir = getLibrary("jacococli.jar")
 
+        // class files black list in case of duplicate classes in report
+        val classFilesBlackList = mutableSetOf<String>()
+
         // Execute each test method separately
         for (testCase in testCases) {
             // name of .exec and .xml files
@@ -132,48 +135,73 @@ class TestCoverageCollector(
             // collect lines covered during the exception
             linesCoveredDuringTheException[testCase.name] = collectLinesCoveredDuringException(testExecutionError)
 
-            // Prepare the command for generating the Jacoco report
-            val command = mutableListOf(
-                javaRunner.absolutePath,
-                "-jar",
-                jacocoCLIDir,
-                "report",
-                "$dataFileName.exec",
-            )
+            var reportGenerated = false
 
-            // for each classpath
-            projectBuildPath.split(":").forEach { cp ->
-                if (cp.trim().isNotEmpty() && cp.trim().isNotBlank()) {
-                    command.add("--classfiles")
-                    command.add(cp)
+            while (!reportGenerated &&
+                classFilesBlackList.size < projectBuildPath.split(":").size
+            ) {
+
+                // Prepare the command for generating the Jacoco report
+                val command = mutableListOf(
+                    javaRunner.absolutePath,
+                    "-jar",
+                    jacocoCLIDir,
+                    "report",
+                    "$dataFileName.exec",
+                )
+
+                // for each classpath
+                projectBuildPath.split(":").forEach { cp ->
+                    if (cp.isNotBlank() &&
+                        cp !in classFilesBlackList
+                    ) {
+                        command.add("--classfiles")
+                        command.add(cp)
+                    }
                 }
+
+                // for each source folder
+                sourceRoots.forEach { root ->
+                    command.add("--sourcefiles")
+                    command.add(root.path)
+                }
+
+                // generate XML report
+                command.add("--xml")
+                command.add("$dataFileName.xml")
+
+                log.info("Runs command: ${command.joinToString(" ")}")
+
+                val reportGenerationError = runCommandLine(command as ArrayList<String>)
+
+                // check if XML report is produced
+                if (!File("$dataFileName.xml").exists()) {
+                    classFilesBlackList.add(detectDuplicatedCLass(reportGenerationError))
+                    continue
+                }
+
+                log.info("xml file exists")
+                reportGenerated = true
             }
 
-            // for each source folder
-            sourceRoots.forEach { root ->
-                command.add("--sourcefiles")
-                command.add(root.path)
-            }
-
-            // generate XML report
-            command.add("--xml")
-            command.add("$dataFileName.xml")
-
-            runCommandLine(command as ArrayList<String>)
-
-            log.info("Runs command: ${command.joinToString(" ")}")
-
-            // check if XML report is produced
             if (!File("$dataFileName.xml").exists()) {
                 LLMErrorManager().errorProcess("Something went wrong with generating Jacoco report.", project)
                 return
             }
 
-            log.info("xml file exists")
-
             // save data to TestGenerationResult
             saveData(testCase, "$dataFileName.xml")
         }
+    }
+
+    private fun detectDuplicatedCLass(reportGenerationError: String): String {
+        if (!reportGenerationError.contains("Can't add different class with same name")) {
+            LLMErrorManager().errorProcess("Something went wrong with generating Jacoco report.", project)
+            throw IllegalStateException("this is an unhandled error in jacoco report generation")
+        }
+
+        return reportGenerationError.split("Error while analyzing ")[1]
+            .split("@")[0].trim()
     }
 
     /**
