@@ -457,6 +457,17 @@ fun getMethodName(psiClass: PsiClass, lineNumber: Int): String {
 }
 
 /**
+ * Checks if the length of the given text is within the specified limit.
+ *
+ * @param text The text to check.
+ * @param limit The maximum length limit in bytes. Defaults to 16384 bytes (4096 * 4).
+ * @return `true` if the length of the text is within the limit, `false` otherwise.
+ */
+fun isTextLengthWithinLimit(text: String, limit: Int = 4096 * 4): Boolean { // Average of 4 bytes per token
+    return text.toByteArray(Charsets.UTF_8).size <= limit
+}
+
+/**
  * Checks if the given line number is within the range of the specified PsiMethod.
  *
  * @param method The PsiMethod to check.
