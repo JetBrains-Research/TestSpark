@@ -397,6 +397,12 @@ val packagePattern = Regex(
     options = setOf(RegexOption.MULTILINE),
 )
 
+/**
+ * Returns the full text of a given class including the package, imports, and class code.
+ *
+ * @param cl The PsiClass object representing the class.
+ * @return The full text of the class.
+ */
 fun getClassFullText(cl: PsiClass): String {
     var fullText = ""
     val fileText = cl.containingFile.text
@@ -419,4 +425,19 @@ fun getClassFullText(cl: PsiClass): String {
     fullText += cl.text
 
     return fullText
+}
+
+
+fun getMethodFullText(psiClass: PsiClass, methodName: String): String {
+    for (currentPsiMethod in psiClass.allMethods) {
+        if (currentPsiMethod.name == methodName) return currentPsiMethod.text
+    }
+    return ""
+}
+
+fun getMethodName(psiClass: PsiClass, codeLine: String): String {
+    for (currentPsiMethod in psiClass.allMethods) {
+
+    }
+    return ""
 }

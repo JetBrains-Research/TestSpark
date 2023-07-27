@@ -2,9 +2,7 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiClass
-import org.jetbrains.research.testgenie.actions.getClassDisplayName
-import org.jetbrains.research.testgenie.actions.getClassFullText
-import org.jetbrains.research.testgenie.actions.getSignatureString
+import org.jetbrains.research.testgenie.actions.*
 import org.jetbrains.research.testgenie.tools.evosuite.generation.ResultWatcher
 
 /**
@@ -17,12 +15,18 @@ import org.jetbrains.research.testgenie.tools.evosuite.generation.ResultWatcher
  * @param polymorphismRelations The map of polymorphism relations.
  */
 class PromptManager(
-    private val cut: PsiClass,
-    private val classesToTest: MutableList<PsiClass>,
-    private val interestingPsiClasses: MutableSet<PsiClass>,
-    private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
+        private val cut: PsiClass,
+        private val classesToTest: MutableList<PsiClass>,
+        private val interestingPsiClasses: MutableSet<PsiClass>,
+        private val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
 ) {
     private val log = Logger.getInstance(ResultWatcher::class.java)
+
+    // prompt: start the request
+    private val header = "Dont use @Before and @After test methods.\n" +
+            "Make tests as atomic as possible.\n" +
+            "All tests should be for JUnit 4.\n" +
+            "In case of mocking, use Mockito 5. But, do not use mocking for all tests.\n"
 
     /**
      * Generates a prompt for generating unit tests in Java for a given class.
@@ -30,7 +34,10 @@ class PromptManager(
      * @return The generated prompt.
      */
     fun generatePromptForClass(): String {
-        return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\n" + getCommonPromptPart()
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\n" +
+                header +
+                "The source code of class under test is as follows:\n```\n${getClassFullText(cut)}\n```\n" +
+                getCommonPromptPart()
     }
 
     /**
@@ -40,7 +47,10 @@ class PromptManager(
      * @return The generated prompt.
      */
     fun generatePromptForMethod(methodDescriptor: String): String {
-        return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for method $methodDescriptor.\n" + getCommonPromptPart()
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for method $methodDescriptor.\n" +
+                header +
+                "The source code of method under test is as follows:\n```\n${getMethodFullText(cut, methodDescriptor.split("(")[0])}\n```\n" +
+                getCommonPromptPart()
     }
 
     /**
@@ -50,7 +60,11 @@ class PromptManager(
      * @return the generated prompt string
      */
     fun generatePromptForLine(lineNumber: Int): String {
-        return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: \"${getClassFullText(cut).split("\n")[lineNumber - 1]}\" on line number $lineNumber.\n" + getCommonPromptPart()
+        val lineCode: String = getClassFullText(cut).split("\n")[lineNumber - 1]
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: `$lineCode` on line number $lineNumber.\n" +
+                header +
+                "The source code of method this the chosen line under test is as follows:\n```\n${getMethodFullText(cut, getMethodName(cut, lineCode))}\n```\n" +
+                getCommonPromptPart()
     }
 
     /**
@@ -59,12 +73,7 @@ class PromptManager(
      * @return The common prompt part as a string.
      */
     private fun getCommonPromptPart(): String {
-        // prompt: start the request
-        var prompt =
-            "Dont use @Before and @After test methods.\nMake tests as atomic as possible.\nAll tests should be for JUnit 4.\nIn case of mocking, use Mockito 5. But, do not use mocking for all tests.\n"
-
-        // prompt: source code
-        prompt += "The source code of class under test is as follows:\n```\n${getClassFullText(cut)}\n```\n"
+        var prompt = ""
 
         // print information about  super classes of CUT
         for (i in 2..classesToTest.size) {
@@ -72,8 +81,8 @@ class PromptManager(
             val superClass = classesToTest[i - 1]
 
             prompt += "${getClassDisplayName(subClass)} extends ${getClassDisplayName(superClass)}. " +
-                "The source code of ${getClassDisplayName(superClass)} is:\n```\n${getClassFullText(superClass)}\n" +
-                "```\n"
+                    "The source code of ${getClassDisplayName(superClass)} is:\n```\n${getClassFullText(superClass)}\n" +
+                    "```\n"
         }
 
         // prompt: signature of methods in the classes used by CUT
