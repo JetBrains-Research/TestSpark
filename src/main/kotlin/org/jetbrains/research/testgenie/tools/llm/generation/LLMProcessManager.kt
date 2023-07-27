@@ -105,7 +105,12 @@ class LLMProcessManager(
             return
         }
         indicator.text = TestGenieBundle.message("searchMessage")
-        // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
+
+        // Prompt size checking
+        if (!isPromptLengthWithinLimit(prompt)) {
+            llmErrorManager.errorProcess(TestGenieBundle.message("tooLongPrompt"), project)
+            return
+        }
 
         // Send the first request to LLM
         var generatedTestSuite: TestSuiteGeneratedByLLM? =
@@ -118,6 +123,7 @@ class LLMProcessManager(
         var report: Report? = null
         var requestsCount = 0
 
+        // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
         while (!generatedTestsArePassing) {
             log.info("New iterations of requests")
 
@@ -225,5 +231,16 @@ class LLMProcessManager(
         testFile.writeText(generatedTestSuite.toStringWithoutExpectedException())
 
         return generatedTestPath
+    }
+
+    /**
+     * Checks if the length of the given text is within the specified limit.
+     *
+     * @param text The text to check.
+     * @param limit The maximum length limit in bytes. Defaults to 16384 bytes (4096 * 4).
+     * @return `true` if the length of the text is within the limit, `false` otherwise.
+     */
+    private fun isPromptLengthWithinLimit(text: String, limit: Int = 4096 * 4): Boolean { // Average of 4 bytes per token
+        return text.toByteArray(Charsets.UTF_8).size <= limit
     }
 }
