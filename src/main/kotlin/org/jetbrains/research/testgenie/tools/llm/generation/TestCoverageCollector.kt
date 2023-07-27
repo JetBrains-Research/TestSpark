@@ -172,16 +172,6 @@ class TestCoverageCollector(
         }
     }
 
-    private fun detectDuplicatedCLass(reportGenerationError: String): String {
-        if (!reportGenerationError.contains("Can't add different class with same name")) {
-            LLMErrorManager().errorProcess("Something went wrong with generating Jacoco report.", project)
-            throw IllegalStateException("this is an unhandled error in jacoco report generation")
-        }
-
-        return reportGenerationError.split("Error while analyzing ")[1]
-            .split("@")[0].trim()
-    }
-
     /**
      * Collect lines covered during the exception happening.
      *
