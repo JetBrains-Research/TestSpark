@@ -24,11 +24,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElementFactory
-import com.intellij.psi.PsiJavaFile
-import com.intellij.psi.PsiManager
+import com.intellij.psi.*
 import com.intellij.refactoring.suggested.newRange
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
@@ -51,15 +47,8 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
-import java.util.Locale
-import javax.swing.BorderFactory
-import javax.swing.Box
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JOptionPane
-import javax.swing.JPanel
+import java.util.*
+import javax.swing.*
 import javax.swing.border.Border
 
 class TestCaseDisplayService(private val project: Project) {
@@ -451,6 +440,11 @@ class TestCaseDisplayService(private val project: Project) {
                 virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
+
+                if (project.service<Workspace>().testGenerationData.runWith.isNotEmpty()) {
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<Workspace>().testGenerationData.runWith})")
+                }
+
                 psiJavaFile!!.add(psiClass!!)
             }
         } else {

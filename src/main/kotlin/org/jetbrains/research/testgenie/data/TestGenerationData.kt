@@ -14,6 +14,8 @@ class TestGenerationData {
     // Code required of imports and package for generated tests
     var importsCode: String = ""
     var packageLine: String = ""
+    var runWith: String = ""
+    var otherInfo: String = ""
 
     // Maps a workspace file to the test generation jobs that were triggered on it.
     // Currently, the file key is represented by its presentableUrl
@@ -35,6 +37,8 @@ class TestGenerationData {
         fileUrl = ""
         importsCode = ""
         packageLine = ""
+        runWith = ""
+        otherInfo = ""
         testGenerationResults.clear()
         pendingTestResults.clear()
         polyDepthReducing = 0
