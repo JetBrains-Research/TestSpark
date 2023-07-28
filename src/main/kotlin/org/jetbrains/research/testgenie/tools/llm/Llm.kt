@@ -10,10 +10,7 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testgenie.TestGenieBundle
-import org.jetbrains.research.testgenie.actions.createLLMPipeline
-import org.jetbrains.research.testgenie.actions.getSurroundingClass
-import org.jetbrains.research.testgenie.actions.getSurroundingLine
-import org.jetbrains.research.testgenie.actions.getSurroundingMethod
+import org.jetbrains.research.testgenie.actions.*
 import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.FragmentToTestDada
 import org.jetbrains.research.testgenie.editor.Workspace
@@ -60,12 +57,49 @@ class Llm(override val name: String = "Llm") : Tool {
             currentPsiClass = currentPsiClass.superClass!!
         }
 
-        val prompt = when (codeType.type!!) {
-            CodeType.CLASS -> PromptManager(project, classesToTest[0], classesToTest).generatePromptForClass()
-            CodeType.METHOD ->
-                PromptManager(project, classesToTest[0], classesToTest).generatePromptForMethod(codeType.objectDescription)
+        // Prompt size checking
+        if (!isPromptLengthWithinLimit(getClassFullText(cutPsiClass))) {
+            llmErrorManager.errorProcess(TestGenieBundle.message("tooLongPrompt"), project)
+            return LLMProcessManager(project, "", cutPsiClass)
+        }
 
-            CodeType.LINE -> PromptManager(project, classesToTest[0], classesToTest).generatePromptForLine(codeType.objectIndex)
+        var prompt: String
+        while (true) {
+            prompt = when (codeType.type!!) {
+                CodeType.CLASS -> PromptManager(project, classesToTest[0], classesToTest).generatePromptForClass()
+                CodeType.METHOD ->
+                    PromptManager(project, classesToTest[0], classesToTest).generatePromptForMethod(codeType.objectDescription)
+
+                CodeType.LINE -> PromptManager(project, classesToTest[0], classesToTest).generatePromptForLine(codeType.objectIndex)
+            }
+
+            // Too big prompt processing
+            if (!isPromptLengthWithinLimit(prompt)) {
+                // depth of polygons reducing
+                if (SettingsArguments.maxPolyDepth(project) > 0) {
+                    project.service<Workspace>().testGenerationData.polyDepthReducing++
+                    log.info("poly depth is: ${SettingsArguments.maxPolyDepth(project)}")
+                    continue
+                }
+
+                // depth of input params reducing
+                if (SettingsArguments.maxInputParamsDepth(project) > 0) {
+                    project.service<Workspace>().testGenerationData.inputParamsDepthReducing++
+                    log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
+                    continue
+                }
+
+                llmErrorManager.errorProcess(TestGenieBundle.message("tooLongPrompt"), project)
+            }
+            break
+        }
+
+        if (project.service<Workspace>().testGenerationData.polyDepthReducing != 0 ||
+            project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0
+        ) {
+            llmErrorManager.warningProcess(TestGenieBundle.message("promptReduction") + "\n" +
+                    "Maximum depth of polygons is ${SettingsArguments.maxPolyDepth(project)}.\n" +
+                    "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.", project)
         }
 
         log.info("Prompt is:\n$prompt")
@@ -127,5 +161,16 @@ class Llm(override val name: String = "Llm") : Tool {
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
         val codeType = FragmentToTestDada(CodeType.LINE, selectedLine)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
+    }
+
+    /**
+     * Checks if the length of the given text is within the specified limit.
+     *
+     * @param text The text to check.
+     * @param limit The maximum length limit in bytes. Defaults to 16384 bytes (4096 * 4).
+     * @return `true` if the length of the text is within the limit, `false` otherwise.
+     */
+    private fun isPromptLengthWithinLimit(text: String, limit: Int = 4096 * 4): Boolean { // Average of 4 bytes per token
+        return text.toByteArray(Charsets.UTF_8).size <= limit
     }
 }

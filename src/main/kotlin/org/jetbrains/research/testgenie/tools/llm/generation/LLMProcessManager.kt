@@ -7,7 +7,6 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testgenie.TestGenieBundle
-import org.jetbrains.research.testgenie.actions.getClassFullText
 import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.FragmentToTestDada
 import org.jetbrains.research.testgenie.data.Report
@@ -109,12 +108,6 @@ class LLMProcessManager(
         }
         indicator.text = TestGenieBundle.message("searchMessage")
 
-        // Prompt size checking
-        if (!isPromptLengthWithinLimit(getClassFullText(cutPsiClass))) {
-            llmErrorManager.errorProcess(TestGenieBundle.message("tooLongPrompt"), project)
-            return
-        }
-
         // Send the first request to LLM
         var generatedTestSuite: TestSuiteGeneratedByLLM? =
             llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
@@ -134,31 +127,6 @@ class LLMProcessManager(
 
             if (requestsCount >= maxRequests) {
                 llmErrorManager.errorProcess(TestGenieBundle.message("invalidGrazieResult"), project)
-                break
-            }
-
-            // TODO move thi loop to PromptManager
-            // Too big prompt processing
-            if (!isPromptLengthWithinLimit(prompt)) {
-                llmErrorManager.warningProcess(TestGenieBundle.message("promptReduction"), project)
-
-                // depth of polygons reducing
-                if (SettingsArguments.maxPolyDepth(project) > 0) {
-                    project.service<Workspace>().testGenerationData.polyDepthReducing++
-                    indicator.text = TestGenieBundle.message("polyDepthReducing") + SettingsArguments.maxPolyDepth(project).toString()
-                    generatedTestSuite = llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
-                    continue
-                }
-
-                // depth of input params
-                if (SettingsArguments.maxInputParamsDepth(project) > 0) {
-                    project.service<Workspace>().testGenerationData.inputParamsDepthReducing++
-                    indicator.text = TestGenieBundle.message("inputParamsDepthReducing") + SettingsArguments.maxPolyDepth(project).toString()
-                    generatedTestSuite = llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
-                    continue
-                }
-
-                llmErrorManager.errorProcess(TestGenieBundle.message("tooLongPrompt"), project)
                 break
             }
 
@@ -260,16 +228,5 @@ class LLMProcessManager(
         testFile.writeText(generatedTestSuite.toStringWithoutExpectedException())
 
         return generatedTestPath
-    }
-
-    /**
-     * Checks if the length of the given text is within the specified limit.
-     *
-     * @param text The text to check.
-     * @param limit The maximum length limit in bytes. Defaults to 16384 bytes (4096 * 4).
-     * @return `true` if the length of the text is within the limit, `false` otherwise.
-     */
-    private fun isPromptLengthWithinLimit(text: String, limit: Int = 4096 * 4): Boolean { // Average of 4 bytes per token
-        return text.toByteArray(Charsets.UTF_8).size <= limit
     }
 }
