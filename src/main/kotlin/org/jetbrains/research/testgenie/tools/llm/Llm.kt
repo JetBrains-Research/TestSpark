@@ -2,6 +2,8 @@ package org.jetbrains.research.testgenie.tools.llm
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
@@ -9,14 +11,15 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.createLLMPipeline
-import org.jetbrains.research.testgenie.actions.getInterestingPsiClasses
-import org.jetbrains.research.testgenie.actions.getPolymorphismRelations
 import org.jetbrains.research.testgenie.actions.getSurroundingClass
 import org.jetbrains.research.testgenie.actions.getSurroundingLine
 import org.jetbrains.research.testgenie.actions.getSurroundingMethod
 import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.FragmentToTestDada
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.helpers.generateMethodDescriptor
+import org.jetbrains.research.testgenie.tools.evosuite.generation.ResultWatcher
+import org.jetbrains.research.testgenie.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testgenie.tools.llm.generation.PromptManager
@@ -28,6 +31,8 @@ import org.jetbrains.research.testgenie.tools.template.Tool
  * @param name The name of the tool. Default value is "Llm".
  */
 class Llm(override val name: String = "Llm") : Tool {
+    private val log = Logger.getInstance(ResultWatcher::class.java)
+
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestDada): LLMProcessManager {
@@ -35,7 +40,7 @@ class Llm(override val name: String = "Llm") : Tool {
 
         val classesToTest = mutableListOf<PsiClass>()
         // check if cut has any none java super class
-        val maxPolymorphismDepth = SettingsArguments.maxPolyDepth()
+        val maxPolymorphismDepth = SettingsArguments.maxPolyDepth(project)
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
@@ -56,16 +61,47 @@ class Llm(override val name: String = "Llm") : Tool {
             currentPsiClass = currentPsiClass.superClass!!
         }
 
-        val interestingPsiClasses = getInterestingPsiClasses(cutPsiClass, classesToTest)
-        val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cutPsiClass)
+        var prompt: String
+        while (true) {
+            prompt = when (codeType.type!!) {
+                CodeType.CLASS -> PromptManager(project, classesToTest[0], classesToTest).generatePromptForClass()
+                CodeType.METHOD ->
+                    PromptManager(project, classesToTest[0], classesToTest).generatePromptForMethod(codeType.objectDescription)
 
-        val prompt = when (codeType.type!!) {
-            CodeType.CLASS -> PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePromptForClass()
-            CodeType.METHOD ->
-                PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePromptForMethod(codeType.objectDescription)
+                CodeType.LINE -> PromptManager(project, classesToTest[0], classesToTest).generatePromptForLine(codeType.objectIndex)
+            }
 
-            CodeType.LINE -> PromptManager(classesToTest[0], classesToTest, interestingPsiClasses, polymorphismRelations).generatePromptForLine(codeType.objectIndex)
+            // Too big prompt processing
+            if (!isPromptLengthWithinLimit(prompt)) {
+                // depth of polymorphism reducing
+                if (SettingsArguments.maxPolyDepth(project) > 1) {
+                    project.service<Workspace>().testGenerationData.polyDepthReducing++
+                    log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
+                    continue
+                }
+
+                // depth of input params reducing
+                if (SettingsArguments.maxInputParamsDepth(project) > 1) {
+                    project.service<Workspace>().testGenerationData.inputParamsDepthReducing++
+                    log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
+                    continue
+                }
+            }
+            break
         }
+
+        if ((project.service<Workspace>().testGenerationData.polyDepthReducing != 0 || project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0) &&
+            isPromptLengthWithinLimit(prompt)
+        ) {
+            llmErrorManager.warningProcess(
+                TestGenieBundle.message("promptReduction") + "\n" +
+                    "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
+                    "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
+                project,
+            )
+        }
+
+        log.info("Prompt is:\n$prompt")
 
         return LLMProcessManager(project, prompt)
     }

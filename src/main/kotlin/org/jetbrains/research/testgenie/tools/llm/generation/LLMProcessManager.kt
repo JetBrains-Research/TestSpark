@@ -16,6 +16,7 @@ import org.jetbrains.research.testgenie.tools.getBuildPath
 import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.getKey
 import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
@@ -83,13 +84,18 @@ class LLMProcessManager(
 
         if (processStopped(project, indicator)) return
 
+        if (!isPromptLengthWithinLimit(prompt)) {
+            llmErrorManager.errorProcess(TestGenieBundle.message("tooLongPrompt"), project)
+            return
+        }
+
         if (codeType.type == CodeType.METHOD) {
             project.service<Workspace>().key = getKey(
                 fileUrl,
                 "$classFQN#${codeType.objectDescription}",
                 modificationStamp,
                 testResultName,
-                projectClassPath
+                projectClassPath,
             )
         }
 
@@ -105,7 +111,6 @@ class LLMProcessManager(
             return
         }
         indicator.text = TestGenieBundle.message("searchMessage")
-        // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
 
         // Send the first request to LLM
         var generatedTestSuite: TestSuiteGeneratedByLLM? =
@@ -118,6 +123,7 @@ class LLMProcessManager(
         var report: Report? = null
         var requestsCount = 0
 
+        // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
         while (!generatedTestsArePassing) {
             log.info("New iterations of requests")
 
@@ -127,6 +133,7 @@ class LLMProcessManager(
                 llmErrorManager.errorProcess(TestGenieBundle.message("invalidGrazieResult"), project)
                 break
             }
+
             // Check if response is not empty
             if (generatedTestSuite == null || generatedTestSuite.testCases.isEmpty()) {
                 llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
@@ -136,12 +143,12 @@ class LLMProcessManager(
                     indicator,
                     packageName,
                     project,
-                    llmErrorManager
+                    llmErrorManager,
                 )
                 continue
             }
 
-            log.info("Result is now empty")
+            log.info("Result is not empty")
 
             // Save the generated TestSuite into a temp file
             val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
@@ -175,7 +182,7 @@ class LLMProcessManager(
                     indicator,
                     packageName,
                     project,
-                    llmErrorManager
+                    llmErrorManager,
                 )
                 continue
             }
@@ -199,7 +206,7 @@ class LLMProcessManager(
             testResultName,
             fileUrl,
             getPackageFromTestSuiteCode(generatedTestSuite.toString()),
-            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN)
+            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN),
         )
     }
 
