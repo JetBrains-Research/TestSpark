@@ -76,14 +76,14 @@ class Llm(override val name: String = "Llm") : Tool {
             // Too big prompt processing
             if (!isPromptLengthWithinLimit(prompt)) {
                 // depth of polygons reducing
-                if (SettingsArguments.maxPolyDepth(project) > 0) {
+                if (SettingsArguments.maxPolyDepth(project) > 1) {
                     project.service<Workspace>().testGenerationData.polyDepthReducing++
                     log.info("poly depth is: ${SettingsArguments.maxPolyDepth(project)}")
                     continue
                 }
 
                 // depth of input params reducing
-                if (SettingsArguments.maxInputParamsDepth(project) > 0) {
+                if (SettingsArguments.maxInputParamsDepth(project) > 1) {
                     project.service<Workspace>().testGenerationData.inputParamsDepthReducing++
                     log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
                     continue
