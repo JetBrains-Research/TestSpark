@@ -13,15 +13,10 @@ import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.ErrorService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
-import org.jetbrains.research.testgenie.tools.getBuildPath
-import org.jetbrains.research.testgenie.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testgenie.tools.getKey
-import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testgenie.tools.*
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testgenie.tools.processStopped
-import org.jetbrains.research.testgenie.tools.saveData
 import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
 import kotlin.io.path.Path
@@ -40,9 +35,8 @@ import kotlin.io.path.createDirectories
  * @property maxRequests The maximum number of requests to be sent to LLM.
  */
 class LLMProcessManager(
-    private val project: Project,
-    private val prompt: String,
-    private val cutPsiClass: PsiClass,
+        private val project: Project,
+        private val prompt: String,
 ) : ProcessManager {
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private var testFileName: String = "GeneratedTest.java"
@@ -84,6 +78,11 @@ class LLMProcessManager(
         log.info("LLM test generation begins")
 
         if (processStopped(project, indicator)) return
+
+        if (!isPromptLengthWithinLimit(prompt)) {
+            llmErrorManager.errorProcess(TestGenieBundle.message("tooLongPrompt"), project)
+            return
+        }
 
         if (codeType.type == CodeType.METHOD) {
             project.service<Workspace>().key = getKey(
