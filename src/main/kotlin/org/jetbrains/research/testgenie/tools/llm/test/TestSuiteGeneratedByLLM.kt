@@ -10,6 +10,8 @@ package org.jetbrains.research.testgenie.tools.llm.test
 data class TestSuiteGeneratedByLLM(
     var imports: Set<String> = emptySet(),
     var packageString: String = "",
+    var runWith: String = "",
+    var otherInfo: String = "",
     var testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf(),
 ) {
 
@@ -86,8 +88,19 @@ data class TestSuiteGeneratedByLLM(
             testText += "$importedElement\n"
         }
 
+        testText += "\n"
+
+        // add runWith if exists
+        if (runWith.isNotBlank()) {
+            testText += "@RunWith($runWith)\n"
+        }
         // open the test class
         testText += "public class GeneratedTest{\n\n"
+
+        // Add other presets (annotations, non-test functions)
+        if (otherInfo.isNotBlank()) {
+            testText += otherInfo
+        }
 
         return testText
     }
