@@ -73,10 +73,10 @@ class Llm(override val name: String = "Llm") : Tool {
 
             // Too big prompt processing
             if (!isPromptLengthWithinLimit(prompt)) {
-                // depth of polygons reducing
+                // depth of polymorphism reducing
                 if (SettingsArguments.maxPolyDepth(project) > 1) {
                     project.service<Workspace>().testGenerationData.polyDepthReducing++
-                    log.info("poly depth is: ${SettingsArguments.maxPolyDepth(project)}")
+                    log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
                     continue
                 }
 
@@ -95,7 +95,7 @@ class Llm(override val name: String = "Llm") : Tool {
         ) {
             llmErrorManager.warningProcess(
                 TestGenieBundle.message("promptReduction") + "\n" +
-                    "Maximum depth of polygons is ${SettingsArguments.maxPolyDepth(project)}.\n" +
+                    "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
                     "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
                 project,
             )

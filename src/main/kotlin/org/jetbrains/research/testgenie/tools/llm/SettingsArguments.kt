@@ -35,9 +35,9 @@ class SettingsArguments {
         fun maxInputParamsDepth(project: Project): Int = settingsState!!.maxInputParamsDepth - project.service<Workspace>().testGenerationData.inputParamsDepthReducing
 
         /**
-         * Returns the maximum depth of polygons.
+         * Returns the maximum depth of polymorphism.
          *
-         * @return The maximum depth of polygons.
+         * @return The maximum depth of polymorphism.
          */
         fun maxPolyDepth(project: Project): Int = settingsState!!.maxPolyDepth - project.service<Workspace>().testGenerationData.polyDepthReducing
 
