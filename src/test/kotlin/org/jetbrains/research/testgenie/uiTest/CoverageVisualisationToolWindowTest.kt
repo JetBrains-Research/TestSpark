@@ -2,10 +2,10 @@ package org.jetbrains.research.testgenie.uiTest
 
 import com.automation.remarks.junit5.Video
 import com.intellij.remoterobot.RemoteRobot
+import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.research.testgenie.uiTest.pages.IdeaFrame
 import org.jetbrains.research.testgenie.uiTest.pages.WelcomeFrame
 import org.jetbrains.research.testgenie.uiTest.utils.RemoteRobotExtension
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation

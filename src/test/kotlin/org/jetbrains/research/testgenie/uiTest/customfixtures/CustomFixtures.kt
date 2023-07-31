@@ -21,7 +21,7 @@ import java.time.Duration
 @FixtureName("JSpinner")
 open class JSpinnerFixture(
     remoteRobot: RemoteRobot,
-    remoteComponent: RemoteComponent
+    remoteComponent: RemoteComponent,
 ) : ComponentFixture(remoteRobot, remoteComponent)
 
 /**
@@ -43,7 +43,7 @@ fun ContainerFixture.jSpinner(locator: Locator): JSpinnerFixture {
 @FixtureName("BasicArrowButton")
 open class BasicArrowButtonFixture(
     remoteRobot: RemoteRobot,
-    remoteComponent: RemoteComponent
+    remoteComponent: RemoteComponent,
 ) : ComponentFixture(remoteRobot, remoteComponent)
 
 /**

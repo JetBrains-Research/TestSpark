@@ -3,6 +3,7 @@
 .qodana/
 build/
 lib/evosuite-*.jar
+lib/JUnitRunner.jar
 **/evosuite-tests/
 
 # Test projects

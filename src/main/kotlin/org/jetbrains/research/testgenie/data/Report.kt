@@ -4,6 +4,9 @@ import org.evosuite.result.BranchInfo
 import org.evosuite.result.MutationInfo
 import org.evosuite.utils.CompactReport
 
+/**
+ * Storage of generated tests. Implemented on the basis of org.evosuite.utils.CompactReport structure.
+ */
 class Report {
     // Fields were created based on the fields in org.evosuite.utils.CompactReport for easier transformation
     var UUT: String = ""
@@ -17,6 +20,8 @@ class Report {
 
     /**
      * Transformation CompactReport to Report
+     *
+     * @param compactReport is org.evosuite.utils.CompactReport object
      */
     constructor(compactReport: CompactReport) {
         UUT = compactReport.UUT
@@ -29,6 +34,9 @@ class Report {
         testCaseList = HashMap(compactReport.testCaseList.map { (key, value) -> key to TestCase(value) }.toMap())
     }
 
+    /**
+     * Default constructor for Report
+     */
     constructor()
 
     /**

@@ -3,71 +3,35 @@ package org.jetbrains.research.testgenie.actions
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiAnonymousClass
-import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiCodeBlock
-import com.intellij.psi.PsiStatement
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.search.searches.ClassInheritorsSearch
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiStatement
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.jetbrains.research.testgenie.tools.evosuite.Pipeline
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
-import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
+import org.jetbrains.research.testgenie.tools.Pipeline
 
-/**
- * This file contains some useful methods and values related to GenerateTests actions.
- */
-
-/**
- * Extracts the required information from an action event and creates an (EvoSuite) Pipeline.
- *
- * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @return the created (EvoSuite) Pipeline, null if some information is missing or if there is no surrounding class
- */
-fun createEvoSuitePipeline(e: AnActionEvent): Pipeline {
+fun createPipeline(e: AnActionEvent): Pipeline {
     val project: Project = e.project!!
 
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
-    val fileUrl = vFile.presentableUrl
-    val modificationStamp = vFile.modificationStamp
+    val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
-    val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
-    val classFQN = psiClass.qualifiedName!!
-
-    val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-
-    val log = Logger.getInstance("GenerateTestsUtils")
     val settingsProjectState = project.service<SettingsProjectService>().state
-    val buildPath = "$projectPath/${settingsProjectState.buildPath}"
+    val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
 
-    log.info("Selected class is $classFQN")
-
-    val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile)!!
-    val cacheStartLine: Int = doc.getLineNumber(psiClass.startOffset)
-    val cacheEndLine: Int = doc.getLineNumber(psiClass.endOffset)
-    log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
-
-    return Pipeline(project, projectPath, buildPath, classFQN, fileUrl, modificationStamp).withCacheLines(
-        cacheStartLine,
-        cacheEndLine,
-    )
+    return Pipeline(e, packageName)
 }
 
 fun PsiMethod.getSignatureString(): String {
@@ -75,104 +39,18 @@ fun PsiMethod.getSignatureString(): String {
     return text.substring(0, bodyStart).replace('\n', ' ').trim()
 }
 
-fun createLLMPipeline(e: AnActionEvent): org.jetbrains.research.testgenie.tools.llm.Pipeline {
-    val project: Project = e.project!!
-
+fun createLLMPipeline(e: AnActionEvent): Pipeline {
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
-
-    val modificationStamp = vFile.modificationStamp
 
     val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
-    val classFQN = cutPsiClass.qualifiedName!!
-    val fileUrl = vFile.presentableUrl
 
-    val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
-
-    val classesToTest = mutableListOf<PsiClass>()
-    // check if cut has any none java super class
-    val maxPolymorphismDepth = SettingsArguments.maxPolyDepth()
-    val maxParametersDepth = SettingsArguments.maxInputParamsDepth()
-
-    var currentPsiClass = cutPsiClass
-    for (index in 0 until maxPolymorphismDepth) {
-        if (!classesToTest.contains(currentPsiClass)) {
-            classesToTest.add(currentPsiClass)
-        }
-
-        if (currentPsiClass.superClass == null ||
-            currentPsiClass.superClass!!.qualifiedName == null ||
-            currentPsiClass.superClass!!.qualifiedName!!.startsWith("java.")
-        ) {
-            break
-        }
-        currentPsiClass = currentPsiClass.superClass!!
-    }
-
-    // Collect interesting classes (i.e., methods that are passed as input arguments to CUT)
-    val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf(cutPsiClass)
-
-    var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
-
-    repeat(maxParametersDepth) {
-        val tempListOfClasses = mutableListOf<PsiClass>()
-
-        currentLevelClasses.forEach { classIt ->
-            classIt.methods.forEach { methodIt ->
-                methodIt.parameterList.parameters.forEach { paramIt ->
-                    PsiTypesUtil.getPsiClass(paramIt.type)?.let {
-                        if (!tempListOfClasses.contains(it) &&
-                            !interestingPsiClasses.contains(it) &&
-                            it.qualifiedName != null &&
-                            !it.qualifiedName!!.startsWith("java.")
-                        ) {
-                            tempListOfClasses.add(it)
-                        }
-                    }
-                }
-            }
-        }
-        currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(tempListOfClasses) }
-        interestingPsiClasses.addAll(tempListOfClasses)
-    }
-
-    // Collect polymorphism Relations in identified interesting classes
-    val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
-    interestingPsiClasses.forEach { currentInterestingClass ->
-        val scope = GlobalSearchScope.projectScope(project)
-        val query = ClassInheritorsSearch.search(currentInterestingClass, scope, false)
-        val detectedSubClasses: Collection<PsiClass> = query.findAll()
-
-        detectedSubClasses.forEach { detectedSubClass ->
-            if (!polymorphismRelations.contains(currentInterestingClass)) {
-                polymorphismRelations[currentInterestingClass] = ArrayList()
-            }
-            polymorphismRelations[currentInterestingClass]?.add(detectedSubClass)
-            if (!psiClassesToVisit.contains(detectedSubClass)) {
-                psiClassesToVisit.addLast(detectedSubClass)
-            }
-        }
-    }
-
-    val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    val settingsProjectState = project.service<SettingsProjectService>().state
-    val buildPath = "$projectPath/${settingsProjectState.buildPath}"
     val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
     packageList.removeLast()
 
-    return org.jetbrains.research.testgenie.tools.llm.Pipeline(
-        project,
-        buildPath,
-        interestingPsiClasses,
-        classesToTest,
-        ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!,
-        packageList.joinToString("."),
-        polymorphismRelations,
-        modificationStamp,
-        fileUrl,
-        classFQN,
-    )
+    val packageName = packageList.joinToString(".")
+
+    return Pipeline(e, packageName)
 }
 
 /**
@@ -459,6 +337,17 @@ val packagePattern = Regex(
     options = setOf(RegexOption.MULTILINE),
 )
 
+val runWithPattern = Regex(
+    pattern = "@RunWith\\([^)]*\\)",
+    options = setOf(RegexOption.MULTILINE),
+)
+
+/**
+ * Returns the full text of a given class including the package, imports, and class code.
+ *
+ * @param cl The PsiClass object representing the class.
+ * @return The full text of the class.
+ */
 fun getClassFullText(cl: PsiClass): String {
     var fullText = ""
     val fileText = cl.containingFile.text

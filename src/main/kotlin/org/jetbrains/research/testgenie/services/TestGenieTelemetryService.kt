@@ -145,7 +145,7 @@ class TestGenieTelemetryService(project: Project) {
                 removedAssertions,
                 addedAssertions,
                 removedVariableDeclarations,
-                addedVariableDeclarations
+                addedVariableDeclarations,
             )
         }
 
@@ -185,7 +185,7 @@ class TestGenieTelemetryService(project: Project) {
         val removedAssertions: Set<String>,
         val addedAssertions: Set<String>,
         val removedVariableDeclarations: Set<String>,
-        val addedVariableDeclarations: Set<String>
+        val addedVariableDeclarations: Set<String>,
     ) :
         AbstractModifiedTestCase(original, modified)
 }

@@ -6,27 +6,39 @@ import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testgenie.TestGenieBundle
-import org.jetbrains.research.testgenie.tools.evosuite.ResultWatcher
+import org.jetbrains.research.testgenie.data.CodeType
+import org.jetbrains.research.testgenie.data.FragmentToTestDada
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
 import org.jetbrains.research.testgenie.services.SettingsProjectService
-import org.jetbrains.research.testgenie.tools.cancelPendingResult
+import org.jetbrains.research.testgenie.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testgenie.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testgenie.tools.getBuildPath
+import org.jetbrains.research.testgenie.tools.getKey
+import org.jetbrains.research.testgenie.tools.processStopped
+import org.jetbrains.research.testgenie.tools.template.generation.ProcessManager
 import java.io.File
 import java.nio.charset.Charset
 import java.util.regex.Pattern
 
+/**
+ * This class manages the execution of EvoSuite, a test generation tool.
+ *
+ * @param project the project in which the tests will be generated
+ * @param projectPath the path to the project directory
+ */
 class EvoSuiteProcessManager(
     private val project: Project,
     private val projectPath: String,
-    private val projectClassPath: String,
-    private val fileUrl: String,
-) {
+) : ProcessManager {
+    private val log = Logger.getInstance(this::class.java)
+
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
     private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
 
@@ -44,14 +56,34 @@ class EvoSuiteProcessManager(
      *
      * @param indicator the progress indicator
      */
-    fun runEvoSuite(
+    override fun runTestGenerator(
         indicator: ProgressIndicator,
-        command: MutableList<String>,
-        log: Logger,
-        testResultName: String,
+        codeType: FragmentToTestDada,
+        projectClassPath: String,
+        resultPath: String,
+        serializeResultPath: String,
+        packageName: String,
+        cutModule: Module,
         classFQN: String,
+        fileUrl: String,
+        testResultName: String,
+        baseDir: String,
+        modificationStamp: Long,
     ) {
         try {
+            if (processStopped(project, indicator)) return
+
+            // get command
+            val command = when (codeType.type!!) {
+                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).build()
+                CodeType.METHOD -> {
+                    project.service<Workspace>().key = getKey(fileUrl, "$classFQN#${codeType.objectDescription}", modificationStamp, testResultName, projectClassPath)
+                    SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forMethod(codeType.objectDescription).build()
+                }
+
+                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
+            }
+
             if (!settingsApplicationState?.seed.isNullOrBlank()) command.add("-seed=${settingsApplicationState?.seed}")
             if (!settingsApplicationState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsApplicationState?.configurationId}")
 
@@ -85,12 +117,9 @@ class EvoSuiteProcessManager(
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (indicator.isCanceled) {
-                        log.info("Cancelling search")
-
-                        cancelPendingResult(project, testResultName)
-
+                    if (processStopped(project, indicator)) {
                         handler.destroyProcess()
+                        return
                     }
 
                     val text = event.text
@@ -124,18 +153,18 @@ class EvoSuiteProcessManager(
                         indicator.fraction = coverage
                     }
 
-                    if (indicator.fraction == 1.0 && indicator.text != TestGenieBundle.message("evosuitePostProcessMessage")) {
-                        indicator.text = TestGenieBundle.message("evosuitePostProcessMessage")
+                    if (indicator.fraction == 1.0 && indicator.text != TestGenieBundle.message("testCasesSaving")) {
+                        indicator.text = TestGenieBundle.message("testCasesSaving")
                     }
                 }
             })
 
             handler.startNotify()
 
-            if (indicator.isCanceled) return
+            if (processStopped(project, indicator)) return
 
             // evosuite errors check
-            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout)) return
+            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return
 
             // start result watcher
             AppExecutorUtil.getAppScheduledExecutorService()

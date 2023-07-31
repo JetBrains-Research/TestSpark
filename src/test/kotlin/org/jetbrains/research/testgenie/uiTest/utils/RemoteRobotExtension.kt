@@ -102,7 +102,7 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
                         }
                         pictureBytes;
                     """,
-                    true
+                    true,
                 )
             } catch (e: Throwable) {
                 e.printStackTrace()
@@ -128,7 +128,7 @@ class RemoteRobotExtension : AfterTestExecutionCallback, ParameterResolver {
               baos.close();
             }
             pictureBytes;
-            """
+            """,
         ).inputStream().use {
             ImageIO.read(it)
         }

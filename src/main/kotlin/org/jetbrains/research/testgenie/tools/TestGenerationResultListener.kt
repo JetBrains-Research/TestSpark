@@ -1,4 +1,4 @@
-package org.jetbrains.research.testgenie.tools.evosuite
+package org.jetbrains.research.testgenie.tools
 
 import com.intellij.util.messages.Topic
 import org.jetbrains.research.testgenie.data.Report

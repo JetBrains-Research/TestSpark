@@ -10,24 +10,24 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
+import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.TestGenieToolTipsBundle
 import org.jetbrains.research.testgenie.services.QuickAccessParametersService
-import org.jdesktop.swingx.JXTitledSeparator
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.event.ActionEvent
+import javax.swing.JButton
 import javax.swing.JCheckBox
+import javax.swing.JComponent
+import javax.swing.JLabel
+import javax.swing.JOptionPane
+import javax.swing.JPanel
 import javax.swing.JSpinner
 import javax.swing.SpinnerNumberModel
-import javax.swing.JButton
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JComponent
-import javax.swing.JOptionPane
 
 /**
  * This class stores the main panel and the UI of the "Parameters" tool window tab.

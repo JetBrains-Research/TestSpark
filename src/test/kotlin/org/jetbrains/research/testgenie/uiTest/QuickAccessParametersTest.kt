@@ -6,6 +6,7 @@ import com.intellij.remoterobot.fixtures.JLabelFixture
 import com.intellij.remoterobot.fixtures.JListFixture
 import com.intellij.remoterobot.fixtures.JTextFieldFixture
 import com.intellij.remoterobot.search.locators.byXpath
+import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.research.testgenie.toolwindow.PopulationLimit
 import org.jetbrains.research.testgenie.toolwindow.QuickAccessParametersState
 import org.jetbrains.research.testgenie.toolwindow.StoppingCondition
@@ -16,7 +17,6 @@ import org.jetbrains.research.testgenie.uiTest.pages.QuickAccessParametersFixtur
 import org.jetbrains.research.testgenie.uiTest.pages.SettingsFrame
 import org.jetbrains.research.testgenie.uiTest.pages.WelcomeFrame
 import org.jetbrains.research.testgenie.uiTest.utils.RemoteRobotExtension
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -120,7 +120,7 @@ class QuickAccessParametersTest {
         Arguments.of("Assertion timeout", quickAccessParameters.assertionTimeoutLabel),
         Arguments.of("JUnit check timeout", quickAccessParameters.jUnitCheckTimeoutLabel),
         Arguments.of("Population limit", quickAccessParameters.populationLimitLabel),
-        Arguments.of("Population", quickAccessParameters.populationValueLabel)
+        Arguments.of("Population", quickAccessParameters.populationValueLabel),
     )
 
     @Order(3)
@@ -134,7 +134,7 @@ class QuickAccessParametersTest {
         Arguments.of("Quick Access Parameters", quickAccessParameters.title),
         Arguments.of("Search Budget", quickAccessParameters.searchBudgetSeparator),
         Arguments.of("Timeouts", quickAccessParameters.timeoutsSeparator),
-        Arguments.of("Genetic Algorithm", quickAccessParameters.geneticAlgorithmSeparator)
+        Arguments.of("Genetic Algorithm", quickAccessParameters.geneticAlgorithmSeparator),
     )
 
     @Order(4)
@@ -184,7 +184,7 @@ class QuickAccessParametersTest {
     private fun valueGeneratorForTestPopulationLimitComboBoxes(): Stream<Arguments> = Stream.of(
         Arguments.of("Tests"),
         Arguments.of("Statements"),
-        Arguments.of("Individuals")
+        Arguments.of("Individuals"),
     )
 
     @Order(7)
@@ -196,7 +196,7 @@ class QuickAccessParametersTest {
         spinner: JSpinnerFixture,
         clicksUp: Int,
         clicksDown: Int,
-        toolTipText: String
+        toolTipText: String,
     ) {
         with(remoteRobot) {
             // Get the actual interior text field
@@ -229,29 +229,53 @@ class QuickAccessParametersTest {
 
         return Stream.of(
             Arguments.of(
-                quickAccessParameters.searchBudgetValueUpArrow, quickAccessParameters.searchBudgetValueDownArrow,
-                quickAccessParameters.searchBudgetValueSpinner, rand(), rand(), quickAccessParameters.searchBudgetValueTooltip
+                quickAccessParameters.searchBudgetValueUpArrow,
+                quickAccessParameters.searchBudgetValueDownArrow,
+                quickAccessParameters.searchBudgetValueSpinner,
+                rand(),
+                rand(),
+                quickAccessParameters.searchBudgetValueTooltip,
             ),
             Arguments.of(
-                quickAccessParameters.initializationTimeoutUpArrow, quickAccessParameters.initializationTimeoutDownArrow,
-                quickAccessParameters.initializationTimeoutSpinner, rand(), rand(), quickAccessParameters.initializationTimeoutTooltip
+                quickAccessParameters.initializationTimeoutUpArrow,
+                quickAccessParameters.initializationTimeoutDownArrow,
+                quickAccessParameters.initializationTimeoutSpinner,
+                rand(),
+                rand(),
+                quickAccessParameters.initializationTimeoutTooltip,
             ),
             Arguments.of(
-                quickAccessParameters.minimizationTimeoutUpArrow, quickAccessParameters.minimizationTimeoutDownArrow,
-                quickAccessParameters.minimizationTimeoutSpinner, rand(), rand(), quickAccessParameters.minimizationTimeoutTooltip
+                quickAccessParameters.minimizationTimeoutUpArrow,
+                quickAccessParameters.minimizationTimeoutDownArrow,
+                quickAccessParameters.minimizationTimeoutSpinner,
+                rand(),
+                rand(),
+                quickAccessParameters.minimizationTimeoutTooltip,
             ),
             Arguments.of(
-                quickAccessParameters.assertionTimeoutUpArrow, quickAccessParameters.assertionTimeoutDownArrow,
-                quickAccessParameters.assertionTimeoutSpinner, rand(), rand(), quickAccessParameters.assertionTimeoutTooltip
+                quickAccessParameters.assertionTimeoutUpArrow,
+                quickAccessParameters.assertionTimeoutDownArrow,
+                quickAccessParameters.assertionTimeoutSpinner,
+                rand(),
+                rand(),
+                quickAccessParameters.assertionTimeoutTooltip,
             ),
             Arguments.of(
-                quickAccessParameters.jUnitCheckTimeoutUpArrow, quickAccessParameters.jUnitCheckTimeoutDownArrow,
-                quickAccessParameters.jUnitCheckTimeoutSpinner, rand(), rand(), quickAccessParameters.jUnitCheckTimeoutTooltip
+                quickAccessParameters.jUnitCheckTimeoutUpArrow,
+                quickAccessParameters.jUnitCheckTimeoutDownArrow,
+                quickAccessParameters.jUnitCheckTimeoutSpinner,
+                rand(),
+                rand(),
+                quickAccessParameters.jUnitCheckTimeoutTooltip,
             ),
             Arguments.of(
-                quickAccessParameters.populationValueUpArrow, quickAccessParameters.populationValueDownArrow,
-                quickAccessParameters.populationValueSpinner, rand(), rand(), quickAccessParameters.populationValueTooltip,
-            )
+                quickAccessParameters.populationValueUpArrow,
+                quickAccessParameters.populationValueDownArrow,
+                quickAccessParameters.populationValueSpinner,
+                rand(),
+                rand(),
+                quickAccessParameters.populationValueTooltip,
+            ),
         )
     }
 
@@ -285,7 +309,7 @@ class QuickAccessParametersTest {
         Arguments.of(quickAccessParameters.minimizationTimeoutSpinner, quickAccessParameters.minimizationTimeoutTooltip),
         Arguments.of(quickAccessParameters.assertionTimeoutSpinner, quickAccessParameters.assertionTimeoutTooltip),
         Arguments.of(quickAccessParameters.jUnitCheckTimeoutSpinner, quickAccessParameters.jUnitCheckTimeoutTooltip),
-        Arguments.of(quickAccessParameters.populationValueSpinner, quickAccessParameters.populationValueTooltip)
+        Arguments.of(quickAccessParameters.populationValueSpinner, quickAccessParameters.populationValueTooltip),
     )
 
     @Order(9)
@@ -457,10 +481,13 @@ class QuickAccessParametersTest {
     }
 
     private fun valueGeneratorForTestSearchBudgetUnitsAreChanging(): Stream<Arguments> = Stream.of(
-        Arguments.of(StoppingCondition.MAXSTATEMENTS), Arguments.of(StoppingCondition.MAXTESTS),
-        Arguments.of(StoppingCondition.MAXGENERATIONS), Arguments.of(StoppingCondition.MAXFITNESSEVALUATIONS),
+        Arguments.of(StoppingCondition.MAXSTATEMENTS),
+        Arguments.of(StoppingCondition.MAXTESTS),
+        Arguments.of(StoppingCondition.MAXGENERATIONS),
+        Arguments.of(StoppingCondition.MAXFITNESSEVALUATIONS),
         // Note that the default value has been set the last to leave everything as it was
-        Arguments.of(StoppingCondition.TIMEDELTA), Arguments.of(StoppingCondition.MAXTIME)
+        Arguments.of(StoppingCondition.TIMEDELTA),
+        Arguments.of(StoppingCondition.MAXTIME),
     )
 
     @Order(14)
@@ -480,7 +507,7 @@ class QuickAccessParametersTest {
         Arguments.of(PopulationLimit.TESTS, "tests"),
         Arguments.of(PopulationLimit.STATEMENTS, "statements"),
         // Note that the default value has been set the last to leave everything as it was
-        Arguments.of(PopulationLimit.INDIVIDUALS, "individuals")
+        Arguments.of(PopulationLimit.INDIVIDUALS, "individuals"),
     )
 
     /**

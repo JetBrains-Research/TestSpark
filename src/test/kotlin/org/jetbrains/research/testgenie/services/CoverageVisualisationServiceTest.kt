@@ -16,7 +16,6 @@ import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testgenie.data.Report
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -75,7 +74,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
         uncoveredMutationSet: Set<MutationInfo>,
         lineCoverage: String,
         branchCoverage: String,
-        mutationCoverage: String
+        mutationCoverage: String,
     ) {
         val report = Report(CompactReport(TestGenerationResultImpl()))
         report.UUT = className
@@ -93,8 +92,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
         assertThat(mutationCoverage).isEqualTo(coverageToolWindowDisplayService.data[3])
     }
 
-    @Test
-    fun createToolWindowTabTestSingleContent() {
+    fun testCreateToolWindowTabTestSingleContent() {
         coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())), myEditor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
 
@@ -102,8 +100,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
         assertThat(toolWindow.contentManager.contents.size).isEqualTo(1)
     }
 
-    @Test
-    fun createToolWindowTabTestContent() {
+    fun testCreateToolWindowTabTestContent() {
         coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())), myEditor)
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestGenie")!!
         val content = toolWindow.contentManager.getContent(0)!!
@@ -122,7 +119,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
                 setOf<MutationInfo>(),
                 "50% (2/4)",
                 "50% (1/2)",
-                "100% (2/2)"
+                "100% (2/2)",
             ),
             Arguments.of(
                 "MyClass",
@@ -134,7 +131,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
                 setOf(mutation3),
                 "60% (3/5)",
                 "0% (0/2)",
-                "67% (2/3)"
+                "67% (2/3)",
             ),
             Arguments.of(
                 "MyClass",
@@ -146,7 +143,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
                 setOf(mutation3),
                 "17% (1/6)",
                 "20% (1/5)",
-                "50% (1/2)"
+                "50% (1/2)",
             ),
             Arguments.of(
                 "MyClass",
@@ -158,7 +155,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
                 setOf(mutation1, mutation3),
                 "100% (7/7)",
                 "100% (5/5)",
-                "0% (0/2)"
+                "0% (0/2)",
             ),
             Arguments.of(
                 "MyClass",
@@ -170,8 +167,8 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
                 setOf(mutation1, mutation2, mutation3, mutation4, mutation5),
                 "0% (0/3)",
                 "63% (5/8)",
-                "29% (2/7)"
-            )
+                "29% (2/7)",
+            ),
         )
     }
 }

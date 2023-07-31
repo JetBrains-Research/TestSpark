@@ -25,9 +25,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.services.SettingsApplicationService
-import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
+import org.jetbrains.research.testgenie.tools.ProjectBuilder
 import java.io.File
 import java.io.FileWriter
 import java.nio.charset.Charset

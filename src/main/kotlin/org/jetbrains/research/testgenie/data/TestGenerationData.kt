@@ -1,10 +1,10 @@
 package org.jetbrains.research.testgenie.data
 
-import com.intellij.openapi.components.service
-import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.services.TestCaseDisplayService
 
+/**
+ * Data with test generation results that include additional information beyond the test cases themselves.
+ */
 class TestGenerationData {
     // Result processing
     var testGenerationResultList: MutableList<Report?> = mutableListOf()
@@ -12,10 +12,10 @@ class TestGenerationData {
     var fileUrl: String = ""
 
     // Code required of imports and package for generated tests
-    var importsCode: String = ""
+    var importsCode: MutableSet<String> = mutableSetOf()
     var packageLine: String = ""
-
-    var isErrorOccurred = false
+    var runWith: String = ""
+    var otherInfo: String = ""
 
     // Maps a workspace file to the test generation jobs that were triggered on it.
     // Currently, the file key is represented by its presentableUrl
@@ -24,16 +24,24 @@ class TestGenerationData {
     // Maps a test generation job id to its corresponding test job information
     var pendingTestResults: HashMap<String, Workspace.TestJobInfo> = HashMap()
 
-    fun clear(project: Project) {
-        project.service<TestCaseDisplayService>().clear()
+    // changing parameters with a large prompt
+    var polyDepthReducing: Int = 0
+    var inputParamsDepthReducing: Int = 0
 
+    /**
+     * Cleaning all old data before new test generation.
+     */
+    fun clear() {
         testGenerationResultList.clear()
         resultName = ""
         fileUrl = ""
-        importsCode = ""
+        importsCode = mutableSetOf()
         packageLine = ""
-        isErrorOccurred = false
+        runWith = ""
+        otherInfo = ""
         testGenerationResults.clear()
         pendingTestResults.clear()
+        polyDepthReducing = 0
+        inputParamsDepthReducing = 0
     }
 }

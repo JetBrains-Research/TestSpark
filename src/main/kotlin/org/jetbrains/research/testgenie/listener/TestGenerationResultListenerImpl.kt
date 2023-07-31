@@ -4,10 +4,10 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.tools.evosuite.TestGenerationResultListener
-import org.jetbrains.research.testgenie.services.TestCaseCachingService
 import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.TestCaseCachingService
+import org.jetbrains.research.testgenie.tools.TestGenerationResultListener
 
 class TestGenerationResultListenerImpl(private val project: Project) : TestGenerationResultListener {
     private val log = Logger.getInstance(this.javaClass)

@@ -6,11 +6,11 @@ import com.intellij.remoterobot.fixtures.EditorFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.WaitForConditionTimeoutException
 import com.intellij.remoterobot.utils.keyboard
+import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.jetbrains.research.testgenie.uiTest.pages.IdeaFrame
 import org.jetbrains.research.testgenie.uiTest.pages.WelcomeFrame
 import org.jetbrains.research.testgenie.uiTest.utils.RemoteRobotExtension
-import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.MethodOrderer
