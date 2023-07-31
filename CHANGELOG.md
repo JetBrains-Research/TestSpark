@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+
+## [0.1.1]
+### Added
+- LLM-based test generation for lines and methods
+- Support mocking-related annotations in generated tests
+- Smarter prompt generation to make sure that its number of tokens does not exceed the limits.
+
+### Fixed
+- Some performance and functional bugs in interaction with Jacoco
+
+### Changed
+- Code refactoring
+
+
 ## [0.1.0]
 
 ### Added

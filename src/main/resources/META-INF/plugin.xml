@@ -20,7 +20,7 @@
     <ul>
         <li>Supports Java (any version).</li>
         <li>Generates unit tests for capturing failures.</li>
-        <li>Generate tests for Java classes</li>
+        <li>Generate tests for Java classes, methods, and single lines.</li>
     </ul>
 
     <h4>Local search-based test generation</h4>
@@ -29,13 +29,23 @@
         <li>Supports up to Java 11.</li>
         <li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage, mutation score.</li>
         <li>Generates unit tests for capturing failures.</li>
-        <li>Generate tests for Java classes, method, and single lines.</li>
+        <li>Generate tests for Java classes, methods, and single lines.</li>
     </ul>
 
     <p>Initially implemented by <a href="https://www.ciselab.nl">CISELab</a> at <a href="https://se.ewi.tudelft.nl">SERG @ TU Delft</a>, TestGenie is currently developed and maintained by <a href="https://lp.jetbrains.com/research/ictl/">ICTL at JetBrains Research</a>.</p>
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.1.1</h4>
+            <ul>
+                <li>Add LLM-based test generation for lines and methods</li>
+                <li>Add support for mocking-related annotations in generated tests</li>
+                <li>Smarter prompt generation to make sure that its number of tokens does not exceed the limits.</li>
+                <li>Improve test parsing</li>
+                <li>Fix some major performance and functional bugs in interaction with Jacoco</li>
+                <li>code refactoring</li>
+            </ul>
+
         <h4>0.1.0</h4>
             <ul>
                 <li>Add LLM-based test generation using Grazie platform</li>
