@@ -24,7 +24,11 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.*
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElementFactory
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiManager
 import com.intellij.refactoring.suggested.newRange
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
@@ -47,8 +51,15 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
-import java.util.*
-import javax.swing.*
+import java.util.Locale
+import javax.swing.BorderFactory
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JLabel
+import javax.swing.JOptionPane
+import javax.swing.JPanel
 import javax.swing.border.Border
 
 class TestCaseDisplayService(private val project: Project) {
@@ -58,10 +69,10 @@ class TestCaseDisplayService(private val project: Project) {
     private var selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private var deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
     private var removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
-    var validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    private var validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
     var toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
-    var testsSelected: Int = 0
+    private var testsSelected: Int = 0
     private var testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
     private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
@@ -609,6 +620,12 @@ class TestCaseDisplayService(private val project: Project) {
             )
         }
 
+        // insert other info to a code
+        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+            selectedClass.rBrace!!.textRange.startOffset,
+            project.service<Workspace>().testGenerationData.otherInfo + "\n",
+        )
+
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
@@ -693,7 +710,7 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param selectedTestCasePanels the panels of the selected tests
      */
-    fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
         selectedTestCasePanels.forEach { removeTestCase(it.key) }
         removeAllHighlights()
         closeToolWindow()

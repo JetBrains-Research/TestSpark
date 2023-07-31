@@ -87,6 +87,7 @@ class TestsAssembler(
         if (otherInfo.isNotBlank()) {
             testSuite.otherInfo = otherInfo
             project.service<Workspace>().testGenerationData.otherInfo = otherInfo
+            project.service<Workspace>().testGenerationData.importsCode += "import org.junit.runner.RunWith;\n"
         }
 
         // Save the main test cases

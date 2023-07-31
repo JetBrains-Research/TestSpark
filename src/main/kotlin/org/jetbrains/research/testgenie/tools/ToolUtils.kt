@@ -62,7 +62,7 @@ fun saveData(project: Project, report: Report, resultName: String, fileUrl: Stri
     workspace.testGenerationData.resultName = resultName
     workspace.testGenerationData.fileUrl = fileUrl
     workspace.testGenerationData.packageLine = packageLine
-    workspace.testGenerationData.importsCode = importsCode
+    workspace.testGenerationData.importsCode += importsCode
 }
 
 /**
