@@ -40,7 +40,7 @@
             <ul>
                 <li>Add LLM-based test generation for lines and methods</li>
                 <li>Add support for mocking-related annotations in generated tests</li>
-                <li>Smarter prompt generation to make sure that its number of tokens does not exceed the limits.</li>
+                <li>Smarter prompt generation to make sure that its number of tokens does not exceed the limits</li>
                 <li>Improve test parsing</li>
                 <li>Fix some major performance and functional bugs in interaction with Jacoco</li>
                 <li>code refactoring</li>
