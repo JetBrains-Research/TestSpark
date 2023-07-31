@@ -82,8 +82,8 @@ class TestCaseDisplayService(private val project: Project) {
         JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
     )
-    var testCasePanels: HashMap<String, JPanel> = HashMap()
-    var originalTestCases: HashMap<String, String> = HashMap()
+    private var testCasePanels: HashMap<String, JPanel> = HashMap()
+    private var originalTestCases: HashMap<String, String> = HashMap()
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
@@ -616,7 +616,7 @@ class TestCaseDisplayService(private val project: Project) {
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
-                it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
+                it.replace("\r\n", "\n").replace("verifyException(", "// verifyException(") + "\n",
             )
         }
 
@@ -629,7 +629,7 @@ class TestCaseDisplayService(private val project: Project) {
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            project.service<Workspace>().testGenerationData.importsCode,
+            project.service<Workspace>().testGenerationData.importsCode.joinToString("\n") + "\n\n",
         )
 
         // insert package to a code

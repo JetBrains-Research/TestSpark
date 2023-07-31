@@ -12,7 +12,7 @@ class TestGenerationData {
     var fileUrl: String = ""
 
     // Code required of imports and package for generated tests
-    var importsCode: String = ""
+    var importsCode: MutableSet<String> = mutableSetOf()
     var packageLine: String = ""
     var runWith: String = ""
     var otherInfo: String = ""
@@ -35,7 +35,7 @@ class TestGenerationData {
         testGenerationResultList.clear()
         resultName = ""
         fileUrl = ""
-        importsCode = ""
+        importsCode = mutableSetOf()
         packageLine = ""
         runWith = ""
         otherInfo = ""

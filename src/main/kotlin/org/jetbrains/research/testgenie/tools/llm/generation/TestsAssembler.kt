@@ -76,6 +76,7 @@ class TestsAssembler(
                 .split(")")[0]
             testSuite.runWith = runWith
             project.service<Workspace>().testGenerationData.runWith = runWith
+            project.service<Workspace>().testGenerationData.importsCode.add("import org.mockito.junit.MockitoJUnitRunner;")
         }
 
         val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
@@ -87,7 +88,7 @@ class TestsAssembler(
         if (otherInfo.isNotBlank()) {
             testSuite.otherInfo = otherInfo
             project.service<Workspace>().testGenerationData.otherInfo = otherInfo
-            project.service<Workspace>().testGenerationData.importsCode += "import org.junit.runner.RunWith;\n"
+            project.service<Workspace>().testGenerationData.importsCode.add("import org.junit.runner.RunWith;")
         }
 
         // Save the main test cases
