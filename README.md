@@ -1,8 +1,8 @@
 # TestGenie
 
 ![Build](https://github.com/ciselab/TestGenie/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/21024-testgenie.svg)](https://plugins.jetbrains.com/plugin/21024-testgenie)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/21024-testgenie.svg)](https://plugins.jetbrains.com/plugin/21024-testgenie)
 
 
 ## Description
