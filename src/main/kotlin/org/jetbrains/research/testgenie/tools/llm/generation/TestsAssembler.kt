@@ -1,10 +1,13 @@
 package org.jetbrains.research.testgenie.tools.llm.generation
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.importPattern
+import org.jetbrains.research.testgenie.actions.runWithPattern
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.llm.test.TestLine
 import org.jetbrains.research.testgenie.tools.llm.test.TestLineType
@@ -65,9 +68,30 @@ class TestsAssembler(
             it.groupValues[0]
         }.toSet()
 
-        val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
-        testSet.removeAt(0)
+        // save RunWith
+        val detectedRunWith = runWithPattern.find(rawText, startIndex = 0)?.groupValues?.get(0)
+        if (detectedRunWith != null) {
+            val runWith = detectedRunWith
+                .split("@RunWith(")[1]
+                .split(")")[0]
+            testSuite.runWith = runWith
+            project.service<Workspace>().testGenerationData.runWith = runWith
+            project.service<Workspace>().testGenerationData.importsCode.add("import org.mockito.junit.MockitoJUnitRunner;")
+        }
 
+        val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
+
+        // save annotations and pre-set methods
+        val otherInfoList = testSet.removeAt(0).split("public class")[1].split("{").toMutableList()
+        otherInfoList.removeFirst()
+        val otherInfo = otherInfoList.joinToString("{")
+        if (otherInfo.isNotBlank()) {
+            testSuite.otherInfo = otherInfo
+            project.service<Workspace>().testGenerationData.otherInfo = otherInfo
+            project.service<Workspace>().testGenerationData.importsCode.add("import org.junit.runner.RunWith;")
+        }
+
+        // Save the main test cases
         testSet.forEach ca@{
             val rawTest = "@Test$it"
             val currentTest = TestCaseGeneratedByLLM()

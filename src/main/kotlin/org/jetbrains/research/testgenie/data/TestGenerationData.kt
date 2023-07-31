@@ -12,8 +12,10 @@ class TestGenerationData {
     var fileUrl: String = ""
 
     // Code required of imports and package for generated tests
-    var importsCode: String = ""
+    var importsCode: MutableSet<String> = mutableSetOf()
     var packageLine: String = ""
+    var runWith: String = ""
+    var otherInfo: String = ""
 
     // Maps a workspace file to the test generation jobs that were triggered on it.
     // Currently, the file key is represented by its presentableUrl
@@ -33,8 +35,10 @@ class TestGenerationData {
         testGenerationResultList.clear()
         resultName = ""
         fileUrl = ""
-        importsCode = ""
+        importsCode = mutableSetOf()
         packageLine = ""
+        runWith = ""
+        otherInfo = ""
         testGenerationResults.clear()
         pendingTestResults.clear()
         polyDepthReducing = 0

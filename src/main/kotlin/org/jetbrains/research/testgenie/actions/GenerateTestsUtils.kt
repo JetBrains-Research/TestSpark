@@ -337,6 +337,11 @@ val packagePattern = Regex(
     options = setOf(RegexOption.MULTILINE),
 )
 
+val runWithPattern = Regex(
+    pattern = "@RunWith\\([^)]*\\)",
+    options = setOf(RegexOption.MULTILINE),
+)
+
 /**
  * Returns the full text of a given class including the package, imports, and class code.
  *

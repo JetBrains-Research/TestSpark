@@ -69,10 +69,10 @@ class TestCaseDisplayService(private val project: Project) {
     private var selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
     private var deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
     private var removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
-    var validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    private var validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
     var toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
-    var testsSelected: Int = 0
+    private var testsSelected: Int = 0
     private var testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
     private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
@@ -82,8 +82,8 @@ class TestCaseDisplayService(private val project: Project) {
         JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
     )
-    var testCasePanels: HashMap<String, JPanel> = HashMap()
-    var originalTestCases: HashMap<String, String> = HashMap()
+    private var testCasePanels: HashMap<String, JPanel> = HashMap()
+    private var originalTestCases: HashMap<String, String> = HashMap()
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
@@ -451,6 +451,11 @@ class TestCaseDisplayService(private val project: Project) {
                 virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
+
+                if (project.service<Workspace>().testGenerationData.runWith.isNotEmpty()) {
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<Workspace>().testGenerationData.runWith})")
+                }
+
                 psiJavaFile!!.add(psiClass!!)
             }
         } else {
@@ -611,14 +616,20 @@ class TestCaseDisplayService(private val project: Project) {
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
-                it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
+                it.replace("\r\n", "\n").replace("verifyException(", "// verifyException(") + "\n",
             )
         }
+
+        // insert other info to a code
+        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+            selectedClass.rBrace!!.textRange.startOffset,
+            project.service<Workspace>().testGenerationData.otherInfo + "\n",
+        )
 
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            project.service<Workspace>().testGenerationData.importsCode,
+            project.service<Workspace>().testGenerationData.importsCode.joinToString("\n") + "\n\n",
         )
 
         // insert package to a code
@@ -699,7 +710,7 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param selectedTestCasePanels the panels of the selected tests
      */
-    fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
         selectedTestCasePanels.forEach { removeTestCase(it.key) }
         removeAllHighlights()
         closeToolWindow()

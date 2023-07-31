@@ -18,16 +18,13 @@ import java.io.File
  * @param classFQN The fully qualified name of the class to be excluded from the imports code. It will not be included in the result.
  * @return The imports code extracted from the test suite code. If no imports are found or the result is empty after filtering, an empty string is returned.
  */
-fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String): String {
-    testSuiteCode ?: return ""
-    val result = testSuiteCode.replace("\r\n", "\n").split("\n").asSequence()
+fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String): MutableSet<String> {
+    testSuiteCode ?: return mutableSetOf()
+    return testSuiteCode.replace("\r\n", "\n").split("\n").asSequence()
         .filter { it.contains("^import".toRegex()) }
         .filterNot { it.contains("evosuite".toRegex()) }
         .filterNot { it.contains("RunWith".toRegex()) }
-        .filterNot { it.contains(classFQN.toRegex()) }
-        .joinToString("\n").plus("\n")
-    if (result.isBlank()) return ""
-    return result
+        .filterNot { it.contains(classFQN.toRegex()) }.toMutableSet()
 }
 
 /**
@@ -43,7 +40,7 @@ fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
         .filter { it.contains("^package".toRegex()) }
         .joinToString("\n").plus("\n")
     if (result.isBlank()) return ""
-    return result
+    return result + "\n"
 }
 
 /**
@@ -56,13 +53,13 @@ fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
  * @param packageLine The package declaration line of the test generation data.
  * @param importsCode The import statements code of the test generation data.
  */
-fun saveData(project: Project, report: Report, resultName: String, fileUrl: String, packageLine: String, importsCode: String) {
+fun saveData(project: Project, report: Report, resultName: String, fileUrl: String, packageLine: String, importsCode: MutableSet<String>) {
     val workspace = project.service<Workspace>()
     workspace.testGenerationData.testGenerationResultList.add(report)
     workspace.testGenerationData.resultName = resultName
     workspace.testGenerationData.fileUrl = fileUrl
     workspace.testGenerationData.packageLine = packageLine
-    workspace.testGenerationData.importsCode = importsCode
+    workspace.testGenerationData.importsCode.addAll(importsCode)
 }
 
 /**
