@@ -1,5 +1,6 @@
 package org.jetbrains.research.testgenie.evosuite.validation
 
+import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

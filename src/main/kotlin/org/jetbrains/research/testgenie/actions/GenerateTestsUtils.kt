@@ -3,66 +3,54 @@ package org.jetbrains.research.testgenie.actions
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiCodeBlock
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiAnonymousClass
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiCodeBlock
 import com.intellij.psi.PsiStatement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.jetbrains.research.testgenie.evosuite.Pipeline
 import org.jetbrains.research.testgenie.services.SettingsProjectService
 import org.jetbrains.research.testgenie.services.StaticInvalidationService
+import org.jetbrains.research.testgenie.tools.Pipeline
 
-/**
- * This file contains some useful methods related to GenerateTests actions.
- */
+fun createPipeline(e: AnActionEvent): Pipeline {
+    val project: Project = e.project!!
 
-/**
- * Extracts the required information from an action event and creates an (EvoSuite) Pipeline.
- *
- * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @return the created (EvoSuite) Pipeline, null if some information is missing or if there is no surrounding class
- */
-fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
-    val project: Project = e.project ?: return null
+    val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return null
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return null
-    val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
-    val fileUrl = vFile.presentableUrl
-    val modificationStamp = vFile.modificationStamp
-
-    val psiClass: PsiClass = getSurroundingClass(psiFile, caret) ?: return null
-    val classFQN = psiClass.qualifiedName ?: return null
-
-    val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-
-    val log = Logger.getInstance("GenerateTestsUtils")
     val settingsProjectState = project.service<SettingsProjectService>().state
-    val buildPath = "$projectPath/${settingsProjectState.buildPath}"
+    val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
 
-    log.info("Selected class is $classFQN")
+    return Pipeline(e, packageName)
+}
 
-    val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
-    val cacheStartLine: Int = doc.getLineNumber(psiClass.startOffset)
-    val cacheEndLine: Int = doc.getLineNumber(psiClass.endOffset)
-    log.info("Selected class is on lines $cacheStartLine to $cacheEndLine")
+fun PsiMethod.getSignatureString(): String {
+    val bodyStart = body?.startOffsetInParent ?: this.textLength
+    return text.substring(0, bodyStart).replace('\n', ' ').trim()
+}
 
-    return Pipeline(project, projectPath, buildPath, classFQN, fileUrl, modificationStamp).withCacheLines(
-        cacheStartLine,
-        cacheEndLine
-    )
+fun createLLMPipeline(e: AnActionEvent): Pipeline {
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
+
+    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
+
+    val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
+    packageList.removeLast()
+
+    val packageName = packageList.joinToString(".")
+
+    return Pipeline(e, packageName)
 }
 
 /**
@@ -73,7 +61,7 @@ fun createEvoSuitePipeline(e: AnActionEvent): Pipeline? {
  * @param caret the current (primary) caret that did the click
  * @return PsiClass element if it has been found, null otherwise
  */
-fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass? {
+fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass {
     // Get the classes of the PSI file
     val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
 
@@ -86,7 +74,7 @@ fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass? {
             surroundingClass = psiClass
         }
     }
-    return surroundingClass
+    return surroundingClass!!
 }
 
 /**
@@ -183,7 +171,10 @@ private fun isAbstractClass(psiClass: PsiClass): Boolean {
             return true
         }
     }
-    return false
+
+    // check if a class is noted as abstract in the text
+    return psiClass.text.replace(" ", "")
+        .contains("abstractclass${psiClass.name}", ignoreCase = true)
 }
 
 /**
@@ -250,9 +241,13 @@ private fun withinElement(psiElement: PsiElement, caret: Caret): Boolean {
  * @return the display name of the PSI class
  */
 fun getClassDisplayName(psiClass: PsiClass): String {
-    return if (psiClass.isInterface) "Interface ${psiClass.qualifiedName}"
-    else if (isAbstractClass(psiClass)) "Abstract Class ${psiClass.qualifiedName}"
-    else "Class ${psiClass.qualifiedName}"
+    return if (psiClass.isInterface) {
+        "Interface ${psiClass.qualifiedName}"
+    } else if (isAbstractClass(psiClass)) {
+        "Abstract Class ${psiClass.qualifiedName}"
+    } else {
+        "Class ${psiClass.qualifiedName}"
+    }
 }
 
 /**
@@ -263,8 +258,116 @@ fun getClassDisplayName(psiClass: PsiClass): String {
  * @return the display name of the PSI method
  */
 fun getMethodDisplayName(psiMethod: PsiMethod): String {
-    return if (isDefaultConstructor(psiMethod)) "Default Constructor"
-    else if (psiMethod.isConstructor) "Constructor"
-    else if (isMethodDefault(psiMethod)) "Default Method ${psiMethod.name}"
-    else "Method ${psiMethod.name}"
+    return if (isDefaultConstructor(psiMethod)) {
+        "Default Constructor"
+    } else if (psiMethod.isConstructor) {
+        "Constructor"
+    } else if (isMethodDefault(psiMethod)) {
+        "Default Method ${psiMethod.name}"
+    } else {
+        "Method ${psiMethod.name}"
+    }
+}
+
+/**
+ * Makes the action visible only if a class has been selected.
+ * It also updates the action name depending on which class has been selected.
+ *
+ * @param e an action event that contains useful information and corresponds to the action invoked by the user
+ * @param name a name of the test generator
+ */
+fun updateForClass(e: AnActionEvent, name: String) {
+    e.presentation.isEnabledAndVisible = false
+
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+
+    val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
+
+    e.presentation.isEnabledAndVisible = true
+    e.presentation.text = "Generate Tests For ${getClassDisplayName(psiClass)} by $name"
+}
+
+/**
+ * Makes the action visible only if a method has been selected.
+ * It also updates the action name depending on which method has been selected.
+ *
+ * @param e an action event that contains useful information and corresponds to the action invoked by the user
+ * @param name a name of the test generator
+ */
+fun updateForMethod(e: AnActionEvent, name: String) {
+    e.presentation.isEnabledAndVisible = false
+
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+
+    val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
+
+    e.presentation.isEnabledAndVisible = true
+    e.presentation.text = "Generate Tests For ${getMethodDisplayName(psiMethod)} by $name"
+}
+
+/**
+ * Makes the action visible only if a line has been selected.
+ * It also updates the action name depending on which line has been selected.
+ *
+ * @param e an action event that contains useful information and corresponds to the action invoked by the user
+ * @param name a name of the test generator
+ */
+fun updateForLine(e: AnActionEvent, name: String) {
+    e.presentation.isEnabledAndVisible = false
+
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+
+    val line: Int = getSurroundingLine(psiFile, caret)?.plus(1)
+        ?: return // lines in the editor and in EvoSuite are one-based
+
+    e.presentation.isEnabledAndVisible = true
+    e.presentation.text = "Generate Tests For Line $line by $name"
+}
+
+val importPattern = Regex(
+    pattern = "^import\\s+(static\\s)?((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
+    options = setOf(RegexOption.MULTILINE),
+)
+
+val packagePattern = Regex(
+    pattern = "^package\\s+((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
+    options = setOf(RegexOption.MULTILINE),
+)
+
+val runWithPattern = Regex(
+    pattern = "@RunWith\\([^)]*\\)",
+    options = setOf(RegexOption.MULTILINE),
+)
+
+/**
+ * Returns the full text of a given class including the package, imports, and class code.
+ *
+ * @param cl The PsiClass object representing the class.
+ * @return The full text of the class.
+ */
+fun getClassFullText(cl: PsiClass): String {
+    var fullText = ""
+    val fileText = cl.containingFile.text
+
+    // get package
+    packagePattern.findAll(fileText, 0).map {
+        it.groupValues[0]
+    }.forEach {
+        fullText += "$it\n\n"
+    }
+
+    // get imports
+    importPattern.findAll(fileText, 0).map {
+        it.groupValues[0]
+    }.forEach {
+        fullText += "$it\n"
+    }
+
+    // Add class code
+    fullText += cl.text
+
+    return fullText
 }

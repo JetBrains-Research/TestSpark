@@ -9,13 +9,14 @@ import net.jqwik.api.Property
 import net.jqwik.api.Provide
 import net.jqwik.api.RandomDistribution
 import net.jqwik.api.lifecycle.BeforeTry
-import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.services.TestCaseCachingServiceTest.Companion.createPair
-import org.jetbrains.research.testgenie.services.TestCaseCachingServiceTest.Companion.createTriple
 import org.assertj.core.api.Assertions.assertThat
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
+import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.services.TestCaseCachingServiceTest.Companion.createPair
+import org.jetbrains.research.testgenie.services.TestCaseCachingServiceTest.Companion.createTriple
 import org.junit.jupiter.api.TestInstance
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -34,13 +35,13 @@ class TestCaseCachingServicePropertyBasedTest {
 
     @Property
     fun singleFileMultipleLines(
-        @ForAll("compactTestCaseGenerator") testCases: List<CompactTestCase>,
-        @ForAll("lineRangeGenerator") lineRange: Pair<Int, Int>
+        @ForAll("compactTestCaseGenerator") testCases: List<TestCase>,
+        @ForAll("lineRangeGenerator") lineRange: Pair<Int, Int>,
     ) {
         val lowerBound = lineRange.first
         val upperBound = lineRange.second
 
-        val report = CompactReport(TestGenerationResultImpl())
+        val report = Report(CompactReport(TestGenerationResultImpl()))
         report.testCaseList = HashMap(testCases.associate { createPair(it) })
         val file = "file"
 
@@ -54,12 +55,12 @@ class TestCaseCachingServicePropertyBasedTest {
                 createTriple(it)
             }
             .containsExactlyInAnyOrder(
-                *expected.map2Array { createTriple(it) }
+                *expected.map2Array { createTriple(it) },
             )
     }
 
     @Provide
-    private fun compactTestCaseGenerator(): Arbitrary<List<CompactTestCase>> {
+    private fun compactTestCaseGenerator(): Arbitrary<List<TestCase>> {
         val lineNumberArbitrary = lineNumberGenerator()
 
         val testNameArbitrary = Arbitraries.strings()
@@ -75,10 +76,10 @@ class TestCaseCachingServicePropertyBasedTest {
         val compactTestCaseArbitrary = Combinators.combine(
             testNameArbitrary,
             testCodeArbitrary,
-            lineNumberArbitrary.set()
+            lineNumberArbitrary.set(),
         )
             .`as` { name, code, lineNumbers ->
-                CompactTestCase(name, code, lineNumbers, setOf(), setOf())
+                TestCase(name, code, lineNumbers, setOf(), setOf())
             }
             .list()
             .uniqueElements { it.testName }

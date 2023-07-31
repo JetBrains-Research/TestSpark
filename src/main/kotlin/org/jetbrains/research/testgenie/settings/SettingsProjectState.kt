@@ -6,14 +6,13 @@ import org.jetbrains.research.testgenie.TestGenieDefaultsBundle
  * This class is the actual data class that stores the values of the Plugin Settings entries.
  */
 data class SettingsProjectState(
-    var javaPath: String = DefaultSettingsPluginState.javaPath,
     var colorRed: Int = DefaultSettingsPluginState.colorRed,
     var colorGreen: Int = DefaultSettingsPluginState.colorGreen,
     var colorBlue: Int = DefaultSettingsPluginState.colorBlue,
     var buildPath: String = DefaultSettingsPluginState.buildPath,
     var buildCommand: String = DefaultSettingsPluginState.buildCommand,
     var telemetryEnabled: Boolean = DefaultSettingsPluginState.telemetryEnabled,
-    var telemetryPath: String = DefaultSettingsPluginState.telemetryPath
+    var telemetryPath: String = DefaultSettingsPluginState.telemetryPath,
 ) {
     /**
      * Default values of SettingsProjectState.

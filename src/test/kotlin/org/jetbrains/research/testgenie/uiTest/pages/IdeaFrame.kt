@@ -97,7 +97,6 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
      * @param projectName name of project
      */
     fun openProjectFile(fileName: String, projectName: String) {
-
         // Wait for file name to be found
         try {
             projectViewTree.findText(projectName).rightClick()

@@ -45,7 +45,7 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
     val searchTextBox
         get() = textField(
             byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"),
-            Duration.ofSeconds(60)
+            Duration.ofSeconds(60),
         )
 
     // Action to find Settings tree view

@@ -7,11 +7,11 @@ import com.intellij.remoterobot.fixtures.JCheckboxFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
+import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.research.testgenie.uiTest.pages.IdeaFrame
 import org.jetbrains.research.testgenie.uiTest.pages.SettingsFrame
 import org.jetbrains.research.testgenie.uiTest.pages.WelcomeFrame
 import org.jetbrains.research.testgenie.uiTest.utils.RemoteRobotExtension
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
@@ -43,9 +43,9 @@ class SettingsComponentTest {
         }
     }
 
+    // @Video
     @Order(1)
     @Test
-    // @Video
     fun checkTestGenieTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         waitFor(Duration.ofSeconds(60)) {
@@ -62,9 +62,9 @@ class SettingsComponentTest {
         }
     }
 
+    // @Video
     @Order(2)
     @Test
-    // @Video
     fun checkTestGenieInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.findTestGenie()
@@ -114,9 +114,9 @@ class SettingsComponentTest {
         ideaFrame.openSettings(true)
     }
 
+    // @Video
     @Order(4)
     @Test
-    // @Video
     fun checkEvoSuiteTabExists(remoteRobot: RemoteRobot) = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         waitFor(Duration.ofSeconds(60)) {
@@ -133,9 +133,9 @@ class SettingsComponentTest {
         }
     }
 
+    // @Video
     @Order(5)
     @Test
-    // @Video
     fun checkEvoSuiteInSettings(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
         val settingsFrame = find(SettingsFrame::class.java, timeout = Duration.ofSeconds(60))
         settingsFrame.findEvoSuite()
@@ -164,7 +164,7 @@ class SettingsComponentTest {
             settingsFrame.outputCoverageCheckBox,
             settingsFrame.methodCoverageCheckBox,
             settingsFrame.methodNoExcCoverageCheckBox,
-            settingsFrame.cBranchCoverageCheckBox
+            settingsFrame.cBranchCoverageCheckBox,
         )
     }
 
@@ -208,7 +208,7 @@ class SettingsComponentTest {
             settingsFrame.createAssertionsCheckBox,
             settingsFrame.debugModeCheckbox,
             settingsFrame.minimiseTestSuiteCheckBox,
-            settingsFrame.flakyTestCheckBox
+            settingsFrame.flakyTestCheckBox,
         )
     }
 
@@ -275,8 +275,8 @@ class SettingsComponentTest {
         assertThat(
             errorDialog.hasText(
                 "Seed parameter is not of numeric type. Therefore, it will not be saved." +
-                    " However, the rest of the parameters have been successfully saved."
-            )
+                    " However, the rest of the parameters have been successfully saved.",
+            ),
         ).isTrue
 
         val okDialog: JButtonFixture?

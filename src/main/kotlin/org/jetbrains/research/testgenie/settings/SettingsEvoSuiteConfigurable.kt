@@ -30,6 +30,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
+        settingsComponent!!.javaPath = settingsState.javaPath
         settingsComponent!!.sandbox = settingsState.sandbox
         settingsComponent!!.assertions = settingsState.assertions
         settingsComponent!!.seed = settingsState.seed
@@ -56,6 +57,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
     override fun isModified(): Boolean {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         var modified: Boolean = settingsComponent!!.sandbox != settingsState.sandbox
+        modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
         modified = modified or (settingsComponent!!.seed != settingsState.seed)
         modified = modified or (settingsComponent!!.algorithm != settingsState.algorithm)
@@ -79,6 +81,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
      */
     override fun apply() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
+        settingsState.javaPath = settingsComponent!!.javaPath
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions
         settingsState.algorithm = settingsComponent!!.algorithm
@@ -99,7 +102,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
         if (settingsComponent!!.seed != "" && seed == null) {
             Messages.showErrorDialog(
                 "Seed parameter is not of numeric type. Therefore, it will not be saved. However, the rest of the parameters have been successfully saved.",
-                "Incorrect Numeric Type For Seed"
+                "Incorrect Numeric Type For Seed",
             )
             return
         }

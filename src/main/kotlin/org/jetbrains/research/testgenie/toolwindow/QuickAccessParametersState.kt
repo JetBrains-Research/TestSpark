@@ -14,7 +14,7 @@ data class QuickAccessParametersState(
     var assertionTimeout: Int = DefaultState.assertionTimeout,
     var junitCheckTimeout: Int = DefaultState.junitCheckTimeout,
     var populationLimit: PopulationLimit = DefaultState.populationLimit,
-    var population: Int = DefaultState.population
+    var population: Int = DefaultState.population,
 ) {
 
     object DefaultState {
@@ -30,7 +30,6 @@ data class QuickAccessParametersState(
     }
 
     fun serializeChangesFromDefault(): List<String> {
-
         val params = mutableListOf<String>()
         if (this.stoppingCondition != DefaultState.stoppingCondition) {
             params.add("-Dstopping_condition=${this.stoppingCondition.name}")
@@ -69,7 +68,8 @@ data class QuickAccessParametersState(
 enum class StoppingCondition(private val display: String, private val units: String) {
     MAXTIME("Max time", "seconds"), MAXSTATEMENTS("Max statements", "statements"), MAXTESTS("Max tests", "tests"),
     MAXGENERATIONS("Max generations", "generations"), MAXFITNESSEVALUATIONS("Max fitness evaluations", "evaluations"),
-    TIMEDELTA("Time delta", "");
+    TIMEDELTA("Time delta", ""),
+    ;
 
     /**
      * Returns the display name of the given enum value that is shown in the UI elements.

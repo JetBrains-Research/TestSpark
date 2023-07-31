@@ -6,6 +6,7 @@ import org.jetbrains.research.testgenie.TestGenieDefaultsBundle
  * This class is the actual data class that stores the values of the EvoSuite Settings entries.
  */
 data class SettingsApplicationState(
+    var javaPath: String = SettingsProjectState.DefaultSettingsPluginState.javaPath,
     var sandbox: Boolean = DefaultSettingsApplicationState.sandbox,
     var assertions: Boolean = DefaultSettingsApplicationState.assertions,
     var seed: String = DefaultSettingsApplicationState.seed,
@@ -22,6 +23,10 @@ data class SettingsApplicationState(
     var criterionMethodNoException: Boolean = DefaultSettingsApplicationState.criterionMethodNoException,
     var criterionCBranch: Boolean = DefaultSettingsApplicationState.criterionCBranch,
     var minimize: Boolean = DefaultSettingsApplicationState.minimize,
+    var grazieUserToken: String = DefaultSettingsApplicationState.grazieUserToken,
+    var maxLLMRequest: Int = DefaultSettingsApplicationState.maxLLMRequest,
+    var maxInputParamsDepth: Int = DefaultSettingsApplicationState.maxInputParamsDepth,
+    var maxPolyDepth: Int = DefaultSettingsApplicationState.maxPolyDepth,
 ) {
 
     /**
@@ -44,6 +49,10 @@ data class SettingsApplicationState(
         val criterionMethod: Boolean = TestGenieDefaultsBundle.defaultValue("criterionMethod").toBoolean()
         val criterionMethodNoException: Boolean = TestGenieDefaultsBundle.defaultValue("criterionMethodNoException").toBoolean()
         val criterionCBranch: Boolean = TestGenieDefaultsBundle.defaultValue("criterionCBranch").toBoolean()
+        val grazieUserToken: String = TestGenieDefaultsBundle.defaultValue("grazieToken")
+        val maxLLMRequest: Int = TestGenieDefaultsBundle.defaultValue("maxLLMRequest").toInt()
+        val maxInputParamsDepth: Int = TestGenieDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
+        val maxPolyDepth: Int = TestGenieDefaultsBundle.defaultValue("maxPolyDepth").toInt()
     }
 
     fun serializeChangesFromDefault(): List<String> {

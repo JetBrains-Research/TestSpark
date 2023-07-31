@@ -20,19 +20,19 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElementFactory
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiElementFactory
 import com.intellij.refactoring.suggested.newRange
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
@@ -41,46 +41,43 @@ import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
+import org.jetbrains.research.testgenie.TestGenieToolTipsBundle
+import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.data.TestCase
 import org.jetbrains.research.testgenie.editor.Workspace
-import org.jetbrains.research.testgenie.evosuite.Pipeline
-import org.jetbrains.research.testgenie.evosuite.validation.Validator
-import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
+import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 import java.awt.BorderLayout
 import java.awt.Color
-import java.awt.Component
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
 import java.util.Locale
-import javax.swing.JPanel
-import javax.swing.JButton
-import javax.swing.JLabel
-import javax.swing.BoxLayout
 import javax.swing.BorderFactory
-import javax.swing.JOptionPane
-import javax.swing.JCheckBox
 import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JLabel
+import javax.swing.JOptionPane
+import javax.swing.JPanel
 import javax.swing.border.Border
 
 class TestCaseDisplayService(private val project: Project) {
 
-    private var cacheLazyPipeline: Pipeline? = null
-
-    private val mainPanel: JPanel = JPanel()
-    private val applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
-    private val selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
-    private val deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
-    private val removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
-    val validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
-    val toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
+    private var mainPanel: JPanel = JPanel()
+    private var applyButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("applyButton"))
+    private var selectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("selectAllButton"))
+    private var deselectAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("deselectAllButton"))
+    private var removeAllButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("removeAllButton"))
+    private var validateButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("validateButton"))
+    var toggleJacocoButton: JButton = JButton(TestGenieLabelsBundle.defaultValue("jacocoToggle"))
 
     private var testsSelected: Int = 0
-    private val testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
-    private val testsSelectedLabel: JLabel = JLabel(testsSelectedText)
+    private var testsSelectedText: String = "${TestGenieLabelsBundle.defaultValue("testsSelected")}: %d/%d"
+    private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
-    private val allTestCasePanel: JPanel = JPanel()
-    private val scrollPane: JBScrollPane = JBScrollPane(
+    private var allTestCasePanel: JPanel = JPanel()
+    private var scrollPane: JBScrollPane = JBScrollPane(
         allTestCasePanel,
         JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
@@ -102,12 +99,6 @@ class TestCaseDisplayService(private val project: Project) {
     private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
     private var isJacocoCoverageActive = false
 
-    // Code required of imports and package for generated tests
-    var importsCode: String = ""
-    var packageLine: String = ""
-
-    var fileUrl: String = ""
-
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
@@ -119,8 +110,10 @@ class TestCaseDisplayService(private val project: Project) {
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
         topButtons.add(removeAllButton)
-        topButtons.add(validateButton)
-        topButtons.add(toggleJacocoButton)
+
+//        TODO uncomment after the validator fixing
+//        topButtons.add(validateButton)
+//        topButtons.add(toggleJacocoButton)
 
         mainPanel.add(topButtons, BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
@@ -134,10 +127,21 @@ class TestCaseDisplayService(private val project: Project) {
         removeAllButton.addActionListener { removeAllTestCases() }
     }
 
+    /**
+     * Enables the validated button.
+     *
+     * This method sets the enabled state of the validated button to true,
+     * allowing users to interact with it.
+     */
     fun makeValidatedButtonAvailable() {
         validateButton.isEnabled = true
     }
 
+    /**
+     * Sets the JaCoCo report for the coverage suites bundle.
+     *
+     * @param coverageSuitesBundle The coverage suites bundle to set the JaCoCo report for.
+     */
     fun setJacocoReport(coverageSuitesBundle: CoverageSuitesBundle) {
         currentJacocoCoverageBundle = coverageSuitesBundle
     }
@@ -152,11 +156,9 @@ class TestCaseDisplayService(private val project: Project) {
      * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
      */
-    fun showGeneratedTests(testJob: Workspace.TestJob, editor: Editor, cacheLazyPipeline: Pipeline?) {
+    fun showGeneratedTests(testJob: Workspace.TestJob, editor: Editor) {
         this.testJob = testJob
-        this.cacheLazyPipeline = cacheLazyPipeline
         displayTestCases(testJob.report, editor)
-        displayLazyRunnerButton()
         createToolWindowTab()
     }
 
@@ -168,9 +170,10 @@ class TestCaseDisplayService(private val project: Project) {
      * @param editor editor instance where coverage should be
      *               visualized
      */
-    private fun displayTestCases(testReport: CompactReport, editor: Editor) {
+    private fun displayTestCases(testReport: Report, editor: Editor) {
         allTestCasePanel.removeAll()
         testCasePanels.clear()
+        originalTestCases.clear()
         testReport.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
@@ -201,10 +204,7 @@ class TestCaseDisplayService(private val project: Project) {
             // Add an editor to modify the test source code
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
             val textFieldEditor = EditorTextField(document, project, JavaFileType.INSTANCE)
-            // Set the default editor color to the one the editor was created with (only done once)
-            if (defaultEditorColor == null) {
-                defaultEditorColor = textFieldEditor.background
-            }
+
             textFieldEditor.setOneLineMode(false)
 
             // Add test case title
@@ -268,12 +268,11 @@ class TestCaseDisplayService(private val project: Project) {
         scrollToPanel(myPanel)
 
         val editor = getEditor(name) ?: return
-        if (!editor.background.equals(defaultEditorColor)) {
-            return
-        }
         val settingsProjectState = project.service<SettingsProjectService>().state
         val highlightColor =
-            Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30)
+            JBColor(TestGenieToolTipsBundle.defaultValue("colorName"), Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30))
+        if (editor.background.equals(highlightColor)) return
+        defaultEditorColor = editor.background
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
     }
@@ -312,7 +311,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Removes all coverage highlighting from the editor.
      */
     private fun removeAllHighlights() {
-        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
+        val editor = project.service<Workspace>().editorForFileUrl(project.service<Workspace>().testGenerationData.fileUrl)
         editor?.markupModel?.removeAllHighlighters()
     }
 
@@ -336,7 +335,7 @@ class TestCaseDisplayService(private val project: Project) {
         for (testCase in testCasePanels) {
             if (names.contains(testCase.key)) {
                 val editor = getEditor(testCase.key) ?: return
-                val highlightColor = Color(255, 0, 0, 90)
+                val highlightColor = JBColor(TestGenieToolTipsBundle.defaultValue("colorName"), Color(255, 0, 0, 90))
                 defaultBorder = editor.border
                 editor.border = BorderFactory.createLineBorder(highlightColor, 3)
             } else {
@@ -381,7 +380,7 @@ class TestCaseDisplayService(private val project: Project) {
                     ).classes.stream().map { it.name }
                     .toArray()
                     .contains(
-                        (PsiManager.getInstance(project).findFile(file) as PsiJavaFile).name.removeSuffix(".java")
+                        (PsiManager.getInstance(project).findFile(file) as PsiJavaFile).name.removeSuffix(".java"),
                     )
                 )
         }
@@ -389,7 +388,7 @@ class TestCaseDisplayService(private val project: Project) {
         val fileChooser = FileChooser.chooseFiles(
             descriptor,
             project,
-            LocalFileSystem.getInstance().findFileByPath(project.basePath!!)
+            LocalFileSystem.getInstance().findFileByPath(project.basePath!!),
         )
 
         // Cancel button pressed
@@ -451,7 +450,12 @@ class TestCaseDisplayService(private val project: Project) {
                 chosenFile.createChildData(null, fileName)
                 virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
-                psiClass = PsiElementFactory.getInstance(project).createClass(className)
+                psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
+
+                if (project.service<Workspace>().testGenerationData.runWith.isNotEmpty()) {
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<Workspace>().testGenerationData.runWith})")
+                }
+
                 psiJavaFile!!.add(psiClass!!)
             }
         } else {
@@ -460,7 +464,7 @@ class TestCaseDisplayService(private val project: Project) {
             psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
             psiClass = psiJavaFile!!.classes[
                 psiJavaFile!!.classes.stream().map { it.name }.toArray()
-                    .indexOf(psiJavaFile!!.name.removeSuffix(".java"))
+                    .indexOf(psiJavaFile!!.name.removeSuffix(".java")),
             ]
         }
 
@@ -469,18 +473,18 @@ class TestCaseDisplayService(private val project: Project) {
             appendTestsToClass(testCaseComponents, psiClass!!, psiJavaFile!!)
         }
 
-        // Open the file after adding
-        FileEditorManager.getInstance(project).openTextEditor(
-            OpenFileDescriptor(project, virtualFile!!),
-            true,
-        )
-
         // The scheduled tests will be submitted in the background
         // (they will be checked every 5 minutes and also when the project is closed)
         scheduleTelemetry(selectedTestCases)
 
         // Remove the selected test cases from the cache and the tool window UI
         removeSelectedTestCases(selectedTestCasePanels)
+
+        // Open the file after adding
+        FileEditorManager.getInstance(project).openTextEditor(
+            OpenFileDescriptor(project, virtualFile!!),
+            true,
+        )
     }
 
     private fun showErrorWindow(message: String) {
@@ -488,10 +492,15 @@ class TestCaseDisplayService(private val project: Project) {
             null,
             message,
             TestGenieLabelsBundle.defaultValue("errorWindowTitle"),
-            JOptionPane.ERROR_MESSAGE
+            JOptionPane.ERROR_MESSAGE,
         )
     }
 
+    /**
+     * Retrieves the names of the active test cases.
+     *
+     * @return a set of strings representing the names of the active test cases.
+     */
     private fun getActiveTests(): Set<String> {
         val selectedTestCases =
             testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
@@ -542,9 +551,16 @@ class TestCaseDisplayService(private val project: Project) {
         Validator(project, testJob.info, edits).validateSuite()
     }
 
+    /**
+     * Toggles the Jacoco coverage for the current project and file.
+     * If Jacoco coverage is active, it will be deactivated.
+     * If Jacoco coverage is inactive, it will be activated using the current Jacoco coverage bundle.
+     *
+     * @throws IllegalStateException if the project or file is not set.
+     */
     private fun toggleJacocoCoverage() {
         val manager = CoverageDataManager.getInstance(project)
-        val editor = project.service<Workspace>().editorForFileUrl(fileUrl)
+        val editor = project.service<Workspace>().editorForFileUrl(project.service<Workspace>().testGenerationData.fileUrl)
         editor?.markupModel?.removeAllHighlighters()
 
         if (isJacocoCoverageActive) {
@@ -600,19 +616,25 @@ class TestCaseDisplayService(private val project: Project) {
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
-                it.replace("\r\n", "\n"),
+                it.replace("\r\n", "\n").replace("verifyException(", "// verifyException(") + "\n",
             )
         }
+
+        // insert other info to a code
+        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+            selectedClass.rBrace!!.textRange.startOffset,
+            project.service<Workspace>().testGenerationData.otherInfo + "\n",
+        )
 
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            importsCode,
+            project.service<Workspace>().testGenerationData.importsCode.joinToString("\n") + "\n\n",
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
-            .insertString(0, packageLine)
+            .insertString(0, project.service<Workspace>().testGenerationData.packageLine)
     }
 
     /**
@@ -644,7 +666,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Closes the tool window and destroys the content of the tab.
      */
     private fun closeToolWindow() {
-        contentManager!!.removeContent(content!!, true)
+        contentManager?.removeContent(content!!, true)
         ToolWindowManager.getInstance(project).getToolWindow("TestGenie")?.hide()
         val coverageVisualisationService = project.service<CoverageVisualisationService>()
         coverageVisualisationService.closeToolWindowTab()
@@ -658,7 +680,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @param testCasePanel the test case panel
      * @return the created button
      */
-    private fun createRemoveButton(test: CompactTestCase, editor: Editor, testCasePanel: JPanel): JButton {
+    private fun createRemoveButton(test: TestCase, editor: Editor, testCasePanel: JPanel): JButton {
         val removeFromCacheButton = JButton("Remove")
         removeFromCacheButton.addActionListener {
             // Remove the highlighting of the test
@@ -699,14 +721,21 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun removeAllTestCases() {
         // Ask the user for the confirmation
-        val choice: Int = Messages.showYesNoCancelDialog(
+        val choice = JOptionPane.showConfirmDialog(
+            null,
             TestGenieBundle.message("removeAllMessage"),
             TestGenieBundle.message("confirmationTitle"),
-            Messages.getQuestionIcon(),
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
         )
-        // Cancel the operation if the user did not press "Yes"
-        if (choice != 0) return
 
+        // Cancel the operation if the user did not press "Yes"
+        if (choice == JOptionPane.NO_OPTION) return
+
+        clear()
+    }
+
+    fun clear() {
         // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()
         removeSelectedTestCases(testCasePanelsToRemove)
@@ -719,7 +748,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun removeTestCase(testName: String) {
         // Remove the test from the cache
-        project.service<TestCaseCachingService>().invalidateFromCache(fileUrl, originalTestCases[testName]!!)
+        project.service<TestCaseCachingService>().invalidateFromCache(project.service<Workspace>().testGenerationData.fileUrl, originalTestCases[testName]!!)
 
         // Remove the test panel from the UI
         allTestCasePanel.remove(testCasePanels[testName])
@@ -771,10 +800,13 @@ class TestCaseDisplayService(private val project: Project) {
 
                 // add border highlight
                 val settingsProjectState = project.service<SettingsProjectService>().state
-                val borderColor = Color(
-                    settingsProjectState.colorRed,
-                    settingsProjectState.colorGreen,
-                    settingsProjectState.colorBlue,
+                val borderColor = JBColor(
+                    TestGenieToolTipsBundle.defaultValue("colorName"),
+                    Color(
+                        settingsProjectState.colorRed,
+                        settingsProjectState.colorGreen,
+                        settingsProjectState.colorBlue,
+                    ),
                 )
                 textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
 
@@ -839,34 +871,5 @@ class TestCaseDisplayService(private val project: Project) {
                 TestGenieTelemetryService.ModifiedTestCase(original, modified)
             }.filter { it.modified != it.original },
         )
-    }
-
-    /**
-     * Display the button to actually invoke EvoSuite if the tests are cached.
-     */
-    private fun displayLazyRunnerButton() {
-        cacheLazyPipeline ?: return
-
-        val lazyRunnerPanel = JPanel()
-        lazyRunnerPanel.layout = BoxLayout(lazyRunnerPanel, BoxLayout.Y_AXIS)
-        val lazyRunnerLabel = JLabel("Showing previously generated test cases from the cache.")
-        lazyRunnerLabel.alignmentX = Component.CENTER_ALIGNMENT
-        lazyRunnerPanel.add(lazyRunnerLabel)
-
-        val lazyRunnerButton = JButton("Generate new tests")
-
-        lazyRunnerButton.addActionListener {
-            lazyRunnerButton.isEnabled = false
-            cacheLazyPipeline!!
-                .withoutCache()
-                .runTestGeneration()
-        }
-
-        lazyRunnerButton.alignmentX = Component.CENTER_ALIGNMENT
-        lazyRunnerPanel.add(lazyRunnerButton)
-
-        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 50)))
-        allTestCasePanel.add(lazyRunnerPanel)
-        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 50)))
     }
 }

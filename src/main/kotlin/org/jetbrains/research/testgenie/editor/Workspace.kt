@@ -15,16 +15,17 @@ import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
-import org.jetbrains.research.testgenie.evosuite.Pipeline
-import org.jetbrains.research.testgenie.evosuite.validation.VALIDATION_RESULT_TOPIC
-import org.jetbrains.research.testgenie.evosuite.validation.ValidationResultListener
-import org.jetbrains.research.testgenie.evosuite.validation.Validator
+import org.jetbrains.research.testgenie.data.Report
+import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.data.TestGenerationData
 import org.jetbrains.research.testgenie.services.COVERAGE_SELECTION_TOGGLE_TOPIC
 import org.jetbrains.research.testgenie.services.CoverageSelectionToggleListener
 import org.jetbrains.research.testgenie.services.CoverageVisualisationService
+import org.jetbrains.research.testgenie.services.ErrorService
 import org.jetbrains.research.testgenie.services.TestCaseDisplayService
-import org.evosuite.utils.CompactReport
-import org.evosuite.utils.CompactTestCase
+import org.jetbrains.research.testgenie.tools.evosuite.validation.VALIDATION_RESULT_TOPIC
+import org.jetbrains.research.testgenie.tools.evosuite.validation.ValidationResultListener
+import org.jetbrains.research.testgenie.tools.evosuite.validation.Validator
 
 /**
  * Workspace state service
@@ -39,15 +40,15 @@ class Workspace(private val project: Project) : Disposable {
         var targetUnit: String,
         val modificationTS: Long,
         val jobId: String,
-        val targetClassPath: String
+        val targetClassPath: String,
     )
 
     class TestJob(
         val info: TestJobInfo,
-        val report: CompactReport,
+        val report: Report,
         val selectedTests: HashSet<String>,
     ) {
-        private fun getSelectedTests(): List<CompactTestCase> {
+        private fun getSelectedTests(): List<TestCase> {
             return report.testCaseList.filter { selectedTests.contains(it.key) }.map { it.value }
         }
 
@@ -59,18 +60,12 @@ class Workspace(private val project: Project) : Disposable {
     }
 
     private val log = Logger.getInstance(this.javaClass)
+
     private var listenerDisposable: Disposable? = null
 
-    /**
-     * Maps a workspace file to the test generation jobs that were triggered on it.
-     * Currently, the file key is represented by its presentableUrl
-     */
-    private val testGenerationResults: HashMap<String, ArrayList<TestJob>> = HashMap()
+    var testGenerationData = TestGenerationData()
 
-    /**
-     * Maps a test generation job id to its corresponding test job information
-     */
-    private var pendingTestResults: HashMap<String, TestJobInfo> = HashMap()
+    var key: TestJobInfo? = null
 
     init {
         val connection = project.messageBus.connect()
@@ -83,7 +78,7 @@ class Workspace(private val project: Project) : Disposable {
                 override fun testGenerationResult(testName: String, selected: Boolean, editor: Editor) {
                     val vFile = vFileForDocument(editor.document) ?: return
                     val fileKey = vFile.presentableUrl
-                    val testJob = testGenerationResults[fileKey]?.last() ?: return
+                    val testJob = testGenerationData.testGenerationResults[fileKey]?.last() ?: return
                     val modTs = editor.document.modificationStamp
 
                     if (selected) {
@@ -97,7 +92,7 @@ class Workspace(private val project: Project) : Disposable {
                         updateCoverage(testJob.getSelectedLines(), testJob.selectedTests, testJob.report, editor)
                     }
                 }
-            }
+            },
         )
 
         connection.subscribe(
@@ -106,7 +101,7 @@ class Workspace(private val project: Project) : Disposable {
                 override fun validationResult(junitResult: Validator.JUnitResult) {
                     showValidationResult(junitResult)
                 }
-            }
+            },
         )
 
         val disposable =
@@ -130,20 +125,22 @@ class Workspace(private val project: Project) : Disposable {
                     }
                 }
             },
-            disposable
+            disposable,
         )
         listenerDisposable = disposable
     }
 
     /**
-     * @param testResultName the test result job id, which is also its file name
+     * Clears the given project's test-related data, including test case display,
+     * error service, coverage visualization, and test generation data.
+     *
+     * @param project the project to clear the test-related data for
      */
-    fun addPendingResult(testResultName: String, jobKey: TestJobInfo) {
-        pendingTestResults[testResultName] = jobKey
-    }
-
-    fun cancelPendingResult(id: String) {
-        pendingTestResults.remove(id)
+    fun clear(project: Project) {
+        project.service<TestCaseDisplayService>().clear()
+        project.service<ErrorService>().clear()
+        project.service<CoverageVisualisationService>().clear()
+        testGenerationData.clear()
     }
 
     /**
@@ -157,15 +154,14 @@ class Workspace(private val project: Project) : Disposable {
      */
     fun receiveGenerationResult(
         testResultName: String,
-        testReport: CompactReport,
-        cacheLazyPipeline: Pipeline? = null,
-        cachedJobKey: TestJobInfo? = null
+        testReport: Report,
+        cachedJobKey: TestJobInfo? = null,
     ): TestJobInfo {
-        val pendingJobKey = pendingTestResults.remove(testResultName)!!
+        val pendingJobKey = testGenerationData.pendingTestResults.remove(testResultName)!!
 
         val jobKey = cachedJobKey ?: pendingJobKey
 
-        val resultsForFile = testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
+        val resultsForFile = testGenerationData.testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
         val displayedSet = HashSet<String>()
         displayedSet.addAll(testReport.testCaseList.keys)
 
@@ -175,7 +171,7 @@ class Workspace(private val project: Project) : Disposable {
         val editor = editorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
-            showReport(testJob, editor, cacheLazyPipeline)
+            showReport(testJob, editor)
         } else {
             log.info("No editor opened for received test result")
         }
@@ -238,13 +234,18 @@ class Workspace(private val project: Project) : Disposable {
      * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
      */
-    private fun showReport(testJob: TestJob, editor: Editor, cacheLazyPipeline: Pipeline?) {
+    private fun showReport(testJob: TestJob, editor: Editor) {
         val visualizationService = project.service<CoverageVisualisationService>()
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.showGeneratedTests(testJob, editor, cacheLazyPipeline)
+        testCaseDisplayService.showGeneratedTests(testJob, editor)
         visualizationService.showCoverage(testJob.report, editor)
     }
 
+    /**
+     * Shows the validation result by marking failing test cases.
+     *
+     * @param validationResult The JUnit result of the validation.
+     */
     private fun showValidationResult(validationResult: Validator.JUnitResult) {
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
         testCaseDisplayService.markFailingTestCases(validationResult.failedTestNames)
@@ -258,17 +259,26 @@ class Workspace(private val project: Project) : Disposable {
     private fun updateCoverage(
         linesToCover: Set<Int>,
         selectedTests: HashSet<String>,
-        testCaseList: CompactReport,
-        editor: Editor
+        testCaseList: Report,
+        editor: Editor,
     ) {
         val visualizationService = project.service<CoverageVisualisationService>()
         visualizationService.updateCoverage(linesToCover, selectedTests, testCaseList, editor)
     }
 
+    /**
+     * Retrieves the last test job from the test generation results for a given file.
+     *
+     * @param fileName The name of the file for which to retrieve the last test job.
+     * @return The last test job generated for the specified file, or null if no test job is found.
+     */
     private fun lastTestGeneration(fileName: String): TestJob? {
-        return testGenerationResults[fileName]?.last()
+        return testGenerationData.testGenerationResults[fileName]?.last()
     }
 
+    /**
+     * Disposes the listenerDisposable if it is not null.
+     */
     override fun dispose() {
         listenerDisposable?.let { Disposer.dispose(it) }
     }

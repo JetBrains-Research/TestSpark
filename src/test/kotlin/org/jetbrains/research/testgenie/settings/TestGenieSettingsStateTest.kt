@@ -47,11 +47,11 @@ class TestGenieSettingsStateTest {
             Arguments.of({ settingsState.junitCheck = !settingsState.junitCheck }, mutableListOf("-Dalgorithm=DYNAMOSA", "-Djunit_check=false")),
             Arguments.of(
                 { settingsState.algorithm = ContentDigestAlgorithm.STEADY_STATE_GA },
-                mutableListOf("-Dalgorithm=STEADY_STATE_GA")
+                mutableListOf("-Dalgorithm=STEADY_STATE_GA"),
             ),
             Arguments.of({ settingsState.assertions = !settingsState.assertions }, mutableListOf("-Dassertions=false", "-Dalgorithm=DYNAMOSA")),
             Arguments.of({ settingsState.sandbox = !settingsState.sandbox }, mutableListOf("-Dsandbox=false", "-Dalgorithm=DYNAMOSA")),
-            Arguments.of({}, mutableListOf("-Dalgorithm=DYNAMOSA"))
+            Arguments.of({}, mutableListOf("-Dalgorithm=DYNAMOSA")),
         )
     }
 }
