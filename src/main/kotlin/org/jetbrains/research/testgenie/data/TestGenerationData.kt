@@ -1,6 +1,7 @@
 package org.jetbrains.research.testgenie.data
 
 import org.jetbrains.research.testgenie.editor.Workspace
+import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 
 /**
  * Data with test generation results that include additional information beyond the test cases themselves.
@@ -28,6 +29,9 @@ class TestGenerationData {
     var polyDepthReducing: Int = 0
     var inputParamsDepthReducing: Int = 0
 
+    // list of correct test cases during the incorrect compilation
+    val compilableTestCases = mutableSetOf<TestCaseGeneratedByLLM>()
+
     /**
      * Cleaning all old data before new test generation.
      */
@@ -43,5 +47,6 @@ class TestGenerationData {
         pendingTestResults.clear()
         polyDepthReducing = 0
         inputParamsDepthReducing = 0
+        compilableTestCases.clear()
     }
 }

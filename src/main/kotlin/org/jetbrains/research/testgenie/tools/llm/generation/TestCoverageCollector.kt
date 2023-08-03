@@ -3,6 +3,7 @@ package org.jetbrains.research.testgenie.tools.llm.generation
 import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ScriptRunnerUtil
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
@@ -13,6 +14,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.Report
 import org.jetbrains.research.testgenie.data.TestCase
+import org.jetbrains.research.testgenie.editor.Workspace
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
@@ -24,6 +26,7 @@ import java.io.File
  * @property project The project associated with the test generation.
  * @property classFQN The class under test's full qualified name.
  * @property resultPath The path to save the generated test coverage report.
+ * @property generatedTestPaths The paths of the generated test files.
  * @property generatedTestFile The generated test file.
  * @property generatedTestPackage The package of the generated test file.
  * @property projectBuildPath The path to the project build directory.
@@ -36,6 +39,7 @@ class TestCoverageCollector(
     private val classFQN: String,
     private val resultPath: String,
     private val generatedTestPaths: List<String>,
+    private val generatedTestFile: File,
     private val generatedTestPackage: String,
     private val projectBuildPath: String,
     private val testCases: MutableList<TestCaseGeneratedByLLM>,
@@ -67,6 +71,40 @@ class TestCoverageCollector(
 
         // collect the Jacoco results and return the report
         return report.normalized()
+    }
+
+    /**
+     * Compiles the generated test file using the proper javac and returns a Pair
+     * indicating whether the compilation was successful and any error message encountered during compilation.
+     *
+     * @return A Pair containing a boolean indicating whether the compilation was successful
+     *         and a String containing any error message encountered during compilation.
+     */
+    fun compileTestCases() {
+        indicator.text = TestGenieBundle.message("compilationTestsChecking")
+
+        // find the proper javac
+        val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()
+
+        for (index in generatedTestPaths.indices) {
+            // compile file
+            runCommandLine(
+                    arrayListOf(
+                            javaCompile.absolutePath,
+                            "-cp",
+                            getPath(projectBuildPath),
+                            generatedTestPaths[index],
+                    ),
+            )
+
+            // create .class file path
+            val classFilePath = generatedTestPaths[index].replace(".java", ".class")
+
+            // check is .class file exists
+            if (File(classFilePath).exists()) {
+                project.service<Workspace>().testGenerationData.compilableTestCases.add(testCases[index])
+            }
+        }
     }
 
     /**

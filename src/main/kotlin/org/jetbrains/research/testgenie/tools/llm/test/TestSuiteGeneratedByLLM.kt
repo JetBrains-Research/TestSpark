@@ -58,11 +58,28 @@ data class TestSuiteGeneratedByLLM(
      *
      * @return the full text of the test suite (excluding the expected exception) as a string.
      */
-    fun toStringWithoutExpectedException(testCaseIndex: Int): String {
+    fun toStringSingleTestCaseWithoutExpectedException(testCaseIndex: Int): String {
         var testFullText = printUpperPart()
 
         // Add test (exclude expected exception)
         testFullText += testCases[testCaseIndex].toStringWithoutExpectedException() + "\n"
+
+        // close the test class
+        testFullText += "}"
+
+        return testFullText
+    }
+
+    /**
+     * Returns the full text of the test suite (excluding the expected exception).
+     *
+     * @return the full text of the test suite (excluding the expected exception) as a string.
+     */
+    fun toStringWithoutExpectedException(): String {
+        var testFullText = printUpperPart()
+
+        // Add each test (exclude expected exception)
+        testCases.forEach { testCase -> testFullText += "${testCase.toStringWithoutExpectedException()}\n" }
 
         // close the test class
         testFullText += "}"
