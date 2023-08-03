@@ -5,7 +5,6 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import com.jetbrains.rd.util.string.printToString
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.data.CodeType
 import org.jetbrains.research.testgenie.data.FragmentToTestDada
@@ -20,7 +19,6 @@ import org.jetbrains.research.testgenie.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testgenie.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testgenie.tools.llm.SettingsArguments
 import org.jetbrains.research.testgenie.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testgenie.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testgenie.tools.processStopped
 import org.jetbrains.research.testgenie.tools.saveData
@@ -46,6 +44,7 @@ class LLMProcessManager(
     private val prompt: String,
 ) : ProcessManager {
     private val settingsProjectState = project.service<SettingsProjectService>().state
+    private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val llmRequestManager = LLMRequestManager()
@@ -122,7 +121,7 @@ class LLMProcessManager(
         var generatedTestsArePassing = false
 
         var report: Report? = null
-        var requestsCount = 0
+        var requestsCount = 1
 
         // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
         while (!generatedTestsArePassing) {
@@ -130,7 +129,7 @@ class LLMProcessManager(
 
             if (processStopped(project, indicator)) return
 
-            if (requestsCount >= maxRequests && project.service<Workspace>().testGenerationData.compilableTestCases.isEmpty()) {
+            if (isLastIteration(requestsCount) && project.service<Workspace>().testGenerationData.compilableTestCases.isEmpty()) {
                 llmErrorManager.errorProcess(TestGenieBundle.message("invalidGrazieResult"), project)
                 break
             }
@@ -151,8 +150,14 @@ class LLMProcessManager(
 
             log.info("Result is not empty")
 
-            // Save the generated TestSuite into a temp file
-            val generatedTestCasesPaths: List<String> = saveGeneratedTestCases(generatedTestSuite, resultPath)
+            var generatedTestCasesPaths: List<String> = listOf()
+
+            if (isLastIteration(requestsCount)) {
+                generatedTestSuite.updateTestCases(project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList())
+            } else {
+                // Save the generated TestSuite into a temp file
+                generatedTestCasesPaths = saveGeneratedTestCases(generatedTestSuite, resultPath)
+            }
 
             // Save the generated TestSuite into a temp file
             val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
@@ -172,10 +177,10 @@ class LLMProcessManager(
                 classFQN,
                 resultPath,
                 generatedTestCasesPaths,
-                File("$generatedTestPath${File.separatorChar}GeneratedTest.java"),
+                File("$generatedTestPath${File.separatorChar}$testFileName"),
                 generatedTestSuite.getPrintablePackageString(),
                 buildPath,
-                if (requestsCount < maxRequests) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
+                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
                 cutModule,
                 fileUrl.split(File.separatorChar).last(),
             )
@@ -184,7 +189,7 @@ class LLMProcessManager(
             coverageCollector.compileTestCases()
             val compilationResult = coverageCollector.compile()
 
-            if (!compilationResult.first && requestsCount < maxRequests) {
+            if (!compilationResult.first && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")
                 llmErrorManager.warningProcess(TestGenieBundle.message("compilationError"), project)
                 requestsCount++
@@ -265,11 +270,13 @@ class LLMProcessManager(
         Path(generatedTestPath).createDirectories()
 
         // Save the generated test suite to the file
-        val testFile = File("$generatedTestPath${File.separatorChar}GeneratedTest.java")
+        val testFile = File("$generatedTestPath${File.separatorChar}$testFileName")
         testFile.createNewFile()
         log.info("Save test in file " + testFile.absolutePath)
         testFile.writeText(generatedTestSuite.toStringWithoutExpectedException())
 
         return generatedTestPath
     }
+
+    private fun isLastIteration(requestsCount: Int) = requestsCount >= maxRequests
 }

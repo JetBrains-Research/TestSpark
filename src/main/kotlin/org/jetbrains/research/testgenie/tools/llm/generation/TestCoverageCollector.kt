@@ -89,12 +89,12 @@ class TestCoverageCollector(
         for (index in generatedTestPaths.indices) {
             // compile file
             runCommandLine(
-                    arrayListOf(
-                            javaCompile.absolutePath,
-                            "-cp",
-                            getPath(projectBuildPath),
-                            generatedTestPaths[index],
-                    ),
+                arrayListOf(
+                    javaCompile.absolutePath,
+                    "-cp",
+                    getPath(projectBuildPath),
+                    generatedTestPaths[index],
+                ),
             )
 
             // create .class file path

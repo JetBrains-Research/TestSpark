@@ -14,6 +14,7 @@ data class TestSuiteGeneratedByLLM(
     var otherInfo: String = "",
     var testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf(),
 ) {
+    private val testFileName: String = "GeneratedTest"
 
     /**
      * Checks if the testCases collection is empty.
@@ -22,6 +23,15 @@ data class TestSuiteGeneratedByLLM(
      */
     fun isEmpty(): Boolean {
         return testCases.isEmpty()
+    }
+
+    /**
+     * Sets the test cases for this object.
+     *
+     * @param testCases the list of test cases to be set
+     */
+    fun updateTestCases(testCases: MutableList<TestCaseGeneratedByLLM>) {
+        this.testCases = testCases
     }
 
     /**
@@ -42,15 +52,12 @@ data class TestSuiteGeneratedByLLM(
      * @return A string representing the test file.
      */
     override fun toString(): String {
-        var testFullText = printUpperPart()
+        var testBody = ""
 
         // Add each test
-        testCases.forEach { testCase -> testFullText += "$testCase\n" }
+        testCases.forEach { testCase -> testBody += "$testCase\n" }
 
-        // close the test class
-        testFullText += "}"
-
-        return testFullText
+        return generateCode(testFileName, testBody)
     }
 
     /**
@@ -58,17 +65,8 @@ data class TestSuiteGeneratedByLLM(
      *
      * @return the full text of the test suite (excluding the expected exception) as a string.
      */
-    fun toStringSingleTestCaseWithoutExpectedException(testCaseIndex: Int): String {
-        var testFullText = printUpperPart()
-
-        // Add test (exclude expected exception)
-        testFullText += testCases[testCaseIndex].toStringWithoutExpectedException() + "\n"
-
-        // close the test class
-        testFullText += "}"
-
-        return testFullText
-    }
+    fun toStringSingleTestCaseWithoutExpectedException(testCaseIndex: Int): String =
+        generateCode("Generated${testCases[testCaseIndex].name}", testCases[testCaseIndex].toStringWithoutExpectedException() + "\n")
 
     /**
      * Returns the full text of the test suite (excluding the expected exception).
@@ -76,10 +74,19 @@ data class TestSuiteGeneratedByLLM(
      * @return the full text of the test suite (excluding the expected exception) as a string.
      */
     fun toStringWithoutExpectedException(): String {
-        var testFullText = printUpperPart()
+        var testBody = ""
 
         // Add each test (exclude expected exception)
-        testCases.forEach { testCase -> testFullText += "${testCase.toStringWithoutExpectedException()}\n" }
+        testCases.forEach { testCase -> testBody += "${testCase.toStringWithoutExpectedException()}\n" }
+
+        return generateCode(testFileName, testBody)
+    }
+
+    private fun generateCode(className: String, body: String): String {
+        var testFullText = printUpperPart(className)
+
+        // Add each test (exclude expected exception)
+        testFullText += body
 
         // close the test class
         testFullText += "}"
@@ -92,7 +99,7 @@ data class TestSuiteGeneratedByLLM(
      *
      * @return the upper part of test suite (package name, imports, and test class name) as a string.
      */
-    private fun printUpperPart(): String {
+    private fun printUpperPart(className: String): String {
         var testText = ""
 
         // Add package
@@ -112,7 +119,7 @@ data class TestSuiteGeneratedByLLM(
             testText += "@RunWith($runWith)\n"
         }
         // open the test class
-        testText += "public class GeneratedTest{\n\n"
+        testText += "public class $className{\n\n"
 
         // Add other presets (annotations, non-test functions)
         if (otherInfo.isNotBlank()) {
