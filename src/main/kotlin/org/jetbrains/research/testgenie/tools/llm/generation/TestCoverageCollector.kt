@@ -35,7 +35,7 @@ class TestCoverageCollector(
     private val project: Project,
     private val classFQN: String,
     private val resultPath: String,
-    private val generatedTestFile: File,
+    private val generatedTestPaths: List<String>,
     private val generatedTestPackage: String,
     private val projectBuildPath: String,
     private val testCases: MutableList<TestCaseGeneratedByLLM>,

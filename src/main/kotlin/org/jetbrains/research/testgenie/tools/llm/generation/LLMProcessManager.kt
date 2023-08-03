@@ -44,7 +44,6 @@ class LLMProcessManager(
     private val prompt: String,
 ) : ProcessManager {
     private val settingsProjectState = project.service<SettingsProjectService>().state
-    private var testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val llmRequestManager = LLMRequestManager()
@@ -151,8 +150,12 @@ class LLMProcessManager(
             log.info("Result is not empty")
 
             // Save the generated TestSuite into a temp file
-            val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
-            if (!File(generatedTestPath).exists()) {
+            val generatedTestPaths: List<String> = saveGeneratedTests(generatedTestSuite, resultPath)
+
+            var isFilesExists = true
+            for (path in generatedTestPaths) isFilesExists = isFilesExists && File(path).exists()
+
+            if (!isFilesExists) {
                 llmErrorManager.errorProcess(TestGenieBundle.message("savingTestFileIssue"), project)
                 break
             }
@@ -163,7 +166,7 @@ class LLMProcessManager(
                 project,
                 classFQN,
                 resultPath,
-                File("$generatedTestPath$testFileName"),
+                generatedTestPaths,
                 generatedTestSuite.getPrintablePackageString(),
                 buildPath,
                 generatedTestSuite.testCases,
@@ -217,7 +220,8 @@ class LLMProcessManager(
      * @param resultPath the path where the generated tests should be saved
      * @return the path where the tests are saved
      */
-    private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): String {
+    private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): List<String> {
+        val testCaseFilePaths = mutableListOf<String>()
         // Generate the final path for the generated tests
         var generatedTestPath = "$resultPath${File.separatorChar}"
         generatedTestSuite.packageString.split(".").forEach { directory ->
@@ -226,11 +230,14 @@ class LLMProcessManager(
         Path(generatedTestPath).createDirectories()
 
         // Save the generated test suite to the file
-        val testFile = File("$generatedTestPath${File.separatorChar}$testFileName")
-        testFile.createNewFile()
-        log.info("Save test in file " + testFile.absolutePath)
-        testFile.writeText(generatedTestSuite.toStringWithoutExpectedException())
+        for (testCaseIndex in generatedTestSuite.testCases.indices) {
+            val testFile = File("$generatedTestPath${File.separatorChar}Generated${generatedTestSuite.testCases[testCaseIndex].name}.java")
+            testFile.createNewFile()
+            log.info("Save test in file " + testFile.absolutePath)
+            testFile.writeText(generatedTestSuite.toStringWithoutExpectedException(testCaseIndex))
+            testCaseFilePaths.add(testFile.absolutePath)
+        }
 
-        return generatedTestPath
+        return testCaseFilePaths
     }
 }
