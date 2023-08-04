@@ -73,8 +73,8 @@ class TestsAssembler(
             val detectedRunWith = runWithPattern.find(rawText, startIndex = 0)?.groupValues?.get(0)
             if (detectedRunWith != null) {
                 val runWith = detectedRunWith
-                        .split("@RunWith(")[1]
-                        .split(")")[0]
+                    .split("@RunWith(")[1]
+                    .split(")")[0]
                 testSuite.runWith = runWith
                 project.service<Workspace>().testGenerationData.runWith = runWith
                 project.service<Workspace>().testGenerationData.importsCode.add("import org.junit.runner.RunWith;")
@@ -100,8 +100,8 @@ class TestsAssembler(
                 // Get expected Exception
                 if (rawTest.startsWith("@Test(expected =")) {
                     currentTest.expectedException = rawTest
-                            .split(")")[0]
-                            .trim()
+                        .split(")")[0]
+                        .trim()
                 }
 
                 // Get unexpected exceptions
@@ -110,21 +110,21 @@ class TestsAssembler(
                     return@ca
                 }
                 val interestingPartOfSignature = rawTest
-                        .split("public void")[1]
-                        .split("{")[0]
-                        .split("()")[1]
-                        .trim()
+                    .split("public void")[1]
+                    .split("{")[0]
+                    .split("()")[1]
+                    .trim()
                 if (interestingPartOfSignature.contains("throws")) {
                     currentTest.throwsException = interestingPartOfSignature
-                            .split("throws")[1]
-                            .trim()
+                        .split("throws")[1]
+                        .trim()
                 }
 
                 // Get test's name
                 currentTest.name = rawTest
-                        .split("public void ")[1]
-                        .split("()")[0]
-                        .trim()
+                    .split("public void ")[1]
+                    .split("()")[0]
+                    .trim()
 
                 // Get test's body
                 // remove opening bracket

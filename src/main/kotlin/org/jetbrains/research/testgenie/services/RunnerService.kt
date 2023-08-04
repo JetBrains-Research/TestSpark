@@ -8,7 +8,6 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testgenie.TestGenieBundle
 
-
 /**
  * Service used for the sole purpose to limit TestGenie to generate tests only once at a time.
  */

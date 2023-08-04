@@ -140,11 +140,11 @@ class LLMProcessManager(
                 llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
                 requestsCount++
                 requestResult = llmRequestManager.request(
-                        requestResult.first,
-                        indicator,
-                        packageName,
-                        project,
-                        llmErrorManager,
+                    requestResult.first,
+                    indicator,
+                    packageName,
+                    project,
+                    llmErrorManager,
                 )
                 generatedTestSuite = requestResult.second
                 continue
