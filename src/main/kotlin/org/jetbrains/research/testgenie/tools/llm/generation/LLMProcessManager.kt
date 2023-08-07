@@ -113,8 +113,10 @@ class LLMProcessManager(
         indicator.text = TestGenieBundle.message("searchMessage")
 
         // Send the first request to LLM
-        var generatedTestSuite: TestSuiteGeneratedByLLM? =
+        var requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
             llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
+
+        var generatedTestSuite = requestResult.second
 
         log.info("Generated tests suite received")
 
@@ -134,17 +136,32 @@ class LLMProcessManager(
                 break
             }
 
-            // Check if response is not empty
-            if (generatedTestSuite == null || generatedTestSuite.testCases.isEmpty()) {
+            if (generatedTestSuite == null) {
                 llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
                 requestsCount++
-                generatedTestSuite = llmRequestManager.request(
+                requestResult = llmRequestManager.request(
+                    requestResult.first,
+                    indicator,
+                    packageName,
+                    project,
+                    llmErrorManager,
+                )
+                generatedTestSuite = requestResult.second
+                continue
+            }
+
+            // Check if response is not empty
+            if (generatedTestSuite.testCases.isEmpty()) {
+                llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
+                requestsCount++
+                requestResult = llmRequestManager.request(
                     "You have provided an empty answer! Please answer my previous question with the same formats",
                     indicator,
                     packageName,
                     project,
                     llmErrorManager,
                 )
+                generatedTestSuite = requestResult.second
                 continue
             }
 
@@ -193,13 +210,14 @@ class LLMProcessManager(
                 log.info("Incorrect result: \n$generatedTestSuite")
                 llmErrorManager.warningProcess(TestGenieBundle.message("compilationError"), project)
                 requestsCount++
-                generatedTestSuite = llmRequestManager.request(
+                requestResult = llmRequestManager.request(
                     "I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```",
                     indicator,
                     packageName,
                     project,
                     llmErrorManager,
                 )
+                generatedTestSuite = requestResult.second
                 continue
             }
 
