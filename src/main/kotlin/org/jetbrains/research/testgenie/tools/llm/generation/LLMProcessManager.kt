@@ -273,5 +273,5 @@ class LLMProcessManager(
         return generatedTestPath
     }
 
-    private fun isLastIteration(requestsCount: Int) = requestsCount >= maxRequests
+    private fun isLastIteration(requestsCount: Int) = requestsCount > maxRequests
 }
