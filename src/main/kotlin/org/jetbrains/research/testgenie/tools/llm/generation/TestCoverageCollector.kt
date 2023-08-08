@@ -80,7 +80,7 @@ class TestCoverageCollector(
      * @return A Pair containing a boolean indicating whether the compilation was successful
      *         and a String containing any error message encountered during compilation.
      */
-    fun compileTestCases() {
+    private fun compileTestCases() {
         indicator.text = TestGenieBundle.message("compilationTestsChecking")
 
         // find the proper javac
@@ -116,6 +116,9 @@ class TestCoverageCollector(
      */
     fun compile(): Pair<Boolean, String> {
         indicator.text = TestGenieBundle.message("compilationTestsChecking")
+
+        // compile test cases for extracting correct ones
+        compileTestCases()
 
         // find the proper javac
         val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()

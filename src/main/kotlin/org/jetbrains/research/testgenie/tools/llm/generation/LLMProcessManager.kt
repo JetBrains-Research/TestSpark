@@ -112,76 +112,62 @@ class LLMProcessManager(
         }
         indicator.text = TestGenieBundle.message("searchMessage")
 
-        // Send the first request to LLM
-        var requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
-            llmRequestManager.request(prompt, indicator, packageName, project, llmErrorManager)
-
-        var generatedTestSuite = requestResult.second
-
         log.info("Generated tests suite received")
 
         var generatedTestsArePassing = false
 
         var report: Report? = null
-        var requestsCount = 1
+
+        var requestsCount = 0
+        var messageToPrompt = prompt
+        var generatedTestSuite: TestSuiteGeneratedByLLM? = null
 
         // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
         while (!generatedTestsArePassing) {
+            requestsCount++
+
             log.info("New iterations of requests")
 
+            // Process stopped checking
             if (processStopped(project, indicator)) return
 
+            // Ending loop checking
             if (isLastIteration(requestsCount) && project.service<Workspace>().testGenerationData.compilableTestCases.isEmpty()) {
                 llmErrorManager.errorProcess(TestGenieBundle.message("invalidGrazieResult"), project)
                 break
             }
 
+            // Send request to LLM
+            val requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
+                llmRequestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
+            generatedTestSuite = requestResult.second
+
+            // Bad response checking
             if (generatedTestSuite == null) {
                 llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
-                requestsCount++
-                requestResult = llmRequestManager.request(
-                    requestResult.first,
-                    indicator,
-                    packageName,
-                    project,
-                    llmErrorManager,
-                )
-                generatedTestSuite = requestResult.second
+                messageToPrompt = requestResult.first
                 continue
             }
 
-            // Check if response is not empty
+            // Empty response checking
             if (generatedTestSuite.testCases.isEmpty()) {
                 llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
-                requestsCount++
-                requestResult = llmRequestManager.request(
-                    "You have provided an empty answer! Please answer my previous question with the same formats",
-                    indicator,
-                    packageName,
-                    project,
-                    llmErrorManager,
-                )
-                generatedTestSuite = requestResult.second
+                messageToPrompt = "You have provided an empty answer! Please answer my previous question with the same formats."
                 continue
-            }
-
-            log.info("Result is not empty")
-
-            var generatedTestCasesPaths: List<String> = listOf()
-
-            if (isLastIteration(requestsCount)) {
-                generatedTestSuite.updateTestCases(project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList())
-            } else {
-                // Save the generated TestSuite into a temp file
-                generatedTestCasesPaths = saveGeneratedTestCases(generatedTestSuite, resultPath)
             }
 
             // Save the generated TestSuite into a temp file
+            var generatedTestCasesPaths: List<String> = listOf()
+            if (isLastIteration(requestsCount)) {
+                generatedTestSuite.updateTestCases(project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList())
+            } else {
+                generatedTestCasesPaths = saveGeneratedTestCases(generatedTestSuite, resultPath)
+            }
             val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
 
+            // Correct files creating checking
             var isFilesExists = true
             for (path in generatedTestCasesPaths) isFilesExists = isFilesExists && File(path).exists()
-
             if (!isFilesExists || !File(generatedTestPath).exists()) {
                 llmErrorManager.errorProcess(TestGenieBundle.message("savingTestFileIssue"), project)
                 break
@@ -203,21 +189,12 @@ class LLMProcessManager(
             )
 
             // compile the test file
-            coverageCollector.compileTestCases()
             val compilationResult = coverageCollector.compile()
 
             if (!compilationResult.first && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")
                 llmErrorManager.warningProcess(TestGenieBundle.message("compilationError"), project)
-                requestsCount++
-                requestResult = llmRequestManager.request(
-                    "I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```",
-                    indicator,
-                    packageName,
-                    project,
-                    llmErrorManager,
-                )
-                generatedTestSuite = requestResult.second
+                messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```"
                 continue
             }
 
