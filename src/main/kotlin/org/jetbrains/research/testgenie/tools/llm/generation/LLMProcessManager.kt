@@ -119,6 +119,7 @@ class LLMProcessManager(
         var report: Report? = null
 
         var requestsCount = 0
+        var warningMessage = ""
         var messageToPrompt = prompt
         var generatedTestSuite: TestSuiteGeneratedByLLM? = null
 
@@ -138,20 +139,24 @@ class LLMProcessManager(
             }
 
             // Send request to LLM
+            if (warningMessage.isNotEmpty()) llmErrorManager.warningProcess(warningMessage, project)
             val requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
                 llmRequestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
             generatedTestSuite = requestResult.second
 
+            // Process stopped checking
+            if (processStopped(project, indicator)) return
+
             // Bad response checking
             if (generatedTestSuite == null) {
-                llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
+                warningMessage = TestGenieBundle.message("emptyResponse")
                 messageToPrompt = requestResult.first
                 continue
             }
 
             // Empty response checking
             if (generatedTestSuite.testCases.isEmpty()) {
-                llmErrorManager.warningProcess(TestGenieBundle.message("emptyResponse"), project)
+                warningMessage = TestGenieBundle.message("emptyResponse")
                 messageToPrompt = "You have provided an empty answer! Please answer my previous question with the same formats."
                 continue
             }
@@ -193,7 +198,7 @@ class LLMProcessManager(
 
             if (!compilationResult.first && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")
-                llmErrorManager.warningProcess(TestGenieBundle.message("compilationError"), project)
+                warningMessage = TestGenieBundle.message("compilationError")
                 messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```"
                 continue
             }
