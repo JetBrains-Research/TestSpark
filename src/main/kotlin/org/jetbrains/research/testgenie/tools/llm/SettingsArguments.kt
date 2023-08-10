@@ -20,6 +20,13 @@ class SettingsArguments {
         fun llmUserToken(): String = settingsState!!.llmUserToken
 
         /**
+         * Retrieves the module from the settings state.
+         *
+         * @return The module as a string.
+         */
+        fun model(): String = settingsState!!.model
+
+        /**
          * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.
          *
          * @return The maximum LLM request value.

@@ -82,7 +82,7 @@ class SettingsLLMComponent {
     private fun stylizePanel() {
         llmUserTokenField.toolTipText = TestGenieToolTipsBundle.defaultValue("llmToken")
         maxLLMRequestsField.toolTipText = TestGenieToolTipsBundle.defaultValue("maximumNumberOfRequests")
-        modelSelector.toolTipText = "TODO"
+        modelSelector.toolTipText = TestGenieToolTipsBundle.defaultValue("model")
         modelSelector.isEnabled = false
         maxInputParamsDepthField.toolTipText = TestGenieToolTipsBundle.defaultValue("parametersDepth")
         maxPolyDepthField.toolTipText = TestGenieToolTipsBundle.defaultValue("maximumPolyDepth")
@@ -101,7 +101,7 @@ class SettingsLLMComponent {
                 false,
             )
             .addLabeledComponent(
-                JBLabel("TODO"),
+                JBLabel(TestGenieLabelsBundle.defaultValue("model")),
                 modelSelector,
                 10,
                 false,
