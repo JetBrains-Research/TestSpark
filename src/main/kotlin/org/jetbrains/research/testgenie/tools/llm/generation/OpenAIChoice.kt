@@ -6,7 +6,7 @@ data class OpenAIChoice(
     val index: Int,
     val delta: Delta,
     @SerializedName("finish_reason")
-    val finishedReason: String
+    val finishedReason: String,
 )
 
 data class Delta(val role: String?, val content: String)
