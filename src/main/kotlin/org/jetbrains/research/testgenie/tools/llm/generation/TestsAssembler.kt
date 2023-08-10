@@ -40,7 +40,7 @@ class TestsAssembler(
      * @param httpRequest the httpRequest sent to OpenAI
      */
     fun receiveResponse(
-        httpRequest: HttpRequests.Request
+        httpRequest: HttpRequests.Request,
     ) {
         while (true) {
             if (processStopped(project, indicator)) return
@@ -56,7 +56,7 @@ class TestsAssembler(
                 JsonParser.parseString(text)
                     .asJsonObject["choices"]
                     .asJsonArray[0].asJsonObject,
-                OpenAIChoice::class.java
+                OpenAIChoice::class.java,
             )
 
             if (choices.finishedReason == "stop") break

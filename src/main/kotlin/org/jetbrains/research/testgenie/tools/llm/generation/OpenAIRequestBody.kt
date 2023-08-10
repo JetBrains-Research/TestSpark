@@ -8,5 +8,5 @@ data class OpenAIRequestBody(
 
 data class OpenAIMessage(
     val role: String,
-    val content: String
+    val content: String,
 )

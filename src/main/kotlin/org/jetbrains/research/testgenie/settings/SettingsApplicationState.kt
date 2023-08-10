@@ -23,7 +23,8 @@ data class SettingsApplicationState(
     var criterionMethodNoException: Boolean = DefaultSettingsApplicationState.criterionMethodNoException,
     var criterionCBranch: Boolean = DefaultSettingsApplicationState.criterionCBranch,
     var minimize: Boolean = DefaultSettingsApplicationState.minimize,
-    var grazieUserToken: String = DefaultSettingsApplicationState.grazieUserToken,
+    var llmUserToken: String = DefaultSettingsApplicationState.llmUserToken,
+    var model: String = DefaultSettingsApplicationState.model,
     var maxLLMRequest: Int = DefaultSettingsApplicationState.maxLLMRequest,
     var maxInputParamsDepth: Int = DefaultSettingsApplicationState.maxInputParamsDepth,
     var maxPolyDepth: Int = DefaultSettingsApplicationState.maxPolyDepth,
@@ -49,7 +50,8 @@ data class SettingsApplicationState(
         val criterionMethod: Boolean = TestGenieDefaultsBundle.defaultValue("criterionMethod").toBoolean()
         val criterionMethodNoException: Boolean = TestGenieDefaultsBundle.defaultValue("criterionMethodNoException").toBoolean()
         val criterionCBranch: Boolean = TestGenieDefaultsBundle.defaultValue("criterionCBranch").toBoolean()
-        val grazieUserToken: String = TestGenieDefaultsBundle.defaultValue("grazieToken")
+        val llmUserToken: String = TestGenieDefaultsBundle.defaultValue("llmToken")
+        var model: String = TestGenieDefaultsBundle.defaultValue("model")
         val maxLLMRequest: Int = TestGenieDefaultsBundle.defaultValue("maxLLMRequest").toInt()
         val maxInputParamsDepth: Int = TestGenieDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
         val maxPolyDepth: Int = TestGenieDefaultsBundle.defaultValue("maxPolyDepth").toInt()
@@ -90,4 +92,14 @@ enum class ContentDigestAlgorithm {
 
     // multiple-objective optimisation algorithms
     NSGAII, SPEA2
+}
+
+class ContentDigestModels {
+    private var models: List<String> = listOf("a", "b", "c")
+
+    fun getModels(): Array<String> = models.toTypedArray()
+
+    fun updateModels(models: List<String>) {
+        this.models = models
+    }
 }

@@ -134,7 +134,7 @@ class LLMProcessManager(
 
             // Ending loop checking
             if (isLastIteration(requestsCount) && project.service<Workspace>().testGenerationData.compilableTestCases.isEmpty()) {
-                llmErrorManager.errorProcess(TestGenieBundle.message("invalidGrazieResult"), project)
+                llmErrorManager.errorProcess(TestGenieBundle.message("invalidLLMResult"), project)
                 break
             }
 

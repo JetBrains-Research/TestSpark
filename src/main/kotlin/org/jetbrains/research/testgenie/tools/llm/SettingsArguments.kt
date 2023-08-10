@@ -13,11 +13,11 @@ class SettingsArguments {
         val settingsState = SettingsApplicationService.getInstance().state
 
         /**
-         * Retrieves the Grazie user token from the application settings.
+         * Retrieves the LLM user token from the application settings.
          *
-         * @return The Grazie user token.
+         * @return The LLM user token.
          */
-        fun grazieUserToken(): String = settingsState!!.grazieUserToken
+        fun llmUserToken(): String = settingsState!!.llmUserToken
 
         /**
          * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.
@@ -46,6 +46,6 @@ class SettingsArguments {
          *
          * @return true if the token is set, false otherwise
          */
-        fun isTokenSet(): Boolean = settingsState!!.grazieUserToken.isNotEmpty()
+        fun isTokenSet(): Boolean = settingsState!!.llmUserToken.isNotEmpty()
     }
 }
