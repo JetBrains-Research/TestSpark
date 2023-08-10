@@ -236,7 +236,7 @@ EvoSuite has hundreds of parameters, not all can be packed in a settings menu. H
 ![EvoSuite Settings](readme-images/pngs/EvoSuiteSettings.png)
 
 ### LLM Parameters
-Users have to set their own token for LLM Platform, the plugin does not provide a default option.
+Users have to set their own token for OpenAI, the plugin does not provide a default option.
 
 ![LLM Token](readme-images/pngs/LLMToken.png)
 
