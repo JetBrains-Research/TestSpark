@@ -1,13 +1,17 @@
 package org.jetbrains.research.testgenie.settings
 
+import com.google.gson.JsonParser
 import com.intellij.ide.ui.UINumericRange
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
+import com.intellij.util.io.HttpRequests
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.TestGenieToolTipsBundle
+import java.net.HttpURLConnection
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JPanel
 import javax.swing.JTextField
@@ -25,13 +29,16 @@ class SettingsLLMComponent {
     private var modelSelector = ComboBox(defaultModulesArray)
 
     // Maximum number of LLM requests
-    private var maxLLMRequestsField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxLLMRequest, 1, 20))
+    private var maxLLMRequestsField =
+        JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxLLMRequest, 1, 20))
 
     // The depth of input parameters used in class under tests
-    private var maxInputParamsDepthField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxInputParamsDepth, 1, 5))
+    private var maxInputParamsDepthField =
+        JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxInputParamsDepth, 1, 5))
 
     // Maximum polymorphism depth
-    private var maxPolyDepthField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
+    private var maxPolyDepthField =
+        JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
 
     init {
         // Adds the panel components
@@ -44,17 +51,23 @@ class SettingsLLMComponent {
         addListeners()
     }
 
+    /**
+     * Adds listeners to the document of the user token field.
+     * These listeners will update the model selector based on the text entered the user token field.
+     */
     private fun addListeners() {
-        llmUserTokenField.document.addDocumentListener(object: DocumentListener {
+        llmUserTokenField.document.addDocumentListener(object : DocumentListener {
             private fun update() {
-                val modules = getModules(llmUserTokenField.text)
-                modelSelector.removeAllItems()
-                if (modules != null) {
-                    modelSelector.model = DefaultComboBoxModel(modules)
-                    modelSelector.isEnabled = true
-                } else {
-                    modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
-                    modelSelector.isEnabled = false
+                ApplicationManager.getApplication().executeOnPooledThread {
+                    val modules = getModules(llmUserTokenField.text)
+                    modelSelector.removeAllItems()
+                    if (modules != null) {
+                        modelSelector.model = DefaultComboBoxModel(modules)
+                        modelSelector.isEnabled = true
+                    } else {
+                        modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
+                        modelSelector.isEnabled = false
+                    }
                 }
             }
 
@@ -72,10 +85,47 @@ class SettingsLLMComponent {
         })
     }
 
+    /**
+     * Retrieves all available models from the OpenAI API using the provided token.
+     *
+     * @param token Authorization token for the OpenAI API.
+     * @return An array of model names if request is successful, otherwise null.
+     */
     private fun getModules(token: String): Array<String>? {
-        if (token == "abcd") {
-            return arrayOf("a", "b", "c", "d")
+        val url = "https://api.openai.com/v1/models"
+
+        val httpRequest = HttpRequests.request(url).tuner {
+            it.setRequestProperty("Authorization", "Bearer $token")
         }
+
+        val models = mutableListOf<String>()
+
+        try {
+            httpRequest.connect {
+                if ((it.connection as HttpURLConnection).responseCode == HttpURLConnection.HTTP_OK) {
+                    val jsonObject = JsonParser.parseString(it.readString()).asJsonObject
+                    val dataArray = jsonObject.getAsJsonArray("data")
+                    for (dataObject in dataArray) {
+                        val id = dataObject.asJsonObject.getAsJsonPrimitive("id").asString
+                        models.add(id)
+                    }
+                }
+            }
+        } catch (e: HttpRequests.HttpStatusException) {
+            return null
+        }
+
+        val gptComparator = Comparator<String> { s1, s2 ->
+            when {
+                s1.contains("gpt") && s2.contains("gpt") -> s1.compareTo(s2)
+                s1.contains("gpt") -> -1
+                s2.contains("gpt") -> 1
+                else -> s1.compareTo(s2)
+            }
+        }
+
+        if (models.isNotEmpty()) return models.sortedWith(gptComparator).toTypedArray()
+
         return null
     }
 
