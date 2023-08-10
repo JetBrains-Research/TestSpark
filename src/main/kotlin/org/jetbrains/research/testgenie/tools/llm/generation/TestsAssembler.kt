@@ -1,9 +1,12 @@
 package org.jetbrains.research.testgenie.tools.llm.generation
 
+import com.google.gson.Gson
+import com.google.gson.JsonParser
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testgenie.TestGenieBundle
 import org.jetbrains.research.testgenie.actions.importPattern
 import org.jetbrains.research.testgenie.actions.runWithPattern
@@ -34,18 +37,39 @@ class TestsAssembler(
     /**
      * Receives a response text and updates the progress bar accordingly.
      *
-     * @param text the response text received from an external source
+     * @param httpRequest the httpRequest sent to OpenAI
      */
-    fun receiveResponse(text: String) {
-        if (processStopped(project, indicator)) return
+    fun receiveResponse(
+        httpRequest: HttpRequests.Request,
+    ) {
+        while (true) {
+            if (processStopped(project, indicator)) return
 
-        // Collect the response and update the progress bar
-        rawText = rawText.plus(text)
-        val generatedTestsCount = rawText.split("@Test").size - 1
+            Thread.sleep(50L)
+            var text = httpRequest.reader.readLine()
 
-        if (lastTestCount != generatedTestsCount) {
-            indicator.text = TestGenieBundle.message("generatingTestNumber") + generatedTestsCount
-            lastTestCount = generatedTestsCount
+            if (text.isEmpty()) continue
+
+            text = text.removePrefix("data: ")
+
+            val choices = Gson().fromJson(
+                JsonParser.parseString(text)
+                    .asJsonObject["choices"]
+                    .asJsonArray[0].asJsonObject,
+                OpenAIChoice::class.java,
+            )
+
+            if (choices.finishedReason == "stop") break
+
+            // Collect the response and update the progress bar
+            rawText = rawText.plus(choices.delta.content)
+
+            val generatedTestsCount = rawText.split("@Test").size - 1
+
+            if (lastTestCount != generatedTestsCount) {
+                indicator.text = TestGenieBundle.message("generatingTestNumber") + generatedTestsCount
+                lastTestCount = generatedTestsCount
+            }
         }
 
         log.debug(rawText)
