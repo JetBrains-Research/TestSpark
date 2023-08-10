@@ -93,13 +93,3 @@ enum class ContentDigestAlgorithm {
     // multiple-objective optimisation algorithms
     NSGAII, SPEA2
 }
-
-class ContentDigestModels {
-    private var models: List<String> = listOf("a", "b", "c")
-
-    fun getModels(): Array<String> = models.toTypedArray()
-
-    fun updateModels(models: List<String>) {
-        this.models = models
-    }
-}

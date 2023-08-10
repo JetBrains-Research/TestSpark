@@ -8,8 +8,11 @@ import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testgenie.TestGenieLabelsBundle
 import org.jetbrains.research.testgenie.TestGenieToolTipsBundle
+import javax.swing.DefaultComboBoxModel
 import javax.swing.JPanel
 import javax.swing.JTextField
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 
 class SettingsLLMComponent {
     var panel: JPanel? = null
@@ -18,8 +21,8 @@ class SettingsLLMComponent {
     private var llmUserTokenField = JTextField(30)
 
     // Models
-    private val contentDigestModels = ContentDigestModels()
-    private var modelSelector = ComboBox(contentDigestModels.getModels())
+    private val defaultModulesArray = arrayOf("")
+    private var modelSelector = ComboBox(defaultModulesArray)
 
     // Maximum number of LLM requests
     private var maxLLMRequestsField = JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxLLMRequest, 1, 20))
@@ -36,12 +39,51 @@ class SettingsLLMComponent {
 
         // Adds additional style (width, tooltips)
         stylizePanel()
+
+        // Adds listeners
+        addListeners()
+    }
+
+    private fun addListeners() {
+        llmUserTokenField.document.addDocumentListener(object: DocumentListener {
+            private fun update() {
+                val modules = getModules(llmUserTokenField.text)
+                modelSelector.removeAllItems()
+                if (modules != null) {
+                    modelSelector.model = DefaultComboBoxModel(modules)
+                    modelSelector.isEnabled = true
+                } else {
+                    modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
+                    modelSelector.isEnabled = false
+                }
+            }
+
+            override fun insertUpdate(e: DocumentEvent) {
+                update()
+            }
+
+            override fun removeUpdate(e: DocumentEvent) {
+                update()
+            }
+
+            override fun changedUpdate(e: DocumentEvent) {
+                update()
+            }
+        })
+    }
+
+    private fun getModules(token: String): Array<String>? {
+        if (token == "abcd") {
+            return arrayOf("a", "b", "c", "d")
+        }
+        return null
     }
 
     private fun stylizePanel() {
         llmUserTokenField.toolTipText = TestGenieToolTipsBundle.defaultValue("llmToken")
         maxLLMRequestsField.toolTipText = TestGenieToolTipsBundle.defaultValue("maximumNumberOfRequests")
         modelSelector.toolTipText = "TODO"
+        modelSelector.isEnabled = false
         maxInputParamsDepthField.toolTipText = TestGenieToolTipsBundle.defaultValue("parametersDepth")
         maxPolyDepthField.toolTipText = TestGenieToolTipsBundle.defaultValue("maximumPolyDepth")
     }
