@@ -1,2 +1,2 @@
-rootProject.name = "TestGenie"
+rootProject.name = "TestSpark"
 include("JUnitRunner")
