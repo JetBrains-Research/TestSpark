@@ -40,11 +40,7 @@ class PromptManager(
         val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
         return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\n" +
             header +
-            "The source code of class under test is as follows:\n```\n${
-                getClassFullText(
-                    cut
-                )
-            }\n```\n" +
+            "The source code of class under test is as follows:\n```\n${getClassFullText(cut)}\n```\n" +
             getCommonPromptPart(interestingPsiClasses, getPolymorphismRelations(project, interestingPsiClasses, cut))
     }
 
@@ -71,8 +67,7 @@ class PromptManager(
     fun generatePromptForLine(lineNumber: Int): String {
         val methodDescriptor = getMethodDescriptor(cut, lineNumber)
         val psiMethod = getPsiMethod(cut, methodDescriptor)!!
-        return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: `${
-            getClassFullText(cut).split("\n")[lineNumber - 1]}` on line number $lineNumber.\n" +
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: `${getClassFullText(cut).split("\n")[lineNumber - 1]}` on line number $lineNumber.\n" +
             header +
             "The source code of method this the chosen line under test is as follows:\n```\n${psiMethod.text}\n```\n" +
             getCommonPromptPart(getInterestingPsiClasses(psiMethod))
@@ -91,8 +86,7 @@ class PromptManager(
             val subClass = classesToTest[i - 2]
             val superClass = classesToTest[i - 1]
 
-            prompt += "${getClassDisplayName(subClass)} extends ${
-                getClassDisplayName(superClass)}. " +
+            prompt += "${getClassDisplayName(subClass)} extends ${getClassDisplayName(superClass)}. " +
                 "The source code of ${getClassDisplayName(superClass)} is:\n```\n${getClassFullText(superClass)}\n" +
                 "```\n"
         }
