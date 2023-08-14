@@ -9,12 +9,12 @@ const val BUNDLE = "messages.TestSpark"
 /**
  * Loads the EvoSuite messages from `messages/TestSpark.properties` file in the `resources` directory.
  */
-object TestSparkBundle : DynamicBundle(org.jetbrains.research.testspark.BUNDLE) {
+object TestSparkBundle : DynamicBundle(BUNDLE) {
 
     /**
      * Gets the requested message.
      */
     @Nls
-    fun message(@PropertyKey(resourceBundle = org.jetbrains.research.testspark.BUNDLE) key: String, vararg params: Any): String =
+    fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any): String =
         getMessage(key, *params)
 }

@@ -9,11 +9,11 @@ const val LABELS_BUNDLE = "defaults.Labels"
 /**
  * Loads the label texts from `defaults/Labels.properties` file in the `recourses` directory.
  */
-object TestSparkLabelsBundle : DynamicBundle(org.jetbrains.research.testspark.LABELS_BUNDLE) {
+object TestSparkLabelsBundle : DynamicBundle(LABELS_BUNDLE) {
 
     /**
      * Gets the requested default value.
      */
     @Nls
-    fun defaultValue(@PropertyKey(resourceBundle = org.jetbrains.research.testspark.LABELS_BUNDLE) key: String): String = getMessage(key)
+    fun defaultValue(@PropertyKey(resourceBundle = LABELS_BUNDLE) key: String): String = getMessage(key)
 }

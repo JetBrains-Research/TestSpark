@@ -55,7 +55,7 @@ class StaticInvalidationService(private val project: Project) {
             val methods = currentClass.methods
             val map: HashMap<String, Pair<ArrayList<PsiElement>, Set<Int>>> = HashMap()
             methods.forEach {
-                if (org.jetbrains.research.testspark.actions.isMethodConcrete(it)) {
+                if (isMethodConcrete(it)) {
                     val startLine = doc.getLineNumber(it.startOffset)
                     val endLine = doc.getLineNumber(it.endOffset)
                     map[it.hierarchicalMethodSignature.toString()] =
