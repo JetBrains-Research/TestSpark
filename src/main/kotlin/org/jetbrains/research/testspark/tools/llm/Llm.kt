@@ -9,6 +9,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
+import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.actions.createLLMPipeline
+import org.jetbrains.research.testspark.actions.getSurroundingClass
+import org.jetbrains.research.testspark.actions.getSurroundingLine
+import org.jetbrains.research.testspark.actions.getSurroundingMethod
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.editor.Workspace
@@ -39,7 +44,7 @@ class Llm(override val name: String = "Llm") : Tool {
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val cutPsiClass: PsiClass = org.jetbrains.research.testspark.actions.getSurroundingClass(psiFile, caret)
+        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
 
         var currentPsiClass = cutPsiClass
         for (index in 0 until maxPolymorphismDepth) {
@@ -89,7 +94,7 @@ class Llm(override val name: String = "Llm") : Tool {
             isPromptLengthWithinLimit(prompt)
         ) {
             llmErrorManager.warningProcess(
-                org.jetbrains.research.testspark.TestSparkBundle.message("promptReduction") + "\n" +
+                TestSparkBundle.message("promptReduction") + "\n" +
                     "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
                     "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
                 project,
@@ -110,7 +115,7 @@ class Llm(override val name: String = "Llm") : Tool {
      */
     private fun isCorrectToken(project: Project): Boolean {
         if (!SettingsArguments.isTokenSet()) {
-            llmErrorManager.errorProcess(org.jetbrains.research.testspark.TestSparkBundle.message("missingToken"), project)
+            llmErrorManager.errorProcess(TestSparkBundle.message("missingToken"), project)
             return false
         }
         return true
@@ -125,8 +130,7 @@ class Llm(override val name: String = "Llm") : Tool {
     override fun generateTestsForClass(e: AnActionEvent) {
         if (!isCorrectToken(e.project!!)) return
         val codeType = FragmentToTestDada(CodeType.CLASS)
-        org.jetbrains.research.testspark.actions.createLLMPipeline(e)
-            .runTestGeneration(getLLMProcessManager(e, codeType), codeType)
+        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 
     /**
@@ -139,10 +143,9 @@ class Llm(override val name: String = "Llm") : Tool {
         if (!isCorrectToken(e.project!!)) return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val psiMethod: PsiMethod = org.jetbrains.research.testspark.actions.getSurroundingMethod(psiFile, caret)!!
+        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
         val codeType = FragmentToTestDada(CodeType.METHOD, generateMethodDescriptor(psiMethod))
-        org.jetbrains.research.testspark.actions.createLLMPipeline(e)
-            .runTestGeneration(getLLMProcessManager(e, codeType), codeType)
+        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 
     /**
@@ -154,9 +157,8 @@ class Llm(override val name: String = "Llm") : Tool {
         if (!isCorrectToken(e.project!!)) return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val selectedLine: Int = org.jetbrains.research.testspark.actions.getSurroundingLine(psiFile, caret)?.plus(1)!!
+        val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
         val codeType = FragmentToTestDada(CodeType.LINE, selectedLine)
-        org.jetbrains.research.testspark.actions.createLLMPipeline(e)
-            .runTestGeneration(getLLMProcessManager(e, codeType), codeType)
+        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 }

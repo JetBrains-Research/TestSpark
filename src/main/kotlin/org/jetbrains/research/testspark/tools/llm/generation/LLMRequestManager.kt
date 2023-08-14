@@ -6,6 +6,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
@@ -55,17 +56,17 @@ class LLMRequestManager {
                 when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
                     HttpURLConnection.HTTP_OK -> testsAssembler.receiveResponse(it)
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> llmErrorManager.errorProcess(
-                        org.jetbrains.research.testspark.TestSparkBundle.message("serverProblems"),
+                        TestSparkBundle.message("serverProblems"),
                         project,
                     )
 
                     HttpURLConnection.HTTP_BAD_REQUEST -> llmErrorManager.errorProcess(
-                        org.jetbrains.research.testspark.TestSparkBundle.message("tooLongPrompt"),
+                        TestSparkBundle.message("tooLongPrompt"),
                         project,
                     )
 
                     HttpURLConnection.HTTP_UNAUTHORIZED -> llmErrorManager.errorProcess(
-                        org.jetbrains.research.testspark.TestSparkBundle.message("wrongToken"),
+                        TestSparkBundle.message("wrongToken"),
                         project,
                     )
 

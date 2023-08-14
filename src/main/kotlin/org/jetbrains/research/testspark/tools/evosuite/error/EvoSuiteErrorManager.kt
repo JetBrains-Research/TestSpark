@@ -6,6 +6,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.template.error.ErrorManager
@@ -34,7 +35,7 @@ class EvoSuiteErrorManager : ErrorManager {
      * @return The common error message with the provided message.
      */
     private fun getCommonErrorMessage(message: String) =
-        org.jetbrains.research.testspark.TestSparkBundle.message("evosuiteErrorCommon") + " " + message
+        TestSparkBundle.message("evosuiteErrorCommon") + " " + message
 
     /**
      * Returns the exceeded timeout message with the specified EvoSuite process timeout.
@@ -43,7 +44,7 @@ class EvoSuiteErrorManager : ErrorManager {
      * @return The exceeded timeout message.
      */
     private fun getExceededTimeoutMessage(evoSuiteProcessTimeout: Long) =
-        org.jetbrains.research.testspark.TestSparkBundle.message("exceededTimeoutMessage") + " " + evoSuiteProcessTimeout + " ms"
+        TestSparkBundle.message("exceededTimeoutMessage") + " " + evoSuiteProcessTimeout + " ms"
 
     /**
      * Retrieves the error message from the EvoSuite output or the non-zero exit code message if available.
@@ -55,7 +56,7 @@ class EvoSuiteErrorManager : ErrorManager {
     private fun getEvoSuiteNonZeroExitCodeMessage(evosuiteOutput: String) =
         "Error: (.*)\n".toRegex().find(evosuiteOutput)?.groupValues?.get(1)
             ?: "Exception: (.*)\n".toRegex().find(evosuiteOutput)?.groupValues?.get(1)
-            ?: org.jetbrains.research.testspark.TestSparkBundle.message("nonZeroCodeMessage")
+            ?: TestSparkBundle.message("nonZeroCodeMessage")
 
     /**
      * Checks if the process is correct by analyzing the output and exit code of the process.
@@ -90,15 +91,15 @@ class EvoSuiteErrorManager : ErrorManager {
         }
 
         // unknown class error
-        if (output.contains(org.jetbrains.research.testspark.TestSparkBundle.message("unknownClassError"))) {
-            errorProcess(org.jetbrains.research.testspark.TestSparkBundle.message("unknownClassMessage"), project)
+        if (output.contains(TestSparkBundle.message("unknownClassError"))) {
+            errorProcess(TestSparkBundle.message("unknownClassMessage"), project)
             return false
         }
 
         // error while initializing target class
-        if (output.contains(org.jetbrains.research.testspark.TestSparkBundle.message("errorWhileInitializingTargetClass"))) {
+        if (output.contains(TestSparkBundle.message("errorWhileInitializingTargetClass"))) {
             errorProcess(
-                org.jetbrains.research.testspark.TestSparkBundle.message("errorWhileInitializingTargetClass").lowercase(Locale.getDefault()),
+                TestSparkBundle.message("errorWhileInitializingTargetClass").lowercase(Locale.getDefault()),
                 project,
             )
             return false
@@ -117,7 +118,7 @@ class EvoSuiteErrorManager : ErrorManager {
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("EvoSuite Execution Error")
                 .createNotification(
-                    org.jetbrains.research.testspark.TestSparkBundle.message("evosuiteErrorTitle"),
+                    TestSparkBundle.message("evosuiteErrorTitle"),
                     getCommonErrorMessage(message),
                     NotificationType.ERROR,
                 )
@@ -134,7 +135,7 @@ class EvoSuiteErrorManager : ErrorManager {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("EvoSuite Execution Error")
             .createNotification(
-                org.jetbrains.research.testspark.TestSparkBundle.message("evosuiteErrorTitle"),
+                TestSparkBundle.message("evosuiteErrorTitle"),
                 getCommonErrorMessage(message),
                 NotificationType.WARNING,
             )

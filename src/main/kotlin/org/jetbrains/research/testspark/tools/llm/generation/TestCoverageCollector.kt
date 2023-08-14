@@ -11,6 +11,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
@@ -80,7 +81,7 @@ class TestCoverageCollector(
      *         and a String containing any error message encountered during compilation.
      */
     private fun compileTestCases() {
-        indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("compilationTestsChecking")
+        indicator.text = TestSparkBundle.message("compilationTestsChecking")
 
         // find the proper javac
         val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()
@@ -114,7 +115,7 @@ class TestCoverageCollector(
      *         and a String containing any error message encountered during compilation.
      */
     fun compile(): Pair<Boolean, String> {
-        indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("compilationTestsChecking")
+        indicator.text = TestSparkBundle.message("compilationTestsChecking")
 
         // compile test cases for extracting correct ones
         compileTestCases()
@@ -142,7 +143,7 @@ class TestCoverageCollector(
      * Runs Jacoco to collect code coverage data and generate reports.
      */
     private fun runJacoco() {
-        indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("runningJacoco")
+        indicator.text = TestSparkBundle.message("runningJacoco")
 
         log.info("Running jacoco")
 
@@ -248,7 +249,7 @@ class TestCoverageCollector(
      * @param xmlFileName The XML file name to read data from.
      */
     private fun saveData(testCase: TestCaseGeneratedByLLM, xmlFileName: String) {
-        indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("testCasesSaving")
+        indicator.text = TestSparkBundle.message("testCasesSaving")
         val setOfLines = mutableSetOf<Int>()
         var isCorrectSourceFile: Boolean
         File(xmlFileName).readText().konsumeXml().apply {

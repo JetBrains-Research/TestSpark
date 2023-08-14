@@ -5,6 +5,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.data.Report
@@ -84,7 +85,7 @@ class LLMProcessManager(
         if (processStopped(project, indicator)) return
 
         if (!isPromptLengthWithinLimit(prompt)) {
-            llmErrorManager.errorProcess(org.jetbrains.research.testspark.TestSparkBundle.message("tooLongPrompt"), project)
+            llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPrompt"), project)
             return
         }
 
@@ -106,10 +107,10 @@ class LLMProcessManager(
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
-            llmErrorManager.errorProcess(org.jetbrains.research.testspark.TestSparkBundle.message("emptyBuildPath"), project)
+            llmErrorManager.errorProcess(TestSparkBundle.message("emptyBuildPath"), project)
             return
         }
-        indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("searchMessage")
+        indicator.text = TestSparkBundle.message("searchMessage")
 
         log.info("Generated tests suite received")
 
@@ -133,7 +134,7 @@ class LLMProcessManager(
 
             // Ending loop checking
             if (isLastIteration(requestsCount) && project.service<Workspace>().testGenerationData.compilableTestCases.isEmpty()) {
-                llmErrorManager.errorProcess(org.jetbrains.research.testspark.TestSparkBundle.message("invalidLLMResult"), project)
+                llmErrorManager.errorProcess(TestSparkBundle.message("invalidLLMResult"), project)
                 break
             }
 
@@ -148,14 +149,14 @@ class LLMProcessManager(
 
             // Bad response checking
             if (generatedTestSuite == null) {
-                warningMessage = org.jetbrains.research.testspark.TestSparkBundle.message("emptyResponse")
+                warningMessage = TestSparkBundle.message("emptyResponse")
                 messageToPrompt = requestResult.first
                 continue
             }
 
             // Empty response checking
             if (generatedTestSuite.testCases.isEmpty()) {
-                warningMessage = org.jetbrains.research.testspark.TestSparkBundle.message("emptyResponse")
+                warningMessage = TestSparkBundle.message("emptyResponse")
                 messageToPrompt = "You have provided an empty answer! Please answer my previous question with the same formats."
                 continue
             }
@@ -173,7 +174,7 @@ class LLMProcessManager(
             var isFilesExists = true
             for (path in generatedTestCasesPaths) isFilesExists = isFilesExists && File(path).exists()
             if (!isFilesExists || !File(generatedTestPath).exists()) {
-                llmErrorManager.errorProcess(org.jetbrains.research.testspark.TestSparkBundle.message("savingTestFileIssue"), project)
+                llmErrorManager.errorProcess(TestSparkBundle.message("savingTestFileIssue"), project)
                 break
             }
 
@@ -197,7 +198,7 @@ class LLMProcessManager(
 
             if (!compilationResult.first && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")
-                warningMessage = org.jetbrains.research.testspark.TestSparkBundle.message("compilationError")
+                warningMessage = TestSparkBundle.message("compilationError")
                 messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```"
                 continue
             }

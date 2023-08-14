@@ -22,6 +22,7 @@ import com.intellij.openapi.util.Comparing
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
@@ -85,7 +86,7 @@ class Validator(
         val projectBuilder = ProjectBuilder(project)
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, org.jetbrains.research.testspark.TestSparkBundle.message("validationCompilation")) {
+            .run(object : Task.Backgroundable(project, TestSparkBundle.message("validationCompilation")) {
                 override fun run(indicator: ProgressIndicator) {
                     try {
                         projectBuilder.runBuild(indicator)
@@ -104,7 +105,7 @@ class Validator(
                         }
                         logger.info("Compilation successful!")
                         logger.info("Executing tests...")
-                        indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("validationRunning")
+                        indicator.text = TestSparkBundle.message("validationRunning")
 
                         runTests(indicator, classpath, targetFqn)
                         runTestsWithCoverage(indicator, classpath, targetFqn, testValidationRoot)
@@ -264,7 +265,7 @@ class Validator(
         testFqn: String,
         testValidationRoot: String,
     ) {
-        indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("calculatingCoverage")
+        indicator.text = TestSparkBundle.message("calculatingCoverage")
 
         val pluginsPath = System.getProperty("idea.plugins.path")
         val jacocoPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}jacocoagent.jar"
@@ -327,8 +328,8 @@ class Validator(
      */
     private fun showTestsCompilationFailed() {
         NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
-            org.jetbrains.research.testspark.TestSparkBundle.message("compilationFailedNotificationTitle"),
-            org.jetbrains.research.testspark.TestSparkBundle.message("compilationFailedNotificationText"),
+            TestSparkBundle.message("compilationFailedNotificationTitle"),
+            TestSparkBundle.message("compilationFailedNotificationText"),
             NotificationType.ERROR,
         ).notify(project)
     }
@@ -338,8 +339,8 @@ class Validator(
      */
     private fun showTestsParsingFailed() {
         NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
-            org.jetbrains.research.testspark.TestSparkBundle.message("compilationFailedNotificationTitle"),
-            org.jetbrains.research.testspark.TestSparkBundle.message("compilationFailedNotificationText"),
+            TestSparkBundle.message("compilationFailedNotificationTitle"),
+            TestSparkBundle.message("compilationFailedNotificationText"),
             NotificationType.ERROR,
         ).notify(project)
     }
@@ -350,7 +351,7 @@ class Validator(
     private fun showValidationResult(junitResult: JUnitResult) {
         val passed = junitResult.totalTests - junitResult.failedTests
         NotificationGroupManager.getInstance().getNotificationGroup("Validation Result").createNotification(
-            org.jetbrains.research.testspark.TestSparkBundle.message("validationResult"),
+            TestSparkBundle.message("validationResult"),
             "$passed/${junitResult.totalTests}",
             NotificationType.INFORMATION,
         ).notify(project)

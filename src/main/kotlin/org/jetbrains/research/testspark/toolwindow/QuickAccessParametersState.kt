@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.toolwindow
 
+import org.jetbrains.research.testspark.TestSparkDefaultsBundle
+
 /**
  * This class is responsible for persisting the values of the parameters in the "Parameters" tool window tab.
  */
@@ -16,15 +18,15 @@ data class QuickAccessParametersState(
 ) {
 
     object DefaultState {
-        val showCoverage: Boolean = org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("showCoverage").toBoolean()
-        val stoppingCondition: StoppingCondition = StoppingCondition.valueOf(org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("stoppingCondition"))
-        val searchBudget: Int = org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("searchBudget").toInt()
-        val initializationTimeout: Int = org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("initializationTimeout").toInt()
-        val minimizationTimeout: Int = org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("minimizationTimeout").toInt()
-        val assertionTimeout: Int = org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("assertionTimeout").toInt()
-        val junitCheckTimeout: Int = org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("junitCheckTimeout").toInt()
-        val populationLimit: PopulationLimit = PopulationLimit.valueOf(org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("populationLimit"))
-        val population: Int = org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("population").toInt()
+        val showCoverage: Boolean = TestSparkDefaultsBundle.defaultValue("showCoverage").toBoolean()
+        val stoppingCondition: StoppingCondition = StoppingCondition.valueOf(TestSparkDefaultsBundle.defaultValue("stoppingCondition"))
+        val searchBudget: Int = TestSparkDefaultsBundle.defaultValue("searchBudget").toInt()
+        val initializationTimeout: Int = TestSparkDefaultsBundle.defaultValue("initializationTimeout").toInt()
+        val minimizationTimeout: Int = TestSparkDefaultsBundle.defaultValue("minimizationTimeout").toInt()
+        val assertionTimeout: Int = TestSparkDefaultsBundle.defaultValue("assertionTimeout").toInt()
+        val junitCheckTimeout: Int = TestSparkDefaultsBundle.defaultValue("junitCheckTimeout").toInt()
+        val populationLimit: PopulationLimit = PopulationLimit.valueOf(TestSparkDefaultsBundle.defaultValue("populationLimit"))
+        val population: Int = TestSparkDefaultsBundle.defaultValue("population").toInt()
     }
 
     fun serializeChangesFromDefault(): List<String> {

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.api.extension.ExtendWith
 import java.awt.event.KeyEvent
 import java.time.Duration
+import kotlin.streams.toList
 
 @TestMethodOrder(OrderAnnotation::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

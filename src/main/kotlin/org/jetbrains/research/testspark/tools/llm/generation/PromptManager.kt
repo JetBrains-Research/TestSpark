@@ -38,10 +38,10 @@ class PromptManager(
      */
     fun generatePromptForClass(): String {
         val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
-        return "Generate unit tests in Java for ${org.jetbrains.research.testspark.actions.getClassDisplayName(cut)} to achieve 100% line coverage for this class.\n" +
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\n" +
             header +
             "The source code of class under test is as follows:\n```\n${
-                org.jetbrains.research.testspark.actions.getClassFullText(
+                getClassFullText(
                     cut
                 )
             }\n```\n" +
@@ -56,7 +56,7 @@ class PromptManager(
      */
     fun generatePromptForMethod(methodDescriptor: String): String {
         val psiMethod = getPsiMethod(cut, methodDescriptor)!!
-        return "Generate unit tests in Java for ${org.jetbrains.research.testspark.actions.getClassDisplayName(cut)} to achieve 100% line coverage for method $methodDescriptor.\n" +
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for method $methodDescriptor.\n" +
             header +
             "The source code of method under test is as follows:\n```\n${psiMethod.text}\n```\n" +
             getCommonPromptPart(getInterestingPsiClasses(psiMethod))
@@ -71,10 +71,8 @@ class PromptManager(
     fun generatePromptForLine(lineNumber: Int): String {
         val methodDescriptor = getMethodDescriptor(cut, lineNumber)
         val psiMethod = getPsiMethod(cut, methodDescriptor)!!
-        return "Generate unit tests in Java for ${org.jetbrains.research.testspark.actions.getClassDisplayName(cut)} only those that cover the line: `${
-            org.jetbrains.research.testspark.actions.getClassFullText(
-                cut
-            ).split("\n")[lineNumber - 1]}` on line number $lineNumber.\n" +
+        return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: `${
+            getClassFullText(cut).split("\n")[lineNumber - 1]}` on line number $lineNumber.\n" +
             header +
             "The source code of method this the chosen line under test is as follows:\n```\n${psiMethod.text}\n```\n" +
             getCommonPromptPart(getInterestingPsiClasses(psiMethod))
@@ -93,16 +91,9 @@ class PromptManager(
             val subClass = classesToTest[i - 2]
             val superClass = classesToTest[i - 1]
 
-            prompt += "${org.jetbrains.research.testspark.actions.getClassDisplayName(subClass)} extends ${
-                org.jetbrains.research.testspark.actions.getClassDisplayName(
-                    superClass
-                )
-            }. " +
-                "The source code of ${org.jetbrains.research.testspark.actions.getClassDisplayName(superClass)} is:\n```\n${
-                    org.jetbrains.research.testspark.actions.getClassFullText(
-                        superClass
-                    )
-                }\n" +
+            prompt += "${getClassDisplayName(subClass)} extends ${
+                getClassDisplayName(superClass)}. " +
+                "The source code of ${getClassDisplayName(superClass)} is:\n```\n${getClassFullText(superClass)}\n" +
                 "```\n"
         }
 
@@ -113,7 +104,7 @@ class PromptManager(
                 continue
             }
 
-            prompt += "=== methods in ${org.jetbrains.research.testspark.actions.getClassDisplayName(interestingPsiClass)}:\n"
+            prompt += "=== methods in ${getClassDisplayName(interestingPsiClass)}:\n"
             for (currentPsiMethod in interestingPsiClass.allMethods) {
                 // Skip java methods
                 if (currentPsiMethod.containingClass!!.qualifiedName!!.startsWith("java")) {

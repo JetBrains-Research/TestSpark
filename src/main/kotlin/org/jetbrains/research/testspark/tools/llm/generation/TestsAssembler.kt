@@ -7,6 +7,9 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
+import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.actions.importPattern
+import org.jetbrains.research.testspark.actions.runWithPattern
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestLine
@@ -64,7 +67,7 @@ class TestsAssembler(
             val generatedTestsCount = rawText.split("@Test").size - 1
 
             if (lastTestCount != generatedTestsCount) {
-                indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("generatingTestNumber") + generatedTestsCount
+                indicator.text = TestSparkBundle.message("generatingTestNumber") + generatedTestsCount
                 lastTestCount = generatedTestsCount
             }
         }
@@ -86,12 +89,12 @@ class TestsAssembler(
             testSuite.packageString = packageName
 
             // save imports
-            testSuite.imports = org.jetbrains.research.testspark.actions.importPattern.findAll(rawText, 0).map {
+            testSuite.imports = importPattern.findAll(rawText, 0).map {
                 it.groupValues[0]
             }.toSet()
 
             // save RunWith
-            val detectedRunWith = org.jetbrains.research.testspark.actions.runWithPattern.find(rawText, startIndex = 0)?.groupValues?.get(0)
+            val detectedRunWith = runWithPattern.find(rawText, startIndex = 0)?.groupValues?.get(0)
             if (detectedRunWith != null) {
                 val runWith = detectedRunWith
                     .split("@RunWith(")[1]

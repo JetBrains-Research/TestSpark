@@ -38,25 +38,22 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
 
     override fun generateTestsForClass(e: AnActionEvent) {
         log.info("Starting tests generation for class by EvoSuite")
-        org.jetbrains.research.testspark.actions.createPipeline(e)
-            .runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestDada(CodeType.CLASS))
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestDada(CodeType.CLASS))
     }
 
     override fun generateTestsForMethod(e: AnActionEvent) {
         log.info("Starting tests generation for method by EvoSuite")
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val psiMethod: PsiMethod = org.jetbrains.research.testspark.actions.getSurroundingMethod(psiFile, caret)!!
-        org.jetbrains.research.testspark.actions.createPipeline(e)
-            .runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestDada(CodeType.METHOD, generateMethodDescriptor(psiMethod)))
+        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestDada(CodeType.METHOD, generateMethodDescriptor(psiMethod)))
     }
 
     override fun generateTestsForLine(e: AnActionEvent) {
         log.info("Starting tests generation for line by EvoSuite")
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val selectedLine: Int = org.jetbrains.research.testspark.actions.getSurroundingLine(psiFile, caret)?.plus(1)!!
-        org.jetbrains.research.testspark.actions.createPipeline(e)
-            .runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestDada(CodeType.LINE, selectedLine))
+        val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestDada(CodeType.LINE, selectedLine))
     }
 }

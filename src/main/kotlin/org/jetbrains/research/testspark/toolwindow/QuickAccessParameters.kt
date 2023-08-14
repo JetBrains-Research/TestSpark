@@ -11,6 +11,9 @@ import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import org.jdesktop.swingx.JXTitledSeparator
+import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.services.QuickAccessParametersService
 import java.awt.Dimension
 import java.awt.Font
@@ -31,7 +34,7 @@ import javax.swing.SpinnerNumberModel
  */
 class QuickAccessParameters(private val project: Project) {
     // Coverage visualisation toggle
-    private val showCoverageCheckbox: JCheckBox = JCheckBox(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("showCoverage"))
+    private val showCoverageCheckbox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("showCoverage"))
 
     // Default state of the quick access parameters
     private val defaultState = QuickAccessParametersState.DefaultState
@@ -47,26 +50,26 @@ class QuickAccessParameters(private val project: Project) {
     private val population: JSpinner = JSpinner(SpinnerNumberModel(0, 0, 10000, 1))
 
     // Save and Reset buttons
-    private val saveButton: JButton = JButton(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("saveButton"))
-    private val resetButton: JButton = JButton(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("resetButton"))
+    private val saveButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("saveButton"))
+    private val resetButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("resetButton"))
 
     // Link to open settings
-    private val settingsLink: ActionLink = ActionLink(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("settingsLink")) {
+    private val settingsLink: ActionLink = ActionLink(TestSparkLabelsBundle.defaultValue("settingsLink")) {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, "EvoSuite")
     }
 
     // Tool Window panel
-    private val panelTitle = JLabel(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("quickAccess"))
+    private val panelTitle = JLabel(TestSparkLabelsBundle.defaultValue("quickAccess"))
     private var toolWindowPanel: JPanel = JPanel()
 
     // The tooltip labels
     private val stoppingConditionToolTip =
-        JBLabel(org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("default") + "${defaultState.searchBudget} " + org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("seconds"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+        JBLabel(TestSparkToolTipsBundle.defaultValue("default") + "${defaultState.searchBudget} " + TestSparkToolTipsBundle.defaultValue("seconds"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
     private val populationLimitToolTip =
-        JBLabel(org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("default") + "${defaultState.population} " + org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("seconds"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
+        JBLabel(TestSparkToolTipsBundle.defaultValue("default") + "${defaultState.population} " + TestSparkToolTipsBundle.defaultValue("seconds"), UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
 
     // Template strings for "default" tooltips
-    private val defaultStr: String = org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("defaultStr")
+    private val defaultStr: String = TestSparkLabelsBundle.defaultValue("defaultStr")
 
     init {
         // Load the persisted state
@@ -109,14 +112,14 @@ class QuickAccessParameters(private val project: Project) {
         .addVerticalGap(25)
         .addComponent(panelTitle)
         // Add coverage visualisation checkbox
-        .addComponent(JXTitledSeparator(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("showCoverageDescription")), 35)
+        .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("showCoverageDescription")), 35)
         .addComponent(showCoverageCheckbox, 35)
         // Add `Search Budget` category
-        .addComponent(JXTitledSeparator(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("searchBudget")), 35)
+        .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("searchBudget")), 35)
         .addLabeledComponent(
             customLabel(
-                org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("budgetType"),
-                org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("budgetType"),
+                TestSparkLabelsBundle.defaultValue("budgetType"),
+                TestSparkToolTipsBundle.defaultValue("budgetType"),
             ),
             stoppingCondition,
             25,
@@ -125,8 +128,8 @@ class QuickAccessParameters(private val project: Project) {
         .addTooltip(default(StoppingCondition.MAXTIME.toString()))
         .addLabeledComponent(
             customLabel(
-                org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("searchBudgetParam"),
-                org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("initTimeout"),
+                TestSparkLabelsBundle.defaultValue("searchBudgetParam"),
+                TestSparkToolTipsBundle.defaultValue("initTimeout"),
             ),
             searchBudget,
             25,
@@ -134,63 +137,63 @@ class QuickAccessParameters(private val project: Project) {
         )
         .addComponentToRightColumn(stoppingConditionToolTip, 1)
         // Add `Timeouts` category
-        .addComponent(JXTitledSeparator(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("timeouts")), 35)
+        .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("timeouts")), 35)
         .addLabeledComponent(
             customLabel(
-                org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("initTimeout"),
-                org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("initTimeout"),
+                TestSparkLabelsBundle.defaultValue("initTimeout"),
+                TestSparkToolTipsBundle.defaultValue("initTimeout"),
             ),
             initializationTimeout,
             25,
             false,
         )
-        .addTooltip(default("${defaultState.initializationTimeout} " + org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("seconds")))
+        .addTooltip(default("${defaultState.initializationTimeout} " + TestSparkToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
-                org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("minimTimeout"),
-                org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("minimTimeout"),
+                TestSparkLabelsBundle.defaultValue("minimTimeout"),
+                TestSparkToolTipsBundle.defaultValue("minimTimeout"),
             ),
             minimisationTimeout,
             20,
             false,
         )
-        .addTooltip(default("${defaultState.minimizationTimeout} " + org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("seconds")))
+        .addTooltip(default("${defaultState.minimizationTimeout} " + TestSparkToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
-                org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("assertTimeout"),
-                org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("assertTimeout"),
+                TestSparkLabelsBundle.defaultValue("assertTimeout"),
+                TestSparkToolTipsBundle.defaultValue("assertTimeout"),
             ),
             assertionTimeout,
             20,
             false,
         )
-        .addTooltip(default("${defaultState.assertionTimeout} " + org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("seconds")))
+        .addTooltip(default("${defaultState.assertionTimeout} " + TestSparkToolTipsBundle.defaultValue("seconds")))
         .addLabeledComponent(
             customLabel(
-                org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("junitTimeout"),
-                org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("junitTimeout"),
+                TestSparkLabelsBundle.defaultValue("junitTimeout"),
+                TestSparkToolTipsBundle.defaultValue("junitTimeout"),
             ),
             junitCheckTimeout,
             20,
             false,
         )
-        .addTooltip(default("${defaultState.junitCheckTimeout} " + org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("seconds")))
+        .addTooltip(default("${defaultState.junitCheckTimeout} " + TestSparkToolTipsBundle.defaultValue("seconds")))
         // Add `Genetic Algorithm` section
-        .addComponent(JXTitledSeparator(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("geneticAlg")), 35)
+        .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("geneticAlg")), 35)
         .addLabeledComponent(
             customLabel(
-                org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("populationLim"),
-                org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("populationLim"),
+                TestSparkLabelsBundle.defaultValue("populationLim"),
+                TestSparkToolTipsBundle.defaultValue("populationLim"),
             ),
             populationLimit,
             25,
             false,
         )
-        .addTooltip(default(org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("individuals")))
+        .addTooltip(default(TestSparkToolTipsBundle.defaultValue("individuals")))
         .addLabeledComponent(
             customLabel(
-                org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("population"),
-                org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("population"),
+                TestSparkLabelsBundle.defaultValue("population"),
+                TestSparkToolTipsBundle.defaultValue("population"),
             ),
             population,
             20,
@@ -254,8 +257,8 @@ class QuickAccessParameters(private val project: Project) {
     private val addListenerForResetButton: (ActionEvent) -> Unit = {
         val choice = JOptionPane.showConfirmDialog(
             null,
-            org.jetbrains.research.testspark.TestSparkBundle.message("resetMessage"),
-            org.jetbrains.research.testspark.TestSparkBundle.message("confirmationTitle"),
+            TestSparkBundle.message("resetMessage"),
+            TestSparkBundle.message("confirmationTitle"),
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE,
         )
@@ -274,7 +277,7 @@ class QuickAccessParameters(private val project: Project) {
 
             loadState()
 
-            Messages.showInfoMessage(org.jetbrains.research.testspark.TestSparkBundle.message("parametersResetMessage"), org.jetbrains.research.testspark.TestSparkBundle.message("parametersResetTitle"))
+            Messages.showInfoMessage(TestSparkBundle.message("parametersResetMessage"), TestSparkBundle.message("parametersResetTitle"))
         }
     }
 
@@ -284,7 +287,7 @@ class QuickAccessParameters(private val project: Project) {
      */
     private val addListenerForSaveButton: (ActionEvent) -> Unit = {
         saveState()
-        Messages.showInfoMessage(org.jetbrains.research.testspark.TestSparkBundle.message("parametersSavedMessage"), org.jetbrains.research.testspark.TestSparkBundle.message("parametersSavedTitle"))
+        Messages.showInfoMessage(TestSparkBundle.message("parametersSavedMessage"), TestSparkBundle.message("parametersSavedTitle"))
     }
 
     /**
@@ -325,17 +328,17 @@ class QuickAccessParameters(private val project: Project) {
      * Adds tooltips to the actual UI elements, not the labels for them.
      */
     private fun addTooltipsToUiElements() {
-        showCoverageCheckbox.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("showCoverage")
-        stoppingCondition.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("stoppingCondition")
-        searchBudget.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("searchBudget")
-        initializationTimeout.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("initTimeoutPopup")
-        minimisationTimeout.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("minimTimeoutPopup")
-        assertionTimeout.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("assertTimeoutPopup")
-        junitCheckTimeout.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("junitTimeoutPopup")
-        populationLimit.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("populationLimPopup")
-        population.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("populationPopup")
+        showCoverageCheckbox.toolTipText = TestSparkToolTipsBundle.defaultValue("showCoverage")
+        stoppingCondition.toolTipText = TestSparkToolTipsBundle.defaultValue("stoppingCondition")
+        searchBudget.toolTipText = TestSparkToolTipsBundle.defaultValue("searchBudget")
+        initializationTimeout.toolTipText = TestSparkToolTipsBundle.defaultValue("initTimeoutPopup")
+        minimisationTimeout.toolTipText = TestSparkToolTipsBundle.defaultValue("minimTimeoutPopup")
+        assertionTimeout.toolTipText = TestSparkToolTipsBundle.defaultValue("assertTimeoutPopup")
+        junitCheckTimeout.toolTipText = TestSparkToolTipsBundle.defaultValue("junitTimeoutPopup")
+        populationLimit.toolTipText = TestSparkToolTipsBundle.defaultValue("populationLimPopup")
+        population.toolTipText = TestSparkToolTipsBundle.defaultValue("populationPopup")
 
-        resetButton.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("resetButton")
+        resetButton.toolTipText = TestSparkToolTipsBundle.defaultValue("resetButton")
     }
 
     /**

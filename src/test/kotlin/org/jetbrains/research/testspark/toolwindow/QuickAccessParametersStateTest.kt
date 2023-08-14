@@ -5,6 +5,7 @@ import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.impl.LightTempDirTestFixtureImpl
 import org.assertj.core.api.Assertions.assertThat
+import org.jetbrains.research.testspark.TestSparkDefaultsBundle
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -95,14 +96,14 @@ class QuickAccessParametersStateTest {
 
         val state = QuickAccessParametersState.DefaultState
 
-        assertThat(state.stoppingCondition.name).isEqualTo(org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("stoppingCondition"))
-        assertThat(state.searchBudget).isEqualTo(org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("searchBudget").toInt())
-        assertThat(state.initializationTimeout).isEqualTo(org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("initializationTimeout").toInt())
-        assertThat(state.minimizationTimeout).isEqualTo(org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("minimizationTimeout").toInt())
-        assertThat(state.assertionTimeout).isEqualTo(org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("assertionTimeout").toInt())
-        assertThat(state.junitCheckTimeout).isEqualTo(org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("junitCheckTimeout").toInt())
-        assertThat(state.populationLimit.name).isEqualTo(org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("populationLimit"))
-        assertThat(state.population).isEqualTo(org.jetbrains.research.testspark.TestSparkDefaultsBundle.defaultValue("population").toInt())
+        assertThat(state.stoppingCondition.name).isEqualTo(TestSparkDefaultsBundle.defaultValue("stoppingCondition"))
+        assertThat(state.searchBudget).isEqualTo(TestSparkDefaultsBundle.defaultValue("searchBudget").toInt())
+        assertThat(state.initializationTimeout).isEqualTo(TestSparkDefaultsBundle.defaultValue("initializationTimeout").toInt())
+        assertThat(state.minimizationTimeout).isEqualTo(TestSparkDefaultsBundle.defaultValue("minimizationTimeout").toInt())
+        assertThat(state.assertionTimeout).isEqualTo(TestSparkDefaultsBundle.defaultValue("assertionTimeout").toInt())
+        assertThat(state.junitCheckTimeout).isEqualTo(TestSparkDefaultsBundle.defaultValue("junitCheckTimeout").toInt())
+        assertThat(state.populationLimit.name).isEqualTo(TestSparkDefaultsBundle.defaultValue("populationLimit"))
+        assertThat(state.population).isEqualTo(TestSparkDefaultsBundle.defaultValue("population").toInt())
     }
 
     @Test
