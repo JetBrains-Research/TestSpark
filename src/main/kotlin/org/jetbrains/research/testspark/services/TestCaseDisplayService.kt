@@ -39,6 +39,9 @@ import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
+import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
@@ -62,15 +65,15 @@ import javax.swing.border.Border
 class TestCaseDisplayService(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
-    private var applyButton: JButton = JButton(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("applyButton"))
-    private var selectAllButton: JButton = JButton(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("selectAllButton"))
-    private var deselectAllButton: JButton = JButton(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("deselectAllButton"))
-    private var removeAllButton: JButton = JButton(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("removeAllButton"))
-    private var validateButton: JButton = JButton(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("validateButton"))
-    var toggleJacocoButton: JButton = JButton(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("jacocoToggle"))
+    private var applyButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("applyButton"))
+    private var selectAllButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("selectAllButton"))
+    private var deselectAllButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("deselectAllButton"))
+    private var removeAllButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("removeAllButton"))
+    private var validateButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("validateButton"))
+    var toggleJacocoButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("jacocoToggle"))
 
     private var testsSelected: Int = 0
-    private var testsSelectedText: String = "${org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("testsSelected")}: %d/%d"
+    private var testsSelectedText: String = "${TestSparkLabelsBundle.defaultValue("testsSelected")}: %d/%d"
     private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
     private var allTestCasePanel: JPanel = JPanel()
@@ -267,7 +270,7 @@ class TestCaseDisplayService(private val project: Project) {
         val editor = getEditor(name) ?: return
         val settingsProjectState = project.service<SettingsProjectService>().state
         val highlightColor =
-            JBColor(org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("colorName"), Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30))
+            JBColor(TestSparkToolTipsBundle.defaultValue("colorName"), Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue, 30))
         if (editor.background.equals(highlightColor)) return
         defaultEditorColor = editor.background
         editor.background = highlightColor
@@ -332,7 +335,7 @@ class TestCaseDisplayService(private val project: Project) {
         for (testCase in testCasePanels) {
             if (names.contains(testCase.key)) {
                 val editor = getEditor(testCase.key) ?: return
-                val highlightColor = JBColor(org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("colorName"), Color(255, 0, 0, 90))
+                val highlightColor = JBColor(TestSparkToolTipsBundle.defaultValue("colorName"), Color(255, 0, 0, 90))
                 defaultBorder = editor.border
                 editor.border = BorderFactory.createLineBorder(highlightColor, 3)
             } else {
@@ -410,8 +413,8 @@ class TestCaseDisplayService(private val project: Project) {
                 val jOptionPane =
                     JOptionPane.showInputDialog(
                         null,
-                        org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("optionPaneMessage"),
-                        org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("optionPaneTitle"),
+                        TestSparkLabelsBundle.defaultValue("optionPaneMessage"),
+                        TestSparkLabelsBundle.defaultValue("optionPaneTitle"),
                         JOptionPane.PLAIN_MESSAGE,
                         null,
                         null,
@@ -430,13 +433,13 @@ class TestCaseDisplayService(private val project: Project) {
 
                 // Check the correctness of a class name
                 if (!Regex("[A-Z][a-zA-Z0-9]*(.java)?").matches(className)) {
-                    showErrorWindow(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("incorrectFileNameMessage"))
+                    showErrorWindow(TestSparkLabelsBundle.defaultValue("incorrectFileNameMessage"))
                     continue
                 }
 
                 // Check the existence of a file with this name
                 if (File(filePath).exists()) {
-                    showErrorWindow(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("fileAlreadyExistsMessage"))
+                    showErrorWindow(TestSparkLabelsBundle.defaultValue("fileAlreadyExistsMessage"))
                     continue
                 }
                 break
@@ -488,7 +491,7 @@ class TestCaseDisplayService(private val project: Project) {
         JOptionPane.showMessageDialog(
             null,
             message,
-            org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("errorWindowTitle"),
+            TestSparkLabelsBundle.defaultValue("errorWindowTitle"),
             JOptionPane.ERROR_MESSAGE,
         )
     }
@@ -649,7 +652,7 @@ class TestCaseDisplayService(private val project: Project) {
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
             mainPanel,
-            org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("generatedTests"),
+            TestSparkLabelsBundle.defaultValue("generatedTests"),
             true,
         )
         contentManager!!.addContent(content!!)
@@ -720,8 +723,8 @@ class TestCaseDisplayService(private val project: Project) {
         // Ask the user for the confirmation
         val choice = JOptionPane.showConfirmDialog(
             null,
-            org.jetbrains.research.testspark.TestSparkBundle.message("removeAllMessage"),
-            org.jetbrains.research.testspark.TestSparkBundle.message("confirmationTitle"),
+            TestSparkBundle.message("removeAllMessage"),
+            TestSparkBundle.message("confirmationTitle"),
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE,
         )
@@ -763,7 +766,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createResetButton(document: Document, textFieldEditor: EditorTextField, testCode: String): JButton {
-        val resetButton = JButton(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("resetButton"))
+        val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetButton"))
         resetButton.isEnabled = false
         resetButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
@@ -798,7 +801,7 @@ class TestCaseDisplayService(private val project: Project) {
                 // add border highlight
                 val settingsProjectState = project.service<SettingsProjectService>().state
                 val borderColor = JBColor(
-                    org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("colorName"),
+                    TestSparkToolTipsBundle.defaultValue("colorName"),
                     Color(
                         settingsProjectState.colorRed,
                         settingsProjectState.colorGreen,
@@ -847,8 +850,8 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun showEmptyTests() {
         NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
-            org.jetbrains.research.testspark.TestSparkBundle.message("emptyTestCasesTitle"),
-            org.jetbrains.research.testspark.TestSparkBundle.message("emptyTestCasesText"),
+            TestSparkBundle.message("emptyTestCasesTitle"),
+            TestSparkBundle.message("emptyTestCasesText"),
             NotificationType.ERROR,
         ).notify(project)
     }

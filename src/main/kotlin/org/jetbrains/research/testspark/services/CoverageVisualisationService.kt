@@ -11,6 +11,8 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
+import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.coverage.CoverageRenderer
 import org.jetbrains.research.testspark.data.Report
 import java.awt.Color
@@ -99,9 +101,9 @@ class CoverageVisualisationService(private val project: Project) {
 
         if (quickAccessParametersState.showCoverage) {
             val settingsProjectState = project.service<SettingsProjectService>().state
-            val color = JBColor(org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("colorName"), Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue))
+            val color = JBColor(TestSparkToolTipsBundle.defaultValue("colorName"), Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue))
             val colorForLines = JBColor(
-                org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("colorName"),
+                TestSparkToolTipsBundle.defaultValue("colorName"),
                 Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
@@ -212,7 +214,7 @@ class CoverageVisualisationService(private val project: Project) {
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
             visualisationService.mainPanel,
-            org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("coverageVisualisation"),
+            TestSparkLabelsBundle.defaultValue("coverageVisualisation"),
             true,
         )
         contentManager!!.addContent(content!!)

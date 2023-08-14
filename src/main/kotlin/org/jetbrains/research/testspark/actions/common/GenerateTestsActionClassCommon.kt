@@ -25,8 +25,7 @@ class GenerateTestsActionClassCommon : AnAction() {
      *
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
-    override fun update(e: AnActionEvent) =
-        org.jetbrains.research.testspark.actions.updateForClass(e, "all test generators")
+    override fun update(e: AnActionEvent) = updateForClass(e, "all test generators")
 
     /**
      * AnAction.getActionUpdateThread() implementation.

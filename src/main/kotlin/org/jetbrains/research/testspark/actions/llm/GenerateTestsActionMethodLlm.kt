@@ -25,7 +25,7 @@ class GenerateTestsActionMethodLlm : AnAction() {
      *
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
-    override fun update(e: AnActionEvent) = org.jetbrains.research.testspark.actions.updateForMethod(e, "GPT-4")
+    override fun update(e: AnActionEvent) = updateForMethod(e, "GPT-4")
 
     /**
      * AnAction.getActionUpdateThread() implementation.

@@ -25,7 +25,7 @@ class GenerateTestsActionClassEvosuite : AnAction() {
      *
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
-    override fun update(e: AnActionEvent) = org.jetbrains.research.testspark.actions.updateForClass(e, "EvoSuite")
+    override fun update(e: AnActionEvent) = updateForClass(e, "EvoSuite")
 
     /**
      * AnAction.getActionUpdateThread() implementation.
