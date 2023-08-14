@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.TestSparkBundle
 
 /**
  * Service used for the sole purpose to limit TestSpark to generate tests only once at a time.
@@ -26,8 +27,8 @@ class RunnerService(private val project: Project) {
         val notification = NotificationGroupManager.getInstance()
             .getNotificationGroup("Execution Error")
             .createNotification(
-                org.jetbrains.research.testspark.TestSparkBundle.message("alreadyRunningNotificationTitle"),
-                org.jetbrains.research.testspark.TestSparkBundle.message("alreadyRunningTextNotificationText"),
+                TestSparkBundle.message("alreadyRunningNotificationTitle"),
+                TestSparkBundle.message("alreadyRunningTextNotificationText"),
                 NotificationType.WARNING,
             )
 

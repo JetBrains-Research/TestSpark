@@ -11,6 +11,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.util.concurrency.AppExecutorUtil
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.editor.Workspace
@@ -107,7 +108,7 @@ class EvoSuiteProcessManager(
             log.info("Starting EvoSuite with arguments: $cmdString")
 
             indicator.isIndeterminate = false
-            indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("searchMessage")
+            indicator.text = TestSparkBundle.message("searchMessage")
             val evoSuiteProcess = GeneralCommandLine(cmd)
             evoSuiteProcess.charset = Charset.forName("UTF-8")
             evoSuiteProcess.setWorkDirectory(projectPath)
@@ -152,8 +153,8 @@ class EvoSuiteProcessManager(
                         indicator.fraction = coverage
                     }
 
-                    if (indicator.fraction == 1.0 && indicator.text != org.jetbrains.research.testspark.TestSparkBundle.message("testCasesSaving")) {
-                        indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("testCasesSaving")
+                    if (indicator.fraction == 1.0 && indicator.text != TestSparkBundle.message("testCasesSaving")) {
+                        indicator.text = TestSparkBundle.message("testCasesSaving")
                     }
                 }
             })
@@ -169,7 +170,7 @@ class EvoSuiteProcessManager(
             AppExecutorUtil.getAppScheduledExecutorService()
                 .execute(ResultWatcher(project, testResultName, fileUrl, classFQN))
         } catch (e: Exception) {
-            evoSuiteErrorManager.errorProcess(org.jetbrains.research.testspark.TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
+            evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()
         }
     }
