@@ -9,6 +9,8 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
+import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import java.awt.Color
 import java.awt.Dimension
@@ -51,15 +53,15 @@ class SettingsPluginComponent(project: Project) {
             "information about your usage patterns, such as the tests you generate and the way you " +
             "modify them manually before applying them to a test suite.",
     )
-    private val telemetrySeparator = JXTitledSeparator(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("telemetry"))
-    private var telemetryEnabledCheckbox = JCheckBox(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("telemetryEnabled"))
+    private val telemetrySeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("telemetry"))
+    private var telemetryEnabledCheckbox = JCheckBox(TestSparkLabelsBundle.defaultValue("telemetryEnabled"))
     private val fileChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
     private val textBrowseFolderListener = TextBrowseFolderListener(fileChooserDescriptor)
     private val telemetryPathChooser = TextFieldWithBrowseButton()
-    private val telemetryPathLabel = JBLabel(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("telemetryPath"))
+    private val telemetryPathLabel = JBLabel(TestSparkLabelsBundle.defaultValue("telemetryPath"))
 
     // Accessibility options
-    private val accessibilitySeparator = JXTitledSeparator(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("accessibility"))
+    private val accessibilitySeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("accessibility"))
     private var colorPicker = JColorChooser()
 
     init {
@@ -93,12 +95,12 @@ class SettingsPluginComponent(project: Project) {
             // Add description of TestSpark
             .addComponent(pluginDescription)
             .addComponent(pluginDescriptionDisclaimer, 15)
-            .addComponent(JXTitledSeparator(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("environmentSettings")), 15)
+            .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("environmentSettings")), 15)
 //            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("javaPath")), javaPathTextField, 10, false)
             // Add buildPath option
-            .addLabeledComponent(JBLabel(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("buildPath")), buildPathTextField, 10, false)
+            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("buildPath")), buildPathTextField, 10, false)
             // Add buildPath option
-            .addLabeledComponent(JBLabel(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("buildCommand")), buildCommandTextField, 10, false)
+            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("buildCommand")), buildCommandTextField, 10, false)
             // Add telemetry options
             .addComponent(telemetrySeparator, 15)
             .addComponent(telemetryDescription, 10)
@@ -106,7 +108,7 @@ class SettingsPluginComponent(project: Project) {
             .addLabeledComponent(telemetryPathLabel, telemetryPathChooser, 10, false)
             // Add accessibility options
             .addComponent(accessibilitySeparator, 15)
-            .addComponent(JBLabel(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("colorPicker")), 15)
+            .addComponent(JBLabel(TestSparkLabelsBundle.defaultValue("colorPicker")), 15)
             .addComponent(colorPicker, 10)
             .addComponentFillVertically(JPanel(), 0)
             .panel
@@ -118,16 +120,16 @@ class SettingsPluginComponent(project: Project) {
      */
     private fun stylizePanel() {
         // Add description to build Path
-        buildPathTextField.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("buildPath")
+        buildPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("buildPath")
 
         // Add description to build Command
-        buildCommandTextField.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("buildCommand")
+        buildCommandTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("buildCommand")
 
         // Add description to telemetry
-        telemetryEnabledCheckbox.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("telemetryEnabled")
+        telemetryEnabledCheckbox.toolTipText = TestSparkToolTipsBundle.defaultValue("telemetryEnabled")
 
         // Add description to telemetry path
-        telemetryPathLabel.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("telemetryPath")
+        telemetryPathLabel.toolTipText = TestSparkToolTipsBundle.defaultValue("telemetryPath")
 
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
@@ -194,17 +196,17 @@ class SettingsPluginComponent(project: Project) {
     var colorRed: Int
         get() = colorPicker.color.red
         set(newStatus) {
-            colorPicker.color = JBColor(org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("colorName"), Color(newStatus, colorPicker.color.green, colorPicker.color.blue))
+            colorPicker.color = JBColor(TestSparkToolTipsBundle.defaultValue("colorName"), Color(newStatus, colorPicker.color.green, colorPicker.color.blue))
         }
 
     var colorGreen: Int
         get() = colorPicker.color.green
         set(newStatus) {
-            colorPicker.color = JBColor(org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("colorName"), Color(colorPicker.color.red, newStatus, colorPicker.color.blue))
+            colorPicker.color = JBColor(TestSparkToolTipsBundle.defaultValue("colorName"), Color(colorPicker.color.red, newStatus, colorPicker.color.blue))
         }
     var colorBlue: Int
         get() = colorPicker.color.blue
         set(newStatus) {
-            colorPicker.color = JBColor(org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("colorName"), Color(colorPicker.color.red, colorPicker.color.green, newStatus))
+            colorPicker.color = JBColor(TestSparkToolTipsBundle.defaultValue("colorName"), Color(colorPicker.color.red, colorPicker.color.green, newStatus))
         }
 }

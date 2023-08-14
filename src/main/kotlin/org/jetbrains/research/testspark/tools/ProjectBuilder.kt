@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.task.ProjectTaskManager
 import com.intellij.util.concurrency.Semaphore
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
@@ -44,7 +45,7 @@ class ProjectBuilder(private val project: Project) {
 
         try {
             indicator.isIndeterminate = true
-            indicator.text = org.jetbrains.research.testspark.TestSparkBundle.message("buildMessage")
+            indicator.text = TestSparkBundle.message("buildMessage")
             if (settingsState.buildCommand.isEmpty()) {
                 // User did not put own command line
                 val promise = ProjectTaskManager.getInstance(project).buildAllModules()
@@ -117,8 +118,8 @@ class ProjectBuilder(private val project: Project) {
     private fun errorProcess() {
         if (project.service<ErrorService>().errorOccurred()) {
             NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-                org.jetbrains.research.testspark.TestSparkBundle.message("buildErrorTitle"),
-                org.jetbrains.research.testspark.TestSparkBundle.message("commonBuildErrorMessage"),
+                TestSparkBundle.message("buildErrorTitle"),
+                TestSparkBundle.message("commonBuildErrorMessage"),
                 NotificationType.ERROR,
             ).notify(project)
         }

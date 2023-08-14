@@ -9,6 +9,8 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
+import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import java.net.HttpURLConnection
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JPanel
@@ -128,12 +130,12 @@ class SettingsLLMComponent {
     }
 
     private fun stylizePanel() {
-        llmUserTokenField.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("llmToken")
-        maxLLMRequestsField.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("maximumNumberOfRequests")
-        modelSelector.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("model")
+        llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
+        maxLLMRequestsField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumNumberOfRequests")
+        modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
         modelSelector.isEnabled = false
-        maxInputParamsDepthField.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("parametersDepth")
-        maxPolyDepthField.toolTipText = org.jetbrains.research.testspark.TestSparkToolTipsBundle.defaultValue("maximumPolyDepth")
+        maxInputParamsDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("parametersDepth")
+        maxPolyDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumPolyDepth")
     }
 
     /**
@@ -141,33 +143,33 @@ class SettingsLLMComponent {
      */
     private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
-            .addComponent(JXTitledSeparator(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("LLMSettings")))
+            .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("LLMSettings")))
             .addLabeledComponent(
-                JBLabel(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("llmToken")),
+                JBLabel(TestSparkLabelsBundle.defaultValue("llmToken")),
                 llmUserTokenField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("model")),
+                JBLabel(TestSparkLabelsBundle.defaultValue("model")),
                 modelSelector,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("parametersDepth")),
+                JBLabel(TestSparkLabelsBundle.defaultValue("parametersDepth")),
                 maxInputParamsDepthField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("maximumPolyDepth")),
+                JBLabel(TestSparkLabelsBundle.defaultValue("maximumPolyDepth")),
                 maxPolyDepthField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(org.jetbrains.research.testspark.TestSparkLabelsBundle.defaultValue("maximumNumberOfRequests")),
+                JBLabel(TestSparkLabelsBundle.defaultValue("maximumNumberOfRequests")),
                 maxLLMRequestsField,
                 10,
                 false,

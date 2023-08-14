@@ -13,6 +13,9 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
+import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.Util
+import org.jetbrains.research.testspark.actions.getSurroundingClass
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
@@ -50,14 +53,14 @@ class Pipeline(
 
     private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
     private val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-    private val cutPsiClass: PsiClass = org.jetbrains.research.testspark.actions.getSurroundingClass(psiFile, caret)
+    private val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
     private val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
 
     private val classFQN = cutPsiClass.qualifiedName!!
 
     init {
-        org.jetbrains.research.testspark.Util.makeTmp()
-        org.jetbrains.research.testspark.Util.makeDir(baseDir)
+        Util.makeTmp()
+        Util.makeDir(baseDir)
 
         project.service<Workspace>().key = getKey(fileUrl, classFQN, modificationStamp, testResultName, projectClassPath)
     }
@@ -71,7 +74,7 @@ class Pipeline(
         val projectBuilder = ProjectBuilder(project)
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, org.jetbrains.research.testspark.TestSparkBundle.message("testGenerationMessage")) {
+            .run(object : Task.Backgroundable(project, TestSparkBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     if (processStopped(project, indicator)) return
 
