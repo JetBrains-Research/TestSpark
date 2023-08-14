@@ -43,7 +43,7 @@ fun createLLMPipeline(e: AnActionEvent): Pipeline {
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
 
-    val cutPsiClass: PsiClass = org.jetbrains.research.testspark.actions.getSurroundingClass(psiFile, caret)
+    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
 
     val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
     packageList.removeLast()
@@ -68,9 +68,9 @@ fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass {
     // Get the surrounding PSI class (i.e. the cursor has to be within that class)
     var surroundingClass: PsiClass? = null
     for (psiClass: PsiClass in classElements) {
-        if (org.jetbrains.research.testspark.actions.withinElement(psiClass, caret)) {
+        if (withinElement(psiClass, caret)) {
             // Check the constraints on a class
-            if (!org.jetbrains.research.testspark.actions.validateClass(psiClass)) continue
+            if (!validateClass(psiClass)) continue
             surroundingClass = psiClass
         }
     }
@@ -91,14 +91,10 @@ fun getSurroundingMethod(psiFile: PsiFile, caret: Caret): PsiMethod? {
     // Get the surrounding PSI method (i.e. the cursor has to be within that method)
     var surroundingMethod: PsiMethod? = null
     for (method: PsiMethod in methodElements) {
-        if (org.jetbrains.research.testspark.actions.isMethodConcrete(method) && org.jetbrains.research.testspark.actions.withinElement(
-                method,
-                caret
-            )
-        ) {
+        if (isMethodConcrete(method) && withinElement(method, caret)) {
             val surroundingClass: PsiClass = PsiTreeUtil.getParentOfType(method, PsiClass::class.java) ?: continue
             // Check the constraints on the surrounding class
-            if (!org.jetbrains.research.testspark.actions.validateClass(surroundingClass)) continue
+            if (!validateClass(surroundingClass)) continue
             surroundingMethod = method
         }
     }
@@ -115,7 +111,7 @@ fun getSurroundingMethod(psiFile: PsiFile, caret: Caret): PsiMethod? {
  * @return line number if the constraints are satisfied else null
  */
 fun getSurroundingLine(psiFile: PsiFile, caret: Caret): Int? {
-    val psiMethod: PsiMethod = org.jetbrains.research.testspark.actions.getSurroundingMethod(psiFile, caret) ?: return null
+    val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return null
 
     val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
 
@@ -125,7 +121,7 @@ fun getSurroundingLine(psiFile: PsiFile, caret: Caret): Int? {
 
     if (selectedLineText.isBlank()) return null
 
-    if (!org.jetbrains.research.testspark.actions.validateLine(selectedLine, psiMethod, psiFile)) return null
+    if (!validateLine(selectedLine, psiMethod, psiFile)) return null
     return selectedLine
 }
 
@@ -146,7 +142,7 @@ fun isMethodConcrete(psiMethod: PsiMethod): Boolean {
  * @return true if the method is a default method of an interface, false otherwise
  */
 fun isMethodDefault(psiMethod: PsiMethod): Boolean {
-    if (!org.jetbrains.research.testspark.actions.isMethodConcrete(psiMethod)) return false
+    if (!isMethodConcrete(psiMethod)) return false
     return psiMethod.containingClass?.isInterface ?: return false
 }
 
@@ -171,7 +167,7 @@ private fun isAbstractClass(psiClass: PsiClass): Boolean {
 
     val methods = PsiTreeUtil.findChildrenOfType(psiClass, PsiMethod::class.java)
     for (psiMethod: PsiMethod in methods) {
-        if (!org.jetbrains.research.testspark.actions.isMethodConcrete(psiMethod)) {
+        if (!isMethodConcrete(psiMethod)) {
             return true
         }
     }
@@ -247,7 +243,7 @@ private fun withinElement(psiElement: PsiElement, caret: Caret): Boolean {
 fun getClassDisplayName(psiClass: PsiClass): String {
     return if (psiClass.isInterface) {
         "Interface ${psiClass.qualifiedName}"
-    } else if (org.jetbrains.research.testspark.actions.isAbstractClass(psiClass)) {
+    } else if (isAbstractClass(psiClass)) {
         "Abstract Class ${psiClass.qualifiedName}"
     } else {
         "Class ${psiClass.qualifiedName}"
@@ -262,11 +258,11 @@ fun getClassDisplayName(psiClass: PsiClass): String {
  * @return the display name of the PSI method
  */
 fun getMethodDisplayName(psiMethod: PsiMethod): String {
-    return if (org.jetbrains.research.testspark.actions.isDefaultConstructor(psiMethod)) {
+    return if (isDefaultConstructor(psiMethod)) {
         "Default Constructor"
     } else if (psiMethod.isConstructor) {
         "Constructor"
-    } else if (org.jetbrains.research.testspark.actions.isMethodDefault(psiMethod)) {
+    } else if (isMethodDefault(psiMethod)) {
         "Default Method ${psiMethod.name}"
     } else {
         "Method ${psiMethod.name}"
@@ -286,10 +282,10 @@ fun updateForClass(e: AnActionEvent, name: String) {
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
-    val psiClass: PsiClass = org.jetbrains.research.testspark.actions.getSurroundingClass(psiFile, caret)
+    val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
 
     e.presentation.isEnabledAndVisible = true
-    e.presentation.text = "Generate Tests For ${org.jetbrains.research.testspark.actions.getClassDisplayName(psiClass)} by $name"
+    e.presentation.text = "Generate Tests For ${getClassDisplayName(psiClass)} by $name"
 }
 
 /**
@@ -305,10 +301,10 @@ fun updateForMethod(e: AnActionEvent, name: String) {
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
-    val psiMethod: PsiMethod = org.jetbrains.research.testspark.actions.getSurroundingMethod(psiFile, caret) ?: return
+    val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
 
     e.presentation.isEnabledAndVisible = true
-    e.presentation.text = "Generate Tests For ${org.jetbrains.research.testspark.actions.getMethodDisplayName(psiMethod)} by $name"
+    e.presentation.text = "Generate Tests For ${getMethodDisplayName(psiMethod)} by $name"
 }
 
 /**
@@ -324,7 +320,7 @@ fun updateForLine(e: AnActionEvent, name: String) {
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
-    val line: Int = org.jetbrains.research.testspark.actions.getSurroundingLine(psiFile, caret)?.plus(1)
+    val line: Int = getSurroundingLine(psiFile, caret)?.plus(1)
         ?: return // lines in the editor and in EvoSuite are one-based
 
     e.presentation.isEnabledAndVisible = true
@@ -357,14 +353,14 @@ fun getClassFullText(cl: PsiClass): String {
     val fileText = cl.containingFile.text
 
     // get package
-    org.jetbrains.research.testspark.actions.packagePattern.findAll(fileText, 0).map {
+    packagePattern.findAll(fileText, 0).map {
         it.groupValues[0]
     }.forEach {
         fullText += "$it\n\n"
     }
 
     // get imports
-    org.jetbrains.research.testspark.actions.importPattern.findAll(fileText, 0).map {
+    importPattern.findAll(fileText, 0).map {
         it.groupValues[0]
     }.forEach {
         fullText += "$it\n"
