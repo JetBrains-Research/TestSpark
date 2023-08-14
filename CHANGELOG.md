@@ -1,6 +1,6 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# TestGenie Changelog
+# TestSpark Changelog
 
 ## [Unreleased]
 
