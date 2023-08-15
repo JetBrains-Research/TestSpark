@@ -39,6 +39,7 @@ import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
+import com.jetbrains.rd.util.string.printToString
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
@@ -225,7 +226,7 @@ class TestCaseDisplayService(private val project: Project) {
             val resetButton = createResetButton(document, textFieldEditor, testCodeFormatted, testCase.testName)
 
             // Enable reset button when editor is changed
-            addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox)
+            addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox, testCase.testCode)
 
             // Set border
             textFieldEditor.border = getBorder(testCase.testName)
@@ -787,36 +788,23 @@ class TestCaseDisplayService(private val project: Project) {
         resetButton: JButton,
         textFieldEditor: EditorTextField,
         checkbox: JCheckBox,
+        testCaseCode: String,
     ) {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                resetButton.isEnabled = true
+                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
 
-                // add line highlighting
-                if (event.newRange.startOffset + 1 >= document.textLength ||
-                    event.newRange.endOffset >= document.textLength
-                ) {
-                    return
-                }
-                val newLine = event.newFragment.contains('\n')
-                val startLine = document.getLineNumber(
-                    event.newRange.startOffset +
-                        (if (newLine) 1 else 0),
+                resetButton.isEnabled = document.text != testCaseCode
+
+                val modifiedLineIndexes = getModifiedLines(
+                    testCaseCode.split("\n"),
+                    document.text.split("\n")
                 )
-                val endLine = document.getLineNumber(event.newRange.endOffset)
-                for (lineNumber in startLine..endLine) {
-                    textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                        if (newLine) DiffColors.DIFF_INSERTED else DiffColors.DIFF_MODIFIED,
-                        lineNumber,
-                        HighlighterLayer.FIRST,
-                    )
-                }
 
-                // Highlight if line has been deleted
-                if (event.oldFragment.contains('\n')) {
+                for (index in modifiedLineIndexes) {
                     textFieldEditor.editor!!.markupModel.addLineHighlighter(
                         DiffColors.DIFF_MODIFIED,
-                        endLine,
+                        index,
                         HighlighterLayer.FIRST,
                     )
                 }
@@ -826,6 +814,54 @@ class TestCaseDisplayService(private val project: Project) {
             }
         })
     }
+
+    /**
+     * Returns the indexes of lines that are modified between two lists of strings.
+     *
+     * @param source The source list of strings.
+     * @param target The target list of strings.
+     * @return The indexes of modified lines.
+     */
+    fun getModifiedLines(source: List<String>, target: List<String>): List<Int> {
+        val dp = Array(source.size + 1) { IntArray(target.size + 1) }
+
+        for (i in 1..source.size) {
+            for (j in 1..target.size) {
+                if (source[i - 1] == target[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                } else {
+                    dp[i][j] = maxOf(dp[i - 1][j], dp[i][j - 1])
+                }
+            }
+        }
+
+        var i = source.size
+        var j = target.size
+
+        val modifiedLineIndexes = mutableListOf<Int>()
+
+        while (i > 0 && j > 0) {
+            if (source[i - 1] == target[j - 1]) {
+                i--
+                j--
+            } else if (dp[i][j] == dp[i - 1][j]) {
+                i--
+            } else if (dp[i][j] == dp[i][j - 1]) {
+                modifiedLineIndexes.add(j - 1)
+                j--
+            }
+        }
+
+        while (j > 0) {
+            modifiedLineIndexes.add(j - 1)
+            j--
+        }
+
+        modifiedLineIndexes.reverse()
+
+        return modifiedLineIndexes
+    }
+
 
     /**
      * Method to show notification that there are no tests to verify
