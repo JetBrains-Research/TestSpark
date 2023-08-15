@@ -97,6 +97,8 @@
                 serviceImplementation="org.jetbrains.research.testspark.services.RunnerService"/>
         <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.ErrorService"/>
+        <projectService
+                serviceImplementation="org.jetbrains.research.testspark.services.TestsExecutionResultService"/>
 
         <toolWindow id="TestSpark" secondary="true" anchor="right"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>

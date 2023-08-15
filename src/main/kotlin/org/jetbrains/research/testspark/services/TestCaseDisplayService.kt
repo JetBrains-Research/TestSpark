@@ -227,13 +227,16 @@ class TestCaseDisplayService(private val project: Project) {
             // Enable reset button when editor is changed
             addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox)
 
+            // Set border
+            textFieldEditor.border = getBorder(testCase.testName)
+
             // Add "Remove" and "Reset" buttons to the test case panel
             resetButton.addActionListener {
                 WriteCommandAction.runWriteCommandAction(project) {
                     document.setText(testCodeFormatted)
                     resetButton.isEnabled = false
-                    textFieldEditor.border = JBUI.Borders.empty()
                     textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+                    textFieldEditor.border = getBorder(testCase.testName)
                 }
             }
             val bottomPanel = JPanel()
@@ -798,18 +801,6 @@ class TestCaseDisplayService(private val project: Project) {
             override fun documentChanged(event: DocumentEvent) {
                 resetButton.isEnabled = true
 
-                // add border highlight
-                val settingsProjectState = project.service<SettingsProjectService>().state
-                val borderColor = JBColor(
-                    TestSparkToolTipsBundle.defaultValue("colorName"),
-                    Color(
-                        settingsProjectState.colorRed,
-                        settingsProjectState.colorGreen,
-                        settingsProjectState.colorBlue,
-                    ),
-                )
-                textFieldEditor.border = BorderFactory.createLineBorder(borderColor)
-
                 // add line highlighting
                 if (event.newRange.startOffset + 1 >= document.textLength ||
                     event.newRange.endOffset >= document.textLength
@@ -872,4 +863,14 @@ class TestCaseDisplayService(private val project: Project) {
             }.filter { it.modified != it.original },
         )
     }
+
+    /**
+     * Returns the border for a given test case.
+     *
+     * @param testCaseName the name of the test case
+     * @return the border for the test case
+     */
+    private fun getBorder(testCaseName: String): Border =
+        if (project.service<TestsExecutionResultService>().isTestCasePassing(testCaseName)) BorderFactory.createLineBorder(JBColor.GREEN)
+        else BorderFactory.createLineBorder(JBColor.RED)
 }

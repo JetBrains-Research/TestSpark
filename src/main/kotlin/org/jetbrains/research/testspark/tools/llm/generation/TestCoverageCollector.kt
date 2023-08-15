@@ -15,6 +15,7 @@ import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
@@ -170,6 +171,9 @@ class TestCoverageCollector(
                     "$generatedTestPackage$className#${testCase.name}",
                 ),
             )
+
+            // add passing test
+            if (testExecutionError.isEmpty()) project.service<TestsExecutionResultService>().addPassingTest(testCase.name)
 
             // collect lines covered during the exception
             linesCoveredDuringTheException[testCase.name] = collectLinesCoveredDuringException(testExecutionError)
