@@ -222,7 +222,7 @@ class TestCaseDisplayService(private val project: Project) {
             val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel)
 
             // Create "Reset" button to reset the changes in the source code of the test
-            val resetButton = createResetButton(document, textFieldEditor, testCodeFormatted)
+            val resetButton = createResetButton(document, textFieldEditor, testCodeFormatted, testCase.testName)
 
             // Enable reset button when editor is changed
             addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox)
@@ -230,15 +230,6 @@ class TestCaseDisplayService(private val project: Project) {
             // Set border
             textFieldEditor.border = getBorder(testCase.testName)
 
-            // Add "Remove" and "Reset" buttons to the test case panel
-            resetButton.addActionListener {
-                WriteCommandAction.runWriteCommandAction(project) {
-                    document.setText(testCodeFormatted)
-                    resetButton.isEnabled = false
-                    textFieldEditor.editor!!.markupModel.removeAllHighlighters()
-                    textFieldEditor.border = getBorder(testCase.testName)
-                }
-            }
             val bottomPanel = JPanel()
             bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
             val bottomButtons = JPanel()
@@ -768,14 +759,14 @@ class TestCaseDisplayService(private val project: Project) {
      * @param testCode the source code of the test
      * @return the created button
      */
-    private fun createResetButton(document: Document, textFieldEditor: EditorTextField, testCode: String): JButton {
+    private fun createResetButton(document: Document, textFieldEditor: EditorTextField, testCode: String, testCaseName: String): JButton {
         val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetButton"))
         resetButton.isEnabled = false
         resetButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
                 document.setText(testCode)
                 resetButton.isEnabled = false
-                textFieldEditor.border = JBUI.Borders.empty()
+                textFieldEditor.border = getBorder(testCaseName)
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
             }
         }
