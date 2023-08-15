@@ -62,6 +62,7 @@ import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.border.Border
+import javax.swing.border.MatteBorder
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -897,7 +898,15 @@ class TestCaseDisplayService(private val project: Project) {
      * @param testCaseName the name of the test case
      * @return the border for the test case
      */
-    private fun getBorder(testCaseName: String): Border =
-        if (project.service<TestsExecutionResultService>().isTestCasePassing(testCaseName)) BorderFactory.createLineBorder(JBColor.GREEN)
-        else BorderFactory.createLineBorder(JBColor.RED)
+    private fun getBorder(testCaseName: String): Border {
+        val size = 3
+        return if (project.service<TestsExecutionResultService>().isTestCasePassing(testCaseName)) MatteBorder(
+            size,
+            size,
+            size,
+            size,
+            JBColor.GREEN
+        )
+        else MatteBorder(size, size, size, size, JBColor.RED)
+    }
 }
