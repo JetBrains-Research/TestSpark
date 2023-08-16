@@ -16,7 +16,7 @@ import kotlin.io.path.createDirectories
 class CommandLineService(private val project: Project) {
     private val sep = File.separatorChar
 
-    val id = UUID.randomUUID().toString()
+    private val id = UUID.randomUUID().toString()
     val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
     val testResultName = "test_gen_result_$id"
 
@@ -114,6 +114,6 @@ class CommandLineService(private val project: Project) {
         log.info("Save test in file " + testFile.absolutePath)
         testFile.writeText(code)
 
-        return generatedTestPath
+        return "$generatedTestPath$testFileName"
     }
 }

@@ -163,18 +163,25 @@ class LLMProcessManager(
             }
 
             // Save the generated TestSuite into a temp file
-            var generatedTestCasesPaths: List<String> = listOf()
+            val generatedTestCasesPaths: MutableList<String> = mutableListOf()
             if (isLastIteration(requestsCount)) {
                 generatedTestSuite.updateTestCases(project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList())
             } else {
-                generatedTestCasesPaths = saveGeneratedTestCases(generatedTestSuite, resultPath)
+                for (testCaseIndex in generatedTestSuite.testCases.indices) {
+                    generatedTestCasesPaths.add(project.service<CommandLineService>().saveGeneratedTests(
+                        generatedTestSuite.packageString,
+                        generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
+                        resultPath,
+                        "Generated${generatedTestSuite.testCases[testCaseIndex].name}.java",
+                    ))
+                }
             }
 
             val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
                 generatedTestSuite.packageString,
                 generatedTestSuite.toStringWithoutExpectedException(),
                 resultPath,
-                testFileName
+                testFileName,
             )
 
             // Correct files creating checking
@@ -192,7 +199,7 @@ class LLMProcessManager(
                 classFQN,
                 resultPath,
                 generatedTestCasesPaths,
-                File("$generatedTestPath${File.separatorChar}$testFileName"),
+                File(generatedTestPath),
                 generatedTestSuite.getPrintablePackageString(),
                 buildPath,
                 if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
@@ -203,7 +210,7 @@ class LLMProcessManager(
             // compile the test file
             indicator.text = TestSparkBundle.message("compilationTestsChecking")
             coverageCollector.compileTestCases()
-            val compilationResult = project.service<CommandLineService>().compileCode(File("$generatedTestPath${File.separatorChar}$testFileName").absolutePath, buildPath)
+            val compilationResult = project.service<CommandLineService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!compilationResult.first && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")
@@ -233,34 +240,6 @@ class LLMProcessManager(
             getPackageFromTestSuiteCode(generatedTestSuite.toString()),
             getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN),
         )
-    }
-
-    /**
-     * Saves the generated test cases to the specified result path.
-     *
-     * @param generatedTestSuite The generated test suite.
-     * @param resultPath The path where the generated test cases should be saved.
-     * @return A list of file paths where the test cases are saved.
-     */
-    private fun saveGeneratedTestCases(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): List<String> {
-        val testCaseFilePaths = mutableListOf<String>()
-        // Generate the final path for the generated tests
-        var generatedTestPath = "$resultPath${File.separatorChar}"
-        generatedTestSuite.packageString.split(".").forEach { directory ->
-            if (directory.isNotBlank()) generatedTestPath += "$directory${File.separatorChar}"
-        }
-        Path(generatedTestPath).createDirectories()
-
-        // Save the generated test suite to the file
-        for (testCaseIndex in generatedTestSuite.testCases.indices) {
-            val testFile = File("$generatedTestPath${File.separatorChar}Generated${generatedTestSuite.testCases[testCaseIndex].name}.java")
-            testFile.createNewFile()
-            log.info("Save test in file " + testFile.absolutePath)
-            testFile.writeText(generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex))
-            testCaseFilePaths.add(testFile.absolutePath)
-        }
-
-        return testCaseFilePaths
     }
 
     private fun isLastIteration(requestsCount: Int) = requestsCount > maxRequests
