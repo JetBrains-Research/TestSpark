@@ -20,6 +20,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -45,12 +46,13 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
+import org.jetbrains.research.testspark.tools.getBuildPath
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
-import java.util.Locale
+import java.util.*
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -61,6 +63,7 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+import kotlin.collections.HashMap
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -791,14 +794,31 @@ class TestCaseDisplayService(private val project: Project) {
     ) {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-//                val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
-//                    packageString,
-//                    document.text,
-//                    resultPath,
-//                    testFileName,
-//                )
-//
-//                project.service<CommandLineService>().compileCode(generatedTestPath, projectBuildPath).first
+                val fileName: String = ('A'..'Z').toList().random().toString() +
+                    (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
+                    ".java"
+
+                val code = project.service<JavaClassBuilderService>().generateCode(
+                    fileName.split(".")[0],
+                    document.text,
+                    project.service<Workspace>().testGenerationData.importsCode,
+                    project.service<Workspace>().testGenerationData.packageLine,
+                    project.service<Workspace>().testGenerationData.runWith,
+                    project.service<Workspace>().testGenerationData.otherInfo,
+                )
+
+                var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+                if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
+                    // User did not set own path
+                    buildPath = getBuildPath(project)
+                }
+
+                val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
+                    project.service<Workspace>().testGenerationData.packageLine,
+                    code,
+                    project.service<CommandLineService>().resultPath,
+                    fileName,
+                )
 
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
 

@@ -83,7 +83,7 @@ class TestsAssembler(
      */
     fun returnTestSuite(packageName: String): TestSuiteGeneratedByLLM? {
         try {
-            val testSuite = TestSuiteGeneratedByLLM()
+            val testSuite = TestSuiteGeneratedByLLM(project)
             rawText = rawText.split("```")[1]
 
             testSuite.packageString = packageName

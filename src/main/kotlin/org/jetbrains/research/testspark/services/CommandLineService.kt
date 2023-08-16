@@ -109,7 +109,7 @@ class CommandLineService(private val project: Project) {
         Path(generatedTestPath).createDirectories()
 
         // Save the generated test suite to the file
-        val testFile = File("$generatedTestPath${File.separatorChar}$testFileName")
+        val testFile = File("$generatedTestPath$testFileName")
         testFile.createNewFile()
         log.info("Save test in file " + testFile.absolutePath)
         testFile.writeText(code)

@@ -25,8 +25,6 @@ import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
-import kotlin.io.path.Path
-import kotlin.io.path.createDirectories
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -168,12 +166,14 @@ class LLMProcessManager(
                 generatedTestSuite.updateTestCases(project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList())
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
-                    generatedTestCasesPaths.add(project.service<CommandLineService>().saveGeneratedTests(
-                        generatedTestSuite.packageString,
-                        generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
-                        resultPath,
-                        "Generated${generatedTestSuite.testCases[testCaseIndex].name}.java",
-                    ))
+                    generatedTestCasesPaths.add(
+                        project.service<CommandLineService>().saveGeneratedTests(
+                            generatedTestSuite.packageString,
+                            generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
+                            resultPath,
+                            "Generated${generatedTestSuite.testCases[testCaseIndex].name}.java",
+                        ),
+                    )
                 }
             }
 
