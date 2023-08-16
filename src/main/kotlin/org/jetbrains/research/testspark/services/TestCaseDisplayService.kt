@@ -791,6 +791,15 @@ class TestCaseDisplayService(private val project: Project) {
     ) {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
+//                val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
+//                    packageString,
+//                    document.text,
+//                    resultPath,
+//                    testFileName,
+//                )
+//
+//                project.service<CommandLineService>().compileCode(generatedTestPath, projectBuildPath).first
+
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
 
                 resetButton.isEnabled = document.text != testCaseCode
@@ -898,13 +907,7 @@ class TestCaseDisplayService(private val project: Project) {
     private fun getBorder(testCaseName: String): Border {
         val size = 3
         return if (project.service<TestsExecutionResultService>().isTestCasePassing(testCaseName)) {
-            MatteBorder(
-                size,
-                size,
-                size,
-                size,
-                JBColor.GREEN,
-            )
+            MatteBorder(size, size, size, size, JBColor.GREEN)
         } else {
             MatteBorder(size, size, size, size, JBColor.RED)
         }

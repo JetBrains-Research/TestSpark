@@ -10,7 +10,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.TestSparkBundle
@@ -18,9 +17,8 @@ import org.jetbrains.research.testspark.Util
 import org.jetbrains.research.testspark.actions.getSurroundingClass
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.CommandLineService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import java.io.File
-import java.util.UUID
 
 /**
  * Pipeline class represents a pipeline for running the test generation process.
@@ -34,18 +32,15 @@ class Pipeline(
 ) {
     private val project = e.project!!
 
-    private val sep = File.separatorChar
-
     private val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
-    private val id = UUID.randomUUID().toString()
-    private val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
-    private val testResultName = "test_gen_result_$id"
+    private val testResultDirectory = project.service<CommandLineService>().testResultDirectory
+    private val testResultName = project.service<CommandLineService>().testResultName
+    private val resultPath = project.service<CommandLineService>().resultPath
+
     private var baseDir = "$testResultDirectory$testResultName-validation"
 
     private val serializeResultPath = "\"$testResultDirectory$testResultName\""
-
-    private val resultPath = "$testResultDirectory$testResultName"
 
     private val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
     private val fileUrl = vFile.presentableUrl

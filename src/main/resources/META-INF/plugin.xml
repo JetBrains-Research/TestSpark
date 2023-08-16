@@ -100,8 +100,6 @@
         <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.TestsExecutionResultService"/>
         <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.CompilableService"/>
-        <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.CommandLineService"/>
 
         <toolWindow id="TestSpark" secondary="true" anchor="right"

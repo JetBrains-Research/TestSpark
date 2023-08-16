@@ -14,7 +14,6 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.CommandLineService
-import org.jetbrains.research.testspark.services.CompilableService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
@@ -82,7 +81,7 @@ class TestCoverageCollector(
      */
     fun compileTestCases() {
         for (index in generatedTestPaths.indices) {
-            if (project.service<CompilableService>().compileCode(generatedTestPaths[index], projectBuildPath).first) {
+            if (project.service<CommandLineService>().compileCode(generatedTestPaths[index], projectBuildPath).first) {
                 project.service<Workspace>().testGenerationData.compilableTestCases.add(testCases[index])
             }
         }
@@ -151,7 +150,7 @@ class TestCoverageCollector(
 
             log.info("Runs command: ${command.joinToString(" ")}")
 
-            val reportGenerationError = project.service<CommandLineService>().runCommandLine(command as ArrayList<String>)
+            project.service<CommandLineService>().runCommandLine(command as ArrayList<String>)
 
             // check if XML report is produced
             if (!File("$dataFileName.xml").exists()) {
