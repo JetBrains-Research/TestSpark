@@ -4,7 +4,10 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ScriptRunnerUtil
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.CompilerModuleExtension
+import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import java.io.File
@@ -115,5 +118,82 @@ class CommandLineService(private val project: Project) {
         testFile.writeText(code)
 
         return "$generatedTestPath$testFileName"
+    }
+
+    /**
+     * Creates an XML report from the JaCoCo coverage data for a specific test case.
+     *
+     * @param className The name of the class under test.
+     * @param dataFileName The name of the coverage data file.
+     * @param cutModule The module containing the class under test.
+     * @param classFQN The fully qualified name of the class under test.
+     * @param testCaseName The name of the test case.
+     * @param projectBuildPath The build path of the project.
+     * @param generatedTestPackage The package where the generated test class is located.
+     * @return An empty string if the test execution is successful, otherwise an error message.
+     */
+    fun createXmlFromJacoco(
+        className: String,
+        dataFileName: String,
+        cutModule: Module,
+        classFQN: String,
+        testCaseName: String,
+        projectBuildPath: String,
+        generatedTestPackage: String,
+    ): String {
+        // find the proper javac
+        val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
+        // JaCoCo libs
+        val jacocoAgentDir = project.service<CommandLineService>().getLibrary("jacocoagent.jar")
+        val jacocoCLIDir = project.service<CommandLineService>().getLibrary("jacococli.jar")
+        val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
+
+        // run the test method with jacoco agent
+        val testExecutionError = project.service<CommandLineService>().runCommandLine(
+            arrayListOf(
+                javaRunner.absolutePath,
+                "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=$classFQN",
+                "-cp",
+                "${project.service<CommandLineService>().getPath(projectBuildPath)}${project.service<CommandLineService>().getLibrary("JUnitRunner.jar")}:$resultPath",
+                "org.jetbrains.research.SingleJUnitTestRunner",
+                "$generatedTestPackage$className#$testCaseName",
+            ),
+        )
+
+        // add passing test
+        if (testExecutionError.isEmpty()) {
+            project.service<TestsExecutionResultService>().addPassingTest(testCaseName)
+        } else {
+            project.service<TestsExecutionResultService>().removeFromPassingTest(testCaseName)
+        }
+
+        // Prepare the command for generating the Jacoco report
+        val command = mutableListOf(
+            javaRunner.absolutePath,
+            "-jar",
+            jacocoCLIDir,
+            "report",
+            "$dataFileName.exec",
+        )
+
+        // for classpath containing cut
+        command.add("--classfiles")
+        command.add(CompilerModuleExtension.getInstance(cutModule)?.compilerOutputPath!!.path)
+
+        // for each source folder
+        sourceRoots.forEach { root ->
+            command.add("--sourcefiles")
+            command.add(root.path)
+        }
+
+        // generate XML report
+        command.add("--xml")
+        command.add("$dataFileName.xml")
+
+        log.info("Runs command: ${command.joinToString(" ")}")
+
+        runCommandLine(command as ArrayList<String>)
+
+        return testExecutionError
     }
 }

@@ -820,6 +820,12 @@ class TestCaseDisplayService(private val project: Project) {
                     fileName,
                 )
 
+                val isCompilable = project.service<CommandLineService>().compileCode(generatedTestPath, buildPath).first
+
+                val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
+
+                val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
+
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
 
                 resetButton.isEnabled = document.text != testCaseCode

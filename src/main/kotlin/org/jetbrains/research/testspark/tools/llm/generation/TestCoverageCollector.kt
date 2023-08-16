@@ -6,15 +6,12 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.CompilerModuleExtension
-import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.CommandLineService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
@@ -50,12 +47,7 @@ class TestCoverageCollector(
 
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
-    // source path
-    private val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
     private val report = Report()
-
-    // list of covered lines during the exceptions
-    private val linesCoveredDuringTheException = HashMap<String, Set<Int>>()
 
     /**
      * Executes Jacoco on the compiled test file and collects the Jacoco results.
@@ -95,62 +87,20 @@ class TestCoverageCollector(
 
         log.info("Running jacoco")
 
-        val className = generatedTestFile.name.split('.')[0]
-        // find the proper javac
-        val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
-        // JaCoCo libs
-        val jacocoAgentDir = project.service<CommandLineService>().getLibrary("jacocoagent.jar")
-        val jacocoCLIDir = project.service<CommandLineService>().getLibrary("jacococli.jar")
-
         // Execute each test method separately
         for (testCase in testCases) {
             // name of .exec and .xml files
-            val dataFileName = "${generatedTestFile.parentFile.absolutePath}/jacoco-${testCase.name}"
+            val dataFileName = "${generatedTestFile.parentFile.absolutePath}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
 
-            // run the test method with jacoco agent
-            val testExecutionError = project.service<CommandLineService>().runCommandLine(
-                arrayListOf(
-                    javaRunner.absolutePath,
-                    "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=$classFQN",
-                    "-cp",
-                    "${project.service<CommandLineService>().getPath(projectBuildPath)}${project.service<CommandLineService>().getLibrary("JUnitRunner.jar")}:$resultPath",
-                    "org.jetbrains.research.SingleJUnitTestRunner",
-                    "$generatedTestPackage$className#${testCase.name}",
-                ),
+            val testExecutionError = project.service<CommandLineService>().createXmlFromJacoco(
+                generatedTestFile.name.split('.')[0],
+                dataFileName,
+                cutModule,
+                classFQN,
+                testCase.name,
+                projectBuildPath,
+                generatedTestPackage,
             )
-
-            // add passing test
-            if (testExecutionError.isEmpty()) project.service<TestsExecutionResultService>().addPassingTest(testCase.name)
-
-            // collect lines covered during the exception
-            linesCoveredDuringTheException[testCase.name] = collectLinesCoveredDuringException(testExecutionError)
-
-            // Prepare the command for generating the Jacoco report
-            val command = mutableListOf(
-                javaRunner.absolutePath,
-                "-jar",
-                jacocoCLIDir,
-                "report",
-                "$dataFileName.exec",
-            )
-
-            // for classpath containing cut
-            command.add("--classfiles")
-            command.add(CompilerModuleExtension.getInstance(cutModule)?.compilerOutputPath!!.path)
-
-            // for each source folder
-            sourceRoots.forEach { root ->
-                command.add("--sourcefiles")
-                command.add(root.path)
-            }
-
-            // generate XML report
-            command.add("--xml")
-            command.add("$dataFileName.xml")
-
-            log.info("Runs command: ${command.joinToString(" ")}")
-
-            project.service<CommandLineService>().runCommandLine(command as ArrayList<String>)
 
             // check if XML report is produced
             if (!File("$dataFileName.xml").exists()) {
@@ -160,7 +110,7 @@ class TestCoverageCollector(
             log.info("xml file exists")
 
             // save data to TestGenerationResult
-            saveData(testCase, "$dataFileName.xml")
+            saveData(testCase, collectLinesCoveredDuringException(testExecutionError), "$dataFileName.xml")
         }
     }
 
@@ -199,7 +149,7 @@ class TestCoverageCollector(
      * @param testCase The test case generated by LLM.
      * @param xmlFileName The XML file name to read data from.
      */
-    private fun saveData(testCase: TestCaseGeneratedByLLM, xmlFileName: String) {
+    private fun saveData(testCase: TestCaseGeneratedByLLM, linesCoveredDuringTheException: Set<Int>, xmlFileName: String) {
         indicator.text = TestSparkBundle.message("testCasesSaving")
         val setOfLines = mutableSetOf<Int>()
         var isCorrectSourceFile: Boolean
@@ -231,7 +181,7 @@ class TestCoverageCollector(
         log.info("Test case saved:\n$testCase")
 
         // Add lines that Jacoco might have missed because of its limitation during the exception
-        setOfLines.addAll(linesCoveredDuringTheException[testCase.name]!!)
+        setOfLines.addAll(linesCoveredDuringTheException)
 
         report.testCaseList[testCase.name] = TestCase(
             testCase.name,
