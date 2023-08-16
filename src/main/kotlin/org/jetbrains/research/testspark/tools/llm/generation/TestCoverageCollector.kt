@@ -1,8 +1,6 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.gitlab.mvysny.konsumexml.konsumeXml
-import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.process.ScriptRunnerUtil
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.Module
@@ -15,6 +13,8 @@ import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.CommandLineService
+import org.jetbrains.research.testspark.services.CompilableService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
@@ -49,7 +49,6 @@ class TestCoverageCollector(
 ) {
     private val log = Logger.getInstance(this::class.java)
 
-    private val sep = File.separatorChar
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
     // source path
@@ -81,63 +80,12 @@ class TestCoverageCollector(
      * @return A Pair containing a boolean indicating whether the compilation was successful
      *         and a String containing any error message encountered during compilation.
      */
-    private fun compileTestCases() {
-        indicator.text = TestSparkBundle.message("compilationTestsChecking")
-
-        // find the proper javac
-        val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()
-
+    fun compileTestCases() {
         for (index in generatedTestPaths.indices) {
-            // compile file
-            runCommandLine(
-                arrayListOf(
-                    javaCompile.absolutePath,
-                    "-cp",
-                    getPath(projectBuildPath),
-                    generatedTestPaths[index],
-                ),
-            )
-
-            // create .class file path
-            val classFilePath = generatedTestPaths[index].replace(".java", ".class")
-
-            // check is .class file exists
-            if (File(classFilePath).exists()) {
+            if (project.service<CompilableService>().compileCode(generatedTestPaths[index], projectBuildPath).first) {
                 project.service<Workspace>().testGenerationData.compilableTestCases.add(testCases[index])
             }
         }
-    }
-
-    /**
-     * Compiles the generated test file using the proper javac and returns a Pair
-     * indicating whether the compilation was successful and any error message encountered during compilation.
-     *
-     * @return A Pair containing a boolean indicating whether the compilation was successful
-     *         and a String containing any error message encountered during compilation.
-     */
-    fun compile(): Pair<Boolean, String> {
-        indicator.text = TestSparkBundle.message("compilationTestsChecking")
-
-        // compile test cases for extracting correct ones
-        compileTestCases()
-
-        // find the proper javac
-        val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()
-        // compile file
-        val errorMsg = runCommandLine(
-            arrayListOf(
-                javaCompile.absolutePath,
-                "-cp",
-                getPath(projectBuildPath),
-                generatedTestFile.absolutePath,
-            ),
-        )
-
-        // create .class file path
-        val classFilePath = generatedTestFile.absolutePath.replace(".java", ".class")
-
-        // check is .class file exists
-        return Pair(File(classFilePath).exists(), errorMsg)
     }
 
     /**
@@ -152,8 +100,8 @@ class TestCoverageCollector(
         // find the proper javac
         val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
         // JaCoCo libs
-        val jacocoAgentDir = getLibrary("jacocoagent.jar")
-        val jacocoCLIDir = getLibrary("jacococli.jar")
+        val jacocoAgentDir = project.service<CommandLineService>().getLibrary("jacocoagent.jar")
+        val jacocoCLIDir = project.service<CommandLineService>().getLibrary("jacococli.jar")
 
         // Execute each test method separately
         for (testCase in testCases) {
@@ -161,12 +109,12 @@ class TestCoverageCollector(
             val dataFileName = "${generatedTestFile.parentFile.absolutePath}/jacoco-${testCase.name}"
 
             // run the test method with jacoco agent
-            val testExecutionError = runCommandLine(
+            val testExecutionError = project.service<CommandLineService>().runCommandLine(
                 arrayListOf(
                     javaRunner.absolutePath,
                     "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=$classFQN",
                     "-cp",
-                    "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:$resultPath",
+                    "${project.service<CommandLineService>().getPath(projectBuildPath)}${project.service<CommandLineService>().getLibrary("JUnitRunner.jar")}:$resultPath",
                     "org.jetbrains.research.SingleJUnitTestRunner",
                     "$generatedTestPackage$className#${testCase.name}",
                 ),
@@ -203,7 +151,7 @@ class TestCoverageCollector(
 
             log.info("Runs command: ${command.joinToString(" ")}")
 
-            val reportGenerationError = runCommandLine(command as ArrayList<String>)
+            val reportGenerationError = project.service<CommandLineService>().runCommandLine(command as ArrayList<String>)
 
             // check if XML report is produced
             if (!File("$dataFileName.xml").exists()) {
@@ -293,42 +241,5 @@ class TestCoverageCollector(
             setOf(),
             setOf(),
         )
-    }
-
-    /**
-     * Executes a command line process and returns the output as a string.
-     *
-     * @param cmd The command line arguments as an ArrayList of strings.
-     * @return The output of the command line process as a string.
-     */
-    private fun runCommandLine(cmd: ArrayList<String>): String {
-        val compilationProcess = GeneralCommandLine(cmd)
-        return ScriptRunnerUtil.getProcessOutput(compilationProcess, ScriptRunnerUtil.STDERR_OUTPUT_KEY_FILTER, 30000)
-    }
-
-    /**
-     * Generates the path for the command by concatenating the necessary paths.
-     *
-     * @param buildPath The path of the build file.
-     * @return The generated path as a string.
-     */
-    private fun getPath(buildPath: String): String {
-        // create the path for the command
-        val pluginsPath = System.getProperty("idea.plugins.path")
-        val junitPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}junit-4.13.jar"
-        val mockitoPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}mockito-core-5.0.0.jar"
-        val hamcrestPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}hamcrest-core-1.3.jar"
-        return "$junitPath:$hamcrestPath:$mockitoPath:$buildPath"
-    }
-
-    /**
-     * Retrieves the absolute path of the specified library.
-     *
-     * @param libraryName the name of the library
-     * @return the absolute path of the library
-     */
-    private fun getLibrary(libraryName: String): String {
-        val pluginsPath = System.getProperty("idea.plugins.path")
-        return "$pluginsPath${sep}TestSpark${sep}lib${sep}$libraryName"
     }
 }

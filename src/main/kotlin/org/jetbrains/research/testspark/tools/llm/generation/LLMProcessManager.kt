@@ -10,6 +10,7 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.CompilableService
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -194,7 +195,9 @@ class LLMProcessManager(
             )
 
             // compile the test file
-            val compilationResult = coverageCollector.compile()
+            indicator.text = TestSparkBundle.message("compilationTestsChecking")
+            coverageCollector.compileTestCases()
+            val compilationResult = project.service<CompilableService>().compileCode(File("$generatedTestPath${File.separatorChar}$testFileName").absolutePath, buildPath)
 
             if (!compilationResult.first && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")
