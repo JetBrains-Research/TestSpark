@@ -29,7 +29,6 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElementFactory
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import com.intellij.refactoring.suggested.newRange
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
@@ -39,7 +38,6 @@ import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
-import com.jetbrains.rd.util.string.printToString
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
@@ -799,7 +797,7 @@ class TestCaseDisplayService(private val project: Project) {
 
                 val modifiedLineIndexes = getModifiedLines(
                     testCaseCode.split("\n"),
-                    document.text.split("\n")
+                    document.text.split("\n"),
                 )
 
                 for (index in modifiedLineIndexes) {
@@ -863,7 +861,6 @@ class TestCaseDisplayService(private val project: Project) {
         return modifiedLineIndexes
     }
 
-
     /**
      * Method to show notification that there are no tests to verify
      */
@@ -900,13 +897,16 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun getBorder(testCaseName: String): Border {
         val size = 3
-        return if (project.service<TestsExecutionResultService>().isTestCasePassing(testCaseName)) MatteBorder(
-            size,
-            size,
-            size,
-            size,
-            JBColor.GREEN
-        )
-        else MatteBorder(size, size, size, size, JBColor.RED)
+        return if (project.service<TestsExecutionResultService>().isTestCasePassing(testCaseName)) {
+            MatteBorder(
+                size,
+                size,
+                size,
+                size,
+                JBColor.GREEN,
+            )
+        } else {
+            MatteBorder(size, size, size, size, JBColor.RED)
+        }
     }
 }
