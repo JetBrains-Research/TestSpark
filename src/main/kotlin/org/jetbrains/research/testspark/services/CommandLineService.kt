@@ -35,7 +35,7 @@ class CommandLineService(private val project: Project) {
      * @param cmd The command line arguments as an ArrayList of strings.
      * @return The output of the command line process as a string.
      */
-    fun runCommandLine(cmd: ArrayList<String>): String {
+    private fun runCommandLine(cmd: ArrayList<String>): String {
         val compilationProcess = GeneralCommandLine(cmd)
         return ScriptRunnerUtil.getProcessOutput(compilationProcess, ScriptRunnerUtil.STDERR_OUTPUT_KEY_FILTER, 30000)
     }
@@ -46,7 +46,7 @@ class CommandLineService(private val project: Project) {
      * @param buildPath The path of the build file.
      * @return The generated path as a string.
      */
-    fun getPath(buildPath: String): String {
+    private fun getPath(buildPath: String): String {
         // create the path for the command
         val pluginsPath = System.getProperty("idea.plugins.path")
         val junitPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}junit-4.13.jar"
@@ -61,7 +61,7 @@ class CommandLineService(private val project: Project) {
      * @param libraryName the name of the library
      * @return the absolute path of the library
      */
-    fun getLibrary(libraryName: String): String {
+    private fun getLibrary(libraryName: String): String {
         val pluginsPath = System.getProperty("idea.plugins.path")
         return "$pluginsPath${sep}TestSpark${sep}lib${sep}$libraryName"
     }
@@ -78,7 +78,7 @@ class CommandLineService(private val project: Project) {
         // find the proper javac
         val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()
         // compile file
-        val errorMsg = project.service<CommandLineService>().runCommandLine(
+        val errorMsg = runCommandLine(
             arrayListOf(
                 javaCompile.absolutePath,
                 "-cp",
@@ -149,7 +149,7 @@ class CommandLineService(private val project: Project) {
         val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
 
         // run the test method with jacoco agent
-        val testExecutionError = project.service<CommandLineService>().runCommandLine(
+        val testExecutionError = runCommandLine(
             arrayListOf(
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=$classFQN",
