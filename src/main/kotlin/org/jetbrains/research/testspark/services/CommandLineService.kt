@@ -4,12 +4,12 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ScriptRunnerUtil
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
+import org.jetbrains.research.testspark.editor.Workspace
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -135,8 +135,6 @@ class CommandLineService(private val project: Project) {
     fun createXmlFromJacoco(
         className: String,
         dataFileName: String,
-        cutModule: Module,
-        classFQN: String,
         testCaseName: String,
         projectBuildPath: String,
         generatedTestPackage: String,
@@ -146,13 +144,13 @@ class CommandLineService(private val project: Project) {
         // JaCoCo libs
         val jacocoAgentDir = project.service<CommandLineService>().getLibrary("jacocoagent.jar")
         val jacocoCLIDir = project.service<CommandLineService>().getLibrary("jacococli.jar")
-        val sourceRoots = ModuleRootManager.getInstance(cutModule).getSourceRoots(false)
+        val sourceRoots = ModuleRootManager.getInstance(project.service<Workspace>().cutModule!!).getSourceRoots(false)
 
         // run the test method with jacoco agent
         val testExecutionError = runCommandLine(
             arrayListOf(
                 javaRunner.absolutePath,
-                "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=$classFQN",
+                "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
                 "-cp",
                 "${project.service<CommandLineService>().getPath(projectBuildPath)}${project.service<CommandLineService>().getLibrary("JUnitRunner.jar")}:$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
@@ -178,7 +176,7 @@ class CommandLineService(private val project: Project) {
 
         // for classpath containing cut
         command.add("--classfiles")
-        command.add(CompilerModuleExtension.getInstance(cutModule)?.compilerOutputPath!!.path)
+        command.add(CompilerModuleExtension.getInstance(project.service<Workspace>().cutModule!!)?.compilerOutputPath!!.path)
 
         // for each source folder
         sourceRoots.forEach { root ->

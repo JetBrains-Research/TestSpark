@@ -73,7 +73,7 @@ class LLMProcessManager(
             project.service<Workspace>().key = getKey(
                 project,
                 "${project.service<Workspace>().classFQN}#${codeType.objectDescription}",
-                )
+            )
         }
 
         // update build path

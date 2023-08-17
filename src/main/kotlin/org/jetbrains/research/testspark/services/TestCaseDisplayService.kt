@@ -221,7 +221,7 @@ class TestCaseDisplayService(private val project: Project) {
             val resetButton = createResetButton(document, textFieldEditor, testCodeFormatted, testCase.testName)
 
             // Enable reset button when editor is changed
-            addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox, testCase.testCode)
+            addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox, testCase.testCode, testCase.testName)
 
             // Set border
             textFieldEditor.border = getBorder(testCase.testName)
@@ -266,8 +266,8 @@ class TestCaseDisplayService(private val project: Project) {
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
                     settingsProjectState.colorBlue,
-                    30
-                )
+                    30,
+                ),
             )
         if (editor.background.equals(highlightColor)) return
         defaultEditorColor = editor.background
@@ -374,14 +374,14 @@ class TestCaseDisplayService(private val project: Project) {
         // Apply filter with folders and java files with main class
         descriptor.withFileFilter { file ->
             file.isDirectory || (
-                    file.extension?.lowercase(Locale.getDefault()) == "java" && (
-                            PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
-                            ).classes.stream().map { it.name }
-                        .toArray()
-                        .contains(
-                            (PsiManager.getInstance(project).findFile(file) as PsiJavaFile).name.removeSuffix(".java"),
-                        )
+                file.extension?.lowercase(Locale.getDefault()) == "java" && (
+                    PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                    ).classes.stream().map { it.name }
+                    .toArray()
+                    .contains(
+                        (PsiManager.getInstance(project).findFile(file) as PsiJavaFile).name.removeSuffix(".java"),
                     )
+                )
         }
 
         val fileChooser = FileChooser.chooseFiles(
@@ -770,7 +770,7 @@ class TestCaseDisplayService(private val project: Project) {
         document: Document,
         textFieldEditor: EditorTextField,
         testCode: String,
-        testCaseName: String
+        testCaseName: String,
     ): JButton {
         val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetButton"))
         resetButton.isEnabled = false
@@ -800,75 +800,69 @@ class TestCaseDisplayService(private val project: Project) {
         textFieldEditor: EditorTextField,
         checkbox: JCheckBox,
         testCaseCode: String,
+        testCaseName: String,
     ) {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                SwingUtilities.invokeLater {
-                    val fileName: String = ('A'..'Z').toList().random().toString() +
-                            (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
-                            ".java"
+                val fileName: String = ('A'..'Z').toList().random().toString() +
+                    (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
+                    ".java"
 
-                    val code = project.service<JavaClassBuilderService>().generateCode(
-                        fileName.split(".")[0],
-                        document.text,
-                        project.service<Workspace>().testGenerationData.importsCode,
-                        project.service<Workspace>().testGenerationData.packageLine,
-                        project.service<Workspace>().testGenerationData.runWith,
-                        project.service<Workspace>().testGenerationData.otherInfo,
-                    )
+                val code = project.service<JavaClassBuilderService>().generateCode(
+                    fileName.split(".")[0],
+                    document.text,
+                    project.service<Workspace>().testGenerationData.importsCode,
+                    project.service<Workspace>().testGenerationData.packageLine,
+                    project.service<Workspace>().testGenerationData.runWith,
+                    project.service<Workspace>().testGenerationData.otherInfo,
+                )
 
-                    var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-                    if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
-                        // User did not set own path
-                        buildPath = getBuildPath(project)
-                    }
-
-                    val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
-                        project.service<Workspace>().testGenerationData.packageLine,
-                        code,
-                        project.service<CommandLineService>().resultPath,
-                        fileName,
-                    )
-
-                    println(project.service<CommandLineService>().compileCode(generatedTestPath, buildPath).first)
-
-                    val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
-
-                    val javaRunner =
-                        File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
-
-//                val testExecutionError = project.service<CommandLineService>().createXmlFromJacoco(
-//                    generatedTestFile.name.split('.')[0],
-//                    dataFileName,
-//                    cutModule,
-//                    classFQN,
-//                    testCase.name,
-//                    buildPath,
-//                    generatedTestPackage,
-//                )
-
-                    textFieldEditor.editor!!.markupModel.removeAllHighlighters()
-
-//                textFieldEditor.border = getBorder(testCase.name)
-
-                    resetButton.isEnabled = document.text != testCaseCode
-
-                    val modifiedLineIndexes = getModifiedLines(
-                        testCaseCode.split("\n"),
-                        document.text.split("\n"),
-                    )
-
-                    for (index in modifiedLineIndexes) {
-                        textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                            DiffColors.DIFF_MODIFIED,
-                            index,
-                            HighlighterLayer.FIRST,
-                        )
-                    }
-
-                    // select checkbox
-                    checkbox.isSelected = true
+                var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+                if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
+                    // User did not set own path
+                    buildPath = getBuildPath(project)
                 }
+
+                val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
+                    project.service<Workspace>().testGenerationData.packageLine,
+                    code,
+                    project.service<Workspace>().resultPath!!,
+                    fileName,
+                )
+
+                project.service<CommandLineService>().compileCode(generatedTestPath, buildPath).first
+
+                val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
+
+                project.service<CommandLineService>().createXmlFromJacoco(
+                    fileName.split(".")[0],
+                    dataFileName,
+                    testCaseName,
+                    buildPath,
+                    project.service<Workspace>().testGenerationData.packageLine,
+                )
+
+                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+
+                textFieldEditor.border = getBorder(testCaseName)
+
+                resetButton.isEnabled = document.text != testCaseCode
+
+                val modifiedLineIndexes = getModifiedLines(
+                    testCaseCode.split("\n"),
+                    document.text.split("\n"),
+                )
+
+                for (index in modifiedLineIndexes) {
+                    textFieldEditor.editor!!.markupModel.addLineHighlighter(
+                        DiffColors.DIFF_MODIFIED,
+                        index,
+                        HighlighterLayer.FIRST,
+                    )
+                }
+
+                // select checkbox
+                checkbox.isSelected = true
             }
         })
     }
