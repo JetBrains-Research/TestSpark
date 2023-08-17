@@ -826,7 +826,19 @@ class TestCaseDisplayService(private val project: Project) {
 
                 val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
 
+//                val testExecutionError = project.service<CommandLineService>().createXmlFromJacoco(
+//                    generatedTestFile.name.split('.')[0],
+//                    dataFileName,
+//                    cutModule,
+//                    classFQN,
+//                    testCase.name,
+//                    buildPath,
+//                    generatedTestPackage,
+//                )
+
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+
+//                textFieldEditor.border = getBorder(testCase.name)
 
                 resetButton.isEnabled = document.text != testCaseCode
 

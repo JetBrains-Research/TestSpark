@@ -12,17 +12,15 @@ import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiClass
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.data.TestGenerationData
-import org.jetbrains.research.testspark.services.COVERAGE_SELECTION_TOGGLE_TOPIC
-import org.jetbrains.research.testspark.services.CoverageSelectionToggleListener
-import org.jetbrains.research.testspark.services.CoverageVisualisationService
-import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.services.*
 import org.jetbrains.research.testspark.tools.evosuite.validation.VALIDATION_RESULT_TOPIC
 import org.jetbrains.research.testspark.tools.evosuite.validation.ValidationResultListener
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
@@ -58,6 +56,19 @@ class Workspace(private val project: Project) : Disposable {
             return lineSet
         }
     }
+
+    var projectClassPath: String? = null
+    var testResultDirectory: String? = null
+    var testResultName: String? = null
+    var resultPath: String? = null
+    var baseDir: String? = null
+    var serializeResultPath: String? = null
+    var vFile: VirtualFile? = null
+    var fileUrl: String? = null
+    var modificationStamp: Long? = null
+    var cutPsiClass: PsiClass? = null
+    var cutModule: Module? = null
+    var classFQN: String? = null
 
     private val log = Logger.getInstance(this.javaClass)
 

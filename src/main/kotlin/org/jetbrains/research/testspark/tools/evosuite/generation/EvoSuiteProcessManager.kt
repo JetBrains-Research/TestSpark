@@ -6,7 +6,6 @@ import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
@@ -59,25 +58,24 @@ class EvoSuiteProcessManager(
     override fun runTestGenerator(
         indicator: ProgressIndicator,
         codeType: FragmentToTestDada,
-        projectClassPath: String,
-        resultPath: String,
-        serializeResultPath: String,
         packageName: String,
-        cutModule: Module,
-        classFQN: String,
-        fileUrl: String,
-        testResultName: String,
-        baseDir: String,
-        modificationStamp: Long,
     ) {
         try {
             if (processStopped(project, indicator)) return
+
+            val projectClassPath = project.service<Workspace>().projectClassPath!!
+            val serializeResultPath = project.service<Workspace>().serializeResultPath!!
+            val classFQN = project.service<Workspace>().classFQN!!
+            val baseDir = project.service<Workspace>().baseDir!!
+            val fileUrl = project.service<Workspace>().fileUrl!!
+            val modificationStamp = project.service<Workspace>().modificationStamp!!
+            val testResultName = project.service<Workspace>().testResultName!!
 
             // get command
             val command = when (codeType.type!!) {
                 CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).build()
                 CodeType.METHOD -> {
-                    project.service<Workspace>().key = getKey(fileUrl, "$classFQN#${codeType.objectDescription}", modificationStamp, testResultName, projectClassPath)
+                    project.service<Workspace>().key = getKey(project, "$classFQN#${codeType.objectDescription}")
                     SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forMethod(codeType.objectDescription).build()
                 }
 

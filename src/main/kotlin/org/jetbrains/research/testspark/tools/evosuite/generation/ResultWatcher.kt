@@ -68,7 +68,7 @@ class ResultWatcher(
 
                         val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
 
-                        saveData(project, Report(testGenerationResult), resultName, fileUrl, getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode), getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN))
+                        saveData(project, Report(testGenerationResult), getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode), getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN))
 
                         return
                     }

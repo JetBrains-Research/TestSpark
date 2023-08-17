@@ -3,10 +3,8 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
@@ -21,8 +19,6 @@ import java.io.File
  *
  * @property indicator The progress indicator to display the current task progress.
  * @property project The project associated with the test generation.
- * @property classFQN The class under test's full qualified name.
- * @property resultPath The path to save the generated test coverage report.
  * @property generatedTestPaths The paths of the generated test files.
  * @property generatedTestFile The generated test file.
  * @property generatedTestPackage The package of the generated test file.
@@ -33,19 +29,14 @@ import java.io.File
 class TestCoverageCollector(
     private val indicator: ProgressIndicator,
     private val project: Project,
-    private val classFQN: String,
-    private val resultPath: String,
     private val generatedTestPaths: List<String>,
     private val generatedTestFile: File,
     private val generatedTestPackage: String,
     private val projectBuildPath: String,
     private val testCases: MutableList<TestCaseGeneratedByLLM>,
-    private val cutModule: Module,
     private val fileNameFQN: String,
 ) {
     private val log = Logger.getInstance(this::class.java)
-
-    private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
     private val report = Report()
 
@@ -95,8 +86,8 @@ class TestCoverageCollector(
             val testExecutionError = project.service<CommandLineService>().createXmlFromJacoco(
                 generatedTestFile.name.split('.')[0],
                 dataFileName,
-                cutModule,
-                classFQN,
+                project.service<Workspace>().cutModule!!,
+                project.service<Workspace>().classFQN!!,
                 testCase.name,
                 projectBuildPath,
                 generatedTestPackage,
@@ -132,7 +123,7 @@ class TestCoverageCollector(
         frames.removeFirst()
 
         frames.forEach { frame ->
-            if (frame.contains(classFQN)) {
+            if (frame.contains(project.service<Workspace>().classFQN!!)) {
                 val coveredLineNumber = frame.split(":")[1].replace(")", "").toIntOrNull()
                 if (coveredLineNumber != null) {
                     result.add(coveredLineNumber)

@@ -3,15 +3,11 @@ package org.jetbrains.research.testspark.tools
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Caret
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.Util
 import org.jetbrains.research.testspark.actions.getSurroundingClass
@@ -32,39 +28,39 @@ class Pipeline(
 ) {
     private val project = e.project!!
 
-    private val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-
-    private val testResultDirectory = project.service<CommandLineService>().testResultDirectory
-    private val testResultName = project.service<CommandLineService>().testResultName
-    private val resultPath = project.service<CommandLineService>().resultPath
-
-    private var baseDir = "$testResultDirectory$testResultName-validation"
-
-    private val serializeResultPath = "\"$testResultDirectory$testResultName\""
-
-    private val vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
-    private val fileUrl = vFile.presentableUrl
-    private val modificationStamp = vFile.modificationStamp
-
-    private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-    private val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-    private val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
-    private val cutModule: Module = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
-
-    private val classFQN = cutPsiClass.qualifiedName!!
-
     init {
-        Util.makeTmp()
-        Util.makeDir(baseDir)
+        project.service<Workspace>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
 
-        project.service<Workspace>().key = getKey(fileUrl, classFQN, modificationStamp, testResultName, projectClassPath)
+        project.service<Workspace>().testResultDirectory = project.service<CommandLineService>().testResultDirectory
+        project.service<Workspace>().testResultName = project.service<CommandLineService>().testResultName
+        project.service<Workspace>().resultPath = project.service<CommandLineService>().resultPath
+
+        project.service<Workspace>().baseDir = "${project.service<Workspace>().testResultDirectory}${project.service<Workspace>().testResultName}-validation"
+
+        project.service<Workspace>().serializeResultPath = "\"${project.service<Workspace>().testResultDirectory}${project.service<Workspace>().testResultName}\""
+
+        project.service<Workspace>().vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
+        project.service<Workspace>().fileUrl = project.service<Workspace>().vFile!!.presentableUrl
+        project.service<Workspace>().modificationStamp = project.service<Workspace>().vFile!!.modificationStamp
+
+        project.service<Workspace>().cutPsiClass = getSurroundingClass(
+            e.dataContext.getData(CommonDataKeys.PSI_FILE)!!,
+            e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!,
+        )
+        project.service<Workspace>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<Workspace>().cutPsiClass!!.containingFile.virtualFile)!!
+
+        project.service<Workspace>().classFQN = project.service<Workspace>().cutPsiClass!!.qualifiedName!!
+        project.service<Workspace>().key = getKey(project, project.service<Workspace>().classFQN!!)
+
+        Util.makeTmp()
+        Util.makeDir(project.service<Workspace>().baseDir!!)
     }
 
     /**
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestDada) {
-        clearDataBeforeTestGeneration(project, testResultName)
+        clearDataBeforeTestGeneration(project, project.service<Workspace>().testResultName!!)
 
         val projectBuilder = ProjectBuilder(project)
 
@@ -79,16 +75,7 @@ class Pipeline(
                         processManager.runTestGenerator(
                             indicator,
                             codeType,
-                            projectClassPath,
-                            resultPath,
-                            serializeResultPath,
                             packageName,
-                            cutModule,
-                            classFQN,
-                            fileUrl,
-                            testResultName,
-                            baseDir,
-                            modificationStamp,
                         )
                     }
 

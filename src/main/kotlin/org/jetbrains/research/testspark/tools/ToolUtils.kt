@@ -53,11 +53,11 @@ fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
  * @param packageLine The package declaration line of the test generation data.
  * @param importsCode The import statements code of the test generation data.
  */
-fun saveData(project: Project, report: Report, resultName: String, fileUrl: String, packageLine: String, importsCode: MutableSet<String>) {
+fun saveData(project: Project, report: Report, packageLine: String, importsCode: MutableSet<String>) {
     val workspace = project.service<Workspace>()
     workspace.testGenerationData.testGenerationResultList.add(report)
-    workspace.testGenerationData.resultName = resultName
-    workspace.testGenerationData.fileUrl = fileUrl
+    workspace.testGenerationData.resultName = project.service<Workspace>().testResultName!!
+    workspace.testGenerationData.fileUrl = project.service<Workspace>().fileUrl!!
     workspace.testGenerationData.packageLine = packageLine
     workspace.testGenerationData.importsCode.addAll(importsCode)
 }
@@ -72,8 +72,14 @@ fun saveData(project: Project, report: Report, resultName: String, fileUrl: Stri
  * @param projectClassPath The classpath of the project associated with the test job.
  * @return The test job information containing the provided parameters.
  */
-fun getKey(fileUrl: String, classFQN: String, modTs: Long, testResultName: String, projectClassPath: String): Workspace.TestJobInfo =
-    Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
+fun getKey(project: Project, classFQN: String): Workspace.TestJobInfo =
+    Workspace.TestJobInfo(
+        project.service<Workspace>().fileUrl!!,
+        classFQN,
+        project.service<Workspace>().modificationStamp!!,
+        project.service<Workspace>().testResultName!!,
+        project.service<Workspace>().projectClassPath!!,
+    )
 
 /**
  * Clears the data before test generation for a specific test result.

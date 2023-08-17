@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
@@ -54,30 +53,12 @@ class LLMProcessManager(
      *
      * @param indicator The progress indicator for tracking the progress of the test generation process.
      * @param codeType The type of code to generate tests for.
-     * @param projectClassPath The class path of the project.
-     * @param resultPath The path to save the generated test results.
-     * @param serializeResultPath The serialized result path.
      * @param packageName The package name of the code being tested.
-     * @param cutModule The module to cut.
-     * @param classFQN The fully qualified name of the class being tested.
-     * @param fileUrl The URL of the file being tested.
-     * @param testResultName The name of the test result.
-     * @param baseDir The base directory of the project.
-     * @param modificationStamp The modification stamp of the file being tested.
      */
     override fun runTestGenerator(
         indicator: ProgressIndicator,
         codeType: FragmentToTestDada,
-        projectClassPath: String,
-        resultPath: String,
-        serializeResultPath: String,
         packageName: String,
-        cutModule: Module,
-        classFQN: String,
-        fileUrl: String,
-        testResultName: String,
-        baseDir: String,
-        modificationStamp: Long,
     ) {
         log.info("LLM test generation begins")
 
@@ -90,16 +71,13 @@ class LLMProcessManager(
 
         if (codeType.type == CodeType.METHOD) {
             project.service<Workspace>().key = getKey(
-                fileUrl,
-                "$classFQN#${codeType.objectDescription}",
-                modificationStamp,
-                testResultName,
-                projectClassPath,
-            )
+                project,
+                "${project.service<Workspace>().classFQN}#${codeType.objectDescription}",
+                )
         }
 
         // update build path
-        var buildPath = projectClassPath
+        var buildPath = project.service<Workspace>().projectClassPath!!
         if (settingsProjectState.buildPath.isEmpty()) {
             // User did not set own path
             buildPath = getBuildPath(project)
@@ -170,7 +148,7 @@ class LLMProcessManager(
                         project.service<CommandLineService>().saveGeneratedTests(
                             generatedTestSuite.packageString,
                             generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
-                            resultPath,
+                            project.service<Workspace>().resultPath!!,
                             "Generated${generatedTestSuite.testCases[testCaseIndex].name}.java",
                         ),
                     )
@@ -180,7 +158,7 @@ class LLMProcessManager(
             val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
                 generatedTestSuite.packageString,
                 generatedTestSuite.toStringWithoutExpectedException(),
-                resultPath,
+                project.service<Workspace>().resultPath!!,
                 testFileName,
             )
 
@@ -196,15 +174,12 @@ class LLMProcessManager(
             val coverageCollector = TestCoverageCollector(
                 indicator,
                 project,
-                classFQN,
-                resultPath,
                 generatedTestCasesPaths,
                 File(generatedTestPath),
                 generatedTestSuite.getPrintablePackageString(),
                 buildPath,
                 if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
-                cutModule,
-                fileUrl.split(File.separatorChar).last(),
+                project.service<Workspace>().fileUrl!!.split(File.separatorChar).last(),
             )
 
             // compile the test file
@@ -235,10 +210,8 @@ class LLMProcessManager(
         saveData(
             project,
             report!!,
-            testResultName,
-            fileUrl,
             getPackageFromTestSuiteCode(generatedTestSuite.toString()),
-            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN),
+            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), project.service<Workspace>().classFQN!!),
         )
     }
 
