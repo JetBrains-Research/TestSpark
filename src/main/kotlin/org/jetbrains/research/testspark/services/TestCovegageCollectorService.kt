@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.services
 
+import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ScriptRunnerUtil
 import com.intellij.openapi.components.service
@@ -9,6 +10,7 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
+import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import java.io.File
 import java.util.*
@@ -16,7 +18,7 @@ import kotlin.collections.ArrayList
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
-class CommandLineService(private val project: Project) {
+class TestCovegageCollectorService(private val project: Project) {
     private val sep = File.separatorChar
 
     private val id = UUID.randomUUID().toString()
@@ -82,7 +84,7 @@ class CommandLineService(private val project: Project) {
             arrayListOf(
                 javaCompile.absolutePath,
                 "-cp",
-                project.service<CommandLineService>().getPath(projectBuildPath),
+                project.service<TestCovegageCollectorService>().getPath(projectBuildPath),
                 path,
             ),
         )
@@ -140,8 +142,8 @@ class CommandLineService(private val project: Project) {
         // find the proper javac
         val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
         // JaCoCo libs
-        val jacocoAgentDir = project.service<CommandLineService>().getLibrary("jacocoagent.jar")
-        val jacocoCLIDir = project.service<CommandLineService>().getLibrary("jacococli.jar")
+        val jacocoAgentDir = project.service<TestCovegageCollectorService>().getLibrary("jacocoagent.jar")
+        val jacocoCLIDir = project.service<TestCovegageCollectorService>().getLibrary("jacococli.jar")
         val sourceRoots = ModuleRootManager.getInstance(project.service<Workspace>().cutModule!!).getSourceRoots(false)
 
         // run the test method with jacoco agent
@@ -150,7 +152,7 @@ class CommandLineService(private val project: Project) {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
                 "-cp",
-                "${project.service<CommandLineService>().getPath(projectBuildPath)}${project.service<CommandLineService>().getLibrary("JUnitRunner.jar")}:$resultPath",
+                "${project.service<TestCovegageCollectorService>().getPath(projectBuildPath)}${project.service<TestCovegageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
                 "$generatedTestPackage$className#$testCaseName",
             ),
@@ -191,5 +193,77 @@ class CommandLineService(private val project: Project) {
         runCommandLine(command as ArrayList<String>)
 
         return testExecutionError
+    }
+
+    /**
+     * Saves data of a given test case to a report.
+     *
+     * @param testCaseName The test case name.
+     * @param testCaseCode The test case code.
+     * @param xmlFileName The XML file name to read data from.
+     */
+    fun getTestCaseFromXml(testCaseName: String, testCaseCode: String, linesCoveredDuringTheException: Set<Int>, xmlFileName: String): TestCase {
+        val setOfLines = mutableSetOf<Int>()
+        var isCorrectSourceFile: Boolean
+        File(xmlFileName).readText().konsumeXml().apply {
+            children("report") {
+                children("sessioninfo") {}
+                children("package") {
+                    children("class") {
+                        children("method") {
+                            children("counter") {}
+                        }
+                        children("counter") {}
+                    }
+                    children("sourcefile") {
+                        isCorrectSourceFile = this.attributes.getValue("name") == project.service<Workspace>().fileUrl!!.split(File.separatorChar).last()
+                        children("line") {
+                            if (isCorrectSourceFile && this.attributes.getValue("mi") == "0") {
+                                setOfLines.add(this.attributes.getValue("nr").toInt())
+                            }
+                        }
+                        children("counter") {}
+                    }
+                    children("counter") {}
+                }
+                children("counter") {}
+            }
+        }
+
+        log.info("Test case saved:\n$testCaseName")
+
+        // Add lines that Jacoco might have missed because of its limitation during the exception
+        setOfLines.addAll(linesCoveredDuringTheException)
+
+        return TestCase(testCaseName, testCaseCode, setOfLines, setOf(), setOf())
+    }
+
+    /**
+     * Collect lines covered during the exception happening.
+     *
+     * @param testExecutionError error output (including the thrown stack trace) during the test execution.
+     * @return a set of lines that are covered in CUT during the exception happening.
+     */
+    fun collectLinesCoveredDuringException(testExecutionError: String): Set<Int> {
+        if (testExecutionError.isBlank()) {
+            return emptySet()
+        }
+
+        val result = mutableSetOf<Int>()
+
+        // get frames
+        val frames = testExecutionError.split("\n\tat ").toMutableList()
+        frames.removeFirst()
+
+        frames.forEach { frame ->
+            if (frame.contains(project.service<Workspace>().classFQN!!)) {
+                val coveredLineNumber = frame.split(":")[1].replace(")", "").toIntOrNull()
+                if (coveredLineNumber != null) {
+                    result.add(coveredLineNumber)
+                }
+            }
+        }
+
+        return result
     }
 }

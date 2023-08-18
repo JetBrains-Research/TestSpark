@@ -9,9 +9,9 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.services.CommandLineService
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.TestCovegageCollectorService
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getKey
@@ -145,7 +145,7 @@ class LLMProcessManager(
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
                     generatedTestCasesPaths.add(
-                        project.service<CommandLineService>().saveGeneratedTests(
+                        project.service<TestCovegageCollectorService>().saveGeneratedTests(
                             generatedTestSuite.packageString,
                             generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
                             project.service<Workspace>().resultPath!!,
@@ -155,7 +155,7 @@ class LLMProcessManager(
                 }
             }
 
-            val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
+            val generatedTestPath: String = project.service<TestCovegageCollectorService>().saveGeneratedTests(
                 generatedTestSuite.packageString,
                 generatedTestSuite.toStringWithoutExpectedException(),
                 project.service<Workspace>().resultPath!!,
@@ -179,13 +179,12 @@ class LLMProcessManager(
                 generatedTestSuite.getPrintablePackageString(),
                 buildPath,
                 if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
-                project.service<Workspace>().fileUrl!!.split(File.separatorChar).last(),
             )
 
             // compile the test file
             indicator.text = TestSparkBundle.message("compilationTestsChecking")
             coverageCollector.compileTestCases()
-            val compilationResult = project.service<CommandLineService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
+            val compilationResult = project.service<TestCovegageCollectorService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!compilationResult.first && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")

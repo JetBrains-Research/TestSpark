@@ -57,6 +57,9 @@ class Workspace(private val project: Project) : Disposable {
         }
     }
 
+    var editor: Editor? = null
+    private var testJob: TestJob? = null
+
     var projectClassPath: String? = null
     var testResultDirectory: String? = null
     var testResultName: String? = null
@@ -176,13 +179,13 @@ class Workspace(private val project: Project) : Disposable {
         val displayedSet = HashSet<String>()
         displayedSet.addAll(testReport.testCaseList.keys)
 
-        val testJob = TestJob(jobKey, testReport, displayedSet)
-        resultsForFile.add(testJob)
+        testJob = TestJob(jobKey, testReport, displayedSet)
+        resultsForFile.add(testJob!!)
 
-        val editor = editorForFileUrl(jobKey.fileUrl)
+        updateEditorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
-            showReport(testJob, editor)
+            showReport()
         } else {
             log.info("No editor opened for received test result")
         }
@@ -194,18 +197,17 @@ class Workspace(private val project: Project) : Disposable {
      * Utility function that returns the editor for a specific file url,
      * in case it is opened in the IDE
      */
-    fun editorForFileUrl(fileUrl: String): Editor? {
+    private fun updateEditorForFileUrl(fileUrl: String) {
         val documentManager = FileDocumentManager.getInstance()
         // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
         FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
             val currentFile = documentManager.getFile(it.document)
             if (currentFile != null) {
                 if (currentFile.presentableUrl == fileUrl) {
-                    return it
+                    editor = it
                 }
             }
         }
-        return null
     }
 
     /**
@@ -234,6 +236,14 @@ class Workspace(private val project: Project) : Disposable {
         return documentManager.getFile(document)
     }
 
+    fun updateTestCase(testCase: TestCase) {
+        val updatedReport = testJob!!.report
+        updatedReport.testCaseList.remove(testCase.testName)
+        updatedReport.testCaseList[testCase.testName] = testCase
+        updatedReport.normalized()
+        project.service<CoverageVisualisationService>().showCoverage(testJob!!.report, editor!!)
+    }
+
     /**
      * Function that calls the services responsible for visualizing
      * coverage and displaying the generated test cases. This
@@ -245,11 +255,11 @@ class Workspace(private val project: Project) : Disposable {
      * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
      */
-    private fun showReport(testJob: TestJob, editor: Editor) {
+    private fun showReport() {
         val visualizationService = project.service<CoverageVisualisationService>()
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.showGeneratedTests(testJob, editor)
-        visualizationService.showCoverage(testJob.report, editor)
+        testCaseDisplayService.showGeneratedTests(testJob!!, editor!!)
+        visualizationService.showCoverage(testJob!!.report, editor!!)
     }
 
     /**

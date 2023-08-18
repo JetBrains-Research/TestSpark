@@ -313,9 +313,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Removes all coverage highlighting from the editor.
      */
     private fun removeAllHighlights() {
-        val editor =
-            project.service<Workspace>().editorForFileUrl(project.service<Workspace>().testGenerationData.fileUrl)
-        editor?.markupModel?.removeAllHighlighters()
+        project.service<Workspace>().editor?.markupModel?.removeAllHighlighters()
     }
 
     /**
@@ -563,9 +561,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun toggleJacocoCoverage() {
         val manager = CoverageDataManager.getInstance(project)
-        val editor =
-            project.service<Workspace>().editorForFileUrl(project.service<Workspace>().testGenerationData.fileUrl)
-        editor?.markupModel?.removeAllHighlighters()
+        project.service<Workspace>().editor?.markupModel?.removeAllHighlighters()
 
         if (isJacocoCoverageActive) {
             manager.chooseSuitesBundle(null)
@@ -776,7 +772,7 @@ class TestCaseDisplayService(private val project: Project) {
         testCode: String,
         testCaseName: String,
     ): JButton {
-        val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetButton"))
+        val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetToLastRunButton"))
         resetButton.isEnabled = false
         resetButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
@@ -817,24 +813,40 @@ class TestCaseDisplayService(private val project: Project) {
                 buildPath = getBuildPath(project)
             }
 
-            val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
+            val generatedTestPath: String = project.service<TestCovegageCollectorService>().saveGeneratedTests(
                 project.service<Workspace>().testGenerationData.packageLine,
                 code,
                 project.service<Workspace>().resultPath!!,
                 fileName,
             )
 
-            project.service<CommandLineService>().compileCode(generatedTestPath, buildPath).first
+            if (!project.service<TestCovegageCollectorService>().compileCode(generatedTestPath, buildPath).first) {
+                project.service<TestsExecutionResultService>().removeFromPassingTest(testCase.testName)
+            } else {
+                val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
 
-            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
+                val testExecutionError = project.service<TestCovegageCollectorService>().createXmlFromJacoco(
+                    fileName.split(".")[0],
+                    dataFileName,
+                    testCase.testName,
+                    buildPath,
+                    project.service<Workspace>().testGenerationData.packageLine,
+                )
 
-            project.service<CommandLineService>().createXmlFromJacoco(
-                fileName.split(".")[0],
-                dataFileName,
-                testCase.testName,
-                buildPath,
-                project.service<Workspace>().testGenerationData.packageLine,
-            )
+                if (!File("$dataFileName.xml").exists()) {
+                    project.service<TestsExecutionResultService>().removeFromPassingTest(testCase.testName)
+                } else {
+                    project.service<Workspace>().updateTestCase(
+                        project.service<TestCovegageCollectorService>().getTestCaseFromXml(
+                            testCase.testName,
+                            testCase.toString(),
+                            project.service<TestCovegageCollectorService>()
+                                .collectLinesCoveredDuringException(testExecutionError),
+                            "$dataFileName.xml",
+                        ),
+                    )
+                }
+            }
 
             testCase.testCode = document.text
             resetButton.isEnabled = false

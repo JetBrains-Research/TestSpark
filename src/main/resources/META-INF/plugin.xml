@@ -100,7 +100,7 @@
         <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.TestsExecutionResultService"/>
         <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.CommandLineService"/>
+                serviceImplementation="org.jetbrains.research.testspark.services.TestCovegageCollectorService"/>
         <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.JavaClassBuilderService"/>
 

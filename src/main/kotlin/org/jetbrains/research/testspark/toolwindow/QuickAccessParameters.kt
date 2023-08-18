@@ -51,7 +51,7 @@ class QuickAccessParameters(private val project: Project) {
 
     // Save and Reset buttons
     private val saveButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("saveButton"))
-    private val resetButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("resetButton"))
+    private val resetButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("resetToLastRunButton"))
 
     // Link to open settings
     private val settingsLink: ActionLink = ActionLink(TestSparkLabelsBundle.defaultValue("settingsLink")) {
