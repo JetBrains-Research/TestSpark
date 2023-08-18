@@ -125,8 +125,6 @@ class CommandLineService(private val project: Project) {
      *
      * @param className The name of the class under test.
      * @param dataFileName The name of the coverage data file.
-     * @param cutModule The module containing the class under test.
-     * @param classFQN The fully qualified name of the class under test.
      * @param testCaseName The name of the test case.
      * @param projectBuildPath The build path of the project.
      * @param generatedTestPackage The package where the generated test class is located.

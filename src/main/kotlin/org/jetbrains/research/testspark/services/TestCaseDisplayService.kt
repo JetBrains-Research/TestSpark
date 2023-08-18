@@ -214,14 +214,17 @@ class TestCaseDisplayService(private val project: Project) {
 
             testCasePanel.add(middlePanel, BorderLayout.CENTER)
 
-            // Create "Remove"  button to remove the test from cache
+            // Create "Remove" button to remove the test from cache
             val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel)
 
             // Create "Reset" button to reset the changes in the source code of the test
             val resetButton = createResetButton(document, textFieldEditor, testCodeFormatted, testCase.testName)
 
+            // Create "Run tests" button to remove the test from cache
+            val runTestButton = createRunTestButton(document, testCase, resetButton, textFieldEditor)
+
             // Enable reset button when editor is changed
-            addListenerToTestDocument(document, resetButton, textFieldEditor, checkbox, testCase.testCode, testCase.testName)
+            addListenerToTestDocument(document, resetButton, runTestButton, textFieldEditor, checkbox, testCase)
 
             // Set border
             textFieldEditor.border = getBorder(testCase.testName)
@@ -232,6 +235,7 @@ class TestCaseDisplayService(private val project: Project) {
             bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
             bottomButtons.add(removeFromCacheButton)
             bottomButtons.add(resetButton)
+            bottomButtons.add(runTestButton)
             bottomPanel.add(bottomButtons)
             bottomPanel.add(Box.createRigidArea(Dimension(0, 25)))
             testCasePanel.add(bottomPanel, BorderLayout.SOUTH)
@@ -785,6 +789,62 @@ class TestCaseDisplayService(private val project: Project) {
         return resetButton
     }
 
+    private fun createRunTestButton(
+        document: Document,
+        testCase: TestCase,
+        resetButton: JButton,
+        textFieldEditor: EditorTextField,
+    ): JButton {
+        val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("runTestButton"))
+        runTestButton.isEnabled = false
+        runTestButton.addActionListener {
+            val fileName: String = ('A'..'Z').toList().random().toString() +
+                (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
+                ".java"
+
+            val code = project.service<JavaClassBuilderService>().generateCode(
+                fileName.split(".")[0],
+                document.text,
+                project.service<Workspace>().testGenerationData.importsCode,
+                project.service<Workspace>().testGenerationData.packageLine,
+                project.service<Workspace>().testGenerationData.runWith,
+                project.service<Workspace>().testGenerationData.otherInfo,
+            )
+
+            var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+            if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
+                // User did not set own path
+                buildPath = getBuildPath(project)
+            }
+
+            val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
+                project.service<Workspace>().testGenerationData.packageLine,
+                code,
+                project.service<Workspace>().resultPath!!,
+                fileName,
+            )
+
+            project.service<CommandLineService>().compileCode(generatedTestPath, buildPath).first
+
+            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
+
+            project.service<CommandLineService>().createXmlFromJacoco(
+                fileName.split(".")[0],
+                dataFileName,
+                testCase.testName,
+                buildPath,
+                project.service<Workspace>().testGenerationData.packageLine,
+            )
+
+            testCase.testCode = document.text
+            resetButton.isEnabled = false
+            runTestButton.isEnabled = false
+            textFieldEditor.border = getBorder(testCase.testName)
+            textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+        }
+        return runTestButton
+    }
+
     /**
      * A helper method to add a listener to the test document (in the tool window panel)
      *   that enables reset button when the editor is changed.
@@ -797,59 +857,23 @@ class TestCaseDisplayService(private val project: Project) {
     private fun addListenerToTestDocument(
         document: Document,
         resetButton: JButton,
+        runTestButton: JButton,
         textFieldEditor: EditorTextField,
         checkbox: JCheckBox,
-        testCaseCode: String,
-        testCaseName: String,
+        testCase: TestCase,
     ) {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                val fileName: String = ('A'..'Z').toList().random().toString() +
-                    (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
-                    ".java"
-
-                val code = project.service<JavaClassBuilderService>().generateCode(
-                    fileName.split(".")[0],
-                    document.text,
-                    project.service<Workspace>().testGenerationData.importsCode,
-                    project.service<Workspace>().testGenerationData.packageLine,
-                    project.service<Workspace>().testGenerationData.runWith,
-                    project.service<Workspace>().testGenerationData.otherInfo,
-                )
-
-                var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-                if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
-                    // User did not set own path
-                    buildPath = getBuildPath(project)
-                }
-
-                val generatedTestPath: String = project.service<CommandLineService>().saveGeneratedTests(
-                    project.service<Workspace>().testGenerationData.packageLine,
-                    code,
-                    project.service<Workspace>().resultPath!!,
-                    fileName,
-                )
-
-                project.service<CommandLineService>().compileCode(generatedTestPath, buildPath).first
-
-                val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
-
-                project.service<CommandLineService>().createXmlFromJacoco(
-                    fileName.split(".")[0],
-                    dataFileName,
-                    testCaseName,
-                    buildPath,
-                    project.service<Workspace>().testGenerationData.packageLine,
-                )
-
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
 
-                textFieldEditor.border = getBorder(testCaseName)
+                resetButton.isEnabled = document.text != testCase.testCode
+                runTestButton.isEnabled = document.text != testCase.testCode
 
-                resetButton.isEnabled = document.text != testCaseCode
+                textFieldEditor.border =
+                    if (document.text == testCase.testCode) getBorder(testCase.testName) else JBUI.Borders.empty()
 
                 val modifiedLineIndexes = getModifiedLines(
-                    testCaseCode.split("\n"),
+                    testCase.testCode.split("\n"),
                     document.text.split("\n"),
                 )
 
