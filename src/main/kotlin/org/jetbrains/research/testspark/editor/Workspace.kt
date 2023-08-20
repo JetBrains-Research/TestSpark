@@ -20,7 +20,11 @@ import com.intellij.psi.PsiClass
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.data.TestGenerationData
-import org.jetbrains.research.testspark.services.*
+import org.jetbrains.research.testspark.services.COVERAGE_SELECTION_TOGGLE_TOPIC
+import org.jetbrains.research.testspark.services.CoverageSelectionToggleListener
+import org.jetbrains.research.testspark.services.CoverageVisualisationService
+import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.tools.evosuite.validation.VALIDATION_RESULT_TOPIC
 import org.jetbrains.research.testspark.tools.evosuite.validation.ValidationResultListener
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator

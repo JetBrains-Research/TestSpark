@@ -52,8 +52,15 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
-import java.util.*
-import javax.swing.*
+import java.util.Locale
+import javax.swing.BorderFactory
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JLabel
+import javax.swing.JOptionPane
+import javax.swing.JPanel
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 import kotlin.collections.HashMap
