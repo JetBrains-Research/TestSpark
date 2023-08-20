@@ -43,7 +43,7 @@ class Workspace(private val project: Project) : Disposable {
 
     class TestJob(
         val info: TestJobInfo,
-        val report: Report,
+        var report: Report,
         val selectedTests: HashSet<String>,
     ) {
         private fun getSelectedTests(): List<TestCase> {
@@ -55,10 +55,14 @@ class Workspace(private val project: Project) : Disposable {
             getSelectedTests().map { lineSet.addAll(it.coveredLines) }
             return lineSet
         }
+
+        fun updateReport(report: Report) {
+            this.report = report
+        }
     }
 
     var editor: Editor? = null
-    var report: Report? = null
+    var testJob: TestJob? = null
 
     var projectClassPath: String? = null
     var testResultDirectory: String? = null
@@ -179,15 +183,13 @@ class Workspace(private val project: Project) : Disposable {
         val displayedSet = HashSet<String>()
         displayedSet.addAll(testReport.testCaseList.keys)
 
-        val testJob = TestJob(jobKey, testReport, displayedSet)
-        resultsForFile.add(testJob)
-
-        report = testReport
+        testJob = TestJob(jobKey, testReport, displayedSet)
+        resultsForFile.add(testJob!!)
 
         updateEditorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
-            showReport(testJob)
+            showReport(testJob!!)
         } else {
             log.info("No editor opened for received test result")
         }
@@ -239,11 +241,11 @@ class Workspace(private val project: Project) : Disposable {
     }
 
     fun updateTestCase(testCase: TestCase) {
-        val updatedReport = report!!
+        val updatedReport = testJob!!.report
         updatedReport.testCaseList.remove(testCase.testName)
         updatedReport.testCaseList[testCase.testName] = testCase
         updatedReport.normalized()
-        report = updatedReport
+        testJob!!.updateReport(updatedReport)
         project.service<CoverageVisualisationService>().showCoverage(updatedReport, editor!!)
     }
 
@@ -253,15 +255,11 @@ class Workspace(private val project: Project) : Disposable {
      * is used whenever a new test generation result gets published.
      *
      * @param testJob the new test job
-     * @param editor editor instance where coverage should be
-     *               visualized
-     * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
-     *                        due to a cache hit, or null if there was a cache miss
      */
     private fun showReport(testJob: TestJob) {
         val visualizationService = project.service<CoverageVisualisationService>()
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.showGeneratedTests(testJob, editor!!)
+        testCaseDisplayService.showGeneratedTests(editor!!)
         visualizationService.showCoverage(testJob.report, editor!!)
     }
 

@@ -91,7 +91,6 @@ class TestCaseDisplayService(private val project: Project) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
 
-    private var testJob: Workspace.TestJob? = null
     private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
     private var isJacocoCoverageActive = false
 
@@ -146,15 +145,13 @@ class TestCaseDisplayService(private val project: Project) {
      * Creates the complete panel in the "Generated Tests" tab,
      * and adds the "Generated Tests" tab to the sidebar tool window.
      *
-     * @param testJob the new test job
      * @param editor editor instance where coverage should be
      *               visualized
      * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
      */
-    fun showGeneratedTests(testJob: Workspace.TestJob, editor: Editor) {
-        this.testJob = testJob
-        displayTestCases(testJob.report, editor)
+    fun showGeneratedTests(editor: Editor) {
+        displayTestCases(project.service<Workspace>().testJob!!.report, editor)
         createToolWindowTab()
     }
 
@@ -552,7 +549,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Validates the tests from the cache.
      */
     private fun validateTests() {
-        val testJob = testJob ?: return
+        val testJob = project.service<Workspace>().testJob ?: return
         val edits = getCurrentVersionsOfSelectedTests()
         validateButton.isEnabled = false
         toggleJacocoButton.isEnabled = false
@@ -824,7 +821,7 @@ class TestCaseDisplayService(private val project: Project) {
     ) {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                val lastRunCode = project.service<Workspace>().report!!.testCaseList[testCase.testName]!!.testCode
+                val lastRunCode = project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
 
                 resetButton.isEnabled = document.text != testCase.testCode
@@ -866,7 +863,7 @@ class TestCaseDisplayService(private val project: Project) {
 
         resetToLastRunButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
-                document.setText(project.service<Workspace>().report!!.testCaseList[testCase.testName]!!.testCode)
+                document.setText(project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode)
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
                 textFieldEditor.border = getBorder(testCase.testName)
