@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.TestCovegageCollectorService
+import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getKey
@@ -145,7 +145,7 @@ class LLMProcessManager(
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
                     generatedTestCasesPaths.add(
-                        project.service<TestCovegageCollectorService>().saveGeneratedTests(
+                        project.service<TestCoverageCollectorService>().saveGeneratedTests(
                             generatedTestSuite.packageString,
                             generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
                             project.service<Workspace>().resultPath!!,
@@ -155,7 +155,7 @@ class LLMProcessManager(
                 }
             }
 
-            val generatedTestPath: String = project.service<TestCovegageCollectorService>().saveGeneratedTests(
+            val generatedTestPath: String = project.service<TestCoverageCollectorService>().saveGeneratedTests(
                 generatedTestSuite.packageString,
                 generatedTestSuite.toStringWithoutExpectedException(),
                 project.service<Workspace>().resultPath!!,
@@ -184,7 +184,7 @@ class LLMProcessManager(
             // compile the test file
             indicator.text = TestSparkBundle.message("compilationTestsChecking")
             coverageCollector.compileTestCases()
-            val compilationResult = project.service<TestCovegageCollectorService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
+            val compilationResult = project.service<TestCoverageCollectorService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!compilationResult.first && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")

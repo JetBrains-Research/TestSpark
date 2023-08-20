@@ -100,7 +100,7 @@
         <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.TestsExecutionResultService"/>
         <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.TestCovegageCollectorService"/>
+                serviceImplementation="org.jetbrains.research.testspark.services.TestCoverageCollectorService"/>
         <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.JavaClassBuilderService"/>
 

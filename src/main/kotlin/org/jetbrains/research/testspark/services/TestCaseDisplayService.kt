@@ -229,7 +229,16 @@ class TestCaseDisplayService(private val project: Project) {
             // Set border
             textFieldEditor.border = getBorder(testCase.testName)
 
-            addListeners(document, resetButton, resetToLastRunButton, runTestButton, textFieldEditor, checkbox, testCase, textFieldEditor.border)
+            addListeners(
+                document,
+                resetButton,
+                resetToLastRunButton,
+                runTestButton,
+                textFieldEditor,
+                checkbox,
+                testCase,
+                textFieldEditor.border,
+            )
 
             val bottomPanel = JPanel()
             bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
@@ -867,8 +876,8 @@ class TestCaseDisplayService(private val project: Project) {
 
         runTestButton.addActionListener {
             val fileName: String = ('A'..'Z').toList().random().toString() +
-                    (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
-                    ".java"
+                (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
+                ".java"
 
             val code = project.service<JavaClassBuilderService>().generateCode(
                 fileName.split(".")[0],
@@ -885,19 +894,25 @@ class TestCaseDisplayService(private val project: Project) {
                 buildPath = getBuildPath(project)
             }
 
-            val generatedTestPath: String = project.service<TestCovegageCollectorService>().saveGeneratedTests(
+            val generatedTestPath: String = project.service<TestCoverageCollectorService>().saveGeneratedTests(
                 project.service<Workspace>().testGenerationData.packageLine,
                 code,
                 project.service<Workspace>().resultPath!!,
                 fileName,
             )
 
-            if (!project.service<TestCovegageCollectorService>().compileCode(generatedTestPath, buildPath).first) {
+            if (!project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath).first) {
                 project.service<TestsExecutionResultService>().removeFromPassingTest(testCase.testName)
             } else {
-                val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
+                val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${
+                    (
+                        List(20) {
+                            ('a'..'z').toList().random()
+                        }.joinToString("")
+                        )
+                }"
 
-                val testExecutionError = project.service<TestCovegageCollectorService>().createXmlFromJacoco(
+                val testExecutionError = project.service<TestCoverageCollectorService>().createXmlFromJacoco(
                     fileName.split(".")[0],
                     dataFileName,
                     testCase.testName,
@@ -909,10 +924,10 @@ class TestCaseDisplayService(private val project: Project) {
                     project.service<TestsExecutionResultService>().removeFromPassingTest(testCase.testName)
                 } else {
                     project.service<Workspace>().updateTestCase(
-                        project.service<TestCovegageCollectorService>().getTestCaseFromXml(
+                        project.service<TestCoverageCollectorService>().getTestCaseFromXml(
                             testCase.testName,
                             document.text,
-                            project.service<TestCovegageCollectorService>()
+                            project.service<TestCoverageCollectorService>()
                                 .collectLinesCoveredDuringException(testExecutionError),
                             "$dataFileName.xml",
                         ),

@@ -1,8 +1,6 @@
 package org.jetbrains.research.testspark.services
 
 import com.gitlab.mvysny.konsumexml.konsumeXml
-import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.process.ScriptRunnerUtil
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -12,13 +10,15 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
-class TestCovegageCollectorService(private val project: Project) {
+class TestCoverageCollectorService(private val project: Project) {
     private val sep = File.separatorChar
 
     private val id = UUID.randomUUID().toString()
@@ -38,8 +38,23 @@ class TestCovegageCollectorService(private val project: Project) {
      * @return The output of the command line process as a string.
      */
     private fun runCommandLine(cmd: ArrayList<String>): String {
-        val compilationProcess = GeneralCommandLine(cmd)
-        return ScriptRunnerUtil.getProcessOutput(compilationProcess, ScriptRunnerUtil.STDERR_OUTPUT_KEY_FILTER, 30000)
+        var errorMessage = ""
+
+        val process = ProcessBuilder()
+            .command("bash", "-c", cmd.joinToString(" "))
+            .redirectErrorStream(true)
+            .start()
+
+        val reader = BufferedReader(InputStreamReader(process.inputStream))
+        var line: String?
+
+        while (reader.readLine().also { line = it } != null) {
+            errorMessage += line
+        }
+
+        process.waitFor()
+
+        return errorMessage
     }
 
     /**
@@ -84,7 +99,7 @@ class TestCovegageCollectorService(private val project: Project) {
             arrayListOf(
                 javaCompile.absolutePath,
                 "-cp",
-                project.service<TestCovegageCollectorService>().getPath(projectBuildPath),
+                project.service<TestCoverageCollectorService>().getPath(projectBuildPath),
                 path,
             ),
         )
@@ -142,8 +157,8 @@ class TestCovegageCollectorService(private val project: Project) {
         // find the proper javac
         val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
         // JaCoCo libs
-        val jacocoAgentDir = project.service<TestCovegageCollectorService>().getLibrary("jacocoagent.jar")
-        val jacocoCLIDir = project.service<TestCovegageCollectorService>().getLibrary("jacococli.jar")
+        val jacocoAgentDir = project.service<TestCoverageCollectorService>().getLibrary("jacocoagent.jar")
+        val jacocoCLIDir = project.service<TestCoverageCollectorService>().getLibrary("jacococli.jar")
         val sourceRoots = ModuleRootManager.getInstance(project.service<Workspace>().cutModule!!).getSourceRoots(false)
 
         // run the test method with jacoco agent
@@ -152,7 +167,9 @@ class TestCovegageCollectorService(private val project: Project) {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
                 "-cp",
-                "${project.service<TestCovegageCollectorService>().getPath(projectBuildPath)}${project.service<TestCovegageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
+                "${
+                    project.service<TestCoverageCollectorService>().getPath(projectBuildPath)
+                }${project.service<TestCoverageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
                 "$generatedTestPackage$className#$testCaseName",
             ),
@@ -202,7 +219,12 @@ class TestCovegageCollectorService(private val project: Project) {
      * @param testCaseCode The test case code.
      * @param xmlFileName The XML file name to read data from.
      */
-    fun getTestCaseFromXml(testCaseName: String, testCaseCode: String, linesCoveredDuringTheException: Set<Int>, xmlFileName: String): TestCase {
+    fun getTestCaseFromXml(
+        testCaseName: String,
+        testCaseCode: String,
+        linesCoveredDuringTheException: Set<Int>,
+        xmlFileName: String,
+    ): TestCase {
         val setOfLines = mutableSetOf<Int>()
         var isCorrectSourceFile: Boolean
         File(xmlFileName).readText().konsumeXml().apply {
@@ -216,7 +238,9 @@ class TestCovegageCollectorService(private val project: Project) {
                         children("counter") {}
                     }
                     children("sourcefile") {
-                        isCorrectSourceFile = this.attributes.getValue("name") == project.service<Workspace>().fileUrl!!.split(File.separatorChar).last()
+                        isCorrectSourceFile =
+                            this.attributes.getValue("name") == project.service<Workspace>().fileUrl!!.split(File.separatorChar)
+                                .last()
                         children("line") {
                             if (isCorrectSourceFile && this.attributes.getValue("mi") == "0") {
                                 setOfLines.add(this.attributes.getValue("nr").toInt())

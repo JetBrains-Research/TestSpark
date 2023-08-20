@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.services.TestCovegageCollectorService
+import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
@@ -61,7 +61,7 @@ class TestCoverageCollector(
      */
     fun compileTestCases() {
         for (index in generatedTestPaths.indices) {
-            if (project.service<TestCovegageCollectorService>().compileCode(generatedTestPaths[index], projectBuildPath).first) {
+            if (project.service<TestCoverageCollectorService>().compileCode(generatedTestPaths[index], projectBuildPath).first) {
                 project.service<Workspace>().testGenerationData.compilableTestCases.add(testCases[index])
             }
         }
@@ -80,7 +80,7 @@ class TestCoverageCollector(
             // name of .exec and .xml files
             val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
 
-            val testExecutionError = project.service<TestCovegageCollectorService>().createXmlFromJacoco(
+            val testExecutionError = project.service<TestCoverageCollectorService>().createXmlFromJacoco(
                 generatedTestFile.name.split('.')[0],
                 dataFileName,
                 testCase.name,
@@ -97,10 +97,10 @@ class TestCoverageCollector(
 
             // save data to TestGenerationResult
             indicator.text = TestSparkBundle.message("testCasesSaving")
-            report.testCaseList[testCase.name] = project.service<TestCovegageCollectorService>().getTestCaseFromXml(
+            report.testCaseList[testCase.name] = project.service<TestCoverageCollectorService>().getTestCaseFromXml(
                 testCase.name,
                 testCase.toString(),
-                project.service<TestCovegageCollectorService>().collectLinesCoveredDuringException(testExecutionError),
+                project.service<TestCoverageCollectorService>().collectLinesCoveredDuringException(testExecutionError),
                 "$dataFileName.xml",
             )
         }

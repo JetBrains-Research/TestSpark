@@ -13,7 +13,7 @@ import org.jetbrains.research.testspark.Util
 import org.jetbrains.research.testspark.actions.getSurroundingClass
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.services.TestCovegageCollectorService
+import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 
 /**
@@ -31,9 +31,9 @@ class Pipeline(
     init {
         project.service<Workspace>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
 
-        project.service<Workspace>().testResultDirectory = project.service<TestCovegageCollectorService>().testResultDirectory
-        project.service<Workspace>().testResultName = project.service<TestCovegageCollectorService>().testResultName
-        project.service<Workspace>().resultPath = project.service<TestCovegageCollectorService>().resultPath
+        project.service<Workspace>().testResultDirectory = project.service<TestCoverageCollectorService>().testResultDirectory
+        project.service<Workspace>().testResultName = project.service<TestCoverageCollectorService>().testResultName
+        project.service<Workspace>().resultPath = project.service<TestCoverageCollectorService>().resultPath
 
         project.service<Workspace>().baseDir = "${project.service<Workspace>().testResultDirectory}${project.service<Workspace>().testResultName}-validation"
 
