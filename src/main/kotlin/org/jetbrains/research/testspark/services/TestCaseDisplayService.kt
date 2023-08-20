@@ -218,16 +218,18 @@ class TestCaseDisplayService(private val project: Project) {
             val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel)
 
             // Create "Reset" button to reset the changes in the source code of the test
-            val resetButton = createResetButton(document, textFieldEditor, testCodeFormatted, testCase.testName)
+            val resetButton = createResetButton()
+
+            // Create "Reset" button to reset the changes to last run in the source code of the test
+            val resetToLastRunButton = createResetToLastRunButton()
 
             // Create "Run tests" button to remove the test from cache
-            val runTestButton = createRunTestButton(document, testCase, resetButton, textFieldEditor)
-
-            // Enable reset button when editor is changed
-            addListenerToTestDocument(document, resetButton, runTestButton, textFieldEditor, checkbox, testCase)
+            val runTestButton = createRunTestButton()
 
             // Set border
             textFieldEditor.border = getBorder(testCase.testName)
+
+            addListeners(document, resetButton, resetToLastRunButton, runTestButton, textFieldEditor, checkbox, testCase, textFieldEditor.border)
 
             val bottomPanel = JPanel()
             bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
@@ -235,6 +237,7 @@ class TestCaseDisplayService(private val project: Project) {
             bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
             bottomButtons.add(removeFromCacheButton)
             bottomButtons.add(resetButton)
+            bottomButtons.add(resetToLastRunButton)
             bottomButtons.add(runTestButton)
             bottomPanel.add(bottomButtons)
             bottomPanel.add(Box.createRigidArea(Dimension(0, 25)))
@@ -761,42 +764,111 @@ class TestCaseDisplayService(private val project: Project) {
     /**
      * Creates a button to reset the changes in the test source code.
      *
-     * @param document the document with the test
-     * @param textFieldEditor the text field editor with the test
-     * @param testCode the source code of the test
      * @return the created button
      */
-    private fun createResetButton(
-        document: Document,
-        textFieldEditor: EditorTextField,
-        testCode: String,
-        testCaseName: String,
-    ): JButton {
-        val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetToLastRunButton"))
+    private fun createResetButton(): JButton {
+        val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetButton"))
         resetButton.isEnabled = false
-        resetButton.addActionListener {
-            WriteCommandAction.runWriteCommandAction(project) {
-                document.setText(testCode)
-                resetButton.isEnabled = false
-                textFieldEditor.border = getBorder(testCaseName)
-                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
-            }
-        }
         return resetButton
     }
 
-    private fun createRunTestButton(
-        document: Document,
-        testCase: TestCase,
-        resetButton: JButton,
-        textFieldEditor: EditorTextField,
-    ): JButton {
+    /**
+     * Creates a button to reset the changes in the test source code.
+     *
+     * @return the created button
+     */
+    private fun createResetToLastRunButton(): JButton {
+        val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetToLastRunButton"))
+        resetButton.isEnabled = false
+        return resetButton
+    }
+
+    /**
+     * Creates a button to reset the changes in the test source code.
+     *
+     * @return the created button
+     */
+    private fun createRunTestButton(): JButton {
         val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("runTestButton"))
         runTestButton.isEnabled = false
+        return runTestButton
+    }
+
+    /**
+     * A helper method to add a listener to the test document (in the tool window panel)
+     *   that enables reset button when the editor is changed.
+     *
+     * @param document the document of the test case
+     * @param resetButton the button to reset changes in the test
+     * @param textFieldEditor the text field editor with the test
+     * @param checkbox the checkbox to select the test
+     */
+    private fun addListeners(
+        document: Document,
+        resetButton: JButton,
+        resetToLastRunButton: JButton,
+        runTestButton: JButton,
+        textFieldEditor: EditorTextField,
+        checkbox: JCheckBox,
+        testCase: TestCase,
+        initialBorder: Border,
+    ) {
+        document.addDocumentListener(object : DocumentListener {
+            override fun documentChanged(event: DocumentEvent) {
+                val lastRunCode = project.service<Workspace>().report!!.testCaseList[testCase.testName]!!.testCode
+                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+
+                resetButton.isEnabled = document.text != testCase.testCode
+                resetToLastRunButton.isEnabled = document.text != lastRunCode
+                runTestButton.isEnabled = document.text != lastRunCode
+
+                textFieldEditor.border =
+                    if (document.text == lastRunCode) getBorder(testCase.testName) else JBUI.Borders.empty()
+
+                val modifiedLineIndexes = getModifiedLines(
+                    lastRunCode.split("\n"),
+                    document.text.split("\n"),
+                )
+
+                for (index in modifiedLineIndexes) {
+                    textFieldEditor.editor!!.markupModel.addLineHighlighter(
+                        DiffColors.DIFF_MODIFIED,
+                        index,
+                        HighlighterLayer.FIRST,
+                    )
+                }
+
+                // select checkbox
+                checkbox.isSelected = true
+            }
+        })
+
+        resetButton.addActionListener {
+            WriteCommandAction.runWriteCommandAction(project) {
+                document.setText(testCase.testCode)
+                resetButton.isEnabled = false
+                resetToLastRunButton.isEnabled = false
+                runTestButton.isEnabled = false
+                project.service<Workspace>().updateTestCase(testCase)
+                textFieldEditor.border = initialBorder
+                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+            }
+        }
+
+        resetToLastRunButton.addActionListener {
+            WriteCommandAction.runWriteCommandAction(project) {
+                document.setText(project.service<Workspace>().report!!.testCaseList[testCase.testName]!!.testCode)
+                resetToLastRunButton.isEnabled = false
+                runTestButton.isEnabled = false
+                textFieldEditor.border = getBorder(testCase.testName)
+                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+            }
+        }
+
         runTestButton.addActionListener {
             val fileName: String = ('A'..'Z').toList().random().toString() +
-                (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
-                ".java"
+                    (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
+                    ".java"
 
             val code = project.service<JavaClassBuilderService>().generateCode(
                 fileName.split(".")[0],
@@ -839,7 +911,7 @@ class TestCaseDisplayService(private val project: Project) {
                     project.service<Workspace>().updateTestCase(
                         project.service<TestCovegageCollectorService>().getTestCaseFromXml(
                             testCase.testName,
-                            testCase.toString(),
+                            document.text,
                             project.service<TestCovegageCollectorService>()
                                 .collectLinesCoveredDuringException(testExecutionError),
                             "$dataFileName.xml",
@@ -848,59 +920,11 @@ class TestCaseDisplayService(private val project: Project) {
                 }
             }
 
-            testCase.testCode = document.text
-            resetButton.isEnabled = false
+            resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
             textFieldEditor.border = getBorder(testCase.testName)
             textFieldEditor.editor!!.markupModel.removeAllHighlighters()
         }
-        return runTestButton
-    }
-
-    /**
-     * A helper method to add a listener to the test document (in the tool window panel)
-     *   that enables reset button when the editor is changed.
-     *
-     * @param document the document of the test case
-     * @param resetButton the button to reset changes in the test
-     * @param textFieldEditor the text field editor with the test
-     * @param checkbox the checkbox to select the test
-     */
-    private fun addListenerToTestDocument(
-        document: Document,
-        resetButton: JButton,
-        runTestButton: JButton,
-        textFieldEditor: EditorTextField,
-        checkbox: JCheckBox,
-        testCase: TestCase,
-    ) {
-        document.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
-
-                resetButton.isEnabled = document.text != testCase.testCode
-                runTestButton.isEnabled = document.text != testCase.testCode
-
-                textFieldEditor.border =
-                    if (document.text == testCase.testCode) getBorder(testCase.testName) else JBUI.Borders.empty()
-
-                val modifiedLineIndexes = getModifiedLines(
-                    testCase.testCode.split("\n"),
-                    document.text.split("\n"),
-                )
-
-                for (index in modifiedLineIndexes) {
-                    textFieldEditor.editor!!.markupModel.addLineHighlighter(
-                        DiffColors.DIFF_MODIFIED,
-                        index,
-                        HighlighterLayer.FIRST,
-                    )
-                }
-
-                // select checkbox
-                checkbox.isSelected = true
-            }
-        })
     }
 
     /**

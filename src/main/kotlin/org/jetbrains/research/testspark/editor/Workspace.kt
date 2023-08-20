@@ -58,7 +58,7 @@ class Workspace(private val project: Project) : Disposable {
     }
 
     var editor: Editor? = null
-    private var testJob: TestJob? = null
+    var report: Report? = null
 
     var projectClassPath: String? = null
     var testResultDirectory: String? = null
@@ -179,13 +179,15 @@ class Workspace(private val project: Project) : Disposable {
         val displayedSet = HashSet<String>()
         displayedSet.addAll(testReport.testCaseList.keys)
 
-        testJob = TestJob(jobKey, testReport, displayedSet)
-        resultsForFile.add(testJob!!)
+        val testJob = TestJob(jobKey, testReport, displayedSet)
+        resultsForFile.add(testJob)
+
+        report = testReport
 
         updateEditorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
-            showReport()
+            showReport(testJob)
         } else {
             log.info("No editor opened for received test result")
         }
@@ -237,11 +239,12 @@ class Workspace(private val project: Project) : Disposable {
     }
 
     fun updateTestCase(testCase: TestCase) {
-        val updatedReport = testJob!!.report
+        val updatedReport = report!!
         updatedReport.testCaseList.remove(testCase.testName)
         updatedReport.testCaseList[testCase.testName] = testCase
         updatedReport.normalized()
-        project.service<CoverageVisualisationService>().showCoverage(testJob!!.report, editor!!)
+        report = updatedReport
+        project.service<CoverageVisualisationService>().showCoverage(updatedReport, editor!!)
     }
 
     /**
@@ -255,11 +258,11 @@ class Workspace(private val project: Project) : Disposable {
      * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
      *                        due to a cache hit, or null if there was a cache miss
      */
-    private fun showReport() {
+    private fun showReport(testJob: TestJob) {
         val visualizationService = project.service<CoverageVisualisationService>()
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.showGeneratedTests(testJob!!, editor!!)
-        visualizationService.showCoverage(testJob!!.report, editor!!)
+        testCaseDisplayService.showGeneratedTests(testJob, editor!!)
+        visualizationService.showCoverage(testJob.report, editor!!)
     }
 
     /**
