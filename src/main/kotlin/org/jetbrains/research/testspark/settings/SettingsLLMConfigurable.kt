@@ -30,6 +30,7 @@ class SettingsLLMConfigurable : Configurable {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         settingsComponent!!.llmUserToken = settingsState.llmUserToken
         settingsComponent!!.model = settingsState.model
+        settingsComponent!!.llmPlatform = settingsState.llmPlatform
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
@@ -44,6 +45,7 @@ class SettingsLLMConfigurable : Configurable {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         var modified: Boolean = settingsComponent!!.llmUserToken != settingsState.llmUserToken
         modified = modified or (settingsComponent!!.model != settingsState.model)
+        modified = modified or (settingsComponent!!.llmPlatform != settingsState.llmPlatform)
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
@@ -58,6 +60,7 @@ class SettingsLLMConfigurable : Configurable {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         settingsState.llmUserToken = settingsComponent!!.llmUserToken
         settingsState.model = settingsComponent!!.model
+        settingsState.llmPlatform = settingsComponent!!.llmPlatform
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
         settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth

@@ -6,15 +6,16 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBRadioButton
+import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import java.net.HttpURLConnection
-import javax.swing.DefaultComboBoxModel
-import javax.swing.JPanel
-import javax.swing.JTextField
+import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -27,6 +28,7 @@ class SettingsLLMComponent {
     // Models
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
+    private var platformSelector = ComboBox(arrayOf("OpenAI"))
 
     // Maximum number of LLM requests
     private var maxLLMRequestsField =
@@ -58,6 +60,7 @@ class SettingsLLMComponent {
     private fun addListeners() {
         llmUserTokenField.document.addDocumentListener(object : DocumentListener {
             private fun update() {
+                if (platformSelector.selectedItem!!.toString() == "Grazie") return
                 ApplicationManager.getApplication().executeOnPooledThread {
                     val modules = getModules(llmUserTokenField.text)
                     modelSelector.removeAllItems()
@@ -142,8 +145,17 @@ class SettingsLLMComponent {
      * Create the main panel for LLM-related settings page
      */
     private fun createSettingsPanel() {
+        // Check if the Grazie platform access is available in the current build
+        if(isGrazieClassLoaded()) platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie","OpenAI"))
+
         panel = FormBuilder.createFormBuilder()
             .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("LLMSettings")))
+            .addLabeledComponent(
+                JBLabel(TestSparkLabelsBundle.defaultValue("llmPlatform")),
+                platformSelector,
+                10,
+                false,
+            )
             .addLabeledComponent(
                 JBLabel(TestSparkLabelsBundle.defaultValue("llmToken")),
                 llmUserTokenField,
@@ -178,6 +190,16 @@ class SettingsLLMComponent {
             .panel
     }
 
+    private fun isGrazieClassLoaded(): Boolean {
+        val className = "org.jetbrains.research.grazie.Request"
+        return try {
+            Class.forName(className)
+            true
+        } catch (e: ClassNotFoundException) {
+            false
+        }
+    }
+
     var llmUserToken: String
         get() = llmUserTokenField.text
         set(newText) {
@@ -188,6 +210,13 @@ class SettingsLLMComponent {
         get() = modelSelector.item
         set(newAlg) {
             modelSelector.item = newAlg
+        }
+
+
+    var llmPlatform: String
+        get() = platformSelector.item
+        set(newAlg) {
+            platformSelector.item = newAlg
         }
 
     var maxLLMRequest: Int

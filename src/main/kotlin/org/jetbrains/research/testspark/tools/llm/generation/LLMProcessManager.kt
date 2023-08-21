@@ -47,7 +47,7 @@ class LLMProcessManager(
     private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
-    private val requestManager: RequestManager = GrazieRequestManager()
+    private val requestManager: RequestManager = StandardRequestManagerFactory().getRequestManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
 
     /**
