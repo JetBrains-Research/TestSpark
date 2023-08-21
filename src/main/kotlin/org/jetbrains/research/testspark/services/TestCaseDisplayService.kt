@@ -20,7 +20,6 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -46,7 +45,6 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
-import org.jetbrains.research.testspark.tools.getBuildPath
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -837,8 +835,8 @@ class TestCaseDisplayService(private val project: Project) {
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
 
                 resetButton.isEnabled = document.text != testCase.testCode
-                resetToLastRunButton.isEnabled = document.text != lastRunCode && document.text != testCase.testCode
-                runTestButton.isEnabled = document.text != lastRunCode
+                resetToLastRunButton.isEnabled = document.text != lastRunCode
+                runTestButton.isEnabled = document.text != lastRunCode && document.text != testCase.testCode
 
                 textFieldEditor.border =
                     when (document.text) {
@@ -868,10 +866,15 @@ class TestCaseDisplayService(private val project: Project) {
         resetButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
                 document.setText(testCase.testCode)
+                project.service<Workspace>().updateTestCase(testCase)
                 resetButton.isEnabled = false
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
-                project.service<Workspace>().updateTestCase(testCase)
+                if ((initialBorder as MatteBorder).matteColor == JBColor.GREEN) {
+                    project.service<TestsExecutionResultService>().addPassingTest(testCase.testName)
+                } else {
+                    project.service<TestsExecutionResultService>().removeFromPassingTest(testCase.testName)
+                }
                 textFieldEditor.border = initialBorder
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
             }

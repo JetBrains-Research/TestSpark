@@ -7,7 +7,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
@@ -15,7 +14,7 @@ import org.jetbrains.research.testspark.tools.getBuildPath
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
-import java.util.*
+import java.util.UUID
 import kotlin.collections.ArrayList
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -163,6 +162,10 @@ class TestCoverageCollectorService(private val project: Project) {
         val jacocoCLIDir = project.service<TestCoverageCollectorService>().getLibrary("jacococli.jar")
         val sourceRoots = ModuleRootManager.getInstance(project.service<Workspace>().cutModule!!).getSourceRoots(false)
 
+        // unique name
+        var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
+        name += "$className#$testCaseName"
+
         // run the test method with jacoco agent
         val testExecutionError = runCommandLine(
             arrayListOf(
@@ -173,7 +176,7 @@ class TestCoverageCollectorService(private val project: Project) {
                     project.service<TestCoverageCollectorService>().getPath(projectBuildPath)
                 }${project.service<TestCoverageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
-                "$generatedTestPackage.$className#$testCaseName",
+                name,
             ),
         )
 
@@ -293,11 +296,20 @@ class TestCoverageCollectorService(private val project: Project) {
         return result
     }
 
+    /**
+     * Update the code of the test.
+     *
+     * @param testCode new code of test
+     * @param testName the name of the test
+     */
     fun updateTestCode(testCode: String, testName: String) {
+        // generate the fileName
+        // TODO check for unique name
         val fileName: String = ('A'..'Z').toList().random().toString() +
-                (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
-                ".java"
+            (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
+            ".java"
 
+        // generate code from document
         val code = project.service<JavaClassBuilderService>().generateCode(
             fileName.split(".")[0],
             testCode,
@@ -307,12 +319,14 @@ class TestCoverageCollectorService(private val project: Project) {
             project.service<Workspace>().testGenerationData.otherInfo,
         )
 
+        // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
             // User did not set own path
             buildPath = getBuildPath(project)
         }
 
+        // save new test to file
         val generatedTestPath: String = project.service<TestCoverageCollectorService>().saveGeneratedTests(
             project.service<Workspace>().testGenerationData.packageLine,
             code,
@@ -320,16 +334,12 @@ class TestCoverageCollectorService(private val project: Project) {
             fileName,
         )
 
+        // compilation checking
         if (!project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath).first) {
             project.service<TestsExecutionResultService>().removeFromPassingTest(testName)
         } else {
-            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${
-                (
-                        List(20) {
-                            ('a'..'z').toList().random()
-                        }.joinToString("")
-                        )
-            }"
+            // TODO check for unique name
+            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
 
             val testExecutionError = project.service<TestCoverageCollectorService>().createXmlFromJacoco(
                 fileName.split(".")[0],
@@ -353,7 +363,9 @@ class TestCoverageCollectorService(private val project: Project) {
                         ),
                     )
                 }
+                return
             }
         }
+        project.service<Workspace>().updateTestCase(TestCase(testName, testCode, setOf(), setOf(), setOf()))
     }
 }

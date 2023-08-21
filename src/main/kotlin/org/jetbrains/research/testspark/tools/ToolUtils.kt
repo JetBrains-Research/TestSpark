@@ -36,6 +36,7 @@ fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String): M
 // get package from a generated code
 fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
     testSuiteCode ?: return ""
+    if (!testSuiteCode.contains("package")) return ""
     val result = testSuiteCode.replace("\r\n", "\n").split("\n")
         .filter { it.contains("^package".toRegex()) }.joinToString("").split("package ")[1].split(";")[0]
     if (result.isBlank()) return ""
@@ -46,9 +47,7 @@ fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
  * Saves the data related to test generation in the specified project's workspace.
  *
  * @param project The project in which the test generation data will be saved.
- * @param report The report object to be added to the test generation result list.
- * @param resultName The name of the test generation result.
- * @param fileUrl The URL of the file where the test generation data will be saved.
+ * @param report The report object to be added to the test generation result list.\
  * @param packageLine The package declaration line of the test generation data.
  * @param importsCode The import statements code of the test generation data.
  */

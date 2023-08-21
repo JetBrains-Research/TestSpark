@@ -68,18 +68,24 @@ class Workspace(private val project: Project) : Disposable {
     var projectClassPath: String? = null
     var testResultDirectory: String? = null
     var testResultName: String? = null
+
     // The path to save the generated test results.
     var resultPath: String? = null
+
     // The base directory of the project.
     var baseDir: String? = null
     var vFile: VirtualFile? = null
+
     // The URL of the file being tested.
     var fileUrl: String? = null
+
     // The modification stamp of the file being tested.
     var modificationStamp: Long? = null
     var cutPsiClass: PsiClass? = null
+
     // The module to cut.
     var cutModule: Module? = null
+
     // The fully qualified name of the class being tested.
     var classFQN: String? = null
 

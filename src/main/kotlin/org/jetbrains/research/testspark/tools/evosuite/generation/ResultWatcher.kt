@@ -2,13 +2,10 @@ package org.jetbrains.research.testspark.tools.evosuite.generation
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.saveData
@@ -45,7 +42,7 @@ class ResultWatcher(
             project,
             Report(testGenerationResult),
             getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
-            getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN)
+            getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
         )
     }
 }
