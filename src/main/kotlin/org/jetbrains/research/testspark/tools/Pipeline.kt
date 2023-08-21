@@ -37,8 +37,6 @@ class Pipeline(
 
         project.service<Workspace>().baseDir = "${project.service<Workspace>().testResultDirectory}${project.service<Workspace>().testResultName}-validation"
 
-        project.service<Workspace>().serializeResultPath = "\"${project.service<Workspace>().testResultDirectory}${project.service<Workspace>().testResultName}\""
-
         project.service<Workspace>().vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
         project.service<Workspace>().fileUrl = project.service<Workspace>().vFile!!.presentableUrl
         project.service<Workspace>().modificationStamp = project.service<Workspace>().vFile!!.modificationStamp

@@ -25,6 +25,8 @@ import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
 import java.nio.charset.Charset
 import java.util.regex.Pattern
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
 
 /**
  * This class manages the execution of EvoSuite, a test generation tool.
@@ -64,22 +66,22 @@ class EvoSuiteProcessManager(
             if (processStopped(project, indicator)) return
 
             val projectClassPath = project.service<Workspace>().projectClassPath!!
-            val serializeResultPath = project.service<Workspace>().serializeResultPath!!
             val classFQN = project.service<Workspace>().classFQN!!
             val baseDir = project.service<Workspace>().baseDir!!
             val fileUrl = project.service<Workspace>().fileUrl!!
-            val modificationStamp = project.service<Workspace>().modificationStamp!!
-            val testResultName = project.service<Workspace>().testResultName!!
+            val resultName = "${project.service<Workspace>().resultPath}${sep}EvoSuiteResult"
+
+            Path(project.service<Workspace>().resultPath!!).createDirectories()
 
             // get command
             val command = when (codeType.type!!) {
-                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).build()
+                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).build()
                 CodeType.METHOD -> {
                     project.service<Workspace>().key = getKey(project, "$classFQN#${codeType.objectDescription}")
-                    SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forMethod(codeType.objectDescription).build()
+                    SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forMethod(codeType.objectDescription).build()
                 }
 
-                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
+                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
             }
 
             if (!settingsApplicationState?.seed.isNullOrBlank()) command.add("-seed=${settingsApplicationState?.seed}")
@@ -166,7 +168,7 @@ class EvoSuiteProcessManager(
 
             // start result watcher
             AppExecutorUtil.getAppScheduledExecutorService()
-                .execute(ResultWatcher(project, testResultName, fileUrl, classFQN))
+                .execute(ResultWatcher(project, resultName, fileUrl, classFQN))
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()

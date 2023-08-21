@@ -2,15 +2,16 @@ package org.jetbrains.research.testspark.tools.evosuite.generation
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.FileUtilRt
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.saveData
-import java.io.File
 import java.io.FileReader
 
 /**
@@ -33,48 +34,18 @@ class ResultWatcher(
     private val log = Logger.getInstance(ResultWatcher::class.java)
 
     override fun run() {
-        val sleepDurationMillis: Long = 2000
-        val maxWatchDurationMillis: Long = 10000
-
-        val sep = File.separatorChar
-        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
-
-        val tmpDir = File(testResultDirectory)
-
         log.info("Started result listener thread for $resultName")
 
-        val startTime = System.currentTimeMillis()
+        val gson = Gson()
+        val reader = JsonReader(FileReader(resultName))
 
-        while (true) {
-            val currentTime = System.currentTimeMillis()
+        val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
 
-            if (currentTime - startTime > maxWatchDurationMillis) {
-                log.info("Max watch duration exceeded, exiting Watcher thread for $resultName")
-                return
-            }
-
-            log.info("Searching for $resultName results in $testResultDirectory")
-            val list = tmpDir.list()
-
-            if (list == null) {
-                log.info("Empty dir")
-            } else {
-                for (pathname in list) {
-                    if (pathname == resultName) {
-                        log.info("Found file $pathname")
-
-                        val gson = Gson()
-                        val reader = JsonReader(FileReader("$testResultDirectory$pathname"))
-
-                        val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
-
-                        saveData(project, Report(testGenerationResult), getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode), getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN))
-
-                        return
-                    }
-                }
-            }
-            Thread.sleep(sleepDurationMillis)
-        }
+        saveData(
+            project,
+            Report(testGenerationResult),
+            getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
+            getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN)
+        )
     }
 }

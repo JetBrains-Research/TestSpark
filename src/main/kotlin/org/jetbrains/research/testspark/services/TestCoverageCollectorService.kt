@@ -7,9 +7,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.tools.getBuildPath
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -171,7 +173,7 @@ class TestCoverageCollectorService(private val project: Project) {
                     project.service<TestCoverageCollectorService>().getPath(projectBuildPath)
                 }${project.service<TestCoverageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
-                "$generatedTestPackage$className#$testCaseName",
+                "$generatedTestPackage.$className#$testCaseName",
             ),
         )
 
@@ -289,5 +291,69 @@ class TestCoverageCollectorService(private val project: Project) {
         }
 
         return result
+    }
+
+    fun updateTestCode(testCode: String, testName: String) {
+        val fileName: String = ('A'..'Z').toList().random().toString() +
+                (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
+                ".java"
+
+        val code = project.service<JavaClassBuilderService>().generateCode(
+            fileName.split(".")[0],
+            testCode,
+            project.service<Workspace>().testGenerationData.importsCode,
+            project.service<Workspace>().testGenerationData.packageLine,
+            project.service<Workspace>().testGenerationData.runWith,
+            project.service<Workspace>().testGenerationData.otherInfo,
+        )
+
+        var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
+            // User did not set own path
+            buildPath = getBuildPath(project)
+        }
+
+        val generatedTestPath: String = project.service<TestCoverageCollectorService>().saveGeneratedTests(
+            project.service<Workspace>().testGenerationData.packageLine,
+            code,
+            project.service<Workspace>().resultPath!!,
+            fileName,
+        )
+
+        if (!project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath).first) {
+            project.service<TestsExecutionResultService>().removeFromPassingTest(testName)
+        } else {
+            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${
+                (
+                        List(20) {
+                            ('a'..'z').toList().random()
+                        }.joinToString("")
+                        )
+            }"
+
+            val testExecutionError = project.service<TestCoverageCollectorService>().createXmlFromJacoco(
+                fileName.split(".")[0],
+                dataFileName,
+                testName,
+                buildPath,
+                project.service<Workspace>().testGenerationData.packageLine,
+            )
+
+            if (!File("$dataFileName.xml").exists()) {
+                project.service<TestsExecutionResultService>().removeFromPassingTest(testName)
+            } else {
+                if (project.service<Workspace>().testJob!!.report.testCaseList[testName]!!.testCode != testCode) {
+                    project.service<Workspace>().updateTestCase(
+                        project.service<TestCoverageCollectorService>().getTestCaseFromXml(
+                            testName,
+                            testCode,
+                            project.service<TestCoverageCollectorService>()
+                                .collectLinesCoveredDuringException(testExecutionError),
+                            "$dataFileName.xml",
+                        ),
+                    )
+                }
+            }
+        }
     }
 }

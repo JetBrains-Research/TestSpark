@@ -37,10 +37,9 @@ fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String): M
 fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
     testSuiteCode ?: return ""
     val result = testSuiteCode.replace("\r\n", "\n").split("\n")
-        .filter { it.contains("^package".toRegex()) }
-        .joinToString("\n").plus("\n")
+        .filter { it.contains("^package".toRegex()) }.joinToString("").split("package ")[1].split(";")[0]
     if (result.isBlank()) return ""
-    return result + "\n"
+    return result
 }
 
 /**

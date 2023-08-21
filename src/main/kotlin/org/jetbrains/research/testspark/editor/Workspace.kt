@@ -20,11 +20,7 @@ import com.intellij.psi.PsiClass
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.data.TestGenerationData
-import org.jetbrains.research.testspark.services.COVERAGE_SELECTION_TOGGLE_TOPIC
-import org.jetbrains.research.testspark.services.CoverageSelectionToggleListener
-import org.jetbrains.research.testspark.services.CoverageVisualisationService
-import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.services.*
 import org.jetbrains.research.testspark.tools.evosuite.validation.VALIDATION_RESULT_TOPIC
 import org.jetbrains.research.testspark.tools.evosuite.validation.ValidationResultListener
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
@@ -76,8 +72,6 @@ class Workspace(private val project: Project) : Disposable {
     var resultPath: String? = null
     // The base directory of the project.
     var baseDir: String? = null
-    // The serialized result path.
-    var serializeResultPath: String? = null
     var vFile: VirtualFile? = null
     // The URL of the file being tested.
     var fileUrl: String? = null
@@ -201,7 +195,7 @@ class Workspace(private val project: Project) : Disposable {
         updateEditorForFileUrl(jobKey.fileUrl)
 
         if (editor != null) {
-            showReport(testJob!!)
+            showReport()
         } else {
             log.info("No editor opened for received test result")
         }
@@ -265,14 +259,10 @@ class Workspace(private val project: Project) : Disposable {
      * Function that calls the services responsible for visualizing
      * coverage and displaying the generated test cases. This
      * is used whenever a new test generation result gets published.
-     *
-     * @param testJob the new test job
      */
-    private fun showReport(testJob: TestJob) {
-        val visualizationService = project.service<CoverageVisualisationService>()
-        val testCaseDisplayService = project.service<TestCaseDisplayService>()
-        testCaseDisplayService.showGeneratedTests(editor!!)
-        visualizationService.showCoverage(testJob.report, editor!!)
+    private fun showReport() {
+        project.service<TestCaseDisplayService>().showGeneratedTests(editor!!)
+        project.service<CoverageVisualisationService>().showCoverage(testJob!!.report, editor!!)
     }
 
     /**

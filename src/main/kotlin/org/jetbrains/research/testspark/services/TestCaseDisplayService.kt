@@ -174,6 +174,11 @@ class TestCaseDisplayService(private val project: Project) {
         allTestCasePanel.removeAll()
         testCasePanels.clear()
         originalTestCases.clear()
+
+        for (testCase in testReport.testCaseList.values) {
+            project.service<TestCoverageCollectorService>().updateTestCode(testCase.testCode, testCase.testName)
+        }
+
         testReport.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
@@ -650,7 +655,7 @@ class TestCaseDisplayService(private val project: Project) {
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
-            .insertString(0, project.service<Workspace>().testGenerationData.packageLine)
+            .insertString(0, "package ${project.service<Workspace>().testGenerationData.packageLine};\n")
     }
 
     /**
@@ -832,11 +837,15 @@ class TestCaseDisplayService(private val project: Project) {
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
 
                 resetButton.isEnabled = document.text != testCase.testCode
-                resetToLastRunButton.isEnabled = document.text != lastRunCode
+                resetToLastRunButton.isEnabled = document.text != lastRunCode && document.text != testCase.testCode
                 runTestButton.isEnabled = document.text != lastRunCode
 
                 textFieldEditor.border =
-                    if (document.text == lastRunCode) getBorder(testCase.testName) else JBUI.Borders.empty()
+                    when (document.text) {
+                        testCase.testCode -> initialBorder
+                        lastRunCode -> getBorder(testCase.testName)
+                        else -> JBUI.Borders.empty()
+                    }
 
                 val modifiedLineIndexes = getModifiedLines(
                     lastRunCode.split("\n"),
@@ -879,65 +888,7 @@ class TestCaseDisplayService(private val project: Project) {
         }
 
         runTestButton.addActionListener {
-            val fileName: String = ('A'..'Z').toList().random().toString() +
-                (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
-                ".java"
-
-            val code = project.service<JavaClassBuilderService>().generateCode(
-                fileName.split(".")[0],
-                document.text,
-                project.service<Workspace>().testGenerationData.importsCode,
-                project.service<Workspace>().testGenerationData.packageLine,
-                project.service<Workspace>().testGenerationData.runWith,
-                project.service<Workspace>().testGenerationData.otherInfo,
-            )
-
-            var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-            if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
-                // User did not set own path
-                buildPath = getBuildPath(project)
-            }
-
-            val generatedTestPath: String = project.service<TestCoverageCollectorService>().saveGeneratedTests(
-                project.service<Workspace>().testGenerationData.packageLine,
-                code,
-                project.service<Workspace>().resultPath!!,
-                fileName,
-            )
-
-            if (!project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath).first) {
-                project.service<TestsExecutionResultService>().removeFromPassingTest(testCase.testName)
-            } else {
-                val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${
-                    (
-                        List(20) {
-                            ('a'..'z').toList().random()
-                        }.joinToString("")
-                        )
-                }"
-
-                val testExecutionError = project.service<TestCoverageCollectorService>().createXmlFromJacoco(
-                    fileName.split(".")[0],
-                    dataFileName,
-                    testCase.testName,
-                    buildPath,
-                    project.service<Workspace>().testGenerationData.packageLine,
-                )
-
-                if (!File("$dataFileName.xml").exists()) {
-                    project.service<TestsExecutionResultService>().removeFromPassingTest(testCase.testName)
-                } else {
-                    project.service<Workspace>().updateTestCase(
-                        project.service<TestCoverageCollectorService>().getTestCaseFromXml(
-                            testCase.testName,
-                            document.text,
-                            project.service<TestCoverageCollectorService>()
-                                .collectLinesCoveredDuringException(testExecutionError),
-                            "$dataFileName.xml",
-                        ),
-                    )
-                }
-            }
+            project.service<TestCoverageCollectorService>().updateTestCode(document.text, testCase.testName)
 
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
