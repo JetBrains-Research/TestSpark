@@ -1,4 +1,4 @@
-import org.jetbrains.changelog .markdownToHTML
+import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
 import java.net.URL
@@ -13,7 +13,6 @@ val thunderdomeVersion = "1.0.5"
 
 val spaceUsername = System.getenv("SPACE_TG_USERNAME")?.toString().orEmpty()
 val spacePassword = System.getenv("SPACE_TG_PASS")?.toString().orEmpty()
-
 
 plugins {
     // Java support
@@ -43,14 +42,14 @@ repositories {
         }
     }
 
-    if (spaceCredentialsProvided()){
+    if (spaceCredentialsProvided()) {
         maven {
             url = uri("https://packages.jetbrains.team/maven/p/grazi/grazie-platform-public")
         }
     }
 }
 
-if(spaceCredentialsProvided()){
+if (spaceCredentialsProvided()) {
     // Add the new source set
     val hasGrazieAccess = sourceSets.create("hasGrazieAccess")
     // add output of main source set to new source set class path
@@ -141,7 +140,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test
     implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
 
-    if(spaceCredentialsProvided()){
+    if (spaceCredentialsProvided()) {
         // Dependencies for hasGrazieAccess variant
         "hasGrazieAccessImplementation"(kotlin("stdlib"))
         "hasGrazieAccessImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")

@@ -55,7 +55,11 @@ class SettingsArguments {
          */
         fun isTokenSet(): Boolean = settingsState!!.llmUserToken.isNotEmpty()
 
-
+        /**
+         * Return the selected LLm platform
+         *
+         * @return selected LLM platform
+         */
         fun llmPlatform(): String = settingsState!!.llmPlatform
     }
 }

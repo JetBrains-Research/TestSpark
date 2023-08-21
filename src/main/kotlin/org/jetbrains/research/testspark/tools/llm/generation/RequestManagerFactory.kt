@@ -6,10 +6,9 @@ interface RequestManagerFactory {
     fun getRequestManager(): RequestManager
 }
 
-
-class StandardRequestManagerFactory: RequestManagerFactory {
+class StandardRequestManagerFactory : RequestManagerFactory {
     override fun getRequestManager(): RequestManager {
-        return when(val platform = SettingsArguments.llmPlatform()) {
+        return when (val platform = SettingsArguments.llmPlatform()) {
             "Grazie" -> GrazieRequestManager()
             "OpenAI" -> OpenAIRequestManager()
             else -> throw IllegalStateException("Unknown selected platform: $platform")

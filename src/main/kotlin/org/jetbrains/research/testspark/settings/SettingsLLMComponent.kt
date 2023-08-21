@@ -6,16 +6,15 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBRadioButton
-import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import java.net.HttpURLConnection
-import javax.swing.*
+import javax.swing.DefaultComboBoxModel
+import javax.swing.JPanel
+import javax.swing.JTextField
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -146,7 +145,7 @@ class SettingsLLMComponent {
      */
     private fun createSettingsPanel() {
         // Check if the Grazie platform access is available in the current build
-        if(isGrazieClassLoaded()) platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie","OpenAI"))
+        if (isGrazieClassLoaded()) platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
 
         panel = FormBuilder.createFormBuilder()
             .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("LLMSettings")))
@@ -211,7 +210,6 @@ class SettingsLLMComponent {
         set(newAlg) {
             modelSelector.item = newAlg
         }
-
 
     var llmPlatform: String
         get() = platformSelector.item
