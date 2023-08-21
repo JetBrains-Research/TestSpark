@@ -36,7 +36,7 @@ import kotlin.io.path.createDirectories
  * @property testFileName The name of the generated test file.
  * @property log An instance of the logger class for logging purposes.
  * @property llmErrorManager An instance of the LLMErrorManager class.
- * @property llmRequestManager An instance of the LLMRequestManager class.
+ * @property requestManager An instance of the LLMRequestManager class.
  * @property maxRequests The maximum number of requests to be sent to LLM.
  */
 class LLMProcessManager(
@@ -47,7 +47,7 @@ class LLMProcessManager(
     private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
-    private val llmRequestManager = LLMRequestManager()
+    private val requestManager: RequestManager = GrazieRequestManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
 
     /**
@@ -141,7 +141,7 @@ class LLMProcessManager(
             // Send request to LLM
             if (warningMessage.isNotEmpty()) llmErrorManager.warningProcess(warningMessage, project)
             val requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
-                llmRequestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
+                requestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
             generatedTestSuite = requestResult.second
 
             // Process stopped checking

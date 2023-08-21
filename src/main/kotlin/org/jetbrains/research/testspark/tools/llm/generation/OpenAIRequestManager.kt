@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.google.gson.GsonBuilder
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
@@ -15,19 +14,14 @@ import java.net.HttpURLConnection
 /**
  * This class represents a manager for making requests to the LLM (Live Learning Model).
  */
-class LLMRequestManager {
-    private val url = "https://api.openai.com/v1/chat/completions"
+class OpenAIRequestManager : RequestManager() {
 
-    private val llmToken = SettingsArguments.llmUserToken()
+    private val url = "https://api.openai.com/v1/chat/completions"
     private val model = SettingsArguments.model()
 
-    private val log: Logger = Logger.getInstance(this.javaClass)
-
     private val httpRequest = HttpRequests.post(url, "application/json").tuner {
-        it.setRequestProperty("Authorization", "Bearer $llmToken")
+        it.setRequestProperty("Authorization", "Bearer $token")
     }
-
-    private val chatHistory = mutableListOf<OpenAIMessage>()
 
     /**
      * Sends a request to LLM with the given prompt and returns the generated TestSuite.
@@ -39,7 +33,7 @@ class LLMRequestManager {
      * @param llmErrorManager the error manager to handle errors during the request
      * @return the generated TestSuite, or null and prompt message
      */
-    fun request(prompt: String, indicator: ProgressIndicator, packageName: String, project: Project, llmErrorManager: LLMErrorManager): Pair<String, TestSuiteGeneratedByLLM?> {
+    override fun request(prompt: String, indicator: ProgressIndicator, packageName: String, project: Project, llmErrorManager: LLMErrorManager): Pair<String, TestSuiteGeneratedByLLM?> {
         // Prepare the chat
         val llmRequestBody = buildRequestBody(prompt)
 
@@ -79,29 +73,19 @@ class LLMRequestManager {
         } catch (e: HttpStatusException) {
             return Pair("", null)
         }
-        // save the full response in the chat history
-        val response = testsAssembler.rawText
-        log.debug("The full response: \n $response")
-        chatHistory.add(OpenAIMessage("assistant", response))
-
-        // check if response is empty
-        if (response.isEmpty() || response.isBlank()) return Pair("You have provided an empty answer! Please answer my previous question with the same formats", null)
-
-        val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName) ?: return Pair("The provided code is not parsable. Please give the correct code", null)
-
-        return Pair("", testSuiteGeneratedByLLM.reformat())
+        return processResponse(testsAssembler, packageName)
     }
 
     /**
-     * Builds a new LLMChat instance using the given prompt.
-     * Adds the prompt to the chat history and then constructs the LLMChat object with the chat history.
+     * Builds a new OpenAI request body instance using the given prompt.
+     * Adds the prompt to the chat history and then constructs the OpenAIRequestBody using the chatHistory and model
      *
      * @param prompt The prompt for the user.
-     * @return The newly created LLMChat object.
+     * @return The newly created OpenAIRequestBody object.
      */
     private fun buildRequestBody(prompt: String): OpenAIRequestBody {
         // add new prompt to chat history
-        chatHistory.add(OpenAIMessage("user", prompt))
+        chatHistory.add(ChatMessage("user", prompt))
 
         return OpenAIRequestBody(model, chatHistory)
     }
