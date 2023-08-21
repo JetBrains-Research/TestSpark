@@ -30,6 +30,45 @@ version = properties("pluginVersion")
 repositories {
     mavenCentral()
     maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
+
+    maven {
+        url = uri("https://packages.jetbrains.team/maven/p/automatically-generating-unit-tests/maven")
+        credentials {
+            username = System.getenv("SPACE_TG_USERNAME")
+            password = System.getenv("SPACE_TG_PASS")
+        }
+    }
+
+    maven {
+        url = uri("https://packages.jetbrains.team/maven/p/grazi/grazie-platform-public")
+    }
+}
+
+val hasGrazieAccess = sourceSets.create("hasGrazieAccess")
+hasGrazieAccess.compileClasspath += sourceSets.main.get().output
+
+java.registerFeature(hasGrazieAccess.name) {
+    usingSourceSet(hasGrazieAccess)
+}
+
+tasks.prepareUiTestingSandbox.configure {
+    dependsOn(hasGrazieAccess.jarTaskName)
+    from(tasks.getByName(hasGrazieAccess.jarTaskName).outputs.files.asPath) { into("TestSpark/lib") }
+
+    hasGrazieAccess.runtimeClasspath
+        .elements.get().forEach {
+            from(it.asFile.absolutePath) { into("TestSpark/lib") }
+        }
+}
+
+tasks.prepareSandbox.configure {
+    dependsOn(hasGrazieAccess.jarTaskName)
+    from(tasks.getByName(hasGrazieAccess.jarTaskName).outputs.files.asPath) { into("TestSpark/lib") }
+
+    hasGrazieAccess.runtimeClasspath
+        .elements.get().forEach {
+            from(it.asFile.absolutePath) { into("TestSpark/lib") }
+        }
 }
 
 dependencies {
@@ -80,6 +119,10 @@ dependencies {
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test
     implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
+    // Dependencies for hasGrazieAccess variant
+    "hasGrazieAccessImplementation"(kotlin("stdlib"))
+    "hasGrazieAccessImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:1.0.1")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
