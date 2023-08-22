@@ -172,7 +172,7 @@ class Workspace(private val project: Project) : Disposable {
         project.service<ErrorService>().clear()
         project.service<CoverageVisualisationService>().clear()
         testGenerationData.clear()
-        project.service<Workspace>().cleanFolder()
+        project.service<Workspace>().cleanFolder(resultPath!!)
         project.service<TestsExecutionResultService>().clear()
     }
 
@@ -203,7 +203,7 @@ class Workspace(private val project: Project) : Disposable {
 
         updateEditorForFileUrl(jobKey.fileUrl)
 
-        project.service<Workspace>().cleanFolder()
+        project.service<Workspace>().cleanFolder(resultPath!!)
 
         if (editor != null) {
             showReport()
@@ -321,20 +321,23 @@ class Workspace(private val project: Project) : Disposable {
     /**
      * Clean data folder
      */
-    fun cleanFolder() {
-        resultPath ?: return
-        val folder = File(resultPath!!)
+    fun cleanFolder(path: String) {
+        val folder = File(path)
 
-        if (folder.exists() && folder.isDirectory) {
+        if (!folder.exists()) return
+
+        if (folder.isDirectory) {
             val files = folder.listFiles()
-
             if (files != null) {
                 for (file in files) {
-                    if (file.isFile) {
+                    if (file.isDirectory) {
+                        cleanFolder(file.absolutePath)
+                    } else {
                         file.delete()
                     }
                 }
             }
         }
+        folder.delete()
     }
 }

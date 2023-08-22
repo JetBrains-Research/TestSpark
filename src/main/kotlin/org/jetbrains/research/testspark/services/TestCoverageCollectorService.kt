@@ -181,7 +181,7 @@ class TestCoverageCollectorService(private val project: Project) {
         )
 
         // add passing test
-        if (testExecutionError.isEmpty()) {
+        if (collectLinesCoveredDuringException(testExecutionError).isEmpty()) {
             project.service<TestsExecutionResultService>().addPassingTest(testCaseName)
         } else {
             project.service<TestsExecutionResultService>().removeFromPassingTest(testCaseName)
@@ -334,7 +334,7 @@ class TestCoverageCollectorService(private val project: Project) {
         if (!project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath).first) {
             project.service<TestsExecutionResultService>().removeFromPassingTest(testName)
         } else {
-            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-$fileName"
+            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${fileName.split(".")[0]}"
 
             val testExecutionError = project.service<TestCoverageCollectorService>().createXmlFromJacoco(
                 fileName.split(".")[0],
@@ -358,13 +358,13 @@ class TestCoverageCollectorService(private val project: Project) {
                         ),
                     )
                 }
-                project.service<Workspace>().cleanFolder()
+                project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
 
                 return
             }
         }
         project.service<Workspace>().updateTestCase(TestCase(testName, testCode, setOf(), setOf(), setOf()))
 
-        project.service<Workspace>().cleanFolder()
+        project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
     }
 }
