@@ -25,7 +25,7 @@ class GenerateTestsActionClassLlm : AnAction() {
      *
      * @param e an action event that contains useful information and corresponds to the action invoked by the user
      */
-    override fun update(e: AnActionEvent) = updateForClass(e, "GPT-4")
+    override fun update(e: AnActionEvent) = updateForClass(e, "LLM")
 
     /**
      * AnAction.getActionUpdateThread() implementation.
