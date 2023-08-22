@@ -24,6 +24,7 @@ import org.jetbrains.research.testspark.services.*
 import org.jetbrains.research.testspark.tools.evosuite.validation.VALIDATION_RESULT_TOPIC
 import org.jetbrains.research.testspark.tools.evosuite.validation.ValidationResultListener
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
+import java.io.File
 
 /**
  * Workspace state service
@@ -171,6 +172,7 @@ class Workspace(private val project: Project) : Disposable {
         project.service<ErrorService>().clear()
         project.service<CoverageVisualisationService>().clear()
         testGenerationData.clear()
+        project.service<Workspace>().cleanFolder()
     }
 
     /**
@@ -199,6 +201,8 @@ class Workspace(private val project: Project) : Disposable {
         resultsForFile.add(testJob!!)
 
         updateEditorForFileUrl(jobKey.fileUrl)
+
+        project.service<Workspace>().cleanFolder()
 
         if (editor != null) {
             showReport()
@@ -311,5 +315,25 @@ class Workspace(private val project: Project) : Disposable {
      */
     override fun dispose() {
         listenerDisposable?.let { Disposer.dispose(it) }
+    }
+
+    /**
+     * Clean data folder
+     */
+    fun cleanFolder() {
+        resultPath ?: return
+        val folder = File(resultPath!!)
+
+        if (folder.exists() && folder.isDirectory) {
+            val files = folder.listFiles()
+
+            if (files != null) {
+                for (file in files) {
+                    if (file.isFile) {
+                        file.delete()
+                    }
+                }
+            }
+        }
     }
 }

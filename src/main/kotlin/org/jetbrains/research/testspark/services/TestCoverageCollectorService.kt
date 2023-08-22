@@ -303,11 +303,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param testName the name of the test
      */
     fun updateTestCode(testCode: String, testName: String) {
-        // generate the fileName
-        // TODO check for unique name
-        val fileName: String = ('A'..'Z').toList().random().toString() +
-            (List(20) { ('a'..'z').toList().random() }.joinToString("")) +
-            ".java"
+        val fileName = "UpdatedTestCase.java"
 
         // generate code from document
         val code = project.service<JavaClassBuilderService>().generateCode(
@@ -338,8 +334,7 @@ class TestCoverageCollectorService(private val project: Project) {
         if (!project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath).first) {
             project.service<TestsExecutionResultService>().removeFromPassingTest(testName)
         } else {
-            // TODO check for unique name
-            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
+            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-$fileName"
 
             val testExecutionError = project.service<TestCoverageCollectorService>().createXmlFromJacoco(
                 fileName.split(".")[0],
@@ -363,9 +358,13 @@ class TestCoverageCollectorService(private val project: Project) {
                         ),
                     )
                 }
+                project.service<Workspace>().cleanFolder()
+
                 return
             }
         }
         project.service<Workspace>().updateTestCase(TestCase(testName, testCode, setOf(), setOf(), setOf()))
+
+        project.service<Workspace>().cleanFolder()
     }
 }
