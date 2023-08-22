@@ -282,6 +282,8 @@ fun updateForClass(e: AnActionEvent, name: String) {
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
+    if (psiFile !is PsiJavaFile) return
+
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
 
     e.presentation.isEnabledAndVisible = true
@@ -301,6 +303,8 @@ fun updateForMethod(e: AnActionEvent, name: String) {
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
+    if (psiFile !is PsiJavaFile) return
+
     val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
 
     e.presentation.isEnabledAndVisible = true
@@ -319,6 +323,8 @@ fun updateForLine(e: AnActionEvent, name: String) {
 
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+
+    if (psiFile !is PsiJavaFile) return
 
     val line: Int = getSurroundingLine(psiFile, caret)?.plus(1)
         ?: return // lines in the editor and in EvoSuite are one-based
