@@ -107,10 +107,13 @@ class TestCaseDisplayService(private val project: Project) {
         mainPanel.layout = BorderLayout()
 
         val topButtons = JPanel()
-        topButtons.layout = FlowLayout(FlowLayout.TRAILING)
+        topButtons.layout = BoxLayout(topButtons, BoxLayout.X_AXIS)
 
+        topButtons.add(Box.createRigidArea(Dimension(10, 0)))
         topButtons.add(testsPassedLabel)
+        topButtons.add(Box.createRigidArea(Dimension(10, 0)))
         topButtons.add(testsSelectedLabel)
+        topButtons.add(Box.createHorizontalGlue())
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
         topButtons.add(removeAllButton)
