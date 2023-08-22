@@ -100,7 +100,7 @@ class TestCoverageCollector(
             report.testCaseList[testCase.name] = project.service<TestCoverageCollectorService>().getTestCaseFromXml(
                 testCase.name,
                 testCase.toString(),
-                project.service<TestCoverageCollectorService>().collectLinesCoveredDuringException(testExecutionError),
+                project.service<TestCoverageCollectorService>().getExceptionData(testExecutionError).second,
                 "$dataFileName.xml",
             )
         }

@@ -181,7 +181,7 @@ class TestCoverageCollectorService(private val project: Project) {
         )
 
         // add passing test
-        if (collectLinesCoveredDuringException(testExecutionError).isEmpty()) {
+        if (!getExceptionData(testExecutionError).first) {
             project.service<TestsExecutionResultService>().addPassingTest(testCaseName)
         } else {
             project.service<TestsExecutionResultService>().removeFromPassingTest(testCaseName)
@@ -268,14 +268,14 @@ class TestCoverageCollectorService(private val project: Project) {
     }
 
     /**
-     * Collect lines covered during the exception happening.
+     * Check for exception and collect lines covered during the exception happening.
      *
      * @param testExecutionError error output (including the thrown stack trace) during the test execution.
      * @return a set of lines that are covered in CUT during the exception happening.
      */
-    fun collectLinesCoveredDuringException(testExecutionError: String): Set<Int> {
+    fun getExceptionData(testExecutionError: String): Pair<Boolean, Set<Int>> {
         if (testExecutionError.isBlank()) {
-            return emptySet()
+            return Pair(false, emptySet())
         }
 
         val result = mutableSetOf<Int>()
@@ -293,7 +293,7 @@ class TestCoverageCollectorService(private val project: Project) {
             }
         }
 
-        return result
+        return Pair(Regex("(^\\d+\\) .+)|(^.+(Exception|Error): .+)|(^\\s+at .+)|(^\\s+... \\d+ more)|(^\\s*Caused by:.+)").find(testExecutionError) != null, result)
     }
 
     /**
@@ -352,8 +352,7 @@ class TestCoverageCollectorService(private val project: Project) {
                         project.service<TestCoverageCollectorService>().getTestCaseFromXml(
                             testName,
                             testCode,
-                            project.service<TestCoverageCollectorService>()
-                                .collectLinesCoveredDuringException(testExecutionError),
+                            project.service<TestCoverageCollectorService>().getExceptionData(testExecutionError).second,
                             "$dataFileName.xml",
                         ),
                     )
