@@ -28,4 +28,14 @@ class TestsExecutionResultService(private val project: Project) {
     fun removeFromPassingTest(testName: String) {
         if (passingTests.contains(testName)) passingTests.remove(testName)
     }
+
+    /**
+     * Number of passing tests
+     */
+    fun size() = passingTests.size
+
+    /**
+     * Clear passing tests
+     */
+    fun clear() = passingTests.clear()
 }

@@ -77,6 +77,9 @@ class TestCaseDisplayService(private val project: Project) {
     private var testsSelectedText: String = "${TestSparkLabelsBundle.defaultValue("testsSelected")}: %d/%d"
     private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
+    private val testsPassedText: String = "${TestSparkLabelsBundle.defaultValue("testsPassed")}: %d/%d"
+    private var testsPassedLabel: JLabel = JLabel(testsPassedText)
+
     private var allTestCasePanel: JPanel = JPanel()
     private var scrollPane: JBScrollPane = JBScrollPane(
         allTestCasePanel,
@@ -106,6 +109,7 @@ class TestCaseDisplayService(private val project: Project) {
         val topButtons = JPanel()
         topButtons.layout = FlowLayout(FlowLayout.TRAILING)
 
+        topButtons.add(testsPassedLabel)
         topButtons.add(testsSelectedLabel)
         topButtons.add(selectAllButton)
         topButtons.add(deselectAllButton)
@@ -202,6 +206,7 @@ class TestCaseDisplayService(private val project: Project) {
                 validateButton.isEnabled = testsSelected > 0
 
                 updateTestsSelectedLabel()
+                updateTestsPassedLabel()
             }
 
             // Add an editor to modify the test source code
@@ -267,6 +272,7 @@ class TestCaseDisplayService(private val project: Project) {
             // Update the number of selected tests (all tests are selected by default)
             testsSelected = testCasePanels.size
             updateTestsSelectedLabel()
+            updateTestsPassedLabel()
         }
     }
 
@@ -618,6 +624,13 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
+     * Updates the label with the number passed tests.
+     */
+    private fun updateTestsPassedLabel() {
+        testsPassedLabel.text = String.format(testsPassedText, project.service<TestsExecutionResultService>().size(), testCasePanels.size)
+    }
+
+    /**
      * Append the provided test cases to the provided class.
      *
      * @param testCaseComponents the test cases to be appended
@@ -715,6 +728,10 @@ class TestCaseDisplayService(private val project: Project) {
             // Update the UI of the tool window tab
             allTestCasePanel.updateUI()
             updateTestsSelectedLabel()
+
+            // Passed tests update
+            project.service<TestsExecutionResultService>().removeFromPassingTest(test.testName)
+            updateTestsPassedLabel()
 
             // If no more tests are remaining, close the tool window
             if (testCasePanels.size == 0) closeToolWindow()
@@ -877,6 +894,8 @@ class TestCaseDisplayService(private val project: Project) {
                 }
                 textFieldEditor.border = initialBorder
                 textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+
+                updateTestsPassedLabel()
             }
         }
 
@@ -897,6 +916,8 @@ class TestCaseDisplayService(private val project: Project) {
             runTestButton.isEnabled = false
             textFieldEditor.border = getBorder(testCase.testName)
             textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+
+            updateTestsPassedLabel()
         }
     }
 

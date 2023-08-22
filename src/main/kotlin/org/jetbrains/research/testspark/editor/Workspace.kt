@@ -173,6 +173,7 @@ class Workspace(private val project: Project) : Disposable {
         project.service<CoverageVisualisationService>().clear()
         testGenerationData.clear()
         project.service<Workspace>().cleanFolder()
+        project.service<TestsExecutionResultService>().clear()
     }
 
     /**
