@@ -28,6 +28,8 @@ class SettingsLLMComponent {
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
 
+    private var lastChosenModule = ""
+
     // Maximum number of LLM requests
     private var maxLLMRequestsField =
         JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxLLMRequest, 1, 20))
@@ -117,7 +119,9 @@ class SettingsLLMComponent {
 
         val gptComparator = Comparator<String> { s1, s2 ->
             when {
-                s1.contains("gpt") && s2.contains("gpt") -> s1.compareTo(s2)
+                s1 == lastChosenModule -> -1
+                s2 == lastChosenModule -> 1
+                s1.contains("gpt") && s2.contains("gpt") -> s2.compareTo(s1)
                 s1.contains("gpt") -> -1
                 s2.contains("gpt") -> 1
                 else -> s1.compareTo(s2)
@@ -187,6 +191,7 @@ class SettingsLLMComponent {
     var model: String
         get() = modelSelector.item
         set(newAlg) {
+            lastChosenModule = newAlg
             modelSelector.item = newAlg
         }
 
