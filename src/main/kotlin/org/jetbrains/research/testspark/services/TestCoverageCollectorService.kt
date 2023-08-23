@@ -70,7 +70,9 @@ class TestCoverageCollectorService(private val project: Project) {
         val junitPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}junit-4.13.jar"
         val mockitoPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}mockito-core-5.0.0.jar"
         val hamcrestPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}hamcrest-core-1.3.jar"
-        return "$junitPath:$hamcrestPath:$mockitoPath:$buildPath"
+        val byteBuddy = "$pluginsPath${sep}TestSpark${sep}lib${sep}byte-buddy-1.14.6.jar"
+        val byteBuddyAgent = "$pluginsPath${sep}TestSpark${sep}lib${sep}byte-buddy-agent-1.14.6.jar"
+        return "$junitPath:$hamcrestPath:$mockitoPath:$byteBuddy:$byteBuddyAgent:$buildPath"
     }
 
     /**

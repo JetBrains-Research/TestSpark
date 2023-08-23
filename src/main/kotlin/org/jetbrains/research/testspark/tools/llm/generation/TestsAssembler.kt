@@ -89,9 +89,10 @@ class TestsAssembler(
             testSuite.packageString = packageName
 
             // save imports
-            testSuite.imports = importPattern.findAll(rawText, 0).map {
-                it.groupValues[0]
-            }.toSet()
+            testSuite.imports = importPattern.findAll(rawText, 0)
+                .map { it.groupValues[0] }
+                .map { it.replace("import static", "import") }
+                .toSet()
 
             // save RunWith
             val detectedRunWith = runWithPattern.find(rawText, startIndex = 0)?.groupValues?.get(0)
