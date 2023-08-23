@@ -180,10 +180,6 @@ class TestCaseDisplayService(private val project: Project) {
         testCasePanels.clear()
         originalTestCases.clear()
 
-        for (testCase in testReport.testCaseList.values) {
-            project.service<TestCoverageCollectorService>().updateTestCode(testCase.testCode, testCase.testName)
-        }
-
         testReport.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
@@ -913,7 +909,9 @@ class TestCaseDisplayService(private val project: Project) {
         }
 
         runTestButton.addActionListener {
-            project.service<TestCoverageCollectorService>().updateTestCode(document.text, testCase.testName)
+           project.service<Workspace>().updateTestCase(
+               project.service<TestCoverageCollectorService>().updateDataWithTestCase(document.text, testCase.testName)
+           )
 
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false

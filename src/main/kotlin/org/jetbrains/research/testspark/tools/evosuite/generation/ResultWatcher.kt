@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.tools.evosuite.generation
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.data.Report
@@ -26,6 +27,7 @@ class ResultWatcher(
     private val resultName: String,
     private val fileUrl: String,
     private val classFQN: String,
+    private val indicator: ProgressIndicator,
 ) :
     Runnable {
     private val log = Logger.getInstance(ResultWatcher::class.java)
@@ -43,6 +45,7 @@ class ResultWatcher(
             Report(testGenerationResult),
             getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
             getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
+            indicator,
         )
     }
 }

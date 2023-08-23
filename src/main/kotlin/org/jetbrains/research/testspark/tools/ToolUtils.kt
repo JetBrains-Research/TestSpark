@@ -6,9 +6,11 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import java.io.File
 
 /**
@@ -51,13 +53,26 @@ fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
  * @param packageLine The package declaration line of the test generation data.
  * @param importsCode The import statements code of the test generation data.
  */
-fun saveData(project: Project, report: Report, packageLine: String, importsCode: MutableSet<String>) {
+fun saveData(
+    project: Project,
+    report: Report,
+    packageLine: String,
+    importsCode: MutableSet<String>,
+    indicator: ProgressIndicator
+) {
     val workspace = project.service<Workspace>()
-    workspace.testGenerationData.testGenerationResultList.add(report)
     workspace.testGenerationData.resultName = project.service<Workspace>().testResultName!!
     workspace.testGenerationData.fileUrl = project.service<Workspace>().fileUrl!!
     workspace.testGenerationData.packageLine = packageLine
     workspace.testGenerationData.importsCode.addAll(importsCode)
+
+    indicator.text = TestSparkBundle.message("testExecutionMessage")
+
+    for (testCase in report.testCaseList.values) {
+        project.service<TestCoverageCollectorService>().updateDataWithTestCase(testCase.testCode, testCase.testName)
+    }
+
+    workspace.testGenerationData.testGenerationResultList.add(report)
 }
 
 /**

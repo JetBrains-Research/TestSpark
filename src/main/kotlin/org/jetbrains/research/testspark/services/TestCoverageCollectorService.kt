@@ -270,6 +270,8 @@ class TestCoverageCollectorService(private val project: Project) {
         // Add lines that Jacoco might have missed because of its limitation during the exception
         setOfLines.addAll(linesCoveredDuringTheException)
 
+        project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
+
         return TestCase(testCaseName, testCaseCode, setOfLines, setOf(), setOf())
     }
 
@@ -308,7 +310,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param testCode new code of test
      * @param testName the name of the test
      */
-    fun updateTestCode(testCode: String, testName: String) {
+    fun updateDataWithTestCase(testCode: String, testName: String): TestCase {
         val fileName = "UpdatedTestCase.java"
 
         // generate code from document
@@ -353,23 +355,16 @@ class TestCoverageCollectorService(private val project: Project) {
             if (!File("$dataFileName.xml").exists()) {
                 project.service<TestsExecutionResultService>().removeFromPassingTest(testName)
             } else {
-                if (project.service<Workspace>().testJob!!.report.testCaseList[testName]!!.testCode != testCode) {
-                    project.service<Workspace>().updateTestCase(
-                        project.service<TestCoverageCollectorService>().getTestCaseFromXml(
-                            testName,
-                            testCode,
-                            project.service<TestCoverageCollectorService>().getExceptionData(testExecutionError).second,
-                            "$dataFileName.xml",
-                        ),
-                    )
-                }
-                project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
-
-                return
+                return project.service<TestCoverageCollectorService>().getTestCaseFromXml(
+                    testName,
+                    testCode,
+                    project.service<TestCoverageCollectorService>().getExceptionData(testExecutionError).second,
+                    "$dataFileName.xml",
+                )
             }
         }
-        project.service<Workspace>().updateTestCase(TestCase(testName, testCode, setOf(), setOf(), setOf()))
-
         project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
+
+        return TestCase(testName, testCode, setOf(), setOf(), setOf())
     }
 }

@@ -168,7 +168,7 @@ class EvoSuiteProcessManager(
 
             // start result watcher
             AppExecutorUtil.getAppScheduledExecutorService()
-                .execute(ResultWatcher(project, resultName, fileUrl, classFQN))
+                .execute(ResultWatcher(project, resultName, fileUrl, classFQN, indicator))
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()
