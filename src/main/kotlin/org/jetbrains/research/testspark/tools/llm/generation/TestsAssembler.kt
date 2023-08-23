@@ -91,7 +91,6 @@ class TestsAssembler(
             // save imports
             testSuite.imports = importPattern.findAll(rawText, 0)
                 .map { it.groupValues[0] }
-                .map { it.replace("import static", "import") }
                 .toSet()
 
             // save RunWith
@@ -103,7 +102,9 @@ class TestsAssembler(
                 testSuite.runWith = runWith
                 project.service<Workspace>().testGenerationData.runWith = runWith
                 project.service<Workspace>().testGenerationData.importsCode.add("import org.junit.runner.RunWith;")
-                // TODO add import for runWith parameter
+            } else {
+                project.service<Workspace>().testGenerationData.runWith = ""
+                project.service<Workspace>().testGenerationData.importsCode.remove("import org.junit.runner.RunWith;")
             }
 
             val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
@@ -114,8 +115,8 @@ class TestsAssembler(
             val otherInfo = otherInfoList.joinToString("{")
             if (otherInfo.isNotBlank()) {
                 testSuite.otherInfo = otherInfo
-                project.service<Workspace>().testGenerationData.otherInfo = otherInfo
             }
+            project.service<Workspace>().testGenerationData.otherInfo = otherInfo
 
             // Save the main test cases
             testSet.forEach ca@{

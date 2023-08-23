@@ -107,6 +107,8 @@ class TestCoverageCollectorService(private val project: Project) {
             ),
         )
 
+        log.info("Error message: $errorMsg")
+
         // create .class file path
         val classFilePath = path.replace(".java", ".class")
 
@@ -181,6 +183,8 @@ class TestCoverageCollectorService(private val project: Project) {
                 name,
             ),
         )
+
+        log.info("Test execution error message: $testExecutionError")
 
         // add passing test
         if (!getExceptionData(testExecutionError).first) {
