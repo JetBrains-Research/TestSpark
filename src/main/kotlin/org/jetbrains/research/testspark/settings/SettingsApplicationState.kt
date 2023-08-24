@@ -25,6 +25,7 @@ data class SettingsApplicationState(
     var minimize: Boolean = DefaultSettingsApplicationState.minimize,
     var llmUserToken: String = DefaultSettingsApplicationState.llmUserToken,
     var model: String = DefaultSettingsApplicationState.model,
+    var llmPlatform: String = DefaultSettingsApplicationState.llmPlatform,
     var maxLLMRequest: Int = DefaultSettingsApplicationState.maxLLMRequest,
     var maxInputParamsDepth: Int = DefaultSettingsApplicationState.maxInputParamsDepth,
     var maxPolyDepth: Int = DefaultSettingsApplicationState.maxPolyDepth,
@@ -52,6 +53,7 @@ data class SettingsApplicationState(
         val criterionCBranch: Boolean = TestSparkDefaultsBundle.defaultValue("criterionCBranch").toBoolean()
         val llmUserToken: String = TestSparkDefaultsBundle.defaultValue("llmToken")
         var model: String = TestSparkDefaultsBundle.defaultValue("model")
+        var llmPlatform: String = TestSparkDefaultsBundle.defaultValue("llmPlatform")
         val maxLLMRequest: Int = TestSparkDefaultsBundle.defaultValue("maxLLMRequest").toInt()
         val maxInputParamsDepth: Int = TestSparkDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
         val maxPolyDepth: Int = TestSparkDefaultsBundle.defaultValue("maxPolyDepth").toInt()

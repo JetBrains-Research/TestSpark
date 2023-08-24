@@ -37,6 +37,19 @@ class TestsAssembler(
     /**
      * Receives a response text and updates the progress bar accordingly.
      *
+     * @param text part of the LLM response
+     */
+    fun receiveResponse(text: String) {
+        if (text.isEmpty()) return
+
+        // Collect the response and update the progress bar
+        rawText = rawText.plus(text)
+        updateProgressBar()
+    }
+
+    /**
+     * Receives a response text and updates the progress bar accordingly.
+     *
      * @param httpRequest the httpRequest sent to OpenAI
      */
     fun receiveResponse(
@@ -63,16 +76,19 @@ class TestsAssembler(
 
             // Collect the response and update the progress bar
             rawText = rawText.plus(choices.delta.content)
-
-            val generatedTestsCount = rawText.split("@Test").size - 1
-
-            if (lastTestCount != generatedTestsCount) {
-                indicator.text = TestSparkBundle.message("generatingTestNumber") + generatedTestsCount
-                lastTestCount = generatedTestsCount
-            }
+            updateProgressBar()
         }
 
         log.debug(rawText)
+    }
+
+    private fun updateProgressBar() {
+        val generatedTestsCount = rawText.split("@Test").size - 1
+
+        if (lastTestCount != generatedTestsCount) {
+            indicator.text = TestSparkBundle.message("generatingTestNumber") + generatedTestsCount
+            lastTestCount = generatedTestsCount
+        }
     }
 
     /**

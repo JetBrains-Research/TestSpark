@@ -14,6 +14,7 @@ import com.intellij.psi.PsiCodeBlock
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
 import com.intellij.psi.util.PsiTreeUtil
@@ -282,6 +283,8 @@ fun updateForClass(e: AnActionEvent, name: String) {
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
+    if (psiFile !is PsiJavaFile) return
+
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
 
     e.presentation.isEnabledAndVisible = true
@@ -301,6 +304,8 @@ fun updateForMethod(e: AnActionEvent, name: String) {
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
 
+    if (psiFile !is PsiJavaFile) return
+
     val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
 
     e.presentation.isEnabledAndVisible = true
@@ -319,6 +324,8 @@ fun updateForLine(e: AnActionEvent, name: String) {
 
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+
+    if (psiFile !is PsiJavaFile) return
 
     val line: Int = getSurroundingLine(psiFile, caret)?.plus(1)
         ?: return // lines in the editor and in EvoSuite are one-based
