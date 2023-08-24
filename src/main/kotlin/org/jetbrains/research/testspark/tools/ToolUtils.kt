@@ -69,6 +69,7 @@ fun saveData(
     indicator.text = TestSparkBundle.message("testExecutionMessage")
 
     for (testCase in report.testCaseList.values) {
+        indicator.text = "Executing ${testCase.testName}"
         project.service<TestCoverageCollectorService>().updateDataWithTestCase(testCase.testCode, testCase.testName)
     }
 

@@ -61,7 +61,6 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import kotlin.collections.HashMap
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -221,6 +220,7 @@ class TestCaseDisplayService(private val project: Project) {
             val testCaseTitle = JLabel(testCase.testName)
 
             middlePanel.add(testCaseTitle)
+            middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
             middlePanel.add(textFieldEditor)
 
             testCasePanel.add(middlePanel, BorderLayout.CENTER)

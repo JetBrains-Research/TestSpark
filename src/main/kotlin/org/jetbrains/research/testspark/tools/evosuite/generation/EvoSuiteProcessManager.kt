@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.tools.evosuite.generation
 
+import com.google.gson.Gson
+import com.google.gson.stream.JsonReader
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessAdapter
@@ -9,20 +11,20 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import com.intellij.util.concurrency.AppExecutorUtil
+import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestDada
+import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.tools.*
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
-import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.getKey
-import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
+import java.io.FileReader
 import java.nio.charset.Charset
 import java.util.regex.Pattern
 import kotlin.io.path.Path
@@ -107,7 +109,7 @@ class EvoSuiteProcessManager(
             val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
             log.info("Starting EvoSuite with arguments: $cmdString")
 
-            indicator.isIndeterminate = false
+//            indicator.isIndeterminate = false
             indicator.text = TestSparkBundle.message("searchMessage")
             val evoSuiteProcess = GeneralCommandLine(cmd)
             evoSuiteProcess.charset = Charset.forName("UTF-8")
@@ -166,9 +168,18 @@ class EvoSuiteProcessManager(
             // evosuite errors check
             if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return
 
-            // start result watcher
-            AppExecutorUtil.getAppScheduledExecutorService()
-                .execute(ResultWatcher(project, resultName, fileUrl, classFQN, indicator))
+            val gson = Gson()
+            val reader = JsonReader(FileReader(resultName))
+
+            val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
+
+            saveData(
+                project,
+                Report(testGenerationResult),
+                getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
+                getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
+                indicator,
+            )
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()

@@ -18,7 +18,6 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.tools.evosuite.generation.ResultWatcher
 import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
@@ -31,7 +30,7 @@ import org.jetbrains.research.testspark.tools.template.Tool
  * @param name The name of the tool. Default value is "Llm".
  */
 class Llm(override val name: String = "Llm") : Tool {
-    private val log = Logger.getInstance(ResultWatcher::class.java)
+    private val log = Logger.getInstance(this::class.java)
 
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
