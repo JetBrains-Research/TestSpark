@@ -27,6 +27,7 @@ class SettingsLLMComponent {
     // Models
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
+    private var platformSelector = ComboBox(arrayOf("OpenAI"))
 
     // Maximum number of LLM requests
     private var maxLLMRequestsField =
@@ -58,6 +59,7 @@ class SettingsLLMComponent {
     private fun addListeners() {
         llmUserTokenField.document.addDocumentListener(object : DocumentListener {
             private fun update() {
+                if (platformSelector.selectedItem!!.toString() == "Grazie") return
                 ApplicationManager.getApplication().executeOnPooledThread {
                     val modules = getModules(llmUserTokenField.text)
                     modelSelector.removeAllItems()
@@ -142,8 +144,20 @@ class SettingsLLMComponent {
      * Create the main panel for LLM-related settings page
      */
     private fun createSettingsPanel() {
+        // Check if the Grazie platform access is available in the current build
+        if (isGrazieClassLoaded())
+            platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
+        else
+            platformSelector.isEnabled = false
+
         panel = FormBuilder.createFormBuilder()
             .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("LLMSettings")))
+            .addLabeledComponent(
+                JBLabel(TestSparkLabelsBundle.defaultValue("llmPlatform")),
+                platformSelector,
+                10,
+                false,
+            )
             .addLabeledComponent(
                 JBLabel(TestSparkLabelsBundle.defaultValue("llmToken")),
                 llmUserTokenField,
@@ -178,6 +192,16 @@ class SettingsLLMComponent {
             .panel
     }
 
+    private fun isGrazieClassLoaded(): Boolean {
+        val className = "org.jetbrains.research.grazie.Request"
+        return try {
+            Class.forName(className)
+            true
+        } catch (e: ClassNotFoundException) {
+            false
+        }
+    }
+
     var llmUserToken: String
         get() = llmUserTokenField.text
         set(newText) {
@@ -188,6 +212,12 @@ class SettingsLLMComponent {
         get() = modelSelector.item
         set(newAlg) {
             modelSelector.item = newAlg
+        }
+
+    var llmPlatform: String
+        get() = platformSelector.item
+        set(newAlg) {
+            platformSelector.item = newAlg
         }
 
     var maxLLMRequest: Int
