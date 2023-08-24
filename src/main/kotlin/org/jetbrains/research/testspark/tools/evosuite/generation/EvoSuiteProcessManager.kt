@@ -1,31 +1,34 @@
 package org.jetbrains.research.testspark.tools.evosuite.generation
 
+import com.google.gson.Gson
+import com.google.gson.stream.JsonReader
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import com.intellij.util.concurrency.AppExecutorUtil
+import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestDada
+import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.tools.*
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
-import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.getKey
-import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
+import java.io.FileReader
 import java.nio.charset.Charset
 import java.util.regex.Pattern
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
 
 /**
  * This class manages the execution of EvoSuite, a test generation tool.
@@ -59,29 +62,28 @@ class EvoSuiteProcessManager(
     override fun runTestGenerator(
         indicator: ProgressIndicator,
         codeType: FragmentToTestDada,
-        projectClassPath: String,
-        resultPath: String,
-        serializeResultPath: String,
         packageName: String,
-        cutModule: Module,
-        classFQN: String,
-        fileUrl: String,
-        testResultName: String,
-        baseDir: String,
-        modificationStamp: Long,
     ) {
         try {
             if (processStopped(project, indicator)) return
 
+            val projectClassPath = project.service<Workspace>().projectClassPath!!
+            val classFQN = project.service<Workspace>().classFQN!!
+            val baseDir = project.service<Workspace>().baseDir!!
+            val fileUrl = project.service<Workspace>().fileUrl!!
+            val resultName = "${project.service<Workspace>().resultPath}${sep}EvoSuiteResult"
+
+            Path(project.service<Workspace>().resultPath!!).createDirectories()
+
             // get command
             val command = when (codeType.type!!) {
-                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).build()
+                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).build()
                 CodeType.METHOD -> {
-                    project.service<Workspace>().key = getKey(fileUrl, "$classFQN#${codeType.objectDescription}", modificationStamp, testResultName, projectClassPath)
-                    SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forMethod(codeType.objectDescription).build()
+                    project.service<Workspace>().key = getKey(project, "$classFQN#${codeType.objectDescription}")
+                    SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forMethod(codeType.objectDescription).build()
                 }
 
-                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, serializeResultPath, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
+                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
             }
 
             if (!settingsApplicationState?.seed.isNullOrBlank()) command.add("-seed=${settingsApplicationState?.seed}")
@@ -107,7 +109,7 @@ class EvoSuiteProcessManager(
             val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
             log.info("Starting EvoSuite with arguments: $cmdString")
 
-            indicator.isIndeterminate = false
+//            indicator.isIndeterminate = false
             indicator.text = TestSparkBundle.message("searchMessage")
             val evoSuiteProcess = GeneralCommandLine(cmd)
             evoSuiteProcess.charset = Charset.forName("UTF-8")
@@ -166,9 +168,18 @@ class EvoSuiteProcessManager(
             // evosuite errors check
             if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return
 
-            // start result watcher
-            AppExecutorUtil.getAppScheduledExecutorService()
-                .execute(ResultWatcher(project, testResultName, fileUrl, classFQN))
+            val gson = Gson()
+            val reader = JsonReader(FileReader(resultName))
+
+            val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
+
+            saveData(
+                project,
+                Report(testGenerationResult),
+                getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
+                getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
+                indicator,
+            )
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()

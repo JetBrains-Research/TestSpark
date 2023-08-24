@@ -97,6 +97,12 @@
                 serviceImplementation="org.jetbrains.research.testspark.services.RunnerService"/>
         <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.ErrorService"/>
+        <projectService
+                serviceImplementation="org.jetbrains.research.testspark.services.TestsExecutionResultService"/>
+        <projectService
+                serviceImplementation="org.jetbrains.research.testspark.services.TestCoverageCollectorService"/>
+        <projectService
+                serviceImplementation="org.jetbrains.research.testspark.services.JavaClassBuilderService"/>
 
         <toolWindow id="TestSpark" secondary="true" anchor="right"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>

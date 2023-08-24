@@ -99,15 +99,15 @@ class TestsAssembler(
      */
     fun returnTestSuite(packageName: String): TestSuiteGeneratedByLLM? {
         try {
-            val testSuite = TestSuiteGeneratedByLLM()
+            val testSuite = TestSuiteGeneratedByLLM(project)
             rawText = rawText.split("```")[1]
 
             testSuite.packageString = packageName
 
             // save imports
-            testSuite.imports = importPattern.findAll(rawText, 0).map {
-                it.groupValues[0]
-            }.toSet()
+            testSuite.imports = importPattern.findAll(rawText, 0)
+                .map { it.groupValues[0] }
+                .toSet()
 
             // save RunWith
             val detectedRunWith = runWithPattern.find(rawText, startIndex = 0)?.groupValues?.get(0)
@@ -118,7 +118,9 @@ class TestsAssembler(
                 testSuite.runWith = runWith
                 project.service<Workspace>().testGenerationData.runWith = runWith
                 project.service<Workspace>().testGenerationData.importsCode.add("import org.junit.runner.RunWith;")
-                // TODO add import for runWith parameter
+            } else {
+                project.service<Workspace>().testGenerationData.runWith = ""
+                project.service<Workspace>().testGenerationData.importsCode.remove("import org.junit.runner.RunWith;")
             }
 
             val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
@@ -129,8 +131,8 @@ class TestsAssembler(
             val otherInfo = otherInfoList.joinToString("{")
             if (otherInfo.isNotBlank()) {
                 testSuite.otherInfo = otherInfo
-                project.service<Workspace>().testGenerationData.otherInfo = otherInfo
             }
+            project.service<Workspace>().testGenerationData.otherInfo = otherInfo
 
             // Save the main test cases
             testSet.forEach ca@{

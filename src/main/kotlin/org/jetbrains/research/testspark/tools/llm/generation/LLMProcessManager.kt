@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
@@ -12,6 +11,7 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getKey
@@ -24,8 +24,6 @@ import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
-import kotlin.io.path.Path
-import kotlin.io.path.createDirectories
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -55,30 +53,12 @@ class LLMProcessManager(
      *
      * @param indicator The progress indicator for tracking the progress of the test generation process.
      * @param codeType The type of code to generate tests for.
-     * @param projectClassPath The class path of the project.
-     * @param resultPath The path to save the generated test results.
-     * @param serializeResultPath The serialized result path.
      * @param packageName The package name of the code being tested.
-     * @param cutModule The module to cut.
-     * @param classFQN The fully qualified name of the class being tested.
-     * @param fileUrl The URL of the file being tested.
-     * @param testResultName The name of the test result.
-     * @param baseDir The base directory of the project.
-     * @param modificationStamp The modification stamp of the file being tested.
      */
     override fun runTestGenerator(
         indicator: ProgressIndicator,
         codeType: FragmentToTestDada,
-        projectClassPath: String,
-        resultPath: String,
-        serializeResultPath: String,
         packageName: String,
-        cutModule: Module,
-        classFQN: String,
-        fileUrl: String,
-        testResultName: String,
-        baseDir: String,
-        modificationStamp: Long,
     ) {
         log.info("LLM test generation begins")
 
@@ -91,16 +71,13 @@ class LLMProcessManager(
 
         if (codeType.type == CodeType.METHOD) {
             project.service<Workspace>().key = getKey(
-                fileUrl,
-                "$classFQN#${codeType.objectDescription}",
-                modificationStamp,
-                testResultName,
-                projectClassPath,
+                project,
+                "${project.service<Workspace>().classFQN}#${codeType.objectDescription}",
             )
         }
 
         // update build path
-        var buildPath = projectClassPath
+        var buildPath = project.service<Workspace>().projectClassPath!!
         if (settingsProjectState.buildPath.isEmpty()) {
             // User did not set own path
             buildPath = getBuildPath(project)
@@ -162,13 +139,28 @@ class LLMProcessManager(
             }
 
             // Save the generated TestSuite into a temp file
-            var generatedTestCasesPaths: List<String> = listOf()
+            val generatedTestCasesPaths: MutableList<String> = mutableListOf()
             if (isLastIteration(requestsCount)) {
                 generatedTestSuite.updateTestCases(project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList())
             } else {
-                generatedTestCasesPaths = saveGeneratedTestCases(generatedTestSuite, resultPath)
+                for (testCaseIndex in generatedTestSuite.testCases.indices) {
+                    generatedTestCasesPaths.add(
+                        project.service<TestCoverageCollectorService>().saveGeneratedTests(
+                            generatedTestSuite.packageString,
+                            generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
+                            project.service<Workspace>().resultPath!!,
+                            "Generated${generatedTestSuite.testCases[testCaseIndex].name}.java",
+                        ),
+                    )
+                }
             }
-            val generatedTestPath: String = saveGeneratedTests(generatedTestSuite, resultPath)
+
+            val generatedTestPath: String = project.service<TestCoverageCollectorService>().saveGeneratedTests(
+                generatedTestSuite.packageString,
+                generatedTestSuite.toStringWithoutExpectedException(),
+                project.service<Workspace>().resultPath!!,
+                testFileName,
+            )
 
             // Correct files creating checking
             var isFilesExists = true
@@ -182,19 +174,17 @@ class LLMProcessManager(
             val coverageCollector = TestCoverageCollector(
                 indicator,
                 project,
-                classFQN,
-                resultPath,
                 generatedTestCasesPaths,
-                File("$generatedTestPath${File.separatorChar}$testFileName"),
+                File(generatedTestPath),
                 generatedTestSuite.getPrintablePackageString(),
                 buildPath,
                 if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
-                cutModule,
-                fileUrl.split(File.separatorChar).last(),
             )
 
             // compile the test file
-            val compilationResult = coverageCollector.compile()
+            indicator.text = TestSparkBundle.message("compilationTestsChecking")
+            coverageCollector.compileTestCases()
+            val compilationResult = project.service<TestCoverageCollectorService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!compilationResult.first && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")
@@ -219,63 +209,10 @@ class LLMProcessManager(
         saveData(
             project,
             report!!,
-            testResultName,
-            fileUrl,
             getPackageFromTestSuiteCode(generatedTestSuite.toString()),
-            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), classFQN),
+            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), project.service<Workspace>().classFQN!!),
+            indicator,
         )
-    }
-
-    /**
-     * Saves the generated test cases to the specified result path.
-     *
-     * @param generatedTestSuite The generated test suite.
-     * @param resultPath The path where the generated test cases should be saved.
-     * @return A list of file paths where the test cases are saved.
-     */
-    private fun saveGeneratedTestCases(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): List<String> {
-        val testCaseFilePaths = mutableListOf<String>()
-        // Generate the final path for the generated tests
-        var generatedTestPath = "$resultPath${File.separatorChar}"
-        generatedTestSuite.packageString.split(".").forEach { directory ->
-            if (directory.isNotBlank()) generatedTestPath += "$directory${File.separatorChar}"
-        }
-        Path(generatedTestPath).createDirectories()
-
-        // Save the generated test suite to the file
-        for (testCaseIndex in generatedTestSuite.testCases.indices) {
-            val testFile = File("$generatedTestPath${File.separatorChar}Generated${generatedTestSuite.testCases[testCaseIndex].name}.java")
-            testFile.createNewFile()
-            log.info("Save test in file " + testFile.absolutePath)
-            testFile.writeText(generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex))
-            testCaseFilePaths.add(testFile.absolutePath)
-        }
-
-        return testCaseFilePaths
-    }
-
-    /**
-     * Saves the generated test suite to a file at the specified result path.
-     *
-     * @param generatedTestSuite the test suite generated by LLM
-     * @param resultPath the path where the generated tests should be saved
-     * @return the path where the tests are saved
-     */
-    private fun saveGeneratedTests(generatedTestSuite: TestSuiteGeneratedByLLM, resultPath: String): String {
-        // Generate the final path for the generated tests
-        var generatedTestPath = "$resultPath${File.separatorChar}"
-        generatedTestSuite.packageString.split(".").forEach { directory ->
-            if (directory.isNotBlank()) generatedTestPath += "$directory${File.separatorChar}"
-        }
-        Path(generatedTestPath).createDirectories()
-
-        // Save the generated test suite to the file
-        val testFile = File("$generatedTestPath${File.separatorChar}$testFileName")
-        testFile.createNewFile()
-        log.info("Save test in file " + testFile.absolutePath)
-        testFile.writeText(generatedTestSuite.toStringWithoutExpectedException())
-
-        return generatedTestPath
     }
 
     private fun isLastIteration(requestsCount: Int) = requestsCount > maxRequests

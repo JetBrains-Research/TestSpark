@@ -6,9 +6,11 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import java.io.File
 
 /**
@@ -36,30 +38,42 @@ fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String): M
 // get package from a generated code
 fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
     testSuiteCode ?: return ""
+    if (!testSuiteCode.contains("package")) return ""
     val result = testSuiteCode.replace("\r\n", "\n").split("\n")
-        .filter { it.contains("^package".toRegex()) }
-        .joinToString("\n").plus("\n")
+        .filter { it.contains("^package".toRegex()) }.joinToString("").split("package ")[1].split(";")[0]
     if (result.isBlank()) return ""
-    return result + "\n"
+    return result
 }
 
 /**
  * Saves the data related to test generation in the specified project's workspace.
  *
  * @param project The project in which the test generation data will be saved.
- * @param report The report object to be added to the test generation result list.
- * @param resultName The name of the test generation result.
- * @param fileUrl The URL of the file where the test generation data will be saved.
+ * @param report The report object to be added to the test generation result list.\
  * @param packageLine The package declaration line of the test generation data.
  * @param importsCode The import statements code of the test generation data.
  */
-fun saveData(project: Project, report: Report, resultName: String, fileUrl: String, packageLine: String, importsCode: MutableSet<String>) {
+fun saveData(
+    project: Project,
+    report: Report,
+    packageLine: String,
+    importsCode: MutableSet<String>,
+    indicator: ProgressIndicator
+) {
     val workspace = project.service<Workspace>()
-    workspace.testGenerationData.testGenerationResultList.add(report)
-    workspace.testGenerationData.resultName = resultName
-    workspace.testGenerationData.fileUrl = fileUrl
+    workspace.testGenerationData.resultName = project.service<Workspace>().testResultName!!
+    workspace.testGenerationData.fileUrl = project.service<Workspace>().fileUrl!!
     workspace.testGenerationData.packageLine = packageLine
     workspace.testGenerationData.importsCode.addAll(importsCode)
+
+    indicator.text = TestSparkBundle.message("testExecutionMessage")
+
+    for (testCase in report.testCaseList.values) {
+        indicator.text = "Executing ${testCase.testName}"
+        project.service<TestCoverageCollectorService>().updateDataWithTestCase(testCase.testCode, testCase.testName)
+    }
+
+    workspace.testGenerationData.testGenerationResultList.add(report)
 }
 
 /**
@@ -72,8 +86,14 @@ fun saveData(project: Project, report: Report, resultName: String, fileUrl: Stri
  * @param projectClassPath The classpath of the project associated with the test job.
  * @return The test job information containing the provided parameters.
  */
-fun getKey(fileUrl: String, classFQN: String, modTs: Long, testResultName: String, projectClassPath: String): Workspace.TestJobInfo =
-    Workspace.TestJobInfo(fileUrl, classFQN, modTs, testResultName, projectClassPath)
+fun getKey(project: Project, classFQN: String): Workspace.TestJobInfo =
+    Workspace.TestJobInfo(
+        project.service<Workspace>().fileUrl!!,
+        classFQN,
+        project.service<Workspace>().modificationStamp!!,
+        project.service<Workspace>().testResultName!!,
+        project.service<Workspace>().projectClassPath!!,
+    )
 
 /**
  * Clears the data before test generation for a specific test result.
