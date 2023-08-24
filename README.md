@@ -10,7 +10,7 @@
 <!-- Plugin description -->
 TestSpark is a plugin for generating unit tests.
 <ul>
-<li>Uses <a href="https://www.evosuite.org">EvoSuite</a> and <a href="https://openai.com/gpt-4">GPT-4</a> for unit tests generation.</li>
+<li>Uses <a href="https://www.evosuite.org">EvoSuite</a> and <a href="https://openai.com">OpenAI</a> models for unit tests generation.</li>
 <li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage, mutation score.</li>
 <li>Generates unit tests for capturing failures.</li>
 <li>Generate tests for Java classes, method, and single lines.</li>
@@ -32,6 +32,7 @@ TestSpark is a plugin for generating unit tests.
 - [Automatic test generation for classes](#generating-tests-for-classes-1)
 - [Automatic test generation for methods](#generating-tests-for-methods)
 - [Automatic test generation for lines](#generating-tests-for-lines-1)
+- [Working with test cases](#working-with-test-cases)
 - [Coverage table](#coverage-table-1)
 - [Coverage visualisation for generated test suite](#coverage-visualisation-1)
 - [Killed mutants visualisation](#killed-mutants-visualisation-1)
@@ -47,6 +48,9 @@ TestSpark uses EvoSuite to automatically generate tests for Java methods. Two cl
 
 ### Generating Tests for Lines
 TestSpark uses EvoSuite to automatically generate tests for Java code lines. Two clicks are required from the user for the tests to be generated.
+
+### Working with test cases
+After receiving the results, the user can interact with the test cases in various ways. They can view the result (whether it's passed or failed), select, delete, modify, reset and execute the tests to update the results.
 
 ### Coverage Table
 Basic statistics for the test suite in form of a table.
@@ -147,6 +151,23 @@ You can examine the created tests, select those you wish to be added to your tes
 Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests and removing (deleting) them. The user also has an overview of how many tests they currently have selected.
 
 ![Quick buttons](readme-images/pngs/selectAll.png)
+
+### Working with test cases
+#### View the execution result
+Effortlessly identify passed and failed test cases with green and red color highlights for instant result comprehension.
+#### Select
+Users can select test cases.
+#### Delete
+Users can delete test cases.
+#### Modify
+Users can modify the code of test cases.
+#### Reset
+Users can reset the code to its original.
+#### Reset to last run
+Users can reset the code to the last run.
+#### Run test
+Users can run the test to update the execution result.
+
 ### Coverage Table
 Once a test suite is generated, basic statistics about it can be seen in the tool window, `coverage` tab. The statistics include line coverage, branch coverage, weak mutation coverage. The table adjusts dynamically - it only calculates the statistics for the selected tests in the test suite.
 
