@@ -54,39 +54,44 @@ class SettingsLLMComponent {
         addListeners()
     }
 
+    fun update() {
+        if (platformSelector.selectedItem!!.toString() == "Grazie") {
+            modelSelector.model = DefaultComboBoxModel(arrayOf("GPT-4"))
+            modelSelector.isEnabled = false
+            return
+        }
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val modules = getModules(llmUserTokenField.text)
+            modelSelector.removeAllItems()
+            if (modules != null) {
+                modelSelector.model = DefaultComboBoxModel(modules)
+                modelSelector.isEnabled = true
+            } else {
+                modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
+                modelSelector.isEnabled = false
+            }
+        }
+    }
+
     /**
      * Adds listeners to the document of the user token field.
      * These listeners will update the model selector based on the text entered the user token field.
      */
     private fun addListeners() {
         llmUserTokenField.document.addDocumentListener(object : DocumentListener {
-            private fun update() {
-                if (platformSelector.selectedItem!!.toString() == "Grazie") return
-                ApplicationManager.getApplication().executeOnPooledThread {
-                    val modules = getModules(llmUserTokenField.text)
-                    modelSelector.removeAllItems()
-                    if (modules != null) {
-                        modelSelector.model = DefaultComboBoxModel(modules)
-                        modelSelector.isEnabled = true
-                    } else {
-                        modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
-                        modelSelector.isEnabled = false
-                    }
-                }
-            }
-
-            override fun insertUpdate(e: DocumentEvent) {
+            override fun insertUpdate(e: DocumentEvent?) {
                 update()
             }
 
-            override fun removeUpdate(e: DocumentEvent) {
+            override fun removeUpdate(e: DocumentEvent?) {
                 update()
             }
 
-            override fun changedUpdate(e: DocumentEvent) {
+            override fun changedUpdate(e: DocumentEvent?) {
                 update()
             }
         })
+        platformSelector.addItemListener { update() }
     }
 
     /**
