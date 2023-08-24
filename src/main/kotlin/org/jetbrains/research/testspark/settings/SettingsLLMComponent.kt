@@ -145,7 +145,10 @@ class SettingsLLMComponent {
      */
     private fun createSettingsPanel() {
         // Check if the Grazie platform access is available in the current build
-        if (isGrazieClassLoaded()) platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
+        if (isGrazieClassLoaded())
+            platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
+        else
+            platformSelector.isEnabled = false
 
         panel = FormBuilder.createFormBuilder()
             .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("LLMSettings")))
