@@ -6,5 +6,5 @@ interface Request {
         token: String,
         messages: List<Pair<String, String>>,
         testsAssembler: TestsAssembler
-    ): TestsAssembler
+    ): Pair<String, TestsAssembler>
 }

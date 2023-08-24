@@ -23,9 +23,22 @@ class GrazieRequestManager : RequestManager() {
         return try {
             val className = "org.jetbrains.research.grazie.Request"
             val request: Request = Class.forName(className).getDeclaredConstructor().newInstance() as Request
-            val testsAssembler = request.request(token, messages, TestsAssembler(project, indicator))
+            val requestResult = request.request(token, messages, TestsAssembler(project, indicator))
+            val requestError = requestResult.first
+            val testsAssembler = requestResult.second
 
-            return processResponse(testsAssembler, packageName)
+            if (requestError.isNotEmpty()) {
+                with(requestError) {
+                    when {
+                        contains("invalid: 401") -> llmErrorManager.errorProcess("Invalid Token for Grazie provided!", project)
+                        else -> llmErrorManager.errorProcess(requestError, project)
+                    }
+                }
+
+                Pair("", null)
+            }
+
+            processResponse(testsAssembler, packageName)
         } catch (e: ClassNotFoundException) {
             llmErrorManager.errorProcess("Grazie test generation feature is not available in this build.", project)
             Pair("", null)

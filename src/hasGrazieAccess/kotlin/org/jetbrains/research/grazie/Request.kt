@@ -1,5 +1,6 @@
 package org.jetbrains.research.grazie
 
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.research.testSpark.grazie.TestGeneration
 import org.jetbrains.research.testspark.tools.llm.generation.Request
@@ -11,16 +12,18 @@ class Request : Request {
         token: String,
         messages: List<Pair<String, String>>,
         testsAssembler: TestsAssembler
-    ): TestsAssembler {
+    ): Pair<String, TestsAssembler> {
 
         val generation = TestGeneration(token)
+        var errorMessage = ""
 
         runBlocking {
-            generation.generate(messages).collect {
+            generation.generate(messages).catch {
+                errorMessage = it.message.toString()
+            }.collect {
                 testsAssembler.receiveResponse(it)
             }
         }
-
-        return testsAssembler
+        return Pair(errorMessage, testsAssembler)
     }
 }
