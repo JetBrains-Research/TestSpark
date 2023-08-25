@@ -112,7 +112,6 @@ To generate a test for a method, right-click (with mouse) anywhere within the me
 
 ![Test generation for methods](readme-images/gifs/testMethod.gif)
 
-
 Once the tests are generated, they can be accessed in the "TestSpark" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:
 
 ![Generated Tests](readme-images/gifs/testsClassAppear.gif)
