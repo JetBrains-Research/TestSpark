@@ -134,8 +134,10 @@ You can examine the created tests, select those you wish to be added to your tes
 Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests and removing (deleting) them. The user also has an overview of how many tests they currently have selected.
 
 ![Quick buttons](readme-images/pngs/selectAll.png)
+
 #### View the execution result
-Effortlessly identify passed and failed test cases with green and red color highlights for instant result comprehension.\
+Effortlessly identify passed and failed test cases with green and red color highlights for instant result comprehension.
+
 ![Execution result](readme-images/gifs/executionResult.gif)
 
 #### Select
