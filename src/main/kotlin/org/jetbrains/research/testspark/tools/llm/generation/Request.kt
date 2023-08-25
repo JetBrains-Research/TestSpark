@@ -5,6 +5,6 @@ interface Request {
     fun request(
         token: String,
         messages: List<Pair<String, String>>,
-        testsAssembler: TestsAssembler
+        testsAssembler: TestsAssembler,
     ): Pair<String, TestsAssembler>
 }

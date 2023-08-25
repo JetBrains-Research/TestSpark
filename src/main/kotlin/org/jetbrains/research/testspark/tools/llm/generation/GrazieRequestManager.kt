@@ -12,9 +12,8 @@ class GrazieRequestManager : RequestManager() {
         indicator: ProgressIndicator,
         packageName: String,
         project: Project,
-        llmErrorManager: LLMErrorManager
+        llmErrorManager: LLMErrorManager,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
-
         // update chat history
         chatHistory.add(ChatMessage("user", prompt))
 

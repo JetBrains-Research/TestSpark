@@ -542,7 +542,7 @@ class TestCaseDisplayService(private val project: Project) {
     private fun getEditor(testCase: String): EditorTextField? {
         val middlePanelComponent = testCasePanels[testCase]?.getComponent(1) ?: return null
         val middlePanel = middlePanelComponent as JPanel
-        return middlePanel.getComponent(1) as EditorTextField
+        return middlePanel.getComponent(2) as EditorTextField
     }
 
     /**
@@ -665,7 +665,14 @@ class TestCaseDisplayService(private val project: Project) {
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
-            .insertString(0, "package ${project.service<Workspace>().testGenerationData.packageLine};\n")
+            .insertString(
+                0,
+                if (project.service<Workspace>().testGenerationData.packageLine.isEmpty()) {
+                    ""
+                } else {
+                    "package ${project.service<Workspace>().testGenerationData.packageLine};\n"
+                },
+            )
     }
 
     /**
@@ -909,9 +916,9 @@ class TestCaseDisplayService(private val project: Project) {
         }
 
         runTestButton.addActionListener {
-           project.service<Workspace>().updateTestCase(
-               project.service<TestCoverageCollectorService>().updateDataWithTestCase(document.text, testCase.testName)
-           )
+            project.service<Workspace>().updateTestCase(
+                project.service<TestCoverageCollectorService>().updateDataWithTestCase(document.text, testCase.testName),
+            )
 
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false

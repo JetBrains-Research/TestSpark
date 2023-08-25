@@ -11,9 +11,8 @@ class Request : Request {
     override fun request(
         token: String,
         messages: List<Pair<String, String>>,
-        testsAssembler: TestsAssembler
+        testsAssembler: TestsAssembler,
     ): Pair<String, TestsAssembler> {
-
         val generation = TestGeneration(token)
         var errorMessage = ""
 

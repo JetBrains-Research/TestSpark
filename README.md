@@ -32,7 +32,7 @@ TestSpark is a plugin for generating unit tests.
 - [Automatic test generation for classes](#generating-tests-for-classes-1)
 - [Automatic test generation for methods](#generating-tests-for-methods)
 - [Automatic test generation for lines](#generating-tests-for-lines-1)
-- [Working with test cases](#working-with-test-cases)
+- [Working with test cases](#working-with-test-cases-1)
 - [Coverage table](#coverage-table-1)
 - [Coverage visualisation for generated test suite](#coverage-visualisation-1)
 - [Killed mutants visualisation](#killed-mutants-visualisation-1)
@@ -41,13 +41,13 @@ TestSpark is a plugin for generating unit tests.
 - [Telemetry](#telemetry-opt-in-1)
 
 ### Generating Tests for Classes
-TestSpark uses EvoSuite and GPT-4 to automatically generate tests for Java classes. Two clicks are required from the user for the tests to be generated.
+TestSpark uses EvoSuite and OpenAI models to automatically generate tests for Java classes. Two clicks are required from the user for the tests to be generated.
 
 ### Generating Tests for Methods
-TestSpark uses EvoSuite to automatically generate tests for Java methods. Two clicks are required from the user for the tests to be generated.
+TestSpark uses EvoSuite and OpenAI models to automatically generate tests for Java methods. Two clicks are required from the user for the tests to be generated.
 
 ### Generating Tests for Lines
-TestSpark uses EvoSuite to automatically generate tests for Java code lines. Two clicks are required from the user for the tests to be generated.
+TestSpark uses EvoSuite and OpenAI models to automatically generate tests for Java code lines. Two clicks are required from the user for the tests to be generated.
 
 ### Working with test cases
 After receiving the results, the user can interact with the test cases in various ways. They can view the result (whether it's passed or failed), select, delete, modify, reset and execute the tests to update the results.
@@ -99,42 +99,26 @@ Opt-in non-intrusive data collection to improve EvoSuite in the future.
 If you are running the plugin for the first time, checkout the [`First time configuration`](#first-time-configuration) section.
 
 ### Generating Tests for Classes
-To generate a test for a class, right-click (with mouse) anywhere within the class you want to test or right-click the class name itself (note that when using multiple cursors only the last one will count). Under the "TestSpark" option, select "Generate Tests for Class [...] by GPT-4/EvoSuite" option:
+To generate a test for a class, right-click (with mouse) anywhere within the class you want to test or right-click the class name itself (note that when using multiple cursors only the last one will count). Under the "TestSpark" option, select "Generate Tests for Class [...] by LLM/EvoSuite" option:
 
 ![Test generation for classes](readme-images/gifs/testClass.gif)
 
-[//]: # ( EvoSuite going to run in the background and generate tests. While EvoSuite is running, a progress bar in the bottom right-hand corner of the IDE:\ )
-[//]: # (![Progress bar]&#40;readme-images/pngs/ProgressBar.jpg&#41;\ )
-
 Once the tests are generated, they can be accessed in the "TestSpark" tool window (under "Generated Tests" tab), accessible via the stripe button on the right-hand side of the IDE:
 
-![Generated Tests](readme-images/gifs/testsAppear.gif)
+![Generated Tests](readme-images/gifs/testsClassAppear.gif)
 
-[//]: # (TODO add information about validation)
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
-Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests and removing (deleting) them. The user also has an overview of how many tests they currently have selected.
-
-![Quick buttons](readme-images/pngs/selectAll.png)
 ### Generating Tests for Methods
-To generate a test for a method, right-click (with mouse) anywhere within the method you want to test or right-click the method name itself (note that when using multiple cursors only the last one will count). Under the "TestSpark" option, select "Generate Tests for Method [...] by EvoSuite" option:
+To generate a test for a method, right-click (with mouse) anywhere within the method you want to test or right-click the method name itself (note that when using multiple cursors only the last one will count). Under the "TestSpark" option, select "Generate Tests for Method [...] by LLM/EvoSuite" option:
 
 ![Test generation for methods](readme-images/gifs/testMethod.gif)
 
-[//]: # (EvoSuite going to run in the background and generate tests. While EvoSuite is running, a progress bar in the bottom right-hand corner of the IDE:)
-
-[//]: # (![Progress bar]&#40;readme-images/pngs/ProgressBar.jpg&#41;)
 
 Once the tests are generated, they can be accessed in the "TestSpark" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:
 
-![Generated Tests](readme-images/gifs/testsAppear.gif)
+![Generated Tests](readme-images/gifs/testsClassAppear.gif)
 
-[//]: # (TODO add information about validation)
-You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
-Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests and removing (deleting) them. The user also has an overview of how many tests they currently have selected.
-
-![Quick buttons](readme-images/pngs/selectAll.png)
 ### Generating Tests for Lines
-To generate a test for a method, right-click (with mouse) anywhere within the line you want. Note that the line has to contain a statement (e.g. you will not have the option on lines with only method declarations). Under the "TestSpark" option, select "Generate Tests for Line [...] by EvoSuite" option:
+To generate a test for a method, right-click (with mouse) anywhere within the line you want. Note that the line has to contain a statement (e.g. you will not have the option on lines with only method declarations). Under the "TestSpark" option, select "Generate Tests for Line [...] by LLM/EvoSuite" option:
 
 ![Test generation for methods](readme-images/gifs/testLine.gif)
 
@@ -144,29 +128,46 @@ To generate a test for a method, right-click (with mouse) anywhere within the li
 
 Once the tests are generated, they can be accessed in the "TestSpark" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:
 
-![Generated Tests](readme-images/gifs/testsAppear.gif)
+![Generated Tests](readme-images/gifs/testsClassAppear.gif)
 
-[//]: # (TODO add information about validation)
+### Working with test cases
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
 Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests and removing (deleting) them. The user also has an overview of how many tests they currently have selected.
 
 ![Quick buttons](readme-images/pngs/selectAll.png)
-
-### Working with test cases
 #### View the execution result
-Effortlessly identify passed and failed test cases with green and red color highlights for instant result comprehension.
+Effortlessly identify passed and failed test cases with green and red color highlights for instant result comprehension.\
+![Execution result](readme-images/gifs/executionResult.gif)
+
 #### Select
 Users can select test cases.
+
+![Select test case](readme-images/gifs/selectTestCase.gif)
+
 #### Delete
 Users can delete test cases.
+
+![Delete test case](readme-images/gifs/deleteTestCase.gif)
+
 #### Modify
 Users can modify the code of test cases.
+
+![Modify test case](readme-images/gifs/modifyTestCase.gif)
+
 #### Reset
 Users can reset the code to its original.
+
+![Reset test case](readme-images/gifs/resetTestCase.gif)
+
 #### Reset to last run
 Users can reset the code to the last run.
+
+![Reset to last run](readme-images/gifs/resetToLastRunTestCase.gif)
+
 #### Run test
 Users can run the test to update the execution result.
+
+![Run test](readme-images/gifs/runTestCase.gif)
 
 ### Coverage Table
 Once a test suite is generated, basic statistics about it can be seen in the tool window, `coverage` tab. The statistics include line coverage, branch coverage, weak mutation coverage. The table adjusts dynamically - it only calculates the statistics for the selected tests in the test suite.
@@ -245,7 +246,7 @@ Before running the plugin for the first time, we highly recommend going to the `
 
 Also, the parameters for the generators have to be configured. Check [EvoSuite Parameters](#evosuite-parameters) and [LLM Parameters](#llm-parameters).
 
-### EvoSuite Parameters
+### EvoSuite Settings
 <!-- How to use Advanced Parameters Settings entry? Where to find it? What can be changed? --> 
 The settings submenu <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> > <kbd>EvoSuite</kbd> allows the user to tweak EvoSuite parameters to their liking.\
 At the moment EvoSuite can be executed only with Java 11, so if the user has a more modern version by default, it is necessary to download Java 11 and set the path to the java file.
@@ -256,14 +257,26 @@ EvoSuite has hundreds of parameters, not all can be packed in a settings menu. H
 
 ![EvoSuite Settings](readme-images/pngs/EvoSuiteSettings.png)
 
-### LLM Parameters
+### LLM Settings
+The settings submenu <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> > <kbd>LLM</kbd> allows the user to tweak LLM parameters to their liking.
+
+![LLM Settings](readme-images/pngs/LLMSettings.png)
+
+Selecting a platform to interact with the LLM. By default only OpenAI is available, but for JetBrains employees there is an option to interact via Graize. More details in the [TestSpark for JetBrains employees](#testspark-for-jetbrains-employees) section.
+
+![LLM Platform](readme-images/pngs/LLMPlatform.png)
+
 Users have to set their own token for OpenAI, the plugin does not provide a default option.
 
 ![LLM Token](readme-images/pngs/LLMToken.png)
 
+Once the correct token is entered, it will be possible to select an OpenAI model for test generation.
+
+![LLM Model](readme-images/pngs/LLMModel.png)
+
 In addition to the token, users are recommended to configure settings for the LLM process.
 
-![LLM Settings](readme-images/pngs/LLMSettings.png)
+![LLM Parameters](readme-images/pngs/LLMParameters.png)
 
 ### Quick Access Parameters
 <!-- How to use Quick Access Parameters tab? Where to find it? What can be changed? --> 
@@ -271,6 +284,22 @@ Some parameters are used so often, that going to the settings menu gets annoying
 
 ![Quick Access](readme-images/gifs/QuickAccess.gif)
 <span style="color:crimson; font-size:150%; font-weight:bold">:exclamation: Pro tip: don't forget to hit the "save" button at the bottom. :exclamation:</span>
+
+## TestSpark for JetBrains employees
+JetBrains employees have the ability to send queries to OpenAI models through the [Grazie platform](https://try.ai.intellij.net/chat).
+
+1) To include test generation using Grazie in the build process, you need to pass Space username and token as properties:\
+   `gradle buildPlugin -Dspace.username=<USERNAME> -Dspace.pass=<TOKEN>`.
+
+2) To include test generation using Grazie in the runIdeForUiTests process, you need to pass Space username and token as properties:\
+   `gradle runIdeForUiTests -Dspace.username=<USERNAME> -Dspace.pass=<TOKEN>`.
+
+3) `<TOKEN>` is generated by [Space](https://jetbrains.team/), which has access to `Automatically generating unit tests` maven packages.
+
+### LLM Settings
+LLM Settings with Grazie platform option:
+
+![LLM Grazie Settings](readme-images/pngs/LLMGrazieSettings.png)
 
 
 ## Contribution

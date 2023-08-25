@@ -58,7 +58,7 @@ fun saveData(
     report: Report,
     packageLine: String,
     importsCode: MutableSet<String>,
-    indicator: ProgressIndicator
+    indicator: ProgressIndicator,
 ) {
     val workspace = project.service<Workspace>()
     workspace.testGenerationData.resultName = project.service<Workspace>().testResultName!!

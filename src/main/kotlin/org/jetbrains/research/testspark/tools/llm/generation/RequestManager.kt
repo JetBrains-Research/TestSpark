@@ -18,12 +18,12 @@ abstract class RequestManager {
         indicator: ProgressIndicator,
         packageName: String,
         project: Project,
-        llmErrorManager: LLMErrorManager
+        llmErrorManager: LLMErrorManager,
     ): Pair<String, TestSuiteGeneratedByLLM?>
 
     open fun processResponse(
         testsAssembler: TestsAssembler,
-        packageName: String
+        packageName: String,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
         // save the full response in the chat history
         val response = testsAssembler.rawText
@@ -31,10 +31,12 @@ abstract class RequestManager {
         chatHistory.add(ChatMessage("assistant", response))
 
         // check if response is empty
-        if (response.isEmpty() || response.isBlank()) return Pair(
-            "You have provided an empty answer! Please answer my previous question with the same formats",
-            null
-        )
+        if (response.isEmpty() || response.isBlank()) {
+            return Pair(
+                "You have provided an empty answer! Please answer my previous question with the same formats",
+                null,
+            )
+        }
 
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
             ?: return Pair("The provided code is not parsable. Please give the correct code", null)

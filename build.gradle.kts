@@ -61,7 +61,7 @@ if (spaceCredentialsProvided()) {
 
     tasks.register("checkCredentials") {
         configurations.detachedConfiguration(
-            dependencies.create("org.jetbrains.research:grazie-test-generation:1.0.1")
+            dependencies.create("org.jetbrains.research:grazie-test-generation:1.0.1"),
         ).files()
     }
 
