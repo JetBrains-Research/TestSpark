@@ -114,7 +114,7 @@ To generate a test for a method, right-click (with mouse) anywhere within the me
 
 Once the tests are generated, they can be accessed in the "TestSpark" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:
 
-![Generated Tests](readme-images/gifs/testsClassAppear.gif)
+![Generated Tests](readme-images/gifs/testsMethodAppear.gif)
 
 ### Generating Tests for Lines
 To generate a test for a method, right-click (with mouse) anywhere within the line you want. Note that the line has to contain a statement (e.g. you will not have the option on lines with only method declarations). Under the "TestSpark" option, select "Generate Tests for Line [...] by LLM/EvoSuite" option:
@@ -127,7 +127,7 @@ To generate a test for a method, right-click (with mouse) anywhere within the li
 
 Once the tests are generated, they can be accessed in the "TestSpark" tool window (under "Generated Tests" tab), accessible via the stripe button on the righthand-side of the IDE:
 
-![Generated Tests](readme-images/gifs/testsClassAppear.gif)
+![Generated Tests](readme-images/gifs/testsLineAppear.gif)
 
 ### Working with test cases
 You can examine the created tests, select those you wish to be added to your test class (via checkboxes). The tests can also be edited inside their mini-editors. Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
