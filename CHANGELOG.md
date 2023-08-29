@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [0.1.2]
+### Added
+- LLM-based test generation using OpenAI platform
+- Visualizing the result of tests executions
+- Plugin's logo
+
+### Fixed
+- Some bugs in parsing tests
+
+### Changed
+- Improving user interaction with test cases
+- plugin's name
 
 ## [0.1.1]
 ### Added

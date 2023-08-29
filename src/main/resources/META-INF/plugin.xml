@@ -36,6 +36,15 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.1.2</h4>
+            <ul>
+                <li>Add LLM-based test generation using OpenAI platform</li>
+                <li>Add visualizing the result of tests executions</li>
+                <li>Improving user interaction with test cases</li>
+                <li>Changing the plugin's name</li>
+                <li>Fix bugs</li>
+            </ul>
+
         <h4>0.1.1</h4>
             <ul>
                 <li>Add LLM-based test generation for lines and methods</li>
