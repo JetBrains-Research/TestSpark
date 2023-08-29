@@ -76,12 +76,14 @@ class TestCoverageCollector(
         log.info("Running jacoco")
 
         // Execute each test method separately
-        for (testCase in testCases) {
+        for (index in generatedTestPaths.indices) {
+            val testCase = testCases[index]
+
             // name of .exec and .xml files
-            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${(List(20) { ('a'..'z').toList().random() }.joinToString(""))}"
+            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${testCase.name}"
 
             val testExecutionError = project.service<TestCoverageCollectorService>().createXmlFromJacoco(
-                generatedTestFile.name.split('.')[0],
+                generatedTestPaths[index].split('/').last().split('.')[0],
                 dataFileName,
                 testCase.name,
                 projectBuildPath,
@@ -104,5 +106,6 @@ class TestCoverageCollector(
                 "$dataFileName.xml",
             )
         }
+        project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
     }
 }

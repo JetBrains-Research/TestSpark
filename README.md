@@ -145,10 +145,10 @@ Users can select test cases.
 
 ![Select test case](readme-images/gifs/selectTestCase.gif)
 
-#### Delete
-Users can delete test cases.
+#### Remove
+Users can remove test cases.
 
-![Delete test case](readme-images/gifs/deleteTestCase.gif)
+![Remove test case](readme-images/gifs/deleteTestCase.gif)
 
 #### Modify
 Users can modify the code of test cases.

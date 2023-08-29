@@ -270,8 +270,6 @@ class TestCoverageCollectorService(private val project: Project) {
         // Add lines that Jacoco might have missed because of its limitation during the exception
         setOfLines.addAll(linesCoveredDuringTheException)
 
-        project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
-
         return TestCase(testCaseName, testCaseCode, setOfLines, setOf(), setOf())
     }
 
@@ -355,12 +353,16 @@ class TestCoverageCollectorService(private val project: Project) {
             if (!File("$dataFileName.xml").exists()) {
                 project.service<TestsExecutionResultService>().removeFromPassingTest(testName)
             } else {
-                return project.service<TestCoverageCollectorService>().getTestCaseFromXml(
+                val testCase = project.service<TestCoverageCollectorService>().getTestCaseFromXml(
                     testName,
                     testCode,
                     project.service<TestCoverageCollectorService>().getExceptionData(testExecutionError).second,
                     "$dataFileName.xml",
                 )
+
+                project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
+
+                return testCase
             }
         }
         project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
