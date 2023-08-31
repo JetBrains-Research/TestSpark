@@ -1,6 +1,6 @@
 # TestSpark
 
-![Build](https://github.com/ciselab/TestSpark/workflows/Build/badge.svg)
+![Build](https://github.com/JetBrains-Research/TestSpark/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/21024-testspark.svg)](https://plugins.jetbrains.com/plugin/21024-testspark)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/21024-testspark.svg)](https://plugins.jetbrains.com/plugin/21024-testspark)
 
