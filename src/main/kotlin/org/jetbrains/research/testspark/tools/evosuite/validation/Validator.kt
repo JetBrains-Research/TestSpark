@@ -12,6 +12,7 @@ import com.intellij.execution.process.CapturingProcessAdapter
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
@@ -64,7 +65,7 @@ class Validator(
 
         val targetProjectCP = testJobInfo.targetClassPath
 
-        val pluginsPath = System.getProperty("idea.plugins.path")
+        val pluginsPath = PathManager.getPluginsPath()
 
         val junitPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}junit-4.13.jar"
         val standaloneRuntimePath = "$pluginsPath${sep}TestSpark${sep}lib${sep}standalone-runtime.jar"
@@ -267,7 +268,7 @@ class Validator(
     ) {
         indicator.text = TestSparkBundle.message("calculatingCoverage")
 
-        val pluginsPath = System.getProperty("idea.plugins.path")
+        val pluginsPath = PathManager.getPluginsPath()
         val jacocoPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}jacocoagent.jar"
         // construct command
         val jacocoReportPath = "$testValidationRoot${sep}jacoco.exec"

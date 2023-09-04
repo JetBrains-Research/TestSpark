@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.services
 
 import com.gitlab.mvysny.konsumexml.konsumeXml
+import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -66,12 +67,12 @@ class TestCoverageCollectorService(private val project: Project) {
      */
     private fun getPath(buildPath: String): String {
         // create the path for the command
-        val pluginsPath = System.getProperty("idea.plugins.path")
-        val junitPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}junit-4.13.jar"
-        val mockitoPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}mockito-core-5.0.0.jar"
-        val hamcrestPath = "$pluginsPath${sep}TestSpark${sep}lib${sep}hamcrest-core-1.3.jar"
-        val byteBuddy = "$pluginsPath${sep}TestSpark${sep}lib${sep}byte-buddy-1.14.6.jar"
-        val byteBuddyAgent = "$pluginsPath${sep}TestSpark${sep}lib${sep}byte-buddy-agent-1.14.6.jar"
+        val pluginsPath = PathManager.getPluginsPath()
+        val junitPath = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}junit-4.13.jar\""
+        val mockitoPath = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}mockito-core-5.0.0.jar\""
+        val hamcrestPath = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}hamcrest-core-1.3.jar\""
+        val byteBuddy = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}byte-buddy-1.14.6.jar\""
+        val byteBuddyAgent = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}byte-buddy-agent-1.14.6.jar\""
         return "$junitPath:$hamcrestPath:$mockitoPath:$byteBuddy:$byteBuddyAgent:$buildPath"
     }
 
@@ -82,8 +83,8 @@ class TestCoverageCollectorService(private val project: Project) {
      * @return the absolute path of the library
      */
     private fun getLibrary(libraryName: String): String {
-        val pluginsPath = System.getProperty("idea.plugins.path")
-        return "$pluginsPath${sep}TestSpark${sep}lib${sep}$libraryName"
+        val pluginsPath = PathManager.getPluginsPath()
+        return "\"$pluginsPath${sep}TestSpark${sep}lib${sep}$libraryName\""
     }
 
     /**
