@@ -40,6 +40,7 @@
             <ul>
                 <li>Add LLM-based test generation using Grazie platform in the settings</li>
                 <li>Fix compilation issue in LLM-based test generation</li>
+                <li>Fix Evosuite test generation freezing in case that a wrong java path is provided</li>
             </ul>
 
         <h4>0.1.2</h4>

@@ -10,6 +10,7 @@
 
 ### Fixed
 - Fix compilation issue in LLM-based test generation
+- Fix Evosuite test generation freezing in case that a wrong java path is provided
 
 ## [0.1.2]
 ### Added
