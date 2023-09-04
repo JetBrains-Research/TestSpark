@@ -19,6 +19,7 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.*
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
@@ -66,6 +67,11 @@ class EvoSuiteProcessManager(
     ) {
         try {
             if (processStopped(project, indicator)) return
+
+            if (!project.service<TestCoverageCollectorService>().runCommandLine(arrayListOf(settingsApplicationState!!.javaPath, "-version")).contains("version \"11")) {
+                evoSuiteErrorManager.errorProcess(TestSparkBundle.message("incorrectJavaVersion"), project)
+                return
+            }
 
             val projectClassPath = project.service<Workspace>().projectClassPath!!
             val classFQN = project.service<Workspace>().classFQN!!

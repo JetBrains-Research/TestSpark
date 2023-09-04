@@ -39,7 +39,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param cmd The command line arguments as an ArrayList of strings.
      * @return The output of the command line process as a string.
      */
-    private fun runCommandLine(cmd: ArrayList<String>): String {
+    fun runCommandLine(cmd: ArrayList<String>): String {
         var errorMessage = ""
 
         val process = ProcessBuilder()
