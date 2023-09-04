@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.1.3]
+### Added
+- LLM-based test generation using Grazie platform in the settings
+
+### Fixed
+- Fix compilation issue in LLM-based test generation
+
 ## [0.1.2]
 ### Added
 - LLM-based test generation using OpenAI platform

@@ -36,6 +36,12 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.1.3</h4>
+            <ul>
+                <li>Add LLM-based test generation using Grazie platform in the settings</li>
+                <li>Fix compilation issue in LLM-based test generation</li>
+            </ul>
+
         <h4>0.1.2</h4>
             <ul>
                 <li>Add LLM-based test generation using OpenAI platform</li>
