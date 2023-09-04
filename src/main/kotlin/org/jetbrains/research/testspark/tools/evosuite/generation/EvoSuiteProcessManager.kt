@@ -68,7 +68,15 @@ class EvoSuiteProcessManager(
         try {
             if (processStopped(project, indicator)) return
 
-            if (!project.service<TestCoverageCollectorService>().runCommandLine(arrayListOf(settingsApplicationState!!.javaPath, "-version")).contains("version \"11")) {
+            val regex = Regex("version \"(.*?)\"")
+            val version = regex.find(project.service<TestCoverageCollectorService>().runCommandLine(arrayListOf(settingsApplicationState!!.javaPath, "-version")))
+                ?.groupValues
+                ?.get(1)
+                ?.split(".")
+                ?.get(0)
+                ?.toInt()
+
+            if (version == null || version > 11) {
                 evoSuiteErrorManager.errorProcess(TestSparkBundle.message("incorrectJavaVersion"), project)
                 return
             }
