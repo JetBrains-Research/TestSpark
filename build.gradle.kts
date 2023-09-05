@@ -24,7 +24,7 @@ plugins {
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.1.2"
     // Gradle Qodana Plugin
-    id("org.jetbrains.qodana") version "0.1.13"
+//    id("org.jetbrains.qodana") version "0.1.13"
 }
 group = properties("pluginGroup")
 version = properties("pluginVersion")
@@ -167,12 +167,12 @@ changelog {
 }
 
 // Configure Gradle Qodana Plugin - read more: https://github.com/JetBrains/gradle-qodana-plugin
-qodana {
-    cachePath.set(projectDir.resolve(".qodana").canonicalPath)
-    reportPath.set(projectDir.resolve("build/reports/inspections").canonicalPath)
-    saveReport.set(true)
-    showReport.set(System.getenv("QODANA_SHOW_REPORT")?.toBoolean() ?: false)
-}
+// qodana {
+//    cachePath.set(projectDir.resolve(".qodana").canonicalPath)
+//    reportPath.set(projectDir.resolve("build/reports/inspections").canonicalPath)
+//    saveReport.set(true)
+//    showReport.set(System.getenv("QODANA_SHOW_REPORT")?.toBoolean() ?: false)
+// }
 
 tasks {
 

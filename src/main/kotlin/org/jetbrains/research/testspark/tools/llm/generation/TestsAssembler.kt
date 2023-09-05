@@ -100,7 +100,7 @@ class TestsAssembler(
     fun returnTestSuite(packageName: String): TestSuiteGeneratedByLLM? {
         try {
             val testSuite = TestSuiteGeneratedByLLM(project)
-            if(rawText.contains("```"))
+            if (rawText.contains("```"))
                 rawText = rawText.split("```")[1]
 
             testSuite.packageString = packageName
@@ -171,7 +171,7 @@ class TestsAssembler(
 
                 // Get test's body
                 // remove opening bracket
-                var testBody =rawTest.split("{").toMutableList().apply {
+                var testBody = rawTest.split("{").toMutableList().apply {
                     removeFirst()
                 }.joinToString("{").trim()
 
