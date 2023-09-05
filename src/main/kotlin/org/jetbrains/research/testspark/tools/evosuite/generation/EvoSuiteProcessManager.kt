@@ -20,9 +20,14 @@ import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
-import org.jetbrains.research.testspark.tools.*
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
+import org.jetbrains.research.testspark.tools.getBuildPath
+import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
+import org.jetbrains.research.testspark.tools.getKey
+import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testspark.tools.processStopped
+import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
 import java.io.FileReader
