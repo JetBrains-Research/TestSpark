@@ -4,7 +4,8 @@
 [![Version](https://img.shields.io/jetbrains/plugin/v/21024-testspark.svg)](https://plugins.jetbrains.com/plugin/21024-testspark)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/21024-testspark.svg)](https://plugins.jetbrains.com/plugin/21024-testspark)
 
-
+![TestSpark Logo](readme-images/pngs/TestSpark_Plugin_logo.png#gh-light-mode-only)
+![TestSpark White Logo](readme-images/pngs/TestSpark_Plugin_white_logo.png#gh-dark-mode-only)
 ## Description
 
 <!-- Plugin description -->
