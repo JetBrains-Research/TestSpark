@@ -12,9 +12,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.getBuildPath
-import java.io.BufferedReader
 import java.io.File
-import java.io.InputStreamReader
 import java.util.UUID
 import kotlin.collections.ArrayList
 import kotlin.io.path.Path

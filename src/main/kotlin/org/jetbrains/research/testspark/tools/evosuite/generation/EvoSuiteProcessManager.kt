@@ -20,7 +20,6 @@ import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.RunCommandLineService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testspark.tools.getBuildPath
