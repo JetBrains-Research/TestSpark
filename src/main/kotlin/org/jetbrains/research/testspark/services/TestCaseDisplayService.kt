@@ -210,9 +210,7 @@ class TestCaseDisplayService(private val project: Project) {
 
             // Add an editor to modify the test source code
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
-            val textFieldEditor = LanguageTextField(Language.findLanguageByID("JAVA"), project, testCodeFormatted, false)
-
-            textFieldEditor.setOneLineMode(false)
+            val textFieldEditor = LanguageTextField(Language.findLanguageByID("JAVA"), editor.project, testCodeFormatted, false)
 
             // Add test case title
             val middlePanel = JPanel()
