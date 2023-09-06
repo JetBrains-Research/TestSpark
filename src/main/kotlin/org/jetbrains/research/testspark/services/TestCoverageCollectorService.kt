@@ -186,11 +186,11 @@ class TestCoverageCollectorService(private val project: Project) {
 
         log.info("Test execution error message: $testExecutionError")
 
-        // add passing test
-        if (!getExceptionData(testExecutionError).first) {
-            project.service<TestsExecutionResultService>().addPassingTest(testCaseName)
+        // add failing test
+        if (getExceptionData(testExecutionError).first) {
+            project.service<TestsExecutionResultService>().addFailedTest(testCaseName, testExecutionError)
         } else {
-            project.service<TestsExecutionResultService>().removeFromPassingTest(testCaseName)
+            project.service<TestsExecutionResultService>().removeFromFailingTest(testCaseName)
         }
 
         // Prepare the command for generating the Jacoco report
@@ -337,8 +337,9 @@ class TestCoverageCollectorService(private val project: Project) {
         )
 
         // compilation checking
-        if (!project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath).first) {
-            project.service<TestsExecutionResultService>().removeFromPassingTest(testName)
+        val compilationResult = project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath)
+        if (!compilationResult.first) {
+            project.service<TestsExecutionResultService>().addFailedTest(testName, compilationResult.second)
         } else {
             val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${fileName.split(".")[0]}"
 
@@ -351,7 +352,7 @@ class TestCoverageCollectorService(private val project: Project) {
             )
 
             if (!File("$dataFileName.xml").exists()) {
-                project.service<TestsExecutionResultService>().removeFromPassingTest(testName)
+                project.service<TestsExecutionResultService>().addFailedTest(testName, testExecutionError)
             } else {
                 val testCase = project.service<TestCoverageCollectorService>().getTestCaseFromXml(
                     testName,
