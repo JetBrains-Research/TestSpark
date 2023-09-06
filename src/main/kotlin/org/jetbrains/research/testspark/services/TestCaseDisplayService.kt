@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.services
 
 import com.intellij.coverage.CoverageDataManager
 import com.intellij.coverage.CoverageSuitesBundle
-import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
@@ -32,6 +32,7 @@ import com.intellij.psi.PsiManager
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
+import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
@@ -209,7 +210,7 @@ class TestCaseDisplayService(private val project: Project) {
 
             // Add an editor to modify the test source code
             val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
-            val textFieldEditor = EditorTextField(document, project, JavaFileType.INSTANCE)
+            val textFieldEditor = LanguageTextField(Language.findLanguageByID("JAVA"), project, testCodeFormatted, false)
 
             textFieldEditor.setOneLineMode(false)
 
