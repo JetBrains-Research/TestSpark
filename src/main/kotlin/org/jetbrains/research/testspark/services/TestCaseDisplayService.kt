@@ -209,8 +209,7 @@ class TestCaseDisplayService(private val project: Project) {
             }
 
             // Add an editor to modify the test source code
-            val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
-            val textFieldEditor = LanguageTextField(Language.findLanguageByID("JAVA"), editor.project, testCodeFormatted, false)
+            val languageTextField = LanguageTextField(Language.findLanguageByID("JAVA"), editor.project, testCodeFormatted, false)
 
             // Add test case title
             val middlePanel = JPanel()
@@ -220,7 +219,7 @@ class TestCaseDisplayService(private val project: Project) {
 
             middlePanel.add(testCaseTitle)
             middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
-            middlePanel.add(textFieldEditor)
+            middlePanel.add(languageTextField)
 
             testCasePanel.add(middlePanel, BorderLayout.CENTER)
 
@@ -237,17 +236,16 @@ class TestCaseDisplayService(private val project: Project) {
             val runTestButton = createRunTestButton()
 
             // Set border
-            textFieldEditor.border = getBorder(testCase.testName)
+            languageTextField.border = getBorder(testCase.testName)
 
             addListeners(
-                document,
                 resetButton,
                 resetToLastRunButton,
                 runTestButton,
-                textFieldEditor,
+                languageTextField,
                 checkbox,
                 testCase,
-                textFieldEditor.border,
+                languageTextField.border,
             )
 
             val bottomPanel = JPanel()
@@ -836,32 +834,30 @@ class TestCaseDisplayService(private val project: Project) {
      * A helper method to add a listener to the test document (in the tool window panel)
      *   that enables reset button when the editor is changed.
      *
-     * @param document the document of the test case
      * @param resetButton the button to reset changes in the test
-     * @param textFieldEditor the text field editor with the test
+     * @param languageTextField the text field editor with the test
      * @param checkbox the checkbox to select the test
      */
     private fun addListeners(
-        document: Document,
         resetButton: JButton,
         resetToLastRunButton: JButton,
         runTestButton: JButton,
-        textFieldEditor: EditorTextField,
+        languageTextField: EditorTextField,
         checkbox: JCheckBox,
         testCase: TestCase,
         initialBorder: Border,
     ) {
-        document.addDocumentListener(object : DocumentListener {
+        languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 val lastRunCode = project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
-                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+                languageTextField.editor!!.markupModel.removeAllHighlighters()
 
-                resetButton.isEnabled = document.text != testCase.testCode
-                resetToLastRunButton.isEnabled = document.text != lastRunCode
-                runTestButton.isEnabled = document.text != lastRunCode && document.text != testCase.testCode
+                resetButton.isEnabled = languageTextField.document.text != testCase.testCode
+                resetToLastRunButton.isEnabled = languageTextField.document.text != lastRunCode
+                runTestButton.isEnabled = languageTextField.document.text != lastRunCode && languageTextField.document.text != testCase.testCode
 
-                textFieldEditor.border =
-                    when (document.text) {
+                languageTextField.border =
+                    when (languageTextField.document.text) {
                         testCase.testCode -> initialBorder
                         lastRunCode -> getBorder(testCase.testName)
                         else -> JBUI.Borders.empty()
@@ -869,11 +865,11 @@ class TestCaseDisplayService(private val project: Project) {
 
                 val modifiedLineIndexes = getModifiedLines(
                     lastRunCode.split("\n"),
-                    document.text.split("\n"),
+                    languageTextField.document.text.split("\n"),
                 )
 
                 for (index in modifiedLineIndexes) {
-                    textFieldEditor.editor!!.markupModel.addLineHighlighter(
+                    languageTextField.editor!!.markupModel.addLineHighlighter(
                         DiffColors.DIFF_MODIFIED,
                         index,
                         HighlighterLayer.FIRST,
@@ -887,7 +883,7 @@ class TestCaseDisplayService(private val project: Project) {
 
         resetButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
-                document.setText(testCase.testCode)
+                languageTextField.document.setText(testCase.testCode)
                 project.service<Workspace>().updateTestCase(testCase)
                 resetButton.isEnabled = false
                 resetToLastRunButton.isEnabled = false
@@ -897,8 +893,8 @@ class TestCaseDisplayService(private val project: Project) {
                 } else {
                     project.service<TestsExecutionResultService>().removeFromPassingTest(testCase.testName)
                 }
-                textFieldEditor.border = initialBorder
-                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+                languageTextField.border = initialBorder
+                languageTextField.editor!!.markupModel.removeAllHighlighters()
 
                 updateTestsPassedLabel()
             }
@@ -906,23 +902,23 @@ class TestCaseDisplayService(private val project: Project) {
 
         resetToLastRunButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
-                document.setText(project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode)
+                languageTextField.document.setText(project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode)
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
-                textFieldEditor.border = getBorder(testCase.testName)
-                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+                languageTextField.border = getBorder(testCase.testName)
+                languageTextField.editor!!.markupModel.removeAllHighlighters()
             }
         }
 
         runTestButton.addActionListener {
             project.service<Workspace>().updateTestCase(
-                project.service<TestCoverageCollectorService>().updateDataWithTestCase(document.text, testCase.testName),
+                project.service<TestCoverageCollectorService>().updateDataWithTestCase(languageTextField.document.text, testCase.testName),
             )
 
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
-            textFieldEditor.border = getBorder(testCase.testName)
-            textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+            languageTextField.border = getBorder(testCase.testName)
+            languageTextField.editor!!.markupModel.removeAllHighlighters()
 
             updateTestsPassedLabel()
         }

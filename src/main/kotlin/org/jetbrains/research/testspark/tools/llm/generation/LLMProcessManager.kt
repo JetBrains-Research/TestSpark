@@ -183,13 +183,13 @@ class LLMProcessManager(
 
             // compile the test file
             indicator.text = TestSparkBundle.message("compilationTestsChecking")
-            coverageCollector.compileTestCases()
-            val compilationResult = project.service<TestCoverageCollectorService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
+            val separateCompilationResult = coverageCollector.compileTestCases()
+            val commonCompilationResult = project.service<TestCoverageCollectorService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
-            if (!compilationResult.first && !isLastIteration(requestsCount)) {
+            if (!separateCompilationResult && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")
                 warningMessage = TestSparkBundle.message("compilationError")
-                messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```"
+                messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${commonCompilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```"
                 continue
             }
 
