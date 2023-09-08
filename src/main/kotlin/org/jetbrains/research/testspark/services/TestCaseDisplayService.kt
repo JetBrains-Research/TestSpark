@@ -657,7 +657,9 @@ class TestCaseDisplayService(private val project: Project) {
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
-                it.replace("\r\n", "\n").replace("verifyException(", "// verifyException(") + "\n",
+                project.service<JavaClassBuilderService>().getTestMethodFromClassWithTestCaseName(
+                    it.replace("\r\n", "\n").replace("verifyException(", "// verifyException(")
+                ) + "\n",
             )
         }
 

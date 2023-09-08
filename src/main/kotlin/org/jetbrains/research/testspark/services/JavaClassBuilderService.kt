@@ -82,4 +82,31 @@ class JavaClassBuilderService(private val project: Project) {
             Locale.getDefault()
         ) else it.toString()
     }}"
+
+    /**
+     * Finds the test method from a given class with the specified test case name.
+     *
+     * @param code The code of the class containing test methods.
+     * @return The test method as a string, including the "@Test" annotation.
+     */
+    fun getTestMethodFromClassWithTestCaseName(code: String): String {
+        var result = ""
+        val upperCutCode = "\t@Test" + code.split("@Test").last()
+        var methodStarted = false
+        var balanceOfBrackets = 0
+        for (symbol in upperCutCode) {
+            result += symbol
+            if (symbol == '{') {
+                methodStarted = true
+                balanceOfBrackets++
+            }
+            if (symbol == '}') {
+                balanceOfBrackets--
+            }
+            if (methodStarted && balanceOfBrackets == 0) {
+                break
+            }
+        }
+        return result + "\n"
+    }
 }
