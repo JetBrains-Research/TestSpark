@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.project.Project
+import java.util.Locale
 
 class JavaClassBuilderService(private val project: Project) {
     /**
@@ -26,7 +27,7 @@ class JavaClassBuilderService(private val project: Project) {
         // close the test class
         testFullText += "}"
 
-        return testFullText
+        return Regex("\n\n\n(\n)*").replace(testFullText, "\n\n")
     }
 
     /**
@@ -69,4 +70,16 @@ class JavaClassBuilderService(private val project: Project) {
 
         return testText
     }
+
+    /**
+     * Returns the generated class name for a given test case.
+     *
+     * @param testCaseName The test case name.
+     * @return The generated class name as a string.
+     */
+    fun getClassWithTestCaseName(testCaseName: String) = "Generated${testCaseName.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.getDefault()
+        ) else it.toString()
+    }}"
 }

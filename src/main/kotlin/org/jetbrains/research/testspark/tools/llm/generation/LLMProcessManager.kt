@@ -10,6 +10,7 @@ import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -149,7 +150,7 @@ class LLMProcessManager(
                             generatedTestSuite.packageString,
                             generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
                             project.service<Workspace>().resultPath!!,
-                            "Generated${generatedTestSuite.testCases[testCaseIndex].name}.java",
+                            "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java",
                         ),
                     )
                 }

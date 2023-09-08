@@ -70,7 +70,7 @@ fun saveData(
     for (testCase in report.testCaseList.values) {
         val code = testCase.testCode
         testCase.testCode = project.service<JavaClassBuilderService>().generateCode(
-            "Generated${testCase.testName}",
+            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
             code,
             workspace.testGenerationData.importsCode,
             workspace.testGenerationData.packageLine,

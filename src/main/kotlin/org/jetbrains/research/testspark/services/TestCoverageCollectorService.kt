@@ -309,7 +309,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param testName the name of the test
      */
     fun updateDataWithTestCase(testCode: String, testName: String): TestCase {
-        val fileName = "Generated$testName.java"
+        val fileName = "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(testName)}.java"
 
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path

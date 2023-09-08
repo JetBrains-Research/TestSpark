@@ -9,7 +9,9 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -17,7 +19,10 @@ import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
+import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectLocator
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -27,14 +32,18 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElementFactory
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
+import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
+import com.intellij.ui.LanguageTextField.DocumentCreator
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
+import com.intellij.util.LocalTimeCounter
 import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.TestSparkBundle
@@ -207,7 +216,13 @@ class TestCaseDisplayService(private val project: Project) {
             }
 
             // Add an editor to modify the test source code
-            val languageTextField = LanguageTextField(Language.findLanguageByID("JAVA"), editor.project, testCodeFormatted, false)
+            val languageTextField = LanguageTextField(
+                Language.findLanguageByID("JAVA"),
+                editor.project,
+                testCodeFormatted,
+                TestCaseDocumentCreator(project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)),
+                false
+            )
 
             // Add test case title
             val middlePanel = JPanel()
@@ -1010,5 +1025,57 @@ class TestCaseDisplayService(private val project: Project) {
         } else {
             MatteBorder(size, size, size, size, JBColor.RED)
         }
+    }
+
+    /**
+     * This class is responsible for creating a test case document.
+     *
+     * @constructor Creates a new TestCaseDocumentCreator object.
+     */
+    open class TestCaseDocumentCreator(private val className: String) : DocumentCreator {
+        /**
+         * Creates a document based on the given parameters. Copied from com.intellij.ui.LanguageTextField
+         *
+         * @param value            The initial text to set in the document.
+         * @param language         The language associated with the document.
+         * @param project          The project to which the document belongs.
+         * @return The created document. Can be null if the language is null and the document
+         *         is created using EditorFactory.
+         */
+        override fun createDocument(value: String?, language: Language?, project: Project?): Document {
+            return if (language != null) {
+                val notNullProject = project ?: ProjectManager.getInstance().defaultProject
+                val factory = PsiFileFactory.getInstance(notNullProject)
+                val fileType: FileType = language.associatedFileType!!
+                val stamp = LocalTimeCounter.currentTime()
+                val psiFile = factory.createFileFromText(
+                    "$className." + fileType.defaultExtension,
+                    fileType, "", stamp, true, false
+                )
+                customizePsiFile(psiFile)
+
+                // No need to guess project in getDocument - we already know it
+                val document = ProjectLocator.computeWithPreferredProject<Document?, RuntimeException>(
+                    psiFile.virtualFile, notNullProject
+                ) {
+                    PsiDocumentManager.getInstance(
+                        notNullProject
+                    ).getDocument(psiFile)
+                }!!
+                ApplicationManager.getApplication().runWriteAction {
+                    document.setText(value!!) // do not put initial value into backing LightVirtualFile.contentsToByteArray
+                }
+                document
+            } else {
+                EditorFactory.getInstance().createDocument(value!!)
+            }
+        }
+
+        /**
+         * Customizes the given PsiFile.
+         *
+         * @param file The PsiFile to be customized.
+         */
+        open fun customizePsiFile(file: PsiFile?) {}
     }
 }
