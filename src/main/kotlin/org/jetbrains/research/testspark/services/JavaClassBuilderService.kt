@@ -77,11 +77,17 @@ class JavaClassBuilderService(private val project: Project) {
      * @param testCaseName The test case name.
      * @return The generated class name as a string.
      */
-    fun getClassWithTestCaseName(testCaseName: String) = "Generated${testCaseName.replaceFirstChar {
-        if (it.isLowerCase()) it.titlecase(
-            Locale.getDefault()
-        ) else it.toString()
-    }}"
+    fun getClassWithTestCaseName(testCaseName: String) = "Generated${
+        testCaseName.replaceFirstChar {
+            if (it.isLowerCase()) {
+                it.titlecase(
+                    Locale.getDefault(),
+                )
+            } else {
+                it.toString()
+            }
+        }
+    }"
 
     /**
      * Finds the test method from a given class with the specified test case name.

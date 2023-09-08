@@ -30,10 +30,10 @@ import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElementFactory
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiFileFactory
-import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
@@ -220,8 +220,10 @@ class TestCaseDisplayService(private val project: Project) {
                 Language.findLanguageByID("JAVA"),
                 editor.project,
                 testCodeFormatted,
-                TestCaseDocumentCreator(project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)),
-                false
+                TestCaseDocumentCreator(
+                    project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+                ),
+                false,
             )
 
             // Add test case title
@@ -636,7 +638,8 @@ class TestCaseDisplayService(private val project: Project) {
      * Updates the label with the number passed tests.
      */
     private fun updateTestsPassedLabel() {
-        testsPassedLabel.text = String.format(testsPassedText, project.service<TestsExecutionResultService>().size(), testCasePanels.size)
+        testsPassedLabel.text =
+            String.format(testsPassedText, project.service<TestsExecutionResultService>().size(), testCasePanels.size)
     }
 
     /**
@@ -658,7 +661,7 @@ class TestCaseDisplayService(private val project: Project) {
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
                 project.service<JavaClassBuilderService>().getTestMethodFromClassWithTestCaseName(
-                    it.replace("\r\n", "\n").replace("verifyException(", "// verifyException(")
+                    it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
                 ) + "\n",
             )
         }
@@ -864,12 +867,14 @@ class TestCaseDisplayService(private val project: Project) {
     ) {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                val lastRunCode = project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
+                val lastRunCode =
+                    project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
                 languageTextField.editor!!.markupModel.removeAllHighlighters()
 
                 resetButton.isEnabled = languageTextField.document.text != testCase.testCode
                 resetToLastRunButton.isEnabled = languageTextField.document.text != lastRunCode
-                runTestButton.isEnabled = languageTextField.document.text != lastRunCode && languageTextField.document.text != testCase.testCode
+                runTestButton.isEnabled =
+                    languageTextField.document.text != lastRunCode && languageTextField.document.text != testCase.testCode
 
                 languageTextField.border =
                     when (languageTextField.document.text) {
@@ -927,7 +932,8 @@ class TestCaseDisplayService(private val project: Project) {
 
         runTestButton.addActionListener {
             project.service<Workspace>().updateTestCase(
-                project.service<TestCoverageCollectorService>().updateDataWithTestCase(languageTextField.document.text, testCase.testName),
+                project.service<TestCoverageCollectorService>()
+                    .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
             )
 
             resetToLastRunButton.isEnabled = false
@@ -1052,16 +1058,21 @@ class TestCaseDisplayService(private val project: Project) {
                 val stamp = LocalTimeCounter.currentTime()
                 val psiFile = factory.createFileFromText(
                     "$className." + fileType.defaultExtension,
-                    fileType, "", stamp, true, false
+                    fileType,
+                    "",
+                    stamp,
+                    true,
+                    false,
                 )
                 customizePsiFile(psiFile)
 
                 // No need to guess project in getDocument - we already know it
                 val document = ProjectLocator.computeWithPreferredProject<Document?, RuntimeException>(
-                    psiFile.virtualFile, notNullProject
+                    psiFile.virtualFile,
+                    notNullProject,
                 ) {
                     PsiDocumentManager.getInstance(
-                        notNullProject
+                        notNullProject,
                     ).getDocument(psiFile)
                 }!!
                 ApplicationManager.getApplication().runWriteAction {
