@@ -1067,14 +1067,7 @@ class TestCaseDisplayService(private val project: Project) {
                 customizePsiFile(psiFile)
 
                 // No need to guess project in getDocument - we already know it
-                val document = ProjectLocator.computeWithPreferredProject<Document?, RuntimeException>(
-                    psiFile.virtualFile,
-                    notNullProject,
-                ) {
-                    PsiDocumentManager.getInstance(
-                        notNullProject,
-                    ).getDocument(psiFile)
-                }!!
+                val document = PsiDocumentManager.getInstance(notNullProject).getDocument(psiFile)!!
                 ApplicationManager.getApplication().runWriteAction {
                     document.setText(value!!) // do not put initial value into backing LightVirtualFile.contentsToByteArray
                 }
