@@ -640,7 +640,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun updateTestsPassedLabel() {
         testsPassedLabel.text =
-            String.format(testsPassedText, project.service<TestsExecutionResultService>().size(), testCasePanels.size)
+            String.format(testsPassedText, testCasePanels.size - project.service<TestsExecutionResultService>().size(), testCasePanels.size)
     }
 
     /**
