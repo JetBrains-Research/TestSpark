@@ -114,6 +114,7 @@ class PromptManager(
         prompt += "=== polymorphism relations:\n"
         polymorphismRelations.forEach { entry ->
             for (currentSubClass in entry.value) {
+                currentSubClass.qualifiedName ?: continue
                 prompt += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
             }
         }
