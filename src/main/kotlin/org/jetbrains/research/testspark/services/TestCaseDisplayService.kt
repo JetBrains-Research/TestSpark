@@ -6,6 +6,7 @@ import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
@@ -50,17 +51,12 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
+import java.nio.file.Paths
 import java.util.Locale
-import javax.swing.BorderFactory
-import javax.swing.Box
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JOptionPane
-import javax.swing.JPanel
+import javax.swing.*
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -719,7 +715,10 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createRemoveButton(test: TestCase, editor: Editor, testCasePanel: JPanel): JButton {
-        val removeFromCacheButton = JButton("Remove")
+//        ImageIcon("/Users/arkadii.sapozhnikov/Desktop/TestSpark/src/main/resources/icons/remove.png")
+        val icon = ImageIcon("${PathManager.getPluginsPath()}/TestSpark/src/main/resources/icons/remove.png")
+        val removeFromCacheButton = JButton(icon)
+        removeFromCacheButton.preferredSize = Dimension(24, 24)
         removeFromCacheButton.addActionListener {
             // Remove the highlighting of the test
             project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)

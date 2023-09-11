@@ -100,6 +100,7 @@ dependencies {
     implementation(files("lib/byte-buddy-1.14.6.jar"))
     implementation(files("lib/byte-buddy-agent-1.14.6.jar"))
     implementation(files("lib/JUnitRunner.jar"))
+    implementation(files("icons/remove.png"))
 
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
