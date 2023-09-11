@@ -251,6 +251,7 @@ class TestCaseDisplayService(private val project: Project) {
 
             // Set border
             languageTextField.border = getBorder(testCase.testName)
+            testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
 
             addListeners(
                 resetButton,
@@ -260,6 +261,7 @@ class TestCaseDisplayService(private val project: Project) {
                 checkbox,
                 testCase,
                 languageTextField.border,
+                testCasePanel,
             )
 
             val bottomPanel = JPanel()
@@ -638,7 +640,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun updateTestsPassedLabel() {
         testsPassedLabel.text =
-            String.format(testsPassedText, project.service<TestsExecutionResultService>().size(), testCasePanels.size)
+            String.format(testsPassedText, testCasePanels.size - project.service<TestsExecutionResultService>().size(), testCasePanels.size)
     }
 
     /**
@@ -750,7 +752,7 @@ class TestCaseDisplayService(private val project: Project) {
             updateTestsSelectedLabel()
 
             // Passed tests update
-            project.service<TestsExecutionResultService>().removeFromPassingTest(test.testName)
+            project.service<TestsExecutionResultService>().removeFromFailingTest(test.testName)
             updateTestsPassedLabel()
 
             // If no more tests are remaining, close the tool window
@@ -863,6 +865,7 @@ class TestCaseDisplayService(private val project: Project) {
         checkbox: JCheckBox,
         testCase: TestCase,
         initialBorder: Border,
+        testCasePanel: JPanel,
     ) {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
@@ -881,6 +884,8 @@ class TestCaseDisplayService(private val project: Project) {
                         lastRunCode -> getBorder(testCase.testName)
                         else -> JBUI.Borders.empty()
                     }
+
+                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
 
                 val modifiedLineIndexes = getModifiedLines(
                     lastRunCode.split("\n"),
@@ -905,14 +910,15 @@ class TestCaseDisplayService(private val project: Project) {
                 languageTextField.document.setText(testCase.testCode)
                 project.service<Workspace>().updateTestCase(testCase)
                 resetButton.isEnabled = false
+                if ((initialBorder as MatteBorder).matteColor == JBColor.GREEN) {
+                    project.service<TestsExecutionResultService>().removeFromFailingTest(testCase.testName)
+                } else {
+                    project.service<TestsExecutionResultService>().addFailedTest(testCase.testName, testCasePanel.toolTipText)
+                }
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
-                if ((initialBorder as MatteBorder).matteColor == JBColor.GREEN) {
-                    project.service<TestsExecutionResultService>().addPassingTest(testCase.testName)
-                } else {
-                    project.service<TestsExecutionResultService>().removeFromPassingTest(testCase.testName)
-                }
                 languageTextField.border = initialBorder
+                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
                 languageTextField.editor!!.markupModel.removeAllHighlighters()
 
                 updateTestsPassedLabel()
@@ -925,7 +931,10 @@ class TestCaseDisplayService(private val project: Project) {
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
                 languageTextField.border = getBorder(testCase.testName)
+                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
                 languageTextField.editor!!.markupModel.removeAllHighlighters()
+
+                updateTestsPassedLabel()
             }
         }
 
@@ -934,10 +943,10 @@ class TestCaseDisplayService(private val project: Project) {
                 project.service<TestCoverageCollectorService>()
                     .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
             )
-
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
             languageTextField.border = getBorder(testCase.testName)
+            testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
             languageTextField.editor!!.markupModel.removeAllHighlighters()
 
             updateTestsPassedLabel()
@@ -1027,10 +1036,10 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun getBorder(testCaseName: String): Border {
         val size = 3
-        return if (project.service<TestsExecutionResultService>().isTestCasePassing(testCaseName)) {
-            MatteBorder(size, size, size, size, JBColor.GREEN)
-        } else {
+        return if (project.service<TestsExecutionResultService>().isTestCaseFailing(testCaseName)) {
             MatteBorder(size, size, size, size, JBColor.RED)
+        } else {
+            MatteBorder(size, size, size, size, JBColor.GREEN)
         }
     }
 
