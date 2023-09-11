@@ -10,6 +10,7 @@ import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import java.io.File
 
@@ -65,6 +66,18 @@ fun saveData(
     workspace.testGenerationData.fileUrl = project.service<Workspace>().fileUrl!!
     workspace.testGenerationData.packageLine = packageLine
     workspace.testGenerationData.importsCode.addAll(importsCode)
+
+    for (testCase in report.testCaseList.values) {
+        val code = testCase.testCode
+        testCase.testCode = project.service<JavaClassBuilderService>().generateCode(
+            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+            code,
+            workspace.testGenerationData.importsCode,
+            workspace.testGenerationData.packageLine,
+            workspace.testGenerationData.runWith,
+            workspace.testGenerationData.otherInfo,
+        )
+    }
 
     indicator.text = TestSparkBundle.message("testExecutionMessage")
 
