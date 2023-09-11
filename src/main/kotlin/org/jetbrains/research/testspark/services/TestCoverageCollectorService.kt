@@ -309,17 +309,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param testName the name of the test
      */
     fun updateDataWithTestCase(testCode: String, testName: String): TestCase {
-        val fileName = "UpdatedTestCase.java"
-
-        // generate code from document
-        val code = project.service<JavaClassBuilderService>().generateCode(
-            fileName.split(".")[0],
-            testCode,
-            project.service<Workspace>().testGenerationData.importsCode,
-            project.service<Workspace>().testGenerationData.packageLine,
-            project.service<Workspace>().testGenerationData.runWith,
-            project.service<Workspace>().testGenerationData.otherInfo,
-        )
+        val fileName = "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(testName)}.java"
 
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
@@ -331,7 +321,7 @@ class TestCoverageCollectorService(private val project: Project) {
         // save new test to file
         val generatedTestPath: String = project.service<TestCoverageCollectorService>().saveGeneratedTests(
             project.service<Workspace>().testGenerationData.packageLine,
-            code,
+            testCode,
             project.service<Workspace>().resultPath!!,
             fileName,
         )

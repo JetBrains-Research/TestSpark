@@ -79,7 +79,7 @@ data class TestSuiteGeneratedByLLM(
      */
     fun toStringSingleTestCaseWithoutExpectedException(testCaseIndex: Int): String =
         project.service<JavaClassBuilderService>().generateCode(
-            "Generated${testCases[testCaseIndex].name}",
+            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCases[testCaseIndex].name),
             testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
             imports,
             packageString,
