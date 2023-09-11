@@ -12,9 +12,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.getBuildPath
-import java.io.BufferedReader
 import java.io.File
-import java.io.InputStreamReader
 import java.util.UUID
 import kotlin.collections.ArrayList
 import kotlin.io.path.Path
@@ -32,32 +30,6 @@ class TestCoverageCollectorService(private val project: Project) {
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
     private val log = Logger.getInstance(this::class.java)
-
-    /**
-     * Executes a command line process and returns the output as a string.
-     *
-     * @param cmd The command line arguments as an ArrayList of strings.
-     * @return The output of the command line process as a string.
-     */
-    fun runCommandLine(cmd: ArrayList<String>): String {
-        var errorMessage = ""
-
-        val process = ProcessBuilder()
-            .command("bash", "-c", cmd.joinToString(" "))
-            .redirectErrorStream(true)
-            .start()
-
-        val reader = BufferedReader(InputStreamReader(process.inputStream))
-        var line: String?
-
-        while (reader.readLine().also { line = it } != null) {
-            errorMessage += line
-        }
-
-        process.waitFor()
-
-        return errorMessage
-    }
 
     /**
      * Generates the path for the command by concatenating the necessary paths.
@@ -99,7 +71,7 @@ class TestCoverageCollectorService(private val project: Project) {
         // find the proper javac
         val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()
         // compile file
-        val errorMsg = runCommandLine(
+        val errorMsg = project.service<RunCommandLineService>().runCommandLine(
             arrayListOf(
                 javaCompile.absolutePath,
                 "-cp",
@@ -172,7 +144,7 @@ class TestCoverageCollectorService(private val project: Project) {
         name += "$className#$testCaseName"
 
         // run the test method with jacoco agent
-        val testExecutionError = runCommandLine(
+        val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
             arrayListOf(
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
@@ -218,7 +190,7 @@ class TestCoverageCollectorService(private val project: Project) {
 
         log.info("Runs command: ${command.joinToString(" ")}")
 
-        runCommandLine(command as ArrayList<String>)
+        project.service<RunCommandLineService>().runCommandLine(command as ArrayList<String>)
 
         return testExecutionError
     }
@@ -309,17 +281,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param testName the name of the test
      */
     fun updateDataWithTestCase(testCode: String, testName: String): TestCase {
-        val fileName = "UpdatedTestCase.java"
-
-        // generate code from document
-        val code = project.service<JavaClassBuilderService>().generateCode(
-            fileName.split(".")[0],
-            testCode,
-            project.service<Workspace>().testGenerationData.importsCode,
-            project.service<Workspace>().testGenerationData.packageLine,
-            project.service<Workspace>().testGenerationData.runWith,
-            project.service<Workspace>().testGenerationData.otherInfo,
-        )
+        val fileName = "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(testName)}.java"
 
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
@@ -331,7 +293,7 @@ class TestCoverageCollectorService(private val project: Project) {
         // save new test to file
         val generatedTestPath: String = project.service<TestCoverageCollectorService>().saveGeneratedTests(
             project.service<Workspace>().testGenerationData.packageLine,
-            code,
+            testCode,
             project.service<Workspace>().resultPath!!,
             fileName,
         )

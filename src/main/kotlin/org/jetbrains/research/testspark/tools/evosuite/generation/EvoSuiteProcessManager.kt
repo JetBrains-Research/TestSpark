@@ -17,9 +17,9 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.RunCommandLineService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -74,7 +74,7 @@ class EvoSuiteProcessManager(
             if (processStopped(project, indicator)) return
 
             val regex = Regex("version \"(.*?)\"")
-            val version = regex.find(project.service<TestCoverageCollectorService>().runCommandLine(arrayListOf(settingsApplicationState!!.javaPath, "-version")))
+            val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(settingsApplicationState!!.javaPath, "-version")))
                 ?.groupValues
                 ?.get(1)
                 ?.split(".")

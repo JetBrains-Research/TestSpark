@@ -29,7 +29,8 @@ class PromptManager(
     private val header = "Dont use @Before and @After test methods.\n" +
         "Make tests as atomic as possible.\n" +
         "All tests should be for JUnit 4.\n" +
-        "In case of mocking, use Mockito 5. But, do not use mocking for all tests.\n"
+        "In case of mocking, use Mockito 5. But, do not use mocking for all tests.\n" +
+        "Name all methods according to the template - [MethodUnderTest][Scenario]Test, and use only English letters.\n"
 
     /**
      * Generates a prompt for generating unit tests in Java for a given class.

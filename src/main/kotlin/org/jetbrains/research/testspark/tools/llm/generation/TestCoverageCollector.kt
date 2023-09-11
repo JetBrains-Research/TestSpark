@@ -59,12 +59,16 @@ class TestCoverageCollector(
      * @return A Pair containing a boolean indicating whether the compilation was successful
      *         and a String containing any error message encountered during compilation.
      */
-    fun compileTestCases() {
+    fun compileTestCases(): Boolean {
+        var result = false
         for (index in generatedTestPaths.indices) {
-            if (project.service<TestCoverageCollectorService>().compileCode(generatedTestPaths[index], projectBuildPath).first) {
+            val compilable = project.service<TestCoverageCollectorService>().compileCode(generatedTestPaths[index], projectBuildPath).first
+            result = result || compilable
+            if (compilable) {
                 project.service<Workspace>().testGenerationData.compilableTestCases.add(testCases[index])
             }
         }
+        return result
     }
 
     /**
