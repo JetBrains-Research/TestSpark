@@ -12,7 +12,9 @@ class TestsExecutionResultService(private val project: Project) {
      * @param testName the name of the passing test to add
      * @param testError the error
      */
-    fun addFailedTest(testName: String, testError: String) { testErrors[testName] = testError.replace("===", "").trimEnd() }
+    fun addFailedTest(testName: String, testError: String) {
+        testErrors[testName] = "<html>${testError.replace("===", "").replace("\t", "<br/>").trimEnd()}</html>"
+    }
 
     /**
      * Checks if a test case with the given name is failing.
