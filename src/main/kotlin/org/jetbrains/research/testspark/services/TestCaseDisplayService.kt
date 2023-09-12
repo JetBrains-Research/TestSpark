@@ -116,15 +116,18 @@ class TestCaseDisplayService(private val project: Project) {
 
         val topButtons = JPanel()
         topButtons.layout = BoxLayout(topButtons, BoxLayout.X_AXIS)
-
+        topButtons.preferredSize = Dimension(0, 30)
         topButtons.add(Box.createRigidArea(Dimension(10, 0)))
         topButtons.add(testsPassedLabel)
         topButtons.add(Box.createRigidArea(Dimension(10, 0)))
         topButtons.add(testsSelectedLabel)
         topButtons.add(Box.createHorizontalGlue())
         topButtons.add(selectAllButton)
+        topButtons.add(Box.createRigidArea(Dimension(10, 0)))
         topButtons.add(unselectAllButton)
+        topButtons.add(Box.createRigidArea(Dimension(10, 0)))
         topButtons.add(removeAllButton)
+        topButtons.add(Box.createRigidArea(Dimension(10, 0)))
 
 //        TODO uncomment after the validator fixing
 //        topButtons.add(validateButton)
@@ -217,11 +220,18 @@ class TestCaseDisplayService(private val project: Project) {
             }
 
             val upperPanel = JPanel()
-            upperPanel.layout = BoxLayout(upperPanel, BoxLayout.X_AXIS)
-            upperPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
             val errorLabel = JLabel(TestSparkIcons.showError)
             updateErrorLabel(errorLabel, testCase.testName)
+            val likeButton = createButton(TestSparkIcons.like)
+            val dislikeButton = createButton(TestSparkIcons.dislike)
+            upperPanel.layout = BoxLayout(upperPanel, BoxLayout.X_AXIS)
+            upperPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
             upperPanel.add(errorLabel)
+            upperPanel.add(Box.createHorizontalGlue())
+            upperPanel.add(likeButton)
+            upperPanel.add(Box.createRigidArea(Dimension(5, 0)))
+            upperPanel.add(dislikeButton)
+            upperPanel.add(Box.createRigidArea(Dimension(10, 0)))
             testCasePanel.add(upperPanel, BorderLayout.NORTH)
 
             // Add an editor to modify the test source code
@@ -262,6 +272,8 @@ class TestCaseDisplayService(private val project: Project) {
                 resetButton,
                 resetToLastRunButton,
                 runTestButton,
+                likeButton,
+                dislikeButton,
                 languageTextField,
                 checkbox,
                 testCase,
@@ -277,6 +289,7 @@ class TestCaseDisplayService(private val project: Project) {
             bottomButtons.add(resetButton)
             bottomButtons.add(resetToLastRunButton)
             bottomButtons.add(runTestButton)
+            bottomButtons.add(Box.createRigidArea(Dimension(10, 0)))
             bottomPanel.add(bottomButtons)
             bottomPanel.add(Box.createRigidArea(Dimension(0, 25)))
             testCasePanel.add(bottomPanel, BorderLayout.SOUTH)
@@ -885,6 +898,8 @@ class TestCaseDisplayService(private val project: Project) {
         resetButton: JButton,
         resetToLastRunButton: JButton,
         runTestButton: JButton,
+        likeButton: JButton,
+        dislikeButton: JButton,
         languageTextField: EditorTextField,
         checkbox: JCheckBox,
         testCase: TestCase,
@@ -975,6 +990,18 @@ class TestCaseDisplayService(private val project: Project) {
             languageTextField.editor!!.markupModel.removeAllHighlighters()
 
             updateTestsPassedLabel()
+        }
+
+        likeButton.addActionListener {
+            likeButton.icon = TestSparkIcons.likeSelected
+            dislikeButton.icon = TestSparkIcons.dislike
+//            TODO add implementation
+        }
+
+        dislikeButton.addActionListener {
+            likeButton.icon = TestSparkIcons.like
+            dislikeButton.icon = TestSparkIcons.dislikeSelected
+//            TODO add implementation
         }
     }
 

@@ -1,7 +1,7 @@
-<!-- Copyright 2000-2021 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file. -->
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <g fill="none" fill-rule="evenodd">
-    <path fill="#6E6E6E" d="M12.0710606,2 L10,4 L4,4 L4,12 L12,12 L12,9.93137755 L14,8 L14,14 L2,14 L2,2 L12.0710606,2 Z"/>
-    <polygon fill="#6E6E6E" fill-rule="nonzero" points="14.457 2 16 3.528 8.711 10.736 5 7.066 6.496 5.585 8.684 7.773"/>
-  </g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20px" height="20px" viewBox="0 0 20 20" version="1.1">
+<g id="surface1">
+<path style=" stroke:none;fill-rule:evenodd;fill:rgb(43.137255%,43.137255%,43.137255%);fill-opacity:1;" d="M 15.089844 2.5 L 12.5 5 L 5 5 L 5 15 L 15 15 L 15 12.414062 L 17.5 10 L 17.5 17.5 L 2.5 17.5 L 2.5 2.5 Z M 15.089844 2.5 "/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(43.137255%,43.137255%,43.137255%);fill-opacity:1;" d="M 18.070312 2.5 L 20 4.410156 L 10.890625 13.421875 L 6.25 8.832031 L 8.121094 6.980469 L 10.855469 9.714844 Z M 18.070312 2.5 "/>
+</g>
 </svg>
