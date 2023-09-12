@@ -56,7 +56,9 @@ import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
-import java.awt.FlowLayout
+import java.awt.Toolkit
+import java.awt.datatransfer.Clipboard
+import java.awt.datatransfer.StringSelection
 import java.io.File
 import java.util.Locale
 import javax.swing.BorderFactory
@@ -68,6 +70,8 @@ import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
+import javax.swing.JSeparator
+import javax.swing.SwingConstants
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
@@ -75,9 +79,12 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
     private var applyButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("applyButton"))
-    private var selectAllButton: JButton = createButton(TestSparkIcons.selectAll)
-    private var unselectAllButton: JButton = createButton(TestSparkIcons.unselectAll)
-    private var removeAllButton: JButton = createButton(TestSparkIcons.removeAll)
+    private var selectAllButton: JButton =
+        createButton(TestSparkIcons.selectAll, TestSparkLabelsBundle.defaultValue("selectAllTip"))
+    private var unselectAllButton: JButton =
+        createButton(TestSparkIcons.unselectAll, TestSparkLabelsBundle.defaultValue("unselectAllTip"))
+    private var removeAllButton: JButton =
+        createButton(TestSparkIcons.removeAll, TestSparkLabelsBundle.defaultValue("removeAllTip"))
     private var validateButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("validateButton"))
     var toggleJacocoButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("jacocoToggle"))
 
@@ -113,6 +120,9 @@ class TestCaseDisplayService(private val project: Project) {
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
+
+        applyButton.isOpaque = false
+        applyButton.isContentAreaFilled = false
 
         val topButtons = JPanel()
         topButtons.layout = BoxLayout(topButtons, BoxLayout.X_AXIS)
@@ -222,12 +232,15 @@ class TestCaseDisplayService(private val project: Project) {
             val upperPanel = JPanel()
             val errorLabel = JLabel(TestSparkIcons.showError)
             updateErrorLabel(errorLabel, testCase.testName)
-            val likeButton = createButton(TestSparkIcons.like)
-            val dislikeButton = createButton(TestSparkIcons.dislike)
+            val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
+            val likeButton = createButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
+            val dislikeButton = createButton(TestSparkIcons.dislike, TestSparkLabelsBundle.defaultValue("dislikeTip"))
             upperPanel.layout = BoxLayout(upperPanel, BoxLayout.X_AXIS)
             upperPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
             upperPanel.add(errorLabel)
             upperPanel.add(Box.createHorizontalGlue())
+            upperPanel.add(copyButton)
+            upperPanel.add(Box.createRigidArea(Dimension(5, 0)))
             upperPanel.add(likeButton)
             upperPanel.add(Box.createRigidArea(Dimension(5, 0)))
             upperPanel.add(dislikeButton)
@@ -250,6 +263,7 @@ class TestCaseDisplayService(private val project: Project) {
             middlePanel.layout = BoxLayout(middlePanel, BoxLayout.Y_AXIS)
             middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
             middlePanel.add(languageTextField)
+            middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
 
             testCasePanel.add(middlePanel, BorderLayout.CENTER)
 
@@ -274,29 +288,34 @@ class TestCaseDisplayService(private val project: Project) {
                 runTestButton,
                 likeButton,
                 dislikeButton,
+                copyButton,
+                errorLabel,
                 languageTextField,
                 checkbox,
                 testCase,
                 languageTextField.border,
-                errorLabel,
             )
 
             val bottomPanel = JPanel()
-            bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
-            val bottomButtons = JPanel()
-            bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
-            bottomButtons.add(removeButton)
-            bottomButtons.add(resetButton)
-            bottomButtons.add(resetToLastRunButton)
-            bottomButtons.add(runTestButton)
-            bottomButtons.add(Box.createRigidArea(Dimension(10, 0)))
-            bottomPanel.add(bottomButtons)
-            bottomPanel.add(Box.createRigidArea(Dimension(0, 25)))
+            bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.X_AXIS)
+            bottomPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
+            bottomPanel.add(runTestButton)
+            bottomPanel.add(Box.createHorizontalGlue())
+            bottomPanel.add(resetButton)
+            bottomPanel.add(Box.createRigidArea(Dimension(5, 0)))
+            bottomPanel.add(resetToLastRunButton)
+            bottomPanel.add(Box.createRigidArea(Dimension(5, 0)))
+            bottomPanel.add(removeButton)
+            bottomPanel.add(Box.createRigidArea(Dimension(10, 0)))
+
             testCasePanel.add(bottomPanel, BorderLayout.SOUTH)
 
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
+            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
+            allTestCasePanel.add(JSeparator(SwingConstants.HORIZONTAL))
+            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
             testCasePanels[testCase.testName] = testCasePanel
 
             // Update the number of selected tests (all tests are selected by default)
@@ -571,9 +590,9 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the editor corresponding to the test case, or null if it does not exist
      */
     private fun getEditor(testCase: String): EditorTextField? {
-        val middlePanelComponent = testCasePanels[testCase]?.getComponent(1) ?: return null
+        val middlePanelComponent = testCasePanels[testCase]?.getComponent(2) ?: return null
         val middlePanel = middlePanelComponent as JPanel
-        return middlePanel.getComponent(2) as EditorTextField
+        return middlePanel.getComponent(1) as EditorTextField
     }
 
     /**
@@ -757,7 +776,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createRemoveButton(test: TestCase, editor: Editor, testCasePanel: JPanel): JButton {
-        val removeButton = createButton(TestSparkIcons.remove)
+        val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTip"))
         removeButton.addActionListener {
             // Remove the highlighting of the test
             project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
@@ -844,7 +863,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createResetButton(): JButton {
-        val resetButton = createButton(TestSparkIcons.reset)
+        val resetButton = createButton(TestSparkIcons.reset, TestSparkLabelsBundle.defaultValue("resetTip"))
         resetButton.isEnabled = false
         return resetButton
     }
@@ -855,7 +874,8 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createResetToLastRunButton(): JButton {
-        val resetButton = createButton(TestSparkIcons.resetToLastRun)
+        val resetButton =
+            createButton(TestSparkIcons.resetToLastRun, TestSparkLabelsBundle.defaultValue("resetToLastRunTip"))
         resetButton.isEnabled = false
         return resetButton
     }
@@ -866,8 +886,12 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createRunTestButton(): JButton {
-        val runTestButton = createButton(TestSparkIcons.runTest)
+        val runTestButton = JButton("Run", TestSparkIcons.runTest)
         runTestButton.isEnabled = false
+        runTestButton.isOpaque = false
+        runTestButton.isContentAreaFilled = false
+        runTestButton.isBorderPainted = true
+        runTestButton.preferredSize = Dimension(60, 30)
         return runTestButton
     }
 
@@ -877,11 +901,12 @@ class TestCaseDisplayService(private val project: Project) {
      * @param icon the icon to be displayed on the button
      * @return the created button
      */
-    private fun createButton(icon: Icon): JButton {
+    private fun createButton(icon: Icon, tip: String): JButton {
         val button = JButton(icon)
         button.isOpaque = false
         button.isContentAreaFilled = false
         button.isBorderPainted = false
+        button.toolTipText = tip
         button.preferredSize = Dimension(16, 16)
         return button
     }
@@ -900,11 +925,12 @@ class TestCaseDisplayService(private val project: Project) {
         runTestButton: JButton,
         likeButton: JButton,
         dislikeButton: JButton,
+        copyButton: JButton,
+        errorLabel: JLabel,
         languageTextField: EditorTextField,
         checkbox: JCheckBox,
         testCase: TestCase,
         initialBorder: Border,
-        errorLabel: JLabel,
     ) {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
@@ -993,15 +1019,28 @@ class TestCaseDisplayService(private val project: Project) {
         }
 
         likeButton.addActionListener {
-            likeButton.icon = TestSparkIcons.likeSelected
+            if (likeButton.icon == TestSparkIcons.likeSelected) {
+                likeButton.icon = TestSparkIcons.like
+            } else if (likeButton.icon == TestSparkIcons.like) {
+                likeButton.icon = TestSparkIcons.likeSelected
+            }
             dislikeButton.icon = TestSparkIcons.dislike
 //            TODO add implementation
         }
 
         dislikeButton.addActionListener {
+            if (dislikeButton.icon == TestSparkIcons.dislikeSelected) {
+                dislikeButton.icon = TestSparkIcons.dislike
+            } else if (dislikeButton.icon == TestSparkIcons.dislike) {
+                dislikeButton.icon = TestSparkIcons.dislikeSelected
+            }
             likeButton.icon = TestSparkIcons.like
-            dislikeButton.icon = TestSparkIcons.dislikeSelected
 //            TODO add implementation
+        }
+
+        copyButton.addActionListener {
+            val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
+            clipboard.setContents(StringSelection(languageTextField.document.text), null)
         }
     }
 

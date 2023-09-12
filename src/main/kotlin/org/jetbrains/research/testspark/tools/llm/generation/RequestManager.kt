@@ -27,7 +27,7 @@ abstract class RequestManager {
     ): Pair<String, TestSuiteGeneratedByLLM?> {
         // save the full response in the chat history
         val response = testsAssembler.rawText
-        log.debug("The full response: \n $response")
+        log.info("The full response: \n $response")
         chatHistory.add(ChatMessage("assistant", response))
 
         // check if response is empty

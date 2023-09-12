@@ -38,4 +38,7 @@ object TestSparkIcons {
 
     @JvmField
     val dislikeSelected = IconLoader.getIcon("/icons/dislikeSelected.svg", javaClass)
+
+    @JvmField
+    val copy = IconLoader.getIcon("/icons/copy.svg", javaClass)
 }
