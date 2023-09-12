@@ -26,13 +26,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElementFactory
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiFileFactory
-import com.intellij.psi.PsiJavaFile
-import com.intellij.psi.PsiManager
+import com.intellij.psi.*
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
@@ -50,6 +44,7 @@ import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.data.TestSparkIcons
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
 import java.awt.BorderLayout
@@ -57,15 +52,8 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
-import java.util.Locale
-import javax.swing.BorderFactory
-import javax.swing.Box
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JOptionPane
-import javax.swing.JPanel
+import java.util.*
+import javax.swing.*
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
@@ -73,9 +61,9 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
     private var applyButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("applyButton"))
-    private var selectAllButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("selectAllButton"))
-    private var deselectAllButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("deselectAllButton"))
-    private var removeAllButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("removeAllButton"))
+    private var selectAllButton: JButton = createButton(TestSparkIcons.selectAll)
+    private var unselectAllButton: JButton = createButton(TestSparkIcons.unselectAll)
+    private var removeAllButton: JButton = createButton(TestSparkIcons.removeAll)
     private var validateButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("validateButton"))
     var toggleJacocoButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("jacocoToggle"))
 
@@ -121,7 +109,7 @@ class TestCaseDisplayService(private val project: Project) {
         topButtons.add(testsSelectedLabel)
         topButtons.add(Box.createHorizontalGlue())
         topButtons.add(selectAllButton)
-        topButtons.add(deselectAllButton)
+        topButtons.add(unselectAllButton)
         topButtons.add(removeAllButton)
 
 //        TODO uncomment after the validator fixing
@@ -135,7 +123,7 @@ class TestCaseDisplayService(private val project: Project) {
         applyButton.addActionListener { applyTests() }
         validateButton.addActionListener { validateTests() }
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
-        deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
+        unselectAllButton.addActionListener { toggleAllCheckboxes(false) }
         toggleJacocoButton.addActionListener { toggleJacocoCoverage() }
         removeAllButton.addActionListener { removeAllTestCases() }
     }
@@ -214,6 +202,14 @@ class TestCaseDisplayService(private val project: Project) {
                 updateTestsPassedLabel()
             }
 
+            val upperPanel = JPanel()
+            upperPanel.layout = BoxLayout(upperPanel, BoxLayout.X_AXIS)
+            upperPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
+            val errorLabel = JLabel(TestSparkIcons.showError)
+            updateErrorLabel(errorLabel, testCase.testName)
+            upperPanel.add(errorLabel)
+            testCasePanel.add(upperPanel, BorderLayout.NORTH)
+
             // Add an editor to modify the test source code
             val languageTextField = LanguageTextField(
                 Language.findLanguageByID("JAVA"),
@@ -228,17 +224,13 @@ class TestCaseDisplayService(private val project: Project) {
             // Add test case title
             val middlePanel = JPanel()
             middlePanel.layout = BoxLayout(middlePanel, BoxLayout.Y_AXIS)
-
-            val testCaseTitle = JLabel(testCase.testName)
-
-            middlePanel.add(testCaseTitle)
             middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
             middlePanel.add(languageTextField)
 
             testCasePanel.add(middlePanel, BorderLayout.CENTER)
 
             // Create "Remove" button to remove the test from cache
-            val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel)
+            val removeButton = createRemoveButton(testCase, editor, testCasePanel)
 
             // Create "Reset" button to reset the changes in the source code of the test
             val resetButton = createResetButton()
@@ -251,7 +243,6 @@ class TestCaseDisplayService(private val project: Project) {
 
             // Set border
             languageTextField.border = getBorder(testCase.testName)
-            testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
 
             addListeners(
                 resetButton,
@@ -261,14 +252,14 @@ class TestCaseDisplayService(private val project: Project) {
                 checkbox,
                 testCase,
                 languageTextField.border,
-                testCasePanel,
+                errorLabel,
             )
 
             val bottomPanel = JPanel()
             bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
             val bottomButtons = JPanel()
             bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
-            bottomButtons.add(removeFromCacheButton)
+            bottomButtons.add(removeButton)
             bottomButtons.add(resetButton)
             bottomButtons.add(resetToLastRunButton)
             bottomButtons.add(runTestButton)
@@ -640,7 +631,11 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun updateTestsPassedLabel() {
         testsPassedLabel.text =
-            String.format(testsPassedText, testCasePanels.size - project.service<TestsExecutionResultService>().size(), testCasePanels.size)
+            String.format(
+                testsPassedText,
+                testCasePanels.size - project.service<TestsExecutionResultService>().size(),
+                testCasePanels.size,
+            )
     }
 
     /**
@@ -735,8 +730,8 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createRemoveButton(test: TestCase, editor: Editor, testCasePanel: JPanel): JButton {
-        val removeFromCacheButton = JButton("Remove")
-        removeFromCacheButton.addActionListener {
+        val removeButton = createButton(TestSparkIcons.remove)
+        removeButton.addActionListener {
             // Remove the highlighting of the test
             project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                 .testGenerationResult(test.testName, false, editor)
@@ -758,7 +753,7 @@ class TestCaseDisplayService(private val project: Project) {
             // If no more tests are remaining, close the tool window
             if (testCasePanels.size == 0) closeToolWindow()
         }
-        return removeFromCacheButton
+        return removeButton
     }
 
     /**
@@ -822,7 +817,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createResetButton(): JButton {
-        val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetButton"))
+        val resetButton = createButton(TestSparkIcons.reset)
         resetButton.isEnabled = false
         return resetButton
     }
@@ -833,7 +828,7 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createResetToLastRunButton(): JButton {
-        val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetToLastRunButton"))
+        val resetButton = createButton(TestSparkIcons.resetToLastRun)
         resetButton.isEnabled = false
         return resetButton
     }
@@ -844,9 +839,24 @@ class TestCaseDisplayService(private val project: Project) {
      * @return the created button
      */
     private fun createRunTestButton(): JButton {
-        val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("runTestButton"))
+        val runTestButton = createButton(TestSparkIcons.runTest)
         runTestButton.isEnabled = false
         return runTestButton
+    }
+
+    /**
+     * Creates a button with the specified icon.
+     *
+     * @param icon the icon to be displayed on the button
+     * @return the created button
+     */
+    private fun createButton(icon: Icon): JButton {
+        val button = JButton(icon)
+        button.isOpaque = false
+        button.isContentAreaFilled = false
+        button.isBorderPainted = false
+        button.preferredSize = Dimension(16, 16)
+        return button
     }
 
     /**
@@ -865,7 +875,7 @@ class TestCaseDisplayService(private val project: Project) {
         checkbox: JCheckBox,
         testCase: TestCase,
         initialBorder: Border,
-        testCasePanel: JPanel,
+        errorLabel: JLabel,
     ) {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
@@ -885,7 +895,7 @@ class TestCaseDisplayService(private val project: Project) {
                         else -> JBUI.Borders.empty()
                     }
 
-                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
+                updateErrorLabel(errorLabel, testCase.testName)
 
                 val modifiedLineIndexes = getModifiedLines(
                     lastRunCode.split("\n"),
@@ -913,12 +923,13 @@ class TestCaseDisplayService(private val project: Project) {
                 if ((initialBorder as MatteBorder).matteColor == JBColor.GREEN) {
                     project.service<TestsExecutionResultService>().removeFromFailingTest(testCase.testName)
                 } else {
-                    project.service<TestsExecutionResultService>().addFailedTest(testCase.testName, testCasePanel.toolTipText)
+                    project.service<TestsExecutionResultService>()
+                        .addFailedTest(testCase.testName, errorLabel.toolTipText)
                 }
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
                 languageTextField.border = initialBorder
-                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
+                updateErrorLabel(errorLabel, testCase.testName)
                 languageTextField.editor!!.markupModel.removeAllHighlighters()
 
                 updateTestsPassedLabel()
@@ -931,7 +942,7 @@ class TestCaseDisplayService(private val project: Project) {
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
                 languageTextField.border = getBorder(testCase.testName)
-                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
+                updateErrorLabel(errorLabel, testCase.testName)
                 languageTextField.editor!!.markupModel.removeAllHighlighters()
 
                 updateTestsPassedLabel()
@@ -946,7 +957,7 @@ class TestCaseDisplayService(private val project: Project) {
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
             languageTextField.border = getBorder(testCase.testName)
-            testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
+            updateErrorLabel(errorLabel, testCase.testName)
             languageTextField.editor!!.markupModel.removeAllHighlighters()
 
             updateTestsPassedLabel()
@@ -1040,6 +1051,21 @@ class TestCaseDisplayService(private val project: Project) {
             MatteBorder(size, size, size, size, JBColor.RED)
         } else {
             MatteBorder(size, size, size, size, JBColor.GREEN)
+        }
+    }
+
+    /**
+     * Updates the error label with a new message.
+     *
+     * @param errorLabel the label to be updated with the error message
+     */
+    private fun updateErrorLabel(errorLabel: JLabel, testCaseName: String) {
+        val error = project.service<TestsExecutionResultService>().getError(testCaseName)
+        if (error.isBlank()) {
+            errorLabel.isVisible = false
+        } else {
+            errorLabel.isVisible = true
+            errorLabel.toolTipText = error
         }
     }
 
