@@ -48,8 +48,6 @@ class TestCaseMiddleAndBottomPanelFactory(
         false,
     )
 
-    private val initialBorder = getBorder(testCase.testName, testCase.testCode)
-
     // Create "Remove" button to remove the test from cache
     private val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTip"))
 
@@ -70,7 +68,7 @@ class TestCaseMiddleAndBottomPanelFactory(
      */
     fun getMiddlePanel(): JPanel {
         // Set border
-        languageTextField.border = initialBorder
+        languageTextField.border = getBorder(testCase.testName, testCase.testCode)
 
         val panel = JPanel()
 
@@ -93,12 +91,17 @@ class TestCaseMiddleAndBottomPanelFactory(
 
                 resetButton.isEnabled = languageTextField.document.text != testCase.testCode
                 resetToLastRunButton.isEnabled = languageTextField.document.text != lastRunCode
-                runTestButton.isEnabled =
-                    languageTextField.document.text != lastRunCode && languageTextField.document.text != testCase.testCode
 
-                languageTextField.border = getBorder(testCase.testName, languageTextField.document.text)
-
+                val error = getError(testCase.testName, languageTextField.document.text)
+                if (error.isNullOrBlank()) {
+                    project.service<TestsExecutionResultService>().addCurrentPassedTest(testCase.testName)
+                } else {
+                    project.service<TestsExecutionResultService>().addCurrentFailedTest(testCase.testName, error)
+                }
                 testCaseUpperPanelFactory.updateErrorLabel()
+                runTestButton.isEnabled = (error == null)
+
+                updateBorder()
 
                 val modifiedLineIndexes = getModifiedLines(
                     lastRunCode.split("\n"),
@@ -146,6 +149,14 @@ class TestCaseMiddleAndBottomPanelFactory(
         return panel
     }
 
+    /**
+     * Listens for a click event on the "Run Test" button and runs the test.
+     * It updates the test case data in the workspace with the current language input
+     * and test name. It disables the "Reset to Last Run" and "Run Test" buttons,
+     * updates the border of the language text field with the test name, updates the error
+     * label in the test case upper panel, removes all highlighters from the language text field,
+     * and updates the UI.
+     */
     private fun runTestButtonListener() {
         project.service<Workspace>().updateTestCase(
             project.service<TestCoverageCollectorService>()
@@ -153,19 +164,29 @@ class TestCaseMiddleAndBottomPanelFactory(
         )
         resetToLastRunButton.isEnabled = false
         runTestButton.isEnabled = false
-        languageTextField.border = getBorder(testCase.testName, languageTextField.document.text)
+        updateBorder()
         testCaseUpperPanelFactory.updateErrorLabel()
         languageTextField.editor!!.markupModel.removeAllHighlighters()
 
         project.service<TestCaseDisplayService>().updateUI()
     }
 
+    /**
+     * Resets the button listener for the reset button. When the reset button is clicked,
+     * this method is called to perform the necessary actions.
+     *
+     * This method updates the language text field with the test code from the current test case,
+     * sets the border of the language text field based on the test name and test code,
+     * updates the current test case in the workspace,
+     * disables the reset button,
+     * adds the current test to the passed or failed tests in the*/
     private fun resetButtonListener() {
         WriteCommandAction.runWriteCommandAction(project) {
             languageTextField.document.setText(testCase.testCode)
+            updateBorder()
             project.service<Workspace>().updateTestCase(testCase)
             resetButton.isEnabled = false
-            if ((initialBorder as MatteBorder).matteColor == JBColor.GREEN) {
+            if (getError(testCase.testName, languageTextField.document.text)!!.isBlank()) {
                 project.service<TestsExecutionResultService>().addPassedTest(testCase.testName, testCase.testCode)
             } else {
                 project.service<TestsExecutionResultService>()
@@ -173,21 +194,22 @@ class TestCaseMiddleAndBottomPanelFactory(
             }
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
-            languageTextField.border = initialBorder
             testCaseUpperPanelFactory.updateErrorLabel()
             languageTextField.editor!!.markupModel.removeAllHighlighters()
-
             project.service<TestCaseDisplayService>().updateUI()
         }
     }
 
+    /**
+     * Resets the language text field to the code from the last test run and updates the UI accordingly.
+     */
     private fun resetToLastRunButtonListener() {
         WriteCommandAction.runWriteCommandAction(project) {
             val code = project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
             languageTextField.document.setText(code)
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
-            languageTextField.border = getBorder(testCase.testName, languageTextField.document.text)
+            updateBorder()
             testCaseUpperPanelFactory.updateErrorLabel()
             languageTextField.editor!!.markupModel.removeAllHighlighters()
 
@@ -195,6 +217,12 @@ class TestCaseMiddleAndBottomPanelFactory(
         }
     }
 
+    /**
+     * Removes the button listener for the test case.
+     *
+     * This method is responsible for removing the highlighting of the test, removing the test case from the cache,
+     * and updating the UI.
+     */
     private fun removeButtonListener() {
         // Remove the highlighting of the test
         project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
@@ -207,6 +235,23 @@ class TestCaseMiddleAndBottomPanelFactory(
     }
 
     /**
+     * Updates the border of the languageTextField based on the provided test name and text.
+     */
+    private fun updateBorder() {
+        languageTextField.border = getBorder(testCase.testName, languageTextField.document.text)
+    }
+
+    /**
+     * Retrieves the error message for a given test case.
+     *
+     * @param testCaseName the name of the test case
+     * @param testCaseCode the code of the test case
+     * @return the error message for the test case
+     */
+    private fun getError(testCaseName: String, testCaseCode: String) =
+        project.service<TestsExecutionResultService>().getError(testCaseName, testCaseCode)
+
+    /**
      * Returns the border for a given test case.
      *
      * @param testCaseName the name of the test case
@@ -214,8 +259,7 @@ class TestCaseMiddleAndBottomPanelFactory(
      */
     private fun getBorder(testCaseName: String, testCaseCode: String): Border {
         val size = 3
-        val error = project.service<TestsExecutionResultService>().getError(testCaseName, testCaseCode)
-        return when (error) {
+        return when (getError(testCaseName, testCaseCode)) {
             null -> JBUI.Borders.empty()
             "" -> MatteBorder(size, size, size, size, JBColor.GREEN)
             else -> MatteBorder(size, size, size, size, JBColor.RED)

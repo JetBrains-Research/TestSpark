@@ -34,6 +34,26 @@ class TestsExecutionResultService(private val project: Project) {
     }
 
     /**
+     * Adds the current passed test to the list of errors.
+     *
+     * @param testName the name of the test to be added as a current passed test
+     */
+    fun addCurrentPassedTest(testName: String) {
+        if (currentTestErrors.contains(testName)) currentTestErrors.remove(testName)
+    }
+
+    /**
+     * Add the current failed test to the list of test errors.
+     *
+     * @param testName The name of the failed test.
+     * @param testError The error message of the failed test.
+     */
+    fun addCurrentFailedTest(testName: String, testError: String) {
+        val htmlError = "<html>${testError.replace("===", "").replace("\t", "<br/>").trimEnd()}</html>"
+        currentTestErrors[testName] = htmlError
+    }
+
+    /**
      * Gets error message.
      *
      * @param testCaseNames The name of the test to be removed.
