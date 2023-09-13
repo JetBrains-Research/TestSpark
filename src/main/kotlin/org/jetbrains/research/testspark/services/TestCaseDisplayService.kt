@@ -236,8 +236,8 @@ class TestCaseDisplayService(private val project: Project) {
 
 
             // create like/dislike buttons
-            val likeButton = JButton("Like") // TODO: TestSparkLabelsBundle.defaultValue(likeButton)
-            val dislikeButton = JButton("Dislike")
+            val likeButton = JButton(TestSparkLabelsBundle.defaultValue("likeButton"))
+            val dislikeButton = JButton(TestSparkLabelsBundle.defaultValue("dislikeButton"))
             val preferenceButtons = JPanel()
             preferenceButtons.add(likeButton)
             preferenceButtons.add(dislikeButton)
