@@ -66,8 +66,11 @@ import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
+import javax.swing.JFrame
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -224,6 +227,39 @@ class TestCaseDisplayService(private val project: Project) {
                 ),
                 false,
             )
+
+
+
+
+
+
+            // create like/dislike buttons
+            val likeButton = JButton("Like") // TODO: TestSparkLabelsBundle.defaultValue(likeButton)
+            val dislikeButton = JButton("Dislike")
+            val preferenceButtons = JPanel()
+            preferenceButtons.add(likeButton)
+            preferenceButtons.add(dislikeButton)
+
+            testCasePanel.add(preferenceButtons, BorderLayout.NORTH)
+
+            val frame = JFrame("Kotlin Swing Application")
+            frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+
+            likeButton.addActionListener(object : ActionListener {
+                override fun actionPerformed(e: ActionEvent) {
+                     JOptionPane.showMessageDialog(frame, "Like Clicked!", "Like!", JOptionPane.INFORMATION_MESSAGE)
+                }
+            })
+
+            dislikeButton.addActionListener(object : ActionListener {
+                override fun actionPerformed(e: ActionEvent) {
+                    JOptionPane.showMessageDialog(frame, "Dislike Clicked!", "Dislike!", JOptionPane.INFORMATION_MESSAGE)
+                }
+            })
+
+
+
+
 
             // Add test case title
             val middlePanel = JPanel()
