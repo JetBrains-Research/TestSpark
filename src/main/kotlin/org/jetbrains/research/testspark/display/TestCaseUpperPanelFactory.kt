@@ -11,11 +11,15 @@ import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
 import javax.swing.Box
 import javax.swing.BoxLayout
+import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel
-import javax.swing.JCheckBox
 
-class TestCaseUpperPanelFactory(private val project: Project, private val testCaseName: String, private val checkbox: JCheckBox) {
+class TestCaseUpperPanelFactory(
+    private val project: Project,
+    private val testCaseName: String,
+    private val checkbox: JCheckBox,
+) {
     private val panel = JPanel()
     private val errorLabel = JLabel(TestSparkIcons.showError)
     private val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
@@ -57,7 +61,12 @@ class TestCaseUpperPanelFactory(private val project: Project, private val testCa
 
         copyButton.addActionListener {
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
-            clipboard.setContents(StringSelection(project.service<TestCaseDisplayService>().getEditor(testCaseName)!!.document.text), null)
+            clipboard.setContents(
+                StringSelection(
+                    project.service<TestCaseDisplayService>().getEditor(testCaseName)!!.document.text,
+                ),
+                null,
+            )
         }
 
         return panel
