@@ -158,13 +158,6 @@ class TestCoverageCollectorService(private val project: Project) {
 
         log.info("Test execution error message: $testExecutionError")
 
-        // add failing test
-        if (getExceptionData(testExecutionError).first) {
-            project.service<TestsExecutionResultService>().addFailedTest(testCaseName, testExecutionError)
-        } else {
-            project.service<TestsExecutionResultService>().removeFromFailingTest(testCaseName)
-        }
-
         // Prepare the command for generating the Jacoco report
         val command = mutableListOf(
             javaRunner.absolutePath,
@@ -301,7 +294,7 @@ class TestCoverageCollectorService(private val project: Project) {
         // compilation checking
         val compilationResult = project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath)
         if (!compilationResult.first) {
-            project.service<TestsExecutionResultService>().addFailedTest(testName, compilationResult.second)
+            project.service<TestsExecutionResultService>().addFailedTest(testName, testCode, compilationResult.second)
         } else {
             val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${fileName.split(".")[0]}"
 
@@ -314,7 +307,7 @@ class TestCoverageCollectorService(private val project: Project) {
             )
 
             if (!File("$dataFileName.xml").exists()) {
-                project.service<TestsExecutionResultService>().addFailedTest(testName, testExecutionError)
+                project.service<TestsExecutionResultService>().addFailedTest(testName, testCode, testExecutionError)
             } else {
                 val testCase = project.service<TestCoverageCollectorService>().getTestCaseFromXml(
                     testName,
@@ -322,6 +315,12 @@ class TestCoverageCollectorService(private val project: Project) {
                     project.service<TestCoverageCollectorService>().getExceptionData(testExecutionError).second,
                     "$dataFileName.xml",
                 )
+
+                if (getExceptionData(testExecutionError).first) {
+                    project.service<TestsExecutionResultService>().addFailedTest(testName, testCode, testExecutionError)
+                } else {
+                    project.service<TestsExecutionResultService>().addPassedTest(testName, testCode)
+                }
 
                 project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
 

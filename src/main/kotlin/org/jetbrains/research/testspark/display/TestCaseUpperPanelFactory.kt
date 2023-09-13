@@ -76,7 +76,7 @@ class TestCaseUpperPanelFactory(
      * Updates the error label with a new message.
      */
     fun updateErrorLabel() {
-        val error = project.service<TestsExecutionResultService>().getError(testCaseName)
+        val error = project.service<TestsExecutionResultService>().getCurrentError(testCaseName)
         if (error.isBlank()) {
             errorLabel.isVisible = false
         } else {

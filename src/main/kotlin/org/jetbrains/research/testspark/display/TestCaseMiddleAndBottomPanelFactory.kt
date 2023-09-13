@@ -48,7 +48,7 @@ class TestCaseMiddleAndBottomPanelFactory(
         false,
     )
 
-    private val initialBorder = getBorder(testCase.testName)
+    private val initialBorder = getBorder(testCase.testName, testCase.testCode)
 
     // Create "Remove" button to remove the test from cache
     private val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTip"))
@@ -96,12 +96,7 @@ class TestCaseMiddleAndBottomPanelFactory(
                 runTestButton.isEnabled =
                     languageTextField.document.text != lastRunCode && languageTextField.document.text != testCase.testCode
 
-                languageTextField.border =
-                    when (languageTextField.document.text) {
-                        testCase.testCode -> initialBorder
-                        lastRunCode -> getBorder(testCase.testName)
-                        else -> JBUI.Borders.empty()
-                    }
+                languageTextField.border = getBorder(testCase.testName, languageTextField.document.text)
 
                 testCaseUpperPanelFactory.updateErrorLabel()
 
@@ -158,7 +153,7 @@ class TestCaseMiddleAndBottomPanelFactory(
         )
         resetToLastRunButton.isEnabled = false
         runTestButton.isEnabled = false
-        languageTextField.border = getBorder(testCase.testName)
+        languageTextField.border = getBorder(testCase.testName, languageTextField.document.text)
         testCaseUpperPanelFactory.updateErrorLabel()
         languageTextField.editor!!.markupModel.removeAllHighlighters()
 
@@ -171,10 +166,10 @@ class TestCaseMiddleAndBottomPanelFactory(
             project.service<Workspace>().updateTestCase(testCase)
             resetButton.isEnabled = false
             if ((initialBorder as MatteBorder).matteColor == JBColor.GREEN) {
-                project.service<TestsExecutionResultService>().removeFromFailingTest(testCase.testName)
+                project.service<TestsExecutionResultService>().addPassedTest(testCase.testName, testCase.testCode)
             } else {
                 project.service<TestsExecutionResultService>()
-                    .addFailedTest(testCase.testName, testCaseUpperPanelFactory.getCurrentError())
+                    .addFailedTest(testCase.testName, testCase.testCode, testCaseUpperPanelFactory.getCurrentError())
             }
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
@@ -188,10 +183,11 @@ class TestCaseMiddleAndBottomPanelFactory(
 
     private fun resetToLastRunButtonListener() {
         WriteCommandAction.runWriteCommandAction(project) {
-            languageTextField.document.setText(project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode)
+            val code = project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
+            languageTextField.document.setText(code)
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
-            languageTextField.border = getBorder(testCase.testName)
+            languageTextField.border = getBorder(testCase.testName, languageTextField.document.text)
             testCaseUpperPanelFactory.updateErrorLabel()
             languageTextField.editor!!.markupModel.removeAllHighlighters()
 
@@ -207,9 +203,6 @@ class TestCaseMiddleAndBottomPanelFactory(
         // Remove the test case from the cache
         project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
 
-        // Passed tests update
-        project.service<TestsExecutionResultService>().removeFromFailingTest(testCase.testName)
-
         project.service<TestCaseDisplayService>().updateUI()
     }
 
@@ -219,12 +212,13 @@ class TestCaseMiddleAndBottomPanelFactory(
      * @param testCaseName the name of the test case
      * @return the border for the test case
      */
-    private fun getBorder(testCaseName: String): Border {
+    private fun getBorder(testCaseName: String, testCaseCode: String): Border {
         val size = 3
-        return if (project.service<TestsExecutionResultService>().isTestCaseFailing(testCaseName)) {
-            MatteBorder(size, size, size, size, JBColor.RED)
-        } else {
-            MatteBorder(size, size, size, size, JBColor.GREEN)
+        val error = project.service<TestsExecutionResultService>().getError(testCaseName, testCaseCode)
+        return when (error) {
+            null -> JBUI.Borders.empty()
+            "" -> MatteBorder(size, size, size, size, JBColor.GREEN)
+            else -> MatteBorder(size, size, size, size, JBColor.RED)
         }
     }
 

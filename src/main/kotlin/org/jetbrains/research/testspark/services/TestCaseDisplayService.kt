@@ -133,6 +133,8 @@ class TestCaseDisplayService(private val project: Project) {
         testCasePanels.clear()
         originalTestCases.clear()
 
+        addSeparator()
+
         testReport.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
@@ -166,15 +168,22 @@ class TestCaseDisplayService(private val project: Project) {
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
-            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
-            allTestCasePanel.add(JSeparator(SwingConstants.HORIZONTAL))
-            allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
+            addSeparator()
             testCasePanels[testCase.testName] = testCasePanel
 
             // Update the number of selected tests (all tests are selected by default)
             testsSelected = testCasePanels.size
             topButtonsPanel.updateTopLabels()
         }
+    }
+
+    /**
+     * Adds a separator to the allTestCasePanel.
+     */
+    private fun addSeparator() {
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
+        allTestCasePanel.add(JSeparator(SwingConstants.HORIZONTAL))
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
     }
 
     /**
