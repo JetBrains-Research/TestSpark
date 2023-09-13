@@ -233,6 +233,8 @@ class TestCaseDisplayService(private val project: Project) {
 
 
 
+
+
             // create like/dislike buttons
             val likeButton = JButton("Like") // TODO: TestSparkLabelsBundle.defaultValue(likeButton)
             val dislikeButton = JButton("Dislike")
@@ -247,15 +249,19 @@ class TestCaseDisplayService(private val project: Project) {
 
             likeButton.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent) {
-                     JOptionPane.showMessageDialog(frame, "Like Clicked!", "Like!", JOptionPane.INFORMATION_MESSAGE)
+                    JOptionPane.showMessageDialog(frame, testCodeFormatted, "'${testCase.testName}' liked", JOptionPane.INFORMATION_MESSAGE)
                 }
             })
 
             dislikeButton.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent) {
-                    JOptionPane.showMessageDialog(frame, "Dislike Clicked!", "Dislike!", JOptionPane.INFORMATION_MESSAGE)
+                    JOptionPane.showMessageDialog(frame, testCodeFormatted, "'${testCase.testName}' disliked", JOptionPane.INFORMATION_MESSAGE)
                 }
             })
+
+
+
+
 
 
 
