@@ -15,7 +15,7 @@ import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 
-class TopButtonsPanel(private val project: Project) {
+class TopButtonsPanelFactory(private val project: Project) {
     private var selectAllButton: JButton =
         createButton(TestSparkIcons.selectAll, TestSparkLabelsBundle.defaultValue("selectAllTip"))
     private var unselectAllButton: JButton =

@@ -38,16 +38,14 @@ import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.TestCaseUpperPanelFactory
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.TopButtonsPanel
+import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.editor.Workspace
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
-import java.awt.Toolkit
-import java.awt.datatransfer.Clipboard
-import java.awt.datatransfer.StringSelection
 import java.io.File
 import java.util.Locale
 import javax.swing.BorderFactory
@@ -55,7 +53,6 @@ import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
-import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.JSeparator
@@ -67,7 +64,7 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
 
-    private val topButtonsPanel = TopButtonsPanel(project)
+    private val topButtonsPanel = TopButtonsPanelFactory(project)
 
     private var applyButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("applyButton"))
 
@@ -102,6 +99,9 @@ class TestCaseDisplayService(private val project: Project) {
 
         mainPanel.add(topButtonsPanel.getPanel(), BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
+
+        applyButton.isOpaque = false
+        applyButton.isContentAreaFilled = false
         mainPanel.add(applyButton, BorderLayout.SOUTH)
 
         applyButton.addActionListener { applyTests() }
@@ -155,9 +155,6 @@ class TestCaseDisplayService(private val project: Project) {
             // Add a checkbox to select the test
             val checkbox = JCheckBox()
             checkbox.isSelected = true
-            testCasePanel.add(checkbox, BorderLayout.WEST)
-
-            // Toggle coverage when checkbox is clicked
             checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
                     .testGenerationResult(testCase.testName, checkbox.isSelected, editor)
@@ -167,24 +164,10 @@ class TestCaseDisplayService(private val project: Project) {
 
                 topButtonsPanel.updateTopLabels()
             }
+            testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val upperPanel = JPanel()
-            val errorLabel = JLabel(TestSparkIcons.showError)
-            updateErrorLabel(errorLabel, testCase.testName)
-            val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
-            val likeButton = createButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
-            val dislikeButton = createButton(TestSparkIcons.dislike, TestSparkLabelsBundle.defaultValue("dislikeTip"))
-            upperPanel.layout = BoxLayout(upperPanel, BoxLayout.X_AXIS)
-            upperPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
-            upperPanel.add(errorLabel)
-            upperPanel.add(Box.createHorizontalGlue())
-            upperPanel.add(copyButton)
-            upperPanel.add(Box.createRigidArea(Dimension(5, 0)))
-            upperPanel.add(likeButton)
-            upperPanel.add(Box.createRigidArea(Dimension(5, 0)))
-            upperPanel.add(dislikeButton)
-            upperPanel.add(Box.createRigidArea(Dimension(10, 0)))
-            testCasePanel.add(upperPanel, BorderLayout.NORTH)
+            val testCaseUpperPanelFactory = TestCaseUpperPanelFactory(project, testCase.testName)
+            testCasePanel.add(testCaseUpperPanelFactory.getPanel(), BorderLayout.NORTH)
 
             // Add an editor to modify the test source code
             val languageTextField = LanguageTextField(
@@ -225,14 +208,11 @@ class TestCaseDisplayService(private val project: Project) {
                 resetButton,
                 resetToLastRunButton,
                 runTestButton,
-                likeButton,
-                dislikeButton,
-                copyButton,
-                errorLabel,
                 languageTextField,
                 checkbox,
                 testCase,
                 languageTextField.border,
+                testCaseUpperPanelFactory,
             )
 
             val bottomPanel = JPanel()
@@ -512,11 +492,11 @@ class TestCaseDisplayService(private val project: Project) {
     /**
      * Retrieve the editor corresponding to a particular test case
      *
-     * @param testCase the name of the test case
+     * @param testCaseName the name of the test case
      * @return the editor corresponding to the test case, or null if it does not exist
      */
-    private fun getEditor(testCase: String): EditorTextField? {
-        val middlePanelComponent = testCasePanels[testCase]?.getComponent(2) ?: return null
+    fun getEditor(testCaseName: String): EditorTextField? {
+        val middlePanelComponent = testCasePanels[testCaseName]?.getComponent(2) ?: return null
         val middlePanel = middlePanelComponent as JPanel
         return middlePanel.getComponent(1) as EditorTextField
     }
@@ -724,14 +704,11 @@ class TestCaseDisplayService(private val project: Project) {
         resetButton: JButton,
         resetToLastRunButton: JButton,
         runTestButton: JButton,
-        likeButton: JButton,
-        dislikeButton: JButton,
-        copyButton: JButton,
-        errorLabel: JLabel,
         languageTextField: EditorTextField,
         checkbox: JCheckBox,
         testCase: TestCase,
         initialBorder: Border,
+        testCaseUpperPanelFactory: TestCaseUpperPanelFactory,
     ) {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
@@ -751,7 +728,7 @@ class TestCaseDisplayService(private val project: Project) {
                         else -> JBUI.Borders.empty()
                     }
 
-                updateErrorLabel(errorLabel, testCase.testName)
+                testCaseUpperPanelFactory.updateErrorLabel()
 
                 val modifiedLineIndexes = getModifiedLines(
                     lastRunCode.split("\n"),
@@ -780,12 +757,12 @@ class TestCaseDisplayService(private val project: Project) {
                     project.service<TestsExecutionResultService>().removeFromFailingTest(testCase.testName)
                 } else {
                     project.service<TestsExecutionResultService>()
-                        .addFailedTest(testCase.testName, errorLabel.toolTipText)
+                        .addFailedTest(testCase.testName, testCaseUpperPanelFactory.getCurrentError())
                 }
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
                 languageTextField.border = initialBorder
-                updateErrorLabel(errorLabel, testCase.testName)
+                testCaseUpperPanelFactory.updateErrorLabel()
                 languageTextField.editor!!.markupModel.removeAllHighlighters()
 
                 topButtonsPanel.updateTopLabels()
@@ -798,7 +775,7 @@ class TestCaseDisplayService(private val project: Project) {
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
                 languageTextField.border = getBorder(testCase.testName)
-                updateErrorLabel(errorLabel, testCase.testName)
+                testCaseUpperPanelFactory.updateErrorLabel()
                 languageTextField.editor!!.markupModel.removeAllHighlighters()
 
                 topButtonsPanel.updateTopLabels()
@@ -813,35 +790,10 @@ class TestCaseDisplayService(private val project: Project) {
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
             languageTextField.border = getBorder(testCase.testName)
-            updateErrorLabel(errorLabel, testCase.testName)
+            testCaseUpperPanelFactory.updateErrorLabel()
             languageTextField.editor!!.markupModel.removeAllHighlighters()
 
             topButtonsPanel.updateTopLabels()
-        }
-
-        likeButton.addActionListener {
-            if (likeButton.icon == TestSparkIcons.likeSelected) {
-                likeButton.icon = TestSparkIcons.like
-            } else if (likeButton.icon == TestSparkIcons.like) {
-                likeButton.icon = TestSparkIcons.likeSelected
-            }
-            dislikeButton.icon = TestSparkIcons.dislike
-//            TODO add implementation
-        }
-
-        dislikeButton.addActionListener {
-            if (dislikeButton.icon == TestSparkIcons.dislikeSelected) {
-                dislikeButton.icon = TestSparkIcons.dislike
-            } else if (dislikeButton.icon == TestSparkIcons.dislike) {
-                dislikeButton.icon = TestSparkIcons.dislikeSelected
-            }
-            likeButton.icon = TestSparkIcons.like
-//            TODO add implementation
-        }
-
-        copyButton.addActionListener {
-            val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
-            clipboard.setContents(StringSelection(languageTextField.document.text), null)
         }
     }
 
@@ -925,21 +877,6 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Updates the error label with a new message.
-     *
-     * @param errorLabel the label to be updated with the error message
-     */
-    private fun updateErrorLabel(errorLabel: JLabel, testCaseName: String) {
-        val error = project.service<TestsExecutionResultService>().getError(testCaseName)
-        if (error.isBlank()) {
-            errorLabel.isVisible = false
-        } else {
-            errorLabel.isVisible = true
-            errorLabel.toolTipText = error
-        }
-    }
-
-    /**
      * Retrieves the list of test case panels.
      *
      * @return The list of test case panels.
@@ -958,5 +895,7 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param testsSelected The number of tests selected.
      */
-    fun setTestsSelected(testsSelected: Int) { this.testsSelected = testsSelected }
+    fun setTestsSelected(testsSelected: Int) {
+        this.testsSelected = testsSelected
+    }
 }
