@@ -27,6 +27,8 @@ class JavaClassBuilderService(private val project: Project) {
         // close the test class
         testFullText += "}"
 
+        testFullText.replace("\r\n", "\n")
+
         return Regex("\n\n\n(\n)*").replace(testFullText, "\n\n")
     }
 

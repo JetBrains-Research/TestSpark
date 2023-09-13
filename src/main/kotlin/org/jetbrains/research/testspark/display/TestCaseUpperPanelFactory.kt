@@ -11,11 +11,11 @@ import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
 import javax.swing.Box
 import javax.swing.BoxLayout
-import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JCheckBox
 
-class TestCaseUpperPanelFactory(private val project: Project, private val testCaseName: String) {
+class TestCaseUpperPanelFactory(private val project: Project, private val testCaseName: String, private val checkbox: JCheckBox) {
     private val panel = JPanel()
     private val errorLabel = JLabel(TestSparkIcons.showError)
     private val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
@@ -25,7 +25,7 @@ class TestCaseUpperPanelFactory(private val project: Project, private val testCa
     fun getPanel(): JPanel {
         updateErrorLabel()
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
-        panel.add(Box.createRigidArea(Dimension(JCheckBox.WIDTH, JCheckBox.HEIGHT)))
+        panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         panel.add(errorLabel)
         panel.add(Box.createHorizontalGlue())
         panel.add(copyButton)
@@ -81,5 +81,5 @@ class TestCaseUpperPanelFactory(private val project: Project, private val testCa
      *
      * @return The tooltip text of the error label.
      */
-    fun getCurrentError() = errorLabel.toolTipText
+    fun getCurrentError(): String = errorLabel.toolTipText
 }
