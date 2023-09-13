@@ -38,6 +38,7 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
         settingsComponent!!.colorBlue = settingsState.colorBlue
         settingsComponent!!.buildCommand = settingsState.buildCommand
         settingsComponent!!.telemetryEnabled = settingsState.telemetryEnabled
+        settingsComponent!!.feedbackTelemetryEnabled = settingsState.feedbackTelemetryEnabled
         settingsComponent!!.telemetryPath =
             if (settingsState.telemetryPath.endsWith(project.name)) {
                 settingsState.telemetryPath
@@ -58,6 +59,7 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
         modified = modified or (settingsComponent!!.colorBlue != settingsState.colorBlue)
         modified = modified or (settingsComponent!!.buildCommand != settingsState.buildCommand)
         modified = modified or (settingsComponent!!.telemetryEnabled != settingsState.telemetryEnabled)
+        modified = modified or (settingsComponent!!.feedbackTelemetryEnabled != settingsState.feedbackTelemetryEnabled)
         modified = modified or (settingsComponent!!.telemetryPath != settingsState.telemetryPath)
         return modified
     }
@@ -73,6 +75,7 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
         settingsState.buildPath = settingsComponent!!.buildPath
         settingsState.buildCommand = settingsComponent!!.buildCommand
         settingsState.telemetryEnabled = settingsComponent!!.telemetryEnabled
+        settingsState.feedbackTelemetryEnabled = settingsComponent!!.feedbackTelemetryEnabled
         resetTelemetryPathIfEmpty(settingsState)
         settingsState.telemetryPath = settingsComponent!!.telemetryPath
 

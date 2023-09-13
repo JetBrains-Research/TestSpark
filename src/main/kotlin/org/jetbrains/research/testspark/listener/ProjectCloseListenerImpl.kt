@@ -4,6 +4,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener
+import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestSparkTelemetryService
 
 class ProjectCloseListenerImpl : ProjectManagerListener {
@@ -17,6 +18,8 @@ class ProjectCloseListenerImpl : ProjectManagerListener {
     override fun projectClosing(project: Project) {
         log.info("Checking generated telemetry for the project ${project.name} before closing...")
 
-        project.service<TestSparkTelemetryService>().submitTelemetry()
+        val telemetryService = project.service<TestSparkTelemetryService>()
+        telemetryService.submitModificationTelemetry()
+        telemetryService.submitFeedbackTelemetry()
     }
 }

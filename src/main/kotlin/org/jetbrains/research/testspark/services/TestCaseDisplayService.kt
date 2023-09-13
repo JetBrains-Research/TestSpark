@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.services
 
 import com.intellij.coverage.CoverageDataManager
 import com.intellij.coverage.CoverageSuitesBundle
+import com.intellij.icons.AllIcons
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -43,6 +44,7 @@ import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.data.TestCaseRate
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
 import java.awt.BorderLayout
@@ -51,14 +53,7 @@ import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
 import java.util.Locale
-import javax.swing.BorderFactory
-import javax.swing.Box
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JOptionPane
-import javax.swing.JPanel
+import javax.swing.*
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
@@ -219,7 +214,53 @@ class TestCaseDisplayService(private val project: Project) {
 
             val testCaseTitle = JLabel(testCase.testName)
 
-            middlePanel.add(testCaseTitle)
+            val topPanel = JPanel()
+            topPanel.layout = BorderLayout()
+
+            if (project.service<SettingsProjectService>().state.feedbackTelemetryEnabled) {
+                val likeButtonIconLabel = JLabel(AllIcons.Ide.Like)
+                val likeButton = JRadioButton()
+
+                val dislikeButtonIconLabel = JLabel(AllIcons.Ide.Dislike)
+                val dislikeButton = JRadioButton()
+
+                val radioButtonAction = { likeIcon: Icon, dislikeIcon: Icon, rate: TestCaseRate ->
+                    likeButtonIconLabel.icon = likeIcon
+                    dislikeButtonIconLabel.icon = dislikeIcon
+                    project.service<TestSparkTelemetryService>().updateFeedbackEntry(testCase, rate)
+                }
+
+                likeButton.addActionListener {
+                    radioButtonAction(AllIcons.Ide.LikeSelected, AllIcons.Ide.DislikeDimmed, TestCaseRate.LIKE)
+                }
+
+                dislikeButton.addActionListener {
+                    radioButtonAction(AllIcons.Ide.LikeDimmed, AllIcons.Ide.DislikeSelected, TestCaseRate.DISLIKE)
+                }
+
+                val likeDislikeButtonGroup = ButtonGroup()
+                likeDislikeButtonGroup.add(likeButton)
+                likeDislikeButtonGroup.add(dislikeButton)
+
+                val ratePanel = { button: JRadioButton, label: JLabel ->
+                    val panel = JPanel()
+                    panel.add(label)
+                    panel.add(button)
+                    panel
+                }
+
+                val likePanel = ratePanel(likeButton, likeButtonIconLabel)
+                val dislikePanel = ratePanel(dislikeButton, dislikeButtonIconLabel)
+
+                val likeDislikePanel = JPanel(BorderLayout())
+                likeDislikePanel.add(likePanel, BorderLayout.WEST)
+                likeDislikePanel.add(dislikePanel, BorderLayout.EAST)
+
+                topPanel.add(likeDislikePanel, BorderLayout.EAST)
+            }
+            topPanel.add(testCaseTitle, BorderLayout.WEST)
+
+            middlePanel.add(topPanel)
             middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
             middlePanel.add(textFieldEditor)
 

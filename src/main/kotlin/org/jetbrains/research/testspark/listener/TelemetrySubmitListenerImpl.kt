@@ -4,6 +4,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
+import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestSparkTelemetryService
 import java.util.Timer
 import java.util.TimerTask
@@ -34,7 +35,9 @@ class TelemetrySubmitListenerImpl : ProjectActivity {
 
                     log.info("Checking generated telemetry for the project ${project.name}...")
 
-                    project.service<TestSparkTelemetryService>().submitTelemetry()
+                    val telemetryService = project.service<TestSparkTelemetryService>()
+                    telemetryService.submitModificationTelemetry()
+                    telemetryService.submitFeedbackTelemetry()
                 }
             },
             300000,

@@ -12,6 +12,7 @@ data class SettingsProjectState(
     var buildPath: String = DefaultSettingsPluginState.buildPath,
     var buildCommand: String = DefaultSettingsPluginState.buildCommand,
     var telemetryEnabled: Boolean = DefaultSettingsPluginState.telemetryEnabled,
+    var feedbackTelemetryEnabled: Boolean = DefaultSettingsPluginState.feedbackTelemetryEnabled,
     var telemetryPath: String = DefaultSettingsPluginState.telemetryPath,
 ) {
     /**
@@ -25,6 +26,7 @@ data class SettingsProjectState(
         const val buildPath: String = ""
         const val buildCommand: String = ""
         val telemetryEnabled: Boolean = TestSparkDefaultsBundle.defaultValue("telemetryEnabled").toBoolean()
+        val feedbackTelemetryEnabled: Boolean = TestSparkDefaultsBundle.defaultValue("feedbackTelemetryEnabled").toBoolean()
         val telemetryPath: String = System.getProperty("user.home")
     }
 }
