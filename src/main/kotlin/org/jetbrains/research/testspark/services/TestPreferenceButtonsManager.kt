@@ -32,6 +32,10 @@ class TestPreferenceButtonsManager (
     val clickNotificationFrame = JFrame("Kotlin Swing Application")
 
 
+    /**
+     * Creating liked/disliked dirs if needed
+     * Assigning click listeners on like/dislike buttons
+     */
     init {
         Files.createDirectories(likedTestsDir)
         Files.createDirectories(dislikedTestsDir)
@@ -50,6 +54,7 @@ class TestPreferenceButtonsManager (
                 likeButton.background = Color.GREEN
                 dislikeButton.background = defaultButtonBackgroundColor
 
+                // showing message whether the test registered as liked or no-op
                 if (entryAdded) {
                     JOptionPane.showMessageDialog(clickNotificationFrame,
                             "Test code for the test '$testName' successfully registered as liked", "'$testName' liked", JOptionPane.INFORMATION_MESSAGE)
@@ -73,6 +78,7 @@ class TestPreferenceButtonsManager (
                 dislikeButton.background = Color.RED
                 likeButton.background = defaultButtonBackgroundColor
 
+                // showing message whether the test registered as disliked or no-op
                 if (entryAdded) {
                     JOptionPane.showMessageDialog(clickNotificationFrame,
                             "Test code for the test '$testName' successfully registered as disliked", "'$testName' disliked", JOptionPane.INFORMATION_MESSAGE)
@@ -85,9 +91,10 @@ class TestPreferenceButtonsManager (
         })
     }
 
+    /**
+     * Creates container with like/dislike buttons inside
+     */
     public fun getPreferenceButtons() : JPanel {
-        // TODO: нужно сделать класс, который по мн-ву названий тестов разобьет их на 3 мн-ва: UNSPECIFIED, LIKED, DISLIKED на основе kvstore
-        // TODO: нужно сделать refactor кода, а потом PR
         val buttonsContainer = JPanel(FlowLayout())
         buttonsContainer.border = LineBorder(java.awt.Color.RED, 2)
 
@@ -102,6 +109,9 @@ class TestPreferenceButtonsManager (
         return preferenceButtonsPanel
     }
 
+    /**
+     * Determintes test state depending on its liked/disliked/unspecified state
+     */
     public fun getTestState() : TestState {
         assert(!(existsInDir(likedTestsDir) && existsInDir(dislikedTestsDir)))
 
@@ -114,6 +124,9 @@ class TestPreferenceButtonsManager (
         return TestState.UNSPECIFIED;
     }
 
+    /**
+     * Checks whether the source code of the test is contained inside provided dir and tracked KeyValueStore
+     */
     private fun existsInDir(sourceDir: Path) : Boolean {
         val store: KeyValueStore = KeyValueStoreFactory.create(sourceDir);
         var result = false

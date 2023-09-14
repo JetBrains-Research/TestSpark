@@ -207,18 +207,6 @@ class TestCaseDisplayService(private val project: Project) {
         val dislikedTestsDir = Paths.get(workingDir.toString(), "disliked-tests/")
         val testNamesStorageFilepath = Paths.get(workingDir.toString(), "test-names.txt");
 
-        /*try {
-            // Create the directory if it doesn't exist
-            Files.deleteIfExists(workingDir)
-            Files.createDirectories(workingDir)
-            println("Directory created: $workingDir")
-        } catch (e: IOException) {
-            println("Error creating the directory: ${e.message}")
-        }*/
-
-
-
-
         testReport.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
@@ -258,19 +246,6 @@ class TestCaseDisplayService(private val project: Project) {
                 false,
             )
 
-
-
-
-
-
-            // 1) create 2 files: liked-tests-[UUID], disliked-tests-[same UUID]
-            // 2) on click of like button: create CRC32 from test content (it will be an id),
-            //    store in the file liked-tests-[UUID] in the following format:
-            //    [CRC32][test-name-bytes-length][test-body-bytes-length][test-name-in-bytes][test-body-in-bytes],
-            //    remove test from disliked-tests-[UUID] if it exists there.
-            //  3) on click of dislike button: do the same as for on click of like button
-            //  4) log all performed actions
-
             // saving current test name into file
             BufferedWriter(Files.newBufferedWriter(
                     testNamesStorageFilepath, StandardOpenOption.CREATE, StandardOpenOption.APPEND)).use { writer ->
@@ -278,15 +253,9 @@ class TestCaseDisplayService(private val project: Project) {
                 writer.newLine()
             }
 
+            // creating like/dislike buttons manager for the current test
             val manager = TestPreferenceButtonsManager(likedTestsDir, dislikedTestsDir, testCodeFormatted, testCase.testName)
             testCasePanel.add(manager.getPreferenceButtons(), BorderLayout.NORTH)
-
-
-
-
-
-
-
 
             // Add test case title
             val middlePanel = JPanel()

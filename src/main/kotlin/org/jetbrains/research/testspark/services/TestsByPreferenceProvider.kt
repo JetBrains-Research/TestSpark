@@ -13,6 +13,9 @@ import java.nio.file.Path
 class TestsByPreferenceProvider {
     class Test(val name: String, val code: String)
 
+    /**
+     * Collects liked/disliked tests from provided list of test names with their source code in Map and returns it
+     */
     fun retrieveTests(likedTestsDir: Path, dislikedTestsDir: Path, testNames: List<String>): Map<TestState, List<Test>> {
         val likedTestsStore = KeyValueStoreFactory.create(likedTestsDir)
         val dislikedTestsStore = KeyValueStoreFactory.create(dislikedTestsDir)
