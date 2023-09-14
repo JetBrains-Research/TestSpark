@@ -57,7 +57,13 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
+import java.io.FileOutputStream
+import java.io.DataOutputStream
+import java.io.FileInputStream
+import java.io.IOException
 import java.util.Locale
+import java.util.UUID
+import java.util.zip.CRC32
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -71,6 +77,8 @@ import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+
+
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -189,6 +197,17 @@ class TestCaseDisplayService(private val project: Project) {
         testCasePanels.clear()
         originalTestCases.clear()
 
+        // generate files for liked and disliked tests
+        val uuid = UUID.randomUUID()
+
+        val likedTestsFile = File("liked-tests-$uuid.txt")
+        val dislikedTestsFile = File("disliked-tests-$uuid.txt")
+
+        // create the files if they don't exist
+        likedTestsFile.createNewFile()
+        dislikedTestsFile.createNewFile()
+
+
         testReport.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
@@ -233,6 +252,13 @@ class TestCaseDisplayService(private val project: Project) {
 
 
 
+            // 1) create 2 files: liked-tests-[UUID], disliked-tests-[same UUID]
+            // 2) on click of like button: create CRC32 from test content (it will be an id),
+            //    store in the file liked-tests-[UUID] in the following format:
+            //    [CRC32][test-name-bytes-length][test-body-bytes-length][test-name-in-bytes][test-body-in-bytes],
+            //    remove test from disliked-tests-[UUID] if it exists there.
+            //  3) on click of dislike button: do the same as for on click of like button
+            //  4) log all performed actions
 
 
             // create like/dislike buttons
@@ -250,6 +276,45 @@ class TestCaseDisplayService(private val project: Project) {
             likeButton.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent) {
                     JOptionPane.showMessageDialog(frame, testCodeFormatted, "'${testCase.testName}' liked", JOptionPane.INFORMATION_MESSAGE)
+
+                    // creating CRC32 which represents id for the current test
+                    val crc32 = CRC32()
+                    val testCodeFormattedBytes = testCodeFormatted.toByteArray()
+                    crc32.update(testCodeFormattedBytes)
+
+                    val checksumValue: Long = crc32.value
+
+                    // writing data into liked tests file
+                    // format: [CRC32](sizeof Long) [sizeof byte-array][testName (serial.)] [sizeof byte-array][testCodeFormatted (serial.)]
+                    // likedTestsFile
+
+                    try {
+                        val fileOutputStream = FileOutputStream(likedTestsFile)
+                        val dataOutputStream = DataOutputStream(fileOutputStream)
+
+                        println("Writting data for test '${testCase.testName}' into file '${likedTestsFile.absolutePath}'...")
+
+                        // write CRC32
+                        println("Writting CRC32: '${checksumValue}'")
+                        dataOutputStream.writeLong(checksumValue)
+
+                        // write test name and length of the sequence of bytes
+                        println("Writting test name: '${testCase.testName}'")
+                        dataOutputStream.writeInt(testCase.testName.toByteArray(Charsets.UTF_8).size)
+                        dataOutputStream.writeBytes(testCase.testName)
+
+                        // write test body and length of the sequence of bytes
+                        println("Writting test code: '${testCodeFormatted}'")
+                        dataOutputStream.writeInt(testCodeFormattedBytes.size)
+                        dataOutputStream.writeBytes(testCodeFormatted)
+
+                        dataOutputStream.close()
+                        fileOutputStream.close()
+
+                        println("Data for test '${testCase.testName}' successfully written to the file: '${likedTestsFile.absolutePath}'")
+                    } catch (e: IOException) {
+                        println("Error writing data to the file '${likedTestsFile.absolutePath}' for test '${testCase.testName}': ${e.message}")
+                    }
                 }
             })
 
