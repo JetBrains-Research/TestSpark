@@ -30,8 +30,7 @@ import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.display.TestCaseMiddleAndBottomPanelFactory
-import org.jetbrains.research.testspark.display.TestCaseUpperPanelFactory
+import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.editor.Workspace
 import java.awt.BorderLayout
@@ -54,7 +53,7 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
 
-    private val topButtonsPanel = TopButtonsPanelFactory(project)
+    private val topButtonsPanelFactory = TopButtonsPanelFactory(project)
 
     private var applyButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("applyButton"))
 
@@ -87,7 +86,7 @@ class TestCaseDisplayService(private val project: Project) {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
 
-        mainPanel.add(topButtonsPanel.getPanel(), BorderLayout.NORTH)
+        mainPanel.add(topButtonsPanelFactory.getPanel(), BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
 
         applyButton.isOpaque = false
@@ -112,8 +111,6 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param editor editor instance where coverage should be
      *               visualized
-     * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
-     *                        due to a cache hit, or null if there was a cache miss
      */
     fun showGeneratedTests(editor: Editor) {
         displayTestCases(project.service<Workspace>().testJob!!.report, editor)
@@ -153,18 +150,14 @@ class TestCaseDisplayService(private val project: Project) {
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
-                topButtonsPanel.updateTopLabels()
+                topButtonsPanelFactory.updateTopLabels()
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCaseUpperPanelFactory = TestCaseUpperPanelFactory(project, testCase.testName, checkbox)
-            testCasePanel.add(testCaseUpperPanelFactory.getPanel(), BorderLayout.NORTH)
-
-            val testCaseMiddleAndBottomPanelFactory =
-                TestCaseMiddleAndBottomPanelFactory(project, testCase, editor, checkbox, testCaseUpperPanelFactory)
-            testCasePanel.add(testCaseMiddleAndBottomPanelFactory.getMiddlePanel(), BorderLayout.CENTER)
-
-            testCasePanel.add(testCaseMiddleAndBottomPanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox)
+            testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
+            testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
+            testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
 
             testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
@@ -176,7 +169,7 @@ class TestCaseDisplayService(private val project: Project) {
 
             // Update the number of selected tests (all tests are selected by default)
             testsSelected = testCasePanels.size
-            topButtonsPanel.updateTopLabels()
+            topButtonsPanelFactory.updateTopLabels()
         }
     }
 
@@ -603,7 +596,7 @@ class TestCaseDisplayService(private val project: Project) {
         // Update the UI of the tool window tab
         allTestCasePanel.updateUI()
 
-        topButtonsPanel.updateTopLabels()
+        topButtonsPanelFactory.updateTopLabels()
 
         // If no more tests are remaining, close the tool window
         if (testCasePanels.size == 0) closeToolWindow()

@@ -21,22 +21,39 @@ import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.awt.Dimension
+import java.awt.Toolkit
+import java.awt.datatransfer.Clipboard
+import java.awt.datatransfer.StringSelection
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
+import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
-class TestCaseMiddleAndBottomPanelFactory(
+class TestCasePanelFactory(
     private val project: Project,
     private val testCase: TestCase,
     private val editor: Editor,
     private val checkbox: JCheckBox,
-    private val testCaseUpperPanelFactory: TestCaseUpperPanelFactory,
 ) {
+    private val panel = JPanel()
+    private val previousButtons =
+        createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
+    private var requestNumber: String = "%d / %d"
+    private var requestLabel: JLabel = JLabel(requestNumber)
+    private val nextButtons = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
+    private val errorLabel = JLabel(TestSparkIcons.showError)
+    private val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
+    private val likeButton = createButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
+    private val dislikeButton = createButton(TestSparkIcons.dislike, TestSparkLabelsBundle.defaultValue("dislikeTip"))
+
+    private var allRequestsNumber = 1
+    private var currentRequestNumber = 1
+
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
         Language.findLanguageByID("JAVA"),
@@ -65,14 +82,100 @@ class TestCaseMiddleAndBottomPanelFactory(
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
+    private val initialCodes: MutableList<String> = mutableListOf()
+    private val lastRunCodes: MutableList<String> = mutableListOf()
+    private val currentCodes: MutableList<String> = mutableListOf()
+
+    /**
+     * Retrieves the upper panel for the GUI.
+     *
+     * This panel contains various components such as buttons, labels, and checkboxes. It is used to display information and
+     * perform actions related to the GUI.
+     *
+     * @return The JPanel object representing the upper panel.
+     */
+    fun getUpperPanel(): JPanel {
+        updateErrorLabel()
+        panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
+        panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
+        panel.add(previousButtons)
+        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(requestLabel)
+        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(nextButtons)
+        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(errorLabel)
+        panel.add(Box.createHorizontalGlue())
+        panel.add(copyButton)
+        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(likeButton)
+        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(dislikeButton)
+        panel.add(Box.createRigidArea(Dimension(12, 0)))
+
+        previousButtons.addActionListener {
+            WriteCommandAction.runWriteCommandAction(project) {
+                if (currentRequestNumber > 1) currentRequestNumber--
+                switchToAnotherCode()
+                updateRequestLabel()
+            }
+        }
+
+        nextButtons.addActionListener {
+            WriteCommandAction.runWriteCommandAction(project) {
+                if (currentRequestNumber < allRequestsNumber) currentRequestNumber++
+                switchToAnotherCode()
+                updateRequestLabel()
+            }
+        }
+
+        likeButton.addActionListener {
+            if (likeButton.icon == TestSparkIcons.likeSelected) {
+                likeButton.icon = TestSparkIcons.like
+            } else if (likeButton.icon == TestSparkIcons.like) {
+                likeButton.icon = TestSparkIcons.likeSelected
+            }
+            dislikeButton.icon = TestSparkIcons.dislike
+//            TODO add implementation
+        }
+
+        dislikeButton.addActionListener {
+            if (dislikeButton.icon == TestSparkIcons.dislikeSelected) {
+                dislikeButton.icon = TestSparkIcons.dislike
+            } else if (dislikeButton.icon == TestSparkIcons.dislike) {
+                dislikeButton.icon = TestSparkIcons.dislikeSelected
+            }
+            likeButton.icon = TestSparkIcons.like
+//            TODO add implementation
+        }
+
+        copyButton.addActionListener {
+            val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
+            clipboard.setContents(
+                StringSelection(
+                    project.service<TestCaseDisplayService>().getEditor(testCase.testName)!!.document.text,
+                ),
+                null,
+            )
+        }
+
+        updateRequestLabel()
+
+        return panel
+    }
+
     /**
      * Retrieves the middle panel of the application.
      * This method sets the border of the languageTextField and
      * adds it to the middlePanel with appropriate spacing.
      */
     fun getMiddlePanel(): JPanel {
+        initialCodes.add(languageTextField.document.text)
+        lastRunCodes.add(languageTextField.document.text)
+        currentCodes.add(languageTextField.document.text)
+
         // Set border
-        languageTextField.border = getBorder(testCase.testName, testCase.testCode)
+        updateBorder()
 
         val panel = JPanel()
 
@@ -84,46 +187,6 @@ class TestCaseMiddleAndBottomPanelFactory(
         addLanguageTextFieldListener(languageTextField)
 
         return panel
-    }
-
-    private fun addLanguageTextFieldListener(languageTextField: LanguageTextField) {
-        languageTextField.document.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                val lastRunCode =
-                    project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
-                languageTextField.editor!!.markupModel.removeAllHighlighters()
-
-                resetButton.isEnabled = languageTextField.document.text != testCase.testCode
-                resetToLastRunButton.isEnabled = languageTextField.document.text != lastRunCode
-
-                val error = getError(testCase.testName, languageTextField.document.text)
-                if (error.isNullOrBlank()) {
-                    project.service<TestsExecutionResultService>().addCurrentPassedTest(testCase.testName)
-                } else {
-                    project.service<TestsExecutionResultService>().addCurrentFailedTest(testCase.testName, error)
-                }
-                testCaseUpperPanelFactory.updateErrorLabel()
-                runTestButton.isEnabled = (error == null)
-
-                updateBorder()
-
-                val modifiedLineIndexes = getModifiedLines(
-                    lastRunCode.split("\n"),
-                    languageTextField.document.text.split("\n"),
-                )
-
-                for (index in modifiedLineIndexes) {
-                    languageTextField.editor!!.markupModel.addLineHighlighter(
-                        DiffColors.DIFF_MODIFIED,
-                        index,
-                        HighlighterLayer.FIRST,
-                    )
-                }
-
-                // select checkbox
-                checkbox.isSelected = true
-            }
-        })
     }
 
     /**
@@ -159,12 +222,150 @@ class TestCaseMiddleAndBottomPanelFactory(
         panel.add(requestPanel)
         panel.add(buttonsPanel)
 
-        runTestButton.addActionListener { runTestButtonListener() }
-        resetButton.addActionListener { resetButtonListener() }
-        resetToLastRunButton.addActionListener { resetToLastRunButtonListener() }
-        removeButton.addActionListener { removeButtonListener() }
+        runTestButton.addActionListener { runTest() }
+        resetButton.addActionListener { reset() }
+        resetToLastRunButton.addActionListener { resetToLastRun() }
+        removeButton.addActionListener { remove() }
+
+        sendButton.isEnabled = false
+        sendButton.addActionListener { sendRequest() }
+
+        // Add a document listener to listen for changes
+        requestField.document.addDocumentListener(object : DocumentListener, javax.swing.event.DocumentListener {
+            override fun insertUpdate(e: javax.swing.event.DocumentEvent?) {
+                textChanged()
+            }
+
+            override fun removeUpdate(e: javax.swing.event.DocumentEvent?) {
+                textChanged()
+            }
+
+            override fun changedUpdate(e: javax.swing.event.DocumentEvent?) {
+                textChanged()
+            }
+
+            private fun textChanged() {
+                sendButton.isEnabled = requestField.text.isNotBlank()
+            }
+        })
 
         return panel
+    }
+
+    /**
+     * Updates the label displaying the request number information.
+     * Uses the requestNumber template to format the label text.
+     */
+    private fun updateRequestLabel() {
+        requestLabel.text = String.format(
+            requestNumber,
+            currentRequestNumber,
+            allRequestsNumber,
+        )
+    }
+
+    /**
+     * Updates the error label with a new message.
+     */
+    private fun updateErrorLabel() {
+        val error = project.service<TestsExecutionResultService>().getCurrentError(testCase.testName)
+        if (error.isBlank()) {
+            errorLabel.isVisible = false
+        } else {
+            errorLabel.isVisible = true
+            errorLabel.toolTipText = error
+        }
+    }
+
+    /**
+     * Adds a document listener to the provided LanguageTextField.
+     * The listener triggers the updateUI() method whenever the document of the LanguageTextField changes.
+     *
+     * @param languageTextField the LanguageTextField to add the listener to
+     */
+    private fun addLanguageTextFieldListener(languageTextField: LanguageTextField) {
+        languageTextField.document.addDocumentListener(object : DocumentListener {
+            override fun documentChanged(event: DocumentEvent) {
+                updateUI()
+            }
+        })
+    }
+
+    /**
+     * Updates the user interface based on the provided code.
+     */
+    private fun updateUI() {
+        val lastRunCode = lastRunCodes[currentRequestNumber - 1]
+        languageTextField.editor!!.markupModel.removeAllHighlighters()
+
+        resetButton.isEnabled = languageTextField.document.text != initialCodes[currentRequestNumber - 1]
+        resetToLastRunButton.isEnabled = languageTextField.document.text != lastRunCode
+
+        val error = getError(testCase.testName, languageTextField.document.text)
+        if (error.isNullOrBlank()) {
+            project.service<TestsExecutionResultService>().addCurrentPassedTest(testCase.testName)
+        } else {
+            project.service<TestsExecutionResultService>().addCurrentFailedTest(testCase.testName, error)
+        }
+        updateErrorLabel()
+        runTestButton.isEnabled = (error == null)
+
+        updateBorder()
+
+        val modifiedLineIndexes = getModifiedLines(
+            lastRunCode.split("\n"),
+            languageTextField.document.text.split("\n"),
+        )
+
+        for (index in modifiedLineIndexes) {
+            languageTextField.editor!!.markupModel.addLineHighlighter(
+                DiffColors.DIFF_MODIFIED,
+                index,
+                HighlighterLayer.FIRST,
+            )
+        }
+
+        currentCodes[currentRequestNumber - 1] = languageTextField.document.text
+
+        // select checkbox
+        checkbox.isSelected = true
+    }
+
+    /**
+     * Sends a request and adds a new code created based on the request.
+     * The request is obtained from the `requestField` text field.
+     * The code includes the request and the working code obtained from `initialCodes` based on the current request number.
+     * After adding the code, it switches to another code.
+     */
+    private fun sendRequest() {
+        WriteCommandAction.runWriteCommandAction(project) {
+            // TODO implement code creator
+            val code = "// Here will be a new code.\n" +
+                "// Your request: ${requestField.text}.\n" +
+                "// Working code:\n" +
+                initialCodes[currentRequestNumber - 1]
+
+            // run new code
+            project.service<Workspace>().updateTestCase(
+                project.service<TestCoverageCollectorService>()
+                    .updateDataWithTestCase(code, testCase.testName),
+            )
+
+            // update numbers
+            allRequestsNumber++
+            currentRequestNumber = allRequestsNumber
+            updateRequestLabel()
+
+            // update lists
+            initialCodes.add(code)
+            lastRunCodes.add(code)
+            currentCodes.add(code)
+
+            requestField.text = ""
+            sendButton.isEnabled = false
+
+            switchToAnotherCode()
+        }
     }
 
     /**
@@ -175,7 +376,7 @@ class TestCaseMiddleAndBottomPanelFactory(
      * label in the test case upper panel, removes all highlighters from the language text field,
      * and updates the UI.
      */
-    private fun runTestButtonListener() {
+    private fun runTest() {
         project.service<Workspace>().updateTestCase(
             project.service<TestCoverageCollectorService>()
                 .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
@@ -183,8 +384,10 @@ class TestCaseMiddleAndBottomPanelFactory(
         resetToLastRunButton.isEnabled = false
         runTestButton.isEnabled = false
         updateBorder()
-        testCaseUpperPanelFactory.updateErrorLabel()
+        updateErrorLabel()
         languageTextField.editor!!.markupModel.removeAllHighlighters()
+
+        lastRunCodes[currentRequestNumber - 1] = languageTextField.document.text
 
         project.service<TestCaseDisplayService>().updateUI()
     }
@@ -198,9 +401,9 @@ class TestCaseMiddleAndBottomPanelFactory(
      * updates the current test case in the workspace,
      * disables the reset button,
      * adds the current test to the passed or failed tests in the*/
-    private fun resetButtonListener() {
+    private fun reset() {
         WriteCommandAction.runWriteCommandAction(project) {
-            languageTextField.document.setText(testCase.testCode)
+            languageTextField.document.setText(initialCodes[currentRequestNumber - 1])
             updateBorder()
             project.service<Workspace>().updateTestCase(testCase)
             resetButton.isEnabled = false
@@ -208,12 +411,16 @@ class TestCaseMiddleAndBottomPanelFactory(
                 project.service<TestsExecutionResultService>().addPassedTest(testCase.testName, testCase.testCode)
             } else {
                 project.service<TestsExecutionResultService>()
-                    .addFailedTest(testCase.testName, testCase.testCode, testCaseUpperPanelFactory.getCurrentError())
+                    .addFailedTest(testCase.testName, testCase.testCode, errorLabel.toolTipText)
             }
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
-            testCaseUpperPanelFactory.updateErrorLabel()
+            updateErrorLabel()
             languageTextField.editor!!.markupModel.removeAllHighlighters()
+
+            currentCodes[currentRequestNumber - 1] = languageTextField.document.text
+            lastRunCodes[currentRequestNumber - 1] = languageTextField.document.text
+
             project.service<TestCaseDisplayService>().updateUI()
         }
     }
@@ -221,15 +428,17 @@ class TestCaseMiddleAndBottomPanelFactory(
     /**
      * Resets the language text field to the code from the last test run and updates the UI accordingly.
      */
-    private fun resetToLastRunButtonListener() {
+    private fun resetToLastRun() {
         WriteCommandAction.runWriteCommandAction(project) {
-            val code = project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
+            val code = lastRunCodes[currentRequestNumber - 1]
             languageTextField.document.setText(code)
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
             updateBorder()
-            testCaseUpperPanelFactory.updateErrorLabel()
+            updateErrorLabel()
             languageTextField.editor!!.markupModel.removeAllHighlighters()
+
+            currentCodes[currentRequestNumber - 1] = languageTextField.document.text
 
             project.service<TestCaseDisplayService>().updateUI()
         }
@@ -241,7 +450,7 @@ class TestCaseMiddleAndBottomPanelFactory(
      * This method is responsible for removing the highlighting of the test, removing the test case from the cache,
      * and updating the UI.
      */
-    private fun removeButtonListener() {
+    private fun remove() {
         // Remove the highlighting of the test
         project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
             .testGenerationResult(testCase.testName, false, editor)
@@ -300,13 +509,23 @@ class TestCaseMiddleAndBottomPanelFactory(
     }
 
     /**
+     * Switches to another code in the language text field.
+     * Retrieves the current request number from the test case upper panel factory and uses it to retrieve the corresponding code from the current codes array.
+     * Sets the retrieved code as the text of the language text field document.
+     */
+    private fun switchToAnotherCode() {
+        languageTextField.document.setText(currentCodes[currentRequestNumber - 1])
+        updateUI()
+    }
+
+    /**
      * Returns the indexes of lines that are modified between two lists of strings.
      *
      * @param source The source list of strings.
      * @param target The target list of strings.
      * @return The indexes of modified lines.
      */
-    fun getModifiedLines(source: List<String>, target: List<String>): List<Int> {
+    private fun getModifiedLines(source: List<String>, target: List<String>): List<Int> {
         val dp = Array(source.size + 1) { IntArray(target.size + 1) }
 
         for (i in 1..source.size) {
