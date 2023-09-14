@@ -379,8 +379,6 @@ class TestCaseDisplayService(private val project: Project) {
 
 
 
-
-
             // Add test case title
             val middlePanel = JPanel()
             middlePanel.layout = BoxLayout(middlePanel, BoxLayout.Y_AXIS)

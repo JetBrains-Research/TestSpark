@@ -21,6 +21,12 @@ class TestPreferenceButtonsManager (val frame: JFrame, private val workingDir: P
     private val dislikedTestsDir = Paths.get(workingDir.toString(), "disliked-tests/")
     private val maxValueFileSize = 1024;
 
+    public enum class TestState {
+        UNSPECIFIED,
+        LIKED,
+        DISLIKED
+    }
+
 
     init {
         Files.createDirectories(likedTestsDir)
@@ -35,24 +41,20 @@ class TestPreferenceButtonsManager (val frame: JFrame, private val workingDir: P
 
                 addIfDoesNotExist(likedTestsDir, dislikedTestsDir, key, value);
 
-                /*
-                val kvStore: KeyValueStore = KeyValueStoreFactory.create(workingDir, maxValueFileSize);
+                println("State of test '${testName}' after liked: ${getTestState()}")
+            }
+        })
 
-                try {
-                    val key = testName.toByteArray(Charsets.UTF_8);
+        dislikeButton.addActionListener(object : ActionListener {
+            override fun actionPerformed(e: ActionEvent) {
+                JOptionPane.showMessageDialog(frame, testCode, "'$testName' disliked", JOptionPane.INFORMATION_MESSAGE)
 
-                    var written = false
-                    if (!kvStore.contains(key)) {
-                        written = true
-                        kvStore.upsert(key, testCode.toByteArray(Charsets.UTF_8))
-                    }
+                val key = testName.toByteArray(Charsets.UTF_8);
+                val value = testCode.toByteArray(Charsets.UTF_8);
 
-                    val res = String(kvStore.loadValue(key)!!, Charsets.UTF_8)
-                    println("Written= $written; value for test:\n'${testName}': '${res}'")
-                }
-                finally {
-                    kvStore.close()
-                }*/
+                addIfDoesNotExist(dislikedTestsDir, likedTestsDir, key, value);
+
+                println("State of test '${testName}' after disliked: ${getTestState()}")
             }
         })
     }
@@ -62,6 +64,32 @@ class TestPreferenceButtonsManager (val frame: JFrame, private val workingDir: P
         preferenceButtons.add(likeButton)
         preferenceButtons.add(dislikeButton)
         return preferenceButtons
+    }
+
+    public fun getTestState() : TestState {
+        assert(!(existsInDir(likedTestsDir) && existsInDir(dislikedTestsDir)))
+
+        if (existsInDir(likedTestsDir)) {
+            return TestState.LIKED;
+        }
+        if (existsInDir(dislikedTestsDir)) {
+            return TestState.DISLIKED;
+        }
+        return TestState.UNSPECIFIED;
+    }
+
+    private fun existsInDir(sourceDir: Path) : Boolean {
+        val store: KeyValueStore = KeyValueStoreFactory.create(sourceDir, maxValueFileSize);
+        var result = false
+        try {
+            val key = testName.toByteArray(Charsets.UTF_8)
+            result = store.contains(key)
+        }
+        finally {
+            store.close();
+        }
+
+        return result;
     }
 
     private fun addIfDoesNotExist(addDir: Path, removeDir: Path, key: ByteArray, value: ByteArray) {
