@@ -6,16 +6,19 @@ import java.io.IOException
 
 interface IndexManager : Closeable {
     /**
-     * Создает связь key -> listOf(FileBlockLocation) в индексе
+     * Creates a {key -> listOf(FileBlockLocation)} relationship in the index
      */
     @Throws(IOException::class)
     fun add(key: ByteArray?, writtenBlocks: List<FileBlockLocation?>?)
 
+    /**
+     * Removes the entry associated with key
+     */
     @Throws(IOException::class)
     fun remove(key: ByteArray?)
 
     /**
-     * Возвращает список блоков, в которых хранится значение
+     * Returns a list of blocks in which the value is stored
      */
     @Throws(IOException::class)
     fun getFileBlocksLocations(key: ByteArray?): List<FileBlockLocation?>?

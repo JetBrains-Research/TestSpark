@@ -7,42 +7,34 @@ import java.io.InputStream
 
 interface KeyValueStore : Closeable {
     /**
-     * Проверяет, есть ли такой ключ в хранилище
+     * Checks whether the provided key exists in the storage
      */
     @Throws(IOException::class)
     operator fun contains(key: ByteArray?): Boolean
 
     /**
-     * По ключу возвращает входной поток из которого можно (лениво) читать значение
+     * Returns by key an input stream from which you can (lazily) read the value
+     *
      */
     @Throws(IOException::class)
     fun openValueStream(key: ByteArray?): InputStream?
 
     /**
-     * Полностью считывает значение в массив байтов и возвращает его
+     * Completely reads the value into an array of bytes and returns it
      */
     @Throws(IOException::class)
     fun loadValue(key: ByteArray?): ByteArray?
 
     /**
-     * Записывает новое значение по ключу. Если ключ уже существует в базе, тогда перезаписывает
-     * старое значение
+     * Writes a new value by key. If the key already exists in the storage, then it overwrites the old value
      */
     @Throws(IOException::class)
     fun upsert(key: ByteArray?, value: ByteArray?)
 
     /**
-     * Удаляет значение из базы. Если значение существовало, то возвращает true, иначе false.
+     * Deletes a value from the storage. If the value existed, it returns true, otherwise false.
      */
     @Throws(IOException::class)
     fun remove(key: ByteArray?): Boolean
-
-    /**
-     * TestOnly
-     *
-     *
-     * Возвращает IndexManager, соответствующий текущему хранилищу
-     */
-    val indexManager: IndexManager?
 }
 

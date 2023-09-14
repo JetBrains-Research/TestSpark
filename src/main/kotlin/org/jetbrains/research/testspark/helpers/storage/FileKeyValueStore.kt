@@ -5,11 +5,10 @@ import java.io.InputStream
 import java.io.SequenceInputStream
 import java.nio.file.Path
 import java.util.*
-import java.util.function.BinaryOperator
 
 
 class FileKeyValueStore internal constructor(workingDir: Path?, valueFileSize: Int) : KeyValueStore {
-    override val indexManager: IndexManager
+    private val indexManager: IndexManager
     private val valueStoreManager: ValueStoreManager
     private var closed = false
 

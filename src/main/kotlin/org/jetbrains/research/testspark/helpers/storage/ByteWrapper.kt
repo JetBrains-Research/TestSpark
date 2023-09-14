@@ -2,8 +2,7 @@ package org.jetbrains.research.testspark.helpers.storage
 
 
 /**
- * Вспомогательная обертка над массивом байтов, понадобится для хранения Map<ByteWrapper></ByteWrapper>,
- * List<FileBlockLocation>> в [IndexManager] </FileBlockLocation>
+ * Auxiliary wrapper over the byte array used for proper storing inside Map<ByteWrapper>
  */
 internal class ByteWrapper(val bytes: ByteArray) {
 

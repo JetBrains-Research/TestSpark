@@ -8,11 +8,11 @@ import java.util.*
 
 /**
  * Format of index file with free file block locations:
- * [number of free file block locations]
- * FileBlockLocation:
- * [fileName]
- * [offset]
- * [size]
+ *      [number of free file block locations]
+ *      FileBlockLocation:
+ *          [fileName]
+ *          [offset]
+ *          [size]
  */
 class FileValueStoreManager internal constructor(private val workingDir: Path, private val valueFileSize: Int) : ValueStoreManager {
     private val storeDirpath: Path = Path.of(workingDir.toString(), STORE_DIRNAME)

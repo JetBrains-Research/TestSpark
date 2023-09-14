@@ -6,24 +6,23 @@ import java.io.InputStream
 
 
 /**
- * Класс, который занимается записью/чтением значений в файлы
+ * A class that writes/reads values to files
  */
 internal interface ValueStoreManager : Closeable {
     /**
-     * Записывает значение в файл, возвращает блоки, в которые было записано значение для добавления
-     * этой информации в индекс
+     * Writes the value to a file, returns the blocks in which the value was written to add this information to the index
      */
     @Throws(IOException::class)
     fun add(value: ByteArray): List<FileBlockLocation?>?
 
     /**
-     * Возвращает входной поток из которого можно читать значение из конкретного блока
+     * Returns an input stream from which a value from a specific block can be read
      */
     @Throws(IOException::class)
     fun openBlockStream(location: FileBlockLocation?): InputStream
 
     /**
-     * Добавляет удаленные блоки в список свободных блоков
+     * Adds deleted blocks to the list of free blocks
      */
     @Throws(IOException::class)
     fun remove(valueBlocksLocations: List<FileBlockLocation?>?)

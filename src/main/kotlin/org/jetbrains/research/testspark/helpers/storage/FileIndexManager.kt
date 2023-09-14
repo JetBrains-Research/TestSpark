@@ -7,15 +7,15 @@ import java.nio.file.Path
 
 /**
  * Format of index file:
- * [number of entries]
- * Entry:
- * [size of key (aka number of bytes)]
- * [key]
- * [number of `FileBlockLocation` instances associated with key]
- * FileBlockLocation:
- * [fileName]
- * [offset]
- * [size]
+ *      [number of entries]
+ *      Entry:
+ *          [size of key (aka number of bytes)]
+ *          [key]
+ *          [number of `FileBlockLocation` instances associated with key]
+ *          FileBlockLocation:
+ *              [fileName]
+ *              [offset]
+ *              [size]
  */
 class FileIndexManager internal constructor(private val workingDir: Path) : IndexManager {
     private val indexFilepath: Path = Path.of(workingDir.toString(), INDEX_FILENAME)

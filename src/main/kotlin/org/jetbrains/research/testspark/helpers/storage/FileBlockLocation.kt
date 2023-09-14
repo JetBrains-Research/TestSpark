@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.helpers.storage
 
 /**
- * Класс-дескриптор блока, в котором хранится значение.
+ * The class is a descriptor of the block in which the value is stored.
  */
 
 class FileBlockLocation(fileName: String, offset: Int, size: Int) {

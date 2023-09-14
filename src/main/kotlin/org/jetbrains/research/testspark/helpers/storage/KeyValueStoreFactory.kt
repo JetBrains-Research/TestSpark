@@ -9,7 +9,7 @@ import java.nio.file.Path
 
 object KeyValueStoreFactory {
     @Throws(IOException::class)
-    fun create(workingDir: Path?, valueFileSize: Int): KeyValueStore {
+    fun create(workingDir: Path?, valueFileSize: Int = 1024): KeyValueStore {
         requireNotNull(workingDir) { "Working directory must not be null" }
         require(valueFileSize > 0) { "Value file size must be positive, got $valueFileSize" }
         if (!Files.exists(workingDir)) {
