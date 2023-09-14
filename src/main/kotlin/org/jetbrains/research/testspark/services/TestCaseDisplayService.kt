@@ -163,7 +163,10 @@ class TestCaseDisplayService(private val project: Project) {
             val testCaseMiddleAndBottomPanelFactory =
                 TestCaseMiddleAndBottomPanelFactory(project, testCase, editor, checkbox, testCaseUpperPanelFactory)
             testCasePanel.add(testCaseMiddleAndBottomPanelFactory.getMiddlePanel(), BorderLayout.CENTER)
+
             testCasePanel.add(testCaseMiddleAndBottomPanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+
+            testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())

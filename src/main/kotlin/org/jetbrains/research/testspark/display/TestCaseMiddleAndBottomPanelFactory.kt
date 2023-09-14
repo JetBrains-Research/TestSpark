@@ -26,6 +26,7 @@ import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JPanel
+import javax.swing.JTextField
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
@@ -35,7 +36,6 @@ class TestCaseMiddleAndBottomPanelFactory(
     private val editor: Editor,
     private val checkbox: JCheckBox,
     private val testCaseUpperPanelFactory: TestCaseUpperPanelFactory,
-
 ) {
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
@@ -60,6 +60,10 @@ class TestCaseMiddleAndBottomPanelFactory(
 
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
+
+    private val requestField = JTextField()
+
+    private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
     /**
      * Retrieves the middle panel of the application.
@@ -127,19 +131,33 @@ class TestCaseMiddleAndBottomPanelFactory(
      */
     fun getBottomPanel(): JPanel {
         val panel = JPanel()
-        panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
-        panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
+        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+
+        val requestPanel = JPanel()
+        requestPanel.layout = BoxLayout(requestPanel, BoxLayout.X_AXIS)
+        requestPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
+        requestPanel.add(requestField)
+        requestPanel.add(Box.createRigidArea(Dimension(5, 0)))
+        requestPanel.add(sendButton)
+        requestPanel.add(Box.createRigidArea(Dimension(15, 0)))
+
+        val buttonsPanel = JPanel()
+        buttonsPanel.layout = BoxLayout(buttonsPanel, BoxLayout.X_AXIS)
+        buttonsPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         runTestButton.isEnabled = false
-        panel.add(runTestButton)
-        panel.add(Box.createHorizontalGlue())
+        buttonsPanel.add(runTestButton)
+        buttonsPanel.add(Box.createHorizontalGlue())
         resetButton.isEnabled = false
-        panel.add(resetButton)
-        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        buttonsPanel.add(resetButton)
+        buttonsPanel.add(Box.createRigidArea(Dimension(5, 0)))
         resetToLastRunButton.isEnabled = false
-        panel.add(resetToLastRunButton)
-        panel.add(Box.createRigidArea(Dimension(5, 0)))
-        panel.add(removeButton)
-        panel.add(Box.createRigidArea(Dimension(10, 0)))
+        buttonsPanel.add(resetToLastRunButton)
+        buttonsPanel.add(Box.createRigidArea(Dimension(5, 0)))
+        buttonsPanel.add(removeButton)
+        buttonsPanel.add(Box.createRigidArea(Dimension(12, 0)))
+
+        panel.add(requestPanel)
+        panel.add(buttonsPanel)
 
         runTestButton.addActionListener { runTestButtonListener() }
         resetButton.addActionListener { resetButtonListener() }
@@ -272,7 +290,7 @@ class TestCaseMiddleAndBottomPanelFactory(
      * @return the created button
      */
     private fun createRunTestButton(): JButton {
-        val runTestButton = JButton("Run", TestSparkIcons.runTest)
+        val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("run"), TestSparkIcons.runTest)
         runTestButton.isEnabled = false
         runTestButton.isOpaque = false
         runTestButton.isContentAreaFilled = false

@@ -41,4 +41,13 @@ object TestSparkIcons {
 
     @JvmField
     val copy = IconLoader.getIcon("/icons/copy.svg", javaClass)
+
+    @JvmField
+    val next = IconLoader.getIcon("/icons/next.svg", javaClass)
+
+    @JvmField
+    val previous = IconLoader.getIcon("/icons/previous.svg", javaClass)
+
+    @JvmField
+    val send = IconLoader.getIcon("/icons/send.svg", javaClass)
 }

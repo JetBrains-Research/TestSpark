@@ -21,15 +21,28 @@ class TestCaseUpperPanelFactory(
     private val checkbox: JCheckBox,
 ) {
     private val panel = JPanel()
+    private val previousButtons = createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
+    private var requestNumber: String = "%d / %d"
+    private var requestLabel: JLabel = JLabel(requestNumber)
+    private val nextButtons = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
     private val errorLabel = JLabel(TestSparkIcons.showError)
     private val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
     private val likeButton = createButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
     private val dislikeButton = createButton(TestSparkIcons.dislike, TestSparkLabelsBundle.defaultValue("dislikeTip"))
 
+    private val allRequestsNumber = 1
+    private val currentRequestNumber = 1
+
     fun getPanel(): JPanel {
         updateErrorLabel()
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
         panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
+        panel.add(previousButtons)
+        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(requestLabel)
+        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(nextButtons)
+        panel.add(Box.createRigidArea(Dimension(5, 0)))
         panel.add(errorLabel)
         panel.add(Box.createHorizontalGlue())
         panel.add(copyButton)
@@ -37,7 +50,15 @@ class TestCaseUpperPanelFactory(
         panel.add(likeButton)
         panel.add(Box.createRigidArea(Dimension(5, 0)))
         panel.add(dislikeButton)
-        panel.add(Box.createRigidArea(Dimension(10, 0)))
+        panel.add(Box.createRigidArea(Dimension(12, 0)))
+
+        previousButtons.addActionListener {
+//            TODO
+        }
+
+        nextButtons.addActionListener {
+//            TODO
+        }
 
         likeButton.addActionListener {
             if (likeButton.icon == TestSparkIcons.likeSelected) {
@@ -69,7 +90,17 @@ class TestCaseUpperPanelFactory(
             )
         }
 
+        updateRequestLabel()
+
         return panel
+    }
+
+    /**
+     * Updates the label displaying the request number information.
+     * Uses the requestNumber template to format the label text.
+     */
+    fun updateRequestLabel() {
+        requestLabel.text = String.format(requestNumber, currentRequestNumber, allRequestsNumber)
     }
 
     /**
