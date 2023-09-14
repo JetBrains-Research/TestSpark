@@ -19,6 +19,8 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.border.LineBorder
 import org.jetbrains.research.testspark.data.TestState
+import javax.swing.border.CompoundBorder
+import javax.swing.border.EmptyBorder
 
 class TestPreferenceButtonsManager (
         private val likedTestsDir: Path,
@@ -75,8 +77,8 @@ class TestPreferenceButtonsManager (
 
                 println("State of test '${testName}' after disliked: ${getTestState()}")
 
-                dislikeButton.background = Color.RED
-                likeButton.background = defaultButtonBackgroundColor
+                 dislikeButton.background = Color.RED
+                 likeButton.background = defaultButtonBackgroundColor
 
                 // showing message whether the test registered as disliked or no-op
                 if (entryAdded) {
@@ -96,14 +98,12 @@ class TestPreferenceButtonsManager (
      */
     public fun getPreferenceButtons() : JPanel {
         val buttonsContainer = JPanel(FlowLayout())
-        buttonsContainer.border = LineBorder(java.awt.Color.RED, 2)
 
         buttonsContainer.add(likeButton)
         buttonsContainer.add(dislikeButton)
 
         val preferenceButtonsPanel = JPanel()
         preferenceButtonsPanel.layout = BorderLayout()
-        preferenceButtonsPanel.border = LineBorder(java.awt.Color.GREEN, 2)
         preferenceButtonsPanel.add(buttonsContainer, BorderLayout.EAST)
 
         return preferenceButtonsPanel
@@ -129,7 +129,7 @@ class TestPreferenceButtonsManager (
      */
     private fun existsInDir(sourceDir: Path) : Boolean {
         val store: KeyValueStore = KeyValueStoreFactory.create(sourceDir);
-        var result = false
+        var result: Boolean
         try {
             val key = testName.toByteArray(Charsets.UTF_8)
             result = store.contains(key)
