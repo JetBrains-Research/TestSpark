@@ -37,7 +37,7 @@ class FileIndexManager internal constructor(private val workingDir: Path) : Inde
             for (i in 0 until entriesCount) {
                 val key: ByteArray = readKeyBytes(input, i)
                 val blocks: List<FileBlockLocation?> = readFileBlockLocations(input)
-                locations.put(ByteWrapper(key), blocks)
+                locations[ByteWrapper(key)] = blocks
             }
         }
     }

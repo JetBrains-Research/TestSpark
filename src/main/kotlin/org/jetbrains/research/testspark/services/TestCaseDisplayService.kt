@@ -203,13 +203,25 @@ class TestCaseDisplayService(private val project: Project) {
 
         // generate files for liked and disliked tests
         val uuid = UUID.randomUUID()
+        val workingDir = Paths.get("./tests-$uuid/liked-tests/");
 
-        val likedTestsFile = File("liked-tests-$uuid.txt")
-        val dislikedTestsFile = File("disliked-tests-$uuid.txt")
+        try {
+            // Create the directory if it doesn't exist
+            Files.deleteIfExists(workingDir)
+            Files.createDirectories(workingDir)
+            println("Directory created: $workingDir")
+        } catch (e: IOException) {
+            println("Error creating the directory: ${e.message}")
+        }
 
-        // create the files if they don't exist
-        likedTestsFile.createNewFile()
-        dislikedTestsFile.createNewFile()
+//        val likedTestsFile = File("liked-tests-$uuid.txt")
+//        val dislikedTestsFile = File("disliked-tests-$uuid.txt")
+//
+//        // create the files if they don't exist
+//        likedTestsFile.createNewFile()
+//        dislikedTestsFile.createNewFile()
+
+
 
 
         testReport.testCaseList.values.forEach {
@@ -264,7 +276,13 @@ class TestCaseDisplayService(private val project: Project) {
             //  3) on click of dislike button: do the same as for on click of like button
             //  4) log all performed actions
 
+            val frame = JFrame("Kotlin Swing Application")
+            frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
 
+            val manager = TestPreferenceButtonsManager(frame, workingDir, testCodeFormatted, testCase.testName)
+            testCasePanel.add(manager.getPreferenceButtons(), BorderLayout.NORTH)
+
+            /*
             // create like/dislike buttons
             val likeButton = JButton(TestSparkLabelsBundle.defaultValue("likeButton"))
             val dislikeButton = JButton(TestSparkLabelsBundle.defaultValue("dislikeButton"))
@@ -274,15 +292,12 @@ class TestCaseDisplayService(private val project: Project) {
 
             testCasePanel.add(preferenceButtons, BorderLayout.NORTH)
 
-            val frame = JFrame("Kotlin Swing Application")
-            frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-
             likeButton.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent) {
                     JOptionPane.showMessageDialog(frame, testCodeFormatted, "'${testCase.testName}' liked", JOptionPane.INFORMATION_MESSAGE)
 
                     val maxValueFileSize = 1024;
-                    val workingDir = Paths.get("./tests-$uuid/liked-tests/");
+
 
                     try {
                         // Create the directory if it doesn't exist
@@ -293,17 +308,20 @@ class TestCaseDisplayService(private val project: Project) {
                         println("Error creating the directory: ${e.message}")
                     }
 
-
                     val kvStore: KeyValueStore = KeyValueStoreFactory.create(workingDir, maxValueFileSize);
-
                     val key = testCase.testName.toByteArray(Charsets.UTF_8);
 
-                    if (!kvStore.contains(key)) {
-                        kvStore.upsert(key, testCodeFormatted.toByteArray(Charsets.UTF_8))
-                    }
+                    try {
+                        if (!kvStore.contains(key)) {
+                            kvStore.upsert(key, testCodeFormatted.toByteArray(Charsets.UTF_8))
+                        }
 
-                    val res = String(kvStore.loadValue(key)!!, Charsets.UTF_8)
-                    println("written value for test '${testCase.testName}': '${res}'")
+                        val res = String(kvStore.loadValue(key)!!, Charsets.UTF_8)
+                        println("written value for test '${testCase.testName}': '${res}'")
+                    }
+                    finally {
+                        kvStore.close()
+                    }
 
                     /*
                     // creating CRC32 which represents id for the current test
@@ -353,6 +371,7 @@ class TestCaseDisplayService(private val project: Project) {
                     JOptionPane.showMessageDialog(frame, testCodeFormatted, "'${testCase.testName}' disliked", JOptionPane.INFORMATION_MESSAGE)
                 }
             })
+             */
 
 
 
