@@ -289,7 +289,7 @@ class TestCaseDisplayService(private val project: Project) {
                     // likedTestsFile
 
                     try {
-                        val fileOutputStream = FileOutputStream(likedTestsFile)
+                        val fileOutputStream = FileOutputStream(likedTestsFile, true)
                         val dataOutputStream = DataOutputStream(fileOutputStream)
 
                         println("Writting data for test '${testCase.testName}' into file '${likedTestsFile.absolutePath}'...")
