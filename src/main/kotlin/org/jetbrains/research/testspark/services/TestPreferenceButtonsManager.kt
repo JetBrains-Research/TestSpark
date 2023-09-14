@@ -18,23 +18,18 @@ import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.border.LineBorder
+import org.jetbrains.research.testspark.data.TestState
 
-class TestPreferenceButtonsManager (private val workingDir: Path, private val testCode: String, private val testName: String) {
+class TestPreferenceButtonsManager (
+        private val likedTestsDir: Path,
+        private val dislikedTestsDir: Path,
+        private val testCode: String,
+        private val testName: String) {
     private val likeButton = JButton(TestSparkLabelsBundle.defaultValue("likeButton"))
     private val dislikeButton = JButton(TestSparkLabelsBundle.defaultValue("dislikeButton"))
     private val defaultButtonBackgroundColor = JButton("").background
 
-    private val likedTestsDir = Paths.get(workingDir.toString(), "liked-tests/")
-    private val dislikedTestsDir = Paths.get(workingDir.toString(), "disliked-tests/")
-    private val maxValueFileSize = 1024;
-
     val clickNotificationFrame = JFrame("Kotlin Swing Application")
-
-    public enum class TestState {
-        UNSPECIFIED,
-        LIKED,
-        DISLIKED
-    }
 
 
     init {
@@ -91,8 +86,6 @@ class TestPreferenceButtonsManager (private val workingDir: Path, private val te
     }
 
     public fun getPreferenceButtons() : JPanel {
-        // TODO: посмотреть, как сделано для панели с кнопками Remove, Reset и тд.
-        // TODO: нужно все комментарии на русском перевести на англ
         // TODO: нужно сделать класс, который по мн-ву названий тестов разобьет их на 3 мн-ва: UNSPECIFIED, LIKED, DISLIKED на основе kvstore
         // TODO: нужно сделать refactor кода, а потом PR
         val buttonsContainer = JPanel(FlowLayout())
@@ -122,7 +115,7 @@ class TestPreferenceButtonsManager (private val workingDir: Path, private val te
     }
 
     private fun existsInDir(sourceDir: Path) : Boolean {
-        val store: KeyValueStore = KeyValueStoreFactory.create(sourceDir, maxValueFileSize);
+        val store: KeyValueStore = KeyValueStoreFactory.create(sourceDir);
         var result = false
         try {
             val key = testName.toByteArray(Charsets.UTF_8)
@@ -142,8 +135,8 @@ class TestPreferenceButtonsManager (private val workingDir: Path, private val te
      * Returns {@code true} if value has been added, otherwise returns {@code false}.
      */
     private fun addIfDoesNotExist(addDir: Path, removeDir: Path, key: ByteArray, value: ByteArray): Boolean {
-        val addStore: KeyValueStore = KeyValueStoreFactory.create(addDir, maxValueFileSize);
-        val removeStore: KeyValueStore = KeyValueStoreFactory.create(removeDir, maxValueFileSize);
+        val addStore: KeyValueStore = KeyValueStoreFactory.create(addDir);
+        val removeStore: KeyValueStore = KeyValueStoreFactory.create(removeDir);
 
         try {
             var added = false

@@ -58,11 +58,6 @@ import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.FlowLayout
-import java.io.File
-import java.io.FileOutputStream
-import java.io.DataOutputStream
-import java.io.FileInputStream
-import java.io.IOException
 import java.util.Locale
 import java.util.UUID
 import java.util.zip.CRC32
@@ -79,8 +74,10 @@ import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import java.io.*
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 import kotlin.io.path.Path
 
 
@@ -203,23 +200,21 @@ class TestCaseDisplayService(private val project: Project) {
 
         // generate files for liked and disliked tests
         val uuid = UUID.randomUUID()
-        val workingDir = Paths.get("./tests-$uuid/");
+        val workingDir = Paths.get("./tests-$uuid/")
+        Files.createDirectories(workingDir)
 
-        try {
+        val likedTestsDir = Paths.get(workingDir.toString(), "liked-tests/")
+        val dislikedTestsDir = Paths.get(workingDir.toString(), "disliked-tests/")
+        val testNamesStorageFilepath = Paths.get(workingDir.toString(), "test-names.txt");
+
+        /*try {
             // Create the directory if it doesn't exist
             Files.deleteIfExists(workingDir)
             Files.createDirectories(workingDir)
             println("Directory created: $workingDir")
         } catch (e: IOException) {
             println("Error creating the directory: ${e.message}")
-        }
-
-//        val likedTestsFile = File("liked-tests-$uuid.txt")
-//        val dislikedTestsFile = File("disliked-tests-$uuid.txt")
-//
-//        // create the files if they don't exist
-//        likedTestsFile.createNewFile()
-//        dislikedTestsFile.createNewFile()
+        }*/
 
 
 
@@ -276,7 +271,14 @@ class TestCaseDisplayService(private val project: Project) {
             //  3) on click of dislike button: do the same as for on click of like button
             //  4) log all performed actions
 
-            val manager = TestPreferenceButtonsManager(workingDir, testCodeFormatted, testCase.testName)
+            // saving current test name into file
+            BufferedWriter(Files.newBufferedWriter(
+                    testNamesStorageFilepath, StandardOpenOption.CREATE, StandardOpenOption.APPEND)).use { writer ->
+                writer.write(testCase.testName)
+                writer.newLine()
+            }
+
+            val manager = TestPreferenceButtonsManager(likedTestsDir, dislikedTestsDir, testCodeFormatted, testCase.testName)
             testCasePanel.add(manager.getPreferenceButtons(), BorderLayout.NORTH)
 
 
