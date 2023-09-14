@@ -203,7 +203,7 @@ class TestCaseDisplayService(private val project: Project) {
 
         // generate files for liked and disliked tests
         val uuid = UUID.randomUUID()
-        val workingDir = Paths.get("./tests-$uuid/liked-tests/");
+        val workingDir = Paths.get("./tests-$uuid/");
 
         try {
             // Create the directory if it doesn't exist

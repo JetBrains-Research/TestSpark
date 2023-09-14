@@ -17,13 +17,25 @@ import javax.swing.JPanel
 class TestPreferenceButtonsManager (val frame: JFrame, private val workingDir: Path, private val testCode: String, private val testName: String) {
     private val likeButton = JButton(TestSparkLabelsBundle.defaultValue("likeButton"))
     private val dislikeButton = JButton(TestSparkLabelsBundle.defaultValue("dislikeButton"))
+    private val likedTestsDir = Paths.get(workingDir.toString(), "liked-tests/")
+    private val dislikedTestsDir = Paths.get(workingDir.toString(), "disliked-tests/")
     private val maxValueFileSize = 1024;
 
+
     init {
+        Files.createDirectories(likedTestsDir)
+        Files.createDirectories(dislikedTestsDir)
+
         likeButton.addActionListener(object : ActionListener {
             override fun actionPerformed(e: ActionEvent) {
                 JOptionPane.showMessageDialog(frame, testCode, "'$testName' liked", JOptionPane.INFORMATION_MESSAGE)
 
+                val key = testName.toByteArray(Charsets.UTF_8);
+                val value = testCode.toByteArray(Charsets.UTF_8);
+
+                addIfDoesNotExist(likedTestsDir, dislikedTestsDir, key, value);
+
+                /*
                 val kvStore: KeyValueStore = KeyValueStoreFactory.create(workingDir, maxValueFileSize);
 
                 try {
@@ -40,7 +52,7 @@ class TestPreferenceButtonsManager (val frame: JFrame, private val workingDir: P
                 }
                 finally {
                     kvStore.close()
-                }
+                }*/
             }
         })
     }
@@ -52,5 +64,27 @@ class TestPreferenceButtonsManager (val frame: JFrame, private val workingDir: P
         return preferenceButtons
     }
 
+    private fun addIfDoesNotExist(addDir: Path, removeDir: Path, key: ByteArray, value: ByteArray) {
+        val addStore: KeyValueStore = KeyValueStoreFactory.create(addDir, maxValueFileSize);
+        val removeStore: KeyValueStore = KeyValueStoreFactory.create(removeDir, maxValueFileSize);
 
+        try {
+            var written = false
+            var removed = false
+            if (!addStore.contains(key)) {
+                addStore.upsert(key, value)
+                removed = removeStore.remove(key)
+                written = true
+            }
+
+            val result = String(addStore.loadValue(key)!!, Charsets.UTF_8)
+
+            println("For dir='${addDir.toString()}':\nwritten=$written, key='$key', value='$result'")
+            println("For dir='${removeDir.toString()}':\nremoved=$removed, key='$key'")
+        }
+        finally {
+            removeStore.close()
+            addStore.close()
+        }
+    }
 }
