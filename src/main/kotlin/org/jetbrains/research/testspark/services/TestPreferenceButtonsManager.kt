@@ -3,13 +3,16 @@ package org.jetbrains.research.testspark.services
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.helpers.storage.KeyValueStore
 import org.jetbrains.research.testspark.helpers.storage.KeyValueStoreFactory
+import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.FlowLayout
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JFrame
 import javax.swing.JOptionPane
@@ -88,10 +91,22 @@ class TestPreferenceButtonsManager (private val workingDir: Path, private val te
     }
 
     public fun getPreferenceButtons() : JPanel {
-        val preferenceButtons = JPanel()
-        preferenceButtons.add(likeButton)
-        preferenceButtons.add(dislikeButton)
-        return preferenceButtons
+        // TODO: посмотреть, как сделано для панели с кнопками Remove, Reset и тд.
+        // TODO: нужно все комментарии на русском перевести на англ
+        // TODO: нужно сделать класс, который по мн-ву названий тестов разобьет их на 3 мн-ва: UNSPECIFIED, LIKED, DISLIKED на основе kvstore
+        // TODO: нужно сделать refactor кода, а потом PR
+        val buttonsContainer = JPanel(FlowLayout())
+        buttonsContainer.border = LineBorder(java.awt.Color.RED, 2)
+
+        buttonsContainer.add(likeButton)
+        buttonsContainer.add(dislikeButton)
+
+        val preferenceButtonsPanel = JPanel()
+        preferenceButtonsPanel.layout = BorderLayout()
+        preferenceButtonsPanel.border = LineBorder(java.awt.Color.GREEN, 2)
+        preferenceButtonsPanel.add(buttonsContainer, BorderLayout.EAST)
+
+        return preferenceButtonsPanel
     }
 
     public fun getTestState() : TestState {
