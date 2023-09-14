@@ -51,6 +51,8 @@ import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.helpers.storage.KeyValueStore
+import org.jetbrains.research.testspark.helpers.storage.KeyValueStoreFactory
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
 import java.awt.BorderLayout
 import java.awt.Color
@@ -77,7 +79,9 @@ import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-
+import java.nio.file.Files
+import java.nio.file.Paths
+import kotlin.io.path.Path
 
 
 class TestCaseDisplayService(private val project: Project) {
@@ -277,6 +281,31 @@ class TestCaseDisplayService(private val project: Project) {
                 override fun actionPerformed(e: ActionEvent) {
                     JOptionPane.showMessageDialog(frame, testCodeFormatted, "'${testCase.testName}' liked", JOptionPane.INFORMATION_MESSAGE)
 
+                    val maxValueFileSize = 1024;
+                    val workingDir = Paths.get("./tests-$uuid/liked-tests/");
+
+                    try {
+                        // Create the directory if it doesn't exist
+                        Files.deleteIfExists(workingDir)
+                        Files.createDirectories(workingDir)
+                        println("Directory created: $workingDir")
+                    } catch (e: IOException) {
+                        println("Error creating the directory: ${e.message}")
+                    }
+
+
+                    val kvStore: KeyValueStore = KeyValueStoreFactory.create(workingDir, maxValueFileSize);
+
+                    val key = testCase.testName.toByteArray(Charsets.UTF_8);
+
+                    if (!kvStore.contains(key)) {
+                        kvStore.upsert(key, testCodeFormatted.toByteArray(Charsets.UTF_8))
+                    }
+
+                    val res = String(kvStore.loadValue(key)!!, Charsets.UTF_8)
+                    println("written value for test '${testCase.testName}': '${res}'")
+
+                    /*
                     // creating CRC32 which represents id for the current test
                     val crc32 = CRC32()
                     val testCodeFormattedBytes = testCodeFormatted.toByteArray()
@@ -315,6 +344,7 @@ class TestCaseDisplayService(private val project: Project) {
                     } catch (e: IOException) {
                         println("Error writing data to the file '${likedTestsFile.absolutePath}' for test '${testCase.testName}': ${e.message}")
                     }
+                    */
                 }
             })
 
