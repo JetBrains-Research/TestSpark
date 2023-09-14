@@ -21,11 +21,15 @@ import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.awt.Dimension
+import java.awt.Graphics
+import java.awt.Graphics2D
+import java.awt.RenderingHints
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
 import javax.swing.Box
 import javax.swing.BoxLayout
+import javax.swing.FocusManager
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JLabel
@@ -78,7 +82,7 @@ class TestCasePanelFactory(
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
 
-    private val requestField = JTextField()
+    private val requestField = HintTextField(TestSparkLabelsBundle.defaultValue("requestFieldHint"))
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
@@ -563,5 +567,20 @@ class TestCasePanelFactory(
         modifiedLineIndexes.reverse()
 
         return modifiedLineIndexes
+    }
+
+    /**
+     * A custom JTextField with a hint text that is displayed when the field is empty and not in focus.
+     */
+    class HintTextField(private val hint: String) : JTextField() {
+        override fun paintComponent(pG: Graphics) {
+            super.paintComponent(pG)
+            if (getText().isEmpty() && FocusManager.getCurrentKeyboardFocusManager().focusOwner !== this) {
+                val g = pG as Graphics2D
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+                g.color = disabledTextColor
+                g.drawString(hint, getInsets().left + 5, getInsets().top + (1.3 * pG.getFontMetrics().maxAscent).toInt())
+            }
+        }
     }
 }
