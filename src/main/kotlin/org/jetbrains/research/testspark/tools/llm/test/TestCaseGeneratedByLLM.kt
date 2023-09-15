@@ -126,7 +126,7 @@ data class TestCaseGeneratedByLLM(
         }
 
         // close test case
-        testFullText += "\t}\n"
+        testFullText += "\t}"
 
         return testFullText
     }
