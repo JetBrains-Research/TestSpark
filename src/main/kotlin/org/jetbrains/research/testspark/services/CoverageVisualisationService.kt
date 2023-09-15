@@ -52,7 +52,7 @@ class CoverageVisualisationService(private val project: Project) {
      */
     fun clear() {
         currentHighlightedData ?: return
-        currentHighlightedData!!.editor.markupModel
+        currentHighlightedData!!.editor.markupModel ?: return
         currentHighlightedData!!.editor.markupModel.removeAllHighlighters()
     }
 
