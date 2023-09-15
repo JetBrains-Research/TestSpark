@@ -68,6 +68,8 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -107,6 +109,10 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
     private var isJacocoCoverageActive = false
+
+    // name of files with liked/disliked tests
+    private var likedTestsFileName: String = "liked_tests.json"
+    private var dislikedTestsFileName: String = "disliked_tests.json"
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -200,6 +206,11 @@ class TestCaseDisplayService(private val project: Project) {
             checkbox.isSelected = true
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
+            // Add like/dislike buttons to the test
+            val likeButton = createLikeButton(testCase)
+            val dislikeButton = createDislikeButton(testCase)
+
+
             // Toggle coverage when checkbox is clicked
             checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
@@ -214,6 +225,22 @@ class TestCaseDisplayService(private val project: Project) {
                 updateTestsPassedLabel()
             }
 
+            // Set an action listener for the "like" button
+            likeButton.addActionListener {
+                saveTestCaseToFile(testCase, likedTestsFileName)
+                deleteTestCaseFromFile(testCase, dislikedTestsFileName)
+                likeButton.border = BorderFactory.createLineBorder(JBColor.GREEN)
+                dislikeButton.border = BorderFactory.createLineBorder(JBColor.PanelBackground)
+            }
+
+            // Set an action listener for the "dislike" button
+            dislikeButton.addActionListener {
+                saveTestCaseToFile(testCase, dislikedTestsFileName)
+                deleteTestCaseFromFile(testCase, likedTestsFileName)
+                likeButton.border = BorderFactory.createLineBorder(JBColor.PanelBackground)
+                dislikeButton.border = BorderFactory.createLineBorder(JBColor.RED)
+            }
+
             // Add an editor to modify the test source code
             val languageTextField = LanguageTextField(
                 Language.findLanguageByID("JAVA"),
@@ -226,16 +253,21 @@ class TestCaseDisplayService(private val project: Project) {
             )
 
             // Add test case title
-            val middlePanel = JPanel()
-            middlePanel.layout = BoxLayout(middlePanel, BoxLayout.Y_AXIS)
+            val middlePanel = JPanel(BorderLayout())
 
-            val testCaseTitle = JLabel(testCase.testName)
+            // Panel to hold the title and the buttons
+            val titleAndButtonsPanel = JPanel(FlowLayout(FlowLayout.LEADING))
+            titleAndButtonsPanel.add(JLabel(testCase.testName))
 
-            middlePanel.add(testCaseTitle)
-            middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
-            middlePanel.add(languageTextField)
-
+            val middleButtons = JPanel(FlowLayout(FlowLayout.TRAILING))
+            middleButtons.add(likeButton)
+            middleButtons.add(dislikeButton)
+            titleAndButtonsPanel.add(middleButtons)
+            middlePanel.add(titleAndButtonsPanel, BorderLayout.NORTH)
+            middlePanel.add(Box.createRigidArea(Dimension(0, 5)), BorderLayout.CENTER)
+            middlePanel.add(languageTextField, BorderLayout.SOUTH)
             testCasePanel.add(middlePanel, BorderLayout.CENTER)
+
 
             // Create "Remove" button to remove the test from cache
             val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel)
@@ -275,6 +307,7 @@ class TestCaseDisplayService(private val project: Project) {
             bottomPanel.add(bottomButtons)
             bottomPanel.add(Box.createRigidArea(Dimension(0, 25)))
             testCasePanel.add(bottomPanel, BorderLayout.SOUTH)
+
 
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
@@ -850,6 +883,31 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
+     * Creates and returns a "Like" button. The button is enabled by default.
+     *
+     * @param testCase The test case.
+     * @return The created button.
+     */
+    private fun createLikeButton(testCase: TestCase): JButton {
+        val likeButton = JButton("Like")
+        likeButton.isEnabled = true
+        return likeButton
+    }
+
+    /**
+     * Creates and returns a "Dislike" button. The button is enabled by default.
+     *
+     * @param testCase The test.
+     * @return The created button.
+     */
+    private fun createDislikeButton(testCase: TestCase): JButton {
+        val dislikeButton = JButton("Dislike")
+        dislikeButton.isEnabled = true
+        return dislikeButton
+    }
+
+
+    /**
      * A helper method to add a listener to the test document (in the tool window panel)
      *   that enables reset button when the editor is changed.
      *
@@ -1091,5 +1149,73 @@ class TestCaseDisplayService(private val project: Project) {
          * @param file The PsiFile to be customized.
          */
         open fun customizePsiFile(file: PsiFile?) {}
+    }
+
+    /**
+     * A data class representing a simple version of a test case, including only the test name and test code.
+     *
+     * @property testName The name of the test case.
+     * @property testCode The code of the test case.
+     */
+    data class SimpleTestCase(val testName: String, val testCode: String)
+
+
+    /**
+     * Saves a given test case to a specified JSON file. If the file already exists, the test case is added
+     * to the existing list of test cases in the file. If the file does not exist, a new file is created with
+     * the test case as the first item in the list.
+     *
+     * @param testCase The test case to save.
+     * @param fileName The name of the JSON file to save the test case to.
+     */
+    private fun saveTestCaseToFile(testCase: TestCase, fileName: String) {
+        val file = File(project.basePath!!, fileName)
+
+        val testCasesList: MutableList<SimpleTestCase>
+
+        if (file.exists()) {
+            val json = file.readText()
+            val type = object : TypeToken<List<TestCase>>() {}.type
+            testCasesList = Gson().fromJson(json, type)
+        } else {
+            testCasesList = mutableListOf()
+        }
+
+        val simpleTestCase = SimpleTestCase(testCase.testName, testCase.testCode)
+
+        testCasesList.add(simpleTestCase)
+
+        val json = Gson().toJson(testCasesList)
+
+        file.writeText(json)
+    }
+
+
+    /**
+     * Deletes a given test case from a specified JSON file based on the test name. If a test case with the
+     * matching test name is found in the file, it is removed. If the file does not exist, the function returns
+     * without doing anything.
+     *
+     * @param testCase The test case to delete.
+     * @param fileName The name of the JSON file to delete the test case from.
+     */
+    private fun deleteTestCaseFromFile(testCase: TestCase, fileName: String) {
+        val file = File(project.basePath!!, fileName)
+
+        val testCasesList: MutableList<SimpleTestCase>
+
+        if (file.exists()) {
+            val json = file.readText()
+            val type = object : TypeToken<List<SimpleTestCase>>() {}.type
+            testCasesList = Gson().fromJson(json, type)
+        } else {
+            return
+        }
+
+        testCasesList.removeIf { it.testName == testCase.testName }
+
+        val json = Gson().toJson(testCasesList)
+
+        file.writeText(json)
     }
 }
