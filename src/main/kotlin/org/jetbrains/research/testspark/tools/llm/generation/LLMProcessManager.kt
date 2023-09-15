@@ -11,6 +11,7 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.services.LLMChatHistoryService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -179,7 +180,7 @@ class LLMProcessManager(
                 File(generatedTestPath),
                 generatedTestSuite.getPrintablePackageString(),
                 buildPath,
-                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
+                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList()
             )
 
             // compile the test file
@@ -206,6 +207,8 @@ class LLMProcessManager(
         if (project.service<ErrorService>().isErrorOccurred()) return
 
         log.info("Result is ready")
+
+        project.service<LLMChatHistoryService>().baseChatHistory.addAll(requestManager.chatHistory)
 
         saveData(
             project,
