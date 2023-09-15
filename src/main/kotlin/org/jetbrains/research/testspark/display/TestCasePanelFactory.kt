@@ -11,6 +11,7 @@ import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.project.Project
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.TestCase
@@ -35,6 +36,7 @@ import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
+import javax.swing.ScrollPaneConstants
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
@@ -67,6 +69,12 @@ class TestCasePanelFactory(
             project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
         ),
         false,
+    )
+
+    private val languageTextFieldScrollPane = JBScrollPane(
+        languageTextField,
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
 
     // Create "Remove" button to remove the test from cache
@@ -185,7 +193,7 @@ class TestCasePanelFactory(
 
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
         panel.add(Box.createRigidArea(Dimension(0, 5)))
-        panel.add(languageTextField)
+        panel.add(languageTextFieldScrollPane)
         panel.add(Box.createRigidArea(Dimension(0, 5)))
 
         addLanguageTextFieldListener(languageTextField)
@@ -579,7 +587,11 @@ class TestCasePanelFactory(
                 val g = pG as Graphics2D
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
                 g.color = disabledTextColor
-                g.drawString(hint, getInsets().left + 5, getInsets().top + (1.3 * pG.getFontMetrics().maxAscent).toInt())
+                g.drawString(
+                    hint,
+                    getInsets().left + 5,
+                    getInsets().top + (1.3 * pG.getFontMetrics().maxAscent).toInt(),
+                )
             }
         }
     }
