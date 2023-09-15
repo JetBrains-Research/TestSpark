@@ -32,7 +32,7 @@ class TestsAssembler(
 ) {
     private val log: Logger = Logger.getInstance(this.javaClass)
     var rawText = ""
-    private var lastTestCount = 0
+    var lastTestCount = 0
 
     /**
      * Receives a response text and updates the progress bar accordingly.
@@ -193,6 +193,10 @@ class TestsAssembler(
 
                 // Save each line
                 val lines = testBody.split("\n").toMutableList()
+                // remove last line if it is empty
+                lines.removeLast().takeIf { lines[lines.lastIndex].isEmpty() }
+//                ().takeIf { lines.removeLast() }
+
                 lines.forEach { rawLine ->
                     val line = rawLine.trim()
 
