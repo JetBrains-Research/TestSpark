@@ -94,6 +94,8 @@ class TestCasePanelFactory(
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
+    private val loadingIcon: JLabel = JLabel(TestSparkIcons.loading)
+
     private val initialCodes: MutableList<String> = mutableListOf()
     private val lastRunCodes: MutableList<String> = mutableListOf()
     private val currentCodes: MutableList<String> = mutableListOf()
@@ -221,6 +223,9 @@ class TestCasePanelFactory(
         buttonsPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         runTestButton.isEnabled = false
         buttonsPanel.add(runTestButton)
+        buttonsPanel.add(Box.createRigidArea(Dimension(5, 0)))
+        loadingIcon.isVisible = false
+        buttonsPanel.add(loadingIcon)
         buttonsPanel.add(Box.createHorizontalGlue())
         resetButton.isEnabled = false
         buttonsPanel.add(resetButton)
@@ -351,6 +356,9 @@ class TestCasePanelFactory(
      */
     private fun sendRequest() {
         WriteCommandAction.runWriteCommandAction(project) {
+            loadingIcon.isVisible = true
+            loadingIcon.repaint()
+
             // TODO implement code creator
             val code = "// Here will be a new code.\n" +
                 "// Your request: ${requestField.text}.\n" +
@@ -377,6 +385,9 @@ class TestCasePanelFactory(
             sendButton.isEnabled = false
 
             switchToAnotherCode()
+
+            loadingIcon.isVisible = false
+            loadingIcon.repaint()
         }
     }
 
@@ -389,6 +400,9 @@ class TestCasePanelFactory(
      * and updates the UI.
      */
     private fun runTest() {
+        loadingIcon.isVisible = true
+        loadingIcon.repaint()
+
         project.service<Workspace>().updateTestCase(
             project.service<TestCoverageCollectorService>()
                 .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
@@ -402,6 +416,9 @@ class TestCasePanelFactory(
         lastRunCodes[currentRequestNumber - 1] = languageTextField.document.text
 
         project.service<TestCaseDisplayService>().updateUI()
+
+        loadingIcon.isVisible = false
+        loadingIcon.repaint()
     }
 
     /**
