@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.services
 
+import ReactedTestManager
 import com.intellij.coverage.CoverageDataManager
 import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.lang.Language
@@ -68,8 +69,7 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+
 
 class TestCaseDisplayService(private val project: Project) {
 
@@ -114,6 +114,8 @@ class TestCaseDisplayService(private val project: Project) {
     private var likedTestsFileName: String = "liked_tests.json"
     private var dislikedTestsFileName: String = "disliked_tests.json"
 
+    private var likedTestsManager: ReactedTestManager? = null
+    private var dislikedTestsManager: ReactedTestManager? = null
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
@@ -144,6 +146,8 @@ class TestCaseDisplayService(private val project: Project) {
         deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
         toggleJacocoButton.addActionListener { toggleJacocoCoverage() }
         removeAllButton.addActionListener { removeAllTestCases() }
+        likedTestsManager = ReactedTestManager(project.basePath!!, likedTestsFileName)
+        dislikedTestsManager = ReactedTestManager(project.basePath!!, dislikedTestsFileName)
     }
 
     /**
@@ -227,18 +231,18 @@ class TestCaseDisplayService(private val project: Project) {
 
             // Set an action listener for the "like" button
             likeButton.addActionListener {
-                saveTestCaseToFile(testCase, likedTestsFileName)
-                deleteTestCaseFromFile(testCase, dislikedTestsFileName)
-                likeButton.border = BorderFactory.createLineBorder(JBColor.GREEN)
-                dislikeButton.border = BorderFactory.createLineBorder(JBColor.PanelBackground)
+                likedTestsManager?.saveTestCase(testCase.testName, testCase.testCode)
+                dislikedTestsManager?.deleteTestCase(testCase.testName)
+                likeButton.background = JBColor.GREEN
+                dislikeButton.background = JBColor.PanelBackground
             }
 
             // Set an action listener for the "dislike" button
             dislikeButton.addActionListener {
-                saveTestCaseToFile(testCase, dislikedTestsFileName)
-                deleteTestCaseFromFile(testCase, likedTestsFileName)
-                likeButton.border = BorderFactory.createLineBorder(JBColor.PanelBackground)
-                dislikeButton.border = BorderFactory.createLineBorder(JBColor.RED)
+                dislikedTestsManager?.saveTestCase(testCase.testName, testCase.testCode)
+                likedTestsManager?.deleteTestCase(testCase.testName)
+                likeButton.background = JBColor.PanelBackground
+                dislikeButton.background = JBColor.RED
             }
 
             // Add an editor to modify the test source code
@@ -1149,73 +1153,5 @@ class TestCaseDisplayService(private val project: Project) {
          * @param file The PsiFile to be customized.
          */
         open fun customizePsiFile(file: PsiFile?) {}
-    }
-
-    /**
-     * A data class representing a simple version of a test case, including only the test name and test code.
-     *
-     * @property testName The name of the test case.
-     * @property testCode The code of the test case.
-     */
-    data class SimpleTestCase(val testName: String, val testCode: String)
-
-
-    /**
-     * Saves a given test case to a specified JSON file. If the file already exists, the test case is added
-     * to the existing list of test cases in the file. If the file does not exist, a new file is created with
-     * the test case as the first item in the list.
-     *
-     * @param testCase The test case to save.
-     * @param fileName The name of the JSON file to save the test case to.
-     */
-    private fun saveTestCaseToFile(testCase: TestCase, fileName: String) {
-        val file = File(project.basePath!!, fileName)
-
-        val testCasesList: MutableList<SimpleTestCase>
-
-        if (file.exists()) {
-            val json = file.readText()
-            val type = object : TypeToken<List<TestCase>>() {}.type
-            testCasesList = Gson().fromJson(json, type)
-        } else {
-            testCasesList = mutableListOf()
-        }
-
-        val simpleTestCase = SimpleTestCase(testCase.testName, testCase.testCode)
-
-        testCasesList.add(simpleTestCase)
-
-        val json = Gson().toJson(testCasesList)
-
-        file.writeText(json)
-    }
-
-
-    /**
-     * Deletes a given test case from a specified JSON file based on the test name. If a test case with the
-     * matching test name is found in the file, it is removed. If the file does not exist, the function returns
-     * without doing anything.
-     *
-     * @param testCase The test case to delete.
-     * @param fileName The name of the JSON file to delete the test case from.
-     */
-    private fun deleteTestCaseFromFile(testCase: TestCase, fileName: String) {
-        val file = File(project.basePath!!, fileName)
-
-        val testCasesList: MutableList<SimpleTestCase>
-
-        if (file.exists()) {
-            val json = file.readText()
-            val type = object : TypeToken<List<SimpleTestCase>>() {}.type
-            testCasesList = Gson().fromJson(json, type)
-        } else {
-            return
-        }
-
-        testCasesList.removeIf { it.testName == testCase.testName }
-
-        val json = Gson().toJson(testCasesList)
-
-        file.writeText(json)
     }
 }
