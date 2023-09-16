@@ -51,8 +51,6 @@ import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.helpers.storage.KeyValueStore
-import org.jetbrains.research.testspark.helpers.storage.KeyValueStoreFactory
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
 import java.awt.BorderLayout
 import java.awt.Color
@@ -199,13 +197,17 @@ class TestCaseDisplayService(private val project: Project) {
         originalTestCases.clear()
 
         // generate files for liked and disliked tests
-        val uuid = UUID.randomUUID()
-        val workingDir = Paths.get("./tests-$uuid/")
-        Files.createDirectories(workingDir)
+        val workingDirectory = Paths.get("./tests-${UUID.randomUUID()}/")
+        Files.createDirectories(workingDirectory)
 
-        val likedTestsDir = Paths.get(workingDir.toString(), "liked-tests/")
-        val dislikedTestsDir = Paths.get(workingDir.toString(), "disliked-tests/")
-        val testNamesStorageFilepath = Paths.get(workingDir.toString(), "test-names.txt");
+        // creating json file with default value of '{}'
+        val testPreferencesDataJson = Paths.get(workingDirectory.toString(), "preferences.json")
+        Files.createFile(testPreferencesDataJson)
+        FileWriter(testPreferencesDataJson.toString()).use { writer -> writer.write("{}") }
+
+//        val likedTestsDir = Paths.get(workingDir.toString(), "liked-tests/")
+//        val dislikedTestsDir = Paths.get(workingDir.toString(), "disliked-tests/")
+//        val testNamesStorageFilepath = Paths.get(workingDir.toString(), "test-names.txt");
 
         testReport.testCaseList.values.forEach {
             val testCase = it
@@ -247,14 +249,14 @@ class TestCaseDisplayService(private val project: Project) {
             )
 
             // saving current test name into file
-            BufferedWriter(Files.newBufferedWriter(
-                    testNamesStorageFilepath, StandardOpenOption.CREATE, StandardOpenOption.APPEND)).use { writer ->
-                writer.write(testCase.testName)
-                writer.newLine()
-            }
+//            BufferedWriter(Files.newBufferedWriter(
+//                    testNamesStorageFilepath, StandardOpenOption.CREATE, StandardOpenOption.APPEND)).use { writer ->
+//                writer.write(testCase.testName)
+//                writer.newLine()
+//            }
 
             // creating like/dislike buttons manager for the current test
-            val manager = TestPreferenceButtonsManager(likedTestsDir, dislikedTestsDir, testCodeFormatted, testCase.testName)
+            val manager = TestPreferenceButtonsManager(testPreferencesDataJson, testCodeFormatted, testCase.testName)
             testCasePanel.add(manager.getPreferenceButtons(), BorderLayout.NORTH)
 
             // Add test case title
