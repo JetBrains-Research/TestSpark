@@ -17,7 +17,7 @@ import javax.swing.JPanel
 
 
 class TestPreferenceButtonsManager (private val jsonFilepath: Path, private val testCode: String, private val testName: String) {
-    enum class State {
+    private enum class State {
         ADDED,
         NOT_ADDED,
         ERROR_OCCURED

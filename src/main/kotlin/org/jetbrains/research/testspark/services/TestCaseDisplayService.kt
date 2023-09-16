@@ -58,7 +58,6 @@ import java.awt.Dimension
 import java.awt.FlowLayout
 import java.util.Locale
 import java.util.UUID
-import java.util.zip.CRC32
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -70,13 +69,10 @@ import javax.swing.JPanel
 import javax.swing.JFrame
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
-import java.io.*
+import java.io.FileWriter
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
-import kotlin.io.path.Path
 
 
 class TestCaseDisplayService(private val project: Project) {
