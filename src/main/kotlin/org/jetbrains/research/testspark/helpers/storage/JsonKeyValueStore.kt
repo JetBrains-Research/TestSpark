@@ -10,7 +10,7 @@ import java.io.FileWriter
 
 /**
  * Implements CRUD operations with provided json file.
- * In order to check for nested key use syntax 'a.b.c' -> json["a"]["b"]["c"]
+ * In order to use nested key use syntax 'a.b.c' -> json["a"]["b"]["c"]
  */
 class JsonKeyValueStore(private val filepath: Path) : KeyValueStore {
     override operator fun contains(key: String): Boolean {
