@@ -205,10 +205,6 @@ class TestCaseDisplayService(private val project: Project) {
         Files.createFile(testPreferencesDataJson)
         FileWriter(testPreferencesDataJson.toString()).use { writer -> writer.write("{}") }
 
-//        val likedTestsDir = Paths.get(workingDir.toString(), "liked-tests/")
-//        val dislikedTestsDir = Paths.get(workingDir.toString(), "disliked-tests/")
-//        val testNamesStorageFilepath = Paths.get(workingDir.toString(), "test-names.txt");
-
         testReport.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
@@ -247,13 +243,6 @@ class TestCaseDisplayService(private val project: Project) {
                 ),
                 false,
             )
-
-            // saving current test name into file
-//            BufferedWriter(Files.newBufferedWriter(
-//                    testNamesStorageFilepath, StandardOpenOption.CREATE, StandardOpenOption.APPEND)).use { writer ->
-//                writer.write(testCase.testName)
-//                writer.newLine()
-//            }
 
             // creating like/dislike buttons manager for the current test
             val manager = TestPreferenceButtonsManager(testPreferencesDataJson, testCodeFormatted, testCase.testName)

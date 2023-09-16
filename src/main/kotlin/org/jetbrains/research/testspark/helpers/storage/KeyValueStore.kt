@@ -6,19 +6,19 @@ import java.io.InputStream
 
 interface KeyValueStore {
     /**
-     * Checks whether the provided key exists in the storage
+     * Checks whether the provided key exists in the store
      */
     @Throws(IOException::class)
     operator fun contains(key: String): Boolean
 
     /**
-     * Completely reads the value into an array of bytes and returns it
+     * Retrieves value associated with a provided key if exists
      */
     @Throws(IOException::class)
     fun get(key: String): String?
 
     /**
-     * Writes a new value by key. If the key already exists in the storage, then it overwrites the old value
+     * Stores a new value by key. If the key already exists in the store, then it overwrites the old value
      */
     @Throws(IOException::class)
     fun upsert(key: String, value: String)

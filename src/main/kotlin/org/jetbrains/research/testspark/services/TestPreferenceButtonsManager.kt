@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.services
 
+import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.helpers.storage.KeyValueStore
 import org.jetbrains.research.testspark.helpers.storage.KeyValueStoreFactory
@@ -14,16 +15,23 @@ import javax.swing.JFrame
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 
+
 class TestPreferenceButtonsManager (private val jsonFilepath: Path, private val testCode: String, private val testName: String) {
+    enum class State {
+        ADDED,
+        NOT_ADDED,
+        ERROR_OCCURED
+    }
+
     private val likeButton = JButton(TestSparkLabelsBundle.defaultValue("likeButton"))
     private val dislikeButton = JButton(TestSparkLabelsBundle.defaultValue("dislikeButton"))
     private val defaultButtonBackgroundColor = JButton("").background
 
+    private val log = Logger.getInstance(this::class.java)
+
     val clickNotificationFrame = JFrame("Kotlin Swing Application")
 
-
     /**
-     * Creating liked/disliked dirs if needed
      * Assigning click listeners on like/dislike buttons
      */
     init {
@@ -35,19 +43,23 @@ class TestPreferenceButtonsManager (private val jsonFilepath: Path, private val 
                 val keyToRemove = "tests.disliked.$testName";
                 val value = testCode;
 
-                val entryAdded = addIfDoesNotExist(keyToAdd, keyToRemove, value);
+                val state: State = addIfDoesNotExist(keyToAdd, keyToRemove, value);
 
                 // showing message whether the test registered as liked or no-op
-                if (entryAdded) {
+                if (state == State.ADDED) {
                     likeButton.background = Color.GREEN
                     dislikeButton.background = defaultButtonBackgroundColor
 
                     JOptionPane.showMessageDialog(clickNotificationFrame,
                             "Test code for the test '$testName' successfully registered as liked", "'$testName' liked", JOptionPane.INFORMATION_MESSAGE)
                 }
-                else {
+                else if (state == State.NOT_ADDED) {
                     JOptionPane.showMessageDialog(clickNotificationFrame,
                             "No operation performed: test code for the test '$testName' already registered as liked", "'$testName' liked", JOptionPane.INFORMATION_MESSAGE)
+                }
+                else {
+                    JOptionPane.showMessageDialog(clickNotificationFrame,
+                            "Could not perform an operation due to unexpected error. Please, we logs to identify an error", "Error occured!", JOptionPane.ERROR_MESSAGE)
                 }
             }
         })
@@ -58,26 +70,30 @@ class TestPreferenceButtonsManager (private val jsonFilepath: Path, private val 
                 val keyToRemove = "tests.liked.$testName";
                 val value = testCode;
 
-                val entryAdded = addIfDoesNotExist(keyToAdd, keyToRemove, value);
+                val state: State = addIfDoesNotExist(keyToAdd, keyToRemove, value);
 
                 // showing message whether the test registered as disliked or no-op
-                if (entryAdded) {
+                if (state == State.ADDED) {
                     dislikeButton.background = Color.RED
                     likeButton.background = defaultButtonBackgroundColor
 
                     JOptionPane.showMessageDialog(clickNotificationFrame,
                             "Test code for the test '$testName' successfully registered as disliked", "'$testName' disliked", JOptionPane.INFORMATION_MESSAGE)
                 }
-                else {
+                else if (state == State.NOT_ADDED) {
                     JOptionPane.showMessageDialog(clickNotificationFrame,
                             "No operation performed: test code for the test '$testName' already registered as disliked", "'$testName' disliked", JOptionPane.INFORMATION_MESSAGE)
+                }
+                else {
+                    JOptionPane.showMessageDialog(clickNotificationFrame,
+                            "Could not perform an operation due to unexpected error. Please, we logs to identify an error", "Error occured!", JOptionPane.ERROR_MESSAGE)
                 }
             }
         })
     }
 
     /**
-     * Creates container with like/dislike buttons inside
+     * @return container with like/dislike buttons inside
      */
     public fun getPreferenceButtons() : JPanel {
         val buttonsContainer = JPanel(FlowLayout())
@@ -100,23 +116,35 @@ class TestPreferenceButtonsManager (private val jsonFilepath: Path, private val 
      *
      * @return wether the value was successfully added into the file
      */
-    private fun addIfDoesNotExist(keyToAdd: String, keyToRemove: String, value: String): Boolean {
-        val store: KeyValueStore = KeyValueStoreFactory.create(jsonFilepath);
+    private fun addIfDoesNotExist(keyToAdd: String, keyToRemove: String, value: String): State {
+        try {
+            val store: KeyValueStore = KeyValueStoreFactory.create(jsonFilepath);
 
-        var added = false
-        var removed = false
+            var added = false
+            var removed = false
 
-        if (!store.contains(keyToAdd)) {
-            store.upsert(keyToAdd, value)
-            removed = store.remove(keyToRemove)
-            added = true
+            if (!store.contains(keyToAdd)) {
+                store.upsert(keyToAdd, value)
+                removed = store.remove(keyToRemove)
+                added = true
+            }
+
+            val result = store.get(keyToAdd)!!
+
+            println("For filepath='${jsonFilepath.toString()}':\nadded=$added, key='$keyToAdd', value='$result'")
+            println("For filepath='${jsonFilepath.toString()}':\nremoved=$removed, key='$keyToRemove'")
+
+            if (added) {
+                return State.ADDED
+            }
+            else {
+                return State.NOT_ADDED
+            }
         }
-
-        val result = store.get(keyToAdd)!!
-
-        println("For filepath='${jsonFilepath.toString()}':\nadded=$added, key='$keyToAdd', value='$result'")
-        println("For filepath='${jsonFilepath.toString()}':\nremoved=$removed, key='$keyToRemove'")
-
-        return added
+        catch (err: Exception) {
+            println("Unable to perform modifications of file '${jsonFilepath.toString()}' due to an error: '${err.message}'");
+            log.info("Unable to perform modifications of file '${jsonFilepath.toString()}' due to an error: '${err.message}'");
+            return State.ERROR_OCCURED
+        }
     }
 }
