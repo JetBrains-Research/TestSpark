@@ -119,6 +119,8 @@
                 serviceImplementation="org.jetbrains.research.testspark.services.TestCoverageCollectorService"/>
         <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.JavaClassBuilderService"/>
+        <projectService
+                serviceImplementation="org.jetbrains.research.testspark.services.RunCommandLineService"/>
 
         <toolWindow id="TestSpark" secondary="true" anchor="right"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>

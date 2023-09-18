@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.services
 import com.intellij.coverage.CoverageDataManager
 import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.icons.AllIcons
-import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
@@ -20,7 +20,9 @@ import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
+import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -28,15 +30,20 @@ import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElementFactory
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
+import com.intellij.ui.LanguageTextField
+import com.intellij.ui.LanguageTextField.DocumentCreator
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
+import com.intellij.util.LocalTimeCounter
 import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.TestSparkBundle
@@ -203,10 +210,15 @@ class TestCaseDisplayService(private val project: Project) {
             }
 
             // Add an editor to modify the test source code
-            val document = EditorFactory.getInstance().createDocument(testCodeFormatted)
-            val textFieldEditor = EditorTextField(document, project, JavaFileType.INSTANCE)
-
-            textFieldEditor.setOneLineMode(false)
+            val languageTextField = LanguageTextField(
+                Language.findLanguageByID("JAVA"),
+                editor.project,
+                testCodeFormatted,
+                TestCaseDocumentCreator(
+                    project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+                ),
+                false,
+            )
 
             // Add test case title
             val middlePanel = JPanel()
@@ -262,7 +274,7 @@ class TestCaseDisplayService(private val project: Project) {
 
             middlePanel.add(topPanel)
             middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
-            middlePanel.add(textFieldEditor)
+            middlePanel.add(languageTextField)
 
             testCasePanel.add(middlePanel, BorderLayout.CENTER)
 
@@ -279,17 +291,18 @@ class TestCaseDisplayService(private val project: Project) {
             val runTestButton = createRunTestButton()
 
             // Set border
-            textFieldEditor.border = getBorder(testCase.testName)
+            languageTextField.border = getBorder(testCase.testName)
+            testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
 
             addListeners(
-                document,
                 resetButton,
                 resetToLastRunButton,
                 runTestButton,
-                textFieldEditor,
+                languageTextField,
                 checkbox,
                 testCase,
-                textFieldEditor.border,
+                languageTextField.border,
+                testCasePanel,
             )
 
             val bottomPanel = JPanel()
@@ -667,7 +680,8 @@ class TestCaseDisplayService(private val project: Project) {
      * Updates the label with the number passed tests.
      */
     private fun updateTestsPassedLabel() {
-        testsPassedLabel.text = String.format(testsPassedText, project.service<TestsExecutionResultService>().size(), testCasePanels.size)
+        testsPassedLabel.text =
+            String.format(testsPassedText, testCasePanels.size - project.service<TestsExecutionResultService>().size(), testCasePanels.size)
     }
 
     /**
@@ -688,7 +702,9 @@ class TestCaseDisplayService(private val project: Project) {
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
-                it.replace("\r\n", "\n").replace("verifyException(", "// verifyException(") + "\n",
+                project.service<JavaClassBuilderService>().getTestMethodFromClassWithTestCaseName(
+                    it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
+                ) + "\n",
             )
         }
 
@@ -777,7 +793,7 @@ class TestCaseDisplayService(private val project: Project) {
             updateTestsSelectedLabel()
 
             // Passed tests update
-            project.service<TestsExecutionResultService>().removeFromPassingTest(test.testName)
+            project.service<TestsExecutionResultService>().removeFromFailingTest(test.testName)
             updateTestsPassedLabel()
 
             // If no more tests are remaining, close the tool window
@@ -878,44 +894,47 @@ class TestCaseDisplayService(private val project: Project) {
      * A helper method to add a listener to the test document (in the tool window panel)
      *   that enables reset button when the editor is changed.
      *
-     * @param document the document of the test case
      * @param resetButton the button to reset changes in the test
-     * @param textFieldEditor the text field editor with the test
+     * @param languageTextField the text field editor with the test
      * @param checkbox the checkbox to select the test
      */
     private fun addListeners(
-        document: Document,
         resetButton: JButton,
         resetToLastRunButton: JButton,
         runTestButton: JButton,
-        textFieldEditor: EditorTextField,
+        languageTextField: EditorTextField,
         checkbox: JCheckBox,
         testCase: TestCase,
         initialBorder: Border,
+        testCasePanel: JPanel,
     ) {
-        document.addDocumentListener(object : DocumentListener {
+        languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                val lastRunCode = project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
-                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+                val lastRunCode =
+                    project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
+                languageTextField.editor!!.markupModel.removeAllHighlighters()
 
-                resetButton.isEnabled = document.text != testCase.testCode
-                resetToLastRunButton.isEnabled = document.text != lastRunCode
-                runTestButton.isEnabled = document.text != lastRunCode && document.text != testCase.testCode
+                resetButton.isEnabled = languageTextField.document.text != testCase.testCode
+                resetToLastRunButton.isEnabled = languageTextField.document.text != lastRunCode
+                runTestButton.isEnabled =
+                    languageTextField.document.text != lastRunCode && languageTextField.document.text != testCase.testCode
 
-                textFieldEditor.border =
-                    when (document.text) {
+                languageTextField.border =
+                    when (languageTextField.document.text) {
                         testCase.testCode -> initialBorder
                         lastRunCode -> getBorder(testCase.testName)
                         else -> JBUI.Borders.empty()
                     }
 
+                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
+
                 val modifiedLineIndexes = getModifiedLines(
                     lastRunCode.split("\n"),
-                    document.text.split("\n"),
+                    languageTextField.document.text.split("\n"),
                 )
 
                 for (index in modifiedLineIndexes) {
-                    textFieldEditor.editor!!.markupModel.addLineHighlighter(
+                    languageTextField.editor!!.markupModel.addLineHighlighter(
                         DiffColors.DIFF_MODIFIED,
                         index,
                         HighlighterLayer.FIRST,
@@ -929,18 +948,19 @@ class TestCaseDisplayService(private val project: Project) {
 
         resetButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
-                document.setText(testCase.testCode)
+                languageTextField.document.setText(testCase.testCode)
                 project.service<Workspace>().updateTestCase(testCase)
                 resetButton.isEnabled = false
+                if ((initialBorder as MatteBorder).matteColor == JBColor.GREEN) {
+                    project.service<TestsExecutionResultService>().removeFromFailingTest(testCase.testName)
+                } else {
+                    project.service<TestsExecutionResultService>().addFailedTest(testCase.testName, testCasePanel.toolTipText)
+                }
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
-                if ((initialBorder as MatteBorder).matteColor == JBColor.GREEN) {
-                    project.service<TestsExecutionResultService>().addPassingTest(testCase.testName)
-                } else {
-                    project.service<TestsExecutionResultService>().removeFromPassingTest(testCase.testName)
-                }
-                textFieldEditor.border = initialBorder
-                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+                languageTextField.border = initialBorder
+                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
+                languageTextField.editor!!.markupModel.removeAllHighlighters()
 
                 updateTestsPassedLabel()
             }
@@ -948,23 +968,27 @@ class TestCaseDisplayService(private val project: Project) {
 
         resetToLastRunButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
-                document.setText(project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode)
+                languageTextField.document.setText(project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode)
                 resetToLastRunButton.isEnabled = false
                 runTestButton.isEnabled = false
-                textFieldEditor.border = getBorder(testCase.testName)
-                textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+                languageTextField.border = getBorder(testCase.testName)
+                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
+                languageTextField.editor!!.markupModel.removeAllHighlighters()
+
+                updateTestsPassedLabel()
             }
         }
 
         runTestButton.addActionListener {
             project.service<Workspace>().updateTestCase(
-                project.service<TestCoverageCollectorService>().updateDataWithTestCase(document.text, testCase.testName),
+                project.service<TestCoverageCollectorService>()
+                    .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
             )
-
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
-            textFieldEditor.border = getBorder(testCase.testName)
-            textFieldEditor.editor!!.markupModel.removeAllHighlighters()
+            languageTextField.border = getBorder(testCase.testName)
+            testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
+            languageTextField.editor!!.markupModel.removeAllHighlighters()
 
             updateTestsPassedLabel()
         }
@@ -1053,10 +1077,60 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun getBorder(testCaseName: String): Border {
         val size = 3
-        return if (project.service<TestsExecutionResultService>().isTestCasePassing(testCaseName)) {
-            MatteBorder(size, size, size, size, JBColor.GREEN)
-        } else {
+        return if (project.service<TestsExecutionResultService>().isTestCaseFailing(testCaseName)) {
             MatteBorder(size, size, size, size, JBColor.RED)
+        } else {
+            MatteBorder(size, size, size, size, JBColor.GREEN)
         }
+    }
+
+    /**
+     * This class is responsible for creating a test case document.
+     *
+     * @constructor Creates a new TestCaseDocumentCreator object.
+     */
+    open class TestCaseDocumentCreator(private val className: String) : DocumentCreator {
+        /**
+         * Creates a document based on the given parameters. Copied from com.intellij.ui.LanguageTextField
+         *
+         * @param value            The initial text to set in the document.
+         * @param language         The language associated with the document.
+         * @param project          The project to which the document belongs.
+         * @return The created document. Can be null if the language is null and the document
+         *         is created using EditorFactory.
+         */
+        override fun createDocument(value: String?, language: Language?, project: Project?): Document {
+            return if (language != null) {
+                val notNullProject = project ?: ProjectManager.getInstance().defaultProject
+                val factory = PsiFileFactory.getInstance(notNullProject)
+                val fileType: FileType = language.associatedFileType!!
+                val stamp = LocalTimeCounter.currentTime()
+                val psiFile = factory.createFileFromText(
+                    "$className." + fileType.defaultExtension,
+                    fileType,
+                    "",
+                    stamp,
+                    true,
+                    false,
+                )
+                customizePsiFile(psiFile)
+
+                // No need to guess project in getDocument - we already know it
+                val document = PsiDocumentManager.getInstance(notNullProject).getDocument(psiFile)!!
+                ApplicationManager.getApplication().runWriteAction {
+                    document.setText(value!!) // do not put initial value into backing LightVirtualFile.contentsToByteArray
+                }
+                document
+            } else {
+                EditorFactory.getInstance().createDocument(value!!)
+            }
+        }
+
+        /**
+         * Customizes the given PsiFile.
+         *
+         * @param file The PsiFile to be customized.
+         */
+        open fun customizePsiFile(file: PsiFile?) {}
     }
 }
