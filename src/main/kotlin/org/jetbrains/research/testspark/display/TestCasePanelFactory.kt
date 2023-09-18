@@ -37,6 +37,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 import javax.swing.ScrollPaneConstants
+import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
@@ -94,7 +95,7 @@ class TestCasePanelFactory(
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
-    private val loadingIcon: JLabel = JLabel(TestSparkIcons.loading)
+    private val loadingLabel: JLabel = JLabel(TestSparkIcons.loading)
 
     private val initialCodes: MutableList<String> = mutableListOf()
     private val lastRunCodes: MutableList<String> = mutableListOf()
@@ -224,8 +225,8 @@ class TestCasePanelFactory(
         runTestButton.isEnabled = false
         buttonsPanel.add(runTestButton)
         buttonsPanel.add(Box.createRigidArea(Dimension(5, 0)))
-        loadingIcon.isVisible = false
-        buttonsPanel.add(loadingIcon)
+        loadingLabel.isVisible = false
+        buttonsPanel.add(loadingLabel)
         buttonsPanel.add(Box.createHorizontalGlue())
         resetButton.isEnabled = false
         buttonsPanel.add(resetButton)
@@ -356,9 +357,6 @@ class TestCasePanelFactory(
      */
     private fun sendRequest() {
         WriteCommandAction.runWriteCommandAction(project) {
-            loadingIcon.isVisible = true
-            loadingIcon.repaint()
-
             // TODO implement code creator
             val code = "// Here will be a new code.\n" +
                 "// Your request: ${requestField.text}.\n" +
@@ -385,9 +383,6 @@ class TestCasePanelFactory(
             sendButton.isEnabled = false
 
             switchToAnotherCode()
-
-            loadingIcon.isVisible = false
-            loadingIcon.repaint()
         }
     }
 
@@ -400,25 +395,25 @@ class TestCasePanelFactory(
      * and updates the UI.
      */
     private fun runTest() {
-        loadingIcon.isVisible = true
-        loadingIcon.repaint()
+        loadingLabel.isVisible = true
 
-        project.service<Workspace>().updateTestCase(
-            project.service<TestCoverageCollectorService>()
-                .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
-        )
-        resetToLastRunButton.isEnabled = false
-        runTestButton.isEnabled = false
-        updateBorder()
-        updateErrorLabel()
-        languageTextField.editor!!.markupModel.removeAllHighlighters()
+        SwingUtilities.invokeLater {
+            project.service<Workspace>().updateTestCase(
+                project.service<TestCoverageCollectorService>()
+                    .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
+            )
+            resetToLastRunButton.isEnabled = false
+            runTestButton.isEnabled = false
+            updateBorder()
+            updateErrorLabel()
+            languageTextField.editor!!.markupModel.removeAllHighlighters()
 
-        lastRunCodes[currentRequestNumber - 1] = languageTextField.document.text
+            lastRunCodes[currentRequestNumber - 1] = languageTextField.document.text
 
-        project.service<TestCaseDisplayService>().updateUI()
+            loadingLabel.isVisible = false
 
-        loadingIcon.isVisible = false
-        loadingIcon.repaint()
+            project.service<TestCaseDisplayService>().updateUI()
+        }
     }
 
     /**
