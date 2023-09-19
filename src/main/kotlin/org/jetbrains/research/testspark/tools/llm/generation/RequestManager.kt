@@ -19,12 +19,17 @@ abstract class RequestManager {
         packageName: String,
         project: Project,
         llmErrorManager: LLMErrorManager,
+        isUserFeedback: Boolean = false
     ): Pair<String, TestSuiteGeneratedByLLM?>
 
     open fun processResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
+
+        if(testsAssembler.rawText.isEmpty()){
+            return Pair("", null)
+        }
         // save the full response in the chat history
         val response = testsAssembler.rawText
         log.info("The full response: \n $response")
@@ -42,5 +47,20 @@ abstract class RequestManager {
             ?: return Pair("The provided code is not parsable. Please give the correct code", null)
 
         return Pair("", testSuiteGeneratedByLLM.reformat())
+    }
+
+    abstract fun send(prompt: String,
+                      indicator: ProgressIndicator,
+                      project: Project,
+                      llmErrorManager: LLMErrorManager): TestsAssembler
+
+    open fun processUserFeedbackResponse(testsAssembler: TestsAssembler,
+                                         packageName: String) : Pair<String, TestSuiteGeneratedByLLM?>{
+        val response = testsAssembler.rawText
+        log.info("The full response: \n $response")
+
+        val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
+
+        return Pair("", testSuiteGeneratedByLLM)
     }
 }

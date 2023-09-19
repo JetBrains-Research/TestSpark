@@ -114,7 +114,7 @@
         <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.ErrorService"/>
         <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.LLMChatHistoryService"/>
+                serviceImplementation="org.jetbrains.research.testspark.services.LLMChatService"/>
         <projectService
                 serviceImplementation="org.jetbrains.research.testspark.services.TestsExecutionResultService"/>
         <projectService

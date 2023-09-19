@@ -13,6 +13,7 @@ class GrazieRequestManager : RequestManager() {
         packageName: String,
         project: Project,
         llmErrorManager: LLMErrorManager,
+        isUserFeedback: Boolean
     ): Pair<String, TestSuiteGeneratedByLLM?> {
         // update chat history
         chatHistory.add(ChatMessage("user", prompt))
@@ -43,6 +44,16 @@ class GrazieRequestManager : RequestManager() {
             Pair("", null)
         }
     }
+
+    override fun send(
+        prompt: String,
+        indicator: ProgressIndicator,
+        project: Project,
+        llmErrorManager: LLMErrorManager
+    ): TestsAssembler {
+        TODO("Not yet implemented")
+    }
+
 
     private fun getMessages(): List<Pair<String, String>> {
         val result = mutableListOf<Pair<String, String>>()

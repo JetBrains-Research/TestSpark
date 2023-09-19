@@ -33,15 +33,42 @@ class OpenAIRequestManager : RequestManager() {
      * @param llmErrorManager the error manager to handle errors during the request
      * @return the generated TestSuite, or null and prompt message
      */
-    override fun request(prompt: String, indicator: ProgressIndicator, packageName: String, project: Project, llmErrorManager: LLMErrorManager): Pair<String, TestSuiteGeneratedByLLM?> {
+    override fun request(prompt: String,
+                         indicator: ProgressIndicator,
+                         packageName: String,
+                         project: Project,
+                         llmErrorManager: LLMErrorManager,
+                         isUserFeedback: Boolean
+    ): Pair<String, TestSuiteGeneratedByLLM?> {
+
+        // save the prompt in chat history if it is not user feedback
+
+        chatHistory.add(ChatMessage("user", prompt))
+
+        // Send Request to LLM
+        log.info("Sending Request ...")
+        val testsAssembler = send(prompt, indicator,project,llmErrorManager)
+
+        // we remove the user request because we dont users requests in chat history
+        if (isUserFeedback)
+            chatHistory.removeLast()
+
+        return when(isUserFeedback){
+            true -> processUserFeedbackResponse(testsAssembler, packageName)
+            false -> processResponse(testsAssembler, packageName)
+        }
+    }
+    override fun send(prompt: String,
+                      indicator: ProgressIndicator,
+                      project: Project,
+                      llmErrorManager: LLMErrorManager): TestsAssembler {
+
         // Prepare the chat
-        val llmRequestBody = buildRequestBody(prompt)
+        val llmRequestBody = OpenAIRequestBody(model, chatHistory)
 
         // Prepare the test assembler
         val testsAssembler = TestsAssembler(project, indicator)
 
-        // Send Request to LLM
-        log.info("Sending Request ...")
         try {
             httpRequest.connect {
                 it.write(GsonBuilder().create().toJson(llmRequestBody))
@@ -71,22 +98,9 @@ class OpenAIRequestManager : RequestManager() {
                 }
             }
         } catch (e: HttpStatusException) {
-            return Pair("", null)
+            log.error("Error in sending request: ${e.message}")
         }
-        return processResponse(testsAssembler, packageName)
-    }
 
-    /**
-     * Builds a new OpenAI request body instance using the given prompt.
-     * Adds the prompt to the chat history and then constructs the OpenAIRequestBody using the chatHistory and model
-     *
-     * @param prompt The prompt for the user.
-     * @return The newly created OpenAIRequestBody object.
-     */
-    private fun buildRequestBody(prompt: String): OpenAIRequestBody {
-        // add new prompt to chat history
-        chatHistory.add(ChatMessage("user", prompt))
-
-        return OpenAIRequestBody(model, chatHistory)
+        return testsAssembler
     }
 }
