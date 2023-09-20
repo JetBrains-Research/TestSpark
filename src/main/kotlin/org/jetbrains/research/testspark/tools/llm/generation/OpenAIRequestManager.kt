@@ -22,10 +22,12 @@ class OpenAIRequestManager : RequestManager() {
         it.setRequestProperty("Authorization", "Bearer $token")
     }
 
-    override fun send(prompt: String,
-                      indicator: ProgressIndicator,
-                      project: Project,
-                      llmErrorManager: LLMErrorManager): TestsAssembler {
+    override fun send(
+        prompt: String,
+        indicator: ProgressIndicator,
+        project: Project,
+        llmErrorManager: LLMErrorManager
+    ): TestsAssembler {
 
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(model, chatHistory)

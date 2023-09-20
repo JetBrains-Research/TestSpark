@@ -35,7 +35,7 @@ class GrazieRequestManager : RequestManager() {
             } else {
                 testsAssembler = requestResult.second
             }
-        }catch (e: ClassNotFoundException){
+        } catch (e: ClassNotFoundException) {
             llmErrorManager.errorProcess("Grazie test generation feature is not available in this build.", project)
         }
 

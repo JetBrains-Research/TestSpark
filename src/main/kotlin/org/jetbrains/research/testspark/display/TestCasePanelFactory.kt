@@ -362,11 +362,12 @@ class TestCasePanelFactory(
                 override fun run(indicator: ProgressIndicator) {
                     if (processStopped(project, indicator)) return
 
-                    val modifiedTest = project.service<LLMChatService>().testModificationRequest(initialCodes[currentRequestNumber - 1],requestField.text, indicator)
+                    val modifiedTest = project.service<LLMChatService>()
+                        .testModificationRequest(initialCodes[currentRequestNumber - 1], requestField.text, indicator)
 
                     if (modifiedTest != null) {
                         addTest(modifiedTest)
-                    }else {
+                    } else {
                         indicator.text = "No new test returned!"
                     }
                     if (processStopped(project, indicator)) return
@@ -376,10 +377,11 @@ class TestCasePanelFactory(
             })
     }
 
-    private fun addTest(testSuite: TestSuiteGeneratedByLLM){
+    private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
         WriteCommandAction.runWriteCommandAction(project) {
 
-            testSuite.testFileName = project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)
+            testSuite.testFileName =
+                project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)
             val code = testSuite.toString()
             // run new code
             project.service<Workspace>().updateTestCase(

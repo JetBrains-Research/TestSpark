@@ -31,19 +31,19 @@ abstract class RequestManager {
         project: Project,
         llmErrorManager: LLMErrorManager,
         isUserFeedback: Boolean = false
-    ): Pair<String, TestSuiteGeneratedByLLM?>{
+    ): Pair<String, TestSuiteGeneratedByLLM?> {
         // save the prompt in chat history
         chatHistory.add(ChatMessage("user", prompt))
 
         // Send Request to LLM
         log.info("Sending Request ...")
-        val testsAssembler = send(prompt, indicator,project,llmErrorManager)
+        val testsAssembler = send(prompt, indicator, project, llmErrorManager)
 
         // we remove the user request because we dont users requests in chat history
         if (isUserFeedback)
             chatHistory.removeLast()
 
-        return when(isUserFeedback){
+        return when (isUserFeedback) {
             true -> processUserFeedbackResponse(testsAssembler, packageName)
             false -> processResponse(testsAssembler, packageName)
         }
@@ -54,7 +54,7 @@ abstract class RequestManager {
         packageName: String,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
 
-        if(testsAssembler.rawText.isEmpty()){
+        if (testsAssembler.rawText.isEmpty()) {
             return Pair("", null)
         }
         // save the full response in the chat history
@@ -76,13 +76,17 @@ abstract class RequestManager {
         return Pair("", testSuiteGeneratedByLLM.reformat())
     }
 
-    abstract fun send(prompt: String,
-                      indicator: ProgressIndicator,
-                      project: Project,
-                      llmErrorManager: LLMErrorManager): TestsAssembler
+    abstract fun send(
+        prompt: String,
+        indicator: ProgressIndicator,
+        project: Project,
+        llmErrorManager: LLMErrorManager
+    ): TestsAssembler
 
-    open fun processUserFeedbackResponse(testsAssembler: TestsAssembler,
-                                         packageName: String) : Pair<String, TestSuiteGeneratedByLLM?>{
+    open fun processUserFeedbackResponse(
+        testsAssembler: TestsAssembler,
+        packageName: String
+    ): Pair<String, TestSuiteGeneratedByLLM?> {
         val response = testsAssembler.rawText
         log.info("The full response: \n $response")
 

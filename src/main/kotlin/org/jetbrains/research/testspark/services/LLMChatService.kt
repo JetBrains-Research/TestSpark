@@ -28,15 +28,16 @@ class LLMChatService(
         return requestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
     }
 
-
-
-
-    fun testModificationRequest(testcase: String, task: String, indicator: ProgressIndicator): TestSuiteGeneratedByLLM? {
+    fun testModificationRequest(
+        testcase: String,
+        task: String,
+        indicator: ProgressIndicator
+    ): TestSuiteGeneratedByLLM? {
         val prompt = "For this test:\n ```\n $testcase\n ```\nPerform the following task: $task"
 
         var packageName = ""
         testcase.split("\n")[0].let {
-            if(it.startsWith("package")){
+            if (it.startsWith("package")) {
                 packageName = it
                     .removePrefix("package ")
                     .removeSuffix(";")
@@ -44,12 +45,14 @@ class LLMChatService(
             }
         }
 
-        val requestResult = requestManager.request(prompt,
+        val requestResult = requestManager.request(
+            prompt,
             indicator,
             packageName,
             project,
             LLMErrorManager(),
-            isUserFeedback = true)
+            isUserFeedback = true
+        )
 
         return requestResult.second
     }
