@@ -437,7 +437,7 @@ class TestCaseDisplayService(private val project: Project) {
     fun getEditor(testCaseName: String): EditorTextField? {
         val middlePanelComponent = testCasePanels[testCaseName]?.getComponent(2) ?: return null
         val middlePanel = middlePanelComponent as JPanel
-        return middlePanel.getComponent(1) as EditorTextField
+        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
     }
 
     /**
