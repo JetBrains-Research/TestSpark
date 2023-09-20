@@ -8,7 +8,6 @@ import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import java.net.HttpURLConnection
 
 /**
@@ -23,41 +22,6 @@ class OpenAIRequestManager : RequestManager() {
         it.setRequestProperty("Authorization", "Bearer $token")
     }
 
-    /**
-     * Sends a request to LLM with the given prompt and returns the generated TestSuite.
-     *
-     * @param prompt the prompt to send to LLM
-     * @param indicator the progress indicator to show progress during the request
-     * @param packageName the name of the package for the generated TestSuite
-     * @param project the project associated with the request
-     * @param llmErrorManager the error manager to handle errors during the request
-     * @return the generated TestSuite, or null and prompt message
-     */
-    override fun request(prompt: String,
-                         indicator: ProgressIndicator,
-                         packageName: String,
-                         project: Project,
-                         llmErrorManager: LLMErrorManager,
-                         isUserFeedback: Boolean
-    ): Pair<String, TestSuiteGeneratedByLLM?> {
-
-        // save the prompt in chat history if it is not user feedback
-
-        chatHistory.add(ChatMessage("user", prompt))
-
-        // Send Request to LLM
-        log.info("Sending Request ...")
-        val testsAssembler = send(prompt, indicator,project,llmErrorManager)
-
-        // we remove the user request because we dont users requests in chat history
-        if (isUserFeedback)
-            chatHistory.removeLast()
-
-        return when(isUserFeedback){
-            true -> processUserFeedbackResponse(testsAssembler, packageName)
-            false -> processResponse(testsAssembler, packageName)
-        }
-    }
     override fun send(prompt: String,
                       indicator: ProgressIndicator,
                       project: Project,
