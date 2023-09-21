@@ -1,5 +1,9 @@
 package org.jetbrains.research.testspark.services
 
+import com.github.javaparser.StaticJavaParser
+import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import com.intellij.openapi.project.Project
 import java.util.Locale
 
@@ -96,24 +100,41 @@ class JavaClassBuilderService(private val project: Project) {
      * @param code The code of the class containing test methods.
      * @return The test method as a string, including the "@Test" annotation.
      */
-    fun getTestMethodFromClassWithTestCaseName(code: String): String {
+    fun getTestMethodCodeFromClassWithTestCase(code: String): String {
         var result = ""
-        val upperCutCode = "\t@Test" + code.split("@Test").last()
-        var methodStarted = false
-        var balanceOfBrackets = 0
-        for (symbol in upperCutCode) {
-            result += symbol
-            if (symbol == '{') {
-                methodStarted = true
-                balanceOfBrackets++
+        val componentUnit: CompilationUnit = StaticJavaParser.parse(code)
+
+        object : VoidVisitorAdapter<Any?>() {
+            override fun visit(method: MethodDeclaration, arg: Any?) {
+                super.visit(method, arg)
+                if (method.getAnnotationByName("Test").isPresent) {
+                    result += "\t" + method.toString().replace("\n", "\n\t") + "\n\n"
+                }
             }
-            if (symbol == '}') {
-                balanceOfBrackets--
+        }.visit(componentUnit, null)
+
+        return result
+    }
+
+    /**
+     * Retrieves the name of the test method from a given Java class with test cases.
+     *
+     * @param code The source code of the Java class with test cases.
+     * @return The name of the test method. If no test method is found, an empty string is returned.
+     */
+    fun getTestMethodNameFromClassWithTestCase(code: String): String {
+        var result = ""
+        val componentUnit: CompilationUnit = StaticJavaParser.parse(code)
+
+        object : VoidVisitorAdapter<Any?>() {
+            override fun visit(method: MethodDeclaration, arg: Any?) {
+                super.visit(method, arg)
+                if (method.getAnnotationByName("Test").isPresent) {
+                    result = method.nameAsString
+                }
             }
-            if (methodStarted && balanceOfBrackets == 0) {
-                break
-            }
-        }
-        return result + "\n"
+        }.visit(componentUnit, null)
+
+        return result
     }
 }

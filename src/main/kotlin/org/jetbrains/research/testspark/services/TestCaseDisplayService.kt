@@ -437,7 +437,7 @@ class TestCaseDisplayService(private val project: Project) {
     fun getEditor(testCaseName: String): EditorTextField? {
         val middlePanelComponent = testCasePanels[testCaseName]?.getComponent(2) ?: return null
         val middlePanel = middlePanelComponent as JPanel
-        return middlePanel.getComponent(1) as EditorTextField
+        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
     }
 
     /**
@@ -454,13 +454,13 @@ class TestCaseDisplayService(private val project: Project) {
         )
 
         // insert tests to a code
-        testCaseComponents.forEach {
+        testCaseComponents.reversed().forEach {
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
-                project.service<JavaClassBuilderService>().getTestMethodFromClassWithTestCaseName(
+                project.service<JavaClassBuilderService>().getTestMethodCodeFromClassWithTestCase(
                     it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
-                ) + "\n",
+                ),
             )
         }
 
