@@ -19,7 +19,7 @@ data class TestSuiteGeneratedByLLM(
     var otherInfo: String = "",
     var testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf(),
 ) {
-    private val testFileName: String = "GeneratedTest"
+    var testFileName: String = "GeneratedTest"
 
     /**
      * Checks if the testCases collection is empty.

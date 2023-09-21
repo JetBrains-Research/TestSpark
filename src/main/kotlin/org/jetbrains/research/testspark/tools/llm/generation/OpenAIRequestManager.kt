@@ -8,7 +8,6 @@ import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import java.net.HttpURLConnection
 
 /**
@@ -23,25 +22,19 @@ class OpenAIRequestManager : RequestManager() {
         it.setRequestProperty("Authorization", "Bearer $token")
     }
 
-    /**
-     * Sends a request to LLM with the given prompt and returns the generated TestSuite.
-     *
-     * @param prompt the prompt to send to LLM
-     * @param indicator the progress indicator to show progress during the request
-     * @param packageName the name of the package for the generated TestSuite
-     * @param project the project associated with the request
-     * @param llmErrorManager the error manager to handle errors during the request
-     * @return the generated TestSuite, or null and prompt message
-     */
-    override fun request(prompt: String, indicator: ProgressIndicator, packageName: String, project: Project, llmErrorManager: LLMErrorManager): Pair<String, TestSuiteGeneratedByLLM?> {
+    override fun send(
+        prompt: String,
+        indicator: ProgressIndicator,
+        project: Project,
+        llmErrorManager: LLMErrorManager
+    ): TestsAssembler {
+
         // Prepare the chat
-        val llmRequestBody = buildRequestBody(prompt)
+        val llmRequestBody = OpenAIRequestBody(model, chatHistory)
 
         // Prepare the test assembler
         val testsAssembler = TestsAssembler(project, indicator)
 
-        // Send Request to LLM
-        log.info("Sending Request ...")
         try {
             httpRequest.connect {
                 it.write(GsonBuilder().create().toJson(llmRequestBody))
@@ -71,22 +64,9 @@ class OpenAIRequestManager : RequestManager() {
                 }
             }
         } catch (e: HttpStatusException) {
-            return Pair("", null)
+            log.error("Error in sending request: ${e.message}")
         }
-        return processResponse(testsAssembler, packageName)
-    }
 
-    /**
-     * Builds a new OpenAI request body instance using the given prompt.
-     * Adds the prompt to the chat history and then constructs the OpenAIRequestBody using the chatHistory and model
-     *
-     * @param prompt The prompt for the user.
-     * @return The newly created OpenAIRequestBody object.
-     */
-    private fun buildRequestBody(prompt: String): OpenAIRequestBody {
-        // add new prompt to chat history
-        chatHistory.add(ChatMessage("user", prompt))
-
-        return OpenAIRequestBody(model, chatHistory)
+        return testsAssembler
     }
 }

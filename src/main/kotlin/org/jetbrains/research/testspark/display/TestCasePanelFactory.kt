@@ -8,19 +8,26 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.COVERAGE_SELECTION_TOGGLE_TOPIC
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.tools.processStopped
 import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Graphics2D
@@ -356,13 +363,32 @@ class TestCasePanelFactory(
      * After adding the code, it switches to another code.
      */
     private fun sendRequest() {
-        WriteCommandAction.runWriteCommandAction(project) {
-            // TODO implement code creator
-            val code = "// Here will be a new code.\n" +
-                "// Your request: ${requestField.text}.\n" +
-                "// Working code:\n" +
-                initialCodes[currentRequestNumber - 1]
+        ProgressManager.getInstance()
+            .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
+                override fun run(indicator: ProgressIndicator) {
+                    if (processStopped(project, indicator)) return
 
+                    val modifiedTest = project.service<LLMChatService>()
+                        .testModificationRequest(initialCodes[currentRequestNumber - 1], requestField.text, indicator)
+
+                    if (modifiedTest != null) {
+                        addTest(modifiedTest)
+                    } else {
+                        indicator.text = "No new test returned!"
+                    }
+                    if (processStopped(project, indicator)) return
+
+                    indicator.stop()
+                }
+            })
+    }
+
+    private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
+        WriteCommandAction.runWriteCommandAction(project) {
+
+            testSuite.testFileName =
+                project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)
+            val code = testSuite.toString()
             // run new code
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
