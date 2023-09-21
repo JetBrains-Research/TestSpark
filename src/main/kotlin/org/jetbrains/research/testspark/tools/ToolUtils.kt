@@ -68,7 +68,7 @@ fun saveData(
     workspace.testGenerationData.packageLine = packageLine
     workspace.testGenerationData.importsCode.addAll(importsCode)
 
-    project.service<TestsExecutionResultService>().initExecutionResult(report.testCaseList.values.map { it.testName })
+    project.service<TestsExecutionResultService>().initExecutionResult(report.testCaseList.values.map { it.id })
 
     for (testCase in report.testCaseList.values) {
         val code = testCase.testCode
@@ -86,7 +86,7 @@ fun saveData(
 
     for (testCase in report.testCaseList.values) {
         indicator.text = "Executing ${testCase.testName}"
-        project.service<TestCoverageCollectorService>().updateDataWithTestCase(testCase.testCode, testCase.testName)
+        project.service<TestCoverageCollectorService>().updateDataWithTestCase(testCase.id, testCase.testName, testCase.testCode)
     }
 
     workspace.testGenerationData.testGenerationResultList.add(report)

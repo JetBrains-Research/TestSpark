@@ -145,7 +145,7 @@ class TestCaseDisplayService(private val project: Project) {
             checkbox.isSelected = true
             checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-                    .testGenerationResult(testCase.testName, checkbox.isSelected, editor)
+                    .testGenerationResult(testCase.id, checkbox.isSelected, editor)
 
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))

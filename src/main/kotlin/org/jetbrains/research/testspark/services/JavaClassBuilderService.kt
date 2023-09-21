@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.services
 
+import com.github.javaparser.ParseProblemException
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.MethodDeclaration
@@ -102,39 +103,63 @@ class JavaClassBuilderService(private val project: Project) {
      */
     fun getTestMethodCodeFromClassWithTestCase(code: String): String {
         var result = ""
-        val componentUnit: CompilationUnit = StaticJavaParser.parse(code)
+        try {
+            val componentUnit: CompilationUnit = StaticJavaParser.parse(code)
+            object : VoidVisitorAdapter<Any?>() {
+                override fun visit(method: MethodDeclaration, arg: Any?) {
+                    super.visit(method, arg)
+                    if (method.getAnnotationByName("Test").isPresent) {
+                        result += "\t" + method.toString().replace("\n", "\n\t") + "\n\n"
+                    }
+                }
+            }.visit(componentUnit, null)
 
-        object : VoidVisitorAdapter<Any?>() {
-            override fun visit(method: MethodDeclaration, arg: Any?) {
-                super.visit(method, arg)
-                if (method.getAnnotationByName("Test").isPresent) {
-                    result += "\t" + method.toString().replace("\n", "\n\t") + "\n\n"
+            return result
+        } catch (e: ParseProblemException) {
+            val upperCutCode = "\t@Test" + code.split("@Test").last()
+            var methodStarted = false
+            var balanceOfBrackets = 0
+            for (symbol in upperCutCode) {
+                result += symbol
+                if (symbol == '{') {
+                    methodStarted = true
+                    balanceOfBrackets++
+                }
+                if (symbol == '}') {
+                    balanceOfBrackets--
+                }
+                if (methodStarted && balanceOfBrackets == 0) {
+                    break
                 }
             }
-        }.visit(componentUnit, null)
-
-        return result
+            return result + "\n"
+        }
     }
 
     /**
      * Retrieves the name of the test method from a given Java class with test cases.
      *
+     * @param oldTestCaseName The old name of test case
      * @param code The source code of the Java class with test cases.
      * @return The name of the test method. If no test method is found, an empty string is returned.
      */
-    fun getTestMethodNameFromClassWithTestCase(code: String): String {
+    fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, code: String): String {
         var result = ""
-        val componentUnit: CompilationUnit = StaticJavaParser.parse(code)
+        try {
+            val componentUnit: CompilationUnit = StaticJavaParser.parse(code)
 
-        object : VoidVisitorAdapter<Any?>() {
-            override fun visit(method: MethodDeclaration, arg: Any?) {
-                super.visit(method, arg)
-                if (method.getAnnotationByName("Test").isPresent) {
-                    result = method.nameAsString
+            object : VoidVisitorAdapter<Any?>() {
+                override fun visit(method: MethodDeclaration, arg: Any?) {
+                    super.visit(method, arg)
+                    if (method.getAnnotationByName("Test").isPresent) {
+                        result = method.nameAsString
+                    }
                 }
-            }
-        }.visit(componentUnit, null)
+            }.visit(componentUnit, null)
 
-        return result
+            return result
+        } catch (e: ParseProblemException) {
+            return oldTestCaseName
+        }
     }
 }
