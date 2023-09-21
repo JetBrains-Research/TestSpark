@@ -50,4 +50,7 @@ object TestSparkIcons {
 
     @JvmField
     val send = IconLoader.getIcon("/icons/send.svg", javaClass)
+
+    @JvmField
+    val loading = IconLoader.getIcon("/icons/loading.svg", javaClass)
 }

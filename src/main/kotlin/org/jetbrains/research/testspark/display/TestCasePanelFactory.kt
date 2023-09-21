@@ -44,6 +44,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 import javax.swing.ScrollPaneConstants
+import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
@@ -100,6 +101,8 @@ class TestCasePanelFactory(
     private val requestField = HintTextField(TestSparkLabelsBundle.defaultValue("requestFieldHint"))
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
+
+    private val loadingLabel: JLabel = JLabel(TestSparkIcons.loading)
 
     private val initialCodes: MutableList<String> = mutableListOf()
     private val lastRunCodes: MutableList<String> = mutableListOf()
@@ -228,6 +231,9 @@ class TestCasePanelFactory(
         buttonsPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         runTestButton.isEnabled = false
         buttonsPanel.add(runTestButton)
+        buttonsPanel.add(Box.createRigidArea(Dimension(5, 0)))
+        loadingLabel.isVisible = false
+        buttonsPanel.add(loadingLabel)
         buttonsPanel.add(Box.createHorizontalGlue())
         resetButton.isEnabled = false
         buttonsPanel.add(resetButton)
@@ -415,19 +421,25 @@ class TestCasePanelFactory(
      * and updates the UI.
      */
     private fun runTest() {
-        project.service<Workspace>().updateTestCase(
-            project.service<TestCoverageCollectorService>()
-                .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
-        )
-        resetToLastRunButton.isEnabled = false
-        runTestButton.isEnabled = false
-        updateBorder()
-        updateErrorLabel()
-        languageTextField.editor!!.markupModel.removeAllHighlighters()
+        loadingLabel.isVisible = true
 
-        lastRunCodes[currentRequestNumber - 1] = languageTextField.document.text
+        SwingUtilities.invokeLater {
+            project.service<Workspace>().updateTestCase(
+                project.service<TestCoverageCollectorService>()
+                    .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
+            )
+            resetToLastRunButton.isEnabled = false
+            runTestButton.isEnabled = false
+            updateBorder()
+            updateErrorLabel()
+            languageTextField.editor!!.markupModel.removeAllHighlighters()
 
-        project.service<TestCaseDisplayService>().updateUI()
+            lastRunCodes[currentRequestNumber - 1] = languageTextField.document.text
+
+            loadingLabel.isVisible = false
+
+            project.service<TestCaseDisplayService>().updateUI()
+        }
     }
 
     /**
