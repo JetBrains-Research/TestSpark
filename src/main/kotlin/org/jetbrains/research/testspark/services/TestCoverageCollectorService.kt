@@ -149,8 +149,7 @@ class TestCoverageCollectorService(private val project: Project) {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
                 "-cp",
-                "${project.service<TestCoverageCollectorService>().getPath(projectBuildPath)
-                }${project.service<TestCoverageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
+                "${project.service<TestCoverageCollectorService>().getPath(projectBuildPath)}${project.service<TestCoverageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
                 name,
             ),
@@ -196,6 +195,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param xmlFileName The XML file name to read data from.
      */
     fun getTestCaseFromXml(
+        testCaseId: Int,
         testCaseName: String,
         testCaseCode: String,
         linesCoveredDuringTheException: Set<Int>,
@@ -214,9 +214,7 @@ class TestCoverageCollectorService(private val project: Project) {
                         children("counter") {}
                     }
                     children("sourcefile") {
-                        isCorrectSourceFile =
-                            this.attributes.getValue("name") == project.service<Workspace>().fileUrl!!.split(File.separatorChar)
-                            .last()
+                        isCorrectSourceFile = this.attributes.getValue("name") == project.service<Workspace>().fileUrl!!.split(File.separatorChar).last()
                         children("line") {
                             if (isCorrectSourceFile && this.attributes.getValue("mi") == "0") {
                                 setOfLines.add(this.attributes.getValue("nr").toInt())
@@ -235,7 +233,7 @@ class TestCoverageCollectorService(private val project: Project) {
         // Add lines that Jacoco might have missed because of its limitation during the exception
         setOfLines.addAll(linesCoveredDuringTheException)
 
-        return TestCase(testCaseName, testCaseCode, setOfLines, setOf(), setOf())
+        return TestCase(testCaseId, testCaseName, testCaseCode, setOfLines, setOf(), setOf())
     }
 
     /**
@@ -264,18 +262,23 @@ class TestCoverageCollectorService(private val project: Project) {
             }
         }
 
-        return Pair(Regex("(^\\d+\\) .+)|(^.+(Exception|Error): .+)|(^\\s+at .+)|(^\\s+... \\d+ more)|(^\\s*Caused by:.+)").find(testExecutionError) != null, result)
+        return Pair(
+            Regex("(^\\d+\\) .+)|(^.+(Exception|Error): .+)|(^\\s+at .+)|(^\\s+... \\d+ more)|(^\\s*Caused by:.+)").find(
+                testExecutionError,
+            ) != null,
+            result,
+        )
     }
 
     /**
      * Update the code of the test.
      *
+     * @param fileName new tmp filename
+     * @param testId new id of test
      * @param testCode new code of test
      * @param testName the name of the test
      */
-    fun updateDataWithTestCase(testCode: String, testName: String): TestCase {
-        val fileName = "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(testName)}.java"
-
+    fun updateDataWithTestCase(fileName: String, testId: Int, testName: String, testCode: String): TestCase {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
@@ -292,9 +295,10 @@ class TestCoverageCollectorService(private val project: Project) {
         )
 
         // compilation checking
-        val compilationResult = project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath)
+        val compilationResult =
+            project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath)
         if (!compilationResult.first) {
-            project.service<TestsExecutionResultService>().addFailedTest(testName, testCode, compilationResult.second)
+            project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, compilationResult.second)
         } else {
             val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${fileName.split(".")[0]}"
 
@@ -307,9 +311,10 @@ class TestCoverageCollectorService(private val project: Project) {
             )
 
             if (!File("$dataFileName.xml").exists()) {
-                project.service<TestsExecutionResultService>().addFailedTest(testName, testCode, testExecutionError)
+                project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, testExecutionError)
             } else {
                 val testCase = project.service<TestCoverageCollectorService>().getTestCaseFromXml(
+                    testId,
                     testName,
                     testCode,
                     project.service<TestCoverageCollectorService>().getExceptionData(testExecutionError).second,
@@ -317,9 +322,9 @@ class TestCoverageCollectorService(private val project: Project) {
                 )
 
                 if (getExceptionData(testExecutionError).first) {
-                    project.service<TestsExecutionResultService>().addFailedTest(testName, testCode, testExecutionError)
+                    project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, testExecutionError)
                 } else {
-                    project.service<TestsExecutionResultService>().addPassedTest(testName, testCode)
+                    project.service<TestsExecutionResultService>().addPassedTest(testId, testCode)
                 }
 
                 project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
@@ -329,6 +334,6 @@ class TestCoverageCollectorService(private val project: Project) {
         }
         project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
 
-        return TestCase(testName, testCode, setOf(), setOf(), setOf())
+        return TestCase(testId, testName, testCode, setOf(), setOf(), setOf())
     }
 }

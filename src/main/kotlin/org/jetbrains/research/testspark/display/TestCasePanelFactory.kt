@@ -192,9 +192,9 @@ class TestCasePanelFactory(
      * adds it to the middlePanel with appropriate spacing.
      */
     fun getMiddlePanel(): JPanel {
-        initialCodes.add(languageTextField.document.text)
-        lastRunCodes.add(languageTextField.document.text)
-        currentCodes.add(languageTextField.document.text)
+        initialCodes.add(testCase.testCode)
+        lastRunCodes.add(testCase.testCode)
+        currentCodes.add(testCase.testCode)
 
         // Set border
         updateBorder()
@@ -293,7 +293,7 @@ class TestCasePanelFactory(
      * Updates the error label with a new message.
      */
     private fun updateErrorLabel() {
-        val error = project.service<TestsExecutionResultService>().getCurrentError(testCase.testName)
+        val error = project.service<TestsExecutionResultService>().getCurrentError(testCase.id)
         if (error.isBlank()) {
             errorLabel.isVisible = false
         } else {
@@ -320,17 +320,19 @@ class TestCasePanelFactory(
      * Updates the user interface based on the provided code.
      */
     private fun updateUI() {
+        updateTestCase()
+
         val lastRunCode = lastRunCodes[currentRequestNumber - 1]
         languageTextField.editor!!.markupModel.removeAllHighlighters()
 
-        resetButton.isEnabled = languageTextField.document.text != initialCodes[currentRequestNumber - 1]
-        resetToLastRunButton.isEnabled = languageTextField.document.text != lastRunCode
+        resetButton.isEnabled = testCase.testCode != initialCodes[currentRequestNumber - 1]
+        resetToLastRunButton.isEnabled = testCase.testCode != lastRunCode
 
-        val error = getError(testCase.testName, languageTextField.document.text)
+        val error = getError(testCase.id, testCase.testCode)
         if (error.isNullOrBlank()) {
-            project.service<TestsExecutionResultService>().addCurrentPassedTest(testCase.testName)
+            project.service<TestsExecutionResultService>().addCurrentPassedTest(testCase.id)
         } else {
-            project.service<TestsExecutionResultService>().addCurrentFailedTest(testCase.testName, error)
+            project.service<TestsExecutionResultService>().addCurrentFailedTest(testCase.id, error)
         }
         updateErrorLabel()
         runTestButton.isEnabled = (error == null)
@@ -339,7 +341,7 @@ class TestCasePanelFactory(
 
         val modifiedLineIndexes = getModifiedLines(
             lastRunCode.split("\n"),
-            languageTextField.document.text.split("\n"),
+            testCase.testCode.split("\n"),
         )
 
         for (index in modifiedLineIndexes) {
@@ -350,7 +352,7 @@ class TestCasePanelFactory(
             )
         }
 
-        currentCodes[currentRequestNumber - 1] = languageTextField.document.text
+        currentCodes[currentRequestNumber - 1] = testCase.testCode
 
         // select checkbox
         checkbox.isSelected = true
@@ -363,6 +365,8 @@ class TestCasePanelFactory(
      * After adding the code, it switches to another code.
      */
     private fun sendRequest() {
+        updateTestCase()
+
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
@@ -385,14 +389,23 @@ class TestCasePanelFactory(
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
         WriteCommandAction.runWriteCommandAction(project) {
-
             testSuite.testFileName =
                 project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)
             val code = testSuite.toString()
+            testCase.testName =
+                project.service<JavaClassBuilderService>()
+                    .getTestMethodNameFromClassWithTestCase(testCase.testName, code)
+            testCase.testCode = code
+
             // run new code
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
-                    .updateDataWithTestCase(code, testCase.testName),
+                    .updateDataWithTestCase(
+                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                        testCase.id,
+                        testCase.testName,
+                        code,
+                    ),
             )
 
             // update numbers
@@ -426,7 +439,12 @@ class TestCasePanelFactory(
         SwingUtilities.invokeLater {
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
-                    .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
+                    .updateDataWithTestCase(
+                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                        testCase.id,
+                        testCase.testName,
+                        testCase.testCode,
+                    ),
             )
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
@@ -434,7 +452,7 @@ class TestCasePanelFactory(
             updateErrorLabel()
             languageTextField.editor!!.markupModel.removeAllHighlighters()
 
-            lastRunCodes[currentRequestNumber - 1] = languageTextField.document.text
+            lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
             loadingLabel.isVisible = false
 
@@ -453,23 +471,24 @@ class TestCasePanelFactory(
      * adds the current test to the passed or failed tests in the*/
     private fun reset() {
         WriteCommandAction.runWriteCommandAction(project) {
+            updateTestCase()
             languageTextField.document.setText(initialCodes[currentRequestNumber - 1])
             updateBorder()
             project.service<Workspace>().updateTestCase(testCase)
             resetButton.isEnabled = false
-            if (getError(testCase.testName, languageTextField.document.text)!!.isBlank()) {
-                project.service<TestsExecutionResultService>().addPassedTest(testCase.testName, testCase.testCode)
+            if (getError(testCase.id, testCase.testCode)!!.isBlank()) {
+                project.service<TestsExecutionResultService>().addPassedTest(testCase.id, testCase.testCode)
             } else {
                 project.service<TestsExecutionResultService>()
-                    .addFailedTest(testCase.testName, testCase.testCode, errorLabel.toolTipText)
+                    .addFailedTest(testCase.id, testCase.testCode, errorLabel.toolTipText)
             }
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
             updateErrorLabel()
             languageTextField.editor!!.markupModel.removeAllHighlighters()
 
-            currentCodes[currentRequestNumber - 1] = languageTextField.document.text
-            lastRunCodes[currentRequestNumber - 1] = languageTextField.document.text
+            currentCodes[currentRequestNumber - 1] = testCase.testCode
+            lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
             project.service<TestCaseDisplayService>().updateUI()
         }
@@ -480,6 +499,7 @@ class TestCasePanelFactory(
      */
     private fun resetToLastRun() {
         WriteCommandAction.runWriteCommandAction(project) {
+            updateTestCase()
             val code = lastRunCodes[currentRequestNumber - 1]
             languageTextField.document.setText(code)
             resetToLastRunButton.isEnabled = false
@@ -488,7 +508,7 @@ class TestCasePanelFactory(
             updateErrorLabel()
             languageTextField.editor!!.markupModel.removeAllHighlighters()
 
-            currentCodes[currentRequestNumber - 1] = languageTextField.document.text
+            currentCodes[currentRequestNumber - 1] = testCase.testCode
 
             project.service<TestCaseDisplayService>().updateUI()
         }
@@ -503,7 +523,7 @@ class TestCasePanelFactory(
     private fun remove() {
         // Remove the highlighting of the test
         project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-            .testGenerationResult(testCase.testName, false, editor)
+            .testGenerationResult(testCase.id, false, editor)
 
         // Remove the test case from the cache
         project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
@@ -515,28 +535,28 @@ class TestCasePanelFactory(
      * Updates the border of the languageTextField based on the provided test name and text.
      */
     private fun updateBorder() {
-        languageTextField.border = getBorder(testCase.testName, languageTextField.document.text)
+        languageTextField.border = getBorder(testCase.id, testCase.testCode)
     }
 
     /**
      * Retrieves the error message for a given test case.
      *
-     * @param testCaseName the name of the test case
+     * @param testCaseId the id of the test case
      * @param testCaseCode the code of the test case
      * @return the error message for the test case
      */
-    private fun getError(testCaseName: String, testCaseCode: String) =
-        project.service<TestsExecutionResultService>().getError(testCaseName, testCaseCode)
+    private fun getError(testCaseId: Int, testCaseCode: String) =
+        project.service<TestsExecutionResultService>().getError(testCaseId, testCaseCode)
 
     /**
      * Returns the border for a given test case.
      *
-     * @param testCaseName the name of the test case
+     * @param testCaseId the id of the test case
      * @return the border for the test case
      */
-    private fun getBorder(testCaseName: String, testCaseCode: String): Border {
+    private fun getBorder(testCaseId: Int, testCaseCode: String): Border {
         val size = 3
-        return when (getError(testCaseName, testCaseCode)) {
+        return when (getError(testCaseId, testCaseCode)) {
             null -> JBUI.Borders.empty()
             "" -> MatteBorder(size, size, size, size, JBColor.GREEN)
             else -> MatteBorder(size, size, size, size, JBColor.RED)
@@ -565,6 +585,7 @@ class TestCasePanelFactory(
      */
     private fun switchToAnotherCode() {
         languageTextField.document.setText(currentCodes[currentRequestNumber - 1])
+        updateTestCase()
         updateUI()
     }
 
@@ -613,6 +634,16 @@ class TestCasePanelFactory(
         modifiedLineIndexes.reverse()
 
         return modifiedLineIndexes
+    }
+
+    /**
+     * Updates the current test case with the specified test name and test code.
+     */
+    private fun updateTestCase() {
+        testCase.testName =
+            project.service<JavaClassBuilderService>()
+                .getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
+        testCase.testCode = languageTextField.document.text
     }
 
     /**
