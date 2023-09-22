@@ -21,6 +21,7 @@ import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.COVERAGE_SELECTION_TOGGLE_TOPIC
+import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
@@ -367,14 +368,14 @@ class TestCasePanelFactory(
     private fun sendRequest() {
         loadingLabel.isVisible = true
         sendButton.isEnabled = false
-
+        project.service<ErrorService>().clear()
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     if (processStopped(project, indicator)) return
 
                     val modifiedTest = project.service<LLMChatService>()
-                        .testModificationRequest(initialCodes[currentRequestNumber - 1], requestField.text, indicator)
+                        .testModificationRequest(initialCodes[currentRequestNumber - 1], requestField.text, indicator, project)
 
                     if (modifiedTest != null) {
                         addTest(modifiedTest)

@@ -64,7 +64,7 @@ class OpenAIRequestManager : RequestManager() {
                 }
             }
         } catch (e: HttpStatusException) {
-            log.error("Error in sending request: ${e.message}")
+            log.info("Error in sending request: ${e.message}")
         }
 
         return testsAssembler

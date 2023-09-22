@@ -3,6 +3,8 @@ package org.jetbrains.research.testspark.services
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
@@ -31,8 +33,13 @@ class LLMChatService(
     fun testModificationRequest(
         testcase: String,
         task: String,
-        indicator: ProgressIndicator
+        indicator: ProgressIndicator,
+        project: Project
     ): TestSuiteGeneratedByLLM? {
+        // Update Token information
+        if (!updateToken(project)) {
+            return null
+        }
         val prompt = "For this test:\n ```\n $testcase\n ```\nPerform the following task: $task"
 
         var packageName = ""
@@ -55,5 +62,25 @@ class LLMChatService(
         )
 
         return requestResult.second
+    }
+
+    private fun updateToken(project: Project): Boolean {
+        requestManager.token = SettingsArguments.llmUserToken()
+        return isCorrectToken(project)
+    }
+
+    /**
+     * Checks if the token is set.
+     *
+     * @param project The project for error processing.
+     *
+     * @return True if the token is set, false otherwise.
+     */
+    fun isCorrectToken(project: Project): Boolean {
+        if (!SettingsArguments.isTokenSet()) {
+            LLMErrorManager().errorProcess(TestSparkBundle.message("missingToken"), project)
+            return false
+        }
+        return true
     }
 }

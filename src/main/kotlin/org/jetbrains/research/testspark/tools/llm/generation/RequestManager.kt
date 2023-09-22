@@ -8,7 +8,7 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 
 abstract class RequestManager {
-    open val token: String = SettingsArguments.llmUserToken()
+    open var token: String = SettingsArguments.llmUserToken()
     open val chatHistory = mutableListOf<ChatMessage>()
 
     open val log: Logger = Logger.getInstance(this.javaClass)
