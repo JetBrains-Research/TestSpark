@@ -392,11 +392,16 @@ class TestCasePanelFactory(
             testSuite.testFileName =
                 project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)
             val code = testSuite.toString()
+            testCase.testName =
+                project.service<JavaClassBuilderService>()
+                    .getTestMethodNameFromClassWithTestCase(testCase.testName, code)
+            testCase.testCode = code
+
             // run new code
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
                     .updateDataWithTestCase(
-                        "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)}.java",
+                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
                         testCase.id,
                         testCase.testName,
                         code,
