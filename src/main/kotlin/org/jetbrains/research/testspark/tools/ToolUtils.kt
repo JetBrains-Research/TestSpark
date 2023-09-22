@@ -86,7 +86,12 @@ fun saveData(
 
     for (testCase in report.testCaseList.values) {
         indicator.text = "Executing ${testCase.testName}"
-        project.service<TestCoverageCollectorService>().updateDataWithTestCase(testCase.id, testCase.testName, testCase.testCode)
+        project.service<TestCoverageCollectorService>().updateDataWithTestCase(
+            "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)}.java",
+            testCase.id,
+            testCase.testName,
+            testCase.testCode,
+        )
     }
 
     workspace.testGenerationData.testGenerationResultList.add(report)

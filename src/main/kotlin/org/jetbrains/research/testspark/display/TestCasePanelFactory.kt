@@ -365,6 +365,8 @@ class TestCasePanelFactory(
      * After adding the code, it switches to another code.
      */
     private fun sendRequest() {
+        updateTestCase()
+
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
@@ -393,7 +395,14 @@ class TestCasePanelFactory(
             // run new code
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
-                    .updateDataWithTestCase(testCase.id, testCase.testName, code),
+                    .updateDataWithTestCase(
+                        "${
+                            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)
+                        }.java",
+                        testCase.id,
+                        testCase.testName,
+                        code,
+                    ),
             )
 
             // update numbers
@@ -427,7 +436,14 @@ class TestCasePanelFactory(
         SwingUtilities.invokeLater {
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
-                    .updateDataWithTestCase(testCase.id, testCase.testName, testCase.testCode),
+                    .updateDataWithTestCase(
+                        "${
+                            project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)
+                        }.java",
+                        testCase.id,
+                        testCase.testName,
+                        testCase.testCode,
+                    ),
             )
             resetToLastRunButton.isEnabled = false
             runTestButton.isEnabled = false
@@ -624,7 +640,8 @@ class TestCasePanelFactory(
      */
     private fun updateTestCase() {
         testCase.testName =
-            project.service<JavaClassBuilderService>().getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
+            project.service<JavaClassBuilderService>()
+                .getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 

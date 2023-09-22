@@ -162,4 +162,18 @@ class JavaClassBuilderService(private val project: Project) {
             return oldTestCaseName
         }
     }
+
+    /**
+     * Retrieves the class name from the given test case code.
+     *
+     * @param code The test case code to extract the class name from.
+     * @return The class name extracted from the test case code.
+     */
+    fun getClassFromTestCaseCode(code: String): String {
+        val pattern = Regex("public\\s+class\\s+(.*)\\s*\\{")
+        val matchResult = pattern.find(code)
+        matchResult ?: return ""
+        val (className) = matchResult.destructured
+        return className
+    }
 }
