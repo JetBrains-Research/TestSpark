@@ -365,7 +365,8 @@ class TestCasePanelFactory(
      * After adding the code, it switches to another code.
      */
     private fun sendRequest() {
-        updateTestCase()
+        loadingLabel.isVisible = true
+        sendButton.isEnabled = false
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
@@ -417,7 +418,7 @@ class TestCasePanelFactory(
             currentCodes.add(code)
 
             requestField.text = ""
-            sendButton.isEnabled = false
+            loadingLabel.isVisible = false
 
             switchToAnotherCode()
         }
@@ -433,6 +434,9 @@ class TestCasePanelFactory(
      */
     private fun runTest() {
         loadingLabel.isVisible = true
+        runTestButton.isEnabled = false
+        resetToLastRunButton.isEnabled = false
+        languageTextField.editor!!.markupModel.removeAllHighlighters()
 
         SwingUtilities.invokeLater {
             project.service<Workspace>().updateTestCase(
@@ -444,11 +448,8 @@ class TestCasePanelFactory(
                         testCase.testCode,
                     ),
             )
-            resetToLastRunButton.isEnabled = false
-            runTestButton.isEnabled = false
             updateBorder()
             updateErrorLabel()
-            languageTextField.editor!!.markupModel.removeAllHighlighters()
 
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
@@ -469,7 +470,6 @@ class TestCasePanelFactory(
      * adds the current test to the passed or failed tests in the*/
     private fun reset() {
         WriteCommandAction.runWriteCommandAction(project) {
-            updateTestCase()
             languageTextField.document.setText(initialCodes[currentRequestNumber - 1])
             updateBorder()
             project.service<Workspace>().updateTestCase(testCase)
@@ -488,6 +488,7 @@ class TestCasePanelFactory(
             currentCodes[currentRequestNumber - 1] = testCase.testCode
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
+            updateTestCase()
             project.service<TestCaseDisplayService>().updateUI()
         }
     }
@@ -497,7 +498,6 @@ class TestCasePanelFactory(
      */
     private fun resetToLastRun() {
         WriteCommandAction.runWriteCommandAction(project) {
-            updateTestCase()
             val code = lastRunCodes[currentRequestNumber - 1]
             languageTextField.document.setText(code)
             resetToLastRunButton.isEnabled = false
@@ -508,6 +508,7 @@ class TestCasePanelFactory(
 
             currentCodes[currentRequestNumber - 1] = testCase.testCode
 
+            updateTestCase()
             project.service<TestCaseDisplayService>().updateUI()
         }
     }
