@@ -368,7 +368,7 @@ class TestCasePanelFactory(
     private fun sendRequest() {
         loadingLabel.isVisible = true
         sendButton.isEnabled = false
-        project.service<ErrorService>().clear()
+
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
@@ -380,7 +380,8 @@ class TestCasePanelFactory(
                     if (modifiedTest != null) {
                         addTest(modifiedTest)
                     } else {
-                        indicator.text = "No new test returned!"
+                        loadingLabel.isVisible = false
+                        sendButton.isEnabled = true
                     }
                     if (processStopped(project, indicator)) return
 
@@ -391,6 +392,7 @@ class TestCasePanelFactory(
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
         WriteCommandAction.runWriteCommandAction(project) {
+            project.service<ErrorService>().clear()
             val code = testSuite.toString()
             testCase.testName =
                 project.service<JavaClassBuilderService>()

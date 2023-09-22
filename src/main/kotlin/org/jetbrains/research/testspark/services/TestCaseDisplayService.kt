@@ -459,7 +459,9 @@ class TestCaseDisplayService(private val project: Project) {
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
                 project.service<JavaClassBuilderService>().getTestMethodCodeFromClassWithTestCase(
-                    it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
+                    project.service<JavaClassBuilderService>().formatJavaCode(
+                        it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
+                    ),
                 ),
             )
         }
@@ -483,7 +485,7 @@ class TestCaseDisplayService(private val project: Project) {
                 if (project.service<Workspace>().testGenerationData.packageLine.isEmpty()) {
                     ""
                 } else {
-                    "package ${project.service<Workspace>().testGenerationData.packageLine};\n"
+                    "package ${project.service<Workspace>().testGenerationData.packageLine};\n\n"
                 },
             )
     }

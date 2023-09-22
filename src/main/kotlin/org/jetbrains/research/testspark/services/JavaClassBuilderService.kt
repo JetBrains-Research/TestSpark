@@ -5,7 +5,16 @@ import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
+import com.intellij.lang.java.JavaLanguage
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.codeStyle.CodeStyleManager
+import org.jetbrains.research.testspark.editor.Workspace
+import java.io.File
 import java.util.Locale
 
 class JavaClassBuilderService(private val project: Project) {
@@ -34,7 +43,7 @@ class JavaClassBuilderService(private val project: Project) {
 
         testFullText.replace("\r\n", "\n")
 
-        return Regex("\n\n\n(\n)*").replace(testFullText, "\n\n")
+        return formatJavaCode(Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"))
     }
 
     /**
@@ -68,7 +77,7 @@ class JavaClassBuilderService(private val project: Project) {
             testText += "@RunWith($runWith)\n"
         }
         // open the test class
-        testText += "public class $className{\n\n"
+        testText += "public class $className {\n\n"
 
         // Add other presets (annotations, non-test functions)
         if (otherInfo.isNotBlank()) {
@@ -172,8 +181,37 @@ class JavaClassBuilderService(private val project: Project) {
     fun getClassFromTestCaseCode(code: String): String {
         val pattern = Regex("public\\s+class\\s+(.*)\\s*\\{")
         val matchResult = pattern.find(code)
-        matchResult ?: return ""
+        matchResult ?: return "GeneratedTest"
         val (className) = matchResult.destructured
         return className
+    }
+
+    /**
+     * Formats the given Java code using IntelliJ IDEA's code formatting rules.
+     *
+     * @param code The Java code to be formatted.
+     * @return The formatted Java code.
+     */
+    fun formatJavaCode(code: String): String {
+        var result = ""
+        WriteCommandAction.runWriteCommandAction(project) {
+            val fileName = project.service<Workspace>().resultPath!! + File.separatorChar + "Formatted.java"
+            // create a temporary PsiFile
+            val psiFile: PsiFile = PsiFileFactory.getInstance(project)
+                .createFileFromText(
+                    fileName,
+                    JavaLanguage.INSTANCE,
+                    code,
+                )
+
+            CodeStyleManager.getInstance(project).reformat(psiFile)
+
+            val document = PsiDocumentManager.getInstance(project).getDocument(psiFile)
+            result = document?.text ?: code
+
+            File(fileName).delete()
+        }
+
+        return result
     }
 }
