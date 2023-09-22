@@ -389,8 +389,6 @@ class TestCasePanelFactory(
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
         WriteCommandAction.runWriteCommandAction(project) {
-            testSuite.testFileName =
-                project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)
             val code = testSuite.toString()
             testCase.testName =
                 project.service<JavaClassBuilderService>()
