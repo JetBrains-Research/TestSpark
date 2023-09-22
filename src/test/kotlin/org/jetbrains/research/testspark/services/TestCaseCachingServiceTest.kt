@@ -319,7 +319,7 @@ class TestCaseCachingServiceTest {
     @Test
     fun testCoversMultipleLinesInRange() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase(0,"a", "aa", setOf(4, 5), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(4, 5), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
         )
