@@ -149,9 +149,7 @@ class TestCoverageCollectorService(private val project: Project) {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
                 "-cp",
-                "${
-                    project.service<TestCoverageCollectorService>().getPath(projectBuildPath)
-                }${project.service<TestCoverageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
+                "${project.service<TestCoverageCollectorService>().getPath(projectBuildPath)}${project.service<TestCoverageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
                 name,
             ),
