@@ -11,6 +11,7 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -46,7 +47,7 @@ class LLMProcessManager(
     private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
-    private val requestManager: RequestManager = StandardRequestManagerFactory().getRequestManager()
+//    private val requestManager: RequestManager = StandardRequestManagerFactory().getRequestManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
 
     /**
@@ -101,6 +102,9 @@ class LLMProcessManager(
         var messageToPrompt = prompt
         var generatedTestSuite: TestSuiteGeneratedByLLM? = null
 
+        // notify LLMChatService to restart the chat process.
+        project.service<LLMChatService>().newSession()
+
         // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
         while (!generatedTestsArePassing) {
             requestsCount++
@@ -119,7 +123,7 @@ class LLMProcessManager(
             // Send request to LLM
             if (warningMessage.isNotEmpty()) llmErrorManager.warningProcess(warningMessage, project)
             val requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
-                requestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
+                project.service<LLMChatService>().testGenerationRequest(messageToPrompt, indicator, packageName, project, llmErrorManager)
             generatedTestSuite = requestResult.second
 
             // Process stopped checking
@@ -179,7 +183,7 @@ class LLMProcessManager(
                 File(generatedTestPath),
                 generatedTestSuite.getPrintablePackageString(),
                 buildPath,
-                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
+                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList()
             )
 
             // compile the test file

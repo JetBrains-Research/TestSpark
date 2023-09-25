@@ -73,13 +73,15 @@ class TestCaseCachingServicePropertyBasedTest {
         val testCodeArbitrary = Arbitraries.strings()
             .ofMinLength(1)
 
+        var index = 0
+
         val compactTestCaseArbitrary = Combinators.combine(
             testNameArbitrary,
             testCodeArbitrary,
             lineNumberArbitrary.set(),
         )
             .`as` { name, code, lineNumbers ->
-                TestCase(name, code, lineNumbers, setOf(), setOf())
+                TestCase(index++, name, code, lineNumbers, setOf(), setOf())
             }
             .list()
             .uniqueElements { it.testName }

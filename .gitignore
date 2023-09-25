@@ -5,6 +5,7 @@ build/
 lib/evosuite-*.jar
 lib/JUnitRunner.jar
 **/evosuite-tests/
+*.DS_Store
 
 # Test projects
 src/test/resources/project/.idea/

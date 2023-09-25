@@ -8,26 +8,58 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 
 abstract class RequestManager {
-    open val token: String = SettingsArguments.llmUserToken()
+    open var token: String = SettingsArguments.llmUserToken()
     open val chatHistory = mutableListOf<ChatMessage>()
 
     open val log: Logger = Logger.getInstance(this.javaClass)
 
-    abstract fun request(
+    /**
+     * Sends a request to LLM with the given prompt and returns the generated TestSuite.
+     *
+     * @param prompt the prompt to send to LLM
+     * @param indicator the progress indicator to show progress during the request
+     * @param packageName the name of the package for the generated TestSuite
+     * @param project the project associated with the request
+     * @param llmErrorManager the error manager to handle errors during the request
+     * @param isUserFeedback indicates if this request is a test generation request or a user feedback
+     * @return the generated TestSuite, or null and prompt message
+     */
+    open fun request(
         prompt: String,
         indicator: ProgressIndicator,
         packageName: String,
         project: Project,
         llmErrorManager: LLMErrorManager,
-    ): Pair<String, TestSuiteGeneratedByLLM?>
+        isUserFeedback: Boolean = false,
+    ): Pair<String, TestSuiteGeneratedByLLM?> {
+        // save the prompt in chat history
+        chatHistory.add(ChatMessage("user", prompt))
+
+        // Send Request to LLM
+        log.info("Sending Request ...")
+        val testsAssembler = send(prompt, indicator, project, llmErrorManager)
+
+        // we remove the user request because we don't users requests in chat history
+        if (isUserFeedback) {
+            chatHistory.removeLast()
+        }
+
+        return when (isUserFeedback) {
+            true -> processUserFeedbackResponse(testsAssembler, packageName)
+            false -> processResponse(testsAssembler, packageName)
+        }
+    }
 
     open fun processResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
+        if (testsAssembler.rawText.isEmpty()) {
+            return Pair("", null)
+        }
         // save the full response in the chat history
         val response = testsAssembler.rawText
-        log.debug("The full response: \n $response")
+        log.info("The full response: \n $response")
         chatHistory.add(ChatMessage("assistant", response))
 
         // check if response is empty
@@ -42,5 +74,24 @@ abstract class RequestManager {
             ?: return Pair("The provided code is not parsable. Please give the correct code", null)
 
         return Pair("", testSuiteGeneratedByLLM.reformat())
+    }
+
+    abstract fun send(
+        prompt: String,
+        indicator: ProgressIndicator,
+        project: Project,
+        llmErrorManager: LLMErrorManager,
+    ): TestsAssembler
+
+    open fun processUserFeedbackResponse(
+        testsAssembler: TestsAssembler,
+        packageName: String,
+    ): Pair<String, TestSuiteGeneratedByLLM?> {
+        val response = testsAssembler.rawText
+        log.info("The full response: \n $response")
+
+        val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
+
+        return Pair("", testSuiteGeneratedByLLM)
     }
 }

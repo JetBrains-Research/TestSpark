@@ -35,7 +35,11 @@ class TestCaseCachingService {
      */
     fun retrieveFromCache(fileUrl: String, lineFrom: Int, lineTo: Int): List<TestCase> {
         val fileTestCaseCache = getFileTestCaseCache(fileUrl)
-        val result = fileTestCaseCache.retrieveFromCache(lineFrom, lineTo).stream().map { TestCase(it) }.toList()
+        val compactTestCasesList: List<CompactTestCase> = fileTestCaseCache.retrieveFromCache(lineFrom, lineTo)
+        val result: MutableList<TestCase> = mutableListOf()
+        for ((index, compactTestCase: CompactTestCase) in compactTestCasesList.withIndex()) {
+            result.add(TestCase(index, compactTestCase))
+        }
         log.info("Retrieved ${result.size} test cases from cache for $fileUrl")
         return result
     }
