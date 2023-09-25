@@ -179,7 +179,7 @@ class JavaClassBuilderService(private val project: Project) {
      * @return The class name extracted from the test case code.
      */
     fun getClassFromTestCaseCode(code: String): String {
-        val pattern = Regex("public\\s+class\\s+(.*)\\s*\\{")
+        val pattern = Regex("public\\s+class\\s+(\\S+)\\s*\\{")
         val matchResult = pattern.find(code)
         matchResult ?: return "GeneratedTest"
         val (className) = matchResult.destructured

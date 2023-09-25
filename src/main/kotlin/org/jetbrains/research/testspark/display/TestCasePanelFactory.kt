@@ -375,9 +375,17 @@ class TestCasePanelFactory(
                     if (processStopped(project, indicator)) return
 
                     val modifiedTest = project.service<LLMChatService>()
-                        .testModificationRequest(initialCodes[currentRequestNumber - 1], requestField.text, indicator, project)
+                        .testModificationRequest(
+                            initialCodes[currentRequestNumber - 1],
+                            requestField.text,
+                            indicator,
+                            project,
+                        )
 
                     if (modifiedTest != null) {
+                        modifiedTest.setTestFileName(
+                            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+                        )
                         addTest(modifiedTest)
                     } else {
                         loadingLabel.isVisible = false
@@ -403,7 +411,9 @@ class TestCasePanelFactory(
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
                     .updateDataWithTestCase(
-                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                        "${
+                            project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)
+                        }.java",
                         testCase.id,
                         testCase.testName,
                         code,
@@ -445,7 +455,9 @@ class TestCasePanelFactory(
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
                     .updateDataWithTestCase(
-                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                        "${
+                            project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)
+                        }.java",
                         testCase.id,
                         testCase.testName,
                         testCase.testCode,

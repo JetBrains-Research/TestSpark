@@ -30,7 +30,7 @@ abstract class RequestManager {
         packageName: String,
         project: Project,
         llmErrorManager: LLMErrorManager,
-        isUserFeedback: Boolean = false
+        isUserFeedback: Boolean = false,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
         // save the prompt in chat history
         chatHistory.add(ChatMessage("user", prompt))
@@ -39,9 +39,10 @@ abstract class RequestManager {
         log.info("Sending Request ...")
         val testsAssembler = send(prompt, indicator, project, llmErrorManager)
 
-        // we remove the user request because we dont users requests in chat history
-        if (isUserFeedback)
+        // we remove the user request because we don't users requests in chat history
+        if (isUserFeedback) {
             chatHistory.removeLast()
+        }
 
         return when (isUserFeedback) {
             true -> processUserFeedbackResponse(testsAssembler, packageName)
@@ -53,7 +54,6 @@ abstract class RequestManager {
         testsAssembler: TestsAssembler,
         packageName: String,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
-
         if (testsAssembler.rawText.isEmpty()) {
             return Pair("", null)
         }
@@ -80,12 +80,12 @@ abstract class RequestManager {
         prompt: String,
         indicator: ProgressIndicator,
         project: Project,
-        llmErrorManager: LLMErrorManager
+        llmErrorManager: LLMErrorManager,
     ): TestsAssembler
 
     open fun processUserFeedbackResponse(
         testsAssembler: TestsAssembler,
-        packageName: String
+        packageName: String,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
         val response = testsAssembler.rawText
         log.info("The full response: \n $response")

@@ -25,7 +25,7 @@ class LLMChatService(
         indicator: ProgressIndicator,
         packageName: String,
         project: Project,
-        llmErrorManager: LLMErrorManager
+        llmErrorManager: LLMErrorManager,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
         return requestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
     }
@@ -34,7 +34,7 @@ class LLMChatService(
         testcase: String,
         task: String,
         indicator: ProgressIndicator,
-        project: Project
+        project: Project,
     ): TestSuiteGeneratedByLLM? {
         // Update Token information
         if (!updateToken(project)) {
@@ -58,7 +58,7 @@ class LLMChatService(
             packageName,
             project,
             LLMErrorManager(),
-            isUserFeedback = true
+            isUserFeedback = true,
         )
 
         return requestResult.second

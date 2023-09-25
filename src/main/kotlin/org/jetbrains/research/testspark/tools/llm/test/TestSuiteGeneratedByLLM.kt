@@ -19,7 +19,7 @@ data class TestSuiteGeneratedByLLM(
     var otherInfo: String = "",
     var testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf(),
 ) {
-    var testFileName: String = "GeneratedTest"
+    private var testFileName: String = "GeneratedTest"
 
     /**
      * Checks if the testCases collection is empty.
@@ -140,5 +140,14 @@ data class TestSuiteGeneratedByLLM(
         testCases.removeIf { testCase -> testCase.isEmpty() }
 
         return this
+    }
+
+    /**
+     * Sets the test file name.
+     *
+     * @param testFileName The file name of the test file to be set.
+     */
+    fun setTestFileName(testFileName: String) {
+        this.testFileName = testFileName
     }
 }
