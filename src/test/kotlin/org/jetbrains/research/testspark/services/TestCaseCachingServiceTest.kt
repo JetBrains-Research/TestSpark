@@ -25,8 +25,8 @@ class TestCaseCachingServiceTest {
     @Test
     fun singleFileSingleLine() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -51,14 +51,14 @@ class TestCaseCachingServiceTest {
     @Test
     fun addingNewTestWithSameCodeInvalidatesPreviousOne() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
         )
         val report1a = Report(CompactReport(TestGenerationResultImpl()))
-        val test1a = TestCase("a2", "aa", setOf(1, 2, 3), setOf(), setOf())
+        val test1a = TestCase(0, "a2", "aa", setOf(1, 2, 3), setOf(), setOf())
         report1a.testCaseList = hashMapOf(
             createPair(test1a),
         )
@@ -83,8 +83,8 @@ class TestCaseCachingServiceTest {
     @Test
     fun invalidateSingleFileSingleLine() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -110,8 +110,8 @@ class TestCaseCachingServiceTest {
     @Test
     fun invalidateSingleTest() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -137,8 +137,8 @@ class TestCaseCachingServiceTest {
     @Test
     fun invalidateNonexistentSingleTest() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -164,11 +164,11 @@ class TestCaseCachingServiceTest {
     @Test
     fun singleFileMultipleLines() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
-        val test3 = TestCase("c", "cc", setOf(1, 4), setOf(), setOf())
-        val test4 = TestCase("d", "dd", setOf(8), setOf(), setOf())
-        val test5 = TestCase("e", "ee", setOf(11), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
+        val test3 = TestCase(2, "c", "cc", setOf(1, 4), setOf(), setOf())
+        val test4 = TestCase(3, "d", "dd", setOf(8), setOf(), setOf())
+        val test5 = TestCase(4, "e", "ee", setOf(11), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -196,11 +196,11 @@ class TestCaseCachingServiceTest {
     @Test
     fun invalidateSingleFileMultipleLines() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
-        val test3 = TestCase("c", "cc", setOf(1, 4), setOf(), setOf())
-        val test4 = TestCase("d", "dd", setOf(8), setOf(), setOf())
-        val test5 = TestCase("e", "ee", setOf(11), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
+        val test3 = TestCase(2, "c", "cc", setOf(1, 4), setOf(), setOf())
+        val test4 = TestCase(3, "d", "dd", setOf(8), setOf(), setOf())
+        val test5 = TestCase(4, "e", "ee", setOf(11), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -230,11 +230,11 @@ class TestCaseCachingServiceTest {
     @Test
     fun multipleFiles() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
-        val test3 = TestCase("c", "cc", setOf(1, 4), setOf(), setOf())
-        val test4 = TestCase("d", "dd", setOf(8), setOf(), setOf())
-        val test5 = TestCase("e", "ee", setOf(11), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
+        val test3 = TestCase(2, "c", "cc", setOf(1, 4), setOf(), setOf())
+        val test4 = TestCase(3, "d", "dd", setOf(8), setOf(), setOf())
+        val test5 = TestCase(4, "e", "ee", setOf(11), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -245,11 +245,11 @@ class TestCaseCachingServiceTest {
 
         val report2 = Report(CompactReport(TestGenerationResultImpl()))
         report2.testCaseList = hashMapOf(
-            createPair(TestCase("0a", "aa", setOf(1, 2), setOf(), setOf())),
-            createPair(TestCase("0b", "bb", setOf(2, 3), setOf(), setOf())),
-            createPair(TestCase("0c", "cc", setOf(1, 4), setOf(), setOf())),
-            createPair(TestCase("0d", "dd", setOf(8), setOf(), setOf())),
-            createPair(TestCase("0e", "ee", setOf(11), setOf(), setOf())),
+            createPair(TestCase(0, "0a", "aa", setOf(1, 2), setOf(), setOf())),
+            createPair(TestCase(1, "0b", "bb", setOf(2, 3), setOf(), setOf())),
+            createPair(TestCase(2, "0c", "cc", setOf(1, 4), setOf(), setOf())),
+            createPair(TestCase(3, "0d", "dd", setOf(8), setOf(), setOf())),
+            createPair(TestCase(4, "0e", "ee", setOf(11), setOf(), setOf())),
         )
 
         val file = "file"
@@ -272,10 +272,10 @@ class TestCaseCachingServiceTest {
     @Test
     fun multipleFilesMultipleInsertions() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
-        val test3 = TestCase("c", "cc", setOf(1, 4), setOf(), setOf())
-        val test5 = TestCase("e", "ee", setOf(11), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
+        val test3 = TestCase(2, "c", "cc", setOf(1, 4), setOf(), setOf())
+        val test5 = TestCase(3, "e", "ee", setOf(11), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -285,15 +285,15 @@ class TestCaseCachingServiceTest {
 
         val report2 = Report(CompactReport(TestGenerationResultImpl()))
         report2.testCaseList = hashMapOf(
-            createPair(TestCase("0a", "aa", setOf(1, 2), setOf(), setOf())),
-            createPair(TestCase("0b", "bb", setOf(2, 3), setOf(), setOf())),
-            createPair(TestCase("0c", "cc", setOf(1, 4), setOf(), setOf())),
-            createPair(TestCase("0d", "dd", setOf(8), setOf(), setOf())),
-            createPair(TestCase("0e", "ee", setOf(11), setOf(), setOf())),
+            createPair(TestCase(0, "0a", "aa", setOf(1, 2), setOf(), setOf())),
+            createPair(TestCase(1, "0b", "bb", setOf(2, 3), setOf(), setOf())),
+            createPair(TestCase(2, "0c", "cc", setOf(1, 4), setOf(), setOf())),
+            createPair(TestCase(3, "0d", "dd", setOf(8), setOf(), setOf())),
+            createPair(TestCase(4, "0e", "ee", setOf(11), setOf(), setOf())),
         )
 
         val report3 = Report(CompactReport(TestGenerationResultImpl()))
-        val test4 = TestCase("d", "dd", setOf(8), setOf(), setOf())
+        val test4 = TestCase(0, "d", "dd", setOf(8), setOf(), setOf())
         report3.testCaseList = hashMapOf(
             createPair(test4),
         )
@@ -319,7 +319,7 @@ class TestCaseCachingServiceTest {
     @Test
     fun testCoversMultipleLinesInRange() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(4, 5), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(4, 5), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
         )
@@ -342,8 +342,8 @@ class TestCaseCachingServiceTest {
     @Test
     fun nonexistentFile() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -360,8 +360,8 @@ class TestCaseCachingServiceTest {
     @Test
     fun noMatchingTests() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -380,8 +380,8 @@ class TestCaseCachingServiceTest {
     @Test
     fun invalidateNoMatchingTests() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -406,8 +406,8 @@ class TestCaseCachingServiceTest {
     @Test
     fun invalidInputLines() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -426,8 +426,8 @@ class TestCaseCachingServiceTest {
     @Test
     fun invalidateInvalidInputLines() {
         val report = Report(CompactReport(TestGenerationResultImpl()))
-        val test1 = TestCase("a", "aa", setOf(1, 2), setOf(), setOf())
-        val test2 = TestCase("b", "bb", setOf(2, 3), setOf(), setOf())
+        val test1 = TestCase(0, "a", "aa", setOf(1, 2), setOf(), setOf())
+        val test2 = TestCase(1, "b", "bb", setOf(2, 3), setOf(), setOf())
         report.testCaseList = hashMapOf(
             createPair(test1),
             createPair(test2),
@@ -451,8 +451,8 @@ class TestCaseCachingServiceTest {
     }
 
     companion object {
-        fun createPair(testCase: TestCase): Pair<String, TestCase> {
-            return Pair(testCase.testName, testCase)
+        fun createPair(testCase: TestCase): Pair<Int, TestCase> {
+            return Pair(testCase.id, testCase)
         }
 
         fun createTriple(testCase: TestCase): Triple<String, String, Set<Int>> {

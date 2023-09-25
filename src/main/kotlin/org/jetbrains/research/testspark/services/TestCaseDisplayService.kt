@@ -1,27 +1,14 @@
 package org.jetbrains.research.testspark.services
 
-import com.intellij.coverage.CoverageDataManager
 import com.intellij.coverage.CoverageSuitesBundle
-import com.intellij.lang.Language
-import com.intellij.notification.NotificationGroupManager
-import com.intellij.notification.NotificationType
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diff.DiffColors
-import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.event.DocumentEvent
-import com.intellij.openapi.editor.event.DocumentListener
-import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
-import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -29,33 +16,26 @@ import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElementFactory
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
-import com.intellij.ui.LanguageTextField
-import com.intellij.ui.LanguageTextField.DocumentCreator
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
-import com.intellij.util.LocalTimeCounter
 import com.intellij.util.containers.stream
 import com.intellij.util.ui.JBUI
-import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.display.TestCasePanelFactory
+import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
-import java.awt.FlowLayout
 import java.io.File
 import java.util.Locale
 import javax.swing.BorderFactory
@@ -63,37 +43,32 @@ import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
-import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
+import javax.swing.JSeparator
+import javax.swing.SwingConstants
 import javax.swing.border.Border
-import javax.swing.border.MatteBorder
 
 class TestCaseDisplayService(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
+
+    private val topButtonsPanelFactory = TopButtonsPanelFactory(project)
+
     private var applyButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("applyButton"))
-    private var selectAllButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("selectAllButton"))
-    private var deselectAllButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("deselectAllButton"))
-    private var removeAllButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("removeAllButton"))
-    private var validateButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("validateButton"))
-    var toggleJacocoButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("jacocoToggle"))
-
-    private var testsSelected: Int = 0
-    private var testsSelectedText: String = "${TestSparkLabelsBundle.defaultValue("testsSelected")}: %d/%d"
-    private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
-
-    private val testsPassedText: String = "${TestSparkLabelsBundle.defaultValue("testsPassed")}: %d/%d"
-    private var testsPassedLabel: JLabel = JLabel(testsPassedText)
 
     private var allTestCasePanel: JPanel = JPanel()
+
     private var scrollPane: JBScrollPane = JBScrollPane(
         allTestCasePanel,
         JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
     )
+
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
     private var originalTestCases: HashMap<String, String> = HashMap()
+
+    private var testsSelected: Int = 0
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
@@ -106,48 +81,19 @@ class TestCaseDisplayService(private val project: Project) {
     private var content: Content? = null
 
     private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
-    private var isJacocoCoverageActive = false
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
 
-        val topButtons = JPanel()
-        topButtons.layout = BoxLayout(topButtons, BoxLayout.X_AXIS)
-
-        topButtons.add(Box.createRigidArea(Dimension(10, 0)))
-        topButtons.add(testsPassedLabel)
-        topButtons.add(Box.createRigidArea(Dimension(10, 0)))
-        topButtons.add(testsSelectedLabel)
-        topButtons.add(Box.createHorizontalGlue())
-        topButtons.add(selectAllButton)
-        topButtons.add(deselectAllButton)
-        topButtons.add(removeAllButton)
-
-//        TODO uncomment after the validator fixing
-//        topButtons.add(validateButton)
-//        topButtons.add(toggleJacocoButton)
-
-        mainPanel.add(topButtons, BorderLayout.NORTH)
+        mainPanel.add(topButtonsPanelFactory.getPanel(), BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
+
+        applyButton.isOpaque = false
+        applyButton.isContentAreaFilled = false
         mainPanel.add(applyButton, BorderLayout.SOUTH)
 
         applyButton.addActionListener { applyTests() }
-        validateButton.addActionListener { validateTests() }
-        selectAllButton.addActionListener { toggleAllCheckboxes(true) }
-        deselectAllButton.addActionListener { toggleAllCheckboxes(false) }
-        toggleJacocoButton.addActionListener { toggleJacocoCoverage() }
-        removeAllButton.addActionListener { removeAllTestCases() }
-    }
-
-    /**
-     * Enables the validated button.
-     *
-     * This method sets the enabled state of the validated button to true,
-     * allowing users to interact with it.
-     */
-    fun makeValidatedButtonAvailable() {
-        validateButton.isEnabled = true
     }
 
     /**
@@ -165,8 +111,6 @@ class TestCaseDisplayService(private val project: Project) {
      *
      * @param editor editor instance where coverage should be
      *               visualized
-     * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
-     *                        due to a cache hit, or null if there was a cache miss
      */
     fun showGeneratedTests(editor: Editor) {
         displayTestCases(project.service<Workspace>().testJob!!.report, editor)
@@ -186,106 +130,56 @@ class TestCaseDisplayService(private val project: Project) {
         testCasePanels.clear()
         originalTestCases.clear()
 
+        addSeparator()
+
         testReport.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
 
             // Fix Windows line separators
-            val testCodeFormatted = testCase.testCode.replace("\r\n", "\n")
-            originalTestCases[testCase.testName] = testCodeFormatted
+            originalTestCases[testCase.testName] = testCase.testCode
 
             // Add a checkbox to select the test
             val checkbox = JCheckBox()
             checkbox.isSelected = true
-            testCasePanel.add(checkbox, BorderLayout.WEST)
-
-            // Toggle coverage when checkbox is clicked
             checkbox.addItemListener {
                 project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-                    .testGenerationResult(testCase.testName, checkbox.isSelected, editor)
+                    .testGenerationResult(testCase.id, checkbox.isSelected, editor)
 
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
-                validateButton.isEnabled = testsSelected > 0
-
-                updateTestsSelectedLabel()
-                updateTestsPassedLabel()
+                topButtonsPanelFactory.updateTopLabels()
             }
+            testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            // Add an editor to modify the test source code
-            val languageTextField = LanguageTextField(
-                Language.findLanguageByID("JAVA"),
-                editor.project,
-                testCodeFormatted,
-                TestCaseDocumentCreator(
-                    project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
-                ),
-                false,
-            )
+            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox)
+            testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
+            testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
+            testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
 
-            // Add test case title
-            val middlePanel = JPanel()
-            middlePanel.layout = BoxLayout(middlePanel, BoxLayout.Y_AXIS)
-
-            val testCaseTitle = JLabel(testCase.testName)
-
-            middlePanel.add(testCaseTitle)
-            middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
-            middlePanel.add(languageTextField)
-
-            testCasePanel.add(middlePanel, BorderLayout.CENTER)
-
-            // Create "Remove" button to remove the test from cache
-            val removeFromCacheButton = createRemoveButton(testCase, editor, testCasePanel)
-
-            // Create "Reset" button to reset the changes in the source code of the test
-            val resetButton = createResetButton()
-
-            // Create "Reset" button to reset the changes to last run in the source code of the test
-            val resetToLastRunButton = createResetToLastRunButton()
-
-            // Create "Run tests" button to remove the test from cache
-            val runTestButton = createRunTestButton()
-
-            // Set border
-            languageTextField.border = getBorder(testCase.testName)
-            testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
-
-            addListeners(
-                resetButton,
-                resetToLastRunButton,
-                runTestButton,
-                languageTextField,
-                checkbox,
-                testCase,
-                languageTextField.border,
-                testCasePanel,
-            )
-
-            val bottomPanel = JPanel()
-            bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
-            val bottomButtons = JPanel()
-            bottomButtons.layout = FlowLayout(FlowLayout.TRAILING)
-            bottomButtons.add(removeFromCacheButton)
-            bottomButtons.add(resetButton)
-            bottomButtons.add(resetToLastRunButton)
-            bottomButtons.add(runTestButton)
-            bottomPanel.add(bottomButtons)
-            bottomPanel.add(Box.createRigidArea(Dimension(0, 25)))
-            testCasePanel.add(bottomPanel, BorderLayout.SOUTH)
+            testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
             // Add panel to parent panel
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
+            addSeparator()
             testCasePanels[testCase.testName] = testCasePanel
 
             // Update the number of selected tests (all tests are selected by default)
             testsSelected = testCasePanels.size
-            updateTestsSelectedLabel()
-            updateTestsPassedLabel()
+            topButtonsPanelFactory.updateTopLabels()
         }
+    }
+
+    /**
+     * Adds a separator to the allTestCasePanel.
+     */
+    private fun addSeparator() {
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
+        allTestCasePanel.add(JSeparator(SwingConstants.HORIZONTAL))
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
     }
 
     /**
@@ -535,112 +429,15 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Retrieves the names of the active test cases.
-     *
-     * @return a set of strings representing the names of the active test cases.
-     */
-    private fun getActiveTests(): Set<String> {
-        val selectedTestCases =
-            testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }.map { it.key }
-
-        return selectedTestCases.toSet()
-    }
-
-    /**
      * Retrieve the editor corresponding to a particular test case
      *
-     * @param testCase the name of the test case
+     * @param testCaseName the name of the test case
      * @return the editor corresponding to the test case, or null if it does not exist
      */
-    private fun getEditor(testCase: String): EditorTextField? {
-        val middlePanelComponent = testCasePanels[testCase]?.getComponent(1) ?: return null
+    fun getEditor(testCaseName: String): EditorTextField? {
+        val middlePanelComponent = testCasePanels[testCaseName]?.getComponent(2) ?: return null
         val middlePanel = middlePanelComponent as JPanel
-        return middlePanel.getComponent(2) as EditorTextField
-    }
-
-    /**
-     * Returns a pair of most-recent edit of selected tests, containing the test name and test code
-     *
-     * @return a pair of each test, containing the test name and test code
-     */
-    private fun getCurrentVersionsOfSelectedTests(): HashMap<String, String> {
-        val selectedTestCases = getActiveTests()
-
-        val lastEditsOfSelectedTestCases = selectedTestCases.associateWith {
-            getEditor(it)!!.document.text
-        }
-
-        return HashMap(lastEditsOfSelectedTestCases)
-    }
-
-    /**
-     * Validates the tests from the cache.
-     */
-    private fun validateTests() {
-        val testJob = project.service<Workspace>().testJob ?: return
-        val edits = getCurrentVersionsOfSelectedTests()
-        validateButton.isEnabled = false
-        toggleJacocoButton.isEnabled = false
-        if (edits.isEmpty()) {
-            showEmptyTests()
-            return
-        }
-
-        Validator(project, testJob.info, edits).validateSuite()
-    }
-
-    /**
-     * Toggles the Jacoco coverage for the current project and file.
-     * If Jacoco coverage is active, it will be deactivated.
-     * If Jacoco coverage is inactive, it will be activated using the current Jacoco coverage bundle.
-     *
-     * @throws IllegalStateException if the project or file is not set.
-     */
-    private fun toggleJacocoCoverage() {
-        val manager = CoverageDataManager.getInstance(project)
-        project.service<Workspace>().editor?.markupModel?.removeAllHighlighters()
-
-        if (isJacocoCoverageActive) {
-            manager.chooseSuitesBundle(null)
-            isJacocoCoverageActive = false
-        } else {
-            currentJacocoCoverageBundle.let {
-                ApplicationManager.getApplication().invokeLater {
-                    manager.chooseSuitesBundle(currentJacocoCoverageBundle)
-                    isJacocoCoverageActive = true
-                }
-            }
-        }
-    }
-
-    /**
-     * Toggles check boxes so that they are either all selected or all not selected,
-     *  depending on the provided parameter.
-     *
-     *  @param selected whether the check boxes have to be selected or not
-     */
-    private fun toggleAllCheckboxes(selected: Boolean) {
-        toggleJacocoButton.isEnabled = selected
-        testCasePanels.forEach { (_, jPanel) ->
-            val checkBox = jPanel.getComponent(0) as JCheckBox
-            checkBox.isSelected = selected
-        }
-        testsSelected = if (selected) testCasePanels.size else 0
-    }
-
-    /**
-     * Updates the label with the number selected tests.
-     */
-    private fun updateTestsSelectedLabel() {
-        testsSelectedLabel.text = String.format(testsSelectedText, testsSelected, testCasePanels.size)
-    }
-
-    /**
-     * Updates the label with the number passed tests.
-     */
-    private fun updateTestsPassedLabel() {
-        testsPassedLabel.text =
-            String.format(testsPassedText, testCasePanels.size - project.service<TestsExecutionResultService>().size(), testCasePanels.size)
+        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
     }
 
     /**
@@ -657,13 +454,15 @@ class TestCaseDisplayService(private val project: Project) {
         )
 
         // insert tests to a code
-        testCaseComponents.forEach {
+        testCaseComponents.reversed().forEach {
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
                 // Fix Windows line separators
-                project.service<JavaClassBuilderService>().getTestMethodFromClassWithTestCaseName(
-                    it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
-                ) + "\n",
+                project.service<JavaClassBuilderService>().getTestMethodCodeFromClassWithTestCase(
+                    project.service<JavaClassBuilderService>().formatJavaCode(
+                        it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
+                    ),
+                ),
             )
         }
 
@@ -686,7 +485,7 @@ class TestCaseDisplayService(private val project: Project) {
                 if (project.service<Workspace>().testGenerationData.packageLine.isEmpty()) {
                     ""
                 } else {
-                    "package ${project.service<Workspace>().testGenerationData.packageLine};\n"
+                    "package ${project.service<Workspace>().testGenerationData.packageLine};\n\n"
                 },
             )
     }
@@ -727,41 +526,6 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Creates a button to remove a test from the cache and from the UI.
-     *
-     * @param test the test case
-     * @param editor the currently opened editor
-     * @param testCasePanel the test case panel
-     * @return the created button
-     */
-    private fun createRemoveButton(test: TestCase, editor: Editor, testCasePanel: JPanel): JButton {
-        val removeFromCacheButton = JButton("Remove")
-        removeFromCacheButton.addActionListener {
-            // Remove the highlighting of the test
-            project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-                .testGenerationResult(test.testName, false, editor)
-
-            // Update the number of selected test cases if necessary
-            if ((testCasePanel.getComponent(0) as JCheckBox).isSelected) testsSelected -= 1
-
-            // Remove the test case from the cache
-            removeTestCase(test.testName)
-
-            // Update the UI of the tool window tab
-            allTestCasePanel.updateUI()
-            updateTestsSelectedLabel()
-
-            // Passed tests update
-            project.service<TestsExecutionResultService>().removeFromFailingTest(test.testName)
-            updateTestsPassedLabel()
-
-            // If no more tests are remaining, close the tool window
-            if (testCasePanels.size == 0) closeToolWindow()
-        }
-        return removeFromCacheButton
-    }
-
-    /**
      * Removes the selected tests from the cache, removes all the highlights from the editor and closes the tool window.
      * This function is called when the user clicks "Apply to test suite" button,
      *  and it is also called with all test cases as selected when the user clicks "Remove All" button.
@@ -774,25 +538,6 @@ class TestCaseDisplayService(private val project: Project) {
         closeToolWindow()
     }
 
-    /**
-     * Removes all test cases from the cache and tool window UI.
-     */
-    private fun removeAllTestCases() {
-        // Ask the user for the confirmation
-        val choice = JOptionPane.showConfirmDialog(
-            null,
-            TestSparkBundle.message("removeAllMessage"),
-            TestSparkBundle.message("confirmationTitle"),
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE,
-        )
-
-        // Cancel the operation if the user did not press "Yes"
-        if (choice == JOptionPane.NO_OPTION) return
-
-        clear()
-    }
-
     fun clear() {
         // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()
@@ -802,213 +547,26 @@ class TestCaseDisplayService(private val project: Project) {
     /**
      * A helper method to remove a test case from the cache and from the UI.
      *
-     * @param testName the name of the test
+     * @param testCaseName the name of the test
      */
-    private fun removeTestCase(testName: String) {
+    fun removeTestCase(testCaseName: String) {
         // Remove the test from the cache
         project.service<TestCaseCachingService>()
-            .invalidateFromCache(project.service<Workspace>().testGenerationData.fileUrl, originalTestCases[testName]!!)
+            .invalidateFromCache(
+                project.service<Workspace>().testGenerationData.fileUrl,
+                originalTestCases[testCaseName]!!,
+            )
+
+        // Update the number of selected test cases if necessary
+        if ((testCasePanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
+            testsSelected--
+        }
 
         // Remove the test panel from the UI
-        allTestCasePanel.remove(testCasePanels[testName])
+        allTestCasePanel.remove(testCasePanels[testCaseName])
 
         // Remove the test panel
-        testCasePanels.remove(testName)
-    }
-
-    /**
-     * Creates a button to reset the changes in the test source code.
-     *
-     * @return the created button
-     */
-    private fun createResetButton(): JButton {
-        val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetButton"))
-        resetButton.isEnabled = false
-        return resetButton
-    }
-
-    /**
-     * Creates a button to reset the changes in the test source code.
-     *
-     * @return the created button
-     */
-    private fun createResetToLastRunButton(): JButton {
-        val resetButton = JButton(TestSparkLabelsBundle.defaultValue("resetToLastRunButton"))
-        resetButton.isEnabled = false
-        return resetButton
-    }
-
-    /**
-     * Creates a button to reset the changes in the test source code.
-     *
-     * @return the created button
-     */
-    private fun createRunTestButton(): JButton {
-        val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("runTestButton"))
-        runTestButton.isEnabled = false
-        return runTestButton
-    }
-
-    /**
-     * A helper method to add a listener to the test document (in the tool window panel)
-     *   that enables reset button when the editor is changed.
-     *
-     * @param resetButton the button to reset changes in the test
-     * @param languageTextField the text field editor with the test
-     * @param checkbox the checkbox to select the test
-     */
-    private fun addListeners(
-        resetButton: JButton,
-        resetToLastRunButton: JButton,
-        runTestButton: JButton,
-        languageTextField: EditorTextField,
-        checkbox: JCheckBox,
-        testCase: TestCase,
-        initialBorder: Border,
-        testCasePanel: JPanel,
-    ) {
-        languageTextField.document.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                val lastRunCode =
-                    project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode
-                languageTextField.editor!!.markupModel.removeAllHighlighters()
-
-                resetButton.isEnabled = languageTextField.document.text != testCase.testCode
-                resetToLastRunButton.isEnabled = languageTextField.document.text != lastRunCode
-                runTestButton.isEnabled =
-                    languageTextField.document.text != lastRunCode && languageTextField.document.text != testCase.testCode
-
-                languageTextField.border =
-                    when (languageTextField.document.text) {
-                        testCase.testCode -> initialBorder
-                        lastRunCode -> getBorder(testCase.testName)
-                        else -> JBUI.Borders.empty()
-                    }
-
-                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
-
-                val modifiedLineIndexes = getModifiedLines(
-                    lastRunCode.split("\n"),
-                    languageTextField.document.text.split("\n"),
-                )
-
-                for (index in modifiedLineIndexes) {
-                    languageTextField.editor!!.markupModel.addLineHighlighter(
-                        DiffColors.DIFF_MODIFIED,
-                        index,
-                        HighlighterLayer.FIRST,
-                    )
-                }
-
-                // select checkbox
-                checkbox.isSelected = true
-            }
-        })
-
-        resetButton.addActionListener {
-            WriteCommandAction.runWriteCommandAction(project) {
-                languageTextField.document.setText(testCase.testCode)
-                project.service<Workspace>().updateTestCase(testCase)
-                resetButton.isEnabled = false
-                if ((initialBorder as MatteBorder).matteColor == JBColor.GREEN) {
-                    project.service<TestsExecutionResultService>().removeFromFailingTest(testCase.testName)
-                } else {
-                    project.service<TestsExecutionResultService>().addFailedTest(testCase.testName, testCasePanel.toolTipText)
-                }
-                resetToLastRunButton.isEnabled = false
-                runTestButton.isEnabled = false
-                languageTextField.border = initialBorder
-                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
-                languageTextField.editor!!.markupModel.removeAllHighlighters()
-
-                updateTestsPassedLabel()
-            }
-        }
-
-        resetToLastRunButton.addActionListener {
-            WriteCommandAction.runWriteCommandAction(project) {
-                languageTextField.document.setText(project.service<Workspace>().testJob!!.report.testCaseList[testCase.testName]!!.testCode)
-                resetToLastRunButton.isEnabled = false
-                runTestButton.isEnabled = false
-                languageTextField.border = getBorder(testCase.testName)
-                testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
-                languageTextField.editor!!.markupModel.removeAllHighlighters()
-
-                updateTestsPassedLabel()
-            }
-        }
-
-        runTestButton.addActionListener {
-            project.service<Workspace>().updateTestCase(
-                project.service<TestCoverageCollectorService>()
-                    .updateDataWithTestCase(languageTextField.document.text, testCase.testName),
-            )
-            resetToLastRunButton.isEnabled = false
-            runTestButton.isEnabled = false
-            languageTextField.border = getBorder(testCase.testName)
-            testCasePanel.toolTipText = project.service<TestsExecutionResultService>().getError(testCase.testName)
-            languageTextField.editor!!.markupModel.removeAllHighlighters()
-
-            updateTestsPassedLabel()
-        }
-    }
-
-    /**
-     * Returns the indexes of lines that are modified between two lists of strings.
-     *
-     * @param source The source list of strings.
-     * @param target The target list of strings.
-     * @return The indexes of modified lines.
-     */
-    fun getModifiedLines(source: List<String>, target: List<String>): List<Int> {
-        val dp = Array(source.size + 1) { IntArray(target.size + 1) }
-
-        for (i in 1..source.size) {
-            for (j in 1..target.size) {
-                if (source[i - 1] == target[j - 1]) {
-                    dp[i][j] = dp[i - 1][j - 1] + 1
-                } else {
-                    dp[i][j] = maxOf(dp[i - 1][j], dp[i][j - 1])
-                }
-            }
-        }
-
-        var i = source.size
-        var j = target.size
-
-        val modifiedLineIndexes = mutableListOf<Int>()
-
-        while (i > 0 && j > 0) {
-            if (source[i - 1] == target[j - 1]) {
-                i--
-                j--
-            } else if (dp[i][j] == dp[i - 1][j]) {
-                i--
-            } else if (dp[i][j] == dp[i][j - 1]) {
-                modifiedLineIndexes.add(j - 1)
-                j--
-            }
-        }
-
-        while (j > 0) {
-            modifiedLineIndexes.add(j - 1)
-            j--
-        }
-
-        modifiedLineIndexes.reverse()
-
-        return modifiedLineIndexes
-    }
-
-    /**
-     * Method to show notification that there are no tests to verify
-     */
-    private fun showEmptyTests() {
-        NotificationGroupManager.getInstance().getNotificationGroup("Test Validation Error").createNotification(
-            TestSparkBundle.message("emptyTestCasesTitle"),
-            TestSparkBundle.message("emptyTestCasesText"),
-            NotificationType.ERROR,
-        ).notify(project)
+        testCasePanels.remove(testCaseName)
     }
 
     /**
@@ -1029,67 +587,43 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Returns the border for a given test case.
+     * Updates the user interface of the tool window.
      *
-     * @param testCaseName the name of the test case
-     * @return the border for the test case
+     * This method updates the UI of the tool window tab by calling the updateUI
+     * method of the allTestCasePanel object and the updateTopLabels method
+     * of the topButtonsPanel object. It also checks if there are no more tests remaining
+     * and closes the tool window if that is the case.
      */
-    private fun getBorder(testCaseName: String): Border {
-        val size = 3
-        return if (project.service<TestsExecutionResultService>().isTestCaseFailing(testCaseName)) {
-            MatteBorder(size, size, size, size, JBColor.RED)
-        } else {
-            MatteBorder(size, size, size, size, JBColor.GREEN)
-        }
+    fun updateUI() {
+        // Update the UI of the tool window tab
+        allTestCasePanel.updateUI()
+
+        topButtonsPanelFactory.updateTopLabels()
+
+        // If no more tests are remaining, close the tool window
+        if (testCasePanels.size == 0) closeToolWindow()
     }
 
     /**
-     * This class is responsible for creating a test case document.
+     * Retrieves the list of test case panels.
      *
-     * @constructor Creates a new TestCaseDocumentCreator object.
+     * @return The list of test case panels.
      */
-    open class TestCaseDocumentCreator(private val className: String) : DocumentCreator {
-        /**
-         * Creates a document based on the given parameters. Copied from com.intellij.ui.LanguageTextField
-         *
-         * @param value            The initial text to set in the document.
-         * @param language         The language associated with the document.
-         * @param project          The project to which the document belongs.
-         * @return The created document. Can be null if the language is null and the document
-         *         is created using EditorFactory.
-         */
-        override fun createDocument(value: String?, language: Language?, project: Project?): Document {
-            return if (language != null) {
-                val notNullProject = project ?: ProjectManager.getInstance().defaultProject
-                val factory = PsiFileFactory.getInstance(notNullProject)
-                val fileType: FileType = language.associatedFileType!!
-                val stamp = LocalTimeCounter.currentTime()
-                val psiFile = factory.createFileFromText(
-                    "$className." + fileType.defaultExtension,
-                    fileType,
-                    "",
-                    stamp,
-                    true,
-                    false,
-                )
-                customizePsiFile(psiFile)
+    fun getTestCasePanels() = testCasePanels
 
-                // No need to guess project in getDocument - we already know it
-                val document = PsiDocumentManager.getInstance(notNullProject).getDocument(psiFile)!!
-                ApplicationManager.getApplication().runWriteAction {
-                    document.setText(value!!) // do not put initial value into backing LightVirtualFile.contentsToByteArray
-                }
-                document
-            } else {
-                EditorFactory.getInstance().createDocument(value!!)
-            }
-        }
+    /**
+     * Retrieves the currently selected tests.
+     *
+     * @return The list of tests currently selected.
+     */
+    fun getTestsSelected() = testsSelected
 
-        /**
-         * Customizes the given PsiFile.
-         *
-         * @param file The PsiFile to be customized.
-         */
-        open fun customizePsiFile(file: PsiFile?) {}
+    /**
+     * Sets the number of tests selected.
+     *
+     * @param testsSelected The number of tests selected.
+     */
+    fun setTestsSelected(testsSelected: Int) {
+        this.testsSelected = testsSelected
     }
 }

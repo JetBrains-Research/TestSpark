@@ -16,5 +16,5 @@ val COVERAGE_SELECTION_TOGGLE_TOPIC: Topic<CoverageSelectionToggleListener> = To
  * generation job with testspark.evosuite.Runner
  */
 interface CoverageSelectionToggleListener {
-    fun testGenerationResult(testName: String, selected: Boolean, editor: Editor)
+    fun testGenerationResult(testId: Int, selected: Boolean, editor: Editor)
 }

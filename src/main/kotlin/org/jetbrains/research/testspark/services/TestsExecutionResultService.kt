@@ -4,52 +4,103 @@ import com.intellij.openapi.project.Project
 
 class TestsExecutionResultService(private val project: Project) {
     // test case name --> test error
-    private val testErrors: MutableMap<String, String> = mutableMapOf()
+    private val currentTestErrors: MutableMap<Int, String> = mutableMapOf()
+
+    // test case id --> result list of { trimmed code --> test error ("" if passed) }
+    private val executionResult: MutableMap<Int, MutableMap<String, String>> = mutableMapOf()
 
     /**
-     * Adds a failed test to the collection.
+     * Adds a failed test to the current execution result.
      *
-     * @param testName the name of the passing test to add
-     * @param testError the error
+     * @param testId The id of the failed test.
+     * @param testCaseCode The code of the failed test case.
+     * @param testError The error message or description of the failed test.
      */
-    fun addFailedTest(testName: String, testError: String) {
-        testErrors[testName] = "<html>${testError.replace("===", "").replace("\t", "<br/>").trimEnd()}</html>"
+    fun addFailedTest(testId: Int, testCaseCode: String, testError: String) {
+        val htmlError = "<html>${testError.replace("===", "").replace("\t", "<br/>").trimEnd()}</html>"
+        currentTestErrors[testId] = htmlError
+        executionResult[testId]!![getTrimmedCode(testCaseCode)] = htmlError
     }
 
     /**
-     * Checks if a test case with the given name is failing.
+     * Adds a passed test to the execution results.
      *
-     * @param testName The name of the test case to check.
-     * @return Returns true if the test case is passing, false otherwise.
+     * @param testId The id of the test.
+     * @param testCaseCode The code of the test case.
      */
-    fun isTestCaseFailing(testName: String): Boolean = testErrors.contains(testName)
+    fun addPassedTest(testId: Int, testCaseCode: String) {
+        if (currentTestErrors.contains(testId)) currentTestErrors.remove(testId)
+        executionResult[testId]!![getTrimmedCode(testCaseCode)] = ""
+    }
 
     /**
-     * Removes the specified test from the failing tests list.
+     * Adds the current passed test to the list of errors.
      *
-     * @param testName The name of the test to be removed.
+     * @param testId the id of the test to be added as a current passed test
      */
-    fun removeFromFailingTest(testName: String) {
-        if (testErrors.contains(testName)) testErrors.remove(testName)
+    fun addCurrentPassedTest(testId: Int) {
+        if (currentTestErrors.contains(testId)) currentTestErrors.remove(testId)
+    }
+
+    /**
+     * Add the current failed test to the list of test errors.
+     *
+     * @param testId The id of the failed test.
+     * @param testError The error message of the failed test.
+     */
+    fun addCurrentFailedTest(testId: Int, testError: String) {
+        val htmlError = "<html>${testError.replace("===", "").replace("\t", "<br/>").trimEnd()}</html>"
+        currentTestErrors[testId] = htmlError
     }
 
     /**
      * Gets error message.
      *
-     * @param testName The name of the test to be removed.
+     * @param testCaseId The id of the test to be removed.
      */
-    fun getError(testName: String): String {
-        if (testErrors.contains(testName)) return testErrors[testName]!!
+    fun getCurrentError(testCaseId: Int): String {
+        if (currentTestErrors.contains(testCaseId)) return currentTestErrors[testCaseId]!!
         return ""
+    }
+
+    /**
+     * Retrieves the error message for a given test.
+     *
+     * @param testCaseId The id of the test.
+     * @param testCaseCode The code of the specific test case.
+     * @return The error message for the given test.
+     */
+    fun getError(testCaseId: Int, testCaseCode: String) = executionResult[testCaseId]!![getTrimmedCode(testCaseCode)]
+
+    /**
+     * Returns the trimmed code by removing all whitespace characters from the given code.
+     *
+     * @param code The code to be trimmed.
+     * @return The trimmed code.
+     */
+    private fun getTrimmedCode(code: String): String = code.filter { !it.isWhitespace() }
+
+    /**
+     * Initializes the execution result for a list of test case names.
+     *
+     * @param testCaseIds A list of test case ids for which the execution result needs to be initialized.
+     */
+    fun initExecutionResult(testCaseIds: List<Int>) {
+        for (testCaseId in testCaseIds) {
+            executionResult[testCaseId] = mutableMapOf()
+        }
     }
 
     /**
      * Number of failing tests
      */
-    fun size() = testErrors.size
+    fun size() = currentTestErrors.size
 
     /**
      * Clear failing tests
      */
-    fun clear() = testErrors.clear()
+    fun clear() {
+        currentTestErrors.clear()
+        executionResult.clear()
+    }
 }

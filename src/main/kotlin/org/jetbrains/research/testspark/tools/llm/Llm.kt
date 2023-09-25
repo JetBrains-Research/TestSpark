@@ -18,6 +18,7 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestDada
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
+import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
@@ -65,9 +66,17 @@ class Llm(override val name: String = "Llm") : Tool {
             prompt = when (codeType.type!!) {
                 CodeType.CLASS -> PromptManager(project, classesToTest[0], classesToTest).generatePromptForClass()
                 CodeType.METHOD ->
-                    PromptManager(project, classesToTest[0], classesToTest).generatePromptForMethod(codeType.objectDescription)
+                    PromptManager(
+                        project,
+                        classesToTest[0],
+                        classesToTest
+                    ).generatePromptForMethod(codeType.objectDescription)
 
-                CodeType.LINE -> PromptManager(project, classesToTest[0], classesToTest).generatePromptForLine(codeType.objectIndex)
+                CodeType.LINE -> PromptManager(
+                    project,
+                    classesToTest[0],
+                    classesToTest
+                ).generatePromptForLine(codeType.objectIndex)
             }
 
             // Too big prompt processing
@@ -106,28 +115,15 @@ class Llm(override val name: String = "Llm") : Tool {
     }
 
     /**
-     * Checks if the token is set.
-     *
-     * @param project The project for error processing.
-     *
-     * @return True if the token is set, false otherwise.
-     */
-    private fun isCorrectToken(project: Project): Boolean {
-        if (!SettingsArguments.isTokenSet()) {
-            llmErrorManager.errorProcess(TestSparkBundle.message("missingToken"), project)
-            return false
-        }
-        return true
-    }
-
-    /**
      * Generates tests for a given class.
      *
      * @param e the AnActionEvent object containing information about the action event
      * @throws IllegalArgumentException if the project in the AnActionEvent object is null
      */
     override fun generateTestsForClass(e: AnActionEvent) {
-        if (!isCorrectToken(e.project!!)) return
+        if (!e.project!!.service<LLMChatService>()
+            .isCorrectToken(e.project!!)
+        ) return
         val codeType = FragmentToTestDada(CodeType.CLASS)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
@@ -139,7 +135,9 @@ class Llm(override val name: String = "Llm") : Tool {
      * @throws IllegalStateException if the project or the surrounding method is null.
      */
     override fun generateTestsForMethod(e: AnActionEvent) {
-        if (!isCorrectToken(e.project!!)) return
+        if (!e.project!!.service<LLMChatService>()
+            .isCorrectToken(e.project!!)
+        ) return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
@@ -153,7 +151,9 @@ class Llm(override val name: String = "Llm") : Tool {
      * @param e The AnActionEvent that triggered the generation of tests.
      */
     override fun generateTestsForLine(e: AnActionEvent) {
-        if (!isCorrectToken(e.project!!)) return
+        if (!e.project!!.service<LLMChatService>()
+            .isCorrectToken(e.project!!)
+        ) return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!

@@ -118,7 +118,8 @@ class Validator(
 
                 override fun onFinished() {
                     super.onFinished()
-                    project.service<TestCaseDisplayService>().makeValidatedButtonAvailable()
+//                    TODO implement function in TestCaseDisplayService
+//                    project.service<TestCaseDisplayService>().makeValidatedButtonAvailable()
                 }
             })
     }
@@ -312,7 +313,8 @@ class Validator(
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
         val coverageSuitesBundle = CoverageSuitesBundle(coverageSuite)
         testCaseDisplayService.setJacocoReport(coverageSuitesBundle)
-        testCaseDisplayService.toggleJacocoButton.isEnabled = true
+//        TODO uncomment after the validator fixing
+//        testCaseDisplayService.toggleJacocoButton.isEnabled = true
     }
 
     private fun getCoverageRunner(file: VirtualFile): CoverageRunner? {
