@@ -584,7 +584,6 @@ class TestCasePanelFactory(
         runTestButton.isOpaque = false
         runTestButton.isContentAreaFilled = false
         runTestButton.isBorderPainted = true
-        runTestButton.preferredSize = Dimension(60, 30)
         return runTestButton
     }
 
