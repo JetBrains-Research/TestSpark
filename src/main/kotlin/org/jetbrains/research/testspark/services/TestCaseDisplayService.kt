@@ -231,11 +231,11 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun scrollToPanel(myPanel: JPanel) {
         var sum = 0
-        for (panel in testCasePanels.values) {
-            if (panel == myPanel) {
+        for (component in allTestCasePanel.components) {
+            if (component == myPanel) {
                 break
             } else {
-                sum += panel.height
+                sum += component.height
             }
         }
         val scroll = scrollPane.verticalScrollBar

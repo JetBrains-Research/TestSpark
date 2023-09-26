@@ -69,6 +69,8 @@ class TestCasePanelFactory(
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
 
+    private val dimensionSize = 7
+
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
         Language.findLanguageByID("JAVA"),
@@ -122,17 +124,17 @@ class TestCasePanelFactory(
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
         panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         panel.add(previousButtons)
-        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         panel.add(requestLabel)
-        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         panel.add(nextButtons)
-        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         panel.add(errorLabel)
         panel.add(Box.createHorizontalGlue())
         panel.add(copyButton)
-        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         panel.add(likeButton)
-        panel.add(Box.createRigidArea(Dimension(5, 0)))
+        panel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         panel.add(dislikeButton)
         panel.add(Box.createRigidArea(Dimension(12, 0)))
 
@@ -223,7 +225,7 @@ class TestCasePanelFactory(
         requestPanel.layout = BoxLayout(requestPanel, BoxLayout.X_AXIS)
         requestPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         requestPanel.add(requestField)
-        requestPanel.add(Box.createRigidArea(Dimension(5, 0)))
+        requestPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         requestPanel.add(sendButton)
         requestPanel.add(Box.createRigidArea(Dimension(15, 0)))
 
@@ -232,16 +234,16 @@ class TestCasePanelFactory(
         buttonsPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         runTestButton.isEnabled = false
         buttonsPanel.add(runTestButton)
-        buttonsPanel.add(Box.createRigidArea(Dimension(5, 0)))
+        buttonsPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         loadingLabel.isVisible = false
         buttonsPanel.add(loadingLabel)
         buttonsPanel.add(Box.createHorizontalGlue())
         resetButton.isEnabled = false
         buttonsPanel.add(resetButton)
-        buttonsPanel.add(Box.createRigidArea(Dimension(5, 0)))
+        buttonsPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         resetToLastRunButton.isEnabled = false
         buttonsPanel.add(resetToLastRunButton)
-        buttonsPanel.add(Box.createRigidArea(Dimension(5, 0)))
+        buttonsPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         buttonsPanel.add(removeButton)
         buttonsPanel.add(Box.createRigidArea(Dimension(12, 0)))
 
