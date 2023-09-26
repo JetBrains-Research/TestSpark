@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.services
 
 import com.google.gson.Gson
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -16,6 +17,7 @@ import java.io.File.separator
 import java.text.SimpleDateFormat
 import java.util.Date
 
+@Service(Service.Level.PROJECT)
 class TestSparkTelemetryService(project: Project) {
     private val projectDuplicate: Project = project
 

@@ -92,38 +92,6 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-
-        <!-- Project-level services -->
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.SettingsProjectService"/>
-        <projectService serviceImplementation="org.jetbrains.research.testspark.services.TestCaseDisplayService"/>
-
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.CoverageVisualisationService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.CoverageToolWindowDisplayService"/>
-        <projectService serviceImplementation="org.jetbrains.research.testspark.editor.Workspace"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.TestCaseCachingService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.StaticInvalidationService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.TestSparkTelemetryService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.RunnerService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.ErrorService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.LLMChatService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.TestsExecutionResultService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.TestCoverageCollectorService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.JavaClassBuilderService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.RunCommandLineService"/>
-
         <toolWindow id="TestSpark" secondary="true" anchor="right" icon="org.jetbrains.research.testspark.display.TestSparkIcons.toolWindowIcon"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>
 

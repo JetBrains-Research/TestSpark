@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
@@ -10,6 +11,7 @@ import java.io.File
 /**
  * This class is responsible for storing the project-level settings persistently. It uses SettingsProjectState class for that.
  */
+@Service(Service.Level.PROJECT)
 @State(name = "SettingsProjectState", storages = [Storage("TestSparkPluginSettings.xml")])
 class SettingsProjectService(project: Project) : PersistentStateComponent<SettingsProjectState> {
 

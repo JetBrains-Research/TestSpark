@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -9,6 +10,7 @@ import org.jetbrains.research.testspark.settings.SettingsApplicationState
 /**
  * This class is responsible for storing the application-level settings persistently. It uses SettingsApplicationState class for that.
  */
+@Service(Service.Level.PROJECT)
 @State(name = "SettingsApplicationState", storages = [Storage("TestSparkEvoSuiteSettings.xml")])
 class SettingsApplicationService : PersistentStateComponent<SettingsApplicationState> {
 

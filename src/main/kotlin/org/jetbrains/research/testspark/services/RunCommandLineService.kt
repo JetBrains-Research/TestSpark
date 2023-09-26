@@ -1,9 +1,11 @@
 package org.jetbrains.research.testspark.services
 
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
+@Service(Service.Level.PROJECT)
 class RunCommandLineService(private val project: Project) {
 
     /**

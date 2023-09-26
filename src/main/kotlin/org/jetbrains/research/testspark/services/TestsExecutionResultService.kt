@@ -1,7 +1,9 @@
 package org.jetbrains.research.testspark.services
 
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 
+@Service(Service.Level.PROJECT)
 class TestsExecutionResultService(private val project: Project) {
     // test case name --> test error
     private val currentTestErrors: MutableMap<Int, String> = mutableMapOf()

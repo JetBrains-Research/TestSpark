@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.editor
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
@@ -38,6 +39,7 @@ import java.io.File
  * related to test generation.
  *
  */
+@Service(Service.Level.PROJECT)
 class Workspace(private val project: Project) : Disposable {
     data class TestJobInfo(
         val fileUrl: String,
