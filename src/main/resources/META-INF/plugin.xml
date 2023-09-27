@@ -38,6 +38,15 @@
     <change-notes><![CDATA[
         <h4>0.1.3</h4>
             <ul>
+                <li>New UI for test generation report</li>
+                <li>Add code highlighting and auto-completion for generated tests</li>
+                <li>Add Java code formatter for generated tests</li>
+                <li>Add direct user feedback to modify each generated test by LLM</li>
+                <li>Improve the test case execution process</li>
+                <li>Improve prompt generation</li>
+            </ul>
+        <h4>0.1.3</h4>
+            <ul>
                 <li>Add LLM-based test generation using Grazie platform in the settings</li>
                 <li>Fix compilation issue in LLM-based test generation</li>
                 <li>Fix Evosuite test generation freezing in case that a wrong java path is provided</li>
