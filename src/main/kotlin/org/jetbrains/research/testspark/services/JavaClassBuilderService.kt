@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
@@ -17,6 +18,7 @@ import org.jetbrains.research.testspark.editor.Workspace
 import java.io.File
 import java.util.Locale
 
+@Service(Service.Level.PROJECT)
 class JavaClassBuilderService(private val project: Project) {
     /**
      * Generates the code for a test class.

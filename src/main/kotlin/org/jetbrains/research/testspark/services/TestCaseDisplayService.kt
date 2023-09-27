@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.services
 
 import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileChooser.FileChooser
@@ -49,6 +50,7 @@ import javax.swing.JSeparator
 import javax.swing.SwingConstants
 import javax.swing.border.Border
 
+@Service(Service.Level.PROJECT)
 class TestCaseDisplayService(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
@@ -229,11 +231,11 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private fun scrollToPanel(myPanel: JPanel) {
         var sum = 0
-        for (panel in testCasePanels.values) {
-            if (panel == myPanel) {
+        for (component in allTestCasePanel.components) {
+            if (component == myPanel) {
                 break
             } else {
-                sum += panel.height
+                sum += component.height
             }
         }
         val scroll = scrollPane.verticalScrollBar

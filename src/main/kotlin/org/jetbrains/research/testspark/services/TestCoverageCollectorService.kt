@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.services
 
 import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.openapi.application.PathManager
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -18,6 +19,7 @@ import kotlin.collections.ArrayList
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
+@Service(Service.Level.PROJECT)
 class TestCoverageCollectorService(private val project: Project) {
     private val sep = File.separatorChar
 

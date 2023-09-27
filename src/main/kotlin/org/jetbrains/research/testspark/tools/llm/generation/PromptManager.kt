@@ -70,7 +70,7 @@ class PromptManager(
         val psiMethod = getPsiMethod(cut, methodDescriptor)!!
         return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: `${getClassFullText(cut).split("\n")[lineNumber - 1]}` on line number $lineNumber.\n" +
             header +
-            "The source code of method this the chosen line under test is as follows:\n```\n${psiMethod.text}\n```\n" +
+            "The source code of method of the chosen line under test is as follows:\n```\n${psiMethod.text}\n```\n" +
             getCommonPromptPart(getInterestingPsiClasses(psiMethod))
     }
 

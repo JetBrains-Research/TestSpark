@@ -1,8 +1,11 @@
 package org.jetbrains.research.testspark.services
 
+import com.intellij.openapi.components.Service
+
 /**
  * Service class for handling error occurrences.
  */
+@Service(Service.Level.PROJECT)
 class ErrorService {
     private var isErrorOccurred: Boolean = false
     fun isErrorOccurred() = isErrorOccurred

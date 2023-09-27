@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -23,6 +24,7 @@ import kotlin.math.roundToInt
  *
  * @param project the project
  */
+@Service(Service.Level.PROJECT)
 class CoverageVisualisationService(private val project: Project) {
 
     // Variable to keep reference to the coverage visualisation content

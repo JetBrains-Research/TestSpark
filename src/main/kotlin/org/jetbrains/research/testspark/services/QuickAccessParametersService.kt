@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import org.jetbrains.research.testspark.toolwindow.QuickAccessParametersState
@@ -10,6 +11,7 @@ import org.jetbrains.research.testspark.toolwindow.QuickAccessParametersState
  * This class is responsible for helping to implement persistence for Quick Access Tool Menu on a sidebar.
  * It provides ability to load state and get state.
  */
+@Service(Service.Level.PROJECT)
 @State(name = "QuickAccessParametersState", storages = [Storage("testSparkQuickAccessParametersState.xml")])
 class QuickAccessParametersService : PersistentStateComponent<QuickAccessParametersState> {
 
