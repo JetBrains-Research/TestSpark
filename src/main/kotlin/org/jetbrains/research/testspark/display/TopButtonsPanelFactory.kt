@@ -39,11 +39,8 @@ class TopButtonsPanelFactory(private val project: Project) {
         panel.add(testsSelectedLabel)
         panel.add(Box.createHorizontalGlue())
         panel.add(selectAllButton)
-        panel.add(Box.createRigidArea(Dimension(10, 0)))
         panel.add(unselectAllButton)
-        panel.add(Box.createRigidArea(Dimension(10, 0)))
         panel.add(removeAllButton)
-        panel.add(Box.createRigidArea(Dimension(10, 0)))
 
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         unselectAllButton.addActionListener { toggleAllCheckboxes(false) }

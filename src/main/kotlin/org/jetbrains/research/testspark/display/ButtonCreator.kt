@@ -16,6 +16,7 @@ fun createButton(icon: Icon, tip: String): JButton {
     button.isContentAreaFilled = false
     button.isBorderPainted = false
     button.toolTipText = tip
-    button.preferredSize = Dimension(16, 16)
+    val size = button.preferredSize.height
+    button.preferredSize = Dimension(size, size)
     return button
 }

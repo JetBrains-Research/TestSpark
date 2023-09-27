@@ -124,17 +124,12 @@ class TestCasePanelFactory(
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
         panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         panel.add(previousButtons)
-        panel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         panel.add(requestLabel)
-        panel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         panel.add(nextButtons)
-        panel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         panel.add(errorLabel)
         panel.add(Box.createHorizontalGlue())
         panel.add(copyButton)
-        panel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         panel.add(likeButton)
-        panel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         panel.add(dislikeButton)
         panel.add(Box.createRigidArea(Dimension(12, 0)))
 
@@ -234,16 +229,13 @@ class TestCasePanelFactory(
         buttonsPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         runTestButton.isEnabled = false
         buttonsPanel.add(runTestButton)
-        buttonsPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         loadingLabel.isVisible = false
         buttonsPanel.add(loadingLabel)
         buttonsPanel.add(Box.createHorizontalGlue())
         resetButton.isEnabled = false
         buttonsPanel.add(resetButton)
-        buttonsPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         resetToLastRunButton.isEnabled = false
         buttonsPanel.add(resetToLastRunButton)
-        buttonsPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         buttonsPanel.add(removeButton)
         buttonsPanel.add(Box.createRigidArea(Dimension(12, 0)))
 
