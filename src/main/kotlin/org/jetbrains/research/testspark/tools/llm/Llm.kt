@@ -27,7 +27,6 @@ import org.jetbrains.research.testspark.tools.template.Tool
  * @param name The name of the tool. Default value is "Llm".
  */
 class Llm(override val name: String = "Llm") : Tool {
-    private val log = Logger.getInstance(this::class.java)
 
     private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestData): LLMProcessManager {
         val project: Project = e.project!!
