@@ -11,7 +11,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.Util
 import org.jetbrains.research.testspark.actions.getSurroundingClass
-import org.jetbrains.research.testspark.data.FragmentToTestDada
+import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
@@ -57,7 +57,7 @@ class Pipeline(
     /**
      * Builds the project and launches generation on a separate thread.
      */
-    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestDada) {
+    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
         clearDataBeforeTestGeneration(project, project.service<Workspace>().testResultName!!)
 
         val projectBuilder = ProjectBuilder(project)

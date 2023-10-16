@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.data
 /**
  * Data about test objects that require test generators.
  */
-class FragmentToTestDada {
+class FragmentToTestData {
 
     // Variable which contains all code elements for which it is possible to request test generation.
     var type: CodeType? = null

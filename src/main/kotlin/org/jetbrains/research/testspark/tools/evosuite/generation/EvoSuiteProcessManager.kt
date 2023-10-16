@@ -14,7 +14,7 @@ import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
-import org.jetbrains.research.testspark.data.FragmentToTestDada
+import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.RunCommandLineService
@@ -67,7 +67,7 @@ class EvoSuiteProcessManager(
      */
     override fun runTestGenerator(
         indicator: ProgressIndicator,
-        codeType: FragmentToTestDada,
+        codeType: FragmentToTestData,
         packageName: String,
     ) {
         try {

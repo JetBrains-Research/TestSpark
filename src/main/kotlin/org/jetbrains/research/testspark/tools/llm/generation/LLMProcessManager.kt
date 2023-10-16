@@ -6,7 +6,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
-import org.jetbrains.research.testspark.data.FragmentToTestDada
+import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
@@ -36,7 +36,6 @@ import java.io.File
  * @property testFileName The name of the generated test file.
  * @property log An instance of the logger class for logging purposes.
  * @property llmErrorManager An instance of the LLMErrorManager class.
- * @property requestManager An instance of the LLMRequestManager class.
  * @property maxRequests The maximum number of requests to be sent to LLM.
  */
 class LLMProcessManager(
@@ -47,7 +46,6 @@ class LLMProcessManager(
     private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
-//    private val requestManager: RequestManager = StandardRequestManagerFactory().getRequestManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
 
     /**
@@ -59,7 +57,7 @@ class LLMProcessManager(
      */
     override fun runTestGenerator(
         indicator: ProgressIndicator,
-        codeType: FragmentToTestDada,
+        codeType: FragmentToTestData,
         packageName: String,
     ) {
         log.info("LLM test generation begins")
