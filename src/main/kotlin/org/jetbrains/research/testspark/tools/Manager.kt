@@ -65,12 +65,8 @@ class Manager {
         fun generateTestsForClassByEvoSuite(e: AnActionEvent) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            for (index in tools.indices) {
-                if (tools[index].name == EvoSuite().name) {
-                    tools[index].generateTestsForClass(e)
-                    display(e, 1)
-                }
-            }
+            EvoSuite().generateTestsForClass(e)
+            display(e, 1)
         }
 
         /**
@@ -81,12 +77,8 @@ class Manager {
         fun generateTestsForClassByLlm(e: AnActionEvent) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            for (index in tools.indices) {
-                if (tools[index].name == Llm().name) {
-                    tools[index].generateTestsForClass(e)
-                    display(e, 1)
-                }
-            }
+            Llm().generateTestsForClass(e)
+            display(e, 1)
         }
 
         /**
@@ -97,12 +89,8 @@ class Manager {
         fun generateTestsForMethodByEvoSuite(e: AnActionEvent) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            for (index in tools.indices) {
-                if (tools[index].name == EvoSuite().name) {
-                    tools[index].generateTestsForMethod(e)
-                    display(e, 1)
-                }
-            }
+            EvoSuite().generateTestsForMethod(e)
+            display(e, 1)
         }
 
         /**
@@ -113,12 +101,8 @@ class Manager {
         fun generateTestsForMethodByLlm(e: AnActionEvent) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            for (index in tools.indices) {
-                if (tools[index].name == Llm().name) {
-                    tools[index].generateTestsForMethod(e)
-                    display(e, 1)
-                }
-            }
+            Llm().generateTestsForMethod(e)
+            display(e, 1)
         }
 
         /**
@@ -129,12 +113,8 @@ class Manager {
         fun generateTestsForLineByEvoSuite(e: AnActionEvent) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            for (index in tools.indices) {
-                if (tools[index].name == EvoSuite().name) {
-                    tools[index].generateTestsForLine(e)
-                    display(e, 1)
-                }
-            }
+            EvoSuite().generateTestsForLine(e)
+            display(e, 1)
         }
 
         /**
@@ -145,12 +125,8 @@ class Manager {
         fun generateTestsForLineByLlm(e: AnActionEvent) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            for (index in tools.indices) {
-                if (tools[index].name == Llm().name) {
-                    tools[index].generateTestsForLine(e)
-                    display(e, 1)
-                }
-            }
+            Llm().generateTestsForLine(e)
+            display(e, 1)
         }
 
         /**

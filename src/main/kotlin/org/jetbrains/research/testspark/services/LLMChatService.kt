@@ -10,16 +10,33 @@ import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestMana
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 
 @Service(Service.Level.PROJECT)
-class LLMChatService(
-    private val project: Project,
-) {
+class LLMChatService {
 
     private var requestManager = StandardRequestManagerFactory().getRequestManager()
 
+    /**
+     * Re-initiates the requestManager. All the chat history will be removed.
+     */
     fun newSession() {
         requestManager = StandardRequestManagerFactory().getRequestManager()
     }
 
+    /**
+     * Sends a test generation request (when chat history of the requestManager is empty).
+     * Sends a feedback to LLm according to previously generated tests (when chat history of the requestManager is not empty).
+     * After receiving the response, it tries to parse the tests
+     *
+     * @param messageToPrompt: A string that represents the prompt to LLM
+     * @param indicator: A ProgressIndicator object that represents the indication of the test generation progress.
+     * @param packageName: A string that represents the package name where the tests will be generated.
+     * @param project: A Project object that represents the current project in which the tests are to be generated.
+     * @param llmErrorManager: An LLMErrorManager object used to handle any errors that might occur during the test generation process.
+     *
+     * @return A Pair object containing a String and a TestSuiteGeneratedByLLM object.
+     * The string component of the Pair represents the parsing result
+     * the TestSuiteGeneratedByLLM component represents the test suite parsed from the LLm response.
+     * If the test suite generation fails, the TestSuiteGeneratedByLLM object will be null. and the reason is available in the string.
+     */
     fun testGenerationRequest(
         messageToPrompt: String,
         indicator: ProgressIndicator,
@@ -30,6 +47,20 @@ class LLMChatService(
         return requestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
     }
 
+    /**
+     * Sends a test modification request according to user's feedback.
+     * After receiving the response, it tries to parse the tests
+     *
+     * @param testcase: The test that is requested to be modified
+     * @param task: A string representing the requested task for test modification
+     * @param indicator: A ProgressIndicator object that represents the indication of the test generation progress.
+     * @param project: A Project object that represents the current project in which the tests are to be generated.
+     *
+     * @return A Pair object containing a String and a TestSuiteGeneratedByLLM object.
+     * The string component of the Pair represents the parsing result
+     * the TestSuiteGeneratedByLLM component represents the test suite parsed from the LLm response.
+     * If the test suite generation fails, the TestSuiteGeneratedByLLM object will be null. and the reason is available in the string.
+     */
     fun testModificationRequest(
         testcase: String,
         task: String,
@@ -64,6 +95,13 @@ class LLMChatService(
         return requestResult.second
     }
 
+    /**
+     * Updates token  based on the last entries of settings and check if the token is valid
+     *
+     * @param project The project for error processing.
+     *
+     * @return True if the token is set, false otherwise.
+     */
     private fun updateToken(project: Project): Boolean {
         requestManager.token = SettingsArguments.llmUserToken()
         return isCorrectToken(project)
