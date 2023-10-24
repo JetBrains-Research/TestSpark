@@ -18,8 +18,6 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.data.Level
-import org.jetbrains.research.testspark.data.Technique
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.COVERAGE_SELECTION_TOGGLE_TOPIC
@@ -159,7 +157,14 @@ class TestCasePanelFactory(
                 likeButton.icon = TestSparkIcons.likeSelected
             }
             dislikeButton.icon = TestSparkIcons.dislike
-//            TODO add implementation
+
+            project.service<CollectorService>().likedDislikedCollector.logEvent(
+                true,
+                getTestId(),
+                project.service<Workspace>().technique!!,
+                project.service<Workspace>().level!!,
+                testCase.testCode != initialCodes[currentRequestNumber - 1],
+            )
         }
 
         dislikeButton.addActionListener {
@@ -169,7 +174,14 @@ class TestCasePanelFactory(
                 dislikeButton.icon = TestSparkIcons.dislikeSelected
             }
             likeButton.icon = TestSparkIcons.like
-//            TODO add implementation
+
+            project.service<CollectorService>().likedDislikedCollector.logEvent(
+                false,
+                getTestId(),
+                project.service<Workspace>().technique!!,
+                project.service<Workspace>().level!!,
+                testCase.testCode != initialCodes[currentRequestNumber - 1],
+            )
         }
 
         copyButton.addActionListener {
@@ -658,6 +670,13 @@ class TestCasePanelFactory(
                 .getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
+
+    /**
+     * Retrieves the test ID by concatenating the workspace ID and the test case ID.
+     *
+     * @return The test ID as a string.
+     */
+    private fun getTestId(): String = project.service<Workspace>().id!! + "_" + testCase.id
 
     /**
      * A custom JTextField with a hint text that is displayed when the field is empty and not in focus.
