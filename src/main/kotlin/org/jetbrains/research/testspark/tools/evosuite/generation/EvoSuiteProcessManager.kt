@@ -13,9 +13,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.TestSparkBundle
-import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.Technique
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.RunCommandLineService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
@@ -95,13 +96,13 @@ class EvoSuiteProcessManager(
 
             // get command
             val command = when (codeType.type!!) {
-                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).build()
-                CodeType.METHOD -> {
+                Level.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).build()
+                Level.METHOD -> {
                     project.service<Workspace>().key = getKey(project, "$classFQN#${codeType.objectDescription}")
                     SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forMethod(codeType.objectDescription).build()
                 }
 
-                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
+                Level.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
             }
 
             if (settingsApplicationState.seed.isNotBlank()) command.add("-seed=${settingsApplicationState.seed}")
@@ -203,4 +204,6 @@ class EvoSuiteProcessManager(
             e.printStackTrace()
         }
     }
+
+    override fun getTechnique() = Technique.EA
 }

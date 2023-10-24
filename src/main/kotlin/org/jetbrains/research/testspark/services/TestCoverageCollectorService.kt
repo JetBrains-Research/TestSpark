@@ -23,7 +23,7 @@ import kotlin.io.path.createDirectories
 class TestCoverageCollectorService(private val project: Project) {
     private val sep = File.separatorChar
 
-    private val id = UUID.randomUUID().toString()
+    val id = UUID.randomUUID().toString()
     val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
     val testResultName = "test_gen_result_$id"
 

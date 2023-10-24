@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.tools.template.generation
 
 import com.intellij.openapi.progress.ProgressIndicator
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.Technique
 
 /**
  * An interface representing a process manager.
@@ -19,4 +20,11 @@ interface ProcessManager {
         codeType: FragmentToTestData,
         packageName: String,
     )
+
+    /**
+     * Retrieves the technique used by a particular entity.
+     *
+     * @return The technique used.
+     */
+    fun getTechnique(): Technique
 }

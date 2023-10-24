@@ -50,6 +50,8 @@ class Pipeline(
         project.service<Workspace>().classFQN = project.service<Workspace>().cutPsiClass!!.qualifiedName!!
         project.service<Workspace>().key = getKey(project, project.service<Workspace>().classFQN!!)
 
+        project.service<Workspace>().id = project.service<TestCoverageCollectorService>().id
+
         Util.makeTmp()
         Util.makeDir(project.service<Workspace>().baseDir!!)
     }
@@ -59,6 +61,9 @@ class Pipeline(
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
         clearDataBeforeTestGeneration(project, project.service<Workspace>().testResultName!!)
+
+        project.service<Workspace>().technique = processManager.getTechnique()
+        project.service<Workspace>().level = codeType.type!!
 
         val projectBuilder = ProjectBuilder(project)
 

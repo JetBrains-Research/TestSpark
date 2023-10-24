@@ -145,6 +145,8 @@
         <notificationGroup id="LLM Execution Error"
                            displayType="BALLOON"/>
 
+        <statistics.counterUsagesCollector implementationClass="org.jetbrains.research.testspark.collectors.FeedbackSentCollector"/>
+
     </extensions>
 
     <projectListeners>

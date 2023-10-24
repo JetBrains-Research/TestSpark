@@ -12,7 +12,7 @@ import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testspark.actions.createPipeline
 import org.jetbrains.research.testspark.actions.getSurroundingLine
 import org.jetbrains.research.testspark.actions.getSurroundingMethod
-import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.SettingsProjectService
@@ -38,7 +38,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
 
     override fun generateTestsForClass(e: AnActionEvent) {
         log.info("Starting tests generation for class by EvoSuite")
-        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestData(CodeType.CLASS))
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestData(Level.CLASS))
     }
 
     override fun generateTestsForMethod(e: AnActionEvent) {
@@ -46,7 +46,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
-        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod)))
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestData(Level.METHOD, generateMethodDescriptor(psiMethod)))
     }
 
     override fun generateTestsForLine(e: AnActionEvent) {
@@ -54,6 +54,6 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
-        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestData(CodeType.LINE, selectedLine))
+        createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestData(Level.LINE, selectedLine))
     }
 }

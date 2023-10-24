@@ -31,6 +31,8 @@ import org.jetbrains.research.testspark.tools.evosuite.validation.VALIDATION_RES
 import org.jetbrains.research.testspark.tools.evosuite.validation.ValidationResultListener
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
 import java.io.File
+import org.jetbrains.research.testspark.data.Level
+import org.jetbrains.research.testspark.data.Technique
 
 /**
  * Workspace state service
@@ -100,6 +102,10 @@ class Workspace(private val project: Project) : Disposable {
     private val log = Logger.getInstance(this.javaClass)
 
     private var listenerDisposable: Disposable? = null
+
+    var id: String? = null
+    var technique: Technique? = null
+    var level: Level? = null
 
     var testGenerationData = TestGenerationData()
 

@@ -18,9 +18,12 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.data.Level
+import org.jetbrains.research.testspark.data.Technique
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.COVERAGE_SELECTION_TOGGLE_TOPIC
+import org.jetbrains.research.testspark.services.CollectorService
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMChatService
@@ -367,6 +370,13 @@ class TestCasePanelFactory(
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     if (processStopped(project, indicator)) return
+
+                    project.service<CollectorService>().feedbackSentCollector.logEvent(
+                        project.service<Workspace>().id!! + "_" + testCase.id,
+                        project.service<Workspace>().technique!!,
+                        project.service<Workspace>().level!!,
+                        testCase.testCode != initialCodes[currentRequestNumber - 1],
+                    )
 
                     val modifiedTest = project.service<LLMChatService>()
                         .testModificationRequest(

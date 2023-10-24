@@ -5,9 +5,10 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
-import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.Technique
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
@@ -69,7 +70,7 @@ class LLMProcessManager(
             return
         }
 
-        if (codeType.type == CodeType.METHOD) {
+        if (codeType.type == Level.METHOD) {
             project.service<Workspace>().key = getKey(
                 project,
                 "${project.service<Workspace>().classFQN}#${codeType.objectDescription}",
@@ -181,7 +182,7 @@ class LLMProcessManager(
                 File(generatedTestPath),
                 generatedTestSuite.getPrintablePackageString(),
                 buildPath,
-                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList()
+                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
             )
 
             // compile the test file
@@ -217,6 +218,8 @@ class LLMProcessManager(
             indicator,
         )
     }
+
+    override fun getTechnique() = Technique.LLM
 
     private fun isLastIteration(requestsCount: Int) = requestsCount > maxRequests
 }

@@ -13,7 +13,7 @@ import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.actions.getClassDisplayName
 import org.jetbrains.research.testspark.actions.getClassFullText
 import org.jetbrains.research.testspark.actions.getSignatureString
-import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
@@ -49,9 +49,9 @@ class PromptManager(
         var prompt: String
         while (true) {
             prompt = when (codeType.type!!) {
-                CodeType.CLASS -> promptManager.generatePromptForClass()
-                CodeType.METHOD -> promptManager.generatePromptForMethod(codeType.objectDescription)
-                CodeType.LINE -> promptManager.generatePromptForLine(codeType.objectIndex)
+                Level.CLASS -> promptManager.generatePromptForClass()
+                Level.METHOD -> promptManager.generatePromptForMethod(codeType.objectDescription)
+                Level.LINE -> promptManager.generatePromptForLine(codeType.objectIndex)
             }
 
             // Too big prompt processing
