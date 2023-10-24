@@ -16,6 +16,8 @@ import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.CollectorService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Color
@@ -106,6 +108,8 @@ class CoverageRenderer(
             false,
             HintHint(editor, point),
         )
+
+        project.service<CollectorService>().coverageStatusShowedCollector.logEvent(project.service<Workspace>().id!!)
     }
 
     /**
