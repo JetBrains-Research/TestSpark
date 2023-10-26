@@ -106,6 +106,7 @@ class Workspace(private val project: Project) : Disposable {
     var id: String? = null
     var technique: Technique? = null
     var level: Level? = null
+    var testGenerationStartTime: Long? = null
 
     var testGenerationData = TestGenerationData()
 

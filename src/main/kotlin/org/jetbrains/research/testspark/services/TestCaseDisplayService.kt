@@ -173,6 +173,20 @@ class TestCaseDisplayService(private val project: Project) {
             testsSelected = testCasePanels.size
             topButtonsPanelFactory.updateTopLabels()
         }
+
+        // Add collector logging
+        project.service<CollectorService>().testGenerationFinishedCollector.logEvent(
+            System.currentTimeMillis() - project.service<Workspace>().testGenerationStartTime!!,
+            project.service<Workspace>().technique!!,
+            project.service<Workspace>().level!!,
+        )
+
+        // Add collector logging
+        project.service<CollectorService>().generatedTestsCollector.logEvent(
+            testReport.testCaseList.size,
+            project.service<Workspace>().technique!!,
+            project.service<Workspace>().level!!,
+        )
     }
 
     /**
@@ -297,6 +311,15 @@ class TestCaseDisplayService(private val project: Project) {
         // Filter the selected test cases
         val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
+
+        // Add collector logging
+        // TODO fix
+        project.service<CollectorService>().integratedTestsCollector.logEvent(
+            selectedTestCases.size,
+            project.service<Workspace>().technique!!,
+            project.service<Workspace>().level!!,
+            0,
+        )
 
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases

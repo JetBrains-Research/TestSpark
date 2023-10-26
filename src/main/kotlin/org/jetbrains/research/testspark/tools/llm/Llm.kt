@@ -12,8 +12,8 @@ import org.jetbrains.research.testspark.actions.createLLMPipeline
 import org.jetbrains.research.testspark.actions.getSurroundingClass
 import org.jetbrains.research.testspark.actions.getSurroundingLine
 import org.jetbrains.research.testspark.actions.getSurroundingMethod
-import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
@@ -55,10 +55,7 @@ class Llm(override val name: String = "Llm") : Tool {
         return LLMProcessManager(
             project,
             // generate the prompt using Prompt manager
-            PromptManager(project, classesToTest[0], classesToTest)
-                .generatePrompt(
-                    codeType
-                )
+            PromptManager(project, classesToTest[0], classesToTest).generatePrompt(codeType),
         )
     }
 
@@ -69,9 +66,7 @@ class Llm(override val name: String = "Llm") : Tool {
      * @throws IllegalArgumentException if the project in the AnActionEvent object is null
      */
     override fun generateTestsForClass(e: AnActionEvent) {
-        if (!e.project!!.service<LLMChatService>()
-            .isCorrectToken(e.project!!)
-        ) return
+        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) return
         val codeType = FragmentToTestData(Level.CLASS)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
@@ -83,9 +78,7 @@ class Llm(override val name: String = "Llm") : Tool {
      * @throws IllegalStateException if the project or the surrounding method is null.
      */
     override fun generateTestsForMethod(e: AnActionEvent) {
-        if (!e.project!!.service<LLMChatService>()
-            .isCorrectToken(e.project!!)
-        ) return
+        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
@@ -99,9 +92,7 @@ class Llm(override val name: String = "Llm") : Tool {
      * @param e The AnActionEvent that triggered the generation of tests.
      */
     override fun generateTestsForLine(e: AnActionEvent) {
-        if (!e.project!!.service<LLMChatService>()
-            .isCorrectToken(e.project!!)
-        ) return
+        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) return
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!

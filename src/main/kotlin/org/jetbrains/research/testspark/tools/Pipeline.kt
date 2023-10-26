@@ -13,6 +13,7 @@ import org.jetbrains.research.testspark.Util
 import org.jetbrains.research.testspark.actions.getSurroundingClass
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.CollectorService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 
@@ -29,13 +30,16 @@ class Pipeline(
     private val project = e.project!!
 
     init {
-        project.service<Workspace>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
+        project.service<Workspace>().projectClassPath =
+            ProjectRootManager.getInstance(project).contentRoots.first().path
 
-        project.service<Workspace>().testResultDirectory = project.service<TestCoverageCollectorService>().testResultDirectory
+        project.service<Workspace>().testResultDirectory =
+            project.service<TestCoverageCollectorService>().testResultDirectory
         project.service<Workspace>().testResultName = project.service<TestCoverageCollectorService>().testResultName
         project.service<Workspace>().resultPath = project.service<TestCoverageCollectorService>().resultPath
 
-        project.service<Workspace>().baseDir = "${project.service<Workspace>().testResultDirectory}${project.service<Workspace>().testResultName}-validation"
+        project.service<Workspace>().baseDir =
+            "${project.service<Workspace>().testResultDirectory}${project.service<Workspace>().testResultName}-validation"
 
         project.service<Workspace>().vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
         project.service<Workspace>().fileUrl = project.service<Workspace>().vFile!!.presentableUrl
@@ -45,7 +49,8 @@ class Pipeline(
             e.dataContext.getData(CommonDataKeys.PSI_FILE)!!,
             e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!,
         )
-        project.service<Workspace>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<Workspace>().cutPsiClass!!.containingFile.virtualFile)!!
+        project.service<Workspace>().cutModule = ProjectFileIndex.getInstance(project)
+            .getModuleForFile(project.service<Workspace>().cutPsiClass!!.containingFile.virtualFile)!!
 
         project.service<Workspace>().classFQN = project.service<Workspace>().cutPsiClass!!.qualifiedName!!
         project.service<Workspace>().key = getKey(project, project.service<Workspace>().classFQN!!)
@@ -64,6 +69,13 @@ class Pipeline(
 
         project.service<Workspace>().technique = processManager.getTechnique()
         project.service<Workspace>().level = codeType.type!!
+        project.service<Workspace>().testGenerationStartTime = System.currentTimeMillis()
+
+        // Add collector logging
+        project.service<CollectorService>().testGenerationStartedCollector.logEvent(
+            project.service<Workspace>().technique!!,
+            project.service<Workspace>().level!!,
+        )
 
         val projectBuilder = ProjectBuilder(project)
 

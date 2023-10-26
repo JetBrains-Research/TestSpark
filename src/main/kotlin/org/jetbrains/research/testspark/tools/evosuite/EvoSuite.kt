@@ -12,8 +12,8 @@ import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testspark.actions.createPipeline
 import org.jetbrains.research.testspark.actions.getSurroundingLine
 import org.jetbrains.research.testspark.actions.getSurroundingMethod
-import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.tools.evosuite.generation.EvoSuiteProcessManager
