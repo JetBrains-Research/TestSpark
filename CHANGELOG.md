@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+## 0.1.5
+### Fixed
+- Minor bugs in LLM-based test generation process
+
 ## 0.1.4
 
 ### Added

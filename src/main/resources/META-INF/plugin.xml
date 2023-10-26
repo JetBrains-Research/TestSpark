@@ -36,6 +36,10 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.1.5</h4>
+            <ul>
+                <li>Fix some minor bugs in LLM-based test generation process</li>
+            </ul>
         <h4>0.1.4</h4>
             <ul>
                 <li>New UI for test generation report</li>
