@@ -312,19 +312,24 @@ class TestCaseDisplayService(private val project: Project) {
         val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
-        // Add collector logging
-        // TODO fix
-        project.service<CollectorService>().integratedTestsCollector.logEvent(
-            selectedTestCases.size,
-            project.service<Workspace>().technique!!,
-            project.service<Workspace>().level!!,
-            0,
-        )
-
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
             .map { getEditor(it)!! }
             .map { it.document.text }
+
+        // Get number of modified tests
+        var modifiedTestsCount = 0
+        for (index in selectedTestCases.indices) {
+            if (originalTestCases[selectedTestCases[index]] != testCaseComponents[index]) modifiedTestsCount++
+        }
+
+        // Add collector logging
+        project.service<CollectorService>().integratedTestsCollector.logEvent(
+            selectedTestCases.size,
+            project.service<Workspace>().technique!!,
+            project.service<Workspace>().level!!,
+            modifiedTestsCount,
+        )
 
         // Descriptor for choosing folders and java files
         val descriptor = FileChooserDescriptor(true, true, false, false, false, false)
