@@ -165,66 +165,10 @@
 
     <actions>
         <!-- TestSpark actions -->
-        <group id="TestSpark.TestSparkActions" text="TestSpark" description="Actions related to TestSpark" popup="true"
-               class="com.intellij.openapi.actionSystem.DefaultActionGroup">
+        <action id="TestSpark.TestSparkActions" text="TestSpark" description="Actions related to TestSpark"
+               class="org.jetbrains.research.testspark.actions.TestSparkAction">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            <!-- Generate tests for class -->
-<!--            <action class="org.jetbrains.research.testspark.actions.common.GenerateTestsActionClassCommon"-->
-<!--                    id="TestSpark.TestSparkActions.GenerateTestsForClass"-->
-<!--                    text="Generate Tests For Class"-->
-<!--                    description="Generate tests for the selected class using TestSpark">-->
-<!--                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="C" keymap="$default"/>-->
-<!--            </action>-->
-<!--            &lt;!&ndash; Generate tests for method &ndash;&gt;-->
-<!--            <action class="org.jetbrains.research.testspark.actions.common.GenerateTestsActionMethodCommon"-->
-<!--                    id="TestSpark.TestSparkActions.GenerateTestsForMethod"-->
-<!--                    text="Generate Tests For Method"-->
-<!--                    description="Generate tests for the selected method using TestSpark">-->
-<!--                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="M" keymap="$default"/>-->
-<!--            </action>-->
-<!--            &lt;!&ndash; Generate tests for lines &ndash;&gt;-->
-<!--            <action class="org.jetbrains.research.testspark.actions.common.GenerateTestsActionLineCommon"-->
-<!--                    id="TestSpark.TestSparkActions.GenerateTestsForLine"-->
-<!--                    text="Generate Tests For Line"-->
-<!--                    description="Generate tests for the selected line using TestSpark">-->
-<!--                <keyboard-shortcut first-keystroke="control alt shift G" second-keystroke="L" keymap="$default"/>-->
-<!--            </action>-->
-            <!-- Generate tests for class using LLM-->
-            <action class="org.jetbrains.research.testspark.actions.llm.GenerateTestsActionClassLlm"
-                    id="TestSpark.TestSparkActions.GenerateTestsForClassLlm"
-                    text="Generate Tests For Class (LLM)"
-                    description="Generate tests for the selected class using TestSpark (LLM version)">
-            </action>
-            <!-- Generate tests for class using EvoSuite-->
-            <action class="org.jetbrains.research.testspark.actions.evosuite.GenerateTestsActionClassEvosuite"
-                    id="TestSpark.TestSparkActions.GenerateTestsForClassEvosuite"
-                    text="Generate Tests For Class (EvoSuite)"
-                    description="Generate tests for the selected class using TestSpark (EvoSuite version)">
-            </action>
-            <!-- Generate tests for method using LLM-->
-            <action class="org.jetbrains.research.testspark.actions.llm.GenerateTestsActionMethodLlm"
-                    id="TestSpark.TestSparkActions.GenerateTestsForMethodLlm"
-                    text="Generate Tests For Method (LLM)"
-                    description="Generate tests for the selected method using TestSpark (LLM version)">
-            </action>
-            <!-- Generate tests for method using EvoSuite-->
-            <action class="org.jetbrains.research.testspark.actions.evosuite.GenerateTestsActionMethodEvosuite"
-                    id="TestSpark.TestSparkActions.GenerateTestsForMethodEvosuite"
-                    text="Generate Tests For Method (EvoSuite)"
-                    description="Generate tests for the selected method using TestSpark (EvoSuite version)">
-            </action>
-            <!-- Generate tests for line using LLM-->
-            <action class="org.jetbrains.research.testspark.actions.llm.GenerateTestsActionLineLlm"
-                    id="TestSpark.TestSparkActions.GenerateTestsForLineLLM"
-                    text="Generate Tests For Line (LLM)"
-                    description="Generate tests for the selected line using TestSpark (LLM version)">
-            </action>
-            <!-- Generate tests for line using EvoSuite-->
-            <action class="org.jetbrains.research.testspark.actions.evosuite.GenerateTestsActionLineEvosuite"
-                    id="TestSpark.TestSparkActions.GenerateTestsForLineEvosuite"
-                    text="Generate Tests For Line (EvoSuite)"
-                    description="Generate tests for the selected line using TestSpark (EvoSuite version)">
-            </action>
-        </group>
+
+        </action>
     </actions>
 </idea-plugin>
