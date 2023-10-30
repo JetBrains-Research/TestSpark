@@ -271,67 +271,29 @@ fun getMethodDisplayName(psiMethod: PsiMethod): String {
 }
 
 /**
- * Makes the action visible only if a class has been selected.
- * It also updates the action name depending on which class has been selected.
+ * Gets the current list of code types based on the given AnActionEvent.
  *
- * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @param name a name of the test generator
+ * @param e The AnActionEvent representing the current action event.
+ * @return An array containing the current code types. If no caret or PSI file is found, an empty array is returned.
+ *         The array contains the class display name, method display name (if present), and the line number (if present).
+ *         The line number is prefixed with "Line".
  */
-fun updateForClass(e: AnActionEvent, name: String) {
-    e.presentation.isEnabledAndVisible = false
+fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*> {
+    val result: ArrayList<String> = arrayListOf()
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return result.toArray()
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return result.toArray()
 
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-
-    if (psiFile !is PsiJavaFile) return
+    if (psiFile !is PsiJavaFile) return result.toArray()
 
     val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
+    val psiMethod: PsiMethod? = getSurroundingMethod(psiFile, caret)
+    val line: Int? = getSurroundingLine(psiFile, caret)?.plus(1)
 
-    e.presentation.isEnabledAndVisible = true
-    e.presentation.text = "Generate Tests For ${getClassDisplayName(psiClass)} by $name"
-}
+    result.add(getClassDisplayName(psiClass))
+    psiMethod?.let { result.add(getMethodDisplayName(it)) }
+    line?.let { result.add("Line $line") }
 
-/**
- * Makes the action visible only if a method has been selected.
- * It also updates the action name depending on which method has been selected.
- *
- * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @param name a name of the test generator
- */
-fun updateForMethod(e: AnActionEvent, name: String) {
-    e.presentation.isEnabledAndVisible = false
-
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-
-    if (psiFile !is PsiJavaFile) return
-
-    val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
-
-    e.presentation.isEnabledAndVisible = true
-    e.presentation.text = "Generate Tests For ${getMethodDisplayName(psiMethod)} by $name"
-}
-
-/**
- * Makes the action visible only if a line has been selected.
- * It also updates the action name depending on which line has been selected.
- *
- * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @param name a name of the test generator
- */
-fun updateForLine(e: AnActionEvent, name: String) {
-    e.presentation.isEnabledAndVisible = false
-
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-
-    if (psiFile !is PsiJavaFile) return
-
-    val line: Int = getSurroundingLine(psiFile, caret)?.plus(1)
-        ?: return // lines in the editor and in EvoSuite are one-based
-
-    e.presentation.isEnabledAndVisible = true
-    e.presentation.text = "Generate Tests For Line $line by $name"
+    return result.toArray()
 }
 
 val importPattern = Regex(
