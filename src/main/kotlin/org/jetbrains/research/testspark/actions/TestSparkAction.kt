@@ -2,14 +2,14 @@ package org.jetbrains.research.testspark.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.ui.DialogWrapper
-import javax.swing.DefaultComboBoxModel
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.tools.Manager
+import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
-import org.jetbrains.research.testspark.tools.Manager
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
