@@ -7,11 +7,11 @@ import com.intellij.internal.statistic.eventLog.validator.rules.impl.CustomValid
 import com.intellij.internal.statistic.service.fus.collectors.CounterUsagesCollector
 
 class CoverageStatusShowedCollector : CounterUsagesCollector() {
-    private val groupId = "tests.coverage"
+    private val groupId = "tests.set"
     private val group = EventLogGroup(groupId, 1)
 
     private val eventId = "coverage.status.showed"
-    private val sessionId = EventFields.StringValidatedByCustomRule("id", CustomValidationRule::class.java)
+    private val sessionId = EventFields.StringValidatedByRegexp("id", CollectorsHelper().sessionIDRegex.pattern)
 
     private val event = group.registerVarargEvent(eventId, sessionId)
 

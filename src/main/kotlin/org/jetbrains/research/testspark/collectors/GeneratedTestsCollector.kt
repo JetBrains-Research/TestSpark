@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.data.Technique
 
 class GeneratedTestsCollector : CounterUsagesCollector() {
     private val groupId = "tests.set"
-    private val group = EventLogGroup(groupId, 3)
+    private val group = EventLogGroup(groupId, 1)
 
     private val eventId = "generated.tests"
     private val count: IntEventField = IntEventField("count")

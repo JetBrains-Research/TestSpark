@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.data.Technique
 
 class TestGenerationFinishedCollector : CounterUsagesCollector() {
     private val groupId = "tests.set"
-    private val group = EventLogGroup(groupId, 2)
+    private val group = EventLogGroup(groupId, 1)
 
     private val eventId = "test.generation.finished"
     private val durationMs: LongEventField = LongEventField("durationMs")

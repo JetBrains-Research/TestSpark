@@ -11,11 +11,11 @@ import org.jetbrains.research.testspark.data.Technique
 
 class LikedDislikedCollector : CounterUsagesCollector() {
     private val groupId = "individual.tests"
-    private val group = EventLogGroup(groupId, 2)
+    private val group = EventLogGroup(groupId, 1)
 
     private val eventId = "liked.disliked"
     private val liked = EventFields.Boolean("liked")
-    private val testId = EventFields.StringValidatedByCustomRule("id", CustomValidationRule::class.java)
+    private val testId = EventFields.StringValidatedByRegexp("id",CollectorsHelper().testIDRegex.pattern)
     private val technique: EnumEventField<Technique> = EventFields.Enum("technique", Technique::class.java)
     private val level: EnumEventField<Level> = EventFields.Enum("level", Level::class.java)
     private val isModified = EventFields.Boolean("is_modified")
