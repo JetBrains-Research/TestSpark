@@ -4,12 +4,16 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.tools.Manager
+import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
+import org.jetbrains.research.testspark.tools.llm.Llm
+import javax.swing.BoxLayout
+import javax.swing.ButtonGroup
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JRadioButton
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
@@ -40,14 +44,31 @@ class TestSparkAction : AnAction() {
      * @param e The AnActionEvent instance.
      */
     class TestSparkActionDialogWrapper(val e: AnActionEvent) : DialogWrapper(true) {
-        private val testGenerators = arrayOf("LLM", "EvoSuite")
+        private val llmButton = JRadioButton(Llm().name)
+        private val evoSuiteButton = JRadioButton(EvoSuite().name)
+        private val testGeneratorButtonGroup = ButtonGroup()
         private val codeTypes = getCurrentListOfCodeTypes(e)
-        private val testGeneratorComboBox = ComboBox(DefaultComboBoxModel(testGenerators))
-        private val scopeComboBox = ComboBox(DefaultComboBoxModel(codeTypes))
+        private val codesToTestComboBox = ComboBox(DefaultComboBoxModel(getCurrentListOfCodeTypes(e)))
 
         init {
             init()
             title = "TestSpark"
+
+            testGeneratorButtonGroup.add(llmButton)
+            testGeneratorButtonGroup.add(evoSuiteButton)
+
+            isOKActionEnabled = false
+
+            addListeners()
+        }
+
+        private fun addListeners() {
+            llmButton.addActionListener {
+                isOKActionEnabled = true
+            }
+            evoSuiteButton.addActionListener {
+                isOKActionEnabled = true
+            }
         }
 
         /**
@@ -56,21 +77,21 @@ class TestSparkAction : AnAction() {
          * @return The center panel as a JComponent.
          */
         override fun createCenterPanel(): JComponent {
-            return FormBuilder.createFormBuilder()
-                .addLabeledComponent(
-                    JLabel("Select the test generator:"),
-                    testGeneratorComboBox,
-                    10,
-                    false,
-                )
-                .addLabeledComponent(
-                    JLabel("Select the code type:"),
-                    scopeComboBox,
-                    10,
-                    false,
-                )
-                .addComponentFillVertically(JPanel(), 0)
-                .panel
+            val panel = JPanel()
+            panel.setLayout(BoxLayout(panel, BoxLayout.Y_AXIS))
+
+            val testGeneratorPanel = JPanel()
+            testGeneratorPanel.add(JLabel("Select the test generator:"))
+            testGeneratorPanel.add(llmButton)
+            testGeneratorPanel.add(evoSuiteButton)
+            panel.add(testGeneratorPanel)
+
+            val codesToTestPanel = JPanel()
+            codesToTestPanel.add(JLabel("Select the code type:"))
+            codesToTestPanel.add(codesToTestComboBox)
+            panel.add(codesToTestPanel)
+
+            return panel
         }
 
         /**
@@ -80,19 +101,22 @@ class TestSparkAction : AnAction() {
          * Finally, it invokes the superclasses doOKAction method.
          */
         override fun doOKAction() {
-            when (testGeneratorComboBox.item) {
-                testGenerators[0] -> when (scopeComboBox.item) {
+            if (llmButton.isSelected) {
+                when (codesToTestComboBox.item) {
                     codeTypes[0] -> Manager.generateTestsForClassByLlm(e)
                     codeTypes[1] -> Manager.generateTestsForMethodByLlm(e)
                     codeTypes[2] -> Manager.generateTestsForLineByLlm(e)
                 }
-                testGenerators[1] -> when (scopeComboBox.item) {
+                super.doOKAction()
+            }
+            if (evoSuiteButton.isSelected) {
+                when (codesToTestComboBox.item) {
                     codeTypes[0] -> Manager.generateTestsForClassByEvoSuite(e)
                     codeTypes[1] -> Manager.generateTestsForMethodByEvoSuite(e)
                     codeTypes[2] -> Manager.generateTestsForLineByEvoSuite(e)
                 }
+                super.doOKAction()
             }
-            super.doOKAction()
         }
     }
 }
