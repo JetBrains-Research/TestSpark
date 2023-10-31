@@ -37,7 +37,7 @@ class SettingsPluginComponent(project: Project) {
     // Telemetry
     private val telemetryDescription = JLabel(
         "<html><body>With your permission, TestSpark will send usage statistics to Intelligent Collaboration tool lab at " +
-            "the Jetbrains Research in order to help with EvoSuite research. This includes " +
+            "the Jetbrains Research in order to help with the research. This includes " +
             "information about your usage patterns, such as the tests you generate and the way you " +
             "modify them manually before applying them to a test suite.",
     )
