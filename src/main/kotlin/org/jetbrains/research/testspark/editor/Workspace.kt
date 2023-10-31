@@ -18,7 +18,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiClass
+import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.Technique
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.COVERAGE_SELECTION_TOGGLE_TOPIC
@@ -31,8 +33,6 @@ import org.jetbrains.research.testspark.tools.evosuite.validation.VALIDATION_RES
 import org.jetbrains.research.testspark.tools.evosuite.validation.ValidationResultListener
 import org.jetbrains.research.testspark.tools.evosuite.validation.Validator
 import java.io.File
-import org.jetbrains.research.testspark.data.Level
-import org.jetbrains.research.testspark.data.Technique
 
 /**
  * Workspace state service

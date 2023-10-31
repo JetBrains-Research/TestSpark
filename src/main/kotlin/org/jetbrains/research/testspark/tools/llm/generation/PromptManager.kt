@@ -13,8 +13,8 @@ import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.actions.getClassDisplayName
 import org.jetbrains.research.testspark.actions.getClassFullText
 import org.jetbrains.research.testspark.actions.getSignatureString
-import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
