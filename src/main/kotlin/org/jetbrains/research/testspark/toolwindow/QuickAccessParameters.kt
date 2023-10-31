@@ -21,6 +21,8 @@ import java.awt.Font
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import java.net.URI
 import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -65,18 +67,20 @@ class QuickAccessParameters(private val project: Project) {
     private val saveButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("saveButton"))
     private val resetButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("resetButton"))
 
+    // Link to documentation
+    private val documentationLink = ActionLink(
+        TestSparkLabelsBundle.defaultValue("documentationLink"),
+        ActionListener { _: ActionEvent? ->
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(URI("https://github.com/JetBrains-Research/TestSpark"))
+            }
+        },
+    )
+
     // Link to open settings
     private val settingsLink: ActionLink = ActionLink(TestSparkLabelsBundle.defaultValue("settingsLink")) {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, "Plugin")
     }
-//    // Link to source code
-//    private val settingsLink: ActionLink = ActionLink(TestSparkLabelsBundle.defaultValue("settingsLink")) {
-//        ShowSettingsUtil.getInstance().showSettingsDialog(project, "Plugin")
-//    }
-//    // Link to open settings
-//    private val settingsLink: ActionLink = ActionLink(TestSparkLabelsBundle.defaultValue("settingsLink")) {
-//        ShowSettingsUtil.getInstance().showSettingsDialog(project, "Plugin")
-//    }
 
     // Tool Window panel
     private var toolWindowPanel: JPanel = JPanel()
@@ -234,6 +238,7 @@ class QuickAccessParameters(private val project: Project) {
         )
         .addComponentToRightColumn(populationLimitToolTip, 1)
         // Add Save and Reset buttons and a link to open TestSpark settings
+        .addComponent(documentationLink, 20)
         .addComponent(settingsLink, 20)
         .addComponent(createSaveAndResetButtons(), 20)
         // Add the main panel
