@@ -25,7 +25,7 @@ import org.jetbrains.research.testspark.tools.template.Tool
  *
  * @param name The name of the tool. Default value is "Llm".
  */
-class Llm(override val name: String = "Llm") : Tool {
+class Llm(override val name: String = "LLM") : Tool {
 
     private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestData): LLMProcessManager {
         val project: Project = e.project!!
@@ -57,8 +57,8 @@ class Llm(override val name: String = "Llm") : Tool {
             // generate the prompt using Prompt manager
             PromptManager(project, classesToTest[0], classesToTest)
                 .generatePrompt(
-                    codeType
-                )
+                    codeType,
+                ),
         )
     }
 
@@ -70,8 +70,10 @@ class Llm(override val name: String = "Llm") : Tool {
      */
     override fun generateTestsForClass(e: AnActionEvent) {
         if (!e.project!!.service<LLMChatService>()
-            .isCorrectToken(e.project!!)
-        ) return
+                .isCorrectToken(e.project!!)
+        ) {
+            return
+        }
         val codeType = FragmentToTestData(CodeType.CLASS)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
@@ -84,8 +86,10 @@ class Llm(override val name: String = "Llm") : Tool {
      */
     override fun generateTestsForMethod(e: AnActionEvent) {
         if (!e.project!!.service<LLMChatService>()
-            .isCorrectToken(e.project!!)
-        ) return
+                .isCorrectToken(e.project!!)
+        ) {
+            return
+        }
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
@@ -100,8 +104,10 @@ class Llm(override val name: String = "Llm") : Tool {
      */
     override fun generateTestsForLine(e: AnActionEvent) {
         if (!e.project!!.service<LLMChatService>()
-            .isCorrectToken(e.project!!)
-        ) return
+                .isCorrectToken(e.project!!)
+        ) {
+            return
+        }
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!

@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.services
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
@@ -97,12 +96,9 @@ class CoverageVisualisationService(private val project: Project) {
         currentHighlightedData = HighlightedData(linesToCover, selectedTests, testReport, editor)
         clear()
 
-        // Show in-line coverage only if enabled in settings
-        val quickAccessParametersState =
-            ApplicationManager.getApplication().getService(QuickAccessParametersService::class.java).state
+        val settingsProjectState = project.service<SettingsProjectService>().state
 
-        if (quickAccessParametersState.showCoverage) {
-            val settingsProjectState = project.service<SettingsProjectService>().state
+        if (settingsProjectState.showCoverageCheckboxSelected) {
             val color = JBColor(TestSparkToolTipsBundle.defaultValue("colorName"), Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue))
             val colorForLines = JBColor(
                 TestSparkToolTipsBundle.defaultValue("colorName"),

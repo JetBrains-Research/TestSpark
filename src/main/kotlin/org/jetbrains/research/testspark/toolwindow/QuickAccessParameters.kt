@@ -21,7 +21,6 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.event.ActionEvent
 import javax.swing.JButton
-import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JOptionPane
@@ -33,9 +32,6 @@ import javax.swing.SpinnerNumberModel
  * This class stores the main panel and the UI of the "Parameters" tool window tab.
  */
 class QuickAccessParameters(private val project: Project) {
-    // Coverage visualisation toggle
-    private val showCoverageCheckbox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("showCoverage"))
-
     // Default state of the quick access parameters
     private val defaultState = QuickAccessParametersState.DefaultState
 
@@ -111,9 +107,6 @@ class QuickAccessParameters(private val project: Project) {
         .setFormLeftIndent(30)
         .addVerticalGap(25)
         .addComponent(panelTitle)
-        // Add coverage visualisation checkbox
-        .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("showCoverageDescription")), 35)
-        .addComponent(showCoverageCheckbox, 35)
         // Add `Search Budget` category
         .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("searchBudget")), 35)
         .addLabeledComponent(
@@ -265,7 +258,6 @@ class QuickAccessParameters(private val project: Project) {
 
         if (choice == JOptionPane.YES_OPTION) {
             val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
-            state.showCoverage = defaultState.showCoverage
             state.stoppingCondition = defaultState.stoppingCondition
             state.searchBudget = defaultState.searchBudget
             state.initializationTimeout = defaultState.initializationTimeout
@@ -296,7 +288,6 @@ class QuickAccessParameters(private val project: Project) {
     private fun loadState() {
         val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
 
-        showCoverageCheckbox.isSelected = state.showCoverage
         stoppingCondition.item = state.stoppingCondition
         searchBudget.value = state.searchBudget
         initializationTimeout.value = state.initializationTimeout
@@ -313,7 +304,6 @@ class QuickAccessParameters(private val project: Project) {
     private fun saveState() {
         val state: QuickAccessParametersState = QuickAccessParametersService.getInstance().state!!
 
-        state.showCoverage = showCoverageCheckbox.isSelected
         state.stoppingCondition = stoppingCondition.item
         state.searchBudget = searchBudget.value as Int
         state.initializationTimeout = initializationTimeout.value as Int
@@ -328,7 +318,6 @@ class QuickAccessParameters(private val project: Project) {
      * Adds tooltips to the actual UI elements, not the labels for them.
      */
     private fun addTooltipsToUiElements() {
-        showCoverageCheckbox.toolTipText = TestSparkToolTipsBundle.defaultValue("showCoverage")
         stoppingCondition.toolTipText = TestSparkToolTipsBundle.defaultValue("stoppingCondition")
         searchBudget.toolTipText = TestSparkToolTipsBundle.defaultValue("searchBudget")
         initializationTimeout.toolTipText = TestSparkToolTipsBundle.defaultValue("initTimeoutPopup")

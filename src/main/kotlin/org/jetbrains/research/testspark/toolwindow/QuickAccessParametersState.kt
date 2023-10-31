@@ -6,7 +6,6 @@ import org.jetbrains.research.testspark.TestSparkDefaultsBundle
  * This class is responsible for persisting the values of the parameters in the "Parameters" tool window tab.
  */
 data class QuickAccessParametersState(
-    var showCoverage: Boolean = DefaultState.showCoverage,
     var stoppingCondition: StoppingCondition = DefaultState.stoppingCondition,
     var searchBudget: Int = DefaultState.searchBudget,
     var initializationTimeout: Int = DefaultState.initializationTimeout,
@@ -18,7 +17,6 @@ data class QuickAccessParametersState(
 ) {
 
     object DefaultState {
-        val showCoverage: Boolean = TestSparkDefaultsBundle.defaultValue("showCoverage").toBoolean()
         val stoppingCondition: StoppingCondition = StoppingCondition.valueOf(TestSparkDefaultsBundle.defaultValue("stoppingCondition"))
         val searchBudget: Int = TestSparkDefaultsBundle.defaultValue("searchBudget").toInt()
         val initializationTimeout: Int = TestSparkDefaultsBundle.defaultValue("initializationTimeout").toInt()
