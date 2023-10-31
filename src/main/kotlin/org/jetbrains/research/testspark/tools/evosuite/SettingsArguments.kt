@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools.evosuite
 
-import org.jetbrains.research.testspark.services.QuickAccessParametersService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -72,13 +71,7 @@ class SettingsArguments(
      * Finalizes the parameter construction by applying the user runtime settings
      */
     fun build(isLineCoverage: Boolean = false): MutableList<String> {
-        val toolWindowState = QuickAccessParametersService.getInstance().state
         val settingsState = SettingsApplicationService.getInstance().state
-
-        if (toolWindowState != null) {
-            val params = toolWindowState.serializeChangesFromDefault()
-            command.addAll(params)
-        }
 
         if (settingsState != null) {
             val params = settingsState.serializeChangesFromDefault()

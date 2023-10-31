@@ -17,7 +17,7 @@ class TestSparkToolWindowFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val quickAccessParameters = QuickAccessParameters(project)
         val contentFactory: ContentFactory = ContentFactory.getInstance()
-        val content: Content = contentFactory.createContent(quickAccessParameters.getContent(), TestSparkLabelsBundle.defaultValue("parametersWindow"), false)
+        val content: Content = contentFactory.createContent(quickAccessParameters.getContent(), TestSparkLabelsBundle.defaultValue("descriptionWindow"), false)
         toolWindow.contentManager.addContent(content)
     }
 }
