@@ -6,7 +6,7 @@ import com.intellij.internal.statistic.eventLog.events.EventPair
 import com.intellij.internal.statistic.service.fus.collectors.CounterUsagesCollector
 
 class CoverageStatusShowedCollector : CounterUsagesCollector() {
-    private val groupId = "tests.set"
+    private val groupId = "tests.coverage"
     private val group = EventLogGroup(groupId, 1)
 
     private val eventId = "coverage.status.showed"
