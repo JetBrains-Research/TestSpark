@@ -70,7 +70,7 @@ class Llm(override val name: String = "LLM") : Tool {
      */
     override fun generateTestsForClass(e: AnActionEvent) {
         if (!e.project!!.service<LLMChatService>()
-                .isCorrectToken(e.project!!)
+            .isCorrectToken(e.project!!)
         ) {
             return
         }
@@ -86,7 +86,7 @@ class Llm(override val name: String = "LLM") : Tool {
      */
     override fun generateTestsForMethod(e: AnActionEvent) {
         if (!e.project!!.service<LLMChatService>()
-                .isCorrectToken(e.project!!)
+            .isCorrectToken(e.project!!)
         ) {
             return
         }
@@ -104,7 +104,7 @@ class Llm(override val name: String = "LLM") : Tool {
      */
     override fun generateTestsForLine(e: AnActionEvent) {
         if (!e.project!!.service<LLMChatService>()
-                .isCorrectToken(e.project!!)
+            .isCorrectToken(e.project!!)
         ) {
             return
         }
