@@ -108,15 +108,9 @@
         <toolWindow id="TestSpark" secondary="true" anchor="right" icon="org.jetbrains.research.testspark.display.TestSparkIcons.toolWindowIcon"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>
 
-<!--        TODO uncomment after the validator fixing-->
-<!--        <toolWindow id="TestSpark Validator" secondary="true" anchor="bottom"-->
-<!--                    factoryClass="org.jetbrains.research.testspark.tools.evosuite.validation.ValidationToolWindowFactory"/>-->
-
         <!-- Application-level services -->
         <applicationService
                 serviceImplementation="org.jetbrains.research.testspark.services.SettingsApplicationService"/>
-        <applicationService
-                serviceImplementation="org.jetbrains.research.testspark.services.QuickAccessParametersService"/>
 
         <!-- Configurables -->
         <projectConfigurable
@@ -126,14 +120,14 @@
                 displayName="TestSpark"/>
         <applicationConfigurable
                 parentId="TestSparkSettings"
-                instance="org.jetbrains.research.testspark.settings.SettingsEvoSuiteConfigurable"
-                id="TestSparkSettings.evosuite"
-                displayName="EvoSuite"/>
-        <applicationConfigurable
-                parentId="TestSparkSettings"
                 instance="org.jetbrains.research.testspark.settings.SettingsLLMConfigurable"
                 id="TestSparkSettings.llm"
                 displayName="Large Language Models"/>
+        <applicationConfigurable
+                parentId="TestSparkSettings"
+                instance="org.jetbrains.research.testspark.settings.SettingsEvoSuiteConfigurable"
+                id="TestSparkSettings.evosuite"
+                displayName="EvoSuite"/>
 
         <!-- Notifications -->
         <notificationGroup id="Execution Error"

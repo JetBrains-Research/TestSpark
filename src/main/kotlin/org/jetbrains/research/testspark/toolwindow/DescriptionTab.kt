@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.toolwindow
 
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
-import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
@@ -12,10 +11,9 @@ import org.jetbrains.research.testspark.settings.SettingsLLMConfigurable
 import org.jetbrains.research.testspark.settings.SettingsPluginConfigurable
 import java.awt.Desktop
 import java.awt.Font
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import java.net.URI
 import javax.swing.BoxLayout
+import javax.swing.JButton
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -25,7 +23,7 @@ import javax.swing.event.HyperlinkEvent
 /**
  * This class stores the main panel and the UI of the "Parameters" tool window tab.
  */
-class QuickAccessParameters(private val project: Project) {
+class DescriptionTab(private val project: Project) {
 
     private val panelTitle = JPanel()
     private val iconTitle = JLabel(TestSparkIcons.pluginIcon)
@@ -71,30 +69,17 @@ class QuickAccessParameters(private val project: Project) {
         }
     }
 
-    // Link to documentation
-    private val documentationLink = ActionLink(
-        TestSparkLabelsBundle.defaultValue("documentationLink"),
-        ActionListener { _: ActionEvent? ->
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(URI("https://github.com/JetBrains-Research/TestSpark"))
-            }
-        },
-    )
-
-    // Link to open settings
-    private val settingsLink: ActionLink = ActionLink(TestSparkLabelsBundle.defaultValue("settingsLink")) {
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsPluginConfigurable::class.java)
-    }
-
     // Link to LLM settings
-    private val llmSettingsLink: ActionLink = ActionLink("LLM Settings") {
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsLLMConfigurable::class.java)
-    }
+    private val llmSettingsButton = JButton(TestSparkLabelsBundle.defaultValue("llmSettingsLink"))
 
     // Link to EvoSuite settings
-    private val evoSuiteSettingsLink: ActionLink = ActionLink("EvoSuite Settings") {
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsEvoSuiteConfigurable::class.java)
-    }
+    private val evoSuiteSettingsButton = JButton(TestSparkLabelsBundle.defaultValue("evoSuiteSettingsLink"))
+
+    // Link to open settings
+    private val settingsButton = JButton(TestSparkLabelsBundle.defaultValue("settingsLink"))
+
+    // Link to documentation
+    private val documentationButton = JButton(TestSparkLabelsBundle.defaultValue("documentationLink"), TestSparkIcons.documentation)
 
     // Tool Window panel
     private var toolWindowPanel: JPanel = JPanel()
@@ -108,6 +93,36 @@ class QuickAccessParameters(private val project: Project) {
 
         // Create the main panel and set the font of the title
         toolWindowPanel = createToolWindowPanel()
+
+        // llm settings button setup
+        llmSettingsButton.isOpaque = false
+        llmSettingsButton.isContentAreaFilled = false
+        llmSettingsButton.addActionListener {
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsLLMConfigurable::class.java)
+        }
+
+        // EvoSuite settings button setup
+        evoSuiteSettingsButton.isOpaque = false
+        evoSuiteSettingsButton.isContentAreaFilled = false
+        evoSuiteSettingsButton.addActionListener {
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsEvoSuiteConfigurable::class.java)
+        }
+
+        // Settings button setup
+        settingsButton.isOpaque = false
+        settingsButton.isContentAreaFilled = false
+        settingsButton.addActionListener {
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsPluginConfigurable::class.java)
+        }
+
+        // Documentation button setup
+        documentationButton.isOpaque = false
+        documentationButton.isContentAreaFilled = false
+        documentationButton.addActionListener {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(URI("https://github.com/JetBrains-Research/TestSpark"))
+            }
+        }
 
         testSparkDescription.text = getCommonDescriptionText(getContent().preferredSize.width)
         testSparkLLMDescription.text = getLLMDescriptionText(getContent().preferredSize.width)
@@ -125,12 +140,12 @@ class QuickAccessParameters(private val project: Project) {
         .addComponent(panelTitle)
         .addComponent(testSparkDescription, 10)
         .addComponent(testSparkLLMDescription, 10)
-        .addComponent(llmSettingsLink, 10)
+        .addComponent(llmSettingsButton, 10)
         .addComponent(testSparkEvoSuiteDescription, 20)
-        .addComponent(evoSuiteSettingsLink, 10)
+        .addComponent(evoSuiteSettingsButton, 10)
         .addComponent(testSparkDisclaimerDescription, 20)
-        .addComponent(documentationLink, 10)
-        .addComponent(settingsLink, 10)
+        .addComponent(settingsButton, 10)
+        .addComponent(documentationButton, 10)
         // Add the main panel
         .addComponentFillVertically(JPanel(), 20)
         .panel

@@ -59,6 +59,8 @@ class TestSparkAction : AnAction() {
 
             isOKActionEnabled = false
 
+            codesToTestComboBox.isOpaque = false
+
             addListeners()
         }
 
