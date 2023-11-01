@@ -3,14 +3,17 @@ package org.jetbrains.research.testspark.settings
 import com.google.gson.JsonParser
 import com.intellij.ide.ui.UINumericRange
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.services.PromptParserService
 import java.net.HttpURLConnection
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JPanel
@@ -28,6 +31,12 @@ class SettingsLLMComponent {
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var platformSelector = ComboBox(arrayOf("OpenAI"))
+
+    // Prompt Editor
+    private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
+    private var editorTab = creatTabbedPane()
+
+
 
     private var lastChosenModule = ""
 
@@ -71,6 +80,24 @@ class SettingsLLMComponent {
                 modelSelector.isEnabled = false
             }
         }
+    }
+
+    private fun creatTabbedPane(): JBTabbedPane{
+        val tabbedPane = JBTabbedPane()
+
+        //Add Class Tab
+        val currentPrompt = "This is the prompt for \$CODE for \$LANGUAGE"
+        tabbedPane.addTab("Class", service<PromptParserService>().highlighter(currentPrompt))
+
+        //Add Method Tab
+        val label2 = JBLabel("This is Tab 2")
+        tabbedPane.addTab("Method", label2)
+
+        //Add Line Tab
+        val label3 = JBLabel("This is Tab 2")
+        tabbedPane.addTab("Line", label3)
+
+        return tabbedPane
     }
 
     /**
@@ -147,6 +174,7 @@ class SettingsLLMComponent {
         modelSelector.isEnabled = false
         maxInputParamsDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("parametersDepth")
         maxPolyDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumPolyDepth")
+        promptSeparator.toolTipText = TestSparkToolTipsBundle.defaultValue("promptEditor")
     }
 
     /**
@@ -197,6 +225,8 @@ class SettingsLLMComponent {
                 10,
                 false,
             )
+            .addComponent(promptSeparator, 15)
+            .addComponent(editorTab, 15)
             .addComponentFillVertically(JPanel(), 0)
             .panel
     }
