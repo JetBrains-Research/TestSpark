@@ -2,14 +2,12 @@ package org.jetbrains.research.testspark.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
-import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -44,33 +42,16 @@ class TestSparkAction : AnAction() {
      * @param e The AnActionEvent instance.
      */
     class TestSparkActionDialogWrapper(val e: AnActionEvent) : DialogWrapper(true) {
-        private val llmButton = JRadioButton(Llm().name)
-        private val evoSuiteButton = JRadioButton(EvoSuite().name)
+        private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
+        private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
         private val codeTypes = getCurrentListOfCodeTypes(e)
-        private val codesToTestComboBox = ComboBox(DefaultComboBoxModel(getCurrentListOfCodeTypes(e)))
+        private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
+        private val codeTypeButtonGroup = ButtonGroup()
 
         init {
             init()
             title = "TestSpark"
-
-            testGeneratorButtonGroup.add(llmButton)
-            testGeneratorButtonGroup.add(evoSuiteButton)
-
-            isOKActionEnabled = false
-
-            codesToTestComboBox.isOpaque = false
-
-            addListeners()
-        }
-
-        private fun addListeners() {
-            llmButton.addActionListener {
-                isOKActionEnabled = true
-            }
-            evoSuiteButton.addActionListener {
-                isOKActionEnabled = true
-            }
         }
 
         /**
@@ -79,8 +60,13 @@ class TestSparkAction : AnAction() {
          * @return The center panel as a JComponent.
          */
         override fun createCenterPanel(): JComponent {
+            isOKActionEnabled = false
+
             val panel = JPanel()
             panel.setLayout(BoxLayout(panel, BoxLayout.Y_AXIS))
+
+            testGeneratorButtonGroup.add(llmButton)
+            testGeneratorButtonGroup.add(evoSuiteButton)
 
             val testGeneratorPanel = JPanel()
             testGeneratorPanel.add(JLabel("Select the test generator:"))
@@ -88,12 +74,41 @@ class TestSparkAction : AnAction() {
             testGeneratorPanel.add(evoSuiteButton)
             panel.add(testGeneratorPanel)
 
+            for (codeType in codeTypes) {
+                val button = JRadioButton(codeType as String)
+                codeTypeButtons.add(button)
+                codeTypeButtonGroup.add(button)
+            }
+
             val codesToTestPanel = JPanel()
             codesToTestPanel.add(JLabel("Select the code type:"))
-            codesToTestPanel.add(codesToTestComboBox)
+            for (button in codeTypeButtons) codesToTestPanel.add(button)
             panel.add(codesToTestPanel)
 
+            addListeners()
+
             return panel
+        }
+
+        private fun addListeners() {
+            llmButton.addActionListener {
+                update()
+            }
+            evoSuiteButton.addActionListener {
+                update()
+            }
+            for (button in codeTypeButtons) {
+                button.addActionListener { update() }
+            }
+        }
+
+        private fun update() {
+            val isTestGeneratorButtonGroupSelected = llmButton.isSelected || evoSuiteButton.isSelected
+            var isCodeTypeButtonGroupSelected = false
+            for (button in codeTypeButtons) {
+                isCodeTypeButtonGroupSelected = isCodeTypeButtonGroupSelected || button.isSelected
+            }
+            isOKActionEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
         }
 
         /**
@@ -104,19 +119,15 @@ class TestSparkAction : AnAction() {
          */
         override fun doOKAction() {
             if (llmButton.isSelected) {
-                when (codesToTestComboBox.item) {
-                    codeTypes[0] -> Manager.generateTestsForClassByLlm(e)
-                    codeTypes[1] -> Manager.generateTestsForMethodByLlm(e)
-                    codeTypes[2] -> Manager.generateTestsForLineByLlm(e)
-                }
+                if (codeTypeButtons[0].isSelected) Manager.generateTestsForClassByLlm(e)
+                if (codeTypeButtons[1].isSelected) Manager.generateTestsForMethodByLlm(e)
+                if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByLlm(e)
                 super.doOKAction()
             }
             if (evoSuiteButton.isSelected) {
-                when (codesToTestComboBox.item) {
-                    codeTypes[0] -> Manager.generateTestsForClassByEvoSuite(e)
-                    codeTypes[1] -> Manager.generateTestsForMethodByEvoSuite(e)
-                    codeTypes[2] -> Manager.generateTestsForLineByEvoSuite(e)
-                }
+                if (codeTypeButtons[0].isSelected) Manager.generateTestsForClassByEvoSuite(e)
+                if (codeTypeButtons[1].isSelected) Manager.generateTestsForMethodByEvoSuite(e)
+                if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByEvoSuite(e)
                 super.doOKAction()
             }
         }

@@ -21,7 +21,6 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.StaticInvalidationService
 import org.jetbrains.research.testspark.tools.Pipeline
 
 fun createPipeline(e: AnActionEvent): Pipeline {
@@ -214,16 +213,6 @@ private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFi
 }
 
 /**
- * Calculates which lines to invalidate from cache.
- *
- * @param psiFile psiFile of the document
- */
-fun calculateLinesToInvalidate(psiFile: PsiFile): Set<Int> {
-    val staticInvalidator = psiFile.project.service<StaticInvalidationService>()
-    return staticInvalidator.invalidate(psiFile)
-}
-
-/**
  * Checks if the caret is within the given PsiElement.
  *
  * @param psiElement PSI element of interest
@@ -243,11 +232,11 @@ private fun withinElement(psiElement: PsiElement, caret: Caret): Boolean {
  */
 fun getClassDisplayName(psiClass: PsiClass): String {
     return if (psiClass.isInterface) {
-        "Interface ${psiClass.qualifiedName}"
+        "<html><b><font color='orange'>interface</font> ${psiClass.qualifiedName}</b></html>"
     } else if (isAbstractClass(psiClass)) {
-        "Abstract Class ${psiClass.qualifiedName}"
+        "<html><b><font color='orange'>abstract class</font> ${psiClass.qualifiedName}</b></html>"
     } else {
-        "Class ${psiClass.qualifiedName}"
+        "<html><b><font color='orange'>class</font> ${psiClass.qualifiedName}</b></html>"
     }
 }
 
@@ -260,13 +249,13 @@ fun getClassDisplayName(psiClass: PsiClass): String {
  */
 fun getMethodDisplayName(psiMethod: PsiMethod): String {
     return if (isDefaultConstructor(psiMethod)) {
-        "Default Constructor"
+        "<html><b><font color='orange'>default constructor</font></b></html>"
     } else if (psiMethod.isConstructor) {
-        "Constructor"
+        "<html><b><font color='orange'>constructor</font></b></html>"
     } else if (isMethodDefault(psiMethod)) {
-        "Default Method ${psiMethod.name}"
+        "<html><b><font color='orange'>default method</font> ${psiMethod.name}</b></html>"
     } else {
-        "Method ${psiMethod.name}"
+        "<html><b><font color='orange'>method</font> ${psiMethod.name}</b></html>"
     }
 }
 
@@ -291,7 +280,7 @@ fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*> {
 
     result.add(getClassDisplayName(psiClass))
     psiMethod?.let { result.add(getMethodDisplayName(it)) }
-    line?.let { result.add("Line $line") }
+    line?.let { result.add("<html><b><font color='orange'>line</font> $line</b></html>") }
 
     return result.toArray()
 }
