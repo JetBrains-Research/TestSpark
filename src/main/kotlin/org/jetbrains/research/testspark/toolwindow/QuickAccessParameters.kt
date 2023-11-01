@@ -6,12 +6,16 @@ import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.settings.SettingsEvoSuiteConfigurable
 import org.jetbrains.research.testspark.settings.SettingsLLMConfigurable
+import org.jetbrains.research.testspark.settings.SettingsPluginConfigurable
 import java.awt.Desktop
 import java.awt.Font
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.net.URI
+import javax.swing.BoxLayout
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -23,7 +27,9 @@ import javax.swing.event.HyperlinkEvent
  */
 class QuickAccessParameters(private val project: Project) {
 
-    private val panelTitle = JLabel(TestSparkLabelsBundle.defaultValue("quickAccess"))
+    private val panelTitle = JPanel()
+    private val iconTitle = JLabel(TestSparkIcons.pluginIcon)
+    private val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("quickAccess"))
 
     private val testSparkDescription = JTextPane().apply {
         isEditable = false
@@ -35,7 +41,27 @@ class QuickAccessParameters(private val project: Project) {
         }
     }
 
+    private val testSparkLLMDescription = JTextPane().apply {
+        isEditable = false
+        contentType = "text/html"
+        addHyperlinkListener { evt ->
+            if (HyperlinkEvent.EventType.ACTIVATED == evt.eventType) {
+                Desktop.getDesktop().browse(evt.url.toURI())
+            }
+        }
+    }
+
     private val testSparkEvoSuiteDescription = JTextPane().apply {
+        isEditable = false
+        contentType = "text/html"
+        addHyperlinkListener { evt ->
+            if (HyperlinkEvent.EventType.ACTIVATED == evt.eventType) {
+                Desktop.getDesktop().browse(evt.url.toURI())
+            }
+        }
+    }
+
+    private val testSparkDisclaimerDescription = JTextPane().apply {
         isEditable = false
         contentType = "text/html"
         addHyperlinkListener { evt ->
@@ -57,26 +83,36 @@ class QuickAccessParameters(private val project: Project) {
 
     // Link to open settings
     private val settingsLink: ActionLink = ActionLink(TestSparkLabelsBundle.defaultValue("settingsLink")) {
-        ShowSettingsUtil.getInstance().showSettingsDialog(project, "Plugin")
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsPluginConfigurable::class.java)
     }
 
     // Link to LLM settings
-
-    private val LLMSettingsLink: ActionLink = ActionLink("LLM Settings") {
+    private val llmSettingsLink: ActionLink = ActionLink("LLM Settings") {
         ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsLLMConfigurable::class.java)
+    }
+
+    // Link to EvoSuite settings
+    private val evoSuiteSettingsLink: ActionLink = ActionLink("EvoSuite Settings") {
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsEvoSuiteConfigurable::class.java)
     }
 
     // Tool Window panel
     private var toolWindowPanel: JPanel = JPanel()
 
     init {
-        panelTitle.font = Font("Monochrome", Font.BOLD, 20)
+        textTitle.font = Font("Monochrome", Font.BOLD, 20)
+
+        panelTitle.setLayout(BoxLayout(panelTitle, BoxLayout.X_AXIS))
+        panelTitle.add(iconTitle)
+        panelTitle.add(textTitle)
 
         // Create the main panel and set the font of the title
         toolWindowPanel = createToolWindowPanel()
 
-        testSparkDescription.text = getDescriptionText(getContent().preferredSize.width)
+        testSparkDescription.text = getCommonDescriptionText(getContent().preferredSize.width)
+        testSparkLLMDescription.text = getLLMDescriptionText(getContent().preferredSize.width)
         testSparkEvoSuiteDescription.text = getEvoSuiteDescriptionText(getContent().preferredSize.width)
+        testSparkDisclaimerDescription.text = getDisclaimerText(getContent().preferredSize.width)
     }
 
     /**
@@ -88,10 +124,13 @@ class QuickAccessParameters(private val project: Project) {
         .addVerticalGap(25)
         .addComponent(panelTitle)
         .addComponent(testSparkDescription, 10)
-        .addComponent(LLMSettingsLink, 20)
-        .addComponent(testSparkEvoSuiteDescription, 10)
-        .addComponent(documentationLink, 20)
-        .addComponent(settingsLink, 20)
+        .addComponent(testSparkLLMDescription, 10)
+        .addComponent(llmSettingsLink, 10)
+        .addComponent(testSparkEvoSuiteDescription, 20)
+        .addComponent(evoSuiteSettingsLink, 10)
+        .addComponent(testSparkDisclaimerDescription, 20)
+        .addComponent(documentationLink, 10)
+        .addComponent(settingsLink, 10)
         // Add the main panel
         .addComponentFillVertically(JPanel(), 20)
         .panel
@@ -106,25 +145,56 @@ class QuickAccessParameters(private val project: Project) {
         return JBScrollPane(toolWindowPanel)
     }
 
-    private fun getEvoSuiteDescriptionText(width: Int): String? {
-        return "<html><body style='width: ${(0.2 * width).toInt()} px;'><font face=\"Monochrome\">" +
-            "<b>Search-based test generation</b>:<br>" +
-            "Uses <a href=\\\"https://www.evosuite.org\\\">EvoSuite</a>. You can generate tests with this tool locally.<br>" +
-            "However, it only supports projects implemented by Java versions 8 to 11.<br>" +
-            "TestSpark is currently developed and maintained by <a href=\"https://lp.jetbrains.com/research/ictl/\">ICTL at JetBrains Research</a>.<br>" +
-            "<br>" +
+    /**
+     * Returns the common description text for TestSpark plugin.
+     *
+     * @param width The width used to set the style of the HTML body.
+     * @return The common description text formatted as HTML.
+     */
+    private fun getCommonDescriptionText(width: Int): String {
+        return "<html><body style='width: ${(1.25 * width).toInt()} px;'><font face=Monochrome>" +
+            "Welcome and thank you for using TestSpark!<br>" +
+            "This plugin let you to generate tests for Java classes, method, and single lines.<br>" +
+            "TestSpark is currently developed and maintained by <a href=https://lp.jetbrains.com/research/ictl/>ICTL at JetBrains Research</a>.<br>" +
+            "We are currently supporting to types of test generation:<br><br></font></body></html>"
+    }
+
+    /**
+     * Returns the description text for LLM-based test generation.
+     *
+     * @param width The width of the text container.
+     * @return The formatted HTML description text for LLM-based test generation.
+     */
+    private fun getLLMDescriptionText(width: Int): String {
+        return "<html><body style='width: ${(0.65 * width).toInt()} px;'><font face=Monochrome>" +
+            "<strong>LLM-based test generation</strong><br><br>" +
+            "Needs <a href=https://openai.com>OpenAI</a> or JetBrains AI Assistant platform (currently, accessible to JetBrains employees) tokens. To use this test generation, you need to enter your token and select your model in the settings.</font></body></html>"
+    }
+
+    /**
+     * Returns the descriptive text for EvoSuite test generation.
+     *
+     * @param width The width of the text body in pixels.
+     * @return The formatted HTML string containing the description of Search-based test generation using EvoSuite.
+     */
+    private fun getEvoSuiteDescriptionText(width: Int): String {
+        return "<html><body style='width: ${(0.65 * width).toInt()} px;'><font face=Monochrome>" +
+            "<strong>Search-based test generation</strong><br><br>" +
+            "Uses <a href=https://www.evosuite.org>EvoSuite</a>. You can generate tests with this tool locally.<br>" +
+            "However, it only supports projects implemented by Java versions 8 to 11.</font></body></html>"
+    }
+
+    /**
+     * Returns the disclaimer text based on the given width.
+     *
+     * @param width The width in pixels to be used for styling the disclaimer text.
+     * @return The disclaimer text as an HTML string.
+     */
+    private fun getDisclaimerText(width: Int): String {
+        return "<html><body style='width: ${(0.65 * width).toInt()} px;'><font face=Monochrome>" +
             "<strong>DISCLAIMER</strong><br><br>" +
             "TestSpark is currently designed to serve as an experimental tool.<br>" +
             "Please keep in mind that tests generated by TestSpark are meant to augment your existing test suites. " +
             "They are not meant to replace writing tests manually.</font></body></html>"
-    }
-
-    private fun getDescriptionText(width: Int): String {
-        return "<html><body style='width: ${(1.2 * width).toInt()} px;'><font face=\"Monochrome\">" +
-            "Welcome and thank you for using TestSpark!<br>" +
-            "This plugin let you to generate tests for Java classes, method, and single lines.<br>" +
-            "We are currently supporting to types of test generation:<br>" +
-            "<b>LLM-based test generation</b>:<br>" +
-            "Needs <a href=\"https://openai.com\">OpenAI</a> or JetBrains AI Assistant platform (currently, accessible to JetBrains employees) tokens. To use this test generation, you need to enter your token and select your model in the settings.</font></body></html>"
     }
 }

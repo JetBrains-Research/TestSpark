@@ -56,4 +56,7 @@ object TestSparkIcons {
 
     @JvmField
     val toolWindowIcon = IconLoader.getIcon("/icons/toolWindowIcon20.svg", javaClass)
+
+    @JvmField
+    val pluginIcon = IconLoader.getIcon("/META-INF/pluginIcon.svg", javaClass)
 }
