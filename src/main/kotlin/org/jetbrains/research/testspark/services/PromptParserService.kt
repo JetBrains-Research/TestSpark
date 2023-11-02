@@ -22,8 +22,8 @@ class PromptParserService {
 
     private val attributes = TextAttributes(JBColor.ORANGE, null, null, null, Font.BOLD or Font.ITALIC)
 
-    fun highlighter(prompt: String): EditorTextField {
-        val textField = EditorTextField(prompt)
+    fun highlighter(textField: EditorTextField, prompt: String): EditorTextField {
+        textField.document.setText(prompt)
         PROMPT_KEYWORD.values().forEach {
             val textToHighlight = "\$${it.text}"
             if(prompt.contains(textToHighlight)){
