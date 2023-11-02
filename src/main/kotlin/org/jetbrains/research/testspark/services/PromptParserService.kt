@@ -9,19 +9,20 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import java.awt.Font
 
-enum class PROMPT_KEYWORD (val text: String){
-    CODE("CODE"),
-    LANGUAGE("LANGUAGE"),
-    TESTING_PLATFORM("TESTING_PLATFORM"),
-    MOCKING_PLATFORM("MOCKING_PLATFORM"),
-    METHODS("METHODS"),
-    POLYMORPHISM("POLYMORPHISM"),
+enum class PROMPT_KEYWORD (val text: String, val description: String){
+    CODE("CODE","Code dsc"),
+    LANGUAGE("LANGUAGE", "lang dsc"),
+    TESTING_PLATFORM("TESTING_PLATFORM", "tetsingpl dsc"),
+    MOCKING_PLATFORM("MOCKING_PLATFORM", "mock dsc"),
+    METHODS("METHODS", "methods dsc"),
+    POLYMORPHISM("POLYMORPHISM", "poly dsc"),
 }
 
 @Service
 class PromptParserService {
 
     private val attributes = TextAttributes(JBColor.ORANGE, null, null, null, Font.BOLD or Font.ITALIC)
+
 
     fun highlighter(textField: EditorTextField, prompt: String): EditorTextField {
         val editor = textField.editor
@@ -54,6 +55,10 @@ class PromptParserService {
         }
 
         return textField
+    }
+
+    fun getKeywords(): Array<PROMPT_KEYWORD> {
+        return PROMPT_KEYWORD.values()
     }
 
 

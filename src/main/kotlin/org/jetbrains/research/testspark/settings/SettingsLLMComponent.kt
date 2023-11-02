@@ -3,9 +3,12 @@ package org.jetbrains.research.testspark.settings
 import com.google.gson.JsonParser
 import com.intellij.ide.ui.UINumericRange
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
+
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.JBColor
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
@@ -15,11 +18,16 @@ import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.services.PromptParserService
+import java.awt.FlowLayout
+import java.awt.Font
 import java.net.HttpURLConnection
+import javax.swing.BoxLayout
 import javax.swing.DefaultComboBoxModel
+import javax.swing.JButton
 import javax.swing.JPanel
+import javax.swing.JSeparator
 import javax.swing.JTextField
-import javax.swing.SwingUtilities
+
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -37,7 +45,6 @@ class SettingsLLMComponent {
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
     private var promptEditorTabbedPane = creatTabbedPane()
-
 
 
     private var lastChosenModule = ""
@@ -84,19 +91,26 @@ class SettingsLLMComponent {
         }
     }
 
-    fun updateHighlighting(prompt: String){
-        val editorTextField = (promptEditorTabbedPane.getComponentAt(0) as EditorTextField)
+    fun updateHighlighting(prompt: String) {
+        val editorTextField = ((promptEditorTabbedPane.getComponent(0) as JPanel).getComponent(0) as EditorTextField)
         service<PromptParserService>().highlighter(editorTextField, prompt)
     }
 
-    private fun creatTabbedPane(): JBTabbedPane{
+    private fun creatTabbedPane(): JBTabbedPane {
         val tabbedPane = JBTabbedPane()
 
         //Add Class Tab
+        val classPanel = JPanel()
+        classPanel.layout = BoxLayout(classPanel, BoxLayout.Y_AXIS)
         val editorTextField = EditorTextField()
         editorTextField.setOneLineMode(false);
 
-        tabbedPane.addTab("Class", editorTextField)
+        classPanel.add(editorTextField)
+        classPanel.add(JSeparator())
+
+        addPromptButtons(classPanel)
+
+        tabbedPane.addTab("Class", classPanel)
         //Add Method Tab
         val label2 = JBLabel("This is Tab 2")
         tabbedPane.addTab("Method", label2)
@@ -106,6 +120,38 @@ class SettingsLLMComponent {
         tabbedPane.addTab("Line", label3)
 
         return tabbedPane
+    }
+
+    private fun addPromptButtons(panel: JPanel) {
+        val keywords = service<PromptParserService>().getKeywords()
+        val editorTextField = panel.getComponent(0) as EditorTextField
+        keywords.forEach {
+            val btnPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+
+            val button = JButton("\$${it.text}")
+            button.setForeground(JBColor.ORANGE)
+            button.font = Font("Monochrome", Font.BOLD, 12)
+
+            // add actionListener for button
+            button.addActionListener { event ->
+                val editor = editorTextField.editor
+
+                editor?.let { editor ->
+                    val offset = editor.caretModel.offset
+                    val document = editorTextField.document
+                    WriteCommandAction.runWriteCommandAction(editor.project) {
+                        document.insertString(offset, "\$${it.text}")
+                    }
+                }
+            }
+
+            // add button and it's description to buttons panel
+            btnPanel.add(button)
+            btnPanel.add(JBLabel(it.description))
+
+            panel.add(btnPanel)
+        }
+
     }
 
     /**
@@ -128,11 +174,12 @@ class SettingsLLMComponent {
         })
         platformSelector.addItemListener { update() }
 
-        (promptEditorTabbedPane.getComponent(0) as EditorTextField).document.addDocumentListener(object : com.intellij.openapi.editor.event.DocumentListener {
-            override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
-                updateHighlighting(event.document.text)
+        ((promptEditorTabbedPane.getComponent(0) as JPanel).getComponent(0) as EditorTextField).document.addDocumentListener(
+            object : com.intellij.openapi.editor.event.DocumentListener {
+                override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
+                    updateHighlighting(event.document.text)
+                }
             }
-        }
         )
     }
 
@@ -294,10 +341,11 @@ class SettingsLLMComponent {
         }
 
     var classPrompt: String
-        get() = (promptEditorTabbedPane.getComponentAt(0) as EditorTextField).document.text
+        get() = ((promptEditorTabbedPane.getComponent(0) as JPanel).getComponent(0) as EditorTextField).document.text
         set(value) {
             ApplicationManager.getApplication().runWriteAction {
-                val editorTextField = (promptEditorTabbedPane.getComponentAt(0) as EditorTextField)
+                val editorTextField =
+                    ((promptEditorTabbedPane.getComponent(0) as JPanel).getComponent(0) as EditorTextField)
                 editorTextField.document.setText(value)
             }
         }
