@@ -19,6 +19,7 @@ import java.net.HttpURLConnection
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JPanel
 import javax.swing.JTextField
+import javax.swing.SwingUtilities
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -83,8 +84,9 @@ class SettingsLLMComponent {
         }
     }
 
-    fun updateHighlighting(){
-        println("CHANGED") // ToDO
+    fun updateHighlighting(prompt: String){
+        val editorTextField = (promptEditorTabbedPane.getComponentAt(0) as EditorTextField)
+        service<PromptParserService>().highlighter(editorTextField, prompt)
     }
 
     private fun creatTabbedPane(): JBTabbedPane{
@@ -128,7 +130,7 @@ class SettingsLLMComponent {
 
         (promptEditorTabbedPane.getComponent(0) as EditorTextField).document.addDocumentListener(object : com.intellij.openapi.editor.event.DocumentListener {
             override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
-                updateHighlighting()
+                updateHighlighting(event.document.text)
             }
         }
         )
@@ -294,9 +296,9 @@ class SettingsLLMComponent {
     var classPrompt: String
         get() = (promptEditorTabbedPane.getComponentAt(0) as EditorTextField).document.text
         set(value) {
-            val editorTextField = (promptEditorTabbedPane.getComponentAt(0) as EditorTextField)
-            service<PromptParserService>().highlighter(editorTextField, value)
-//            promptEditorTabbedPane.setComponentAt(0, service<PromptParserService>().highlighter(editorTextField, value))
-//            (promptEditorTabbedPane.getComponentAt(0) as EditorTextField).text = value
+            ApplicationManager.getApplication().runWriteAction {
+                val editorTextField = (promptEditorTabbedPane.getComponentAt(0) as EditorTextField)
+                editorTextField.document.setText(value)
+            }
         }
 }
