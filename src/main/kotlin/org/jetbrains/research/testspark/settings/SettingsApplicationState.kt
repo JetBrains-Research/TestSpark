@@ -29,6 +29,7 @@ data class SettingsApplicationState(
     var maxLLMRequest: Int = DefaultSettingsApplicationState.maxLLMRequest,
     var maxInputParamsDepth: Int = DefaultSettingsApplicationState.maxInputParamsDepth,
     var maxPolyDepth: Int = DefaultSettingsApplicationState.maxPolyDepth,
+    var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
 ) {
 
     /**
@@ -57,6 +58,7 @@ data class SettingsApplicationState(
         val maxLLMRequest: Int = TestSparkDefaultsBundle.defaultValue("maxLLMRequest").toInt()
         val maxInputParamsDepth: Int = TestSparkDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
         val maxPolyDepth: Int = TestSparkDefaultsBundle.defaultValue("maxPolyDepth").toInt()
+        val classPrompt: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
     }
 
     fun serializeChangesFromDefault(): List<String> {

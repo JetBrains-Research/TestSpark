@@ -34,6 +34,7 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
+        settingsComponent!!.classPrompt = settingsState.classPrompt
     }
 
     /**
@@ -49,6 +50,7 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
+        modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
 
         return modified
     }
@@ -64,6 +66,7 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
         settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth
+        settingsState.classPrompt = settingsComponent!!.classPrompt
     }
 
     /**

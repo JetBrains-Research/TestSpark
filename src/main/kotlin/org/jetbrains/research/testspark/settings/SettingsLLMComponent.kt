@@ -5,6 +5,7 @@ import com.intellij.ide.ui.UINumericRange
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
@@ -34,7 +35,7 @@ class SettingsLLMComponent {
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
-    private var editorTab = creatTabbedPane()
+    private var promptEditorTabbedPane = creatTabbedPane()
 
 
 
@@ -82,13 +83,18 @@ class SettingsLLMComponent {
         }
     }
 
+    fun updateHighlighting(){
+        println("CHANGED") // ToDO
+    }
+
     private fun creatTabbedPane(): JBTabbedPane{
         val tabbedPane = JBTabbedPane()
 
         //Add Class Tab
-        val currentPrompt = "This is the prompt for \$CODE for \$LANGUAGE"
-        tabbedPane.addTab("Class", service<PromptParserService>().highlighter(currentPrompt))
+        val editorTextField = EditorTextField()
+        editorTextField.setOneLineMode(false);
 
+        tabbedPane.addTab("Class", editorTextField)
         //Add Method Tab
         val label2 = JBLabel("This is Tab 2")
         tabbedPane.addTab("Method", label2)
@@ -119,6 +125,13 @@ class SettingsLLMComponent {
             }
         })
         platformSelector.addItemListener { update() }
+
+        (promptEditorTabbedPane.getComponent(0) as EditorTextField).document.addDocumentListener(object : com.intellij.openapi.editor.event.DocumentListener {
+            override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
+                updateHighlighting()
+            }
+        }
+        )
     }
 
     /**
@@ -226,7 +239,7 @@ class SettingsLLMComponent {
                 false,
             )
             .addComponent(promptSeparator, 15)
-            .addComponent(editorTab, 15)
+            .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)
             .panel
     }
@@ -276,5 +289,14 @@ class SettingsLLMComponent {
         get() = maxPolyDepthField.number
         set(value) {
             maxPolyDepthField.number = value
+        }
+
+    var classPrompt: String
+        get() = (promptEditorTabbedPane.getComponentAt(0) as EditorTextField).document.text
+        set(value) {
+            val editorTextField = (promptEditorTabbedPane.getComponentAt(0) as EditorTextField)
+            service<PromptParserService>().highlighter(editorTextField, value)
+//            promptEditorTabbedPane.setComponentAt(0, service<PromptParserService>().highlighter(editorTextField, value))
+//            (promptEditorTabbedPane.getComponentAt(0) as EditorTextField).text = value
         }
 }
