@@ -1,20 +1,33 @@
 package org.jetbrains.research.testspark.actions
 
+import com.google.gson.JsonParser
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.ui.ComboBox
+import com.intellij.ui.components.JBLabel
+import com.intellij.util.io.HttpRequests
+import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.tools.Manager
+import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
+import org.jetbrains.research.testspark.tools.llm.Llm
 import java.awt.CardLayout
 import java.awt.Dimension
 import java.awt.Toolkit
+import java.net.HttpURLConnection
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
+import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
-import org.jetbrains.research.testspark.tools.Manager
-import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
-import org.jetbrains.research.testspark.tools.llm.Llm
+import javax.swing.JTextField
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
@@ -48,6 +61,12 @@ class TestSparkAction : AnAction() {
         private val codeTypes = getCurrentListOfCodeTypes(e)
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
+
+        private val defaultModulesArray = arrayOf("")
+        private var modelSelector = ComboBox(defaultModulesArray)
+        private var llmUserTokenField = JTextField(30)
+        private var platformSelector = ComboBox(arrayOf("OpenAI"))
+        private var lastChosenModule = ""
 
         private val nextButton = JButton("Next")
         private val backButton = JButton("Back")
@@ -106,27 +125,72 @@ class TestSparkAction : AnAction() {
         }
 
         private fun getLlmPanel(): JPanel {
-            val llmPanel = JPanel()
+            val bottomButtons = JPanel()
+            bottomButtons.add(backButton)
+            bottomButtons.add(okButton)
 
-            llmPanel.add(backButton)
-            llmPanel.add(okButton)
+            llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
+            modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
+            modelSelector.isEnabled = false
 
-            return llmPanel
+            if (isGrazieClassLoaded()) {
+                platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
+            } else {
+                platformSelector.isEnabled = false
+            }
+
+            return FormBuilder.createFormBuilder()
+                .addLabeledComponent(
+                    JBLabel(TestSparkLabelsBundle.defaultValue("llmPlatform")),
+                    platformSelector,
+                    10,
+                    false,
+                )
+                .addLabeledComponent(
+                    JBLabel(TestSparkLabelsBundle.defaultValue("llmToken")),
+                    llmUserTokenField,
+                    10,
+                    false,
+                )
+                .addLabeledComponent(
+                    JBLabel(TestSparkLabelsBundle.defaultValue("model")),
+                    modelSelector,
+                    10,
+                    false,
+                )
+                .addComponentFillVertically(bottomButtons, 10)
+                .panel
         }
 
         private fun addListeners(panel: JPanel) {
             llmButton.addActionListener {
-                update()
+                updateNextButton()
             }
             evoSuiteButton.addActionListener {
-                update()
+                updateNextButton()
             }
             for (button in codeTypeButtons) {
-                button.addActionListener { update() }
+                button.addActionListener { updateNextButton() }
             }
             nextButton.addActionListener {
                 cardLayout.next(panel)
                 pack()
+            }
+            llmUserTokenField.document.addDocumentListener(object : DocumentListener {
+                override fun insertUpdate(e: DocumentEvent?) {
+                    updateModelSelector()
+                }
+
+                override fun removeUpdate(e: DocumentEvent?) {
+                    updateModelSelector()
+                }
+
+                override fun changedUpdate(e: DocumentEvent?) {
+                    updateModelSelector()
+                }
+            })
+            platformSelector.addItemListener {
+                updateModelSelector()
             }
             backButton.addActionListener {
                 cardLayout.previous(panel)
@@ -147,13 +211,88 @@ class TestSparkAction : AnAction() {
             }
         }
 
-        private fun update() {
+        private fun isGrazieClassLoaded(): Boolean {
+            val className = "org.jetbrains.research.grazie.Request"
+            return try {
+                Class.forName(className)
+                true
+            } catch (e: ClassNotFoundException) {
+                false
+            }
+        }
+
+        private fun updateNextButton() {
             val isTestGeneratorButtonGroupSelected = llmButton.isSelected || evoSuiteButton.isSelected
             var isCodeTypeButtonGroupSelected = false
             for (button in codeTypeButtons) {
                 isCodeTypeButtonGroupSelected = isCodeTypeButtonGroupSelected || button.isSelected
             }
             nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
+        }
+
+        private fun updateModelSelector() {
+            if (platformSelector.selectedItem!!.toString() == "Grazie") {
+                modelSelector.model = DefaultComboBoxModel(arrayOf("GPT-4"))
+                modelSelector.isEnabled = false
+                return
+            }
+            ApplicationManager.getApplication().executeOnPooledThread {
+                val modules = getModules(llmUserTokenField.text)
+                modelSelector.removeAllItems()
+                if (modules != null) {
+                    modelSelector.model = DefaultComboBoxModel(modules)
+                    modelSelector.isEnabled = true
+                } else {
+                    modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
+                    modelSelector.isEnabled = false
+                }
+            }
+        }
+
+        /**
+         * Retrieves all available models from the OpenAI API using the provided token.
+         *
+         * @param token Authorization token for the OpenAI API.
+         * @return An array of model names if request is successful, otherwise null.
+         */
+        private fun getModules(token: String): Array<String>? {
+            val url = "https://api.openai.com/v1/models"
+
+            val httpRequest = HttpRequests.request(url).tuner {
+                it.setRequestProperty("Authorization", "Bearer $token")
+            }
+
+            val models = mutableListOf<String>()
+
+            try {
+                httpRequest.connect {
+                    if ((it.connection as HttpURLConnection).responseCode == HttpURLConnection.HTTP_OK) {
+                        val jsonObject = JsonParser.parseString(it.readString()).asJsonObject
+                        val dataArray = jsonObject.getAsJsonArray("data")
+                        for (dataObject in dataArray) {
+                            val id = dataObject.asJsonObject.getAsJsonPrimitive("id").asString
+                            models.add(id)
+                        }
+                    }
+                }
+            } catch (e: HttpRequests.HttpStatusException) {
+                return null
+            }
+
+            val gptComparator = Comparator<String> { s1, s2 ->
+                when {
+                    s1 == lastChosenModule -> -1
+                    s2 == lastChosenModule -> 1
+                    s1.contains("gpt") && s2.contains("gpt") -> s2.compareTo(s1)
+                    s1.contains("gpt") -> -1
+                    s2.contains("gpt") -> 1
+                    else -> s1.compareTo(s2)
+                }
+            }
+
+            if (models.isNotEmpty()) return models.sortedWith(gptComparator).toTypedArray()
+
+            return null
         }
     }
 }
