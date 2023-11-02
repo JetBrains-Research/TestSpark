@@ -69,8 +69,10 @@ class TestSparkAction : AnAction() {
         private var lastChosenModule = ""
 
         private val nextButton = JButton("Next")
-        private val backButton = JButton("Back")
-        private val okButton = JButton("OK")
+        private val backLlmButton = JButton("Back")
+        private val okLlmButton = JButton("OK")
+        private val backEvoSuiteButton = JButton("Back")
+        private val okEvoSuiteButton = JButton("OK")
 
         private val cardLayout = CardLayout()
 
@@ -79,6 +81,7 @@ class TestSparkAction : AnAction() {
 
             panel.add(getMainPanel(), "1")
             panel.add(getLlmPanel(), "2")
+            panel.add(getEvoSuitePanel(), "3")
 
             addListeners(panel)
 
@@ -126,8 +129,15 @@ class TestSparkAction : AnAction() {
 
         private fun getLlmPanel(): JPanel {
             val bottomButtons = JPanel()
-            bottomButtons.add(backButton)
-            bottomButtons.add(okButton)
+
+            backLlmButton.isOpaque = false
+            backLlmButton.isContentAreaFilled = false
+            bottomButtons.add(backLlmButton)
+
+            okLlmButton.isOpaque = false
+            okLlmButton.isContentAreaFilled = false
+            okLlmButton.isEnabled = false
+            bottomButtons.add(okLlmButton)
 
             llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
             modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
@@ -162,6 +172,21 @@ class TestSparkAction : AnAction() {
                 .panel
         }
 
+        private fun getEvoSuitePanel(): JPanel {
+            val bottomButtons = JPanel()
+
+            backEvoSuiteButton.isOpaque = false
+            backEvoSuiteButton.isContentAreaFilled = false
+            bottomButtons.add(backEvoSuiteButton)
+
+            okEvoSuiteButton.isOpaque = false
+            okEvoSuiteButton.isContentAreaFilled = false
+            okEvoSuiteButton.isEnabled = false
+            bottomButtons.add(okEvoSuiteButton)
+
+            return bottomButtons
+        }
+
         private fun addListeners(panel: JPanel) {
             llmButton.addActionListener {
                 updateNextButton()
@@ -174,6 +199,9 @@ class TestSparkAction : AnAction() {
             }
             nextButton.addActionListener {
                 cardLayout.next(panel)
+                if (evoSuiteButton.isSelected) {
+                    cardLayout.next(panel)
+                }
                 pack()
             }
             llmUserTokenField.document.addDocumentListener(object : DocumentListener {
@@ -192,21 +220,25 @@ class TestSparkAction : AnAction() {
             platformSelector.addItemListener {
                 updateModelSelector()
             }
-            backButton.addActionListener {
+            backLlmButton.addActionListener {
                 cardLayout.previous(panel)
                 pack()
             }
-            okButton.addActionListener {
-                if (llmButton.isSelected) {
-                    if (codeTypeButtons[0].isSelected) Manager.generateTestsForClassByLlm(e)
-                    if (codeTypeButtons[1].isSelected) Manager.generateTestsForMethodByLlm(e)
-                    if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByLlm(e)
-                }
-                if (evoSuiteButton.isSelected) {
-                    if (codeTypeButtons[0].isSelected) Manager.generateTestsForClassByEvoSuite(e)
-                    if (codeTypeButtons[1].isSelected) Manager.generateTestsForMethodByEvoSuite(e)
-                    if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByEvoSuite(e)
-                }
+            okLlmButton.addActionListener {
+                if (codeTypeButtons[0].isSelected) Manager.generateTestsForClassByLlm(e)
+                if (codeTypeButtons[1].isSelected) Manager.generateTestsForMethodByLlm(e)
+                if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByLlm(e)
+                dispose()
+            }
+            backEvoSuiteButton.addActionListener {
+                cardLayout.previous(panel)
+                cardLayout.previous(panel)
+                pack()
+            }
+            okEvoSuiteButton.addActionListener {
+                if (codeTypeButtons[0].isSelected) Manager.generateTestsForClassByEvoSuite(e)
+                if (codeTypeButtons[1].isSelected) Manager.generateTestsForMethodByEvoSuite(e)
+                if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByEvoSuite(e)
                 dispose()
             }
         }
@@ -231,6 +263,7 @@ class TestSparkAction : AnAction() {
         }
 
         private fun updateModelSelector() {
+            okLlmButton.isEnabled = false
             if (platformSelector.selectedItem!!.toString() == "Grazie") {
                 modelSelector.model = DefaultComboBoxModel(arrayOf("GPT-4"))
                 modelSelector.isEnabled = false
@@ -242,6 +275,7 @@ class TestSparkAction : AnAction() {
                 if (modules != null) {
                     modelSelector.model = DefaultComboBoxModel(modules)
                     modelSelector.isEnabled = true
+                    okLlmButton.isEnabled = true
                 } else {
                     modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
                     modelSelector.isEnabled = false
