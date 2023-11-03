@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.tools.evosuite
 
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.services.ActionsStateService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 
@@ -21,11 +22,10 @@ class SettingsArguments(
     private val classFQN: String,
     baseDir: String,
 ) {
-    // TODO fix
-    private val algorithm = ContentDigestAlgorithm.DYNAMOSA
+    private val actionsState = ActionsStateService.getInstance().state
 
     private var command: MutableList<String> = mutableListOf(
-        algorithmsToGenerateMap[algorithm]!!,
+        algorithmsToGenerateMap[actionsState!!.algorithm]!!,
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
         "-base_dir", """"$baseDir"""",
@@ -79,7 +79,7 @@ class SettingsArguments(
         if (settingsState != null) {
             val params = settingsState.serializeChangesFromDefault()
             command.addAll(params)
-            command.add("-Dalgorithm=$algorithm")
+            command.add("-Dalgorithm=${actionsState!!.algorithm}")
             command.add(createCriterionString(settingsState, isLineCoverage))
         }
         return command

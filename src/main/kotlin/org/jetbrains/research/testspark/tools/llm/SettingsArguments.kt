@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.tools.llm
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.ActionsStateService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 
 /**
@@ -11,20 +12,21 @@ import org.jetbrains.research.testspark.services.SettingsApplicationService
 class SettingsArguments {
     companion object {
         val settingsState = SettingsApplicationService.getInstance().state
+        val actionsState = ActionsStateService.getInstance().state
 
         /**
          * Retrieves the LLM user token from the application settings.
          *
          * @return The LLM user token.
          */
-        fun llmUserToken(): String = settingsState!!.llmUserToken
+        fun llmUserToken(): String = actionsState!!.llmUserToken
 
         /**
          * Retrieves the module from the settings state.
          *
          * @return The module as a string.
          */
-        fun model(): String = settingsState!!.model
+        fun model(): String = actionsState!!.model
 
         /**
          * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.
@@ -53,13 +55,13 @@ class SettingsArguments {
          *
          * @return true if the token is set, false otherwise
          */
-        fun isTokenSet(): Boolean = settingsState!!.llmUserToken.isNotEmpty()
+        fun isTokenSet(): Boolean = actionsState!!.llmUserToken.isNotEmpty()
 
         /**
          * Return the selected LLm platform
          *
          * @return selected LLM platform
          */
-        fun llmPlatform(): String = settingsState!!.llmPlatform
+        fun llmPlatform(): String = actionsState!!.llmPlatform
     }
 }

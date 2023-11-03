@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.settings.SettingsApplicationState
  * This class is responsible for storing the application-level settings persistently. It uses SettingsApplicationState class for that.
  */
 @Service(Service.Level.PROJECT)
-@State(name = "SettingsApplicationState", storages = [Storage("TestSparkEvoSuiteSettings.xml")])
+@State(name = "SettingsApplicationState", storages = [Storage("TestSparkSettings.xml")])
 class SettingsApplicationService : PersistentStateComponent<SettingsApplicationState> {
 
     private var settingsApplicationState: SettingsApplicationState = SettingsApplicationState()

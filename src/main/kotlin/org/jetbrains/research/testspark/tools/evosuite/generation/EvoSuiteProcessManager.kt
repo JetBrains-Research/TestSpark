@@ -17,6 +17,7 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.ActionsStateService
 import org.jetbrains.research.testspark.services.RunCommandLineService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
@@ -56,6 +57,7 @@ class EvoSuiteProcessManager(
     private var evoSuitePath = "$pluginsPath${sep}TestSpark${sep}lib${sep}evosuite-$evosuiteVersion.jar"
 
     private val settingsApplicationState = SettingsApplicationService.getInstance().state!!
+    private val actionsState = ActionsStateService.getInstance().state!!
     private val settingsProjectState = project.service<SettingsProjectService>().state
 
     private val evoSuiteErrorManager: EvoSuiteErrorManager = EvoSuiteErrorManager()
@@ -74,9 +76,7 @@ class EvoSuiteProcessManager(
             if (processStopped(project, indicator)) return
 
             val regex = Regex("version \"(.*?)\"")
-            // TODO fix
-            val javaPath = "java"
-            val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(javaPath, "-version")))
+            val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(actionsState.javaPath, "-version")))
                 ?.groupValues
                 ?.get(1)
                 ?.split(".")
@@ -120,7 +120,7 @@ class EvoSuiteProcessManager(
 
             // construct command
             val cmd = ArrayList<String>()
-            cmd.add(javaPath)
+            cmd.add(actionsState.javaPath)
             cmd.add("-Djdk.attach.allowAttachSelf=true")
             cmd.add("-jar")
             cmd.add(evoSuitePath)

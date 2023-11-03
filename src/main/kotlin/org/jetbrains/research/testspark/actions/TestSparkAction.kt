@@ -8,10 +8,11 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.services.ActionsStateService
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
@@ -31,7 +32,6 @@ import javax.swing.JRadioButton
 import javax.swing.JTextField
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
-import org.jetbrains.research.testspark.display.TestSparkIcons
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
@@ -76,9 +76,11 @@ class TestSparkAction : AnAction() {
         private val okLlmButton = JButton("OK")
 
         private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
-        private var javaPathTextField = JTextField()
+        private var javaPathTextField = JTextField(30)
         private val backEvoSuiteButton = JButton("Back")
         private val okEvoSuiteButton = JButton("OK")
+
+        private val actionsState = ActionsStateService.getInstance().state!!
 
         private val cardLayout = CardLayout()
 
@@ -175,8 +177,11 @@ class TestSparkAction : AnAction() {
             bottomButtons.add(okLlmButton)
 
             llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
+            llmUserTokenField.text = actionsState.llmUserToken
+
             modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
             modelSelector.isEnabled = false
+            updateModelSelector()
 
             if (isGrazieClassLoaded()) {
                 platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
@@ -233,9 +238,10 @@ class TestSparkAction : AnAction() {
             bottomButtons.add(okEvoSuiteButton)
 
             algorithmSelector.setMinimumAndPreferredWidth(300)
+            algorithmSelector.selectedItem = actionsState.algorithm
 
             javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
-            javaPathTextField.text = TestSparkDefaultsBundle.defaultValue("javaPath")
+            javaPathTextField.text = actionsState.javaPath
 
             return FormBuilder.createFormBuilder()
                 .setFormLeftIndent(10)
@@ -267,12 +273,15 @@ class TestSparkAction : AnAction() {
             llmButton.addActionListener {
                 updateNextButton()
             }
+
             evoSuiteButton.addActionListener {
                 updateNextButton()
             }
+
             for (button in codeTypeButtons) {
                 button.addActionListener { updateNextButton() }
             }
+
             nextButton.addActionListener {
                 cardLayout.next(panel)
                 if (evoSuiteButton.isSelected) {
@@ -280,6 +289,7 @@ class TestSparkAction : AnAction() {
                 }
                 pack()
             }
+
             llmUserTokenField.document.addDocumentListener(object : DocumentListener {
                 override fun insertUpdate(e: DocumentEvent?) {
                     updateModelSelector()
@@ -293,28 +303,60 @@ class TestSparkAction : AnAction() {
                     updateModelSelector()
                 }
             })
+
             platformSelector.addItemListener {
                 updateModelSelector()
             }
+
             backLlmButton.addActionListener {
                 cardLayout.previous(panel)
                 pack()
             }
+
             okLlmButton.addActionListener {
-                if (codeTypeButtons[0].isSelected) Manager.generateTestsForClassByLlm(e)
-                if (codeTypeButtons[1].isSelected) Manager.generateTestsForMethodByLlm(e)
-                if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByLlm(e)
+                actionsState.llmPlatform = platformSelector.selectedItem!!.toString()
+                actionsState.llmUserToken = llmUserTokenField.text
+                actionsState.model = modelSelector.selectedItem!!.toString()
+                if (codeTypeButtons[0].isSelected) {
+                    Manager.generateTestsForClassByLlm(e)
+                } else if (codeTypeButtons[1].isSelected) {
+                    Manager.generateTestsForMethodByLlm(e)
+                } else if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByLlm(e)
                 dispose()
             }
+
+            javaPathTextField.document.addDocumentListener(object : DocumentListener {
+                override fun insertUpdate(e: DocumentEvent?) {
+                    updateJavaPath()
+                }
+
+                override fun removeUpdate(e: DocumentEvent?) {
+                    updateJavaPath()
+                }
+
+                override fun changedUpdate(e: DocumentEvent?) {
+                    updateJavaPath()
+                }
+
+                fun updateJavaPath() { actionsState.javaPath = javaPathTextField.text }
+            })
+
+            algorithmSelector.addActionListener {
+                actionsState.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm
+            }
+
             backEvoSuiteButton.addActionListener {
                 cardLayout.previous(panel)
                 cardLayout.previous(panel)
                 pack()
             }
+
             okEvoSuiteButton.addActionListener {
-                if (codeTypeButtons[0].isSelected) Manager.generateTestsForClassByEvoSuite(e)
-                if (codeTypeButtons[1].isSelected) Manager.generateTestsForMethodByEvoSuite(e)
-                if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByEvoSuite(e)
+                if (codeTypeButtons[0].isSelected) {
+                    Manager.generateTestsForClassByEvoSuite(e)
+                } else if (codeTypeButtons[1].isSelected) {
+                    Manager.generateTestsForMethodByEvoSuite(e)
+                } else if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByEvoSuite(e)
                 dispose()
             }
         }
