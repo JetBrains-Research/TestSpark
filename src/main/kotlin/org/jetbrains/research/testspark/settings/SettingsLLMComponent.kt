@@ -14,7 +14,6 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.ui.FormBuilder
-import com.intellij.util.ui.JBFont
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
@@ -32,6 +31,12 @@ import javax.swing.JTextField
 
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
+
+enum class PromptEditorType(val text: String, val index: Int) {
+    CLASS("Class", 0),
+    METHOD("Method", 1),
+    LINE("Line", 2)
+}
 
 class SettingsLLMComponent {
     var panel: JPanel? = null
@@ -93,13 +98,13 @@ class SettingsLLMComponent {
         }
     }
 
-    fun updateHighlighting(prompt: String) {
-        val editorTextField = ((promptEditorTabbedPane.getComponent(0) as JPanel).getComponent(0) as EditorTextField)
+    fun updateHighlighting(prompt: String, editorType: PromptEditorType) {
+        val editorTextField = getEditorTextField(editorType)
         service<PromptParserService>().highlighter(editorTextField, prompt)
-        if (!service<PromptParserService>().isPromptValid(prompt)){
+        if (!service<PromptParserService>().isPromptValid(prompt)) {
             val border = BorderFactory.createLineBorder(JBColor.RED)
             editorTextField.border = border
-        }else{
+        } else {
             editorTextField.border = null
         }
     }
@@ -107,27 +112,27 @@ class SettingsLLMComponent {
     private fun creatTabbedPane(): JBTabbedPane {
         val tabbedPane = JBTabbedPane()
 
-        //Add Class Tab
-        val classPanel = JPanel()
-        classPanel.layout = BoxLayout(classPanel, BoxLayout.Y_AXIS)
-        val editorTextField = EditorTextField()
-        editorTextField.setOneLineMode(false);
-
-        classPanel.add(editorTextField)
-        classPanel.add(JSeparator())
-
-        addPromptButtons(classPanel)
-
-        tabbedPane.addTab("Class", classPanel)
-        //Add Method Tab
-        val label2 = JBLabel("This is Tab 2")
-        tabbedPane.addTab("Method", label2)
-
-        //Add Line Tab
-        val label3 = JBLabel("This is Tab 2")
-        tabbedPane.addTab("Line", label3)
+        //Add tabs for each testing level
+        addPromptEditorTab(tabbedPane, PromptEditorType.CLASS)
+        addPromptEditorTab(tabbedPane, PromptEditorType.METHOD)
+        addPromptEditorTab(tabbedPane, PromptEditorType.LINE)
 
         return tabbedPane
+    }
+
+    private fun addPromptEditorTab(tabbedPane: JBTabbedPane, promptEditorType: PromptEditorType) {
+        // initiate the panel
+        val panel = JPanel()
+        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+        // Add editor text field (the prompt editor) to the panel
+        val editorTextField = EditorTextField()
+        editorTextField.setOneLineMode(false)
+        panel.add(editorTextField)
+        panel.add(JSeparator())
+        // add buttons for inserting keywords to the prompt editor
+        addPromptButtons(panel)
+        // add the panel as a new tab
+        tabbedPane.addTab(promptEditorType.text, panel)
     }
 
     private fun addPromptButtons(panel: JPanel) {
@@ -182,13 +187,20 @@ class SettingsLLMComponent {
         })
         platformSelector.addItemListener { update() }
 
-        ((promptEditorTabbedPane.getComponent(0) as JPanel).getComponent(0) as EditorTextField).document.addDocumentListener(
-            object : com.intellij.openapi.editor.event.DocumentListener {
-                override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
-                    updateHighlighting(event.document.text)
+        addHighlighterListeners()
+
+    }
+
+    private fun addHighlighterListeners() {
+        PromptEditorType.values().forEach {
+            getEditorTextField(it).document.addDocumentListener(
+                object : com.intellij.openapi.editor.event.DocumentListener {
+                    override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
+                        updateHighlighting(event.document.text, it)
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     /**
@@ -311,6 +323,10 @@ class SettingsLLMComponent {
         }
     }
 
+    private fun getEditorTextField(editorType: PromptEditorType): EditorTextField {
+        return (promptEditorTabbedPane.getComponentAt(editorType.index) as JPanel).getComponent(0) as EditorTextField
+    }
+
     var llmUserToken: String
         get() = llmUserTokenField.text
         set(newText) {
@@ -349,12 +365,33 @@ class SettingsLLMComponent {
         }
 
     var classPrompt: String
-        get() = ((promptEditorTabbedPane.getComponent(0) as JPanel).getComponent(0) as EditorTextField).document.text
+        get() = getEditorTextField(PromptEditorType.CLASS).document.text
         set(value) {
             ApplicationManager.getApplication().runWriteAction {
                 val editorTextField =
-                    ((promptEditorTabbedPane.getComponent(0) as JPanel).getComponent(0) as EditorTextField)
+                    getEditorTextField(PromptEditorType.CLASS)
                 editorTextField.document.setText(value)
             }
         }
+
+    var methodPrompt: String
+        get() = getEditorTextField(PromptEditorType.METHOD).document.text
+        set(value) {
+            ApplicationManager.getApplication().runWriteAction {
+                val editorTextField =
+                    getEditorTextField(PromptEditorType.METHOD)
+                editorTextField.document.setText(value)
+            }
+        }
+
+    var linePrompt: String
+        get() = getEditorTextField(PromptEditorType.LINE).document.text
+        set(value) {
+            ApplicationManager.getApplication().runWriteAction {
+                val editorTextField =
+                    getEditorTextField(PromptEditorType.LINE)
+                editorTextField.document.setText(value)
+            }
+        }
+
 }

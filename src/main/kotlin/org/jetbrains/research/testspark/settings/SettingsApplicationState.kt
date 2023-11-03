@@ -30,6 +30,8 @@ data class SettingsApplicationState(
     var maxInputParamsDepth: Int = DefaultSettingsApplicationState.maxInputParamsDepth,
     var maxPolyDepth: Int = DefaultSettingsApplicationState.maxPolyDepth,
     var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
+    var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
+    var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
 ) {
 
     /**
@@ -59,6 +61,8 @@ data class SettingsApplicationState(
         val maxInputParamsDepth: Int = TestSparkDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
         val maxPolyDepth: Int = TestSparkDefaultsBundle.defaultValue("maxPolyDepth").toInt()
         val classPrompt: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
+        val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
+        val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
     }
 
     fun serializeChangesFromDefault(): List<String> {

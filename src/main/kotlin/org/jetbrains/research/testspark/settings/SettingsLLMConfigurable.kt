@@ -37,6 +37,8 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
         settingsComponent!!.classPrompt = settingsState.classPrompt
+        settingsComponent!!.methodPrompt = settingsState.methodPrompt
+        settingsComponent!!.linePrompt = settingsState.linePrompt
     }
 
     /**
@@ -52,8 +54,15 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
+        // class prompt
         modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
         modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.classPrompt)
+        //method prompt
+        modified = modified or (settingsComponent!!.methodPrompt != settingsState.methodPrompt)
+        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.methodPrompt)
+        //line prompt
+        modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
+        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.linePrompt)
 
         return modified
     }
@@ -70,6 +79,8 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
         settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth
         settingsState.classPrompt = settingsComponent!!.classPrompt
+        settingsState.methodPrompt = settingsComponent!!.methodPrompt
+        settingsState.linePrompt = settingsComponent!!.linePrompt
     }
 
     /**
