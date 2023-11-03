@@ -14,6 +14,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.ui.FormBuilder
+import com.intellij.util.ui.JBFont
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
@@ -21,6 +22,7 @@ import org.jetbrains.research.testspark.services.PromptParserService
 import java.awt.FlowLayout
 import java.awt.Font
 import java.net.HttpURLConnection
+import javax.swing.BorderFactory
 import javax.swing.BoxLayout
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
@@ -94,6 +96,12 @@ class SettingsLLMComponent {
     fun updateHighlighting(prompt: String) {
         val editorTextField = ((promptEditorTabbedPane.getComponent(0) as JPanel).getComponent(0) as EditorTextField)
         service<PromptParserService>().highlighter(editorTextField, prompt)
+        if (!service<PromptParserService>().isPromptValid(prompt)){
+            val border = BorderFactory.createLineBorder(JBColor.RED)
+            editorTextField.border = border
+        }else{
+            editorTextField.border = null
+        }
     }
 
     private fun creatTabbedPane(): JBTabbedPane {
@@ -147,7 +155,7 @@ class SettingsLLMComponent {
 
             // add button and it's description to buttons panel
             btnPanel.add(button)
-            btnPanel.add(JBLabel(it.description))
+            btnPanel.add(JBLabel("${it.description} - ${if (it.mandatory) "mandatory" else "optional"}"))
 
             panel.add(btnPanel)
         }

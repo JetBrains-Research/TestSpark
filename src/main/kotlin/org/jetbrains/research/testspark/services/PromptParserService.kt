@@ -9,13 +9,13 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import java.awt.Font
 
-enum class PROMPT_KEYWORD (val text: String, val description: String){
-    CODE("CODE","Code dsc"),
-    LANGUAGE("LANGUAGE", "lang dsc"),
-    TESTING_PLATFORM("TESTING_PLATFORM", "tetsingpl dsc"),
-    MOCKING_PLATFORM("MOCKING_PLATFORM", "mock dsc"),
-    METHODS("METHODS", "methods dsc"),
-    POLYMORPHISM("POLYMORPHISM", "poly dsc"),
+enum class PROMPT_KEYWORD (val text: String, val description: String, val mandatory: Boolean){
+    CODE("CODE","The code under test (Class, method, or line)",true),
+    LANGUAGE("LANGUAGE", "Programming language of the project under test (only Java supported at this point)", true),
+    TESTING_PLATFORM("TESTING_PLATFORM", "testing platform used in the project (Only JUnit 4 is supported at this point)", true),
+    MOCKING_FRAMEWORK("MOCKING_FRAMEWORK", "mock framework that can be used in generated test (Only Mockito is supported at this point)", false),
+    METHODS("METHODS", "signature of methods used in the code under tests", false),
+    POLYMORPHISM("POLYMORPHISM", "polymorphism relations between classes involved in the code under test.", false),
 }
 
 @Service
@@ -59,6 +59,18 @@ class PromptParserService {
 
     fun getKeywords(): Array<PROMPT_KEYWORD> {
         return PROMPT_KEYWORD.values()
+    }
+
+    fun isPromptValid(prompt: String): Boolean {
+
+        PROMPT_KEYWORD.values().forEach {
+            if (it.mandatory){
+                val text = "\$${it.text}"
+                if (!prompt.contains(text))
+                    return false
+            }
+        }
+        return true
     }
 
 

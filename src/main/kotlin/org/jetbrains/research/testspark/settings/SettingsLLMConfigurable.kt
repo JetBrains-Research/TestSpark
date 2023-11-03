@@ -1,6 +1,8 @@
 package org.jetbrains.research.testspark.settings
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import javax.swing.JComponent
 
@@ -51,6 +53,7 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
         modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
+        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.classPrompt)
 
         return modified
     }
