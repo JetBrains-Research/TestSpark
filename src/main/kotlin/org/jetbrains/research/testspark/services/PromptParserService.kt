@@ -10,6 +10,7 @@ import com.intellij.ui.JBColor
 import java.awt.Font
 
 enum class PROMPT_KEYWORD (val text: String, val description: String, val mandatory: Boolean){
+    NAME("NAME","The name of the code under test (Class name, method name, line number)",true),
     CODE("CODE","The code under test (Class, method, or line)",true),
     LANGUAGE("LANGUAGE", "Programming language of the project under test (only Java supported at this point)", true),
     TESTING_PLATFORM("TESTING_PLATFORM", "testing platform used in the project (Only JUnit 4 is supported at this point)", true),
