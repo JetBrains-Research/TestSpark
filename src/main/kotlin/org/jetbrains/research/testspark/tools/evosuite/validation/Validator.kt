@@ -206,7 +206,9 @@ class Validator(
 
         // construct command
         val cmd = ArrayList<String>()
-        cmd.add(settingsApplicationState!!.javaPath)
+        // TODO fix
+        val javaPath = "java"
+        cmd.add(javaPath)
         cmd.add("-cp")
         cmd.add(classpath)
         cmd.add("org.junit.runner.JUnitCore")
@@ -276,7 +278,9 @@ class Validator(
         // delete old report
         File(jacocoReportPath).delete()
         val cmd = ArrayList<String>()
-        cmd.add(settingsApplicationState!!.javaPath)
+        // TODO fix
+        val javaPath = "java"
+        cmd.add(javaPath)
         cmd.add("-javaagent:$jacocoPath=destfile=$jacocoReportPath")
         cmd.add("-cp")
         cmd.add(classpath)

@@ -8,13 +8,16 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.awt.CardLayout
 import java.awt.Dimension
+import java.awt.Font
 import java.awt.Toolkit
 import java.net.HttpURLConnection
 import javax.swing.BoxLayout
@@ -28,6 +31,7 @@ import javax.swing.JRadioButton
 import javax.swing.JTextField
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
+import org.jetbrains.research.testspark.display.TestSparkIcons
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
@@ -67,10 +71,12 @@ class TestSparkAction : AnAction() {
         private var llmUserTokenField = JTextField(30)
         private var platformSelector = ComboBox(arrayOf("OpenAI"))
         private var lastChosenModule = ""
-
         private val nextButton = JButton("Next")
         private val backLlmButton = JButton("Back")
         private val okLlmButton = JButton("OK")
+
+        private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
+        private var javaPathTextField = JTextField()
         private val backEvoSuiteButton = JButton("Back")
         private val okEvoSuiteButton = JButton("OK")
 
@@ -97,9 +103,24 @@ class TestSparkAction : AnAction() {
             isVisible = true
         }
 
+        /**
+         * Returns the main panel for the test generator UI.
+         * This panel contains options for selecting the test generator and the code type.
+         * It also includes a button for proceeding to the next step.
+         *
+         * @return the main panel for the test generator UI
+         */
         private fun getMainPanel(): JPanel {
             val mainPanel = JPanel()
             mainPanel.setLayout(BoxLayout(mainPanel, BoxLayout.Y_AXIS))
+
+            val panelTitle = JPanel()
+            val iconTitle = JLabel(TestSparkIcons.pluginIcon)
+            val textTitle = JLabel("Welcome to TestSpark!")
+            textTitle.font = Font("Monochrome", Font.BOLD, 20)
+            panelTitle.add(iconTitle)
+            panelTitle.add(textTitle)
+            mainPanel.add(panelTitle)
 
             testGeneratorButtonGroup.add(llmButton)
             testGeneratorButtonGroup.add(evoSuiteButton)
@@ -118,16 +139,30 @@ class TestSparkAction : AnAction() {
 
             val codesToTestPanel = JPanel()
             codesToTestPanel.add(JLabel("Select the code type:"))
+            if (codeTypeButtons.size == 1) codeTypeButtons[0].isSelected = true
             for (button in codeTypeButtons) codesToTestPanel.add(button)
             mainPanel.add(codesToTestPanel)
 
+            val nextButtonPanel = JPanel()
             nextButton.isEnabled = false
-            mainPanel.add(nextButton)
+            nextButtonPanel.add(nextButton)
+            mainPanel.add(nextButtonPanel)
 
             return mainPanel
         }
 
+        /**
+         * Retrieves the LLM panel.
+         *
+         * @return The JPanel object representing the LLM setup panel.
+         */
         private fun getLlmPanel(): JPanel {
+            val textTitle = JLabel("LLM Setup")
+            textTitle.font = Font("Monochrome", Font.BOLD, 20)
+
+            val titlePanel = JPanel()
+            titlePanel.add(textTitle)
+
             val bottomButtons = JPanel()
 
             backLlmButton.isOpaque = false
@@ -150,6 +185,9 @@ class TestSparkAction : AnAction() {
             }
 
             return FormBuilder.createFormBuilder()
+                .setFormLeftIndent(10)
+                .addVerticalGap(5)
+                .addComponent(titlePanel)
                 .addLabeledComponent(
                     JBLabel(TestSparkLabelsBundle.defaultValue("llmPlatform")),
                     platformSelector,
@@ -172,7 +210,18 @@ class TestSparkAction : AnAction() {
                 .panel
         }
 
+        /**
+         * Returns the EvoSuite panel for setting up EvoSuite configurations.
+         *
+         * @return the JPanel containing the EvoSuite setup GUI components
+         */
         private fun getEvoSuitePanel(): JPanel {
+            val textTitle = JLabel("EvoSuite Setup")
+            textTitle.font = Font("Monochrome", Font.BOLD, 20)
+
+            val titlePanel = JPanel()
+            titlePanel.add(textTitle)
+
             val bottomButtons = JPanel()
 
             backEvoSuiteButton.isOpaque = false
@@ -181,12 +230,39 @@ class TestSparkAction : AnAction() {
 
             okEvoSuiteButton.isOpaque = false
             okEvoSuiteButton.isContentAreaFilled = false
-            okEvoSuiteButton.isEnabled = false
             bottomButtons.add(okEvoSuiteButton)
 
-            return bottomButtons
+            algorithmSelector.setMinimumAndPreferredWidth(300)
+
+            javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
+            javaPathTextField.text = TestSparkDefaultsBundle.defaultValue("javaPath")
+
+            return FormBuilder.createFormBuilder()
+                .setFormLeftIndent(10)
+                .addVerticalGap(5)
+                .addComponent(titlePanel)
+                .addLabeledComponent(
+                    JBLabel(TestSparkLabelsBundle.defaultValue("javaPath")),
+                    javaPathTextField,
+                    10,
+                    false,
+                )
+                .addLabeledComponent(
+                    JBLabel(TestSparkLabelsBundle.defaultValue("defaultSearch")),
+                    algorithmSelector,
+                    10,
+                    false,
+                )
+                .addComponentFillVertically(JPanel(), 30)
+                .addComponentFillVertically(bottomButtons, 10)
+                .panel
         }
 
+        /**
+         * Adds listeners to various components in the given panel.
+         *
+         * @param panel the JPanel to add listeners to
+         */
         private fun addListeners(panel: JPanel) {
             llmButton.addActionListener {
                 updateNextButton()
@@ -243,6 +319,10 @@ class TestSparkAction : AnAction() {
             }
         }
 
+        /**
+         * Checks if the Grazie class is loaded.
+         * @return true if the Grazie class is loaded, false otherwise.
+         */
         private fun isGrazieClassLoaded(): Boolean {
             val className = "org.jetbrains.research.grazie.Request"
             return try {
@@ -253,6 +333,12 @@ class TestSparkAction : AnAction() {
             }
         }
 
+        /**
+         * Updates the state of the "Next" button based on the selected options.
+         * The "Next" button is enabled only if a test generator button (llmButton or evoSuiteButton) and at least one
+         * code type button (from codeTypeButtons) are selected.
+         *
+         * This method should be called whenever*/
         private fun updateNextButton() {
             val isTestGeneratorButtonGroupSelected = llmButton.isSelected || evoSuiteButton.isSelected
             var isCodeTypeButtonGroupSelected = false
@@ -262,6 +348,14 @@ class TestSparkAction : AnAction() {
             nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
         }
 
+        /**
+         * Updates the model selector based on the selected platform in the platform selector.
+         * If the selected platform is "Grazie", the model selector is disabled and set to display only "GPT-4".
+         * If the selected platform is not "Grazie", the model selector is updated with the available modules fetched asynchronously using llmUserTokenField and enables the okLlmButton.
+         * If the modules fetch fails, the model selector is set to display the default modules and is disabled.
+         *
+         * This method runs on a separate thread using ApplicationManager.getApplication().executeOnPooledThread{}.
+         */
         private fun updateModelSelector() {
             okLlmButton.isEnabled = false
             if (platformSelector.selectedItem!!.toString() == "Grazie") {

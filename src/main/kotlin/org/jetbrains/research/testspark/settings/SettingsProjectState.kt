@@ -20,7 +20,6 @@ data class SettingsProjectState(
      */
     object DefaultSettingsPluginState {
         val showCoverageCheckboxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("showCoverageCheckboxSelected").toBoolean()
-        val javaPath: String = TestSparkDefaultsBundle.defaultValue("javaPath")
         val colorRed: Int = TestSparkDefaultsBundle.defaultValue("colorRed").toInt()
         val colorGreen: Int = TestSparkDefaultsBundle.defaultValue("colorGreen").toInt()
         val colorBlue: Int = TestSparkDefaultsBundle.defaultValue("colorBlue").toInt()
