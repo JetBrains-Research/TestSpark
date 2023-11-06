@@ -5,7 +5,6 @@ import com.intellij.ide.ui.UINumericRange
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
-
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
@@ -28,7 +27,6 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
-
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -52,7 +50,6 @@ class SettingsLLMComponent {
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
     private var promptEditorTabbedPane = creatTabbedPane()
-
 
     private var lastChosenModule = ""
 
@@ -112,7 +109,7 @@ class SettingsLLMComponent {
     private fun creatTabbedPane(): JBTabbedPane {
         val tabbedPane = JBTabbedPane()
 
-        //Add tabs for each testing level
+        // Add tabs for each testing level
         addPromptEditorTab(tabbedPane, PromptEditorType.CLASS)
         addPromptEditorTab(tabbedPane, PromptEditorType.METHOD)
         addPromptEditorTab(tabbedPane, PromptEditorType.LINE)
@@ -164,7 +161,6 @@ class SettingsLLMComponent {
 
             panel.add(btnPanel)
         }
-
     }
 
     /**
@@ -188,7 +184,6 @@ class SettingsLLMComponent {
         platformSelector.addItemListener { update() }
 
         addHighlighterListeners()
-
     }
 
     private fun addHighlighterListeners() {
@@ -393,5 +388,4 @@ class SettingsLLMComponent {
                 editorTextField.document.setText(value)
             }
         }
-
 }

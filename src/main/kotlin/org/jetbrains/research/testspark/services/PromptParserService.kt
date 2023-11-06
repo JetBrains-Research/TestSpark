@@ -27,7 +27,7 @@ enum class PROMPT_KEYWORD(val text: String, val description: String, val mandato
     POLYMORPHISM("POLYMORPHISM", "polymorphism relations between classes involved in the code under test.", false);
 
     fun getOffsets(prompt: String): Pair<Int, Int>? {
-        val textToHighlight = "\$${text}"
+        val textToHighlight = "\$$text"
         if (!prompt.contains(textToHighlight))
             return null
 
@@ -41,7 +41,6 @@ enum class PROMPT_KEYWORD(val text: String, val description: String, val mandato
 class PromptParserService {
 
     private val attributes = TextAttributes(JBColor.ORANGE, null, null, null, Font.BOLD or Font.ITALIC)
-
 
     fun highlighter(textField: EditorTextField, prompt: String): EditorTextField {
         val editor = textField.editor
@@ -91,6 +90,4 @@ class PromptParserService {
         }
         return true
     }
-
-
 }

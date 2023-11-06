@@ -57,10 +57,10 @@ class SettingsLLMConfigurable : Configurable {
         // class prompt
         modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
         modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.classPrompt)
-        //method prompt
+        // method prompt
         modified = modified or (settingsComponent!!.methodPrompt != settingsState.methodPrompt)
         modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.methodPrompt)
-        //line prompt
+        // line prompt
         modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
         modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.linePrompt)
 
