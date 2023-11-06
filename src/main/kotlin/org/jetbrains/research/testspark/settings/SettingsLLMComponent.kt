@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.settings
 
+import com.google.gson.JsonParser
 import com.intellij.ide.ui.UINumericRange
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
