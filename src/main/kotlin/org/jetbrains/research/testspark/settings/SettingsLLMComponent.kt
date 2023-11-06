@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.settings
 
-import com.google.gson.JsonParser
 import com.intellij.ide.ui.UINumericRange
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
@@ -245,10 +244,7 @@ class SettingsLLMComponent {
     }
 
     private fun stylizePanel() {
-        llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
         maxLLMRequestsField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumNumberOfRequests")
-        modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
-        modelSelector.isEnabled = false
         maxInputParamsDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("parametersDepth")
         maxPolyDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumPolyDepth")
         promptSeparator.toolTipText = TestSparkToolTipsBundle.defaultValue("promptEditor")
@@ -258,32 +254,8 @@ class SettingsLLMComponent {
      * Create the main panel for LLM-related settings page
      */
     private fun createSettingsPanel() {
-        // Check if the Grazie platform access is available in the current build
-        if (isGrazieClassLoaded()) {
-            platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
-        } else
-            platformSelector.isEnabled = false
-
         panel = FormBuilder.createFormBuilder()
             .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("LLMSettings")))
-            .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("llmPlatform")),
-                platformSelector,
-                10,
-                false,
-            )
-            .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("llmToken")),
-                llmUserTokenField,
-                10,
-                false,
-            )
-            .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("model")),
-                modelSelector,
-                10,
-                false,
-            )
             .addLabeledComponent(
                 JBLabel(TestSparkLabelsBundle.defaultValue("parametersDepth")),
                 maxInputParamsDepthField,
