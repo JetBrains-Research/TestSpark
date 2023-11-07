@@ -44,7 +44,7 @@ fun createLLMPipeline(e: AnActionEvent): Pipeline {
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
 
-    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
+    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)!!
 
     val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
     packageList.removeLast()
@@ -62,7 +62,7 @@ fun createLLMPipeline(e: AnActionEvent): Pipeline {
  * @param caret the current (primary) caret that did the click
  * @return PsiClass element if it has been found, null otherwise
  */
-fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass {
+fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass? {
     // Get the classes of the PSI file
     val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
 
@@ -75,7 +75,7 @@ fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass {
             surroundingClass = psiClass
         }
     }
-    return surroundingClass!!
+    return surroundingClass
 }
 
 /**
@@ -285,7 +285,9 @@ fun updateForClass(e: AnActionEvent, name: String) {
 
     if (psiFile !is PsiJavaFile) return
 
-    val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
+    val psiClass: PsiClass? = getSurroundingClass(psiFile, caret)
+
+    psiClass ?: return
 
     e.presentation.isEnabledAndVisible = true
     e.presentation.text = "Generate Tests For ${getClassDisplayName(psiClass)} by $name"
