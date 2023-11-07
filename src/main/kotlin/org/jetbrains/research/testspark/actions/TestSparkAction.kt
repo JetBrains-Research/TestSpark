@@ -460,7 +460,7 @@ class TestSparkAction : AnAction() {
                 }
             }
 
-            if (models.isNotEmpty()) return models.sortedWith(gptComparator).toTypedArray()
+            if (models.isNotEmpty()) return models.sortedWith(gptComparator).toTypedArray().filter { !it.contains("vision") }.toTypedArray()
 
             return null
         }
