@@ -56,6 +56,7 @@ data class SettingsApplicationState(
         val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
     }
 
+    // TODO remove from here
     fun serializeChangesFromDefault(): List<String> {
         val params = mutableListOf<String>()
         // Parameters from settings menu

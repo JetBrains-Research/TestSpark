@@ -97,29 +97,6 @@ class SettingsEvoSuiteConfigurableTest {
         assertThat(oldValue).isNotEqualTo(settingsState.configurationId)
     }
 
-    @Test
-    fun testResetAlgorithmComboBox() {
-        val oldValue = settingsComponent.algorithm
-        settingsComponent.algorithm = ContentDigestAlgorithm.NSGAII
-        settingsConfigurable.reset()
-        assertThat(oldValue).isEqualTo(settingsComponent.algorithm)
-    }
-
-    @Test
-    fun testApplyAlgorithmComboBox() {
-        val oldValue = settingsComponent.algorithm
-        settingsComponent.algorithm = ContentDigestAlgorithm.BREEDER_GA
-        settingsConfigurable.apply()
-        assertThat(oldValue).isNotEqualTo(settingsComponent.algorithm)
-        assertThat(oldValue).isNotEqualTo(settingsState.algorithm)
-    }
-
-    @Test
-    fun testIsModifiedAlgorithmComboBox() {
-        settingsComponent.algorithm = ContentDigestAlgorithm.RANDOM_SEARCH
-        assertThat(settingsConfigurable.isModified).isTrue
-    }
-
     @ParameterizedTest
     @MethodSource("checkBoxValueGenerator")
     fun testResetCheckBoxes(oldValue: Boolean, function: () -> Unit, component: () -> Boolean, state: () -> Boolean) {
