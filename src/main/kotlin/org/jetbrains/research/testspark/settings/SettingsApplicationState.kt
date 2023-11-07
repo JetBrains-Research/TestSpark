@@ -50,6 +50,7 @@ data class SettingsApplicationState(
         val maxPolyDepth: Int = TestSparkDefaultsBundle.defaultValue("maxPolyDepth").toInt()
     }
 
+    // TODO remove from here
     fun serializeChangesFromDefault(): List<String> {
         val params = mutableListOf<String>()
         // Parameters from settings menu

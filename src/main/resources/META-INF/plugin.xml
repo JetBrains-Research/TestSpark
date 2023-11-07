@@ -112,6 +112,8 @@
         <applicationService
                 serviceImplementation="org.jetbrains.research.testspark.services.SettingsApplicationService"/>
         <applicationService
+                serviceImplementation="org.jetbrains.research.testspark.services.SettingsProjectService"/>
+        <applicationService
                 serviceImplementation="org.jetbrains.research.testspark.services.ActionsStateService"/>
 
         <!-- Configurables -->
