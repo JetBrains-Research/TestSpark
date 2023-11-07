@@ -360,10 +360,6 @@ class TestSparkAction : AnAction() {
                 } else if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByEvoSuite(e)
                 dispose()
             }
-
-            modelSelector.addActionListener {
-                actionsState.model = modelSelector.selectedItem!!.toString()
-            }
         }
 
         /**
