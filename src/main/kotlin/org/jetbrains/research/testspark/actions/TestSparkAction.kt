@@ -187,7 +187,6 @@ class TestSparkAction : AnAction() {
 
             okLlmButton.isOpaque = false
             okLlmButton.isContentAreaFilled = false
-            okLlmButton.isEnabled = false
             bottomButtons.add(okLlmButton)
 
             return FormBuilder.createFormBuilder()
@@ -400,11 +399,9 @@ class TestSparkAction : AnAction() {
          * This method runs on a separate thread using ApplicationManager.getApplication().executeOnPooledThread{}.
          */
         private fun updateModelSelector() {
-            okLlmButton.isEnabled = false
             if (platformSelector.selectedItem!!.toString() == "Grazie") {
                 modelSelector.model = DefaultComboBoxModel(arrayOf("GPT-4"))
                 modelSelector.isEnabled = false
-                okLlmButton.isEnabled = true
                 return
             }
             ApplicationManager.getApplication().executeOnPooledThread {
@@ -414,7 +411,6 @@ class TestSparkAction : AnAction() {
                     modelSelector.model = DefaultComboBoxModel(modules)
                     if (modules.contains(actionsState.model)) modelSelector.selectedItem = actionsState.model
                     modelSelector.isEnabled = true
-                    okLlmButton.isEnabled = true
                 } else {
                     modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
                     modelSelector.isEnabled = false
