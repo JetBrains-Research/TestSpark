@@ -165,6 +165,20 @@ class TestSparkAction : AnAction() {
             val titlePanel = JPanel()
             titlePanel.add(textTitle)
 
+            if (isGrazieClassLoaded()) {
+                platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
+                platformSelector.selectedItem = actionsState.llmPlatform
+            } else {
+                platformSelector.isEnabled = false
+            }
+
+            llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
+            llmUserTokenField.text = actionsState.llmUserToken
+
+            modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
+            modelSelector.isEnabled = false
+            updateModelSelector()
+
             val bottomButtons = JPanel()
 
             backLlmButton.isOpaque = false
@@ -175,19 +189,6 @@ class TestSparkAction : AnAction() {
             okLlmButton.isContentAreaFilled = false
             okLlmButton.isEnabled = false
             bottomButtons.add(okLlmButton)
-
-            llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
-            llmUserTokenField.text = actionsState.llmUserToken
-
-            modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
-            modelSelector.isEnabled = false
-            updateModelSelector()
-
-            if (isGrazieClassLoaded()) {
-                platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
-            } else {
-                platformSelector.isEnabled = false
-            }
 
             return FormBuilder.createFormBuilder()
                 .setFormLeftIndent(10)
@@ -359,6 +360,10 @@ class TestSparkAction : AnAction() {
                 } else if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByEvoSuite(e)
                 dispose()
             }
+
+            modelSelector.addActionListener {
+                actionsState.model = modelSelector.selectedItem!!.toString()
+            }
         }
 
         /**
@@ -403,13 +408,15 @@ class TestSparkAction : AnAction() {
             if (platformSelector.selectedItem!!.toString() == "Grazie") {
                 modelSelector.model = DefaultComboBoxModel(arrayOf("GPT-4"))
                 modelSelector.isEnabled = false
+                okLlmButton.isEnabled = true
                 return
             }
             ApplicationManager.getApplication().executeOnPooledThread {
-                val modules = getModules(llmUserTokenField.text)
+                val modules = getOpenAIModules(llmUserTokenField.text)
                 modelSelector.removeAllItems()
                 if (modules != null) {
                     modelSelector.model = DefaultComboBoxModel(modules)
+                    if (modules.contains(actionsState.model)) modelSelector.selectedItem = actionsState.model
                     modelSelector.isEnabled = true
                     okLlmButton.isEnabled = true
                 } else {
@@ -425,7 +432,7 @@ class TestSparkAction : AnAction() {
          * @param token Authorization token for the OpenAI API.
          * @return An array of model names if request is successful, otherwise null.
          */
-        private fun getModules(token: String): Array<String>? {
+        private fun getOpenAIModules(token: String): Array<String>? {
             val url = "https://api.openai.com/v1/models"
 
             val httpRequest = HttpRequests.request(url).tuner {
