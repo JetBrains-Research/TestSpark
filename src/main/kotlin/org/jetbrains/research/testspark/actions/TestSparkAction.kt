@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.actions
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
@@ -216,4 +217,6 @@ class TestSparkAction : AnAction() {
             nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
         }
     }
+
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 }
