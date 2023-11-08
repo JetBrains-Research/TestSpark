@@ -3,8 +3,8 @@ package org.jetbrains.research.testspark.settings.evosuite
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import javax.swing.JComponent
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import javax.swing.JComponent
 
 /**
  * This class allows to configure some EvoSuite settings via the EvoSuite page in the Settings dialog,

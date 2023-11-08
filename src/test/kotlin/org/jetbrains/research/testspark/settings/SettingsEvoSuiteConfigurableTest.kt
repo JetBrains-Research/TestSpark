@@ -9,6 +9,8 @@ import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteComponent
+import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,8 +19,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
-import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteComponent
-import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettingsEvoSuiteConfigurableTest {
