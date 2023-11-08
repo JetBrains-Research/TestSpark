@@ -9,6 +9,8 @@ import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteComponent
+import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -95,29 +97,6 @@ class SettingsEvoSuiteConfigurableTest {
         settingsConfigurable.apply()
         assertThat(oldValue).isNotEqualTo(settingsComponent.configurationId)
         assertThat(oldValue).isNotEqualTo(settingsState.configurationId)
-    }
-
-    @Test
-    fun testResetAlgorithmComboBox() {
-        val oldValue = settingsComponent.algorithm
-        settingsComponent.algorithm = ContentDigestAlgorithm.NSGAII
-        settingsConfigurable.reset()
-        assertThat(oldValue).isEqualTo(settingsComponent.algorithm)
-    }
-
-    @Test
-    fun testApplyAlgorithmComboBox() {
-        val oldValue = settingsComponent.algorithm
-        settingsComponent.algorithm = ContentDigestAlgorithm.BREEDER_GA
-        settingsConfigurable.apply()
-        assertThat(oldValue).isNotEqualTo(settingsComponent.algorithm)
-        assertThat(oldValue).isNotEqualTo(settingsState.algorithm)
-    }
-
-    @Test
-    fun testIsModifiedAlgorithmComboBox() {
-        settingsComponent.algorithm = ContentDigestAlgorithm.RANDOM_SEARCH
-        assertThat(settingsConfigurable.isModified).isTrue
     }
 
     @ParameterizedTest

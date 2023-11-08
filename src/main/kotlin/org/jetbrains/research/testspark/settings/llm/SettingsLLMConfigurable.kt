@@ -1,7 +1,10 @@
-package org.jetbrains.research.testspark.settings
+package org.jetbrains.research.testspark.settings.llm
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
 
 /**
@@ -34,6 +37,9 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
+        settingsComponent!!.classPrompt = settingsState.classPrompt
+        settingsComponent!!.methodPrompt = settingsState.methodPrompt
+        settingsComponent!!.linePrompt = settingsState.linePrompt
     }
 
     /**
@@ -49,6 +55,15 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
+        // class prompt
+        modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
+        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.classPrompt)
+        // method prompt
+        modified = modified or (settingsComponent!!.methodPrompt != settingsState.methodPrompt)
+        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.methodPrompt)
+        // line prompt
+        modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
+        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.linePrompt)
 
         return modified
     }
@@ -64,6 +79,9 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
         settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth
+        settingsState.classPrompt = settingsComponent!!.classPrompt
+        settingsState.methodPrompt = settingsComponent!!.methodPrompt
+        settingsState.linePrompt = settingsComponent!!.linePrompt
     }
 
     /**

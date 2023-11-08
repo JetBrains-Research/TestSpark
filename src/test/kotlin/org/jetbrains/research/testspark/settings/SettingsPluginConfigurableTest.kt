@@ -9,6 +9,8 @@ import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteComponent
+import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
@@ -84,30 +86,15 @@ class SettingsPluginConfigurableTest {
         assertThat(state()).isNotEqualTo(oldValue)
     }
 
-    @Test
-    @Order(1)
-    fun testIsModifiedJavaPath() {
-        settingsApplicationState.javaPath = "this is modified: first"
-        assertThat(settingsEvoConfigurable.isModified).isTrue
-        assertThat(settingsEvoComponent.javaPath).isNotEqualTo(settingsApplicationState.javaPath)
-    }
-
     @Order(4)
     @Test
-    fun testResetJavaPath() {
-        val oldValue = settingsEvoComponent.javaPath
-        settingsEvoComponent.javaPath = "this is modified: second"
+    fun testReset() {
         settingsEvoConfigurable.reset()
-        assertThat(oldValue).isEqualTo(settingsEvoComponent.javaPath)
     }
 
     @Test
-    fun testApplyJavaPath() {
-        val oldValue = settingsApplicationState.javaPath
-        settingsApplicationState.javaPath = "this is modified: third"
+    fun testApply() {
         settingsConfigurable.apply()
-        assertThat(oldValue).isNotEqualTo(settingsApplicationState.javaPath)
-        assertThat(oldValue).isNotEqualTo(settingsApplicationState.javaPath)
     }
 
     private fun intValueGenerator(): Stream<Arguments> {

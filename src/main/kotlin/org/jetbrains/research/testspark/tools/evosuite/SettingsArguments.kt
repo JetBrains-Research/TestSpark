@@ -1,8 +1,7 @@
 package org.jetbrains.research.testspark.tools.evosuite
 
-import org.jetbrains.research.testspark.services.QuickAccessParametersService
+import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 
 /**
@@ -22,8 +21,10 @@ class SettingsArguments(
     private val classFQN: String,
     baseDir: String,
 ) {
+    private val settingsState = SettingsApplicationService.getInstance().state!!
+
     private var command: MutableList<String> = mutableListOf(
-        algorithmsToGenerateMap[SettingsApplicationService.getInstance().state!!.algorithm]!!,
+        algorithmsToGenerateMap[settingsState.algorithm]!!,
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
         "-base_dir", """"$baseDir"""",
@@ -72,13 +73,7 @@ class SettingsArguments(
      * Finalizes the parameter construction by applying the user runtime settings
      */
     fun build(isLineCoverage: Boolean = false): MutableList<String> {
-        val toolWindowState = QuickAccessParametersService.getInstance().state
         val settingsState = SettingsApplicationService.getInstance().state
-
-        if (toolWindowState != null) {
-            val params = toolWindowState.serializeChangesFromDefault()
-            command.addAll(params)
-        }
 
         if (settingsState != null) {
             val params = settingsState.serializeChangesFromDefault()
