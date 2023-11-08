@@ -17,6 +17,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
+import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteComponent
+import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettingsEvoSuiteConfigurableTest {

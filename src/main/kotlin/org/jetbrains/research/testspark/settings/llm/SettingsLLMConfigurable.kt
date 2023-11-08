@@ -1,9 +1,10 @@
-package org.jetbrains.research.testspark.settings
+package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
 
 /**

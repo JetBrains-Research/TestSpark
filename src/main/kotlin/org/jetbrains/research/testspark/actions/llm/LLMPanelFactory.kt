@@ -13,8 +13,6 @@ import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
-import javax.swing.event.DocumentEvent
-import javax.swing.event.DocumentListener
 
 class LLMPanelFactory : ToolPanelFactory {
     private val defaultModulesArray = arrayOf("")
@@ -28,55 +26,13 @@ class LLMPanelFactory : ToolPanelFactory {
     private val settingsState = SettingsApplicationService.getInstance().state!!
 
     init {
-        addListeners()
-    }
-
-    private fun addListeners() {
-        llmUserTokenField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent?) {
-                updateModelSelector(
-                    platformSelector,
-                    modelSelector,
-                    llmUserTokenField,
-                    settingsState,
-                    defaultModulesArray,
-                    lastChosenModule,
-                )
-            }
-
-            override fun removeUpdate(e: DocumentEvent?) {
-                updateModelSelector(
-                    platformSelector,
-                    modelSelector,
-                    llmUserTokenField,
-                    settingsState,
-                    defaultModulesArray,
-                    lastChosenModule,
-                )
-            }
-
-            override fun changedUpdate(e: DocumentEvent?) {
-                updateModelSelector(
-                    platformSelector,
-                    modelSelector,
-                    llmUserTokenField,
-                    settingsState,
-                    defaultModulesArray,
-                    lastChosenModule,
-                )
-            }
-        })
-
-        platformSelector.addItemListener {
-            updateModelSelector(
-                platformSelector,
-                modelSelector,
-                llmUserTokenField,
-                settingsState,
-                defaultModulesArray,
-                lastChosenModule,
-            )
-        }
+        addLLMPanelListeners(
+            platformSelector,
+            modelSelector,
+            llmUserTokenField,
+            defaultModulesArray,
+            lastChosenModule,
+        )
     }
 
     /**
@@ -122,7 +78,6 @@ class LLMPanelFactory : ToolPanelFactory {
             platformSelector,
             modelSelector,
             llmUserTokenField,
-            settingsState,
             defaultModulesArray,
             lastChosenModule,
         )

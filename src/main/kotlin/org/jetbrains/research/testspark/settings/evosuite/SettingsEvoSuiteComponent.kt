@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.settings
+package org.jetbrains.research.testspark.settings.evosuite
 
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel

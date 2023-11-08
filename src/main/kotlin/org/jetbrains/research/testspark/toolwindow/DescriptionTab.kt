@@ -6,9 +6,9 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.settings.SettingsEvoSuiteConfigurable
-import org.jetbrains.research.testspark.settings.SettingsLLMConfigurable
 import org.jetbrains.research.testspark.settings.SettingsPluginConfigurable
+import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
+import org.jetbrains.research.testspark.settings.llm.SettingsLLMConfigurable
 import java.awt.Desktop
 import java.awt.Font
 import java.net.URI

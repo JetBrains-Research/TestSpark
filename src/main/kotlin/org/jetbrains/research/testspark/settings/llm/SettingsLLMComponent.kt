@@ -1,6 +1,5 @@
-package org.jetbrains.research.testspark.settings
+package org.jetbrains.research.testspark.settings.llm
 
-import com.google.gson.JsonParser
 import com.intellij.ide.ui.UINumericRange
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
@@ -11,15 +10,16 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
-import com.intellij.util.io.HttpRequests
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.actions.llm.addLLMPanelListeners
+import org.jetbrains.research.testspark.actions.llm.isGrazieClassLoaded
 import org.jetbrains.research.testspark.services.PromptParserService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.FlowLayout
 import java.awt.Font
-import java.net.HttpURLConnection
 import javax.swing.BorderFactory
 import javax.swing.BoxLayout
 import javax.swing.DefaultComboBoxModel
@@ -27,14 +27,6 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
-import javax.swing.event.DocumentEvent
-import javax.swing.event.DocumentListener
-
-enum class PromptEditorType(val text: String, val index: Int) {
-    CLASS("Class", 0),
-    METHOD("Method", 1),
-    LINE("Line", 2),
-}
 
 class SettingsLLMComponent {
     var panel: JPanel? = null
@@ -74,25 +66,6 @@ class SettingsLLMComponent {
 
         // Adds listeners
         addListeners()
-    }
-
-    fun update() {
-        if (platformSelector.selectedItem!!.toString() == "Grazie") {
-            modelSelector.model = DefaultComboBoxModel(arrayOf("GPT-4"))
-            modelSelector.isEnabled = false
-            return
-        }
-        ApplicationManager.getApplication().executeOnPooledThread {
-            val modules = getModules(llmUserTokenField.text)
-            modelSelector.removeAllItems()
-            if (modules != null) {
-                modelSelector.model = DefaultComboBoxModel(modules)
-                modelSelector.isEnabled = true
-            } else {
-                modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
-                modelSelector.isEnabled = false
-            }
-        }
     }
 
     fun updateHighlighting(prompt: String, editorType: PromptEditorType) {
@@ -168,20 +141,13 @@ class SettingsLLMComponent {
      * These listeners will update the model selector based on the text entered the user token field.
      */
     private fun addListeners() {
-        llmUserTokenField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent?) {
-                update()
-            }
-
-            override fun removeUpdate(e: DocumentEvent?) {
-                update()
-            }
-
-            override fun changedUpdate(e: DocumentEvent?) {
-                update()
-            }
-        })
-        platformSelector.addItemListener { update() }
+        addLLMPanelListeners(
+            platformSelector,
+            modelSelector,
+            llmUserTokenField,
+            defaultModulesArray,
+            lastChosenModule,
+        )
 
         addHighlighterListeners()
     }
@@ -196,52 +162,6 @@ class SettingsLLMComponent {
                 },
             )
         }
-    }
-
-    /**
-     * Retrieves all available models from the OpenAI API using the provided token.
-     *
-     * @param token Authorization token for the OpenAI API.
-     * @return An array of model names if request is successful, otherwise null.
-     */
-    private fun getModules(token: String): Array<String>? {
-        val url = "https://api.openai.com/v1/models"
-
-        val httpRequest = HttpRequests.request(url).tuner {
-            it.setRequestProperty("Authorization", "Bearer $token")
-        }
-
-        val models = mutableListOf<String>()
-
-        try {
-            httpRequest.connect {
-                if ((it.connection as HttpURLConnection).responseCode == HttpURLConnection.HTTP_OK) {
-                    val jsonObject = JsonParser.parseString(it.readString()).asJsonObject
-                    val dataArray = jsonObject.getAsJsonArray("data")
-                    for (dataObject in dataArray) {
-                        val id = dataObject.asJsonObject.getAsJsonPrimitive("id").asString
-                        models.add(id)
-                    }
-                }
-            }
-        } catch (e: HttpRequests.HttpStatusException) {
-            return null
-        }
-
-        val gptComparator = Comparator<String> { s1, s2 ->
-            when {
-                s1 == lastChosenModule -> -1
-                s2 == lastChosenModule -> 1
-                s1.contains("gpt") && s2.contains("gpt") -> s2.compareTo(s1)
-                s1.contains("gpt") -> -1
-                s2.contains("gpt") -> 1
-                else -> s1.compareTo(s2)
-            }
-        }
-
-        if (models.isNotEmpty()) return models.sortedWith(gptComparator).toTypedArray()
-
-        return null
     }
 
     private fun stylizePanel() {
@@ -307,16 +227,6 @@ class SettingsLLMComponent {
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)
             .panel
-    }
-
-    private fun isGrazieClassLoaded(): Boolean {
-        val className = "org.jetbrains.research.grazie.Request"
-        return try {
-            Class.forName(className)
-            true
-        } catch (e: ClassNotFoundException) {
-            false
-        }
     }
 
     private fun getEditorTextField(editorType: PromptEditorType): EditorTextField {
