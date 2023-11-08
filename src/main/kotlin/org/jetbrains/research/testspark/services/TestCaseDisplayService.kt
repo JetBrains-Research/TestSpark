@@ -307,16 +307,21 @@ class TestCaseDisplayService(private val project: Project) {
         val descriptor = FileChooserDescriptor(true, true, false, false, false, false)
 
         // Apply filter with folders and java files with main class
-        descriptor.withFileFilter { file ->
-            file.isDirectory || (
-                file.extension?.lowercase(Locale.getDefault()) == "java" && (
-                    PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
-                    ).classes.stream().map { it.name }
-                    .toArray()
-                    .contains(
-                        (PsiManager.getInstance(project).findFile(file) as PsiJavaFile).name.removeSuffix(".java"),
+        WriteCommandAction.runWriteCommandAction(project) {
+            descriptor.withFileFilter { file ->
+                file.isDirectory || (
+                    file.extension?.lowercase(Locale.getDefault()) == "java" && (
+                        PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                        ).classes.stream().map { it.name }
+                        .toArray()
+                        .contains(
+                            (
+                                PsiManager.getInstance(project)
+                                    .findFile(file) as PsiJavaFile
+                                ).name.removeSuffix(".java"),
+                        )
                     )
-                )
+            }
         }
 
         val fileChooser = FileChooser.chooseFiles(

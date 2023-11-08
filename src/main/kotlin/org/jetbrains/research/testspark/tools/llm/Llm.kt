@@ -36,7 +36,7 @@ class Llm(override val name: String = "LLM") : Tool {
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
+        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)!!
 
         var currentPsiClass = cutPsiClass
         for (index in 0 until maxPolymorphismDepth) {
@@ -69,9 +69,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @throws IllegalArgumentException if the project in the AnActionEvent object is null
      */
     override fun generateTestsForClass(e: AnActionEvent) {
-        if (!e.project!!.service<LLMChatService>()
-            .isCorrectToken(e.project!!)
-        ) {
+        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
@@ -85,9 +83,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @throws IllegalStateException if the project or the surrounding method is null.
      */
     override fun generateTestsForMethod(e: AnActionEvent) {
-        if (!e.project!!.service<LLMChatService>()
-            .isCorrectToken(e.project!!)
-        ) {
+        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
             return
         }
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
@@ -103,9 +99,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param e The AnActionEvent that triggered the generation of tests.
      */
     override fun generateTestsForLine(e: AnActionEvent) {
-        if (!e.project!!.service<LLMChatService>()
-            .isCorrectToken(e.project!!)
-        ) {
+        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
             return
         }
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
