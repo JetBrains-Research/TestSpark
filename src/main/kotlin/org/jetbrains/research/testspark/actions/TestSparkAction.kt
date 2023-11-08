@@ -41,6 +41,20 @@ class TestSparkAction : AnAction() {
     }
 
     /**
+     * Updates the state of the action based on the provided event.
+     *
+     * @param e the AnActionEvent object representing the event
+     */
+    override fun update(e: AnActionEvent) {
+        if (getCurrentListOfCodeTypes(e) == null) {
+            e.presentation.isEnabled = false
+        } else {
+            e.presentation.isEnabled = true
+        }
+        super.update(e)
+    }
+
+    /**
      * Class representing the TestSparkActionWindow.
      *
      * @property e The AnActionEvent object.
@@ -49,7 +63,7 @@ class TestSparkAction : AnAction() {
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
-        private val codeTypes = getCurrentListOfCodeTypes(e)
+        private val codeTypes = getCurrentListOfCodeTypes(e)!!
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 

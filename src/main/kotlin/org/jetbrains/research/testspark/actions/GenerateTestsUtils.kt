@@ -267,7 +267,7 @@ fun getMethodDisplayName(psiMethod: PsiMethod): String {
  *         The array contains the class display name, method display name (if present), and the line number (if present).
  *         The line number is prefixed with "Line".
  */
-fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*> {
+fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*>? {
     val result: ArrayList<String> = arrayListOf()
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return result.toArray()
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return result.toArray()
@@ -276,8 +276,8 @@ fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*> {
 
     val psiClass: PsiClass? = getSurroundingClass(psiFile, caret)
 
-    psiClass ?: return
-  
+    psiClass ?: return null
+
     val psiMethod: PsiMethod? = getSurroundingMethod(psiFile, caret)
     val line: Int? = getSurroundingLine(psiFile, caret)?.plus(1)
 
