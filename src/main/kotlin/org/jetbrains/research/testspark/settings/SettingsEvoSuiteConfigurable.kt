@@ -30,9 +30,11 @@ class SettingsEvoSuiteConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
+        settingsComponent!!.javaPath = settingsState.javaPath
         settingsComponent!!.sandbox = settingsState.sandbox
         settingsComponent!!.assertions = settingsState.assertions
         settingsComponent!!.seed = settingsState.seed
+        settingsComponent!!.algorithm = settingsState.algorithm
         settingsComponent!!.configurationId = settingsState.configurationId
         settingsComponent!!.clientOnThread = settingsState.clientOnThread
         settingsComponent!!.junitCheck = settingsState.junitCheck
@@ -55,8 +57,10 @@ class SettingsEvoSuiteConfigurable : Configurable {
     override fun isModified(): Boolean {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         var modified: Boolean = settingsComponent!!.sandbox != settingsState.sandbox
+        modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
         modified = modified or (settingsComponent!!.seed != settingsState.seed)
+        modified = modified or (settingsComponent!!.algorithm != settingsState.algorithm)
         modified = modified or (settingsComponent!!.configurationId != settingsState.configurationId)
         modified = modified or (settingsComponent!!.clientOnThread != settingsState.clientOnThread)
         modified = modified or (settingsComponent!!.junitCheck != settingsState.junitCheck)
@@ -77,8 +81,10 @@ class SettingsEvoSuiteConfigurable : Configurable {
      */
     override fun apply() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
+        settingsState.javaPath = settingsComponent!!.javaPath
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions
+        settingsState.algorithm = settingsComponent!!.algorithm
         settingsState.configurationId = settingsComponent!!.configurationId
         settingsState.clientOnThread = settingsComponent!!.clientOnThread
         settingsState.junitCheck = settingsComponent!!.junitCheck
@@ -110,6 +116,15 @@ class SettingsEvoSuiteConfigurable : Configurable {
      */
     override fun getDisplayName(): String {
         return "TestSpark"
+    }
+
+    /**
+     * Returns the UI component that should be focused when the TestSpark Settings page is opened.
+     *
+     *  @return preferred UI component
+     */
+    override fun getPreferredFocusedComponent(): JComponent {
+        return settingsComponent!!.getPreferredFocusedComponent()
     }
 
     /**

@@ -1,11 +1,14 @@
 package org.jetbrains.research.testspark.settings
 
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import javax.swing.JCheckBox
+import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JTextField
 
@@ -16,6 +19,7 @@ class SettingsEvoSuiteComponent {
     var panel: JPanel? = null
 
     // EvoSuite "input" options (e.g. text, number)
+    private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
     private var configurationIdTextField = JTextField()
     private var seedTextField = JTextField()
 
@@ -39,6 +43,9 @@ class SettingsEvoSuiteComponent {
     private var criterionMethodNoExceptionCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("criterionMethodNoExc"))
     private var criterionCBranchCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("criterionCBranch"))
 
+    // Java path
+    private var javaPathTextField = JTextField()
+
     init {
 
         // Adds the panel components
@@ -53,9 +60,12 @@ class SettingsEvoSuiteComponent {
      */
     private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
+            .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("javaSettings")))
+            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("javaPath")), javaPathTextField, 10, false)
             .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("generalSettings")))
             // EvoSuite "input" options (e.g. text, number)
             // Important settings like algorithm selection, seed selection
+            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("defaultSearch")), algorithmSelector, 10, false)
             .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("seed")), seedTextField, 10, false)
             .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("configId")), configurationIdTextField, 5, false)
             // Checkboxes settings
@@ -82,13 +92,35 @@ class SettingsEvoSuiteComponent {
      * Add stylistic additions to elements of EvoSuite settings panel (e.g. tooltips)
      */
     private fun stylizePanel() {
+        // Dimensions adjustments
+        algorithmSelector.setMinimumAndPreferredWidth(300)
+
         // Tooltips
         seedTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("seed")
         configurationIdTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("configId")
         clientOnThreadCheckBox.toolTipText = TestSparkToolTipsBundle.defaultValue("debug")
         junitCheckCheckBox.toolTipText = TestSparkToolTipsBundle.defaultValue("junit")
         criterionSeparator.toolTipText = TestSparkToolTipsBundle.defaultValue("criterion")
+
+        javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
     }
+
+    /**
+     * Returns the UI component that should be focused when a user opens the TestSpark Settings page.
+     *
+     * @return preferred UI component
+     */
+    fun getPreferredFocusedComponent(): JComponent {
+        return algorithmSelector
+    }
+
+    // Settings "changers"
+
+    var javaPath: String
+        get() = javaPathTextField.text
+        set(newConfig) {
+            javaPathTextField.text = newConfig
+        }
 
     var sandbox: Boolean
         get() = sandboxCheckBox.isSelected
@@ -106,6 +138,12 @@ class SettingsEvoSuiteComponent {
         get() = seedTextField.text
         set(newText) {
             seedTextField.text = newText
+        }
+
+    var algorithm: ContentDigestAlgorithm
+        get() = algorithmSelector.item
+        set(newAlg) {
+            algorithmSelector.item = newAlg
         }
 
     var configurationId: String
