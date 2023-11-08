@@ -78,7 +78,6 @@ class SettingsArguments(
         if (settingsState != null) {
             val params = settingsState.serializeChangesFromDefault()
             command.addAll(params)
-            command.add("-Dalgorithm=${settingsState.algorithm}")
             command.add(createCriterionString(settingsState, isLineCoverage))
         }
         return command
