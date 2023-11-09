@@ -9,13 +9,31 @@
 ## Description
 
 <!-- Plugin description -->
-TestSpark is a plugin for generating unit tests.
+TestSpark is a plugin for generating unit tests. TestSpark natively integrates different AI-based test generation tools and techniques in the IDE.
+
+TestSpark currently supports two test generation strategies:
 <ul>
-<li>Uses <a href="https://www.evosuite.org">EvoSuite</a> and <a href="https://openai.com">OpenAI</a> models for unit tests generation.</li>
+        <li>LLM-based test generation (using <a href="https://openai.com">OpenAI</a> and JetBrains internal AI Assistant platform)</li>
+        <li>Local search-based test generation (using <a href="https://www.evosuite.org">EvoSuite</a>)</li>
+</ul>
+<h4>LLM-based test generation</h4>
+    <p>For this type of test generation, TestSpark sends request to different Large Language Models. Also, it automastically checks if tests are valid before presenting it to users.</p>
+    <p>This feature needs a token from OpenAI platform or the AI Assistant platform.</p>
+    <ul>
+        <li>Supports Java (any version).</li>
+        <li>Generates unit tests for capturing failures.</li>
+        <li>Generate tests for Java classes, methods, and single lines.</li>
+    </ul>
+
+<h4>Local search-based test generation</h4>
+<p>For this type of test generation, TestSpark uses <a href="https://www.evosuite.org">EvoSuite</a>, which is the  most powerful search-based local test generator. </p>
+<ul>
+<li>Supports up to Java 11.</li>
 <li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage, mutation score.</li>
 <li>Generates unit tests for capturing failures.</li>
-<li>Generate tests for Java classes, method, and single lines.</li>
+<li>Generate tests for Java classes, methods, and single lines.</li>
 </ul>
+
 
 <p>Initially implemented by <a href="https://www.ciselab.nl">CISELab</a> at <a href="https://se.ewi.tudelft.nl">SERG @ TU Delft</a>, TestSpark is currently developed and maintained by <a href="https://lp.jetbrains.com/research/ictl/">ICTL at JetBrains Research</a>.</p>
 
