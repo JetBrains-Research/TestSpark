@@ -40,6 +40,7 @@
             <ul>
                 <li>New UI for requesting a test generation process</li>
                 <li>Users can now modify the prompt for each LLM-based request in the settings of the plugin</li>
+                <li>Added the usage guide window</li>
                 <li>Fixed some minor bugs</li>
             </ul>
         <h4>0.1.5</h4>

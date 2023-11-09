@@ -10,6 +10,7 @@
 
 ### Added
 - Prompt editor for LLM-based test generation
+- The usage guide window
 
 ### Changed
 - New UI for requesting a test generation process
