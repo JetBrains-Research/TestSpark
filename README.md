@@ -17,7 +17,7 @@ TestSpark currently supports two test generation strategies:
         <li>Local search-based test generation (using <a href="https://www.evosuite.org">EvoSuite</a>)</li>
 </ul>
 <h4>LLM-based test generation</h4>
-    <p>For this type of test generation, TestSpark sends request to different Large Language Models. Also, it automastically checks if tests are valid before presenting it to users.</p>
+    <p>For this type of test generation, TestSpark sends request to different Large Language Models. Also, it automatically checks if tests are valid before presenting it to users.</p>
     <p>This feature needs a token from OpenAI platform or the AI Assistant platform.</p>
     <ul>
         <li>Supports Java (any version).</li>
