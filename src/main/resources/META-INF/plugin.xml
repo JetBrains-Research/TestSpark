@@ -36,6 +36,12 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.1.6</h4>
+            <ul>
+                <li>New UI for requesting a test generation process</li>
+                <li>Users can now modify the prompt for each LLM-based request in the settings of the plugin</li>
+                <li>Fixed some minor bugs</li>
+            </ul>
         <h4>0.1.5</h4>
             <ul>
                 <li>Fix some minor bugs in LLM-based test generation process</li>
