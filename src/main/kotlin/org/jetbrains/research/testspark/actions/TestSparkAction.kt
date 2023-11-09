@@ -52,7 +52,6 @@ class TestSparkAction : AnAction() {
         } else {
             e.presentation.isEnabled = true
         }
-        super.update(e)
     }
 
     /**
