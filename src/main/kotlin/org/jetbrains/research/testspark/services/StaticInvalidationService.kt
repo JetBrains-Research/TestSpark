@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.services
 
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
@@ -19,6 +20,7 @@ import org.jetbrains.research.testspark.actions.isMethodConcrete
  * Service used to invalidate cache statically
  * @param project - the project
  */
+@Service(Service.Level.PROJECT)
 class StaticInvalidationService(private val project: Project) {
 
     // HashMap of Class filePath -> (HashMap of Method Signature -> (Method Body, Covered Lines))

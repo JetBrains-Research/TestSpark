@@ -4,6 +4,25 @@
 
 ## Unreleased
 
+## 0.1.5
+
+### Fixed
+- Minor bugs in LLM-based test generation process
+
+## 0.1.4
+
+### Added
+- Code highlighting and auto-completion for generated tests
+- Java code formatter for generated tests
+- Direct user feedback to modify each generated test by LLM
+
+### Changed
+- New UI for test generation report
+
+### Fixed
+- Improve the test case execution process
+- Improve prompt generation
+
 ## 0.1.3
 
 ### Added

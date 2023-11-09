@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -23,6 +24,7 @@ import kotlin.math.roundToInt
  *
  * @param project the project
  */
+@Service(Service.Level.PROJECT)
 class CoverageVisualisationService(private val project: Project) {
 
     // Variable to keep reference to the coverage visualisation content
@@ -42,7 +44,7 @@ class CoverageVisualisationService(private val project: Project) {
      */
     data class HighlightedData(
         val linesToCover: Set<Int>,
-        val selectedTests: HashSet<String>,
+        val selectedTests: HashSet<Int>,
         val testReport: Report,
         val editor: Editor,
     )
@@ -74,7 +76,7 @@ class CoverageVisualisationService(private val project: Project) {
         fillToolWindowContents(testReport)
         createToolWindowTab()
 
-        updateCoverage(testReport.allCoveredLines, testReport.testCaseList.keys.toHashSet(), testReport, editor)
+        updateCoverage(testReport.allCoveredLines, testReport.testCaseList.values.stream().map { it.id }.toList().toHashSet(), testReport, editor)
     }
 
     /**
@@ -88,7 +90,7 @@ class CoverageVisualisationService(private val project: Project) {
      */
     fun updateCoverage(
         linesToCover: Set<Int>,
-        selectedTests: HashSet<String>,
+        selectedTests: HashSet<Int>,
         testReport: Report,
         editor: Editor,
     ) {
@@ -128,10 +130,10 @@ class CoverageVisualisationService(private val project: Project) {
             }
 
             val mutationCovered =
-                testReport.testCaseList.filter { x -> x.key in selectedTests }.map { x -> x.value.coveredMutants }
+                testReport.testCaseList.filter { x -> x.value.id in selectedTests }.map { x -> x.value.coveredMutants }
                     .flatten().groupBy { x -> x.lineNo }
             val mutationNotCovered =
-                testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.key !in selectedTests }
+                testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.value.id !in selectedTests }
                     .map { x -> x.value.coveredMutants }.flatten().groupBy { x -> x.lineNo }
 
             for (i in linesToCover) {
@@ -141,8 +143,8 @@ class CoverageVisualisationService(private val project: Project) {
                     editor.markupModel.addLineHighlighter(line, HighlighterLayer.ADDITIONAL_SYNTAX, textAttribute)
 
                 val testsCoveringLine =
-                    testReport.testCaseList.filter { x -> i in x.value.coveredLines && x.key in selectedTests }
-                        .map { x -> x.key }
+                    testReport.testCaseList.filter { x -> i in x.value.coveredLines && x.value.id in selectedTests }
+                        .map { x -> x.value.testName }
                 val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
                 val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 

@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.data
 import org.evosuite.result.BranchInfo
 import org.evosuite.result.MutationInfo
 import org.evosuite.utils.CompactReport
+import org.evosuite.utils.CompactTestCase
 
 /**
  * Storage of generated tests. Implemented on the basis of org.evosuite.utils.CompactReport structure.
@@ -16,7 +17,7 @@ class Report {
     var allUncoveredBranches: Set<BranchInfo> = setOf()
     var allCoveredMutation: Set<MutationInfo> = setOf()
     var allUncoveredMutation: Set<MutationInfo> = setOf()
-    var testCaseList: HashMap<String, TestCase> = hashMapOf()
+    var testCaseList: HashMap<Int, TestCase> = hashMapOf()
 
     /**
      * Transformation CompactReport to Report
@@ -31,7 +32,9 @@ class Report {
         allUncoveredBranches = compactReport.allUncoveredBranches
         allCoveredMutation = compactReport.allCoveredMutation
         allUncoveredMutation = compactReport.allUncoveredMutation
-        testCaseList = HashMap(compactReport.testCaseList.map { (key, value) -> key to TestCase(value) }.toMap())
+        for ((index, compactTestCase: CompactTestCase) in compactReport.testCaseList.values.withIndex()) {
+            testCaseList[index] = TestCase(index, compactTestCase)
+        }
     }
 
     /**

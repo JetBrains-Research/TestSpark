@@ -36,6 +36,19 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.1.5</h4>
+            <ul>
+                <li>Fix some minor bugs in LLM-based test generation process</li>
+            </ul>
+        <h4>0.1.4</h4>
+            <ul>
+                <li>New UI for test generation report</li>
+                <li>Add code highlighting and auto-completion for generated tests</li>
+                <li>Add Java code formatter for generated tests</li>
+                <li>Add direct user feedback to modify each generated test by LLM</li>
+                <li>Improve the test case execution process</li>
+                <li>Improve prompt generation</li>
+            </ul>
         <h4>0.1.3</h4>
             <ul>
                 <li>Add LLM-based test generation using Grazie platform in the settings</li>
@@ -92,35 +105,7 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-
-        <!-- Project-level services -->
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.SettingsProjectService"/>
-        <projectService serviceImplementation="org.jetbrains.research.testspark.services.TestCaseDisplayService"/>
-
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.CoverageVisualisationService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.CoverageToolWindowDisplayService"/>
-        <projectService serviceImplementation="org.jetbrains.research.testspark.editor.Workspace"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.TestCaseCachingService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.StaticInvalidationService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.TestSparkTelemetryService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.RunnerService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.ErrorService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.TestsExecutionResultService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.TestCoverageCollectorService"/>
-        <projectService
-                serviceImplementation="org.jetbrains.research.testspark.services.JavaClassBuilderService"/>
-
-        <toolWindow id="TestSpark" secondary="true" anchor="right"
+        <toolWindow id="TestSpark" secondary="true" anchor="right" icon="org.jetbrains.research.testspark.display.TestSparkIcons.toolWindowIcon"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>
 
 <!--        TODO uncomment after the validator fixing-->

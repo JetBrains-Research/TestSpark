@@ -4,6 +4,7 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
@@ -11,6 +12,7 @@ import org.jetbrains.research.testspark.TestSparkBundle
 /**
  * Service used for the sole purpose to limit TestSpark to generate tests only once at a time.
  */
+@Service(Service.Level.PROJECT)
 class RunnerService(private val project: Project) {
     private var isRunning: Boolean = false
 

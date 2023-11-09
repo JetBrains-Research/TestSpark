@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.editor
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Document
@@ -38,6 +39,7 @@ import java.io.File
  * related to test generation.
  *
  */
+@Service(Service.Level.PROJECT)
 class Workspace(private val project: Project) : Disposable {
     data class TestJobInfo(
         val fileUrl: String,
@@ -50,7 +52,7 @@ class Workspace(private val project: Project) : Disposable {
     class TestJob(
         val info: TestJobInfo,
         var report: Report,
-        val selectedTests: HashSet<String>,
+        val selectedTests: HashSet<Int>,
     ) {
         private fun getSelectedTests(): List<TestCase> {
             return report.testCaseList.filter { selectedTests.contains(it.key) }.map { it.value }
@@ -111,16 +113,16 @@ class Workspace(private val project: Project) : Disposable {
         connection.subscribe(
             COVERAGE_SELECTION_TOGGLE_TOPIC,
             object : CoverageSelectionToggleListener {
-                override fun testGenerationResult(testName: String, selected: Boolean, editor: Editor) {
+                override fun testGenerationResult(testId: Int, selected: Boolean, editor: Editor) {
                     val vFile = vFileForDocument(editor.document) ?: return
                     val fileKey = vFile.presentableUrl
                     val testJob = testGenerationData.testGenerationResults[fileKey]?.last() ?: return
                     val modTs = editor.document.modificationStamp
 
                     if (selected) {
-                        testJob.selectedTests.add(testName)
+                        testJob.selectedTests.add(testId)
                     } else {
-                        testJob.selectedTests.remove(testName)
+                        testJob.selectedTests.remove(testId)
                     }
 
                     // update coverage only if the modification timestamp is the same
@@ -200,8 +202,8 @@ class Workspace(private val project: Project) : Disposable {
         val jobKey = cachedJobKey ?: pendingJobKey
 
         val resultsForFile = testGenerationData.testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
-        val displayedSet = HashSet<String>()
-        displayedSet.addAll(testReport.testCaseList.keys)
+        val displayedSet = HashSet<Int>()
+        displayedSet.addAll(testReport.testCaseList.values.stream().map { it.id }.toList())
 
         testJob = TestJob(jobKey, testReport, displayedSet)
         resultsForFile.add(testJob!!)
@@ -264,8 +266,8 @@ class Workspace(private val project: Project) : Disposable {
 
     fun updateTestCase(testCase: TestCase) {
         val updatedReport = testJob!!.report
-        updatedReport.testCaseList.remove(testCase.testName)
-        updatedReport.testCaseList[testCase.testName] = testCase
+        updatedReport.testCaseList.remove(testCase.id)
+        updatedReport.testCaseList[testCase.id] = testCase
         updatedReport.normalized()
         testJob!!.updateReport(updatedReport)
         project.service<CoverageVisualisationService>().showCoverage(updatedReport, editor!!)
@@ -298,7 +300,7 @@ class Workspace(private val project: Project) : Disposable {
      */
     private fun updateCoverage(
         linesToCover: Set<Int>,
-        selectedTests: HashSet<String>,
+        selectedTests: HashSet<Int>,
         testCaseList: Report,
         editor: Editor,
     ) {

@@ -19,7 +19,7 @@ data class TestSuiteGeneratedByLLM(
     var otherInfo: String = "",
     var testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf(),
 ) {
-    private val testFileName: String = "GeneratedTest"
+    private var testFileName: String = "GeneratedTest"
 
     /**
      * Checks if the testCases collection is empty.
@@ -79,7 +79,7 @@ data class TestSuiteGeneratedByLLM(
      */
     fun toStringSingleTestCaseWithoutExpectedException(testCaseIndex: Int): String =
         project.service<JavaClassBuilderService>().generateCode(
-            "Generated${testCases[testCaseIndex].name}",
+            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCases[testCaseIndex].name),
             testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
             imports,
             packageString,
@@ -140,5 +140,14 @@ data class TestSuiteGeneratedByLLM(
         testCases.removeIf { testCase -> testCase.isEmpty() }
 
         return this
+    }
+
+    /**
+     * Sets the test file name.
+     *
+     * @param testFileName The file name of the test file to be set.
+     */
+    fun setTestFileName(testFileName: String) {
+        this.testFileName = testFileName
     }
 }

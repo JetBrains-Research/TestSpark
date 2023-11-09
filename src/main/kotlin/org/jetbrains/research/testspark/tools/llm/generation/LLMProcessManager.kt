@@ -6,10 +6,12 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
-import org.jetbrains.research.testspark.data.FragmentToTestDada
+import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -34,7 +36,6 @@ import java.io.File
  * @property testFileName The name of the generated test file.
  * @property log An instance of the logger class for logging purposes.
  * @property llmErrorManager An instance of the LLMErrorManager class.
- * @property requestManager An instance of the LLMRequestManager class.
  * @property maxRequests The maximum number of requests to be sent to LLM.
  */
 class LLMProcessManager(
@@ -45,7 +46,6 @@ class LLMProcessManager(
     private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
-    private val requestManager: RequestManager = StandardRequestManagerFactory().getRequestManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
 
     /**
@@ -57,7 +57,7 @@ class LLMProcessManager(
      */
     override fun runTestGenerator(
         indicator: ProgressIndicator,
-        codeType: FragmentToTestDada,
+        codeType: FragmentToTestData,
         packageName: String,
     ) {
         log.info("LLM test generation begins")
@@ -100,6 +100,9 @@ class LLMProcessManager(
         var messageToPrompt = prompt
         var generatedTestSuite: TestSuiteGeneratedByLLM? = null
 
+        // notify LLMChatService to restart the chat process.
+        project.service<LLMChatService>().newSession()
+
         // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
         while (!generatedTestsArePassing) {
             requestsCount++
@@ -118,7 +121,7 @@ class LLMProcessManager(
             // Send request to LLM
             if (warningMessage.isNotEmpty()) llmErrorManager.warningProcess(warningMessage, project)
             val requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
-                requestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
+                project.service<LLMChatService>().testGenerationRequest(messageToPrompt, indicator, packageName, project, llmErrorManager)
             generatedTestSuite = requestResult.second
 
             // Process stopped checking
@@ -149,7 +152,7 @@ class LLMProcessManager(
                             generatedTestSuite.packageString,
                             generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
                             project.service<Workspace>().resultPath!!,
-                            "Generated${generatedTestSuite.testCases[testCaseIndex].name}.java",
+                            "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java",
                         ),
                     )
                 }
@@ -178,18 +181,18 @@ class LLMProcessManager(
                 File(generatedTestPath),
                 generatedTestSuite.getPrintablePackageString(),
                 buildPath,
-                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
+                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList()
             )
 
             // compile the test file
             indicator.text = TestSparkBundle.message("compilationTestsChecking")
-            coverageCollector.compileTestCases()
-            val compilationResult = project.service<TestCoverageCollectorService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
+            val separateCompilationResult = coverageCollector.compileTestCases()
+            val commonCompilationResult = project.service<TestCoverageCollectorService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
-            if (!compilationResult.first && !isLastIteration(requestsCount)) {
+            if (!separateCompilationResult && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")
                 warningMessage = TestSparkBundle.message("compilationError")
-                messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${compilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```"
+                messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${commonCompilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```"
                 continue
             }
 

@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
+import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
@@ -7,11 +9,17 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
+import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.actions.getClassDisplayName
 import org.jetbrains.research.testspark.actions.getClassFullText
 import org.jetbrains.research.testspark.actions.getSignatureString
+import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
+import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 
 /**
  * A class that manages prompts for generating unit tests.
@@ -29,14 +37,67 @@ class PromptManager(
     private val header = "Dont use @Before and @After test methods.\n" +
         "Make tests as atomic as possible.\n" +
         "All tests should be for JUnit 4.\n" +
-        "In case of mocking, use Mockito 5. But, do not use mocking for all tests.\n"
+        "In case of mocking, use Mockito 5. But, do not use mocking for all tests.\n" +
+        "Name all methods according to the template - [MethodUnderTest][Scenario]Test, and use only English letters.\n"
+
+    private val log = Logger.getInstance(this::class.java)
+    private val llmErrorManager: LLMErrorManager = LLMErrorManager()
+
+    fun generatePrompt(codeType: FragmentToTestData): String {
+        val promptManager = PromptManager(project, classesToTest[0], classesToTest)
+
+        var prompt: String
+        while (true) {
+            prompt = when (codeType.type!!) {
+                CodeType.CLASS -> promptManager.generatePromptForClass()
+                CodeType.METHOD -> promptManager.generatePromptForMethod(codeType.objectDescription)
+                CodeType.LINE -> promptManager.generatePromptForLine(codeType.objectIndex)
+            }
+
+            // Too big prompt processing
+            if (!isPromptLengthWithinLimit(prompt)) {
+                // depth of polymorphism reducing
+                if (SettingsArguments.maxPolyDepth(project) > 1) {
+                    project.service<Workspace>().testGenerationData.polyDepthReducing++
+                    log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
+                    continue
+                }
+
+                // depth of input params reducing
+                if (SettingsArguments.maxInputParamsDepth(project) > 1) {
+                    project.service<Workspace>().testGenerationData.inputParamsDepthReducing++
+                    log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
+                    continue
+                }
+            }
+            break
+        }
+
+        // Show warning in case of depth reduction
+        if ((
+            project.service<Workspace>().testGenerationData.polyDepthReducing != 0 ||
+                project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0
+            ) &&
+            isPromptLengthWithinLimit(prompt)
+        ) {
+            llmErrorManager.warningProcess(
+                TestSparkBundle.message("promptReduction") + "\n" +
+                    "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
+                    "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
+                project,
+            )
+        }
+
+        log.info("Prompt is:\n$prompt")
+        return prompt
+    }
 
     /**
      * Generates a prompt for generating unit tests in Java for a given class.
      *
      * @return The generated prompt.
      */
-    fun generatePromptForClass(): String {
+    private fun generatePromptForClass(): String {
         val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
         return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\n" +
             header +
@@ -50,7 +111,7 @@ class PromptManager(
      * @param methodDescriptor The descriptor of the method.
      * @return The generated prompt.
      */
-    fun generatePromptForMethod(methodDescriptor: String): String {
+    private fun generatePromptForMethod(methodDescriptor: String): String {
         val psiMethod = getPsiMethod(cut, methodDescriptor)!!
         return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for method $methodDescriptor.\n" +
             header +
@@ -64,12 +125,12 @@ class PromptManager(
      * @param lineNumber the line number for which to generate the prompt
      * @return the generated prompt string
      */
-    fun generatePromptForLine(lineNumber: Int): String {
+    private fun generatePromptForLine(lineNumber: Int): String {
         val methodDescriptor = getMethodDescriptor(cut, lineNumber)
         val psiMethod = getPsiMethod(cut, methodDescriptor)!!
         return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: `${getClassFullText(cut).split("\n")[lineNumber - 1]}` on line number $lineNumber.\n" +
             header +
-            "The source code of method this the chosen line under test is as follows:\n```\n${psiMethod.text}\n```\n" +
+            "The source code of method of the chosen line under test is as follows:\n```\n${psiMethod.text}\n```\n" +
             getCommonPromptPart(getInterestingPsiClasses(psiMethod))
     }
 
@@ -113,6 +174,7 @@ class PromptManager(
         prompt += "=== polymorphism relations:\n"
         polymorphismRelations.forEach { entry ->
             for (currentSubClass in entry.value) {
+                currentSubClass.qualifiedName ?: continue
                 prompt += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
             }
         }
@@ -149,7 +211,6 @@ class PromptManager(
     /**
      * Retrieves a set of interesting PsiClasses based on a given cutPsiClass and a list of classesToTest.
      *
-     * @param cutPsiClass The PsiClass to start the search from.
      * @param classesToTest The list of classes to test for interesting PsiClasses.
      * @return The set of interesting PsiClasses found during the search.
      */

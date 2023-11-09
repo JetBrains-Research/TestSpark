@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.services
 
+import com.intellij.openapi.components.Service
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.table.JBTable
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
@@ -10,6 +11,7 @@ import javax.swing.table.AbstractTableModel
 /**
  * Class to display EvoSuite coverage in the tool window.
  */
+@Service(Service.Level.PROJECT)
 class CoverageToolWindowDisplayService {
     var mainPanel: JScrollPane? = null
     var data: ArrayList<String> = arrayListOf("", "", "", "")

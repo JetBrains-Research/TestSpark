@@ -10,7 +10,9 @@ import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.TestCoverageCollectorService
+import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
 
 /**
@@ -66,11 +68,30 @@ fun saveData(
     workspace.testGenerationData.packageLine = packageLine
     workspace.testGenerationData.importsCode.addAll(importsCode)
 
+    project.service<TestsExecutionResultService>().initExecutionResult(report.testCaseList.values.map { it.id })
+
+    for (testCase in report.testCaseList.values) {
+        val code = testCase.testCode
+        testCase.testCode = project.service<JavaClassBuilderService>().generateCode(
+            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+            code,
+            workspace.testGenerationData.importsCode,
+            workspace.testGenerationData.packageLine,
+            workspace.testGenerationData.runWith,
+            workspace.testGenerationData.otherInfo,
+        )
+    }
+
     indicator.text = TestSparkBundle.message("testExecutionMessage")
 
     for (testCase in report.testCaseList.values) {
         indicator.text = "Executing ${testCase.testName}"
-        project.service<TestCoverageCollectorService>().updateDataWithTestCase(testCase.testCode, testCase.testName)
+        project.service<TestCoverageCollectorService>().updateDataWithTestCase(
+            "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)}.java",
+            testCase.id,
+            testCase.testName,
+            testCase.testCode,
+        )
     }
 
     workspace.testGenerationData.testGenerationResultList.add(report)
@@ -79,11 +100,7 @@ fun saveData(
 /**
  * Retrieves the key for a test job in the workspace.
  *
- * @param fileUrl The URL of the file associated with the test job.
  * @param classFQN The fully qualified name of the class associated with the test job.
- * @param modTs The modification timestamp of the file associated with the test job.
- * @param testResultName The name of the test result associated with the test job.
- * @param projectClassPath The classpath of the project associated with the test job.
  * @return The test job information containing the provided parameters.
  */
 fun getKey(project: Project, classFQN: String): Workspace.TestJobInfo =

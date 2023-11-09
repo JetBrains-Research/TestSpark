@@ -98,10 +98,12 @@ class TestsAssembler(
      * @return A TestSuiteGeneratedByLLM object containing the extracted test cases and package name.
      */
     fun returnTestSuite(packageName: String): TestSuiteGeneratedByLLM? {
+        if (rawText.isBlank()) return null
         try {
             val testSuite = TestSuiteGeneratedByLLM(project)
-            if (rawText.contains("```"))
+            if (rawText.contains("```")) {
                 rawText = rawText.split("```")[1]
+            }
 
             testSuite.packageString = packageName
 
@@ -129,7 +131,7 @@ class TestsAssembler(
             // save annotations and pre-set methods
             val otherInfoList = testSet.removeAt(0).split("public class")[1].split("{").toMutableList()
             otherInfoList.removeFirst()
-            val otherInfo = otherInfoList.joinToString("{")
+            val otherInfo = otherInfoList.joinToString("{").trimEnd() + "\n\n"
             if (otherInfo.isNotBlank()) {
                 testSuite.otherInfo = otherInfo
             }

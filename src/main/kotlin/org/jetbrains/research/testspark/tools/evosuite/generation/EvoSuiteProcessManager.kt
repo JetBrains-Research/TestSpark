@@ -14,12 +14,12 @@ import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
-import org.jetbrains.research.testspark.data.FragmentToTestDada
+import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.RunCommandLineService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -67,14 +67,14 @@ class EvoSuiteProcessManager(
      */
     override fun runTestGenerator(
         indicator: ProgressIndicator,
-        codeType: FragmentToTestDada,
+        codeType: FragmentToTestData,
         packageName: String,
     ) {
         try {
             if (processStopped(project, indicator)) return
 
             val regex = Regex("version \"(.*?)\"")
-            val version = regex.find(project.service<TestCoverageCollectorService>().runCommandLine(arrayListOf(settingsApplicationState!!.javaPath, "-version")))
+            val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(settingsApplicationState!!.javaPath, "-version")))
                 ?.groupValues
                 ?.get(1)
                 ?.split(".")
@@ -89,7 +89,6 @@ class EvoSuiteProcessManager(
             val projectClassPath = project.service<Workspace>().projectClassPath!!
             val classFQN = project.service<Workspace>().classFQN!!
             val baseDir = project.service<Workspace>().baseDir!!
-            val fileUrl = project.service<Workspace>().fileUrl!!
             val resultName = "${project.service<Workspace>().resultPath}${sep}EvoSuiteResult"
 
             Path(project.service<Workspace>().resultPath!!).createDirectories()
@@ -105,8 +104,8 @@ class EvoSuiteProcessManager(
                 CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
             }
 
-            if (!settingsApplicationState?.seed.isNullOrBlank()) command.add("-seed=${settingsApplicationState?.seed}")
-            if (!settingsApplicationState?.configurationId.isNullOrBlank()) command.add("-Dconfiguration_id=${settingsApplicationState?.configurationId}")
+            if (settingsApplicationState.seed.isNotBlank()) command.add("-seed=${settingsApplicationState.seed}")
+            if (settingsApplicationState.configurationId.isNotBlank()) command.add("-Dconfiguration_id=${settingsApplicationState.configurationId}")
 
             // update build path
             var buildPath = projectClassPath
@@ -119,7 +118,7 @@ class EvoSuiteProcessManager(
 
             // construct command
             val cmd = ArrayList<String>()
-            cmd.add(settingsApplicationState!!.javaPath)
+            cmd.add(settingsApplicationState.javaPath)
             cmd.add("-Djdk.attach.allowAttachSelf=true")
             cmd.add("-jar")
             cmd.add(evoSuitePath)

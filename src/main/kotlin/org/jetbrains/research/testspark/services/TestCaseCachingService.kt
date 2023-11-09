@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.services
 
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
 import org.evosuite.utils.CompactTestCase
 import org.jetbrains.research.testspark.data.Report
@@ -7,6 +8,7 @@ import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import kotlin.streams.toList
 
+@Service(Service.Level.PROJECT)
 class TestCaseCachingService {
     private val log: Logger = Logger.getInstance(this.javaClass)
     private val files = mutableMapOf<String, FileTestCaseCache>()
@@ -35,7 +37,11 @@ class TestCaseCachingService {
      */
     fun retrieveFromCache(fileUrl: String, lineFrom: Int, lineTo: Int): List<TestCase> {
         val fileTestCaseCache = getFileTestCaseCache(fileUrl)
-        val result = fileTestCaseCache.retrieveFromCache(lineFrom, lineTo).stream().map { TestCase(it) }.toList()
+        val compactTestCasesList: List<CompactTestCase> = fileTestCaseCache.retrieveFromCache(lineFrom, lineTo)
+        val result: MutableList<TestCase> = mutableListOf()
+        for ((index, compactTestCase: CompactTestCase) in compactTestCasesList.withIndex()) {
+            result.add(TestCase(index, compactTestCase))
+        }
         log.info("Retrieved ${result.size} test cases from cache for $fileUrl")
         return result
     }
