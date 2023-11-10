@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.services
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
@@ -38,5 +39,17 @@ class SettingsProjectService(project: Project) : PersistentStateComponent<Settin
      */
     override fun loadState(state: SettingsProjectState) {
         settingsProjectState = state
+    }
+
+    companion object {
+
+        /**
+         * Returns the service object with a static call.
+         *
+         * @return the service that manages the state
+         */
+        fun getInstance(): PersistentStateComponent<SettingsProjectState> {
+            return ApplicationManager.getApplication().getService(SettingsProjectService::class.java)
+        }
     }
 }

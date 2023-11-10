@@ -55,7 +55,7 @@ class EvoSuiteProcessManager(
     private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
     private var evoSuitePath = "$pluginsPath${sep}TestSpark${sep}lib${sep}evosuite-$evosuiteVersion.jar"
 
-    private val settingsApplicationState = SettingsApplicationService.getInstance().state
+    private val settingsApplicationState = SettingsApplicationService.getInstance().state!!
     private val settingsProjectState = project.service<SettingsProjectService>().state
 
     private val evoSuiteErrorManager: EvoSuiteErrorManager = EvoSuiteErrorManager()
@@ -74,7 +74,7 @@ class EvoSuiteProcessManager(
             if (processStopped(project, indicator)) return
 
             val regex = Regex("version \"(.*?)\"")
-            val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(settingsApplicationState!!.javaPath, "-version")))
+            val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(settingsApplicationState.javaPath, "-version")))
                 ?.groupValues
                 ?.get(1)
                 ?.split(".")

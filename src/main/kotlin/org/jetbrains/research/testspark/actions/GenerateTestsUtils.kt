@@ -21,7 +21,6 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.StaticInvalidationService
 import org.jetbrains.research.testspark.tools.Pipeline
 
 fun createPipeline(e: AnActionEvent): Pipeline {
@@ -44,7 +43,7 @@ fun createLLMPipeline(e: AnActionEvent): Pipeline {
     val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
     val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
 
-    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
+    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)!!
 
     val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
     packageList.removeLast()
@@ -62,7 +61,7 @@ fun createLLMPipeline(e: AnActionEvent): Pipeline {
  * @param caret the current (primary) caret that did the click
  * @return PsiClass element if it has been found, null otherwise
  */
-fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass {
+fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass? {
     // Get the classes of the PSI file
     val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
 
@@ -75,7 +74,7 @@ fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass {
             surroundingClass = psiClass
         }
     }
-    return surroundingClass!!
+    return surroundingClass
 }
 
 /**
@@ -214,16 +213,6 @@ private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFi
 }
 
 /**
- * Calculates which lines to invalidate from cache.
- *
- * @param psiFile psiFile of the document
- */
-fun calculateLinesToInvalidate(psiFile: PsiFile): Set<Int> {
-    val staticInvalidator = psiFile.project.service<StaticInvalidationService>()
-    return staticInvalidator.invalidate(psiFile)
-}
-
-/**
  * Checks if the caret is within the given PsiElement.
  *
  * @param psiElement PSI element of interest
@@ -243,11 +232,11 @@ private fun withinElement(psiElement: PsiElement, caret: Caret): Boolean {
  */
 fun getClassDisplayName(psiClass: PsiClass): String {
     return if (psiClass.isInterface) {
-        "Interface ${psiClass.qualifiedName}"
+        "<html><b><font color='orange'>interface</font> ${psiClass.qualifiedName}</b></html>"
     } else if (isAbstractClass(psiClass)) {
-        "Abstract Class ${psiClass.qualifiedName}"
+        "<html><b><font color='orange'>abstract class</font> ${psiClass.qualifiedName}</b></html>"
     } else {
-        "Class ${psiClass.qualifiedName}"
+        "<html><b><font color='orange'>class</font> ${psiClass.qualifiedName}</b></html>"
     }
 }
 
@@ -260,78 +249,43 @@ fun getClassDisplayName(psiClass: PsiClass): String {
  */
 fun getMethodDisplayName(psiMethod: PsiMethod): String {
     return if (isDefaultConstructor(psiMethod)) {
-        "Default Constructor"
+        "<html><b><font color='orange'>default constructor</font></b></html>"
     } else if (psiMethod.isConstructor) {
-        "Constructor"
+        "<html><b><font color='orange'>constructor</font></b></html>"
     } else if (isMethodDefault(psiMethod)) {
-        "Default Method ${psiMethod.name}"
+        "<html><b><font color='orange'>default method</font> ${psiMethod.name}</b></html>"
     } else {
-        "Method ${psiMethod.name}"
+        "<html><b><font color='orange'>method</font> ${psiMethod.name}</b></html>"
     }
 }
 
 /**
- * Makes the action visible only if a class has been selected.
- * It also updates the action name depending on which class has been selected.
+ * Gets the current list of code types based on the given AnActionEvent.
  *
- * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @param name a name of the test generator
+ * @param e The AnActionEvent representing the current action event.
+ * @return An array containing the current code types. If no caret or PSI file is found, an empty array is returned.
+ *         The array contains the class display name, method display name (if present), and the line number (if present).
+ *         The line number is prefixed with "Line".
  */
-fun updateForClass(e: AnActionEvent, name: String) {
-    e.presentation.isEnabledAndVisible = false
+fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*>? {
+    val result: ArrayList<String> = arrayListOf()
+    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return result.toArray()
+    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return result.toArray()
 
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
+    if (psiFile !is PsiJavaFile) return result.toArray()
 
-    if (psiFile !is PsiJavaFile) return
+    val psiClass: PsiClass? = getSurroundingClass(psiFile, caret)
 
-    val psiClass: PsiClass = getSurroundingClass(psiFile, caret)
+    psiClass ?: return null
 
-    e.presentation.isEnabledAndVisible = true
-    e.presentation.text = "Generate Tests For ${getClassDisplayName(psiClass)} by $name"
-}
+    val psiMethod: PsiMethod? = getSurroundingMethod(psiFile, caret)
+    val line: Int? = getSurroundingLine(psiFile, caret)?.plus(1)
 
-/**
- * Makes the action visible only if a method has been selected.
- * It also updates the action name depending on which method has been selected.
- *
- * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @param name a name of the test generator
- */
-fun updateForMethod(e: AnActionEvent, name: String) {
-    e.presentation.isEnabledAndVisible = false
+    result.add(getClassDisplayName(psiClass))
+    psiMethod?.let { result.add(getMethodDisplayName(it)) }
+    line?.let { result.add("<html><b><font color='orange'>line</font> $line</b></html>") }
 
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-
-    if (psiFile !is PsiJavaFile) return
-
-    val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return
-
-    e.presentation.isEnabledAndVisible = true
-    e.presentation.text = "Generate Tests For ${getMethodDisplayName(psiMethod)} by $name"
-}
-
-/**
- * Makes the action visible only if a line has been selected.
- * It also updates the action name depending on which line has been selected.
- *
- * @param e an action event that contains useful information and corresponds to the action invoked by the user
- * @param name a name of the test generator
- */
-fun updateForLine(e: AnActionEvent, name: String) {
-    e.presentation.isEnabledAndVisible = false
-
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE) ?: return
-
-    if (psiFile !is PsiJavaFile) return
-
-    val line: Int = getSurroundingLine(psiFile, caret)?.plus(1)
-        ?: return // lines in the editor and in EvoSuite are one-based
-
-    e.presentation.isEnabledAndVisible = true
-    e.presentation.text = "Generate Tests For Line $line by $name"
+    return result.toArray()
 }
 
 val importPattern = Regex(

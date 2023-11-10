@@ -26,7 +26,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.tools.ProjectBuilder
 import java.io.File
@@ -48,8 +47,7 @@ class Validator(
     private val tests: HashMap<String, String>, // test name, test code
 ) {
     private val logger: Logger = Logger.getInstance(this.javaClass)
-    private val settingsState = project.service<SettingsProjectService>().state
-    private val settingsApplicationState = SettingsApplicationService.getInstance().state
+    private val settingsState = SettingsApplicationService.getInstance().state!!
     private val junitTimeout: Long = 12000000 // TODO: Source from config
 
     private val sep = File.separatorChar
@@ -202,11 +200,10 @@ class Validator(
         testFqn: String,
     ) {
         indicator.isIndeterminate = false
-        settingsState
 
         // construct command
         val cmd = ArrayList<String>()
-        cmd.add(settingsApplicationState!!.javaPath)
+        cmd.add(settingsState.javaPath)
         cmd.add("-cp")
         cmd.add(classpath)
         cmd.add("org.junit.runner.JUnitCore")
@@ -276,7 +273,7 @@ class Validator(
         // delete old report
         File(jacocoReportPath).delete()
         val cmd = ArrayList<String>()
-        cmd.add(settingsApplicationState!!.javaPath)
+        cmd.add(settingsState.javaPath)
         cmd.add("-javaagent:$jacocoPath=destfile=$jacocoReportPath")
         cmd.add("-cp")
         cmd.add(classpath)
@@ -306,7 +303,7 @@ class Validator(
             .addExternalCoverageSuite(
                 virtualFile.name,
                 virtualFile.timeStamp,
-                coverageRunner,
+                coverageRunner!!,
                 DefaultCoverageFileProvider(virtualFile.path),
             )
 

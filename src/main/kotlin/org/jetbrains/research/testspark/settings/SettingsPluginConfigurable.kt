@@ -32,6 +32,7 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
      */
     override fun reset() {
         val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
+        settingsComponent!!.showCoverageCheckboxSelected = settingsState.showCoverageCheckboxSelected
         settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
         settingsComponent!!.colorGreen = settingsState.colorGreen
@@ -41,7 +42,9 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
         settingsComponent!!.telemetryPath =
             if (settingsState.telemetryPath.endsWith(project.name)) {
                 settingsState.telemetryPath
-            } else settingsState.telemetryPath.plus(File.separator).plus(project.name)
+            } else {
+                settingsState.telemetryPath.plus(File.separator).plus(project.name)
+            }
     }
 
     /**
@@ -51,8 +54,8 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
-//        var modified: Boolean = settingsComponent!!.javaPath != settingsState.javaPath
         var modified: Boolean = settingsComponent!!.buildPath != settingsState.buildPath
+        modified = modified or (settingsComponent!!.showCoverageCheckboxSelected != settingsState.showCoverageCheckboxSelected)
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
         modified = modified or (settingsComponent!!.colorGreen != settingsState.colorGreen)
         modified = modified or (settingsComponent!!.colorBlue != settingsState.colorBlue)
@@ -67,6 +70,7 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
      */
     override fun apply() {
         val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
+        settingsState.showCoverageCheckboxSelected = settingsComponent!!.showCoverageCheckboxSelected
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen
         settingsState.colorBlue = settingsComponent!!.colorBlue
@@ -106,15 +110,6 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
     override fun getDisplayName(): String {
         return "TestSpark"
     }
-
-    /**
-     * Returns the UI component that should be focused when the TestSpark Settings page is opened.
-     *
-     *  @return preferred UI component
-     */
-//    override fun getPreferredFocusedComponent(): JComponent {
-//        return settingsComponent!!.getPreferredFocusedComponent()
-//    }
 
     /**
      * Disposes the UI resources. It is called when a user closes the Settings dialog.

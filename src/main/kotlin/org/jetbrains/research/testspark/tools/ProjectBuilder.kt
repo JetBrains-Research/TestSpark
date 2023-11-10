@@ -4,7 +4,6 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
@@ -27,10 +26,6 @@ class ProjectBuilder(private val project: Project) {
 
     private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
     private val settingsState = project.service<SettingsProjectService>().state
-
-    init {
-        ApplicationManager.getApplication().saveAll()
-    }
 
     /**
      * Runs the build process.

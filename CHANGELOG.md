@@ -4,6 +4,18 @@
 
 ## Unreleased
 
+## 0.1.6
+### Fixed
+- Minor bugs in general test generation process
+
+### Added
+- Prompt editor for LLM-based test generation
+- The usage guide window
+- Support build 233.*
+
+### Changed
+- New UI for requesting a test generation process
+
 ## 0.1.5
 
 ### Fixed
