@@ -42,6 +42,7 @@
                 <li>Users can now modify the prompt for each LLM-based request in the settings of the plugin</li>
                 <li>Added the usage guide window</li>
                 <li>Fixed some minor bugs</li>
+                <li>Add support build 233.*</li>
             </ul>
         <h4>0.1.5</h4>
             <ul>

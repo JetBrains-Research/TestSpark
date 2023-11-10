@@ -11,6 +11,7 @@
 ### Added
 - Prompt editor for LLM-based test generation
 - The usage guide window
+- Support build 233.*
 
 ### Changed
 - New UI for requesting a test generation process
