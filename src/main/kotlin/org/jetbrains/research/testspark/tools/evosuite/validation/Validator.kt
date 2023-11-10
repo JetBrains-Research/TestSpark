@@ -303,7 +303,7 @@ class Validator(
             .addExternalCoverageSuite(
                 virtualFile.name,
                 virtualFile.timeStamp,
-                coverageRunner,
+                coverageRunner!!,
                 DefaultCoverageFileProvider(virtualFile.path),
             )
 
