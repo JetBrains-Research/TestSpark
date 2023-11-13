@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiMethod
@@ -10,13 +11,15 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.TestSparkBundle
-import org.jetbrains.research.testspark.actions.getClassDisplayName
 import org.jetbrains.research.testspark.actions.getClassFullText
 import org.jetbrains.research.testspark.actions.getSignatureString
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Level
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
+import org.jetbrains.research.testspark.services.PROMPT_KEYWORD
+import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
@@ -33,25 +36,19 @@ class PromptManager(
     private val cut: PsiClass,
     private val classesToTest: MutableList<PsiClass>,
 ) {
-    // prompt: start the request
-    private val header = "Dont use @Before and @After test methods.\n" +
-        "Make tests as atomic as possible.\n" +
-        "All tests should be for JUnit 4.\n" +
-        "In case of mocking, use Mockito 5. But, do not use mocking for all tests.\n" +
-        "Name all methods according to the template - [MethodUnderTest][Scenario]Test, and use only English letters.\n"
+    val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
 
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     fun generatePrompt(codeType: FragmentToTestData): String {
-        val promptManager = PromptManager(project, classesToTest[0], classesToTest)
 
         var prompt: String
         while (true) {
             prompt = when (codeType.type!!) {
-                Level.CLASS -> promptManager.generatePromptForClass()
-                Level.METHOD -> promptManager.generatePromptForMethod(codeType.objectDescription)
-                Level.LINE -> promptManager.generatePromptForLine(codeType.objectIndex)
+                Level.CLASS -> generatePromptForClass()
+                Level.METHOD -> generatePromptForMethod(codeType.objectDescription)
+                Level.LINE -> generatePromptForLine(codeType.objectIndex)
             }
 
             // Too big prompt processing
@@ -98,11 +95,19 @@ class PromptManager(
      * @return The generated prompt.
      */
     private fun generatePromptForClass(): String {
+        var classPrompt = settingsState.classPrompt
         val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
-        return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for this class.\n" +
-            header +
-            "The source code of class under test is as follows:\n```\n${getClassFullText(cut)}\n```\n" +
-            getCommonPromptPart(interestingPsiClasses, getPolymorphismRelations(project, interestingPsiClasses, cut))
+
+        classPrompt = insertLanguage(classPrompt)
+        classPrompt = insertName(classPrompt, cut.qualifiedName!!)
+        classPrompt = insertTestingPlatform(classPrompt)
+        classPrompt = insertMockingFramework(classPrompt)
+        classPrompt = insertCodeUnderTest(classPrompt, getClassFullText(cut))
+        classPrompt = insertMethodsSignatures(classPrompt, interestingPsiClasses)
+        classPrompt =
+            insertPolymorphismRelations(classPrompt, getPolymorphismRelations(project, interestingPsiClasses, cut))
+
+        return classPrompt
     }
 
     /**
@@ -112,11 +117,21 @@ class PromptManager(
      * @return The generated prompt.
      */
     private fun generatePromptForMethod(methodDescriptor: String): String {
+        var methodPrompt = settingsState.methodPrompt
         val psiMethod = getPsiMethod(cut, methodDescriptor)!!
-        return "Generate unit tests in Java for ${getClassDisplayName(cut)} to achieve 100% line coverage for method $methodDescriptor.\n" +
-            header +
-            "The source code of method under test is as follows:\n```\n${psiMethod.text}\n```\n" +
-            getCommonPromptPart(getInterestingPsiClasses(psiMethod))
+
+        methodPrompt = insertLanguage(methodPrompt)
+        methodPrompt = insertName(methodPrompt, "${cut.qualifiedName!!}.${psiMethod.name}")
+        methodPrompt = insertTestingPlatform(methodPrompt)
+        methodPrompt = insertMockingFramework(methodPrompt)
+        methodPrompt = insertCodeUnderTest(methodPrompt, psiMethod.text)
+        methodPrompt = insertMethodsSignatures(methodPrompt, getInterestingPsiClasses(psiMethod))
+        methodPrompt = insertPolymorphismRelations(
+            methodPrompt,
+            getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut)
+        )
+
+        return methodPrompt
     }
 
     /**
@@ -126,62 +141,135 @@ class PromptManager(
      * @return the generated prompt string
      */
     private fun generatePromptForLine(lineNumber: Int): String {
+        var linePrompt = settingsState.linePrompt
         val methodDescriptor = getMethodDescriptor(cut, lineNumber)
         val psiMethod = getPsiMethod(cut, methodDescriptor)!!
-        return "Generate unit tests in Java for ${getClassDisplayName(cut)} only those that cover the line: `${getClassFullText(cut).split("\n")[lineNumber - 1]}` on line number $lineNumber.\n" +
-            header +
-            "The source code of method of the chosen line under test is as follows:\n```\n${psiMethod.text}\n```\n" +
-            getCommonPromptPart(getInterestingPsiClasses(psiMethod))
+
+        // get code of line under test
+        val document = PsiDocumentManager.getInstance(project).getDocument(cut.containingFile)
+        val lineStartOffset = document!!.getLineStartOffset(lineNumber - 1)
+        val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
+        val lineUnderTest = document.getText(TextRange.create(lineStartOffset, lineEndOffset))
+
+        linePrompt = insertLanguage(linePrompt)
+        linePrompt = insertName(linePrompt, lineUnderTest.trim())
+        linePrompt = insertTestingPlatform(linePrompt)
+        linePrompt = insertMockingFramework(linePrompt)
+        linePrompt = insertCodeUnderTest(linePrompt, psiMethod.text)
+        linePrompt = insertMethodsSignatures(linePrompt, getInterestingPsiClasses(psiMethod))
+        linePrompt = insertPolymorphismRelations(
+            linePrompt,
+            getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut)
+        )
+
+        return linePrompt
     }
 
-    /**
-     * Retrieves the common prompt part for generating test documentation.
-     *
-     * @return The common prompt part as a string.
-     */
-    private fun getCommonPromptPart(interestingPsiClasses: MutableSet<PsiClass>, polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()): String {
-        var prompt = ""
+    private fun isPromptValid(keyword: PROMPT_KEYWORD, prompt: String): Boolean {
+        val keywordText = keyword.text
+        val isMandatory = keyword.mandatory
 
-        // print information about  super classes of CUT
-        for (i in 2..classesToTest.size) {
-            val subClass = classesToTest[i - 2]
-            val superClass = classesToTest[i - 1]
+        return (prompt.contains(keywordText) || !isMandatory)
+    }
 
-            prompt += "${getClassDisplayName(subClass)} extends ${getClassDisplayName(superClass)}. " +
-                "The source code of ${getClassDisplayName(superClass)} is:\n```\n${getClassFullText(superClass)}\n" +
-                "```\n"
+    private fun insertLanguage(classPrompt: String): String {
+        if (isPromptValid(PROMPT_KEYWORD.LANGUAGE, classPrompt)) {
+            val keyword = "\$${PROMPT_KEYWORD.LANGUAGE.text}"
+            return classPrompt.replace(keyword, "Java", ignoreCase = false)
+        } else {
+            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.LANGUAGE.text}")
         }
+    }
 
-        // prompt: signature of methods in the classes used by CUT
-        prompt += "Here are the method signatures of classes used by the class under test. Only use these signatures for creating objects, not your own ideas.\n"
-        for (interestingPsiClass: PsiClass in interestingPsiClasses) {
-            if (interestingPsiClass.qualifiedName!!.startsWith("java")) {
-                continue
+    private fun insertName(classPrompt: String, classDisplayName: String): String {
+        if (isPromptValid(PROMPT_KEYWORD.NAME, classPrompt)) {
+            val keyword = "\$${PROMPT_KEYWORD.NAME.text}"
+            return classPrompt.replace(keyword, classDisplayName, ignoreCase = false)
+        } else {
+            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.NAME.text}")
+        }
+    }
+
+    private fun insertTestingPlatform(classPrompt: String): String {
+        if (isPromptValid(PROMPT_KEYWORD.TESTING_PLATFORM, classPrompt)) {
+            val keyword = "\$${PROMPT_KEYWORD.TESTING_PLATFORM.text}"
+            return classPrompt.replace(keyword, "JUnit 4", ignoreCase = false)
+        } else {
+            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.TESTING_PLATFORM.text}")
+        }
+    }
+
+    private fun insertMockingFramework(classPrompt: String): String {
+        if (isPromptValid(PROMPT_KEYWORD.MOCKING_FRAMEWORK, classPrompt)) {
+            val keyword = "\$${PROMPT_KEYWORD.MOCKING_FRAMEWORK.text}"
+            return classPrompt.replace(keyword, "Mockito 5", ignoreCase = false)
+        } else {
+            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.MOCKING_FRAMEWORK.text}")
+        }
+    }
+
+    private fun insertCodeUnderTest(classPrompt: String, classFullText: String): String {
+        if (isPromptValid(PROMPT_KEYWORD.CODE, classPrompt)) {
+            val keyword = "\$${PROMPT_KEYWORD.CODE.text}"
+            var fullText = "```\n${classFullText}\n```\n"
+
+            for (i in 2..classesToTest.size) {
+                val subClass = classesToTest[i - 2]
+                val superClass = classesToTest[i - 1]
+
+                fullText += "${subClass.qualifiedName} extends ${superClass.qualifiedName}. " +
+                    "The source code of ${superClass.qualifiedName} is:\n```\n${getClassFullText(superClass)}\n" +
+                    "```\n"
             }
+            return classPrompt.replace(keyword, fullText, ignoreCase = false)
+        } else {
+            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.CODE.text}")
+        }
+    }
 
-            prompt += "=== methods in ${getClassDisplayName(interestingPsiClass)}:\n"
-            for (currentPsiMethod in interestingPsiClass.allMethods) {
-                // Skip java methods
-                if (currentPsiMethod.containingClass!!.qualifiedName!!.startsWith("java")) {
+    private fun insertMethodsSignatures(classPrompt: String, interestingPsiClasses: MutableSet<PsiClass>): String {
+        val keyword = "\$${PROMPT_KEYWORD.METHODS.text}"
+
+        if (isPromptValid(PROMPT_KEYWORD.METHODS, classPrompt)) {
+            var fullText = ""
+            for (interestingPsiClass: PsiClass in interestingPsiClasses) {
+                if (interestingPsiClass.qualifiedName!!.startsWith("java")) {
                     continue
                 }
-                prompt += " - ${currentPsiMethod.getSignatureString()}\n"
-            }
-            prompt += "\n\n"
-        }
 
-        // prompt: add polymorphism relations between involved classes
-        prompt += "=== polymorphism relations:\n"
-        polymorphismRelations.forEach { entry ->
-            for (currentSubClass in entry.value) {
-                currentSubClass.qualifiedName ?: continue
-                prompt += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
+                fullText += "=== methods in ${interestingPsiClass.qualifiedName!!}:\n"
+                for (currentPsiMethod in interestingPsiClass.allMethods) {
+                    // Skip java methods
+                    if (currentPsiMethod.containingClass!!.qualifiedName!!.startsWith("java")) {
+                        continue
+                    }
+                    fullText += " - ${currentPsiMethod.getSignatureString()}\n"
+                }
             }
+            return classPrompt.replace(keyword, fullText, ignoreCase = false)
+        } else {
+            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.METHODS.text}")
         }
-        // Make sure that LLM does not provide extra information other than the test file
-        prompt += "put the generated test between ```"
+    }
 
-        return prompt
+    private fun insertPolymorphismRelations(
+        classPrompt: String,
+        polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>
+    ): String {
+        val keyword = "\$${PROMPT_KEYWORD.POLYMORPHISM.text}"
+        if (isPromptValid(PROMPT_KEYWORD.METHODS, classPrompt)) {
+            var fullText = ""
+
+            polymorphismRelations.forEach { entry ->
+                for (currentSubClass in entry.value) {
+                    currentSubClass.qualifiedName ?: continue
+                    fullText += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
+                }
+            }
+            return classPrompt.replace(keyword, fullText, ignoreCase = false)
+        } else {
+            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.POLYMORPHISM.text}")
+        }
     }
 
     /**
@@ -250,10 +338,15 @@ class PromptManager(
      * @param cutPsiClass The cut PsiClass to determine polymorphism relations against.
      * @return A mutable map where the key represents an interesting PsiClass and the value is a list of its detected subclasses.
      */
-    private fun getPolymorphismRelations(project: Project, interestingPsiClasses: MutableSet<PsiClass>, cutPsiClass: PsiClass): MutableMap<PsiClass, MutableList<PsiClass>> {
+    private fun getPolymorphismRelations(
+        project: Project,
+        interestingPsiClasses: MutableSet<PsiClass>,
+        cutPsiClass: PsiClass
+    ): MutableMap<PsiClass, MutableList<PsiClass>> {
         val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
 
         val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
+        interestingPsiClasses.add(cutPsiClass)
 
         interestingPsiClasses.forEach { currentInterestingClass ->
             val scope = GlobalSearchScope.projectScope(project)

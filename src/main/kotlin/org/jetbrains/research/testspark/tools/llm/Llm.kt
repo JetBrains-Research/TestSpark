@@ -25,7 +25,7 @@ import org.jetbrains.research.testspark.tools.template.Tool
  *
  * @param name The name of the tool. Default value is "Llm".
  */
-class Llm(override val name: String = "Llm") : Tool {
+class Llm(override val name: String = "LLM") : Tool {
 
     private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestData): LLMProcessManager {
         val project: Project = e.project!!
@@ -36,7 +36,7 @@ class Llm(override val name: String = "Llm") : Tool {
 
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)
+        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)!!
 
         var currentPsiClass = cutPsiClass
         for (index in 0 until maxPolymorphismDepth) {

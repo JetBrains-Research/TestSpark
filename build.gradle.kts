@@ -33,6 +33,7 @@ version = properties("pluginVersion")
 repositories {
     mavenCentral()
     maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
+    maven("https://www.jetbrains.com/intellij-repository/snapshots")
 
     maven {
         url = uri("https://packages.jetbrains.team/maven/p/automatically-generating-unit-tests/maven")

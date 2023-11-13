@@ -6,6 +6,7 @@ import org.jetbrains.research.testspark.TestSparkDefaultsBundle
  * This class is the actual data class that stores the values of the Plugin Settings entries.
  */
 data class SettingsProjectState(
+    var showCoverageCheckboxSelected: Boolean = DefaultSettingsPluginState.showCoverageCheckboxSelected,
     var colorRed: Int = DefaultSettingsPluginState.colorRed,
     var colorGreen: Int = DefaultSettingsPluginState.colorGreen,
     var colorBlue: Int = DefaultSettingsPluginState.colorBlue,
@@ -18,7 +19,7 @@ data class SettingsProjectState(
      * Default values of SettingsProjectState.
      */
     object DefaultSettingsPluginState {
-        val javaPath: String = TestSparkDefaultsBundle.defaultValue("javaPath")
+        val showCoverageCheckboxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("showCoverageCheckboxSelected").toBoolean()
         val colorRed: Int = TestSparkDefaultsBundle.defaultValue("colorRed").toInt()
         val colorGreen: Int = TestSparkDefaultsBundle.defaultValue("colorGreen").toInt()
         val colorBlue: Int = TestSparkDefaultsBundle.defaultValue("colorBlue").toInt()

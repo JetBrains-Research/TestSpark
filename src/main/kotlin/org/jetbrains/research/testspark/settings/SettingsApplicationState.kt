@@ -1,12 +1,13 @@
 package org.jetbrains.research.testspark.settings
 
 import org.jetbrains.research.testspark.TestSparkDefaultsBundle
+import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 
 /**
  * This class is the actual data class that stores the values of the EvoSuite Settings entries.
  */
 data class SettingsApplicationState(
-    var javaPath: String = SettingsProjectState.DefaultSettingsPluginState.javaPath,
+    var javaPath: String = DefaultSettingsApplicationState.javaPath,
     var sandbox: Boolean = DefaultSettingsApplicationState.sandbox,
     var assertions: Boolean = DefaultSettingsApplicationState.assertions,
     var seed: String = DefaultSettingsApplicationState.seed,
@@ -29,12 +30,16 @@ data class SettingsApplicationState(
     var maxLLMRequest: Int = DefaultSettingsApplicationState.maxLLMRequest,
     var maxInputParamsDepth: Int = DefaultSettingsApplicationState.maxInputParamsDepth,
     var maxPolyDepth: Int = DefaultSettingsApplicationState.maxPolyDepth,
+    var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
+    var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
+    var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
 ) {
 
     /**
      * Default values of SettingsApplicationState.
      */
     object DefaultSettingsApplicationState {
+        var javaPath: String = TestSparkDefaultsBundle.defaultValue("javaPath")
         val sandbox: Boolean = TestSparkDefaultsBundle.defaultValue("sandbox").toBoolean()
         val assertions: Boolean = TestSparkDefaultsBundle.defaultValue("assertions").toBoolean()
         val seed: String = TestSparkDefaultsBundle.defaultValue("seed")
@@ -57,8 +62,12 @@ data class SettingsApplicationState(
         val maxLLMRequest: Int = TestSparkDefaultsBundle.defaultValue("maxLLMRequest").toInt()
         val maxInputParamsDepth: Int = TestSparkDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
         val maxPolyDepth: Int = TestSparkDefaultsBundle.defaultValue("maxPolyDepth").toInt()
+        val classPrompt: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
+        val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
+        val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
     }
 
+    // TODO remove from here
     fun serializeChangesFromDefault(): List<String> {
         val params = mutableListOf<String>()
         // Parameters from settings menu
@@ -77,21 +86,4 @@ data class SettingsApplicationState(
         }
         return params
     }
-}
-
-enum class ContentDigestAlgorithm {
-    // random
-    RANDOM_SEARCH,
-
-    // GAs
-    STANDARD_GA, MONOTONIC_GA, STEADY_STATE_GA, BREEDER_GA, CELLULAR_GA, STANDARD_CHEMICAL_REACTION, MAP_ELITES,
-
-    // mu-lambda
-    ONE_PLUS_LAMBDA_LAMBDA_GA, ONE_PLUS_ONE_EA, MU_PLUS_LAMBDA_EA, MU_LAMBDA_EA,
-
-    // many-objective algorithms
-    MOSA, DYNAMOSA, LIPS, MIO,
-
-    // multiple-objective optimisation algorithms
-    NSGAII, SPEA2
 }
