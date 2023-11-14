@@ -124,9 +124,20 @@ class DescriptionTab(private val project: Project) {
             }
         }
 
+        // testSpark description setup
+        testSparkDescription.isOpaque = false
         testSparkDescription.text = getCommonDescriptionText(getContent().preferredSize.width)
+
+        // testSpark LLM description setup
+        testSparkLLMDescription.isOpaque = false
         testSparkLLMDescription.text = getLLMDescriptionText(getContent().preferredSize.width)
+
+        // testSpark EvoSuite description setup
+        testSparkEvoSuiteDescription.isOpaque = false
         testSparkEvoSuiteDescription.text = getEvoSuiteDescriptionText(getContent().preferredSize.width)
+
+        // testSpark disclaimer description setup
+        testSparkDisclaimerDescription.isOpaque = false
         testSparkDisclaimerDescription.text = getDisclaimerText(getContent().preferredSize.width)
     }
 

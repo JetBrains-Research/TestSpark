@@ -20,44 +20,6 @@ class Manager {
         val tools: List<Tool> = listOf(EvoSuite(), Llm())
 
         /**
-         * Generates tests for a given class based on the provided
-         * AnActionEvent.
-         *
-         * @param e the AnActionEvent used to trigger the test generation
-         */
-        fun generateTestsForClass(e: AnActionEvent) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
-
-            for (tool: Tool in tools) tool.generateTestsForClass(e)
-            display(e, tools.size)
-        }
-
-        /**
-         * Generates tests for a given method.
-         *
-         * @param e The AnActionEvent containing information about the action event.
-         * @throws NullPointerException if e.project is null or if the RunnerService is not available.
-         */
-        fun generateTestsForMethod(e: AnActionEvent) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
-
-            for (tool: Tool in tools) tool.generateTestsForMethod(e)
-            display(e, tools.size)
-        }
-
-        /**
-         * Generates tests for a specific line of code.
-         *
-         * @param e The AnActionEvent object representing the action event.
-         */
-        fun generateTestsForLine(e: AnActionEvent) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
-
-            for (tool: Tool in tools) tool.generateTestsForLine(e)
-            display(e, tools.size)
-        }
-
-        /**
          * Generates tests for a class using EvoSuite.
          *
          * @param e The AnActionEvent object representing the action event.

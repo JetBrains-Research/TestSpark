@@ -42,7 +42,6 @@ class PromptManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     fun generatePrompt(codeType: FragmentToTestData): String {
-
         var prompt: String
         while (true) {
             prompt = when (codeType.type!!) {
@@ -72,9 +71,9 @@ class PromptManager(
 
         // Show warning in case of depth reduction
         if ((
-            project.service<Workspace>().testGenerationData.polyDepthReducing != 0 ||
-                project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0
-            ) &&
+                project.service<Workspace>().testGenerationData.polyDepthReducing != 0 ||
+                    project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0
+                ) &&
             isPromptLengthWithinLimit(prompt)
         ) {
             llmErrorManager.warningProcess(
@@ -128,7 +127,7 @@ class PromptManager(
         methodPrompt = insertMethodsSignatures(methodPrompt, getInterestingPsiClasses(psiMethod))
         methodPrompt = insertPolymorphismRelations(
             methodPrompt,
-            getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut)
+            getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut),
         )
 
         return methodPrompt
@@ -159,7 +158,7 @@ class PromptManager(
         linePrompt = insertMethodsSignatures(linePrompt, getInterestingPsiClasses(psiMethod))
         linePrompt = insertPolymorphismRelations(
             linePrompt,
-            getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut)
+            getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut),
         )
 
         return linePrompt
@@ -254,7 +253,7 @@ class PromptManager(
 
     private fun insertPolymorphismRelations(
         classPrompt: String,
-        polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>
+        polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     ): String {
         val keyword = "\$${PROMPT_KEYWORD.POLYMORPHISM.text}"
         if (isPromptValid(PROMPT_KEYWORD.METHODS, classPrompt)) {
@@ -341,7 +340,7 @@ class PromptManager(
     private fun getPolymorphismRelations(
         project: Project,
         interestingPsiClasses: MutableSet<PsiClass>,
-        cutPsiClass: PsiClass
+        cutPsiClass: PsiClass,
     ): MutableMap<PsiClass, MutableList<PsiClass>> {
         val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
 
