@@ -5,10 +5,12 @@
 ## Unreleased
 
 ## 0.1.7
+
 ### Fixed
 - Minor bugs in new test generation UI
 
 ## 0.1.6
+
 ### Fixed
 - Minor bugs in general test generation process
 
@@ -21,6 +23,7 @@
 - New UI for requesting a test generation process
 
 ## 0.1.5
+
 ### Fixed
 - Minor bugs in LLM-based test generation process
 
