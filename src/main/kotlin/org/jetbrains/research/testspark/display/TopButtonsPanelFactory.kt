@@ -16,6 +16,7 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 
 class TopButtonsPanelFactory(private val project: Project) {
+    private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
         createButton(TestSparkIcons.selectAll, TestSparkLabelsBundle.defaultValue("selectAllTip"))
     private var unselectAllButton: JButton =
@@ -38,6 +39,7 @@ class TopButtonsPanelFactory(private val project: Project) {
         panel.add(Box.createRigidArea(Dimension(10, 0)))
         panel.add(testsSelectedLabel)
         panel.add(Box.createHorizontalGlue())
+        panel.add(runAllButton)
         panel.add(selectAllButton)
         panel.add(unselectAllButton)
         panel.add(removeAllButton)
@@ -99,5 +101,18 @@ class TopButtonsPanelFactory(private val project: Project) {
         if (choice == JOptionPane.NO_OPTION) return
 
         project.service<TestCaseDisplayService>().clear()
+    }
+
+    /**
+     * Creates a JButton for running all tests.
+     *
+     * @return a JButton for running all tests
+     */
+    private fun createRunAllTestButton(): JButton {
+        val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("runAll"), TestSparkIcons.runTest)
+        runTestButton.isOpaque = false
+        runTestButton.isContentAreaFilled = false
+        runTestButton.isBorderPainted = true
+        return runTestButton
     }
 }
