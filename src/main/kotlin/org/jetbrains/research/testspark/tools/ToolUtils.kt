@@ -6,12 +6,10 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
-import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
-import org.jetbrains.research.testspark.services.TestCoverageCollectorService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
 
@@ -79,18 +77,6 @@ fun saveData(
             workspace.testGenerationData.packageLine,
             workspace.testGenerationData.runWith,
             workspace.testGenerationData.otherInfo,
-        )
-    }
-
-    indicator.text = TestSparkBundle.message("testExecutionMessage")
-
-    for (testCase in report.testCaseList.values) {
-        indicator.text = "Executing ${testCase.testName}"
-        project.service<TestCoverageCollectorService>().updateDataWithTestCase(
-            "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)}.java",
-            testCase.id,
-            testCase.testName,
-            testCase.testCode,
         )
     }
 

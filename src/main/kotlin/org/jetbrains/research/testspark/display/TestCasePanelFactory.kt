@@ -42,6 +42,7 @@ import javax.swing.FocusManager
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JLabel
+import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.JTextField
 import javax.swing.ScrollPaneConstants
@@ -227,7 +228,7 @@ class TestCasePanelFactory(
         val buttonsPanel = JPanel()
         buttonsPanel.layout = BoxLayout(buttonsPanel, BoxLayout.X_AXIS)
         buttonsPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
-        runTestButton.isEnabled = false
+        runTestButton.isEnabled = true
         buttonsPanel.add(runTestButton)
         loadingLabel.isVisible = false
         buttonsPanel.add(loadingLabel)
@@ -405,7 +406,9 @@ class TestCasePanelFactory(
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
                     .updateDataWithTestCase(
-                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                        "${
+                            project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)
+                        }.java",
                         testCase.id,
                         testCase.testName,
                         code,
@@ -438,6 +441,17 @@ class TestCasePanelFactory(
      * and updates the UI.
      */
     private fun runTest() {
+        val choice = JOptionPane.showConfirmDialog(
+            null,
+            TestSparkBundle.message("runCautionMessage"),
+            TestSparkBundle.message("confirmationTitle"),
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.WARNING_MESSAGE,
+        )
+
+        // Cancel the operation if the user did not press "OK"
+        if (choice == JOptionPane.CANCEL_OPTION) return
+
         loadingLabel.isVisible = true
         runTestButton.isEnabled = false
         resetToLastRunButton.isEnabled = false
@@ -447,7 +461,9 @@ class TestCasePanelFactory(
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
                     .updateDataWithTestCase(
-                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                        "${
+                            project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)
+                        }.java",
                         testCase.id,
                         testCase.testName,
                         testCase.testCode,
@@ -479,14 +495,17 @@ class TestCasePanelFactory(
             updateBorder()
             project.service<Workspace>().updateTestCase(testCase)
             resetButton.isEnabled = false
-            if (getError(testCase.id, testCase.testCode)!!.isBlank()) {
-                project.service<TestsExecutionResultService>().addPassedTest(testCase.id, testCase.testCode)
-            } else {
-                project.service<TestsExecutionResultService>()
-                    .addFailedTest(testCase.id, testCase.testCode, errorLabel.toolTipText)
+            val error = getError(testCase.id, testCase.testCode)
+            if (error != null) {
+                if (error.isBlank()) {
+                    project.service<TestsExecutionResultService>().addPassedTest(testCase.id, testCase.testCode)
+                } else {
+                    project.service<TestsExecutionResultService>()
+                        .addFailedTest(testCase.id, testCase.testCode, errorLabel.toolTipText)
+                }
             }
             resetToLastRunButton.isEnabled = false
-            runTestButton.isEnabled = false
+            runTestButton.isEnabled = (error == null)
             updateErrorLabel()
             languageTextField.editor!!.markupModel.removeAllHighlighters()
 
@@ -574,7 +593,6 @@ class TestCasePanelFactory(
      */
     private fun createRunTestButton(): JButton {
         val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("run"), TestSparkIcons.runTest)
-        runTestButton.isEnabled = false
         runTestButton.isOpaque = false
         runTestButton.isContentAreaFilled = false
         runTestButton.isBorderPainted = true
