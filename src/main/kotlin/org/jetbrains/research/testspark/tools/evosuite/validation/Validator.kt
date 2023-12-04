@@ -309,7 +309,7 @@ class Validator(
 
         val testCaseDisplayService = project.service<TestCaseDisplayService>()
         val coverageSuitesBundle = CoverageSuitesBundle(coverageSuite)
-        testCaseDisplayService.setJacocoReport(coverageSuitesBundle)
+//        testCaseDisplayService.setJacocoReport(coverageSuitesBundle)
 //        TODO uncomment after the validator fixing
 //        testCaseDisplayService.toggleJacocoButton.isEnabled = true
     }

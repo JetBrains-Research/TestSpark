@@ -243,7 +243,17 @@ class TestCasePanelFactory(
         panel.add(requestPanel)
         panel.add(buttonsPanel)
 
-        runTestButton.addActionListener { runTest() }
+        runTestButton.addActionListener {
+            val choice = JOptionPane.showConfirmDialog(
+                null,
+                TestSparkBundle.message("runCautionMessage"),
+                TestSparkBundle.message("confirmationTitle"),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+            )
+
+            if (choice == JOptionPane.OK_OPTION) runTest()
+        }
         resetButton.addActionListener { reset() }
         resetToLastRunButton.addActionListener { resetToLastRun() }
         removeButton.addActionListener { remove() }
@@ -441,17 +451,6 @@ class TestCasePanelFactory(
      * and updates the UI.
      */
     private fun runTest() {
-        val choice = JOptionPane.showConfirmDialog(
-            null,
-            TestSparkBundle.message("runCautionMessage"),
-            TestSparkBundle.message("confirmationTitle"),
-            JOptionPane.OK_CANCEL_OPTION,
-            JOptionPane.WARNING_MESSAGE,
-        )
-
-        // Cancel the operation if the user did not press "OK"
-        if (choice == JOptionPane.CANCEL_OPTION) return
-
         loadingLabel.isVisible = true
         runTestButton.isEnabled = false
         resetToLastRunButton.isEnabled = false

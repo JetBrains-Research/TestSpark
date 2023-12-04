@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.services
 
-import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
@@ -68,7 +67,6 @@ class TestCaseDisplayService(private val project: Project) {
     )
 
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
-    private var originalTestCases: HashMap<String, String> = HashMap()
 
     private var testsSelected: Int = 0
 
@@ -82,8 +80,6 @@ class TestCaseDisplayService(private val project: Project) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
 
-    private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
-
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
@@ -96,15 +92,6 @@ class TestCaseDisplayService(private val project: Project) {
         mainPanel.add(applyButton, BorderLayout.SOUTH)
 
         applyButton.addActionListener { applyTests() }
-    }
-
-    /**
-     * Sets the JaCoCo report for the coverage suites bundle.
-     *
-     * @param coverageSuitesBundle The coverage suites bundle to set the JaCoCo report for.
-     */
-    fun setJacocoReport(coverageSuitesBundle: CoverageSuitesBundle) {
-        currentJacocoCoverageBundle = coverageSuitesBundle
     }
 
     /**
@@ -130,7 +117,6 @@ class TestCaseDisplayService(private val project: Project) {
     private fun displayTestCases(testReport: Report, editor: Editor) {
         allTestCasePanel.removeAll()
         testCasePanels.clear()
-        originalTestCases.clear()
 
         addSeparator()
 
@@ -138,9 +124,6 @@ class TestCaseDisplayService(private val project: Project) {
             val testCase = it
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
-
-            // Fix Windows line separators
-            originalTestCases[testCase.testName] = testCase.testCode
 
             // Add a checkbox to select the test
             val checkbox = JCheckBox()
@@ -412,10 +395,6 @@ class TestCaseDisplayService(private val project: Project) {
             appendTestsToClass(testCaseComponents, psiClass!!, psiJavaFile!!)
         }
 
-        // The scheduled tests will be submitted in the background
-        // (they will be checked every 5 minutes and also when the project is closed)
-        scheduleTelemetry(selectedTestCases)
-
         // Remove the selected test cases from the cache and the tool window UI
         removeSelectedTestCases(selectedTestCasePanels)
 
@@ -557,13 +536,6 @@ class TestCaseDisplayService(private val project: Project) {
      * @param testCaseName the name of the test
      */
     fun removeTestCase(testCaseName: String) {
-        // Remove the test from the cache
-        project.service<TestCaseCachingService>()
-            .invalidateFromCache(
-                project.service<Workspace>().testGenerationData.fileUrl,
-                originalTestCases[testCaseName]!!,
-            )
-
         // Update the number of selected test cases if necessary
         if ((testCasePanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
             testsSelected--
@@ -574,23 +546,6 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove the test panel
         testCasePanels.remove(testCaseName)
-    }
-
-    /**
-     * Schedules the telemetry for the selected and modified tests.
-     *
-     * @param selectedTestCases the test cases selected by the user
-     */
-    private fun scheduleTelemetry(selectedTestCases: List<String>) {
-        val telemetryService = project.service<TestSparkTelemetryService>()
-        telemetryService.scheduleTestCasesForTelemetry(
-            selectedTestCases.map {
-                val modified = getEditor(it)!!.text
-                val original = originalTestCases[it]!!
-
-                TestSparkTelemetryService.ModifiedTestCase(original, modified)
-            }.filter { it.modified != it.original },
-        )
     }
 
     /**
