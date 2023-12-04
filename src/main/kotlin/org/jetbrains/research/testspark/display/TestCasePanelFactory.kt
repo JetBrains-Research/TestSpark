@@ -557,6 +557,7 @@ class TestCasePanelFactory(
         // Remove the test case from the cache
         project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
 
+        runTestButton.isEnabled = false
         project.service<TestCaseDisplayService>().updateUI()
 
         isRemoved = true
