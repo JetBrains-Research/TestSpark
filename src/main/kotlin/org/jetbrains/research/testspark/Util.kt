@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark
 
 import com.intellij.openapi.util.io.FileUtilRt
 import java.io.File
+import java.util.*
 
 class Util {
     companion object {
@@ -21,6 +22,20 @@ class Util {
             if (!dir.exists()) {
                 dir.mkdirs()
             }
+        }
+
+        val classpathSeparator: Char
+            get() {
+                var sep = ':'
+                if (isWindows()) {
+                    sep = ';'
+                }
+                return sep
+            }
+
+        fun isWindows(): Boolean {
+            val os = System.getProperty("os.name").lowercase(Locale.getDefault())
+            return (os.indexOf("win") >= 0)
         }
     }
 }
