@@ -420,9 +420,7 @@ class TestCasePanelFactory(
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
                     .updateDataWithTestCase(
-                        "${
-                            project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)
-                        }.java",
+                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
                         testCase.id,
                         testCase.testName,
                         code,
@@ -467,9 +465,7 @@ class TestCasePanelFactory(
             project.service<Workspace>().updateTestCase(
                 project.service<TestCoverageCollectorService>()
                     .updateDataWithTestCase(
-                        "${
-                            project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)
-                        }.java",
+                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
                         testCase.id,
                         testCase.testName,
                         testCase.testCode,
