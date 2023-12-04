@@ -30,6 +30,8 @@ class TopButtonsPanelFactory(private val project: Project) {
     private val testsPassedText: String = "${TestSparkLabelsBundle.defaultValue("testsPassed")}: %d/%d"
     private var testsPassedLabel: JLabel = JLabel(testsPassedText)
 
+    private val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
+
     fun getPanel(): JPanel {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
@@ -47,6 +49,7 @@ class TopButtonsPanelFactory(private val project: Project) {
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         unselectAllButton.addActionListener { toggleAllCheckboxes(false) }
         removeAllButton.addActionListener { removeAllTestCases() }
+        runAllButton.addActionListener { runAllTestCases() }
 
         return panel
     }
@@ -67,6 +70,19 @@ class TopButtonsPanelFactory(private val project: Project) {
                     .getTestCasePanels().size - project.service<TestsExecutionResultService>().size(),
                 project.service<TestCaseDisplayService>().getTestCasePanels().size,
             )
+        runAllButton.isEnabled = false
+        for (testCasePanelFactory in testCasePanelFactories) {
+            runAllButton.isEnabled = runAllButton.isEnabled || testCasePanelFactory.isRunEnabled()
+        }
+    }
+
+    /**
+     * Sets the array of TestCasePanelFactory objects.
+     *
+     * @param testCasePanelFactories The ArrayList containing the TestCasePanelFactory objects to be set.
+     */
+    fun setTestCasePanelFactoriesArray(testCasePanelFactories: ArrayList<TestCasePanelFactory>) {
+        this.testCasePanelFactories.addAll(testCasePanelFactories)
     }
 
     /**
@@ -101,6 +117,30 @@ class TopButtonsPanelFactory(private val project: Project) {
         if (choice == JOptionPane.NO_OPTION) return
 
         project.service<TestCaseDisplayService>().clear()
+    }
+
+    /**
+     * Executes all test cases.
+     *
+     * This method presents a caution message to the user and asks for confirmation before executing the test cases.
+     * If the user confirms, it iterates through each test case panel factory and runs the corresponding test.
+     */
+    private fun runAllTestCases() {
+        val choice = JOptionPane.showConfirmDialog(
+            null,
+            TestSparkBundle.message("runCautionMessage"),
+            TestSparkBundle.message("confirmationTitle"),
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.WARNING_MESSAGE,
+        )
+
+        if (choice == JOptionPane.CANCEL_OPTION) return
+
+        runAllButton.isEnabled = false
+
+        for (testCasePanelFactory in testCasePanelFactories) {
+            testCasePanelFactory.runTest()
+        }
     }
 
     /**

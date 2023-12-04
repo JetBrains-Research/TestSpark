@@ -72,6 +72,8 @@ class TestCasePanelFactory(
 
     private val dimensionSize = 7
 
+    private var isRemoved = false
+
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
         Language.findLanguageByID("JAVA"),
@@ -362,6 +364,8 @@ class TestCasePanelFactory(
 
         // select checkbox
         checkbox.isSelected = true
+
+        project.service<TestCaseDisplayService>().updateUI()
     }
 
     /**
@@ -450,7 +454,10 @@ class TestCasePanelFactory(
      * label in the test case upper panel, removes all highlighters from the language text field,
      * and updates the UI.
      */
-    private fun runTest() {
+    fun runTest() {
+        if (isRemoved) return
+        if (!runTestButton.isEnabled) return
+
         loadingLabel.isVisible = true
         runTestButton.isEnabled = false
         resetToLastRunButton.isEnabled = false
@@ -551,7 +558,16 @@ class TestCasePanelFactory(
         project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
 
         project.service<TestCaseDisplayService>().updateUI()
+
+        isRemoved = true
     }
+
+    /**
+     * Determines if the "Run" button is enabled.
+     *
+     * @return true if the "Run" button is enabled, false otherwise.
+     */
+    fun isRunEnabled() = runTestButton.isEnabled
 
     /**
      * Updates the border of the languageTextField based on the provided test name and text.

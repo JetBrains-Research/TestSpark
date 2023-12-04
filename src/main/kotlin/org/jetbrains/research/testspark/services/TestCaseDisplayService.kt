@@ -120,6 +120,9 @@ class TestCaseDisplayService(private val project: Project) {
 
         addSeparator()
 
+        // TestCasePanelFactories array
+        val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
+
         testReport.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
@@ -144,6 +147,8 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
 
+            testCasePanelFactories.add(testCasePanelFactory)
+
             testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
             // Add panel to parent panel
@@ -156,6 +161,9 @@ class TestCaseDisplayService(private val project: Project) {
             testsSelected = testCasePanels.size
             topButtonsPanelFactory.updateTopLabels()
         }
+
+        topButtonsPanelFactory.setTestCasePanelFactoriesArray(testCasePanelFactories)
+        topButtonsPanelFactory.updateTopLabels()
     }
 
     /**
