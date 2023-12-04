@@ -10,6 +10,7 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
+import org.jetbrains.research.testspark.Util
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -47,7 +48,9 @@ class TestCoverageCollectorService(private val project: Project) {
         val hamcrestPath = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}hamcrest-core-1.3.jar\""
         val byteBuddy = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}byte-buddy-1.14.6.jar\""
         val byteBuddyAgent = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}byte-buddy-agent-1.14.6.jar\""
-        return "$junitPath:$hamcrestPath:$mockitoPath:$byteBuddy:$byteBuddyAgent:$buildPath"
+
+        val sep = Util.classpathSeparator
+        return "$junitPath${sep}$hamcrestPath${sep}$mockitoPath${sep}$byteBuddy${sep}$byteBuddyAgent${sep}$buildPath"
     }
 
     /**
@@ -71,7 +74,13 @@ class TestCoverageCollectorService(private val project: Project) {
      */
     fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
         // find the proper javac
-        val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()
+        val javaCompile = File(javaHomeDirectory.path).walk()
+            .filter {
+                val isCompilerName = if (Util.isWindows()) it.name.equals("javac.exe") else it.name.equals("javac")
+                isCompilerName && it.isFile
+            }
+            .first()
+
         // compile file
         val errorMsg = project.service<RunCommandLineService>().runCommandLine(
             arrayListOf(
@@ -135,7 +144,12 @@ class TestCoverageCollectorService(private val project: Project) {
         generatedTestPackage: String,
     ): String {
         // find the proper javac
-        val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
+        val javaRunner = File(javaHomeDirectory.path).walk()
+            .filter {
+                val isJavaName = if (Util.isWindows()) it.name.equals("java.exe") else it.name.equals("java")
+                isJavaName && it.isFile
+            }
+            .first()
         // JaCoCo libs
         val jacocoAgentDir = project.service<TestCoverageCollectorService>().getLibrary("jacocoagent.jar")
         val jacocoCLIDir = project.service<TestCoverageCollectorService>().getLibrary("jacococli.jar")
@@ -151,7 +165,7 @@ class TestCoverageCollectorService(private val project: Project) {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
                 "-cp",
-                "${project.service<TestCoverageCollectorService>().getPath(projectBuildPath)}${project.service<TestCoverageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
+                "${project.service<TestCoverageCollectorService>().getPath(projectBuildPath)}${project.service<TestCoverageCollectorService>().getLibrary("JUnitRunner.jar")}${Util.classpathSeparator}$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
                 name,
             ),
