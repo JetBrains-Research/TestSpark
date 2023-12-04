@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark
 
 import com.intellij.openapi.util.io.FileUtilRt
 import java.io.File
-import java.util.*
+import java.util.Locale
 
 class Util {
     companion object {
