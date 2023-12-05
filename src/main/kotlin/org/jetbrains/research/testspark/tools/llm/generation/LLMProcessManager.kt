@@ -8,6 +8,7 @@ import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
@@ -21,6 +22,7 @@ import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
@@ -93,7 +95,7 @@ class LLMProcessManager(
 
         var generatedTestsArePassing = false
 
-        var report: Report? = null
+        val report = Report()
 
         var requestsCount = 0
         var warningMessage = ""
@@ -137,7 +139,8 @@ class LLMProcessManager(
             // Empty response checking
             if (generatedTestSuite.testCases.isEmpty()) {
                 warningMessage = TestSparkBundle.message("emptyResponse")
-                messageToPrompt = "You have provided an empty answer! Please answer my previous question with the same formats."
+                messageToPrompt =
+                    "You have provided an empty answer! Please answer my previous question with the same formats."
                 continue
             }
 
@@ -173,20 +176,17 @@ class LLMProcessManager(
                 break
             }
 
-            // Collect coverage information for each generated test method and display it
-            val coverageCollector = TestCoverageCollector(
-                indicator,
-                project,
-                generatedTestCasesPaths,
-                File(generatedTestPath),
-                generatedTestSuite.getPrintablePackageString(),
-                buildPath,
-                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList()
-            )
+            // Get test cases
+            val testCases: MutableList<TestCaseGeneratedByLLM> =
+                if (!isLastIteration(requestsCount)) {
+                    generatedTestSuite.testCases
+                } else {
+                    project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList()
+                }
 
-            // compile the test file
+            // Compile the test file
             indicator.text = TestSparkBundle.message("compilationTestsChecking")
-            val separateCompilationResult = coverageCollector.compileTestCases()
+            val separateCompilationResult = project.service<TestCoverageCollectorService>().compileTestCases(generatedTestCasesPaths, buildPath, testCases)
             val commonCompilationResult = project.service<TestCoverageCollectorService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!separateCompilationResult && !isLastIteration(requestsCount)) {
@@ -199,7 +199,10 @@ class LLMProcessManager(
             log.info("Result is compilable")
 
             generatedTestsArePassing = true
-            report = coverageCollector.collect()
+
+            for (index in testCases.indices) {
+                report.testCaseList[index] = TestCase(index, testCases[index].name, testCases[index].toString(), setOf(), setOf(), setOf())
+            }
         }
 
         if (processStopped(project, indicator)) return
@@ -211,7 +214,7 @@ class LLMProcessManager(
 
         saveData(
             project,
-            report!!,
+            report,
             getPackageFromTestSuiteCode(generatedTestSuite.toString()),
             getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), project.service<Workspace>().classFQN!!),
             indicator,

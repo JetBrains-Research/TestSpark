@@ -13,6 +13,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.getBuildPath
+import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
 import java.util.UUID
 import kotlin.collections.ArrayList
@@ -89,6 +90,25 @@ class TestCoverageCollectorService(private val project: Project) {
 
         // check is .class file exists
         return Pair(File(classFilePath).exists(), errorMsg)
+    }
+
+    /**
+     * Compiles the generated test file using the proper javac and returns a Pair
+     * indicating whether the compilation was successful and any error message encountered during compilation.
+     *
+     * @return A Pair containing a boolean indicating whether the compilation was successful
+     *         and a String containing any error message encountered during compilation.
+     */
+    fun compileTestCases(generatedTestCasesPaths: List<String>, buildPath: String, testCases: MutableList<TestCaseGeneratedByLLM>): Boolean {
+        var result = false
+        for (index in generatedTestCasesPaths.indices) {
+            val compilable = project.service<TestCoverageCollectorService>().compileCode(generatedTestCasesPaths[index], buildPath).first
+            result = result || compilable
+            if (compilable) {
+                project.service<Workspace>().testGenerationData.compilableTestCases.add(testCases[index])
+            }
+        }
+        return result
     }
 
     /**
