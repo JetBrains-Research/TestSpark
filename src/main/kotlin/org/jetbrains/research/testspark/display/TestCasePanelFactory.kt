@@ -25,7 +25,7 @@ import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestCoverageCollectorService
+import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
@@ -416,17 +416,6 @@ class TestCasePanelFactory(
                     .getTestMethodNameFromClassWithTestCase(testCase.testName, code)
             testCase.testCode = code
 
-            // run new code
-            project.service<Workspace>().updateTestCase(
-                project.service<TestCoverageCollectorService>()
-                    .updateDataWithTestCase(
-                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
-                        testCase.id,
-                        testCase.testName,
-                        code,
-                    ),
-            )
-
             // update numbers
             allRequestsNumber++
             currentRequestNumber = allRequestsNumber
@@ -463,8 +452,8 @@ class TestCasePanelFactory(
 
         SwingUtilities.invokeLater {
             project.service<Workspace>().updateTestCase(
-                project.service<TestCoverageCollectorService>()
-                    .updateDataWithTestCase(
+                project.service<TestStorageProcessingService>()
+                    .processNewTestCase(
                         "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
                         testCase.id,
                         testCase.testName,

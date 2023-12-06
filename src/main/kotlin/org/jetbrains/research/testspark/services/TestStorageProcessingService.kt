@@ -21,7 +21,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
 @Service(Service.Level.PROJECT)
-class TestCoverageCollectorService(private val project: Project) {
+class TestStorageProcessingService(private val project: Project) {
     private val sep = File.separatorChar
 
     private val id = UUID.randomUUID().toString()
@@ -42,12 +42,11 @@ class TestCoverageCollectorService(private val project: Project) {
      */
     private fun getPath(buildPath: String): String {
         // create the path for the command
-        val pluginsPath = PathManager.getPluginsPath()
-        val junitPath = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}junit-4.13.jar\""
-        val mockitoPath = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}mockito-core-5.0.0.jar\""
-        val hamcrestPath = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}hamcrest-core-1.3.jar\""
-        val byteBuddy = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}byte-buddy-1.14.6.jar\""
-        val byteBuddyAgent = "\"$pluginsPath${sep}TestSpark${sep}lib${sep}byte-buddy-agent-1.14.6.jar\""
+        val junitPath = getLibrary("junit-4.13.jar")
+        val mockitoPath = getLibrary("mockito-core-5.0.0.jar")
+        val hamcrestPath = getLibrary("hamcrest-core-1.3.jar")
+        val byteBuddy = getLibrary("byte-buddy-1.14.6.jar")
+        val byteBuddyAgent = getLibrary("byte-buddy-agent-1.14.6.jar")
         return "$junitPath:$hamcrestPath:$mockitoPath:$byteBuddy:$byteBuddyAgent:$buildPath"
     }
 
@@ -78,7 +77,7 @@ class TestCoverageCollectorService(private val project: Project) {
             arrayListOf(
                 javaCompile.absolutePath,
                 "-cp",
-                project.service<TestCoverageCollectorService>().getPath(projectBuildPath),
+                getPath(projectBuildPath),
                 path,
             ),
         )
@@ -102,7 +101,7 @@ class TestCoverageCollectorService(private val project: Project) {
     fun compileTestCases(generatedTestCasesPaths: List<String>, buildPath: String, testCases: MutableList<TestCaseGeneratedByLLM>): Boolean {
         var result = false
         for (index in generatedTestCasesPaths.indices) {
-            val compilable = project.service<TestCoverageCollectorService>().compileCode(generatedTestCasesPaths[index], buildPath).first
+            val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
             result = result || compilable
             if (compilable) {
                 project.service<Workspace>().testGenerationData.compilableTestCases.add(testCases[index])
@@ -120,7 +119,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param testFileName The name of the test file.
      * @return The path where the generated tests are saved.
      */
-    fun saveGeneratedTests(packageString: String, code: String, resultPath: String, testFileName: String): String {
+    fun saveGeneratedTest(packageString: String, code: String, resultPath: String, testFileName: String): String {
         // Generate the final path for the generated tests
         var generatedTestPath = "$resultPath${File.separatorChar}"
         packageString.split(".").forEach { directory ->
@@ -147,7 +146,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param generatedTestPackage The package where the generated test class is located.
      * @return An empty string if the test execution is successful, otherwise an error message.
      */
-    fun createXmlFromJacoco(
+    private fun createXmlFromJacoco(
         className: String,
         dataFileName: String,
         testCaseName: String,
@@ -157,13 +156,15 @@ class TestCoverageCollectorService(private val project: Project) {
         // find the proper javac
         val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
         // JaCoCo libs
-        val jacocoAgentDir = project.service<TestCoverageCollectorService>().getLibrary("jacocoagent.jar")
-        val jacocoCLIDir = project.service<TestCoverageCollectorService>().getLibrary("jacococli.jar")
+        val jacocoAgentDir = getLibrary("jacocoagent.jar")
+        val jacocoCLIDir = getLibrary("jacococli.jar")
         val sourceRoots = ModuleRootManager.getInstance(project.service<Workspace>().cutModule!!).getSourceRoots(false)
 
         // unique name
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
         name += "$className#$testCaseName"
+
+        println("${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:$resultPath")
 
         // run the test method with jacoco agent
         val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
@@ -171,7 +172,7 @@ class TestCoverageCollectorService(private val project: Project) {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
                 "-cp",
-                "${project.service<TestCoverageCollectorService>().getPath(projectBuildPath)}${project.service<TestCoverageCollectorService>().getLibrary("JUnitRunner.jar")}:$resultPath",
+                "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
                 name,
             ),
@@ -216,7 +217,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param testCaseCode The test case code.
      * @param xmlFileName The XML file name to read data from.
      */
-    fun getTestCaseFromXml(
+    private fun getTestCaseFromXml(
         testCaseId: Int,
         testCaseName: String,
         testCaseCode: String,
@@ -264,7 +265,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param testExecutionError error output (including the thrown stack trace) during the test execution.
      * @return a set of lines that are covered in CUT during the exception happening.
      */
-    fun getExceptionData(testExecutionError: String): Pair<Boolean, Set<Int>> {
+    private fun getExceptionData(testExecutionError: String): Pair<Boolean, Set<Int>> {
         if (testExecutionError.isBlank()) {
             return Pair(false, emptySet())
         }
@@ -300,7 +301,7 @@ class TestCoverageCollectorService(private val project: Project) {
      * @param testCode new code of test
      * @param testName the name of the test
      */
-    fun updateDataWithTestCase(fileName: String, testId: Int, testName: String, testCode: String): TestCase {
+    fun processNewTestCase(fileName: String, testId: Int, testName: String, testCode: String): TestCase {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
@@ -309,7 +310,7 @@ class TestCoverageCollectorService(private val project: Project) {
         }
 
         // save new test to file
-        val generatedTestPath: String = project.service<TestCoverageCollectorService>().saveGeneratedTests(
+        val generatedTestPath: String = saveGeneratedTest(
             project.service<Workspace>().testGenerationData.packageLine,
             testCode,
             project.service<Workspace>().resultPath!!,
@@ -317,14 +318,13 @@ class TestCoverageCollectorService(private val project: Project) {
         )
 
         // compilation checking
-        val compilationResult =
-            project.service<TestCoverageCollectorService>().compileCode(generatedTestPath, buildPath)
+        val compilationResult = compileCode(generatedTestPath, buildPath)
         if (!compilationResult.first) {
             project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, compilationResult.second)
         } else {
             val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${fileName.split(".")[0]}"
 
-            val testExecutionError = project.service<TestCoverageCollectorService>().createXmlFromJacoco(
+            val testExecutionError = createXmlFromJacoco(
                 fileName.split(".")[0],
                 dataFileName,
                 testName,
@@ -335,11 +335,11 @@ class TestCoverageCollectorService(private val project: Project) {
             if (!File("$dataFileName.xml").exists()) {
                 project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, testExecutionError)
             } else {
-                val testCase = project.service<TestCoverageCollectorService>().getTestCaseFromXml(
+                val testCase = getTestCaseFromXml(
                     testId,
                     testName,
                     testCode,
-                    project.service<TestCoverageCollectorService>().getExceptionData(testExecutionError).second,
+                    getExceptionData(testExecutionError).second,
                     "$dataFileName.xml",
                 )
 

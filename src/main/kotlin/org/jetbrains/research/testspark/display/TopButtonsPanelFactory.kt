@@ -139,6 +139,7 @@ class TopButtonsPanelFactory(private val project: Project) {
         runAllButton.isEnabled = false
 
         for (testCasePanelFactory in testCasePanelFactories) {
+            // todo use doClick() function after removing JOptionPane
             testCasePanelFactory.runTest()
         }
     }
