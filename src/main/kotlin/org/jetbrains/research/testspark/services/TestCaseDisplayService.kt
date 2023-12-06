@@ -467,8 +467,8 @@ class TestCaseDisplayService(private val project: Project) {
                 .getTestMethodCodeFromClassWithTestCase(
                     project.service<JavaClassBuilderService>().formatJavaCode(
                         it.replace("\r\n", "\n")
-                          .replace("verifyException(", "// verifyException(")
-                    )
+                            .replace("verifyException(", "// verifyException("),
+                    ),
                 )
                 // Fix Windows line separators
                 .replace("\r\n", "\n")

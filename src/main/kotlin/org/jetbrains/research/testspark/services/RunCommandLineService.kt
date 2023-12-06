@@ -22,17 +22,16 @@ class RunCommandLineService(private val project: Project) {
          * Since Windows does not provide bash, use cmd or similar default command line interpreter
          */
         val process = if (Util.isWindows()) {
-                ProcessBuilder()
-                    .command("cmd", "/c", cmd.joinToString(" "))
-                    .redirectErrorStream(true)
-                    .start()
-            }
-            else {
-                ProcessBuilder()
-                    .command("bash", "-c", cmd.joinToString(" "))
-                    .redirectErrorStream(true)
-                    .start()
-            }
+            ProcessBuilder()
+                .command("cmd", "/c", cmd.joinToString(" "))
+                .redirectErrorStream(true)
+                .start()
+        } else {
+            ProcessBuilder()
+                .command("bash", "-c", cmd.joinToString(" "))
+                .redirectErrorStream(true)
+                .start()
+        }
 
         val reader = BufferedReader(InputStreamReader(process.inputStream))
         var line: String?
