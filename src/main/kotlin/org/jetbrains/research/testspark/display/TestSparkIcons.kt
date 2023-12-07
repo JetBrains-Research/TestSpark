@@ -61,5 +61,8 @@ object TestSparkIcons {
     val documentation = IconLoader.getIcon("/icons/documentation.svg", javaClass)
 
     @JvmField
+    val settings = IconLoader.getIcon("/icons/settings.svg", javaClass)
+
+    @JvmField
     val pluginIcon = IconLoader.getIcon("/META-INF/pluginIcon.svg", javaClass)
 }
