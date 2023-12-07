@@ -6,7 +6,6 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.services.TestCaseCachingService
 import org.jetbrains.research.testspark.tools.TestGenerationResultListener
 
 class TestGenerationResultListenerImpl(private val project: Project) : TestGenerationResultListener {
@@ -17,19 +16,7 @@ class TestGenerationResultListenerImpl(private val project: Project) : TestGener
         val workspace = project.service<Workspace>()
 
         ApplicationManager.getApplication().invokeLater {
-            val jobInfo = workspace.receiveGenerationResult(resultName, testReport)
-            cacheGeneratedTestCases(testReport, fileUrl, jobInfo)
+            workspace.receiveGenerationResult(resultName, testReport)
         }
-    }
-
-    /**
-     * Put the generated test cases into the cache.
-     * @param testReport the test report
-     * @param fileUrl the file url
-     * @param jobInfo the job info of the generated tests
-     */
-    private fun cacheGeneratedTestCases(testReport: Report, fileUrl: String, jobInfo: Workspace.TestJobInfo) {
-        val cache = project.service<TestCaseCachingService>()
-        cache.putIntoCache(fileUrl, testReport, jobInfo)
     }
 }

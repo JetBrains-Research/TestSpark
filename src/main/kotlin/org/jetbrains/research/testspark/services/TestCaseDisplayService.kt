@@ -26,7 +26,6 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
-import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.Report
@@ -38,7 +37,6 @@ import java.awt.Color
 import java.awt.Dimension
 import java.io.File
 import java.util.Locale
-import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
@@ -47,7 +45,6 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
-import javax.swing.border.Border
 
 @Service(Service.Level.PROJECT)
 class TestCaseDisplayService(private val project: Project) {
@@ -72,7 +69,6 @@ class TestCaseDisplayService(private val project: Project) {
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
-    private var defaultBorder: Border? = null
 
     // Content Manager to be able to add / remove tabs from tool window
     private var contentManager: ContentManager? = null
@@ -132,9 +128,6 @@ class TestCaseDisplayService(private val project: Project) {
             val checkbox = JCheckBox()
             checkbox.isSelected = true
             checkbox.addItemListener {
-                project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-                    .testGenerationResult(testCase.id, checkbox.isSelected, editor)
-
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
@@ -249,25 +242,6 @@ class TestCaseDisplayService(private val project: Project) {
             Thread.sleep(10000)
             editor.background = defaultEditorColor
         }.start()
-    }
-
-    /**
-     * Highlight tests failing dynamic validation
-     *
-     * @param names set of test names that fail
-     */
-    fun markFailingTestCases(names: Set<String>) {
-        for (testCase in testCasePanels) {
-            if (names.contains(testCase.key)) {
-                val editor = getEditor(testCase.key) ?: return
-                val highlightColor = JBColor(TestSparkToolTipsBundle.defaultValue("colorName"), Color(255, 0, 0, 90))
-                defaultBorder = editor.border
-                editor.border = BorderFactory.createLineBorder(highlightColor, 3)
-            } else {
-                val editor = getEditor(testCase.key) ?: return
-                editor.border = JBUI.Borders.empty()
-            }
-        }
     }
 
     /**

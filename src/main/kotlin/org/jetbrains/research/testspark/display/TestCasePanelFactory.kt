@@ -20,7 +20,6 @@ import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.services.COVERAGE_SELECTION_TOGGLE_TOPIC
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMChatService
@@ -328,7 +327,7 @@ class TestCasePanelFactory(
      * Updates the user interface based on the provided code.
      */
     private fun updateUI() {
-        updateTestCase()
+        updateTestCaseInformation()
 
         val lastRunCode = lastRunCodes[currentRequestNumber - 1]
         languageTextField.editor!!.markupModel.removeAllHighlighters()
@@ -365,6 +364,7 @@ class TestCasePanelFactory(
         // select checkbox
         checkbox.isSelected = true
 
+        project.service<Workspace>().updateTestCase(testCase)
         project.service<TestCaseDisplayService>().updateUI()
     }
 
@@ -503,8 +503,7 @@ class TestCasePanelFactory(
             currentCodes[currentRequestNumber - 1] = testCase.testCode
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
-            updateTestCase()
-            project.service<TestCaseDisplayService>().updateUI()
+            updateUI()
         }
     }
 
@@ -523,8 +522,7 @@ class TestCasePanelFactory(
 
             currentCodes[currentRequestNumber - 1] = testCase.testCode
 
-            updateTestCase()
-            project.service<TestCaseDisplayService>().updateUI()
+            updateUI()
         }
     }
 
@@ -535,17 +533,13 @@ class TestCasePanelFactory(
      * and updating the UI.
      */
     private fun remove() {
-        // Remove the highlighting of the test
-        project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-            .testGenerationResult(testCase.id, false, editor)
-
         // Remove the test case from the cache
         project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
 
         runTestButton.isEnabled = false
-        project.service<TestCaseDisplayService>().updateUI()
-
         isRemoved = true
+
+        updateUI()
     }
 
     /**
@@ -607,7 +601,6 @@ class TestCasePanelFactory(
      */
     private fun switchToAnotherCode() {
         languageTextField.document.setText(currentCodes[currentRequestNumber - 1])
-        updateTestCase()
         updateUI()
     }
 
@@ -661,7 +654,7 @@ class TestCasePanelFactory(
     /**
      * Updates the current test case with the specified test name and test code.
      */
-    private fun updateTestCase() {
+    private fun updateTestCaseInformation() {
         testCase.testName =
             project.service<JavaClassBuilderService>()
                 .getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)

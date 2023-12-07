@@ -164,15 +164,13 @@ class TestStorageProcessingService(private val project: Project) {
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
         name += "$className#$testCaseName"
 
-        println("${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:$resultPath")
-
         // run the test method with jacoco agent
         val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
             arrayListOf(
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
                 "-cp",
-                "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:$resultPath",
+                "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:\"$resultPath\"",
                 "org.jetbrains.research.SingleJUnitTestRunner",
                 name,
             ),
