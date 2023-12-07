@@ -48,7 +48,6 @@ class Pipeline(
         project.service<Workspace>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<Workspace>().cutPsiClass!!.containingFile.virtualFile)!!
 
         project.service<Workspace>().classFQN = project.service<Workspace>().cutPsiClass!!.qualifiedName!!
-        project.service<Workspace>().key = getKey(project, project.service<Workspace>().classFQN!!)
 
         Util.makeTmp()
         Util.makeDir(project.service<Workspace>().baseDir!!)
@@ -58,7 +57,7 @@ class Pipeline(
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-        clearDataBeforeTestGeneration(project, project.service<Workspace>().testResultName!!)
+        clearDataBeforeTestGeneration(project)
 
         val projectBuilder = ProjectBuilder(project)
 

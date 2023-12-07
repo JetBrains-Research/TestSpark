@@ -364,7 +364,7 @@ class TestCasePanelFactory(
         // select checkbox
         checkbox.isSelected = true
 
-        project.service<Workspace>().updateTestCase(testCase)
+        project.service<Workspace>().updateReport(testCase)
         project.service<TestCaseDisplayService>().updateUI()
     }
 
@@ -451,7 +451,7 @@ class TestCasePanelFactory(
         languageTextField.editor!!.markupModel.removeAllHighlighters()
 
         SwingUtilities.invokeLater {
-            project.service<Workspace>().updateTestCase(
+            project.service<Workspace>().updateReport(
                 project.service<TestStorageProcessingService>()
                     .processNewTestCase(
                         "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
@@ -484,7 +484,7 @@ class TestCasePanelFactory(
         WriteCommandAction.runWriteCommandAction(project) {
             languageTextField.document.setText(initialCodes[currentRequestNumber - 1])
             updateBorder()
-            project.service<Workspace>().updateTestCase(testCase)
+            project.service<Workspace>().updateReport(testCase)
             resetButton.isEnabled = false
             val error = getError(testCase.id, testCase.testCode)
             if (error != null) {

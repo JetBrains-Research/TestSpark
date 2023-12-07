@@ -98,7 +98,7 @@ class TestCaseDisplayService(private val project: Project) {
      *               visualized
      */
     fun showGeneratedTests(editor: Editor) {
-        displayTestCases(project.service<Workspace>().testJob!!.report, editor)
+        displayTestCases(project.service<Workspace>().report!!, editor)
         createToolWindowTab()
     }
 

@@ -29,25 +29,10 @@ import java.io.File
  */
 @Service(Service.Level.PROJECT)
 class Workspace(private val project: Project) {
-    data class TestJobInfo(
-        val fileUrl: String,
-        var targetUnit: String,
-        val modificationTS: Long,
-        val jobId: String,
-        val targetClassPath: String,
-    )
-
-    class TestJob(
-        val info: TestJobInfo,
-        var report: Report,
-    ) {
-        fun updateReport(report: Report) {
-            this.report = report
-        }
-    }
+    // final report
+    var report: Report? = null
 
     var editor: Editor? = null
-    var testJob: TestJob? = null
 
     // The class path of the project.
     var projectClassPath: String? = null
@@ -78,8 +63,6 @@ class Workspace(private val project: Project) {
 
     var testGenerationData = TestGenerationData()
 
-    var key: TestJobInfo? = null
-
     /**
      * Clears the given project's test-related data, including test case display,
      * error service, coverage visualization, and test generation data.
@@ -97,38 +80,21 @@ class Workspace(private val project: Project) {
 
     /**
      * Updates the state after the action of publishing results.
-     *
-     * @param testResultName the test result job id which was received
-     * @param testReport the generated test suite
-     * @param cacheLazyPipeline the runner that was instantiated but not used to create the test suite
-     *                        due to a cache hit, or null if there was a cache miss
-     * @return the test job that was generated
+     * @param report the generated test suite
      */
-    fun receiveGenerationResult(
-        testResultName: String,
-        testReport: Report,
-        cachedJobKey: TestJobInfo? = null,
-    ): TestJobInfo {
-        val pendingJobKey = testGenerationData.pendingTestResults.remove(testResultName)!!
+    fun receiveGenerationResult(report: Report) {
+        this.report = report
 
-        val jobKey = cachedJobKey ?: pendingJobKey
-
-        val resultsForFile = testGenerationData.testGenerationResults.getOrPut(jobKey.fileUrl) { ArrayList() }
-
-        testJob = TestJob(jobKey, testReport)
-        resultsForFile.add(testJob!!)
-
-        updateEditorForFileUrl(jobKey.fileUrl)
+        updateEditorForFileUrl(testGenerationData.fileUrl)
 
         project.service<Workspace>().cleanFolder(resultPath!!)
 
         if (editor != null) {
-            showReport()
+            project.service<TestCaseDisplayService>().showGeneratedTests(editor!!)
+            project.service<CoverageVisualisationService>().showCoverage(report, editor!!)
         } else {
             log.info("No editor opened for received test result")
         }
-
-        return jobKey
     }
 
     /**
@@ -148,23 +114,11 @@ class Workspace(private val project: Project) {
         }
     }
 
-    fun updateTestCase(testCase: TestCase) {
-        val updatedReport = testJob!!.report
-        updatedReport.testCaseList.remove(testCase.id)
-        updatedReport.testCaseList[testCase.id] = testCase
-        updatedReport.normalized()
-        testJob!!.updateReport(updatedReport)
-        project.service<CoverageVisualisationService>().showCoverage(updatedReport, editor!!)
-    }
-
-    /**
-     * Function that calls the services responsible for visualizing
-     * coverage and displaying the generated test cases. This
-     * is used whenever a new test generation result gets published.
-     */
-    private fun showReport() {
-        project.service<TestCaseDisplayService>().showGeneratedTests(editor!!)
-        project.service<CoverageVisualisationService>().showCoverage(testJob!!.report, editor!!)
+    fun updateReport(testCase: TestCase) {
+        report!!.testCaseList.remove(testCase.id)
+        report!!.testCaseList[testCase.id] = testCase
+        report!!.normalized()
+        project.service<CoverageVisualisationService>().showCoverage(report!!, editor!!)
     }
 
     /**

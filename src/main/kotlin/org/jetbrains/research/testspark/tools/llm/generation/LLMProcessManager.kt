@@ -5,7 +5,6 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
-import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
@@ -17,7 +16,6 @@ import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.getKey
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -69,13 +67,6 @@ class LLMProcessManager(
         if (!isPromptLengthWithinLimit(prompt)) {
             llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPrompt"), project)
             return
-        }
-
-        if (codeType.type == CodeType.METHOD) {
-            project.service<Workspace>().key = getKey(
-                project,
-                "${project.service<Workspace>().classFQN}#${codeType.objectDescription}",
-            )
         }
 
         // update build path

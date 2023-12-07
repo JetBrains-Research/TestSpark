@@ -84,30 +84,13 @@ fun saveData(
 }
 
 /**
- * Retrieves the key for a test job in the workspace.
- *
- * @param classFQN The fully qualified name of the class associated with the test job.
- * @return The test job information containing the provided parameters.
- */
-fun getKey(project: Project, classFQN: String): Workspace.TestJobInfo =
-    Workspace.TestJobInfo(
-        project.service<Workspace>().fileUrl!!,
-        classFQN,
-        project.service<Workspace>().modificationStamp!!,
-        project.service<Workspace>().testResultName!!,
-        project.service<Workspace>().projectClassPath!!,
-    )
-
-/**
  * Clears the data before test generation for a specific test result.
  *
  * @param project The project for which the test generation data needs to be cleared.
- * @param testResultName The name of the test result for which the data needs to be cleared.
  */
-fun clearDataBeforeTestGeneration(project: Project, testResultName: String) {
+fun clearDataBeforeTestGeneration(project: Project) {
     val workspace = project.service<Workspace>()
     workspace.clear(project)
-    workspace.testGenerationData.pendingTestResults[testResultName] = project.service<Workspace>().key!!
 }
 
 /**
