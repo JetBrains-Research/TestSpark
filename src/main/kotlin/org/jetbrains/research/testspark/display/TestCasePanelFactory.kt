@@ -69,8 +69,6 @@ class TestCasePanelFactory(
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
 
-    private var lastArrayOfCoveredLines: Set<Int> = setOf()
-
     private val dimensionSize = 7
 
     private var isRemoved = false
@@ -449,8 +447,6 @@ class TestCasePanelFactory(
 
         loadingLabel.isVisible = true
         runTestButton.isEnabled = false
-        resetToLastRunButton.isEnabled = false
-        languageTextField.editor!!.markupModel.removeAllHighlighters()
 
         SwingUtilities.invokeLater {
             val newTestCase = project.service<TestStorageProcessingService>()
@@ -461,17 +457,11 @@ class TestCasePanelFactory(
                     testCase.testCode,
                 )
             testCase.coveredLines = newTestCase.coveredLines
-            project.service<Workspace>().updateReport(testCase)
-
-            updateBorder()
-            updateErrorLabel()
 
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
             loadingLabel.isVisible = false
 
-            lastArrayOfCoveredLines = newTestCase.coveredLines
-
-            project.service<TestCaseDisplayService>().updateUI()
+            updateUI()
         }
     }
 
