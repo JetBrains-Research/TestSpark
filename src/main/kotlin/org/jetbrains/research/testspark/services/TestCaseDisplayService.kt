@@ -6,8 +6,10 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
@@ -456,6 +458,23 @@ class TestCaseDisplayService(private val project: Project) {
                     "package ${project.service<Workspace>().testGenerationData.packageLine};\n\n"
                 },
             )
+    }
+
+    /**
+     * Utility function that returns the editor for a specific file url,
+     * in case it is opened in the IDE
+     */
+    fun updateEditorForFileUrl(fileUrl: String) {
+        val documentManager = FileDocumentManager.getInstance()
+        // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
+        FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
+            val currentFile = documentManager.getFile(it.document)
+            if (currentFile != null) {
+                if (currentFile.presentableUrl == fileUrl) {
+                    project.service<Workspace>().editor = it
+                }
+            }
+        }
     }
 
     /**

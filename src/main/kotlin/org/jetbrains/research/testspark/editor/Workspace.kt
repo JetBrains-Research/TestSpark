@@ -4,9 +4,6 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
@@ -85,30 +82,13 @@ class Workspace(private val project: Project) {
     fun receiveGenerationResult(report: Report) {
         this.report = report
 
-        updateEditorForFileUrl(testGenerationData.fileUrl)
+        project.service<TestCaseDisplayService>().updateEditorForFileUrl(testGenerationData.fileUrl)
 
         if (editor != null) {
             project.service<TestCaseDisplayService>().showGeneratedTests(editor!!)
             project.service<CoverageVisualisationService>().showCoverage(report, editor!!)
         } else {
             log.info("No editor opened for received test result")
-        }
-    }
-
-    /**
-     * Utility function that returns the editor for a specific file url,
-     * in case it is opened in the IDE
-     */
-    private fun updateEditorForFileUrl(fileUrl: String) {
-        val documentManager = FileDocumentManager.getInstance()
-        // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
-        FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
-            val currentFile = documentManager.getFile(it.document)
-            if (currentFile != null) {
-                if (currentFile.presentableUrl == fileUrl) {
-                    editor = it
-                }
-            }
         }
     }
 
