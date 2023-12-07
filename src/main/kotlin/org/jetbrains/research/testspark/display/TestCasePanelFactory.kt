@@ -447,8 +447,6 @@ class TestCasePanelFactory(
 
         loadingLabel.isVisible = true
         runTestButton.isEnabled = false
-        resetToLastRunButton.isEnabled = false
-        languageTextField.editor!!.markupModel.removeAllHighlighters()
 
         SwingUtilities.invokeLater {
             project.service<Workspace>().updateReport(
@@ -460,14 +458,10 @@ class TestCasePanelFactory(
                         testCase.testCode,
                     ),
             )
-            updateBorder()
-            updateErrorLabel()
-
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
-
             loadingLabel.isVisible = false
 
-            project.service<TestCaseDisplayService>().updateUI()
+            updateUI()
         }
     }
 
@@ -483,25 +477,7 @@ class TestCasePanelFactory(
     private fun reset() {
         WriteCommandAction.runWriteCommandAction(project) {
             languageTextField.document.setText(initialCodes[currentRequestNumber - 1])
-            updateBorder()
-            project.service<Workspace>().updateReport(testCase)
-            resetButton.isEnabled = false
-            val error = getError(testCase.id, testCase.testCode)
-            if (error != null) {
-                if (error.isBlank()) {
-                    project.service<TestsExecutionResultService>().addPassedTest(testCase.id, testCase.testCode)
-                } else {
-                    project.service<TestsExecutionResultService>()
-                        .addFailedTest(testCase.id, testCase.testCode, errorLabel.toolTipText)
-                }
-            }
-            resetToLastRunButton.isEnabled = false
-            runTestButton.isEnabled = (error == null)
-            updateErrorLabel()
-            languageTextField.editor!!.markupModel.removeAllHighlighters()
-
             currentCodes[currentRequestNumber - 1] = testCase.testCode
-            lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
             updateUI()
         }
@@ -512,14 +488,7 @@ class TestCasePanelFactory(
      */
     private fun resetToLastRun() {
         WriteCommandAction.runWriteCommandAction(project) {
-            val code = lastRunCodes[currentRequestNumber - 1]
-            languageTextField.document.setText(code)
-            resetToLastRunButton.isEnabled = false
-            runTestButton.isEnabled = false
-            updateBorder()
-            updateErrorLabel()
-            languageTextField.editor!!.markupModel.removeAllHighlighters()
-
+            languageTextField.document.setText(lastRunCodes[currentRequestNumber - 1])
             currentCodes[currentRequestNumber - 1] = testCase.testCode
 
             updateUI()
