@@ -69,6 +69,8 @@ class TestCasePanelFactory(
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
 
+    private val testCaseCodeToListOfCoveredLines: HashMap<String, Set<Int>> = hashMapOf()
+
     private val dimensionSize = 7
 
     private var isRemoved = false
@@ -364,6 +366,12 @@ class TestCasePanelFactory(
         // select checkbox
         checkbox.isSelected = true
 
+        if (testCaseCodeToListOfCoveredLines.containsKey(testCase.testCode)) {
+            testCase.coveredLines = testCaseCodeToListOfCoveredLines[testCase.testCode]!!
+        } else {
+            testCase.coveredLines = setOf()
+        }
+
         project.service<Workspace>().updateReport(testCase)
         project.service<TestCaseDisplayService>().updateUI()
     }
@@ -457,6 +465,8 @@ class TestCasePanelFactory(
                     testCase.testCode,
                 )
             testCase.coveredLines = newTestCase.coveredLines
+
+            testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
             loadingLabel.isVisible = false
