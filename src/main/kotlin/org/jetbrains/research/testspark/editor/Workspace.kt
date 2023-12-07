@@ -11,6 +11,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiClass
+import org.jetbrains.research.testspark.DataFilesUtil
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.data.TestGenerationData
@@ -18,7 +19,6 @@ import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import java.io.File
 
 /**
  * Workspace state service
@@ -74,7 +74,7 @@ class Workspace(private val project: Project) {
         project.service<ErrorService>().clear()
         project.service<CoverageVisualisationService>().clear()
         testGenerationData.clear()
-        project.service<Workspace>().cleanFolder(resultPath!!)
+        DataFilesUtil.cleanFolder(resultPath!!)
         project.service<TestsExecutionResultService>().clear()
     }
 
@@ -86,8 +86,6 @@ class Workspace(private val project: Project) {
         this.report = report
 
         updateEditorForFileUrl(testGenerationData.fileUrl)
-
-        project.service<Workspace>().cleanFolder(resultPath!!)
 
         if (editor != null) {
             project.service<TestCaseDisplayService>().showGeneratedTests(editor!!)
@@ -121,26 +119,9 @@ class Workspace(private val project: Project) {
         project.service<CoverageVisualisationService>().showCoverage(report!!, editor!!)
     }
 
-    /**
-     * Clean data folder
-     */
-    fun cleanFolder(path: String) {
-        val folder = File(path)
-
-        if (!folder.exists()) return
-
-        if (folder.isDirectory) {
-            val files = folder.listFiles()
-            if (files != null) {
-                for (file in files) {
-                    if (file.isDirectory) {
-                        cleanFolder(file.absolutePath)
-                    } else {
-                        file.delete()
-                    }
-                }
-            }
-        }
-        folder.delete()
+    fun removeTestCase(testCase: TestCase) {
+        report!!.testCaseList.remove(testCase.id)
+        report!!.normalized()
+        project.service<CoverageVisualisationService>().showCoverage(report!!, editor!!)
     }
 }

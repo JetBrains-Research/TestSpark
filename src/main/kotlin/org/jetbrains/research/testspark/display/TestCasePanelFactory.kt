@@ -52,7 +52,7 @@ import javax.swing.border.MatteBorder
 class TestCasePanelFactory(
     private val project: Project,
     private val testCase: TestCase,
-    private val editor: Editor,
+    editor: Editor,
     private val checkbox: JCheckBox,
 ) {
     private val panel = JPanel()
@@ -68,6 +68,8 @@ class TestCasePanelFactory(
 
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
+
+    private var lastArrayOfCoveredLines: Set<Int> = setOf()
 
     private val dimensionSize = 7
 
@@ -447,21 +449,29 @@ class TestCasePanelFactory(
 
         loadingLabel.isVisible = true
         runTestButton.isEnabled = false
+        resetToLastRunButton.isEnabled = false
+        languageTextField.editor!!.markupModel.removeAllHighlighters()
 
         SwingUtilities.invokeLater {
-            project.service<Workspace>().updateReport(
-                project.service<TestStorageProcessingService>()
-                    .processNewTestCase(
-                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
-                        testCase.id,
-                        testCase.testName,
-                        testCase.testCode,
-                    ),
-            )
+            val newTestCase = project.service<TestStorageProcessingService>()
+                .processNewTestCase(
+                    "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                    testCase.id,
+                    testCase.testName,
+                    testCase.testCode,
+                )
+            testCase.coveredLines = newTestCase.coveredLines
+            project.service<Workspace>().updateReport(testCase)
+
+            updateBorder()
+            updateErrorLabel()
+
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
             loadingLabel.isVisible = false
 
-            updateUI()
+            lastArrayOfCoveredLines = newTestCase.coveredLines
+
+            project.service<TestCaseDisplayService>().updateUI()
         }
     }
 
@@ -478,6 +488,7 @@ class TestCasePanelFactory(
         WriteCommandAction.runWriteCommandAction(project) {
             languageTextField.document.setText(initialCodes[currentRequestNumber - 1])
             currentCodes[currentRequestNumber - 1] = testCase.testCode
+            lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
             updateUI()
         }
@@ -508,7 +519,8 @@ class TestCasePanelFactory(
         runTestButton.isEnabled = false
         isRemoved = true
 
-        updateUI()
+        project.service<Workspace>().removeTestCase(testCase)
+        project.service<TestCaseDisplayService>().updateUI()
     }
 
     /**

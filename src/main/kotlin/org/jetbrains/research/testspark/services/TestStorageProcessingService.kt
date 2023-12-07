@@ -10,6 +10,7 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
+import org.jetbrains.research.testspark.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -347,12 +348,12 @@ class TestStorageProcessingService(private val project: Project) {
                     project.service<TestsExecutionResultService>().addPassedTest(testId, testCode)
                 }
 
-                project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
+                DataFilesUtil.cleanFolder(project.service<Workspace>().resultPath!!)
 
                 return testCase
             }
         }
-        project.service<Workspace>().cleanFolder(project.service<Workspace>().resultPath!!)
+        DataFilesUtil.cleanFolder(project.service<Workspace>().resultPath!!)
 
         return TestCase(testId, testName, testCode, setOf(), setOf(), setOf())
     }
