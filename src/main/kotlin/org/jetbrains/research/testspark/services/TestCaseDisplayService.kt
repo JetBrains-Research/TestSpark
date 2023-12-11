@@ -3,7 +3,6 @@ package org.jetbrains.research.testspark.services
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -30,7 +29,6 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.editor.Workspace

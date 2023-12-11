@@ -19,8 +19,13 @@ import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.TestCase
-import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.services.*
+import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.services.LLMChatService
+import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.services.TestStorageProcessingService
+import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 import java.awt.Dimension
