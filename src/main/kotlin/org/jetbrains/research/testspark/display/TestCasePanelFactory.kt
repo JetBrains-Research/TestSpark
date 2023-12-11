@@ -22,10 +22,10 @@ import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMChatService
+import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 import java.awt.Dimension
