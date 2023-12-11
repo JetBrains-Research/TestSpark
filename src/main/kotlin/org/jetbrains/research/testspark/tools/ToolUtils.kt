@@ -10,6 +10,7 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
 
@@ -61,7 +62,7 @@ fun saveData(
     indicator: ProgressIndicator,
 ) {
     val workspace = project.service<Workspace>()
-    workspace.testGenerationData.resultName = project.service<Workspace>().testResultName!!
+    workspace.testGenerationData.resultName = project.service<TestStorageProcessingService>().testResultName!!
     workspace.testGenerationData.fileUrl = project.service<Workspace>().fileUrl!!
     workspace.testGenerationData.packageLine = packageLine
     workspace.testGenerationData.importsCode.addAll(importsCode)
@@ -89,8 +90,7 @@ fun saveData(
  * @param project The project for which the test generation data needs to be cleared.
  */
 fun clearDataBeforeTestGeneration(project: Project) {
-    val workspace = project.service<Workspace>()
-    workspace.clear(project)
+    project.service<Workspace>().clear(project)
 }
 
 /**

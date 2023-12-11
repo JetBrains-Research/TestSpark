@@ -30,16 +30,9 @@ class Pipeline(
 
     init {
         project.service<Workspace>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
-
-        project.service<Workspace>().testResultDirectory = project.service<TestStorageProcessingService>().testResultDirectory
-        project.service<Workspace>().testResultName = project.service<TestStorageProcessingService>().testResultName
         project.service<Workspace>().resultPath = project.service<TestStorageProcessingService>().resultPath
-
-        project.service<Workspace>().baseDir = "${project.service<Workspace>().testResultDirectory}${project.service<Workspace>().testResultName}-validation"
-
-        project.service<Workspace>().vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
-        project.service<Workspace>().fileUrl = project.service<Workspace>().vFile!!.presentableUrl
-        project.service<Workspace>().modificationStamp = project.service<Workspace>().vFile!!.modificationStamp
+        project.service<Workspace>().baseDir = "${project.service<TestStorageProcessingService>().testResultDirectory}${project.service<TestStorageProcessingService>().testResultName}-validation"
+        project.service<Workspace>().fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
         project.service<Workspace>().cutPsiClass = getSurroundingClass(
             e.dataContext.getData(CommonDataKeys.PSI_FILE)!!,

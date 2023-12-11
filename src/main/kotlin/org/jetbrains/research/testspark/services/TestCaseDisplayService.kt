@@ -93,26 +93,13 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Creates the complete panel in the "Generated Tests" tab,
-     * and adds the "Generated Tests" tab to the sidebar tool window.
-     *
-     * @param editor editor instance where coverage should be
-     *               visualized
-     */
-    fun showGeneratedTests(editor: Editor) {
-        displayTestCases(project.service<Workspace>().report!!, editor)
-        createToolWindowTab()
-    }
-
-    /**
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
-     *
-     * @param testReport The report from which each testcase should be displayed
-     * @param editor editor instance where coverage should be
-     *               visualized
      */
-    private fun displayTestCases(testReport: Report, editor: Editor) {
+    fun displayTestCases() {
+        val report = project.service<ReportLockingService>().getReport()
+        val editor = project.service<Workspace>().editor!!
+
         allTestCasePanel.removeAll()
         testCasePanels.clear()
 
@@ -121,7 +108,7 @@ class TestCaseDisplayService(private val project: Project) {
         // TestCasePanelFactories array
         val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
 
-        testReport.testCaseList.values.forEach {
+        report.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
@@ -159,6 +146,8 @@ class TestCaseDisplayService(private val project: Project) {
 
         topButtonsPanelFactory.setTestCasePanelFactoriesArray(testCasePanelFactories)
         topButtonsPanelFactory.updateTopLabels()
+
+        createToolWindowTab()
     }
 
     /**

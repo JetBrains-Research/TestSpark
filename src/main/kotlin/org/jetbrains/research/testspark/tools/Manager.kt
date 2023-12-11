@@ -8,6 +8,7 @@ import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.RunnerService
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
@@ -131,7 +132,7 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
             log.info("Found all $numberOfUsedTool generation results")
 
             ApplicationManager.getApplication().invokeLater {
-                event.project!!.service<Workspace>().receiveGenerationResult(getMergeResult(numberOfUsedTool))
+                event.project!!.service<ReportLockingService>().receiveReport(getMergeResult(numberOfUsedTool))
             }
 
             break
