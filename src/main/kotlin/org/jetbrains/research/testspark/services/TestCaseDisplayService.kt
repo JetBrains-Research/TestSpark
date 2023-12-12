@@ -269,17 +269,17 @@ class TestCaseDisplayService(private val project: Project) {
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
                 file.isDirectory || (
-                        file.extension?.lowercase(Locale.getDefault()) == "java" && (
-                                PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
-                                ).classes.stream().map { it.name }
-                            .toArray()
-                            .contains(
-                                (
-                                        PsiManager.getInstance(project)
-                                            .findFile(file) as PsiJavaFile
-                                        ).name.removeSuffix(".java"),
-                            )
+                    file.extension?.lowercase(Locale.getDefault()) == "java" && (
+                        PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                        ).classes.stream().map { it.name }
+                        .toArray()
+                        .contains(
+                            (
+                                PsiManager.getInstance(project)
+                                    .findFile(file) as PsiJavaFile
+                                ).name.removeSuffix(".java"),
                         )
+                    )
             }
         }
 

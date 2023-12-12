@@ -2,11 +2,9 @@ package org.jetbrains.research.testspark.display
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import com.intellij.ui.JBColor
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.awt.Dimension
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -15,7 +13,6 @@ import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
-import javax.swing.border.MatteBorder
 
 class TopButtonsPanelFactory(private val project: Project) {
     private var runAllButton: JButton = createRunAllTestButton()

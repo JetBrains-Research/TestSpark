@@ -91,7 +91,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
 //    }
 
     fun testCreateToolWindowTabTestSingleContent() {
-        coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())), myEditor)
+        coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())))
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")!!
 
         // Verify only 1 content is created
@@ -99,7 +99,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
     }
 
     fun testCreateToolWindowTabTestContent() {
-        coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())), myEditor)
+        coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())))
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")!!
         val content = toolWindow.contentManager.getContent(0)!!
         assertThat(content.displayName).isEqualTo("Coverage")
