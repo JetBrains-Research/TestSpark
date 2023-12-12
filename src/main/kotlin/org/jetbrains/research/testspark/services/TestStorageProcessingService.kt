@@ -48,7 +48,8 @@ class TestStorageProcessingService(private val project: Project) {
         val hamcrestPath = getLibrary("hamcrest-core-1.3.jar")
         val byteBuddy = getLibrary("byte-buddy-1.14.6.jar")
         val byteBuddyAgent = getLibrary("byte-buddy-agent-1.14.6.jar")
-        return "$junitPath:$hamcrestPath:$mockitoPath:$byteBuddy:$byteBuddyAgent:$buildPath"
+        val sep = DataFilesUtil.classpathSeparator
+        return "$junitPath${sep}$hamcrestPath${sep}$mockitoPath${sep}$byteBuddy${sep}$byteBuddyAgent${sep}$buildPath"
     }
 
     /**
@@ -72,7 +73,13 @@ class TestStorageProcessingService(private val project: Project) {
      */
     fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
         // find the proper javac
-        val javaCompile = File(javaHomeDirectory.path).walk().filter { it.name.equals("javac") && it.isFile }.first()
+        val javaCompile = File(javaHomeDirectory.path).walk()
+            .filter {
+                val isCompilerName = if (DataFilesUtil.isWindows()) it.name.equals("javac.exe") else it.name.equals("javac")
+                isCompilerName && it.isFile
+            }
+            .first()
+
         // compile file
         val errorMsg = project.service<RunCommandLineService>().runCommandLine(
             arrayListOf(
@@ -155,7 +162,12 @@ class TestStorageProcessingService(private val project: Project) {
         generatedTestPackage: String,
     ): String {
         // find the proper javac
-        val javaRunner = File(javaHomeDirectory.path).walk().filter { it.name.equals("java") && it.isFile }.first()
+        val javaRunner = File(javaHomeDirectory.path).walk()
+            .filter {
+                val isJavaName = if (DataFilesUtil.isWindows()) it.name.equals("java.exe") else it.name.equals("java")
+                isJavaName && it.isFile
+            }
+            .first()
         // JaCoCo libs
         val jacocoAgentDir = getLibrary("jacocoagent.jar")
         val jacocoCLIDir = getLibrary("jacococli.jar")
@@ -171,7 +183,7 @@ class TestStorageProcessingService(private val project: Project) {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
                 "-cp",
-                "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}:\"$resultPath\"",
+                "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
                 name,
             ),

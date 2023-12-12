@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark
 
 import com.intellij.openapi.util.io.FileUtilRt
 import java.io.File
+import java.util.Locale
 
 class DataFilesUtil {
     companion object {
@@ -41,6 +42,20 @@ class DataFilesUtil {
                 }
             }
             folder.delete()
+        }
+
+        val classpathSeparator: Char
+            get() {
+                var sep = ':'
+                if (isWindows()) {
+                    sep = ';'
+                }
+                return sep
+            }
+
+        fun isWindows(): Boolean {
+            val os = System.getProperty("os.name").lowercase(Locale.getDefault())
+            return (os.indexOf("win") >= 0)
         }
     }
 }

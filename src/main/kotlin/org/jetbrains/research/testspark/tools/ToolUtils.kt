@@ -6,6 +6,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
+import org.jetbrains.research.testspark.DataFilesUtil
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
@@ -104,8 +105,8 @@ fun getBuildPath(project: Project): String {
 
     for (module in ModuleManager.getInstance(project).modules) {
         val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
-        compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
 
+        compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(DataFilesUtil.classpathSeparator.toString()) }
         // Include extra libraries in classpath
         val librariesPaths = ModuleRootManager.getInstance(module).orderEntries().librariesOnly().pathsList.pathList
         for (lib in librariesPaths) {
@@ -126,7 +127,7 @@ fun getBuildPath(project: Project): String {
                 continue
             }
 
-            buildPath += lib.plus(":")
+            buildPath += lib.plus(DataFilesUtil.classpathSeparator.toString())
         }
     }
     return buildPath
