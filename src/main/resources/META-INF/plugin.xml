@@ -36,6 +36,10 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.1.7</h4>
+            <ul>
+                <li>Fixed minor bugs and improve new test generation UI</li>
+            </ul>
         <h4>0.1.6</h4>
             <ul>
                 <li>New UI for requesting a test generation process</li>

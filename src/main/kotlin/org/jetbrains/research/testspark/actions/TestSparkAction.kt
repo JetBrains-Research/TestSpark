@@ -13,6 +13,8 @@ import java.awt.CardLayout
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Toolkit
+import java.awt.event.WindowEvent
+import java.awt.event.WindowFocusListener
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
 import javax.swing.JButton
@@ -149,6 +151,14 @@ class TestSparkAction : AnAction() {
          * @param panel the JPanel to add listeners to
          */
         private fun addListeners(panel: JPanel) {
+            this.addWindowFocusListener(object : WindowFocusListener {
+                override fun windowGainedFocus(e: WindowEvent) {
+                }
+                override fun windowLostFocus(e: WindowEvent) {
+                    dispose()
+                }
+            })
+
             llmButton.addActionListener {
                 updateNextButton()
             }

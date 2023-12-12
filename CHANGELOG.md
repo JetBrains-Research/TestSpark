@@ -4,7 +4,13 @@
 
 ## Unreleased
 
+## 0.1.7
+
+### Fixed
+- Minor bugs in new test generation UI
+
 ## 0.1.6
+
 ### Fixed
 - Minor bugs in general test generation process
 
