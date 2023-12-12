@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.display
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.ui.JBColor
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
@@ -14,6 +15,7 @@ import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
+import javax.swing.border.MatteBorder
 
 class TopButtonsPanelFactory(private val project: Project) {
     private var runAllButton: JButton = createRunAllTestButton()
@@ -58,6 +60,12 @@ class TopButtonsPanelFactory(private val project: Project) {
      * Updates the labels.
      */
     fun updateTopLabels() {
+        var numberOfPassedTests = 0
+        for (testCasePanelFactory in testCasePanelFactories) {
+            if (testCasePanelFactory.getError() == "") {
+                numberOfPassedTests++
+            }
+        }
         testsSelectedLabel.text = String.format(
             testsSelectedText,
             project.service<TestCaseDisplayService>().getTestsSelected(),
@@ -66,8 +74,7 @@ class TopButtonsPanelFactory(private val project: Project) {
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
-                project.service<TestCaseDisplayService>()
-                    .getTestCasePanels().size - project.service<TestsExecutionResultService>().size(),
+                numberOfPassedTests,
                 project.service<TestCaseDisplayService>().getTestCasePanels().size,
             )
         runAllButton.isEnabled = false

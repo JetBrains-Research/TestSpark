@@ -337,7 +337,7 @@ class TestCasePanelFactory(
         resetButton.isEnabled = testCase.testCode != initialCodes[currentRequestNumber - 1]
         resetToLastRunButton.isEnabled = testCase.testCode != lastRunCode
 
-        val error = getError(testCase.id, testCase.testCode)
+        val error = getError()
         if (error.isNullOrBlank()) {
             project.service<TestsExecutionResultService>().addCurrentPassedTest(testCase.id)
         } else {
@@ -534,7 +534,7 @@ class TestCasePanelFactory(
      * Updates the border of the languageTextField based on the provided test name and text.
      */
     private fun updateBorder() {
-        languageTextField.border = getBorder(testCase.id, testCase.testCode)
+        languageTextField.border = getBorder()
     }
 
     /**
@@ -544,8 +544,7 @@ class TestCasePanelFactory(
      * @param testCaseCode the code of the test case
      * @return the error message for the test case
      */
-    private fun getError(testCaseId: Int, testCaseCode: String) =
-        project.service<TestsExecutionResultService>().getError(testCaseId, testCaseCode)
+    fun getError() = project.service<TestsExecutionResultService>().getError(testCase.id, testCase.testCode)
 
     /**
      * Returns the border for a given test case.
@@ -553,9 +552,9 @@ class TestCasePanelFactory(
      * @param testCaseId the id of the test case
      * @return the border for the test case
      */
-    private fun getBorder(testCaseId: Int, testCaseCode: String): Border {
+    private fun getBorder(): Border {
         val size = 3
-        return when (getError(testCaseId, testCaseCode)) {
+        return when (getError()) {
             null -> JBUI.Borders.empty()
             "" -> MatteBorder(size, size, size, size, JBColor.GREEN)
             else -> MatteBorder(size, size, size, size, JBColor.RED)
