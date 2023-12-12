@@ -15,6 +15,7 @@ import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.coverage.CoverageRenderer
 import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.editor.Workspace
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -68,14 +69,17 @@ class CoverageVisualisationService(private val project: Project) {
      * Instantiates tab for coverage table and calls function to update coverage.
      *
      * @param testReport the generated tests summary
-     * @param editor editor whose contents tests were generated for
      */
-    fun showCoverage(testReport: Report, editor: Editor) {
+    fun showCoverage(testReport: Report) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
         createToolWindowTab()
 
-        updateCoverage(testReport.allCoveredLines, testReport.testCaseList.values.stream().map { it.id }.toList().toHashSet(), testReport, editor)
+        updateCoverage(
+            testReport.allCoveredLines,
+            testReport.testCaseList.values.stream().map { it.id }.toList().toHashSet(),
+            testReport,
+        )
     }
 
     /**
@@ -85,21 +89,23 @@ class CoverageVisualisationService(private val project: Project) {
      * @param linesToCover total set of lines  to cover
      * @param testReport report used for gutter information
      * @param selectedTests hash set of selected test names
-     * @param editor editor instance where coverage should be updated
      */
     fun updateCoverage(
         linesToCover: Set<Int>,
         selectedTests: HashSet<Int>,
         testReport: Report,
-        editor: Editor,
     ) {
-        currentHighlightedData = HighlightedData(linesToCover, selectedTests, testReport, editor)
+        currentHighlightedData =
+            HighlightedData(linesToCover, selectedTests, testReport, project.service<Workspace>().editor!!)
         clear()
 
         val settingsProjectState = project.service<SettingsProjectService>().state
 
         if (settingsProjectState.showCoverageCheckboxSelected) {
-            val color = JBColor(TestSparkToolTipsBundle.defaultValue("colorName"), Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue))
+            val color = JBColor(
+                TestSparkToolTipsBundle.defaultValue("colorName"),
+                Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
+            )
             val colorForLines = JBColor(
                 TestSparkToolTipsBundle.defaultValue("colorName"),
                 Color(
@@ -135,8 +141,11 @@ class CoverageVisualisationService(private val project: Project) {
             for (i in linesToCover) {
                 val line = i - 1
 
-                val hl =
-                    editor.markupModel.addLineHighlighter(line, HighlighterLayer.ADDITIONAL_SYNTAX, textAttribute)
+                val hl = project.service<Workspace>().editor!!.markupModel.addLineHighlighter(
+                    line,
+                    HighlighterLayer.ADDITIONAL_SYNTAX,
+                    textAttribute
+                )
 
                 val testsCoveringLine =
                     testReport.testCaseList.filter { x -> i in x.value.coveredLines && x.value.id in selectedTests }

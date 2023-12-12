@@ -4,7 +4,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import java.io.File
 import java.util.Locale
 
-class Util {
+class DataFilesUtil {
     companion object {
         fun makeTmp() {
             val sep = File.separatorChar
@@ -22,6 +22,26 @@ class Util {
             if (!dir.exists()) {
                 dir.mkdirs()
             }
+        }
+
+        fun cleanFolder(path: String) {
+            val folder = File(path)
+
+            if (!folder.exists()) return
+
+            if (folder.isDirectory) {
+                val files = folder.listFiles()
+                if (files != null) {
+                    for (file in files) {
+                        if (file.isDirectory) {
+                            cleanFolder(file.absolutePath)
+                        } else {
+                            file.delete()
+                        }
+                    }
+                }
+            }
+            folder.delete()
         }
 
         val classpathSeparator: Char

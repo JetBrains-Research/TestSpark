@@ -19,13 +19,12 @@ import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.TestCase
-import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.services.COVERAGE_SELECTION_TOGGLE_TOPIC
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMChatService
+import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestCoverageCollectorService
+import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
@@ -42,6 +41,7 @@ import javax.swing.FocusManager
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JLabel
+import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.JTextField
 import javax.swing.ScrollPaneConstants
@@ -52,7 +52,7 @@ import javax.swing.border.MatteBorder
 class TestCasePanelFactory(
     private val project: Project,
     private val testCase: TestCase,
-    private val editor: Editor,
+    editor: Editor,
     private val checkbox: JCheckBox,
 ) {
     private val panel = JPanel()
@@ -69,7 +69,11 @@ class TestCasePanelFactory(
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
 
+    private val testCaseCodeToListOfCoveredLines: HashMap<String, Set<Int>> = hashMapOf()
+
     private val dimensionSize = 7
+
+    private var isRemoved = false
 
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
@@ -227,7 +231,7 @@ class TestCasePanelFactory(
         val buttonsPanel = JPanel()
         buttonsPanel.layout = BoxLayout(buttonsPanel, BoxLayout.X_AXIS)
         buttonsPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
-        runTestButton.isEnabled = false
+        runTestButton.isEnabled = true
         buttonsPanel.add(runTestButton)
         loadingLabel.isVisible = false
         buttonsPanel.add(loadingLabel)
@@ -242,7 +246,17 @@ class TestCasePanelFactory(
         panel.add(requestPanel)
         panel.add(buttonsPanel)
 
-        runTestButton.addActionListener { runTest() }
+        runTestButton.addActionListener {
+            val choice = JOptionPane.showConfirmDialog(
+                null,
+                TestSparkBundle.message("runCautionMessage"),
+                TestSparkBundle.message("confirmationTitle"),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+            )
+
+            if (choice == JOptionPane.OK_OPTION) runTest()
+        }
         resetButton.addActionListener { reset() }
         resetToLastRunButton.addActionListener { resetToLastRun() }
         removeButton.addActionListener { remove() }
@@ -315,7 +329,7 @@ class TestCasePanelFactory(
      * Updates the user interface based on the provided code.
      */
     private fun updateUI() {
-        updateTestCase()
+        updateTestCaseInformation()
 
         val lastRunCode = lastRunCodes[currentRequestNumber - 1]
         languageTextField.editor!!.markupModel.removeAllHighlighters()
@@ -323,7 +337,7 @@ class TestCasePanelFactory(
         resetButton.isEnabled = testCase.testCode != initialCodes[currentRequestNumber - 1]
         resetToLastRunButton.isEnabled = testCase.testCode != lastRunCode
 
-        val error = getError(testCase.id, testCase.testCode)
+        val error = getError()
         if (error.isNullOrBlank()) {
             project.service<TestsExecutionResultService>().addCurrentPassedTest(testCase.id)
         } else {
@@ -351,6 +365,15 @@ class TestCasePanelFactory(
 
         // select checkbox
         checkbox.isSelected = true
+
+        if (testCaseCodeToListOfCoveredLines.containsKey(testCase.testCode)) {
+            testCase.coveredLines = testCaseCodeToListOfCoveredLines[testCase.testCode]!!
+        } else {
+            testCase.coveredLines = setOf()
+        }
+
+        project.service<ReportLockingService>().updateTestCase(testCase)
+        project.service<TestCaseDisplayService>().updateUI()
     }
 
     /**
@@ -401,17 +424,6 @@ class TestCasePanelFactory(
                     .getTestMethodNameFromClassWithTestCase(testCase.testName, code)
             testCase.testCode = code
 
-            // run new code
-            project.service<Workspace>().updateTestCase(
-                project.service<TestCoverageCollectorService>()
-                    .updateDataWithTestCase(
-                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
-                        testCase.id,
-                        testCase.testName,
-                        code,
-                    ),
-            )
-
             // update numbers
             allRequestsNumber++
             currentRequestNumber = allRequestsNumber
@@ -437,30 +449,29 @@ class TestCasePanelFactory(
      * label in the test case upper panel, removes all highlighters from the language text field,
      * and updates the UI.
      */
-    private fun runTest() {
+    fun runTest() {
+        if (isRemoved) return
+        if (!runTestButton.isEnabled) return
+
         loadingLabel.isVisible = true
         runTestButton.isEnabled = false
-        resetToLastRunButton.isEnabled = false
-        languageTextField.editor!!.markupModel.removeAllHighlighters()
 
         SwingUtilities.invokeLater {
-            project.service<Workspace>().updateTestCase(
-                project.service<TestCoverageCollectorService>()
-                    .updateDataWithTestCase(
-                        "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
-                        testCase.id,
-                        testCase.testName,
-                        testCase.testCode,
-                    ),
-            )
-            updateBorder()
-            updateErrorLabel()
+            val newTestCase = project.service<TestStorageProcessingService>()
+                .processNewTestCase(
+                    "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                    testCase.id,
+                    testCase.testName,
+                    testCase.testCode,
+                )
+            testCase.coveredLines = newTestCase.coveredLines
+
+            testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
-
             loadingLabel.isVisible = false
 
-            project.service<TestCaseDisplayService>().updateUI()
+            updateUI()
         }
     }
 
@@ -476,25 +487,10 @@ class TestCasePanelFactory(
     private fun reset() {
         WriteCommandAction.runWriteCommandAction(project) {
             languageTextField.document.setText(initialCodes[currentRequestNumber - 1])
-            updateBorder()
-            project.service<Workspace>().updateTestCase(testCase)
-            resetButton.isEnabled = false
-            if (getError(testCase.id, testCase.testCode)!!.isBlank()) {
-                project.service<TestsExecutionResultService>().addPassedTest(testCase.id, testCase.testCode)
-            } else {
-                project.service<TestsExecutionResultService>()
-                    .addFailedTest(testCase.id, testCase.testCode, errorLabel.toolTipText)
-            }
-            resetToLastRunButton.isEnabled = false
-            runTestButton.isEnabled = false
-            updateErrorLabel()
-            languageTextField.editor!!.markupModel.removeAllHighlighters()
-
             currentCodes[currentRequestNumber - 1] = testCase.testCode
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
-            updateTestCase()
-            project.service<TestCaseDisplayService>().updateUI()
+            updateUI()
         }
     }
 
@@ -503,18 +499,10 @@ class TestCasePanelFactory(
      */
     private fun resetToLastRun() {
         WriteCommandAction.runWriteCommandAction(project) {
-            val code = lastRunCodes[currentRequestNumber - 1]
-            languageTextField.document.setText(code)
-            resetToLastRunButton.isEnabled = false
-            runTestButton.isEnabled = false
-            updateBorder()
-            updateErrorLabel()
-            languageTextField.editor!!.markupModel.removeAllHighlighters()
-
+            languageTextField.document.setText(lastRunCodes[currentRequestNumber - 1])
             currentCodes[currentRequestNumber - 1] = testCase.testCode
 
-            updateTestCase()
-            project.service<TestCaseDisplayService>().updateUI()
+            updateUI()
         }
     }
 
@@ -525,21 +513,28 @@ class TestCasePanelFactory(
      * and updating the UI.
      */
     private fun remove() {
-        // Remove the highlighting of the test
-        project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-            .testGenerationResult(testCase.id, false, editor)
-
         // Remove the test case from the cache
         project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
 
+        runTestButton.isEnabled = false
+        isRemoved = true
+
+        project.service<ReportLockingService>().removeTestCase(testCase)
         project.service<TestCaseDisplayService>().updateUI()
     }
+
+    /**
+     * Determines if the "Run" button is enabled.
+     *
+     * @return true if the "Run" button is enabled, false otherwise.
+     */
+    fun isRunEnabled() = runTestButton.isEnabled
 
     /**
      * Updates the border of the languageTextField based on the provided test name and text.
      */
     private fun updateBorder() {
-        languageTextField.border = getBorder(testCase.id, testCase.testCode)
+        languageTextField.border = getBorder()
     }
 
     /**
@@ -549,8 +544,7 @@ class TestCasePanelFactory(
      * @param testCaseCode the code of the test case
      * @return the error message for the test case
      */
-    private fun getError(testCaseId: Int, testCaseCode: String) =
-        project.service<TestsExecutionResultService>().getError(testCaseId, testCaseCode)
+    fun getError() = project.service<TestsExecutionResultService>().getError(testCase.id, testCase.testCode)
 
     /**
      * Returns the border for a given test case.
@@ -558,9 +552,9 @@ class TestCasePanelFactory(
      * @param testCaseId the id of the test case
      * @return the border for the test case
      */
-    private fun getBorder(testCaseId: Int, testCaseCode: String): Border {
+    private fun getBorder(): Border {
         val size = 3
-        return when (getError(testCaseId, testCaseCode)) {
+        return when (getError()) {
             null -> JBUI.Borders.empty()
             "" -> MatteBorder(size, size, size, size, JBColor.GREEN)
             else -> MatteBorder(size, size, size, size, JBColor.RED)
@@ -574,7 +568,6 @@ class TestCasePanelFactory(
      */
     private fun createRunTestButton(): JButton {
         val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("run"), TestSparkIcons.runTest)
-        runTestButton.isEnabled = false
         runTestButton.isOpaque = false
         runTestButton.isContentAreaFilled = false
         runTestButton.isBorderPainted = true
@@ -588,7 +581,6 @@ class TestCasePanelFactory(
      */
     private fun switchToAnotherCode() {
         languageTextField.document.setText(currentCodes[currentRequestNumber - 1])
-        updateTestCase()
         updateUI()
     }
 
@@ -642,7 +634,7 @@ class TestCasePanelFactory(
     /**
      * Updates the current test case with the specified test name and test code.
      */
-    private fun updateTestCase() {
+    private fun updateTestCaseInformation() {
         testCase.testName =
             project.service<JavaClassBuilderService>()
                 .getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)

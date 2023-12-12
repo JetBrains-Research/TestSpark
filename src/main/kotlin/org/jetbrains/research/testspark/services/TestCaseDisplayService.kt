@@ -1,14 +1,14 @@
 package org.jetbrains.research.testspark.services
 
-import com.intellij.coverage.CoverageSuitesBundle
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
@@ -27,10 +27,8 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
-import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.editor.Workspace
@@ -39,7 +37,6 @@ import java.awt.Color
 import java.awt.Dimension
 import java.io.File
 import java.util.Locale
-import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
@@ -48,7 +45,6 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
-import javax.swing.border.Border
 
 @Service(Service.Level.PROJECT)
 class TestCaseDisplayService(private val project: Project) {
@@ -68,21 +64,17 @@ class TestCaseDisplayService(private val project: Project) {
     )
 
     private var testCasePanels: HashMap<String, JPanel> = HashMap()
-    private var originalTestCases: HashMap<String, String> = HashMap()
 
     private var testsSelected: Int = 0
 
     // Default color for the editors in the tool window
     private var defaultEditorColor: Color? = null
-    private var defaultBorder: Border? = null
 
     // Content Manager to be able to add / remove tabs from tool window
     private var contentManager: ContentManager? = null
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
-
-    private var currentJacocoCoverageBundle: CoverageSuitesBundle? = null
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -99,60 +91,39 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Sets the JaCoCo report for the coverage suites bundle.
-     *
-     * @param coverageSuitesBundle The coverage suites bundle to set the JaCoCo report for.
-     */
-    fun setJacocoReport(coverageSuitesBundle: CoverageSuitesBundle) {
-        currentJacocoCoverageBundle = coverageSuitesBundle
-    }
-
-    /**
-     * Creates the complete panel in the "Generated Tests" tab,
-     * and adds the "Generated Tests" tab to the sidebar tool window.
-     *
-     * @param editor editor instance where coverage should be
-     *               visualized
-     */
-    fun showGeneratedTests(editor: Editor) {
-        displayTestCases(project.service<Workspace>().testJob!!.report, editor)
-        createToolWindowTab()
-    }
-
-    /**
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
-     *
-     * @param testReport The report from which each testcase should be displayed
-     * @param editor editor instance where coverage should be
-     *               visualized
      */
-    private fun displayTestCases(testReport: Report, editor: Editor) {
+    fun displayTestCases() {
+        val report = project.service<ReportLockingService>().getReport()
+        val editor = project.service<Workspace>().editor!!
+
         allTestCasePanel.removeAll()
         testCasePanels.clear()
-        originalTestCases.clear()
 
         addSeparator()
 
-        testReport.testCaseList.values.forEach {
+        // TestCasePanelFactories array
+        val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
+
+        report.testCaseList.values.forEach {
             val testCase = it
             val testCasePanel = JPanel()
             testCasePanel.layout = BorderLayout()
-
-            // Fix Windows line separators
-            originalTestCases[testCase.testName] = testCase.testCode
 
             // Add a checkbox to select the test
             val checkbox = JCheckBox()
             checkbox.isSelected = true
             checkbox.addItemListener {
-                project.messageBus.syncPublisher(COVERAGE_SELECTION_TOGGLE_TOPIC)
-                    .testGenerationResult(testCase.id, checkbox.isSelected, editor)
-
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
-                topButtonsPanelFactory.updateTopLabels()
+                if (checkbox.isSelected)
+                    project.service<ReportLockingService>().selectTestCase(testCase.id)
+                else
+                    project.service<ReportLockingService>().unselectTestCase(testCase.id)
+
+                updateUI()
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
@@ -160,6 +131,8 @@ class TestCaseDisplayService(private val project: Project) {
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+
+            testCasePanelFactories.add(testCasePanelFactory)
 
             testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
@@ -173,6 +146,11 @@ class TestCaseDisplayService(private val project: Project) {
             testsSelected = testCasePanels.size
             topButtonsPanelFactory.updateTopLabels()
         }
+
+        topButtonsPanelFactory.setTestCasePanelFactoriesArray(testCasePanelFactories)
+        topButtonsPanelFactory.updateTopLabels()
+
+        createToolWindowTab()
     }
 
     /**
@@ -258,25 +236,6 @@ class TestCaseDisplayService(private val project: Project) {
             Thread.sleep(10000)
             editor.background = defaultEditorColor
         }.start()
-    }
-
-    /**
-     * Highlight tests failing dynamic validation
-     *
-     * @param names set of test names that fail
-     */
-    fun markFailingTestCases(names: Set<String>) {
-        for (testCase in testCasePanels) {
-            if (names.contains(testCase.key)) {
-                val editor = getEditor(testCase.key) ?: return
-                val highlightColor = JBColor(TestSparkToolTipsBundle.defaultValue("colorName"), Color(255, 0, 0, 90))
-                defaultBorder = editor.border
-                editor.border = BorderFactory.createLineBorder(highlightColor, 3)
-            } else {
-                val editor = getEditor(testCase.key) ?: return
-                editor.border = JBUI.Borders.empty()
-            }
-        }
     }
 
     /**
@@ -412,10 +371,6 @@ class TestCaseDisplayService(private val project: Project) {
             appendTestsToClass(testCaseComponents, psiClass!!, psiJavaFile!!)
         }
 
-        // The scheduled tests will be submitted in the background
-        // (they will be checked every 5 minutes and also when the project is closed)
-        scheduleTelemetry(selectedTestCases)
-
         // Remove the selected test cases from the cache and the tool window UI
         removeSelectedTestCases(selectedTestCasePanels)
 
@@ -504,6 +459,23 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
+     * Utility function that returns the editor for a specific file url,
+     * in case it is opened in the IDE
+     */
+    fun updateEditorForFileUrl(fileUrl: String) {
+        val documentManager = FileDocumentManager.getInstance()
+        // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
+        FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
+            val currentFile = documentManager.getFile(it.document)
+            if (currentFile != null) {
+                if (currentFile.presentableUrl == fileUrl) {
+                    project.service<Workspace>().editor = it
+                }
+            }
+        }
+    }
+
+    /**
      * Creates a new toolWindow tab for the coverage visualisation.
      */
     private fun createToolWindowTab() {
@@ -563,13 +535,6 @@ class TestCaseDisplayService(private val project: Project) {
      * @param testCaseName the name of the test
      */
     fun removeTestCase(testCaseName: String) {
-        // Remove the test from the cache
-        project.service<TestCaseCachingService>()
-            .invalidateFromCache(
-                project.service<Workspace>().testGenerationData.fileUrl,
-                originalTestCases[testCaseName]!!,
-            )
-
         // Update the number of selected test cases if necessary
         if ((testCasePanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
             testsSelected--
@@ -580,23 +545,6 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Remove the test panel
         testCasePanels.remove(testCaseName)
-    }
-
-    /**
-     * Schedules the telemetry for the selected and modified tests.
-     *
-     * @param selectedTestCases the test cases selected by the user
-     */
-    private fun scheduleTelemetry(selectedTestCases: List<String>) {
-        val telemetryService = project.service<TestSparkTelemetryService>()
-        telemetryService.scheduleTestCasesForTelemetry(
-            selectedTestCases.map {
-                val modified = getEditor(it)!!.text
-                val original = originalTestCases[it]!!
-
-                TestSparkTelemetryService.ModifiedTestCase(original, modified)
-            }.filter { it.modified != it.original },
-        )
     }
 
     /**

@@ -8,12 +8,12 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
+import org.jetbrains.research.testspark.DataFilesUtil
 import org.jetbrains.research.testspark.TestSparkBundle
-import org.jetbrains.research.testspark.Util
 import org.jetbrains.research.testspark.actions.getSurroundingClass
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.services.TestCoverageCollectorService
+import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 
 /**
@@ -30,16 +30,9 @@ class Pipeline(
 
     init {
         project.service<Workspace>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
-
-        project.service<Workspace>().testResultDirectory = project.service<TestCoverageCollectorService>().testResultDirectory
-        project.service<Workspace>().testResultName = project.service<TestCoverageCollectorService>().testResultName
-        project.service<Workspace>().resultPath = project.service<TestCoverageCollectorService>().resultPath
-
-        project.service<Workspace>().baseDir = "${project.service<Workspace>().testResultDirectory}${project.service<Workspace>().testResultName}-validation"
-
-        project.service<Workspace>().vFile = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!
-        project.service<Workspace>().fileUrl = project.service<Workspace>().vFile!!.presentableUrl
-        project.service<Workspace>().modificationStamp = project.service<Workspace>().vFile!!.modificationStamp
+        project.service<Workspace>().resultPath = project.service<TestStorageProcessingService>().resultPath
+        project.service<Workspace>().baseDir = "${project.service<TestStorageProcessingService>().testResultDirectory}${project.service<TestStorageProcessingService>().testResultName}-validation"
+        project.service<Workspace>().fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
         project.service<Workspace>().cutPsiClass = getSurroundingClass(
             e.dataContext.getData(CommonDataKeys.PSI_FILE)!!,
@@ -48,17 +41,16 @@ class Pipeline(
         project.service<Workspace>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<Workspace>().cutPsiClass!!.containingFile.virtualFile)!!
 
         project.service<Workspace>().classFQN = project.service<Workspace>().cutPsiClass!!.qualifiedName!!
-        project.service<Workspace>().key = getKey(project, project.service<Workspace>().classFQN!!)
 
-        Util.makeTmp()
-        Util.makeDir(project.service<Workspace>().baseDir!!)
+        DataFilesUtil.makeTmp()
+        DataFilesUtil.makeDir(project.service<Workspace>().baseDir!!)
     }
 
     /**
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-        clearDataBeforeTestGeneration(project, project.service<Workspace>().testResultName!!)
+        clearDataBeforeTestGeneration(project)
 
         val projectBuilder = ProjectBuilder(project)
 

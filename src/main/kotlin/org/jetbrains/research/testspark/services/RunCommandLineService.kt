@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.Util
+import org.jetbrains.research.testspark.DataFilesUtil
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -21,7 +21,7 @@ class RunCommandLineService(private val project: Project) {
         /**
          * Since Windows does not provide bash, use cmd or similar default command line interpreter
          */
-        val process = if (Util.isWindows()) {
+        val process = if (DataFilesUtil.isWindows()) {
             ProcessBuilder()
                 .command("cmd", "/c", cmd.joinToString(" "))
                 .redirectErrorStream(true)

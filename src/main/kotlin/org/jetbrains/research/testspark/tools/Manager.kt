@@ -1,12 +1,14 @@
 package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.RunnerService
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
@@ -129,12 +131,9 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
 
             log.info("Found all $numberOfUsedTool generation results")
 
-            // sends result to Workspace
-            event.project!!.messageBus.syncPublisher(TEST_GENERATION_RESULT_TOPIC).testGenerationResult(
-                getMergeResult(numberOfUsedTool),
-                event.project!!.service<Workspace>().testGenerationData.resultName,
-                event.project!!.service<Workspace>().testGenerationData.fileUrl,
-            )
+            ApplicationManager.getApplication().invokeLater {
+                event.project!!.service<ReportLockingService>().receiveReport(getMergeResult(numberOfUsedTool))
+            }
 
             break
         }
