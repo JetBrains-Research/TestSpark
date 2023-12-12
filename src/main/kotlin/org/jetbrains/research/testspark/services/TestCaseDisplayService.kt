@@ -118,7 +118,12 @@ class TestCaseDisplayService(private val project: Project) {
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
-                topButtonsPanelFactory.updateTopLabels()
+                if (checkbox.isSelected)
+                    project.service<ReportLockingService>().selectTestCase(testCase.id)
+                else
+                    project.service<ReportLockingService>().unselectTestCase(testCase.id)
+
+                updateUI()
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
@@ -264,17 +269,17 @@ class TestCaseDisplayService(private val project: Project) {
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
                 file.isDirectory || (
-                    file.extension?.lowercase(Locale.getDefault()) == "java" && (
-                        PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
-                        ).classes.stream().map { it.name }
-                        .toArray()
-                        .contains(
-                            (
-                                PsiManager.getInstance(project)
-                                    .findFile(file) as PsiJavaFile
-                                ).name.removeSuffix(".java"),
+                        file.extension?.lowercase(Locale.getDefault()) == "java" && (
+                                PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                                ).classes.stream().map { it.name }
+                            .toArray()
+                            .contains(
+                                (
+                                        PsiManager.getInstance(project)
+                                            .findFile(file) as PsiJavaFile
+                                        ).name.removeSuffix(".java"),
+                            )
                         )
-                    )
             }
         }
 

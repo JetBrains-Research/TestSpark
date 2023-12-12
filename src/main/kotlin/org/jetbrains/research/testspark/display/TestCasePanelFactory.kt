@@ -372,7 +372,7 @@ class TestCasePanelFactory(
             testCase.coveredLines = setOf()
         }
 
-        project.service<ReportLockingService>().updateReport(testCase)
+        project.service<ReportLockingService>().updateTestCase(testCase)
         project.service<TestCaseDisplayService>().updateUI()
     }
 

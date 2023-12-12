@@ -13,6 +13,8 @@ class ReportLockingService(private val project: Project) {
     // final report
     private var report: Report? = null
 
+    private val unselectedTestCases = HashMap<Int, TestCase>()
+
     private val log = Logger.getInstance(this.javaClass)
 
     fun getReport() = report!!
@@ -34,7 +36,7 @@ class ReportLockingService(private val project: Project) {
         }
     }
 
-    fun updateReport(testCase: TestCase) {
+    fun updateTestCase(testCase: TestCase) {
         report!!.testCaseList.remove(testCase.id)
         report!!.testCaseList[testCase.id] = testCase
         report!!.normalized()
@@ -43,6 +45,18 @@ class ReportLockingService(private val project: Project) {
 
     fun removeTestCase(testCase: TestCase) {
         report!!.testCaseList.remove(testCase.id)
+        report!!.normalized()
+        project.service<CoverageVisualisationService>().showCoverage(report!!)
+    }
+
+    fun unselectTestCase(testCaseId: Int) {
+        unselectedTestCases[testCaseId] = report!!.testCaseList[testCaseId]!!
+        removeTestCase(report!!.testCaseList[testCaseId]!!)
+    }
+
+    fun selectTestCase(testCaseId: Int) {
+        report!!.testCaseList[testCaseId] = unselectedTestCases[testCaseId]!!
+        unselectedTestCases.remove(testCaseId)
         report!!.normalized()
         project.service<CoverageVisualisationService>().showCoverage(report!!)
     }
