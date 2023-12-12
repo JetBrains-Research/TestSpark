@@ -462,14 +462,20 @@ class TestCaseDisplayService(private val project: Project) {
 
         // insert tests to a code
         testCaseComponents.reversed().forEach {
+            val testMethodCode = project
+                .service<JavaClassBuilderService>()
+                .getTestMethodCodeFromClassWithTestCase(
+                    project.service<JavaClassBuilderService>().formatJavaCode(
+                        it.replace("\r\n", "\n")
+                            .replace("verifyException(", "// verifyException("),
+                    ),
+                )
+                // Fix Windows line separators
+                .replace("\r\n", "\n")
+
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
-                // Fix Windows line separators
-                project.service<JavaClassBuilderService>().getTestMethodCodeFromClassWithTestCase(
-                    project.service<JavaClassBuilderService>().formatJavaCode(
-                        it.replace("\r\n", "\n").replace("verifyException(", "// verifyException("),
-                    ),
-                ),
+                testMethodCode,
             )
         }
 
