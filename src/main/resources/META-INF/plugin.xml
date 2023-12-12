@@ -36,6 +36,11 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.1.8</h4>
+            <ul>
+                <li>Fixed Windows compatibility issues</li>
+                <li>Improve and refactor the test execution process</li>
+            </ul>
         <h4>0.1.7</h4>
             <ul>
                 <li>Fixed minor bugs and improve new test generation UI</li>
