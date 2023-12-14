@@ -1,6 +1,8 @@
 package org.jetbrains.research.testspark.display
 
 import com.intellij.lang.Language
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
@@ -181,6 +183,14 @@ class TestCasePanelFactory(
                 ),
                 null,
             )
+            NotificationGroupManager.getInstance()
+                .getNotificationGroup("Test case copied")
+                .createNotification(
+                    "",
+                    TestSparkBundle.message("testCaseCopied"),
+                    NotificationType.INFORMATION,
+                )
+                .notify(project)
         }
 
         updateRequestLabel()
