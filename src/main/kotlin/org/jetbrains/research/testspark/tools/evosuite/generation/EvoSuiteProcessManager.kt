@@ -14,7 +14,7 @@ import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.Level
+import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.Technique
 import org.jetbrains.research.testspark.editor.Workspace
@@ -25,7 +25,6 @@ import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.getKey
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
@@ -96,13 +95,12 @@ class EvoSuiteProcessManager(
 
             // get command
             val command = when (codeType.type!!) {
-                Level.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).build()
-                Level.METHOD -> {
-                    project.service<Workspace>().key = getKey(project, "$classFQN#${codeType.objectDescription}")
+                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).build()
+                CodeType.METHOD -> {
                     SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forMethod(codeType.objectDescription).build()
                 }
 
-                Level.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
+                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
             }
 
             if (settingsApplicationState.seed.isNotBlank()) command.add("-seed=${settingsApplicationState.seed}")

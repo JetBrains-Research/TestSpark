@@ -5,7 +5,6 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.awt.Dimension
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -16,6 +15,7 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 
 class TopButtonsPanelFactory(private val project: Project) {
+    private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
         createButton(TestSparkIcons.selectAll, TestSparkLabelsBundle.defaultValue("selectAllTip"))
     private var unselectAllButton: JButton =
@@ -29,6 +29,8 @@ class TopButtonsPanelFactory(private val project: Project) {
     private val testsPassedText: String = "${TestSparkLabelsBundle.defaultValue("testsPassed")}: %d/%d"
     private var testsPassedLabel: JLabel = JLabel(testsPassedText)
 
+    private val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
+
     fun getPanel(): JPanel {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
@@ -38,6 +40,7 @@ class TopButtonsPanelFactory(private val project: Project) {
         panel.add(Box.createRigidArea(Dimension(10, 0)))
         panel.add(testsSelectedLabel)
         panel.add(Box.createHorizontalGlue())
+        panel.add(runAllButton)
         panel.add(selectAllButton)
         panel.add(unselectAllButton)
         panel.add(removeAllButton)
@@ -45,6 +48,7 @@ class TopButtonsPanelFactory(private val project: Project) {
         selectAllButton.addActionListener { toggleAllCheckboxes(true) }
         unselectAllButton.addActionListener { toggleAllCheckboxes(false) }
         removeAllButton.addActionListener { removeAllTestCases() }
+        runAllButton.addActionListener { runAllTestCases() }
 
         return panel
     }
@@ -53,6 +57,12 @@ class TopButtonsPanelFactory(private val project: Project) {
      * Updates the labels.
      */
     fun updateTopLabels() {
+        var numberOfPassedTests = 0
+        for (testCasePanelFactory in testCasePanelFactories) {
+            if (testCasePanelFactory.getError() == "") {
+                numberOfPassedTests++
+            }
+        }
         testsSelectedLabel.text = String.format(
             testsSelectedText,
             project.service<TestCaseDisplayService>().getTestsSelected(),
@@ -61,10 +71,22 @@ class TopButtonsPanelFactory(private val project: Project) {
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
-                project.service<TestCaseDisplayService>()
-                    .getTestCasePanels().size - project.service<TestsExecutionResultService>().size(),
+                numberOfPassedTests,
                 project.service<TestCaseDisplayService>().getTestCasePanels().size,
             )
+        runAllButton.isEnabled = false
+        for (testCasePanelFactory in testCasePanelFactories) {
+            runAllButton.isEnabled = runAllButton.isEnabled || testCasePanelFactory.isRunEnabled()
+        }
+    }
+
+    /**
+     * Sets the array of TestCasePanelFactory objects.
+     *
+     * @param testCasePanelFactories The ArrayList containing the TestCasePanelFactory objects to be set.
+     */
+    fun setTestCasePanelFactoriesArray(testCasePanelFactories: ArrayList<TestCasePanelFactory>) {
+        this.testCasePanelFactories.addAll(testCasePanelFactories)
     }
 
     /**
@@ -99,5 +121,43 @@ class TopButtonsPanelFactory(private val project: Project) {
         if (choice == JOptionPane.NO_OPTION) return
 
         project.service<TestCaseDisplayService>().clear()
+    }
+
+    /**
+     * Executes all test cases.
+     *
+     * This method presents a caution message to the user and asks for confirmation before executing the test cases.
+     * If the user confirms, it iterates through each test case panel factory and runs the corresponding test.
+     */
+    private fun runAllTestCases() {
+        val choice = JOptionPane.showConfirmDialog(
+            null,
+            TestSparkBundle.message("runCautionMessage"),
+            TestSparkBundle.message("confirmationTitle"),
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.WARNING_MESSAGE,
+        )
+
+        if (choice == JOptionPane.CANCEL_OPTION) return
+
+        runAllButton.isEnabled = false
+
+        for (testCasePanelFactory in testCasePanelFactories) {
+            // todo use doClick() function after removing JOptionPane
+            testCasePanelFactory.runTest()
+        }
+    }
+
+    /**
+     * Creates a JButton for running all tests.
+     *
+     * @return a JButton for running all tests
+     */
+    private fun createRunAllTestButton(): JButton {
+        val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("runAll"), TestSparkIcons.runTest)
+        runTestButton.isOpaque = false
+        runTestButton.isContentAreaFilled = false
+        runTestButton.isBorderPainted = true
+        return runTestButton
     }
 }

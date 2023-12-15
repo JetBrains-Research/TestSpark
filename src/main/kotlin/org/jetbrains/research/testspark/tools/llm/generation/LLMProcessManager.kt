@@ -6,22 +6,23 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.Level
+import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.Technique
+import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.TestCoverageCollectorService
+import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.getKey
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
@@ -70,13 +71,6 @@ class LLMProcessManager(
             return
         }
 
-        if (codeType.type == Level.METHOD) {
-            project.service<Workspace>().key = getKey(
-                project,
-                "${project.service<Workspace>().classFQN}#${codeType.objectDescription}",
-            )
-        }
-
         // update build path
         var buildPath = project.service<Workspace>().projectClassPath!!
         if (settingsProjectState.buildPath.isEmpty()) {
@@ -94,7 +88,7 @@ class LLMProcessManager(
 
         var generatedTestsArePassing = false
 
-        var report: Report? = null
+        val report = Report()
 
         var requestsCount = 0
         var warningMessage = ""
@@ -138,7 +132,8 @@ class LLMProcessManager(
             // Empty response checking
             if (generatedTestSuite.testCases.isEmpty()) {
                 warningMessage = TestSparkBundle.message("emptyResponse")
-                messageToPrompt = "You have provided an empty answer! Please answer my previous question with the same formats."
+                messageToPrompt =
+                    "You have provided an empty answer! Please answer my previous question with the same formats."
                 continue
             }
 
@@ -149,7 +144,7 @@ class LLMProcessManager(
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
                     generatedTestCasesPaths.add(
-                        project.service<TestCoverageCollectorService>().saveGeneratedTests(
+                        project.service<TestStorageProcessingService>().saveGeneratedTest(
                             generatedTestSuite.packageString,
                             generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
                             project.service<Workspace>().resultPath!!,
@@ -159,7 +154,7 @@ class LLMProcessManager(
                 }
             }
 
-            val generatedTestPath: String = project.service<TestCoverageCollectorService>().saveGeneratedTests(
+            val generatedTestPath: String = project.service<TestStorageProcessingService>().saveGeneratedTest(
                 generatedTestSuite.packageString,
                 generatedTestSuite.toStringWithoutExpectedException(),
                 project.service<Workspace>().resultPath!!,
@@ -174,21 +169,18 @@ class LLMProcessManager(
                 break
             }
 
-            // Collect coverage information for each generated test method and display it
-            val coverageCollector = TestCoverageCollector(
-                indicator,
-                project,
-                generatedTestCasesPaths,
-                File(generatedTestPath),
-                generatedTestSuite.getPrintablePackageString(),
-                buildPath,
-                if (!isLastIteration(requestsCount)) generatedTestSuite.testCases else project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList(),
-            )
+            // Get test cases
+            val testCases: MutableList<TestCaseGeneratedByLLM> =
+                if (!isLastIteration(requestsCount)) {
+                    generatedTestSuite.testCases
+                } else {
+                    project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList()
+                }
 
-            // compile the test file
+            // Compile the test file
             indicator.text = TestSparkBundle.message("compilationTestsChecking")
-            val separateCompilationResult = coverageCollector.compileTestCases()
-            val commonCompilationResult = project.service<TestCoverageCollectorService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
+            val separateCompilationResult = project.service<TestStorageProcessingService>().compileTestCases(generatedTestCasesPaths, buildPath, testCases)
+            val commonCompilationResult = project.service<TestStorageProcessingService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!separateCompilationResult && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n$generatedTestSuite")
@@ -200,7 +192,10 @@ class LLMProcessManager(
             log.info("Result is compilable")
 
             generatedTestsArePassing = true
-            report = coverageCollector.collect()
+
+            for (index in testCases.indices) {
+                report.testCaseList[index] = TestCase(index, testCases[index].name, testCases[index].toString(), setOf(), setOf(), setOf())
+            }
         }
 
         if (processStopped(project, indicator)) return
@@ -212,7 +207,7 @@ class LLMProcessManager(
 
         saveData(
             project,
-            report!!,
+            report,
             getPackageFromTestSuiteCode(generatedTestSuite.toString()),
             getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), project.service<Workspace>().classFQN!!),
             indicator,

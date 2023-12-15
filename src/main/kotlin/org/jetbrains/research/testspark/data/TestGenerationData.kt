@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.data
 
-import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 
 /**
@@ -17,13 +16,6 @@ class TestGenerationData {
     var packageLine: String = ""
     var runWith: String = ""
     var otherInfo: String = ""
-
-    // Maps a workspace file to the test generation jobs that were triggered on it.
-    // Currently, the file key is represented by its presentableUrl
-    var testGenerationResults: HashMap<String, ArrayList<Workspace.TestJob>> = HashMap()
-
-    // Maps a test generation job id to its corresponding test job information
-    var pendingTestResults: HashMap<String, Workspace.TestJobInfo> = HashMap()
 
     // changing parameters with a large prompt
     var polyDepthReducing: Int = 0
@@ -43,8 +35,6 @@ class TestGenerationData {
         packageLine = ""
         runWith = ""
         otherInfo = ""
-        testGenerationResults.clear()
-        pendingTestResults.clear()
         polyDepthReducing = 0
         inputParamsDepthReducing = 0
         compilableTestCases.clear()

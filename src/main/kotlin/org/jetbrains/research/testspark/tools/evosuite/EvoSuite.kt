@@ -18,6 +18,7 @@ import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.tools.evosuite.generation.EvoSuiteProcessManager
 import org.jetbrains.research.testspark.tools.template.Tool
+import java.io.File
 
 /**
  * Represents the EvoSuite class, which is a tool used to generate tests for Java code.
@@ -32,7 +33,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         val project: Project = e.project!!
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val settingsProjectState = project.service<SettingsProjectService>().state
-        val buildPath = "$projectClassPath/${settingsProjectState.buildPath}"
+        val buildPath = "$projectClassPath${File.separatorChar}${settingsProjectState.buildPath}"
         return EvoSuiteProcessManager(project, buildPath)
     }
 
