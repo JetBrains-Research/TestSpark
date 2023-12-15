@@ -71,9 +71,9 @@ class PromptManager(
 
         // Show warning in case of depth reduction
         if ((
-                project.service<Workspace>().testGenerationData.polyDepthReducing != 0 ||
-                    project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0
-                ) &&
+            project.service<Workspace>().testGenerationData.polyDepthReducing != 0 ||
+                project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0
+            ) &&
             isPromptLengthWithinLimit(prompt)
         ) {
             llmErrorManager.warningProcess(
