@@ -82,8 +82,8 @@ class Llm(override val name: String = "LLM") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
-        val level = FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod))
-        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, level), level)
+        val fragmentToTestData = FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod))
+        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, fragmentToTestData), fragmentToTestData)
     }
 
     /**
@@ -96,7 +96,7 @@ class Llm(override val name: String = "LLM") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
-        val level = FragmentToTestData(CodeType.LINE, selectedLine)
-        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, level), level)
+        val fragmentToTestData = FragmentToTestData(CodeType.LINE, selectedLine)
+        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, fragmentToTestData), fragmentToTestData)
     }
 }

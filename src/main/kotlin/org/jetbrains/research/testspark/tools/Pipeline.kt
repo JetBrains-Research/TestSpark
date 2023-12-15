@@ -16,7 +16,6 @@ import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.CollectorService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import java.util.UUID
 
 /**
  * Pipeline class represents a pipeline for running the test generation process.
@@ -45,7 +44,7 @@ class Pipeline(
 
         project.service<Workspace>().classFQN = project.service<Workspace>().cutPsiClass!!.qualifiedName!!
 
-        project.service<Workspace>().id = UUID.randomUUID().toString()
+        project.service<Workspace>().id = project.service<TestStorageProcessingService>().id
 
         DataFilesUtil.makeTmp()
         DataFilesUtil.makeDir(project.service<Workspace>().baseDir!!)
