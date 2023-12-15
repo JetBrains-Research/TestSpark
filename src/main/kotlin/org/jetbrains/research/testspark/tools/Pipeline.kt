@@ -13,10 +13,10 @@ import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.actions.getSurroundingClass
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.editor.Workspace
-import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.CollectorService
+import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import java.util.*
+import java.util.UUID
 
 /**
  * Pipeline class represents a pipeline for running the test generation process.

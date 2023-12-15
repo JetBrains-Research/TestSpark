@@ -13,8 +13,8 @@ import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.actions.getClassFullText
 import org.jetbrains.research.testspark.actions.getSignatureString
-import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.PROMPT_KEYWORD
@@ -71,9 +71,9 @@ class PromptManager(
 
         // Show warning in case of depth reduction
         if ((
-            project.service<Workspace>().testGenerationData.polyDepthReducing != 0 ||
-                project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0
-            ) &&
+                project.service<Workspace>().testGenerationData.polyDepthReducing != 0 ||
+                    project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0
+                ) &&
             isPromptLengthWithinLimit(prompt)
         ) {
             llmErrorManager.warningProcess(

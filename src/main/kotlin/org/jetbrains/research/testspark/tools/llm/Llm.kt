@@ -12,8 +12,8 @@ import org.jetbrains.research.testspark.actions.createLLMPipeline
 import org.jetbrains.research.testspark.actions.getSurroundingClass
 import org.jetbrains.research.testspark.actions.getSurroundingLine
 import org.jetbrains.research.testspark.actions.getSurroundingMethod
-import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager

@@ -6,7 +6,6 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.TestSparkBundle
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.Technique
 import org.jetbrains.research.testspark.data.TestCase
