@@ -7,7 +7,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import org.jetbrains.research.testspark.DataFilesUtil
-import org.jetbrains.research.testspark.data.Level
+import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.Technique
 import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
@@ -48,7 +48,7 @@ class Workspace {
 
     var id: String? = null
     var technique: Technique? = null
-    var level: Level? = null
+    var codeType: CodeType? = null
     var testGenerationStartTime: Long? = null
 
     var testGenerationData = TestGenerationData()

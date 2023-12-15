@@ -167,7 +167,7 @@ class TestCasePanelFactory(
                 true,
                 getTestId(),
                 project.service<Workspace>().technique!!,
-                project.service<Workspace>().level!!,
+                project.service<Workspace>().codeType!!,
                 testCase.testCode != initialCodes[currentRequestNumber - 1],
             )
         }
@@ -184,7 +184,7 @@ class TestCasePanelFactory(
                 false,
                 getTestId(),
                 project.service<Workspace>().technique!!,
-                project.service<Workspace>().level!!,
+                project.service<Workspace>().codeType!!,
                 testCase.testCode != initialCodes[currentRequestNumber - 1],
             )
         }
@@ -410,7 +410,7 @@ class TestCasePanelFactory(
                     project.service<CollectorService>().feedbackSentCollector.logEvent(
                         project.service<Workspace>().id!! + "_" + testCase.id,
                         project.service<Workspace>().technique!!,
-                        project.service<Workspace>().level!!,
+                        project.service<Workspace>().codeType!!,
                         testCase.testCode != initialCodes[currentRequestNumber - 1],
                     )
 
@@ -516,6 +516,8 @@ class TestCasePanelFactory(
             updateUI()
         }
     }
+
+    fun isGlobalModified(): Boolean = testCase.testCode != initialCodes[0]
 
     /**
      * Resets the language text field to the code from the last test run and updates the UI accordingly.

@@ -16,6 +16,7 @@ import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.CollectorService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
+import java.util.*
 
 /**
  * Pipeline class represents a pipeline for running the test generation process.
@@ -44,6 +45,8 @@ class Pipeline(
 
         project.service<Workspace>().classFQN = project.service<Workspace>().cutPsiClass!!.qualifiedName!!
 
+        project.service<Workspace>().id = UUID.randomUUID().toString()
+
         DataFilesUtil.makeTmp()
         DataFilesUtil.makeDir(project.service<Workspace>().baseDir!!)
     }
@@ -51,17 +54,17 @@ class Pipeline(
     /**
      * Builds the project and launches generation on a separate thread.
      */
-    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
+    fun runTestGeneration(processManager: ProcessManager, fragmentToTestData: FragmentToTestData) {
         clearDataBeforeTestGeneration(project)
 
         project.service<Workspace>().technique = processManager.getTechnique()
-        project.service<Workspace>().level = codeType.type!!
+        project.service<Workspace>().codeType = fragmentToTestData.type!!
         project.service<Workspace>().testGenerationStartTime = System.currentTimeMillis()
 
         // Add collector logging
         project.service<CollectorService>().testGenerationStartedCollector.logEvent(
             project.service<Workspace>().technique!!,
-            project.service<Workspace>().level!!,
+            project.service<Workspace>().codeType!!,
         )
 
         val projectBuilder = ProjectBuilder(project)
@@ -76,7 +79,7 @@ class Pipeline(
 
                         processManager.runTestGenerator(
                             indicator,
-                            codeType,
+                            fragmentToTestData,
                             packageName,
                         )
                     }

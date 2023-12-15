@@ -13,7 +13,7 @@ import org.jetbrains.research.testspark.actions.getSurroundingClass
 import org.jetbrains.research.testspark.actions.getSurroundingLine
 import org.jetbrains.research.testspark.actions.getSurroundingMethod
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.Level
+import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
@@ -67,7 +67,7 @@ class Llm(override val name: String = "LLM") : Tool {
      */
     override fun generateTestsForClass(e: AnActionEvent) {
         if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) return
-        val codeType = FragmentToTestData(Level.CLASS)
+        val codeType = FragmentToTestData(CodeType.CLASS)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 
@@ -82,7 +82,7 @@ class Llm(override val name: String = "LLM") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
-        val level = FragmentToTestData(Level.METHOD, generateMethodDescriptor(psiMethod))
+        val level = FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod))
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, level), level)
     }
 
@@ -96,7 +96,7 @@ class Llm(override val name: String = "LLM") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
-        val level = FragmentToTestData(Level.LINE, selectedLine)
+        val level = FragmentToTestData(CodeType.LINE, selectedLine)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, level), level)
     }
 }

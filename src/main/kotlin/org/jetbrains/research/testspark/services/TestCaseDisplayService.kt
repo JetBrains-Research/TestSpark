@@ -76,6 +76,9 @@ class TestCaseDisplayService(private val project: Project) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
 
+    // TestCasePanelFactories array
+    private val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
+
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
@@ -102,9 +105,6 @@ class TestCaseDisplayService(private val project: Project) {
         testCasePanels.clear()
 
         addSeparator()
-
-        // TestCasePanelFactories array
-        val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
 
         report.testCaseList.values.forEach {
             val testCase = it
@@ -156,14 +156,14 @@ class TestCaseDisplayService(private val project: Project) {
         project.service<CollectorService>().testGenerationFinishedCollector.logEvent(
             System.currentTimeMillis() - project.service<Workspace>().testGenerationStartTime!!,
             project.service<Workspace>().technique!!,
-            project.service<Workspace>().level!!,
+            project.service<Workspace>().codeType!!,
         )
 
         // Add collector logging
         project.service<CollectorService>().generatedTestsCollector.logEvent(
             report.testCaseList.size,
             project.service<Workspace>().technique!!,
-            project.service<Workspace>().level!!,
+            project.service<Workspace>().codeType!!,
         )
     }
 
@@ -278,15 +278,15 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Get number of modified tests
         var modifiedTestsCount = 0
-        for (index in selectedTestCases.indices) {
-            if (originalTestCases[selectedTestCases[index]] != testCaseComponents[index]) modifiedTestsCount++
+        for (testCasePanelFactory in testCasePanelFactories) {
+            if (testCasePanelFactory.isGlobalModified()) modifiedTestsCount++
         }
 
         // Add collector logging
         project.service<CollectorService>().integratedTestsCollector.logEvent(
             selectedTestCases.size,
             project.service<Workspace>().technique!!,
-            project.service<Workspace>().level!!,
+            project.service<Workspace>().codeType!!,
             modifiedTestsCount,
         )
 
