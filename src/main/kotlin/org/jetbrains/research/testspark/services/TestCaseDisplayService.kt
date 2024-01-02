@@ -31,7 +31,6 @@ import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
-import org.jetbrains.research.testspark.editor.Workspace
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -96,7 +95,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     fun displayTestCases() {
         val report = project.service<ReportLockingService>().getReport()
-        val editor = project.service<Workspace>().editor!!
+        val editor = project.service<ProjectContextService>().editor!!
 
         allTestCasePanel.removeAll()
         testCasePanels.clear()
@@ -118,10 +117,11 @@ class TestCaseDisplayService(private val project: Project) {
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
-                if (checkbox.isSelected)
+                if (checkbox.isSelected) {
                     project.service<ReportLockingService>().selectTestCase(testCase.id)
-                else
+                } else {
                     project.service<ReportLockingService>().unselectTestCase(testCase.id)
+                }
 
                 updateUI()
             }
@@ -224,7 +224,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Removes all coverage highlighting from the editor.
      */
     private fun removeAllHighlights() {
-        project.service<Workspace>().editor?.markupModel?.removeAllHighlighters()
+        project.service<ProjectContextService>().editor?.markupModel?.removeAllHighlighters()
     }
 
     /**
@@ -350,8 +350,8 @@ class TestCaseDisplayService(private val project: Project) {
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
 
-                if (project.service<Workspace>().testGenerationData.runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<Workspace>().testGenerationData.runWith})")
+                if (project.service<ProjectContextService>().testGenerationData.runWith.isNotEmpty()) {
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<ProjectContextService>().testGenerationData.runWith})")
                 }
 
                 psiJavaFile!!.add(psiClass!!)
@@ -437,23 +437,23 @@ class TestCaseDisplayService(private val project: Project) {
         // insert other info to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             selectedClass.rBrace!!.textRange.startOffset,
-            project.service<Workspace>().testGenerationData.otherInfo + "\n",
+            project.service<ProjectContextService>().testGenerationData.otherInfo + "\n",
         )
 
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            project.service<Workspace>().testGenerationData.importsCode.joinToString("\n") + "\n\n",
+            project.service<ProjectContextService>().testGenerationData.importsCode.joinToString("\n") + "\n\n",
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
             .insertString(
                 0,
-                if (project.service<Workspace>().testGenerationData.packageLine.isEmpty()) {
+                if (project.service<ProjectContextService>().testGenerationData.packageLine.isEmpty()) {
                     ""
                 } else {
-                    "package ${project.service<Workspace>().testGenerationData.packageLine};\n\n"
+                    "package ${project.service<ProjectContextService>().testGenerationData.packageLine};\n\n"
                 },
             )
     }
@@ -469,7 +469,7 @@ class TestCaseDisplayService(private val project: Project) {
             val currentFile = documentManager.getFile(it.document)
             if (currentFile != null) {
                 if (currentFile.presentableUrl == fileUrl) {
-                    project.service<Workspace>().editor = it
+                    project.service<ProjectContextService>().editor = it
                 }
             }
         }

@@ -10,14 +10,14 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.actions.getClassFullText
 import org.jetbrains.research.testspark.actions.getSignatureString
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.PROMPT_KEYWORD
+import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
@@ -54,14 +54,14 @@ class PromptManager(
             if (!isPromptLengthWithinLimit(prompt)) {
                 // depth of polymorphism reducing
                 if (SettingsArguments.maxPolyDepth(project) > 1) {
-                    project.service<Workspace>().testGenerationData.polyDepthReducing++
+                    project.service<ProjectContextService>().testGenerationData.polyDepthReducing++
                     log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
                     continue
                 }
 
                 // depth of input params reducing
                 if (SettingsArguments.maxInputParamsDepth(project) > 1) {
-                    project.service<Workspace>().testGenerationData.inputParamsDepthReducing++
+                    project.service<ProjectContextService>().testGenerationData.inputParamsDepthReducing++
                     log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
                     continue
                 }
@@ -71,9 +71,9 @@ class PromptManager(
 
         // Show warning in case of depth reduction
         if ((
-            project.service<Workspace>().testGenerationData.polyDepthReducing != 0 ||
-                project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0
-            ) &&
+                project.service<ProjectContextService>().testGenerationData.polyDepthReducing != 0 ||
+                    project.service<ProjectContextService>().testGenerationData.inputParamsDepthReducing != 0
+                ) &&
             isPromptLengthWithinLimit(prompt)
         ) {
             llmErrorManager.warningProcess(

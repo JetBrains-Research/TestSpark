@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 
 /**
@@ -39,14 +39,14 @@ class SettingsArguments {
          * @param project the project for which to retrieve the maximum input parameters depth value
          * @return The maximum depth for input parameters.
          */
-        fun maxInputParamsDepth(project: Project): Int = settingsState!!.maxInputParamsDepth - project.service<Workspace>().testGenerationData.inputParamsDepthReducing
+        fun maxInputParamsDepth(project: Project): Int = settingsState!!.maxInputParamsDepth - project.service<ProjectContextService>().testGenerationData.inputParamsDepthReducing
 
         /**
          * Returns the maximum depth of polymorphism.
          *
          * @return The maximum depth of polymorphism.
          */
-        fun maxPolyDepth(project: Project): Int = settingsState!!.maxPolyDepth - project.service<Workspace>().testGenerationData.polyDepthReducing
+        fun maxPolyDepth(project: Project): Int = settingsState!!.maxPolyDepth - project.service<ProjectContextService>().testGenerationData.polyDepthReducing
 
         /**
          * Checks if the token is set for the user in the settings.

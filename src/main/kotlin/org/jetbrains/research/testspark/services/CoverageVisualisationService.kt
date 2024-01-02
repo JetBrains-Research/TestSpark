@@ -15,7 +15,6 @@ import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.coverage.CoverageRenderer
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.editor.Workspace
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -96,7 +95,7 @@ class CoverageVisualisationService(private val project: Project) {
         testReport: Report,
     ) {
         currentHighlightedData =
-            HighlightedData(linesToCover, selectedTests, testReport, project.service<Workspace>().editor!!)
+            HighlightedData(linesToCover, selectedTests, testReport, project.service<ProjectContextService>().editor!!)
         clear()
 
         val settingsProjectState = project.service<SettingsProjectService>().state
@@ -141,7 +140,7 @@ class CoverageVisualisationService(private val project: Project) {
             for (i in linesToCover) {
                 val line = i - 1
 
-                val hl = project.service<Workspace>().editor!!.markupModel.addLineHighlighter(
+                val hl = project.service<ProjectContextService>().editor!!.markupModel.addLineHighlighter(
                     line,
                     HighlighterLayer.ADDITIONAL_SYNTAX,
                     textAttribute

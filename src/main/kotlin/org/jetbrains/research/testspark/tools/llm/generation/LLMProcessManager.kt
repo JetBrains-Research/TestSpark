@@ -8,10 +8,10 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
-import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMChatService
+import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -70,7 +70,7 @@ class LLMProcessManager(
         }
 
         // update build path
-        var buildPath = project.service<Workspace>().projectClassPath!!
+        var buildPath = project.service<ProjectContextService>().projectClassPath!!
         if (settingsProjectState.buildPath.isEmpty()) {
             // User did not set own path
             buildPath = getBuildPath(project)
@@ -106,7 +106,7 @@ class LLMProcessManager(
             if (processStopped(project, indicator)) return
 
             // Ending loop checking
-            if (isLastIteration(requestsCount) && project.service<Workspace>().testGenerationData.compilableTestCases.isEmpty()) {
+            if (isLastIteration(requestsCount) && project.service<ProjectContextService>().testGenerationData.compilableTestCases.isEmpty()) {
                 llmErrorManager.errorProcess(TestSparkBundle.message("invalidLLMResult"), project)
                 break
             }
@@ -138,14 +138,14 @@ class LLMProcessManager(
             // Save the generated TestSuite into a temp file
             val generatedTestCasesPaths: MutableList<String> = mutableListOf()
             if (isLastIteration(requestsCount)) {
-                generatedTestSuite.updateTestCases(project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList())
+                generatedTestSuite.updateTestCases(project.service<ProjectContextService>().testGenerationData.compilableTestCases.toMutableList())
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
                     generatedTestCasesPaths.add(
                         project.service<TestStorageProcessingService>().saveGeneratedTest(
                             generatedTestSuite.packageString,
                             generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
-                            project.service<Workspace>().resultPath!!,
+                            project.service<ProjectContextService>().resultPath!!,
                             "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java",
                         ),
                     )
@@ -155,7 +155,7 @@ class LLMProcessManager(
             val generatedTestPath: String = project.service<TestStorageProcessingService>().saveGeneratedTest(
                 generatedTestSuite.packageString,
                 generatedTestSuite.toStringWithoutExpectedException(),
-                project.service<Workspace>().resultPath!!,
+                project.service<ProjectContextService>().resultPath!!,
                 testFileName,
             )
 
@@ -172,7 +172,7 @@ class LLMProcessManager(
                 if (!isLastIteration(requestsCount)) {
                     generatedTestSuite.testCases
                 } else {
-                    project.service<Workspace>().testGenerationData.compilableTestCases.toMutableList()
+                    project.service<ProjectContextService>().testGenerationData.compilableTestCases.toMutableList()
                 }
 
             // Compile the test file
@@ -207,7 +207,7 @@ class LLMProcessManager(
             project,
             report,
             getPackageFromTestSuiteCode(generatedTestSuite.toString()),
-            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), project.service<Workspace>().classFQN!!),
+            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), project.service<ProjectContextService>().classFQN!!),
             indicator,
         )
     }

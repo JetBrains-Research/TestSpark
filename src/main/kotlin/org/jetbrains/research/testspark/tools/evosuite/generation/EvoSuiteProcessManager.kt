@@ -16,7 +16,7 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.RunCommandLineService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
@@ -85,12 +85,12 @@ class EvoSuiteProcessManager(
                 return
             }
 
-            val projectClassPath = project.service<Workspace>().projectClassPath!!
-            val classFQN = project.service<Workspace>().classFQN!!
-            val baseDir = project.service<Workspace>().baseDir!!
-            val resultName = "${project.service<Workspace>().resultPath}${sep}EvoSuiteResult"
+            val projectClassPath = project.service<ProjectContextService>().projectClassPath!!
+            val classFQN = project.service<ProjectContextService>().classFQN!!
+            val baseDir = project.service<ProjectContextService>().baseDir!!
+            val resultName = "${project.service<ProjectContextService>().resultPath}${sep}EvoSuiteResult"
 
-            Path(project.service<Workspace>().resultPath!!).createDirectories()
+            Path(project.service<ProjectContextService>().resultPath!!).createDirectories()
 
             // get command
             val command = when (codeType.type!!) {

@@ -8,9 +8,9 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
@@ -62,11 +62,10 @@ fun saveData(
     importsCode: MutableSet<String>,
     indicator: ProgressIndicator,
 ) {
-    val workspace = project.service<Workspace>()
-    workspace.testGenerationData.resultName = project.service<TestStorageProcessingService>().testResultName!!
-    workspace.testGenerationData.fileUrl = project.service<Workspace>().fileUrl!!
-    workspace.testGenerationData.packageLine = packageLine
-    workspace.testGenerationData.importsCode.addAll(importsCode)
+    project.service<ProjectContextService>().testGenerationData.resultName = project.service<TestStorageProcessingService>().testResultName!!
+    project.service<ProjectContextService>().testGenerationData.fileUrl = project.service<ProjectContextService>().fileUrl!!
+    project.service<ProjectContextService>().testGenerationData.packageLine = packageLine
+    project.service<ProjectContextService>().testGenerationData.importsCode.addAll(importsCode)
 
     project.service<TestsExecutionResultService>().initExecutionResult(report.testCaseList.values.map { it.id })
 
@@ -75,23 +74,14 @@ fun saveData(
         testCase.testCode = project.service<JavaClassBuilderService>().generateCode(
             project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
             code,
-            workspace.testGenerationData.importsCode,
-            workspace.testGenerationData.packageLine,
-            workspace.testGenerationData.runWith,
-            workspace.testGenerationData.otherInfo,
+            project.service<ProjectContextService>().testGenerationData.importsCode,
+            project.service<ProjectContextService>().testGenerationData.packageLine,
+            project.service<ProjectContextService>().testGenerationData.runWith,
+            project.service<ProjectContextService>().testGenerationData.otherInfo,
         )
     }
 
-    workspace.testGenerationData.testGenerationResultList.add(report)
-}
-
-/**
- * Clears the data before test generation for a specific test result.
- *
- * @param project The project for which the test generation data needs to be cleared.
- */
-fun clearDataBeforeTestGeneration(project: Project) {
-    project.service<Workspace>().clear(project)
+    project.service<ProjectContextService>().testGenerationData.testGenerationResultList.add(report)
 }
 
 /**

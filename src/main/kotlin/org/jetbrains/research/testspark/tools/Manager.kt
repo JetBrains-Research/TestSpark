@@ -6,8 +6,8 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.RunnerService
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
@@ -120,10 +120,10 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
         // waiting for the generation result
         while (true) {
             // checks if all generator are finished their work
-            if (event.project!!.service<Workspace>().testGenerationData.testGenerationResultList.size != numberOfUsedTool) {
+            if (event.project!!.service<ProjectContextService>().testGenerationData.testGenerationResultList.size != numberOfUsedTool) {
                 // there is some error during the process running
                 if (event.project!!.service<ErrorService>().isErrorOccurred()) break
-                log.info("Found ${event.project!!.service<Workspace>().testGenerationData.testGenerationResultList.size} number of results")
+                log.info("Found ${event.project!!.service<ProjectContextService>().testGenerationData.testGenerationResultList.size} number of results")
                 log.info("Waiting for other generation results")
                 Thread.sleep(sleepDurationMillis)
                 continue
@@ -151,7 +151,7 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
         log.info("Merging $numberOfUsedTool generation results")
 
         if (numberOfUsedTool == 1) {
-            return event.project!!.service<Workspace>().testGenerationData.testGenerationResultList[0]!!
+            return event.project!!.service<ProjectContextService>().testGenerationData.testGenerationResultList[0]!!
         }
         TODO("implement merge")
     }
