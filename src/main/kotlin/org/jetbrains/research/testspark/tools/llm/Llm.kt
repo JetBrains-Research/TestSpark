@@ -8,14 +8,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
-import org.jetbrains.research.testspark.actions.createLLMPipeline
-import org.jetbrains.research.testspark.actions.getSurroundingClass
-import org.jetbrains.research.testspark.actions.getSurroundingLine
-import org.jetbrains.research.testspark.actions.getSurroundingMethod
+import org.jetbrains.research.testspark.helpers.getSurroundingClass
+import org.jetbrains.research.testspark.helpers.getSurroundingLine
+import org.jetbrains.research.testspark.helpers.getSurroundingMethod
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.LLMChatService
+import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import org.jetbrains.research.testspark.tools.template.Tool
@@ -107,5 +107,19 @@ class Llm(override val name: String = "LLM") : Tool {
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
         val codeType = FragmentToTestData(CodeType.LINE, selectedLine)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
+    }
+
+    private fun createLLMPipeline(e: AnActionEvent): Pipeline {
+        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
+
+        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)!!
+
+        val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
+        packageList.removeLast()
+
+        val packageName = packageList.joinToString(".")
+
+        return Pipeline(e, packageName)
     }
 }

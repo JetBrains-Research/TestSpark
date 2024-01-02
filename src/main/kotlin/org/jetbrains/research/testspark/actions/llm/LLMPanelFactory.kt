@@ -13,6 +13,9 @@ import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
+import org.jetbrains.research.testspark.helpers.isGrazieClassLoaded
+import org.jetbrains.research.testspark.helpers.updateModelSelector
 
 class LLMPanelFactory : ToolPanelFactory {
     private val defaultModulesArray = arrayOf("")

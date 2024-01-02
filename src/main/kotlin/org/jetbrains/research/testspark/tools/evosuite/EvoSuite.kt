@@ -9,9 +9,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
-import org.jetbrains.research.testspark.actions.createPipeline
-import org.jetbrains.research.testspark.actions.getSurroundingLine
-import org.jetbrains.research.testspark.actions.getSurroundingMethod
+import org.jetbrains.research.testspark.helpers.getSurroundingLine
+import org.jetbrains.research.testspark.helpers.getSurroundingMethod
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
@@ -19,6 +18,7 @@ import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.tools.evosuite.generation.EvoSuiteProcessManager
 import org.jetbrains.research.testspark.tools.template.Tool
 import java.io.File
+import org.jetbrains.research.testspark.tools.Pipeline
 
 /**
  * Represents the EvoSuite class, which is a tool used to generate tests for Java code.
@@ -56,5 +56,16 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
         createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestData(CodeType.LINE, selectedLine))
+    }
+
+    private fun createPipeline(e: AnActionEvent): Pipeline {
+        val project: Project = e.project!!
+
+        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+
+        val settingsProjectState = project.service<SettingsProjectService>().state
+        val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
+
+        return Pipeline(e, packageName)
     }
 }

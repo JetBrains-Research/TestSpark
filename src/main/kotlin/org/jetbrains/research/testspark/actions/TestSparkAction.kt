@@ -22,6 +22,7 @@ import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
+import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 
 /**
  * Represents an action to be performed in the TestSpark plugin.

@@ -10,8 +10,6 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.actions.getClassFullText
-import org.jetbrains.research.testspark.actions.getSignatureString
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -251,6 +249,11 @@ class PromptManager(
         }
     }
 
+    private fun PsiMethod.getSignatureString(): String {
+        val bodyStart = body?.startOffsetInParent ?: this.textLength
+        return text.substring(0, bodyStart).replace('\n', ' ').trim()
+    }
+
     private fun insertPolymorphismRelations(
         classPrompt: String,
         polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
@@ -408,5 +411,35 @@ class PromptManager(
         val startLine = document.getLineNumber(textRange.startOffset) + 1
         val endLine = document.getLineNumber(textRange.endOffset) + 1
         return lineNumber in startLine..endLine
+    }
+
+    /**
+     * Returns the full text of a given class including the package, imports, and class code.
+     *
+     * @param cl The PsiClass object representing the class.
+     * @return The full text of the class.
+     */
+    private fun getClassFullText(cl: PsiClass): String {
+        var fullText = ""
+        val fileText = cl.containingFile.text
+
+        // get package
+        packagePattern.findAll(fileText, 0).map {
+            it.groupValues[0]
+        }.forEach {
+            fullText += "$it\n\n"
+        }
+
+        // get imports
+        importPattern.findAll(fileText, 0).map {
+            it.groupValues[0]
+        }.forEach {
+            fullText += "$it\n"
+        }
+
+        // Add class code
+        fullText += cl.text
+
+        return fullText
     }
 }
