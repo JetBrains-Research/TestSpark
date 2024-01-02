@@ -10,7 +10,7 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
-import org.jetbrains.research.testspark.DataFilesUtil
+import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.getBuildPath

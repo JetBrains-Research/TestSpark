@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
-import org.jetbrains.research.testspark.DataFilesUtil
+import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.ErrorService

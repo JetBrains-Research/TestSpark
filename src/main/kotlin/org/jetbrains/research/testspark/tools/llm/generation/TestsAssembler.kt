@@ -7,7 +7,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
-import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.actions.importPattern
 import org.jetbrains.research.testspark.actions.runWithPattern
 import org.jetbrains.research.testspark.editor.Workspace

@@ -49,11 +49,7 @@ class TestSparkAction : AnAction() {
      * @param e the AnActionEvent object representing the event
      */
     override fun update(e: AnActionEvent) {
-        if (getCurrentListOfCodeTypes(e) == null) {
-            e.presentation.isEnabled = false
-        } else {
-            e.presentation.isEnabled = true
-        }
+        e.presentation.isEnabled = getCurrentListOfCodeTypes(e) != null
     }
 
     /**

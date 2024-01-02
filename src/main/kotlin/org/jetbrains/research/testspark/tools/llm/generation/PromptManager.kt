@@ -10,7 +10,7 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.actions.getClassFullText
 import org.jetbrains.research.testspark.actions.getSignatureString
 import org.jetbrains.research.testspark.data.CodeType

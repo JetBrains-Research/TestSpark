@@ -8,8 +8,8 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
-import org.jetbrains.research.testspark.DataFilesUtil
-import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.data.DataFilesUtil
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.actions.getSurroundingClass
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.editor.Workspace

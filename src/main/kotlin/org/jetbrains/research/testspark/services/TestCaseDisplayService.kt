@@ -27,8 +27,8 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.editor.Workspace

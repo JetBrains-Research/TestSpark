@@ -11,8 +11,8 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.coverage.CoverageRenderer
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
