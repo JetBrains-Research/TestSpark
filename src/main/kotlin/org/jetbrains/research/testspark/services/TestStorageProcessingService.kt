@@ -111,7 +111,7 @@ class TestStorageProcessingService(private val project: Project) {
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
             result = result || compilable
             if (compilable) {
-                project.service<ProjectContextService>().testGenerationData.compilableTestCases.add(testCases[index])
+                project.service<TestGenerationDataService>().compilableTestCases.add(testCases[index])
             }
         }
         return result
@@ -321,7 +321,7 @@ class TestStorageProcessingService(private val project: Project) {
 
         // save new test to file
         val generatedTestPath: String = saveGeneratedTest(
-            project.service<ProjectContextService>().testGenerationData.packageLine,
+            project.service<TestGenerationDataService>().packageLine,
             testCode,
             project.service<ProjectContextService>().resultPath!!,
             fileName,
@@ -339,7 +339,7 @@ class TestStorageProcessingService(private val project: Project) {
                 dataFileName,
                 testName,
                 buildPath,
-                project.service<ProjectContextService>().testGenerationData.packageLine,
+                project.service<TestGenerationDataService>().packageLine,
             )
 
             if (!File("$dataFileName.xml").exists()) {

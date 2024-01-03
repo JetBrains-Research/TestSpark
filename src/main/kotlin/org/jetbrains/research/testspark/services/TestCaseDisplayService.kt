@@ -350,8 +350,8 @@ class TestCaseDisplayService(private val project: Project) {
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
 
-                if (project.service<ProjectContextService>().testGenerationData.runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<ProjectContextService>().testGenerationData.runWith})")
+                if (project.service<TestGenerationDataService>().runWith.isNotEmpty()) {
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<TestGenerationDataService>().runWith})")
                 }
 
                 psiJavaFile!!.add(psiClass!!)
@@ -437,23 +437,23 @@ class TestCaseDisplayService(private val project: Project) {
         // insert other info to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             selectedClass.rBrace!!.textRange.startOffset,
-            project.service<ProjectContextService>().testGenerationData.otherInfo + "\n",
+            project.service<TestGenerationDataService>().otherInfo + "\n",
         )
 
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            project.service<ProjectContextService>().testGenerationData.importsCode.joinToString("\n") + "\n\n",
+            project.service<TestGenerationDataService>().importsCode.joinToString("\n") + "\n\n",
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
             .insertString(
                 0,
-                if (project.service<ProjectContextService>().testGenerationData.packageLine.isEmpty()) {
+                if (project.service<TestGenerationDataService>().packageLine.isEmpty()) {
                     ""
                 } else {
-                    "package ${project.service<ProjectContextService>().testGenerationData.packageLine};\n\n"
+                    "package ${project.service<TestGenerationDataService>().packageLine};\n\n"
                 },
             )
     }

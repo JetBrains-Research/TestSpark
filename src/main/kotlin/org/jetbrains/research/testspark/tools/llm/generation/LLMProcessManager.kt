@@ -26,6 +26,7 @@ import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
+import org.jetbrains.research.testspark.services.TestGenerationDataService
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -106,7 +107,7 @@ class LLMProcessManager(
             if (processStopped(project, indicator)) return
 
             // Ending loop checking
-            if (isLastIteration(requestsCount) && project.service<ProjectContextService>().testGenerationData.compilableTestCases.isEmpty()) {
+            if (isLastIteration(requestsCount) && project.service<TestGenerationDataService>().compilableTestCases.isEmpty()) {
                 llmErrorManager.errorProcess(TestSparkBundle.message("invalidLLMResult"), project)
                 break
             }
@@ -138,7 +139,7 @@ class LLMProcessManager(
             // Save the generated TestSuite into a temp file
             val generatedTestCasesPaths: MutableList<String> = mutableListOf()
             if (isLastIteration(requestsCount)) {
-                generatedTestSuite.updateTestCases(project.service<ProjectContextService>().testGenerationData.compilableTestCases.toMutableList())
+                generatedTestSuite.updateTestCases(project.service<TestGenerationDataService>().compilableTestCases.toMutableList())
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
                     generatedTestCasesPaths.add(
@@ -172,7 +173,7 @@ class LLMProcessManager(
                 if (!isLastIteration(requestsCount)) {
                     generatedTestSuite.testCases
                 } else {
-                    project.service<ProjectContextService>().testGenerationData.compilableTestCases.toMutableList()
+                    project.service<TestGenerationDataService>().compilableTestCases.toMutableList()
                 }
 
             // Compile the test file

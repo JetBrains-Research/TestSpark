@@ -15,8 +15,8 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.PROMPT_KEYWORD
-import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -52,14 +52,14 @@ class PromptManager(
             if (!isPromptLengthWithinLimit(prompt)) {
                 // depth of polymorphism reducing
                 if (SettingsArguments.maxPolyDepth(project) > 1) {
-                    project.service<ProjectContextService>().testGenerationData.polyDepthReducing++
+                    project.service<TestGenerationDataService>().polyDepthReducing++
                     log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
                     continue
                 }
 
                 // depth of input params reducing
                 if (SettingsArguments.maxInputParamsDepth(project) > 1) {
-                    project.service<ProjectContextService>().testGenerationData.inputParamsDepthReducing++
+                    project.service<TestGenerationDataService>().inputParamsDepthReducing++
                     log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
                     continue
                 }
@@ -69,8 +69,8 @@ class PromptManager(
 
         // Show warning in case of depth reduction
         if ((
-                project.service<ProjectContextService>().testGenerationData.polyDepthReducing != 0 ||
-                    project.service<ProjectContextService>().testGenerationData.inputParamsDepthReducing != 0
+                project.service<TestGenerationDataService>().polyDepthReducing != 0 ||
+                    project.service<TestGenerationDataService>().inputParamsDepthReducing != 0
                 ) &&
             isPromptLengthWithinLimit(prompt)
         ) {

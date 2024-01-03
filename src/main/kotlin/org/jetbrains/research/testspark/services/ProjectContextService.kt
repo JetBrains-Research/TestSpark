@@ -4,7 +4,6 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.module.Module
 import com.intellij.psi.PsiClass
-import org.jetbrains.research.testspark.data.TestGenerationData
 
 @Service(Service.Level.PROJECT)
 class ProjectContextService {
@@ -29,6 +28,4 @@ class ProjectContextService {
 
     // The fully qualified name of the class being tested.
     var classFQN: String? = null
-
-    var testGenerationData = TestGenerationData()
 }

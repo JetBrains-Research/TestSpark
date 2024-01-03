@@ -14,6 +14,7 @@ import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
+import org.jetbrains.research.testspark.services.TestGenerationDataService
 
 /**
  * Retrieves the imports code from a given test suite code.
@@ -62,10 +63,10 @@ fun saveData(
     importsCode: MutableSet<String>,
     indicator: ProgressIndicator,
 ) {
-    project.service<ProjectContextService>().testGenerationData.resultName = project.service<TestStorageProcessingService>().testResultName!!
-    project.service<ProjectContextService>().testGenerationData.fileUrl = project.service<ProjectContextService>().fileUrl!!
-    project.service<ProjectContextService>().testGenerationData.packageLine = packageLine
-    project.service<ProjectContextService>().testGenerationData.importsCode.addAll(importsCode)
+    project.service<TestGenerationDataService>().resultName = project.service<TestStorageProcessingService>().testResultName!!
+    project.service<TestGenerationDataService>().fileUrl = project.service<ProjectContextService>().fileUrl!!
+    project.service<TestGenerationDataService>().packageLine = packageLine
+    project.service<TestGenerationDataService>().importsCode.addAll(importsCode)
 
     project.service<TestsExecutionResultService>().initExecutionResult(report.testCaseList.values.map { it.id })
 
@@ -74,14 +75,14 @@ fun saveData(
         testCase.testCode = project.service<JavaClassBuilderService>().generateCode(
             project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
             code,
-            project.service<ProjectContextService>().testGenerationData.importsCode,
-            project.service<ProjectContextService>().testGenerationData.packageLine,
-            project.service<ProjectContextService>().testGenerationData.runWith,
-            project.service<ProjectContextService>().testGenerationData.otherInfo,
+            project.service<TestGenerationDataService>().importsCode,
+            project.service<TestGenerationDataService>().packageLine,
+            project.service<TestGenerationDataService>().runWith,
+            project.service<TestGenerationDataService>().otherInfo,
         )
     }
 
-    project.service<ProjectContextService>().testGenerationData.testGenerationResultList.add(report)
+    project.service<TestGenerationDataService>().testGenerationResultList.add(report)
 }
 
 /**
