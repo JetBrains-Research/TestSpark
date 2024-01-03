@@ -95,7 +95,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     fun displayTestCases() {
         val report = project.service<ReportLockingService>().getReport()
-        val editor = project.service<ProjectContextService>().editor!!
+        val editor = project.service<EditorService>().editor!!
 
         allTestCasePanel.removeAll()
         testCasePanels.clear()
@@ -224,7 +224,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Removes all coverage highlighting from the editor.
      */
     private fun removeAllHighlights() {
-        project.service<ProjectContextService>().editor?.markupModel?.removeAllHighlighters()
+        project.service<EditorService>().editor?.markupModel?.removeAllHighlighters()
     }
 
     /**
@@ -469,7 +469,7 @@ class TestCaseDisplayService(private val project: Project) {
             val currentFile = documentManager.getFile(it.document)
             if (currentFile != null) {
                 if (currentFile.presentableUrl == fileUrl) {
-                    project.service<ProjectContextService>().editor = it
+                    project.service<EditorService>().editor = it
                 }
             }
         }

@@ -1,14 +1,11 @@
 package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.module.Module
 import com.intellij.psi.PsiClass
 
 @Service(Service.Level.PROJECT)
 class ProjectContextService {
-    var editor: Editor? = null
-
     // The class path of the project.
     var projectClassPath: String? = null
 

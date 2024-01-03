@@ -27,7 +27,7 @@ class ReportLockingService(private val project: Project) {
 
         project.service<TestCaseDisplayService>().updateEditorForFileUrl(project.service<TestGenerationDataService>().fileUrl)
 
-        if (project.service<ProjectContextService>().editor != null) {
+        if (project.service<EditorService>().editor != null) {
             project.service<TestCaseDisplayService>().displayTestCases()
             project.service<CoverageVisualisationService>().showCoverage(report)
         } else {
