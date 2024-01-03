@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMPanelFactory
 import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
@@ -22,7 +23,6 @@ import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
-import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 
 /**
  * Represents an action to be performed in the TestSpark plugin.

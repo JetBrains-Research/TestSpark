@@ -13,6 +13,7 @@ import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
@@ -26,7 +27,6 @@ import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
-import org.jetbrains.research.testspark.services.TestGenerationDataService
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface

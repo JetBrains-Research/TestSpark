@@ -16,20 +16,22 @@ enum class PROMPT_KEYWORD(val text: String, val description: String, val mandato
     TESTING_PLATFORM(
         "TESTING_PLATFORM",
         "testing platform used in the project (Only JUnit 4 is supported at this point)",
-        true
+        true,
     ),
     MOCKING_FRAMEWORK(
         "MOCKING_FRAMEWORK",
         "mock framework that can be used in generated test (Only Mockito is supported at this point)",
-        false
+        false,
     ),
     METHODS("METHODS", "signature of methods used in the code under tests", false),
-    POLYMORPHISM("POLYMORPHISM", "polymorphism relations between classes involved in the code under test.", false);
+    POLYMORPHISM("POLYMORPHISM", "polymorphism relations between classes involved in the code under test.", false),
+    ;
 
     fun getOffsets(prompt: String): Pair<Int, Int>? {
         val textToHighlight = "\$$text"
-        if (!prompt.contains(textToHighlight))
+        if (!prompt.contains(textToHighlight)) {
             return null
+        }
 
         val startOffset = prompt.indexOf(textToHighlight)
         val endOffset = startOffset + textToHighlight.length
@@ -51,21 +53,26 @@ class PromptParserService {
         }
 
         PROMPT_KEYWORD.values().forEach {
-
             it.getOffsets(prompt)?.let { offsets ->
                 val startOffset = offsets.first
                 val endOffset = offsets.second
 
                 if (editor != null) {
                     markup!!.addRangeHighlighter(
-                        startOffset, endOffset, HighlighterLayer.LAST,
-                        attributes, HighlighterTargetArea.EXACT_RANGE
+                        startOffset,
+                        endOffset,
+                        HighlighterLayer.LAST,
+                        attributes,
+                        HighlighterTargetArea.EXACT_RANGE,
                     )
                 } else {
                     textField.addSettingsProvider { textFieldSettings ->
                         textFieldSettings.markupModel.addRangeHighlighter(
-                            startOffset, endOffset, HighlighterLayer.LAST,
-                            attributes, HighlighterTargetArea.EXACT_RANGE
+                            startOffset,
+                            endOffset,
+                            HighlighterLayer.LAST,
+                            attributes,
+                            HighlighterTargetArea.EXACT_RANGE,
                         )
                     }
                 }
@@ -80,12 +87,12 @@ class PromptParserService {
     }
 
     fun isPromptValid(prompt: String): Boolean {
-
         PROMPT_KEYWORD.values().forEach {
             if (it.mandatory) {
                 val text = "\$${it.text}"
-                if (!prompt.contains(text))
+                if (!prompt.contains(text)) {
                     return false
+                }
             }
         }
         return true

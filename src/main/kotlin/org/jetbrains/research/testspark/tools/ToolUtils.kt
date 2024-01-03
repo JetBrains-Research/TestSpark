@@ -11,10 +11,10 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.ProjectContextService
+import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
-import org.jetbrains.research.testspark.services.TestGenerationDataService
 
 /**
  * Retrieves the imports code from a given test suite code.

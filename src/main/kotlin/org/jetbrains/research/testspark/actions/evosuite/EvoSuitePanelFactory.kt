@@ -3,9 +3,9 @@ package org.jetbrains.research.testspark.actions.evosuite
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import java.awt.Font

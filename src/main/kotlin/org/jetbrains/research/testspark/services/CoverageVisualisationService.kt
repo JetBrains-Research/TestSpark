@@ -103,7 +103,7 @@ class CoverageVisualisationService(private val project: Project) {
         if (settingsProjectState.showCoverageCheckboxSelected) {
             val color = JBColor(
                 TestSparkToolTipsBundle.defaultValue("colorName"),
-                Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
+                Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue),
             )
             val colorForLines = JBColor(
                 TestSparkToolTipsBundle.defaultValue("colorName"),
@@ -143,7 +143,7 @@ class CoverageVisualisationService(private val project: Project) {
                 val hl = project.service<ProjectContextService>().editor!!.markupModel.addLineHighlighter(
                     line,
                     HighlighterLayer.ADDITIONAL_SYNTAX,
-                    textAttribute
+                    textAttribute,
                 )
 
                 val testsCoveringLine =

@@ -9,16 +9,16 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
-import org.jetbrains.research.testspark.helpers.getSurroundingLine
-import org.jetbrains.research.testspark.helpers.getSurroundingMethod
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
+import org.jetbrains.research.testspark.helpers.getSurroundingLine
+import org.jetbrains.research.testspark.helpers.getSurroundingMethod
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.evosuite.generation.EvoSuiteProcessManager
 import org.jetbrains.research.testspark.tools.template.Tool
 import java.io.File
-import org.jetbrains.research.testspark.tools.Pipeline
 
 /**
  * Represents the EvoSuite class, which is a tool used to generate tests for Java code.

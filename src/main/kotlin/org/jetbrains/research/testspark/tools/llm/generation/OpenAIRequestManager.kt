@@ -26,9 +26,8 @@ class OpenAIRequestManager : RequestManager() {
         prompt: String,
         indicator: ProgressIndicator,
         project: Project,
-        llmErrorManager: LLMErrorManager
+        llmErrorManager: LLMErrorManager,
     ): TestsAssembler {
-
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(model, chatHistory)
 
