@@ -68,12 +68,9 @@ class PromptManager(
         }
 
         // Show warning in case of depth reduction
-        if ((
-                project.service<TestGenerationDataService>().polyDepthReducing != 0 ||
-                    project.service<TestGenerationDataService>().inputParamsDepthReducing != 0
-                ) &&
-            isPromptLengthWithinLimit(prompt)
-        ) {
+        val polyDepthReducing = project.service<TestGenerationDataService>().polyDepthReducing
+        val inputParamsDepthReducing = project.service<TestGenerationDataService>().inputParamsDepthReducing
+        if ((polyDepthReducing != 0 || inputParamsDepthReducing != 0) && isPromptLengthWithinLimit(prompt)) {
             llmErrorManager.warningProcess(
                 TestSparkBundle.message("promptReduction") + "\n" +
                     "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
