@@ -14,7 +14,7 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.services.PROMPT_KEYWORD
+import org.jetbrains.research.testspark.services.PromptKeyword
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -162,7 +162,7 @@ class PromptManager(
         return linePrompt
     }
 
-    private fun isPromptValid(keyword: PROMPT_KEYWORD, prompt: String): Boolean {
+    private fun isPromptValid(keyword: PromptKeyword, prompt: String): Boolean {
         val keywordText = keyword.text
         val isMandatory = keyword.mandatory
 
@@ -170,44 +170,44 @@ class PromptManager(
     }
 
     private fun insertLanguage(classPrompt: String): String {
-        if (isPromptValid(PROMPT_KEYWORD.LANGUAGE, classPrompt)) {
-            val keyword = "\$${PROMPT_KEYWORD.LANGUAGE.text}"
+        if (isPromptValid(PromptKeyword.LANGUAGE, classPrompt)) {
+            val keyword = "\$${PromptKeyword.LANGUAGE.text}"
             return classPrompt.replace(keyword, "Java", ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.LANGUAGE.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.LANGUAGE.text}")
         }
     }
 
     private fun insertName(classPrompt: String, classDisplayName: String): String {
-        if (isPromptValid(PROMPT_KEYWORD.NAME, classPrompt)) {
-            val keyword = "\$${PROMPT_KEYWORD.NAME.text}"
+        if (isPromptValid(PromptKeyword.NAME, classPrompt)) {
+            val keyword = "\$${PromptKeyword.NAME.text}"
             return classPrompt.replace(keyword, classDisplayName, ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.NAME.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.NAME.text}")
         }
     }
 
     private fun insertTestingPlatform(classPrompt: String): String {
-        if (isPromptValid(PROMPT_KEYWORD.TESTING_PLATFORM, classPrompt)) {
-            val keyword = "\$${PROMPT_KEYWORD.TESTING_PLATFORM.text}"
+        if (isPromptValid(PromptKeyword.TESTING_PLATFORM, classPrompt)) {
+            val keyword = "\$${PromptKeyword.TESTING_PLATFORM.text}"
             return classPrompt.replace(keyword, "JUnit 4", ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.TESTING_PLATFORM.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.TESTING_PLATFORM.text}")
         }
     }
 
     private fun insertMockingFramework(classPrompt: String): String {
-        if (isPromptValid(PROMPT_KEYWORD.MOCKING_FRAMEWORK, classPrompt)) {
-            val keyword = "\$${PROMPT_KEYWORD.MOCKING_FRAMEWORK.text}"
+        if (isPromptValid(PromptKeyword.MOCKING_FRAMEWORK, classPrompt)) {
+            val keyword = "\$${PromptKeyword.MOCKING_FRAMEWORK.text}"
             return classPrompt.replace(keyword, "Mockito 5", ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.MOCKING_FRAMEWORK.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.MOCKING_FRAMEWORK.text}")
         }
     }
 
     private fun insertCodeUnderTest(classPrompt: String, classFullText: String): String {
-        if (isPromptValid(PROMPT_KEYWORD.CODE, classPrompt)) {
-            val keyword = "\$${PROMPT_KEYWORD.CODE.text}"
+        if (isPromptValid(PromptKeyword.CODE, classPrompt)) {
+            val keyword = "\$${PromptKeyword.CODE.text}"
             var fullText = "```\n${classFullText}\n```\n"
 
             for (i in 2..classesToTest.size) {
@@ -220,14 +220,14 @@ class PromptManager(
             }
             return classPrompt.replace(keyword, fullText, ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.CODE.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.CODE.text}")
         }
     }
 
     private fun insertMethodsSignatures(classPrompt: String, interestingPsiClasses: MutableSet<PsiClass>): String {
-        val keyword = "\$${PROMPT_KEYWORD.METHODS.text}"
+        val keyword = "\$${PromptKeyword.METHODS.text}"
 
-        if (isPromptValid(PROMPT_KEYWORD.METHODS, classPrompt)) {
+        if (isPromptValid(PromptKeyword.METHODS, classPrompt)) {
             var fullText = ""
             for (interestingPsiClass: PsiClass in interestingPsiClasses) {
                 if (interestingPsiClass.qualifiedName!!.startsWith("java")) {
@@ -245,7 +245,7 @@ class PromptManager(
             }
             return classPrompt.replace(keyword, fullText, ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.METHODS.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.METHODS.text}")
         }
     }
 
@@ -258,8 +258,8 @@ class PromptManager(
         classPrompt: String,
         polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     ): String {
-        val keyword = "\$${PROMPT_KEYWORD.POLYMORPHISM.text}"
-        if (isPromptValid(PROMPT_KEYWORD.METHODS, classPrompt)) {
+        val keyword = "\$${PromptKeyword.POLYMORPHISM.text}"
+        if (isPromptValid(PromptKeyword.METHODS, classPrompt)) {
             var fullText = ""
 
             polymorphismRelations.forEach { entry ->
@@ -270,7 +270,7 @@ class PromptManager(
             }
             return classPrompt.replace(keyword, fullText, ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.POLYMORPHISM.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.POLYMORPHISM.text}")
         }
     }
 

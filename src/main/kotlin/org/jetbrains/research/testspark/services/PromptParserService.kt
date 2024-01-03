@@ -9,7 +9,7 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import java.awt.Font
 
-enum class PROMPT_KEYWORD(val text: String, val description: String, val mandatory: Boolean) {
+enum class PromptKeyword(val text: String, val description: String, val mandatory: Boolean) {
     NAME("NAME", "The name of the code under test (Class name, method name, line number)", true),
     CODE("CODE", "The code under test (Class, method, or line)", true),
     LANGUAGE("LANGUAGE", "Programming language of the project under test (only Java supported at this point)", true),
@@ -52,7 +52,7 @@ class PromptParserService {
             markup.removeAllHighlighters()
         }
 
-        PROMPT_KEYWORD.values().forEach {
+        PromptKeyword.values().forEach {
             it.getOffsets(prompt)?.let { offsets ->
                 val startOffset = offsets.first
                 val endOffset = offsets.second
@@ -82,12 +82,12 @@ class PromptParserService {
         return textField
     }
 
-    fun getKeywords(): Array<PROMPT_KEYWORD> {
-        return PROMPT_KEYWORD.values()
+    fun getKeywords(): Array<PromptKeyword> {
+        return PromptKeyword.values()
     }
 
     fun isPromptValid(prompt: String): Boolean {
-        PROMPT_KEYWORD.values().forEach {
+        PromptKeyword.values().forEach {
             if (it.mandatory) {
                 val text = "\$${it.text}"
                 if (!prompt.contains(text)) {
