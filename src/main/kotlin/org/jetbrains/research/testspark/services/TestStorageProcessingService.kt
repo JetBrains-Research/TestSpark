@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.services
 
+import com.github.dockerjava.core.DockerClientBuilder
 import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.Service
@@ -16,10 +17,10 @@ import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
-import java.util.UUID
-import kotlin.collections.ArrayList
+import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
+
 
 @Service(Service.Level.PROJECT)
 class TestStorageProcessingService(private val project: Project) {
@@ -30,8 +31,8 @@ class TestStorageProcessingService(private val project: Project) {
     val testResultName = "test_gen_result_$id"
 
     val resultPath = "$testResultDirectory$testResultName"
-
-    private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
+    private val projectRootManager = ProjectRootManager.getInstance(project)
+    private val javaHomeDirectory = projectRootManager.projectSdk!!.homeDirectory!!
 
     private val log = Logger.getInstance(this::class.java)
 
@@ -161,6 +162,7 @@ class TestStorageProcessingService(private val project: Project) {
         projectBuildPath: String,
         generatedTestPackage: String,
     ): String {
+
         // find the proper javac
         val javaRunner = File(javaHomeDirectory.path).walk()
             .filter {
@@ -176,6 +178,20 @@ class TestStorageProcessingService(private val project: Project) {
         // unique name
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
         name += "$className#$testCaseName"
+
+        // parse the version
+        var sdkVersion = projectRootManager.projectSdk!!.versionString!!.substringAfter("version ").replace("\"","")
+
+        if(sdkVersion.startsWith("1.8")){
+            sdkVersion="8u${sdkVersion.substringAfter("_")}"
+        }
+
+
+        // docker run amazoncorretto:sdkVersion java ... (Also attach the directory with .class files and Jacoco output directory)
+        // Notes: If the version does not exist we can either try other vendors or we can also use the closest java version
+        // Notes: set up a restricted user for docker run
+
+
 
         // run the test method with jacoco agent
         val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
