@@ -41,8 +41,6 @@ class Pipeline(
         )
         project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
 
-        project.service<ProjectContextService>().classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!
-
         DataFilesUtil.makeTmp()
         DataFilesUtil.makeDir(project.service<ProjectContextService>().baseDir!!)
     }

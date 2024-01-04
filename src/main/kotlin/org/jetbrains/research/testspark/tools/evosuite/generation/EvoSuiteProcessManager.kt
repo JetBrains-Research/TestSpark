@@ -86,7 +86,7 @@ class EvoSuiteProcessManager(
             }
 
             val projectClassPath = project.service<ProjectContextService>().projectClassPath!!
-            val classFQN = project.service<ProjectContextService>().classFQN!!
+            val classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!
             val baseDir = project.service<ProjectContextService>().baseDir!!
             val resultName = "${project.service<ProjectContextService>().resultPath}${sep}EvoSuiteResult"
 

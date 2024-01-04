@@ -22,7 +22,4 @@ class ProjectContextService {
 
     // The module to cut.
     var cutModule: Module? = null
-
-    // The fully qualified name of the class being tested.
-    var classFQN: String? = null
 }
