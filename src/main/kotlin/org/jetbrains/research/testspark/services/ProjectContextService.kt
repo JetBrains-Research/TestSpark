@@ -20,6 +20,8 @@ class ProjectContextService {
 
     var cutPsiClass: PsiClass? = null
 
+    var classFQN: String? = null
+
     // The module to cut.
     var cutModule: Module? = null
 }

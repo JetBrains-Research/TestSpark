@@ -180,7 +180,7 @@ class TestStorageProcessingService(private val project: Project) {
         val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
             arrayListOf(
                 javaRunner.absolutePath,
-                "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!}",
+                "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<ProjectContextService>().classFQN}",
                 "-cp",
                 "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
@@ -287,7 +287,7 @@ class TestStorageProcessingService(private val project: Project) {
         frames.removeFirst()
 
         frames.forEach { frame ->
-            if (frame.contains(project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!)) {
+            if (frame.contains(project.service<ProjectContextService>().classFQN!!)) {
                 val coveredLineNumber = frame.split(":")[1].replace(")", "").toIntOrNull()
                 if (coveredLineNumber != null) {
                     result.add(coveredLineNumber)
