@@ -10,9 +10,8 @@ class GrazieRequestManager : RequestManager() {
         prompt: String,
         indicator: ProgressIndicator,
         project: Project,
-        llmErrorManager: LLMErrorManager
+        llmErrorManager: LLMErrorManager,
     ): TestsAssembler {
-
         var testsAssembler = TestsAssembler(project, indicator)
 
         try {
@@ -26,7 +25,7 @@ class GrazieRequestManager : RequestManager() {
                     when {
                         contains("invalid: 401") -> llmErrorManager.errorProcess(
                             "Invalid Token for Grazie provided!",
-                            project
+                            project,
                         )
 
                         else -> llmErrorManager.errorProcess(requestError, project)
