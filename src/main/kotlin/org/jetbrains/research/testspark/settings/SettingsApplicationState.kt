@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.settings
 
-import org.jetbrains.research.testspark.TestSparkDefaultsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 
 /**

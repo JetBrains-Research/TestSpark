@@ -11,11 +11,10 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.coverage.CoverageRenderer
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.editor.Workspace
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -96,7 +95,7 @@ class CoverageVisualisationService(private val project: Project) {
         testReport: Report,
     ) {
         currentHighlightedData =
-            HighlightedData(linesToCover, selectedTests, testReport, project.service<Workspace>().editor!!)
+            HighlightedData(linesToCover, selectedTests, testReport, project.service<EditorService>().editor!!)
         clear()
 
         val settingsProjectState = project.service<SettingsProjectService>().state
@@ -104,7 +103,7 @@ class CoverageVisualisationService(private val project: Project) {
         if (settingsProjectState.showCoverageCheckboxSelected) {
             val color = JBColor(
                 TestSparkToolTipsBundle.defaultValue("colorName"),
-                Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue)
+                Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue),
             )
             val colorForLines = JBColor(
                 TestSparkToolTipsBundle.defaultValue("colorName"),
@@ -141,10 +140,10 @@ class CoverageVisualisationService(private val project: Project) {
             for (i in linesToCover) {
                 val line = i - 1
 
-                val hl = project.service<Workspace>().editor!!.markupModel.addLineHighlighter(
+                val hl = project.service<EditorService>().editor!!.markupModel.addLineHighlighter(
                     line,
                     HighlighterLayer.ADDITIONAL_SYNTAX,
-                    textAttribute
+                    textAttribute,
                 )
 
                 val testsCoveringLine =
