@@ -183,6 +183,14 @@ class TestCasePanelFactory(
                 ),
                 null,
             )
+            NotificationGroupManager.getInstance()
+                .getNotificationGroup("Test case copied")
+                .createNotification(
+                    "",
+                    TestSparkBundle.message("testCaseCopied"),
+                    NotificationType.INFORMATION,
+                )
+                .notify(project)
         }
 
         updateRequestLabel()

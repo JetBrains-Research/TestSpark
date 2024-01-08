@@ -153,13 +153,11 @@
                            displayType="BALLOON"/>
         <notificationGroup id="EvoSuite Execution Error"
                            displayType="BALLOON"/>
-        <notificationGroup id="Test Validation Error"
-                           displayType="BALLOON"/>
         <notificationGroup id="Build Execution Error"
                            displayType="BALLOON"/>
-        <notificationGroup id="Validation Result"
-                           displayType="BALLOON"/>
         <notificationGroup id="LLM Execution Error"
+                           displayType="BALLOON"/>
+        <notificationGroup id="Test case copied"
                            displayType="BALLOON"/>
 
     </extensions>
