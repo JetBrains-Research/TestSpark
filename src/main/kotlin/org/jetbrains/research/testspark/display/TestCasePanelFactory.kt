@@ -1,6 +1,8 @@
 package org.jetbrains.research.testspark.display
 
 import com.intellij.lang.Language
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
@@ -405,9 +407,19 @@ class TestCasePanelFactory(
                         )
                         addTest(modifiedTest)
                     } else {
+                        NotificationGroupManager.getInstance()
+                            .getNotificationGroup("LLM Execution Error")
+                            .createNotification(
+                                TestSparkBundle.message("llmWarningTitle"),
+                                TestSparkBundle.message("noRequestFromLLM"),
+                                NotificationType.WARNING,
+                            )
+                            .notify(project)
+
                         loadingLabel.isVisible = false
                         sendButton.isEnabled = true
                     }
+
                     if (processStopped(project, indicator)) return
 
                     indicator.stop()
