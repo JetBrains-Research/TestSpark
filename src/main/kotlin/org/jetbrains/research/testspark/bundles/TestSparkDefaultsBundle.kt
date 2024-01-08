@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark
+package org.jetbrains.research.testspark.bundles
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.Nls

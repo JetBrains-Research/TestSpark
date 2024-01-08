@@ -2,8 +2,8 @@ package org.jetbrains.research.testspark.display
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.TestSparkBundle
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Dimension
 import javax.swing.Box

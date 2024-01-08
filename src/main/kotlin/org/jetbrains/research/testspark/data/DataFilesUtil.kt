@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark
+package org.jetbrains.research.testspark.data
 
 import com.intellij.openapi.util.io.FileUtilRt
 import java.io.File
