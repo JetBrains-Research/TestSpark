@@ -24,24 +24,36 @@ import org.jetbrains.research.testspark.services.TestsExecutionResultService
 class Workspace {
     var editor: Editor? = null
 
-    // The class path of the project.
+    /**
+     * The class path of the project.
+     */
     var projectClassPath: String? = null
 
-    // The path to save the generated test results.
+    /**
+     * The path to save the generated test results.
+     */
     var resultPath: String? = null
 
-    // The base directory of the project.
+    /**
+     * The base directory of the project.
+     */
     var baseDir: String? = null
 
-    // The URL of the file being tested.
+    /**
+     * The URL of the file being tested.
+     */
     var fileUrl: String? = null
 
     var cutPsiClass: PsiClass? = null
 
-    // The module to cut.
+    /**
+     * The module to cut.
+     */
     var cutModule: Module? = null
 
-    // The fully qualified name of the class being tested.
+    /**
+     * The fully qualified name of the class being tested.
+     */
     var classFQN: String? = null
 
     var testGenerationData = TestGenerationData()
