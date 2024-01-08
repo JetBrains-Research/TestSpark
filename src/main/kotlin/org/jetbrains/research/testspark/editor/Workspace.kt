@@ -62,7 +62,7 @@ class Workspace {
      * Clears the given project's test-related data, including test case display,
      * error service, coverage visualization, and test generation data.
      *
-     * @param project the project to clear the test-related data for
+     * @param project the project for which to clear the test-related data
      */
     fun clear(project: Project) {
         project.service<TestCaseDisplayService>().clear()
