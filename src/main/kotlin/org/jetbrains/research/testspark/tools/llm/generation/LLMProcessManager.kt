@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
-import com.github.dockerjava.core.DockerClientBuilder
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
@@ -97,7 +96,6 @@ class LLMProcessManager(
 
         // notify LLMChatService to restart the chat process.
         project.service<LLMChatService>().newSession()
-        val dockerClient = DockerClientBuilder.getInstance().build()
         // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
         while (!generatedTestsArePassing) {
             requestsCount++
