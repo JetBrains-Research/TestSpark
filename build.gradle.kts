@@ -143,6 +143,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test
     implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
 
+    // https://mvnrepository.com/artifact/com.github.docker-java/docker-java
+    implementation("com.github.docker-java:docker-java:3.3.4")
+
     if (spaceCredentialsProvided()) {
         // Dependencies for hasGrazieAccess variant
         "hasGrazieAccessImplementation"(kotlin("stdlib"))
