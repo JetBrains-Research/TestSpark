@@ -10,7 +10,9 @@ import org.jetbrains.research.testspark.editor.Workspace
 
 @Service(Service.Level.PROJECT)
 class ReportLockingService(private val project: Project) {
-    // final report
+    /**
+     * Final report
+     */
     private var report: Report? = null
 
     private val unselectedTestCases = HashMap<Int, TestCase>()
