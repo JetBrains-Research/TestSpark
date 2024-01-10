@@ -88,7 +88,6 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
             currentHighlightedData.linesToCover,
             currentHighlightedData.selectedTests,
             currentHighlightedData.testReport,
-            currentHighlightedData.editor,
         )
     }
 

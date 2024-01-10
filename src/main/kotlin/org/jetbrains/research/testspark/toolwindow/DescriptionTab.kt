@@ -70,13 +70,13 @@ class DescriptionTab(private val project: Project) {
     }
 
     // Link to LLM settings
-    private val llmSettingsButton = JButton(TestSparkLabelsBundle.defaultValue("llmSettingsLink"))
+    private val llmSettingsButton = JButton(TestSparkLabelsBundle.defaultValue("llmSettingsLink"), TestSparkIcons.settings)
 
     // Link to EvoSuite settings
-    private val evoSuiteSettingsButton = JButton(TestSparkLabelsBundle.defaultValue("evoSuiteSettingsLink"))
+    private val evoSuiteSettingsButton = JButton(TestSparkLabelsBundle.defaultValue("evoSuiteSettingsLink"), TestSparkIcons.settings)
 
     // Link to open settings
-    private val settingsButton = JButton(TestSparkLabelsBundle.defaultValue("settingsLink"))
+    private val settingsButton = JButton(TestSparkLabelsBundle.defaultValue("settingsLink"), TestSparkIcons.settings)
 
     // Link to documentation
     private val documentationButton = JButton(TestSparkLabelsBundle.defaultValue("documentationLink"), TestSparkIcons.documentation)

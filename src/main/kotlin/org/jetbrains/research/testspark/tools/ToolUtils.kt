@@ -6,12 +6,12 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
-import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.DataFilesUtil
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
-import org.jetbrains.research.testspark.services.TestCoverageCollectorService
+import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
 
@@ -63,7 +63,7 @@ fun saveData(
     indicator: ProgressIndicator,
 ) {
     val workspace = project.service<Workspace>()
-    workspace.testGenerationData.resultName = project.service<Workspace>().testResultName!!
+    workspace.testGenerationData.resultName = project.service<TestStorageProcessingService>().testResultName!!
     workspace.testGenerationData.fileUrl = project.service<Workspace>().fileUrl!!
     workspace.testGenerationData.packageLine = packageLine
     workspace.testGenerationData.importsCode.addAll(importsCode)
@@ -82,46 +82,16 @@ fun saveData(
         )
     }
 
-    indicator.text = TestSparkBundle.message("testExecutionMessage")
-
-    for (testCase in report.testCaseList.values) {
-        indicator.text = "Executing ${testCase.testName}"
-        project.service<TestCoverageCollectorService>().updateDataWithTestCase(
-            "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName)}.java",
-            testCase.id,
-            testCase.testName,
-            testCase.testCode,
-        )
-    }
-
     workspace.testGenerationData.testGenerationResultList.add(report)
 }
-
-/**
- * Retrieves the key for a test job in the workspace.
- *
- * @param classFQN The fully qualified name of the class associated with the test job.
- * @return The test job information containing the provided parameters.
- */
-fun getKey(project: Project, classFQN: String): Workspace.TestJobInfo =
-    Workspace.TestJobInfo(
-        project.service<Workspace>().fileUrl!!,
-        classFQN,
-        project.service<Workspace>().modificationStamp!!,
-        project.service<Workspace>().testResultName!!,
-        project.service<Workspace>().projectClassPath!!,
-    )
 
 /**
  * Clears the data before test generation for a specific test result.
  *
  * @param project The project for which the test generation data needs to be cleared.
- * @param testResultName The name of the test result for which the data needs to be cleared.
  */
-fun clearDataBeforeTestGeneration(project: Project, testResultName: String) {
-    val workspace = project.service<Workspace>()
-    workspace.clear(project)
-    workspace.testGenerationData.pendingTestResults[testResultName] = project.service<Workspace>().key!!
+fun clearDataBeforeTestGeneration(project: Project) {
+    project.service<Workspace>().clear(project)
 }
 
 /**
@@ -135,8 +105,8 @@ fun getBuildPath(project: Project): String {
 
     for (module in ModuleManager.getInstance(project).modules) {
         val compilerOutputPath = CompilerModuleExtension.getInstance(module)?.compilerOutputPath
-        compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(":") }
 
+        compilerOutputPath?.let { buildPath += compilerOutputPath.path.plus(DataFilesUtil.classpathSeparator.toString()) }
         // Include extra libraries in classpath
         val librariesPaths = ModuleRootManager.getInstance(module).orderEntries().librariesOnly().pathsList.pathList
         for (lib in librariesPaths) {
@@ -157,7 +127,7 @@ fun getBuildPath(project: Project): String {
                 continue
             }
 
-            buildPath += lib.plus(":")
+            buildPath += lib.plus(DataFilesUtil.classpathSeparator.toString())
         }
     }
     return buildPath

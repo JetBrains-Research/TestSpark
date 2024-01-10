@@ -4,6 +4,14 @@
 
 ## Unreleased
 
+## 0.1.8
+
+### Fixed
+- Windows compatibility issue
+
+### Changed
+- Improve and refactor the test execution process.
+
 ## 0.1.7
 
 ### Fixed
