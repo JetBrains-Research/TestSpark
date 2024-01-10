@@ -9,8 +9,8 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import java.awt.Color
 import java.awt.Dimension

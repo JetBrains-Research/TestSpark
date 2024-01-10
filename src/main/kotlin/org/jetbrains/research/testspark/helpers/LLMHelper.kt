@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.actions.llm
+package org.jetbrains.research.testspark.helpers
 
 import com.google.gson.JsonParser
 import com.intellij.openapi.application.ApplicationManager

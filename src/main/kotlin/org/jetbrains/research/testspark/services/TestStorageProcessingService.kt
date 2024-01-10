@@ -11,9 +11,8 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
-import org.jetbrains.research.testspark.DataFilesUtil
+import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestCase
-import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
@@ -113,7 +112,7 @@ class TestStorageProcessingService(private val project: Project) {
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
             result = result || compilable
             if (compilable) {
-                project.service<Workspace>().testGenerationData.compilableTestCases.add(testCases[index])
+                project.service<TestGenerationDataService>().compilableTestCases.add(testCases[index])
             }
         }
         return result
@@ -173,7 +172,7 @@ class TestStorageProcessingService(private val project: Project) {
         // JaCoCo libs
         val jacocoAgentDir = getLibrary("jacocoagent.jar")
         val jacocoCLIDir = getLibrary("jacococli.jar")
-        val sourceRoots = ModuleRootManager.getInstance(project.service<Workspace>().cutModule!!).getSourceRoots(false)
+        val sourceRoots = ModuleRootManager.getInstance(project.service<ProjectContextService>().cutModule!!).getSourceRoots(false)
 
         // unique name
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
@@ -197,7 +196,7 @@ class TestStorageProcessingService(private val project: Project) {
         val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
             arrayListOf(
                 javaRunner.absolutePath,
-                "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<Workspace>().classFQN}",
+                "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<ProjectContextService>().classFQN}",
                 "-cp",
                 "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner",
@@ -218,7 +217,7 @@ class TestStorageProcessingService(private val project: Project) {
 
         // for classpath containing cut
         command.add("--classfiles")
-        command.add(CompilerModuleExtension.getInstance(project.service<Workspace>().cutModule!!)?.compilerOutputPath!!.path)
+        command.add(CompilerModuleExtension.getInstance(project.service<ProjectContextService>().cutModule!!)?.compilerOutputPath!!.path)
 
         // for each source folder
         sourceRoots.forEach { root ->
@@ -264,7 +263,7 @@ class TestStorageProcessingService(private val project: Project) {
                         children("counter") {}
                     }
                     children("sourcefile") {
-                        isCorrectSourceFile = this.attributes.getValue("name") == project.service<Workspace>().fileUrl!!.split(File.separatorChar).last()
+                        isCorrectSourceFile = this.attributes.getValue("name") == project.service<ProjectContextService>().fileUrl!!.split(File.separatorChar).last()
                         children("line") {
                             if (isCorrectSourceFile && this.attributes.getValue("mi") == "0") {
                                 setOfLines.add(this.attributes.getValue("nr").toInt())
@@ -304,7 +303,7 @@ class TestStorageProcessingService(private val project: Project) {
         frames.removeFirst()
 
         frames.forEach { frame ->
-            if (frame.contains(project.service<Workspace>().classFQN!!)) {
+            if (frame.contains(project.service<ProjectContextService>().classFQN!!)) {
                 val coveredLineNumber = frame.split(":")[1].replace(")", "").toIntOrNull()
                 if (coveredLineNumber != null) {
                     result.add(coveredLineNumber)
@@ -338,9 +337,9 @@ class TestStorageProcessingService(private val project: Project) {
 
         // save new test to file
         val generatedTestPath: String = saveGeneratedTest(
-            project.service<Workspace>().testGenerationData.packageLine,
+            project.service<TestGenerationDataService>().packageLine,
             testCode,
-            project.service<Workspace>().resultPath!!,
+            project.service<ProjectContextService>().resultPath!!,
             fileName,
         )
 
@@ -349,14 +348,14 @@ class TestStorageProcessingService(private val project: Project) {
         if (!compilationResult.first) {
             project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, compilationResult.second)
         } else {
-            val dataFileName = "${project.service<Workspace>().resultPath!!}/jacoco-${fileName.split(".")[0]}"
+            val dataFileName = "${project.service<ProjectContextService>().resultPath!!}/jacoco-${fileName.split(".")[0]}"
 
             val testExecutionError = createXmlFromJacoco(
                 fileName.split(".")[0],
                 dataFileName,
                 testName,
                 buildPath,
-                project.service<Workspace>().testGenerationData.packageLine,
+                project.service<TestGenerationDataService>().packageLine,
             )
 
             if (!File("$dataFileName.xml").exists()) {
@@ -376,12 +375,12 @@ class TestStorageProcessingService(private val project: Project) {
                     project.service<TestsExecutionResultService>().addPassedTest(testId, testCode)
                 }
 
-                DataFilesUtil.cleanFolder(project.service<Workspace>().resultPath!!)
+                DataFilesUtil.cleanFolder(project.service<ProjectContextService>().resultPath!!)
 
                 return testCase
             }
         }
-        DataFilesUtil.cleanFolder(project.service<Workspace>().resultPath!!)
+        DataFilesUtil.cleanFolder(project.service<ProjectContextService>().resultPath!!)
 
         return TestCase(testId, testName, testCode, setOf(), setOf(), setOf())
     }

@@ -7,7 +7,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 
 /**
  * Service used for the sole purpose to limit TestSpark to generate tests only once at a time.
