@@ -41,7 +41,7 @@ class SettingsLLMComponent {
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
-    private var promptEditorTabbedPane = creatTabbedPane()
+    private var promptEditorTabbedPane = createTabbedPane()
 
     private var lastChosenModule = ""
 
@@ -79,7 +79,7 @@ class SettingsLLMComponent {
         }
     }
 
-    private fun creatTabbedPane(): JBTabbedPane {
+    private fun createTabbedPane(): JBTabbedPane {
         val tabbedPane = JBTabbedPane()
 
         // Add tabs for each testing level
