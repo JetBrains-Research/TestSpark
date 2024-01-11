@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.tools.llm.generation.Info
 import java.net.HttpURLConnection
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JTextField
@@ -22,6 +23,15 @@ fun isGrazieClassLoaded(): Boolean {
         true
     } catch (e: ClassNotFoundException) {
         false
+    }
+}
+
+fun loadGrazieInfo(): Info? {
+    val className = "org.jetbrains.research.grazie.Info"
+    return try {
+        Class.forName(className).getDeclaredConstructor().newInstance() as Info
+    } catch (e: ClassNotFoundException) {
+        null
     }
 }
 
@@ -102,8 +112,10 @@ fun updateModelSelector(
     val settingsState = SettingsApplicationService.getInstance().state!!
 
     if (platformSelector.selectedItem!!.toString() == "Grazie") {
-        modelSelector.model = DefaultComboBoxModel(arrayOf("GPT-4"))
-        modelSelector.isEnabled = false
+        val info = loadGrazieInfo()
+        val availableProfiles = info?.availableProfiles() ?: emptySet()
+        modelSelector.model = DefaultComboBoxModel(availableProfiles.toTypedArray())
+        modelSelector.isEnabled = true
         return
     }
     ApplicationManager.getApplication().executeOnPooledThread {
