@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.services
 
-import com.github.dockerjava.core.DockerClientBuilder
 import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.Service
@@ -13,6 +12,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.error.TestExecutionErrorManager
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
@@ -75,7 +75,8 @@ class TestStorageProcessingService(private val project: Project) {
         // find the proper javac
         val javaCompile = File(javaHomeDirectory.path).walk()
             .filter {
-                val isCompilerName = if (DataFilesUtil.isWindows()) it.name.equals("javac.exe") else it.name.equals("javac")
+                val isCompilerName =
+                    if (DataFilesUtil.isWindows()) it.name.equals("javac.exe") else it.name.equals("javac")
                 isCompilerName && it.isFile
             }
             .first()
@@ -106,7 +107,11 @@ class TestStorageProcessingService(private val project: Project) {
      * @return A Pair containing a boolean indicating whether the compilation was successful
      *         and a String containing any error message encountered during compilation.
      */
-    fun compileTestCases(generatedTestCasesPaths: List<String>, buildPath: String, testCases: MutableList<TestCaseGeneratedByLLM>): Boolean {
+    fun compileTestCases(
+        generatedTestCasesPaths: List<String>,
+        buildPath: String,
+        testCases: MutableList<TestCaseGeneratedByLLM>
+    ): Boolean {
         var result = false
         for (index in generatedTestCasesPaths.indices) {
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
@@ -160,6 +165,7 @@ class TestStorageProcessingService(private val project: Project) {
         testCaseName: String,
         projectBuildPath: String,
         generatedTestPackage: String,
+        onDocker: Boolean = false
     ): String {
 
         // find the proper javac
@@ -172,24 +178,60 @@ class TestStorageProcessingService(private val project: Project) {
         // JaCoCo libs
         val jacocoAgentDir = getLibrary("jacocoagent.jar")
         val jacocoCLIDir = getLibrary("jacococli.jar")
-        val sourceRoots = ModuleRootManager.getInstance(project.service<ProjectContextService>().cutModule!!).getSourceRoots(false)
+        val sourceRoots =
+            ModuleRootManager.getInstance(project.service<ProjectContextService>().cutModule!!).getSourceRoots(false)
 
         // unique name
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
         name += "$className#$testCaseName"
 
-        // parse the version
-        var sdkVersion = projectRootManager.projectSdk!!.versionString!!.substringAfter("version ").replace("\"","")
+        if(onDocker){
+            // ToDo: Add the docker code here later
+        }
 
-        if(sdkVersion.startsWith("1.8")){
-            sdkVersion="8u${sdkVersion.substringAfter("_")}"
+        // parse the version
+        var sdkVersion = projectRootManager.projectSdk!!.versionString!!.substringAfter("version ").replace("\"", "")
+
+        if (sdkVersion.startsWith("1.8")) {
+            sdkVersion = "8u${sdkVersion.substringAfter("_")}"
+        }
+
+        val imageID = "amazoncorretto:$sdkVersion"
+
+        val dockerService = project.service<DockerUtilsService>()
+        if (dockerService.imageLocallyExists(imageID)
+            || // pull the docker image if it does not exist
+            dockerService.pullImage("amazoncorretto:$sdkVersion")
+        ) {
+            log.debug("Docker Image amazoncorretto:$sdkVersion is ready.")
+
+            val username = "USER"
+
+            //make a container from the image with a user
+            val containerID: String? = dockerService.createContainer(imageID, username)
+
+            if (containerID == null) {
+                TestExecutionErrorManager().errorProcess("Could not make container from $imageID", project)
+            }
+
+            containerID?.let {
+                // copy Jacoco files
+                dockerService.makeDir(containerID, username, "/home/$username/jacoco/")
+                dockerService.copyFilesToContainer(containerID, jacocoAgentDir.removeSurrounding("\""),"/home/$username/jacoco/jacocoagent.jar")
+                dockerService.copyFilesToContainer(containerID, jacocoCLIDir,"/home/$username/jacoco/jacococli.jar")
+            }
+
+
+
+            // ToDo: make a container from the image (Also attach the directory with .class files and Jacoco output directory)
+        }else{
+            TestExecutionErrorManager().errorProcess("The docker image $imageID does not exists locally, and we could not pull it.", project)
         }
 
 
         // docker run amazoncorretto:sdkVersion java ... (Also attach the directory with .class files and Jacoco output directory)
         // Notes: If the version does not exist we can either try other vendors or we can also use the closest java version
         // Notes: set up a restricted user for docker run
-
 
 
         // run the test method with jacoco agent
@@ -263,7 +305,10 @@ class TestStorageProcessingService(private val project: Project) {
                         children("counter") {}
                     }
                     children("sourcefile") {
-                        isCorrectSourceFile = this.attributes.getValue("name") == project.service<ProjectContextService>().fileUrl!!.split(File.separatorChar).last()
+                        isCorrectSourceFile =
+                            this.attributes.getValue("name") == project.service<ProjectContextService>().fileUrl!!.split(
+                                File.separatorChar
+                            ).last()
                         children("line") {
                             if (isCorrectSourceFile && this.attributes.getValue("mi") == "0") {
                                 setOfLines.add(this.attributes.getValue("nr").toInt())
@@ -348,7 +393,8 @@ class TestStorageProcessingService(private val project: Project) {
         if (!compilationResult.first) {
             project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, compilationResult.second)
         } else {
-            val dataFileName = "${project.service<ProjectContextService>().resultPath!!}/jacoco-${fileName.split(".")[0]}"
+            val dataFileName =
+                "${project.service<ProjectContextService>().resultPath!!}/jacoco-${fileName.split(".")[0]}"
 
             val testExecutionError = createXmlFromJacoco(
                 fileName.split(".")[0],

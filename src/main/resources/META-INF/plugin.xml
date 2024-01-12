@@ -157,6 +157,8 @@
                            displayType="BALLOON"/>
         <notificationGroup id="LLM Execution Error"
                            displayType="BALLOON"/>
+        <notificationGroup id="Test Execution Error"
+                           displayType="BALLOON"/>
         <notificationGroup id="Test case copied"
                            displayType="BALLOON"/>
 
