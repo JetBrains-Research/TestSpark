@@ -15,6 +15,7 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import java.util.concurrent.CountDownLatch
+import org.jetbrains.research.testspark.data.DataFilesUtil
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
@@ -64,9 +65,7 @@ class ProjectBuilder(private val project: Project) {
                 // Save all open editors
                 val cmd = ArrayList<String>()
 
-                val operatingSystem = System.getProperty("os.name")
-
-                if (operatingSystem.lowercase().contains("windows")) {
+                if (DataFilesUtil.isWindows()) {
                     cmd.add("cmd.exe")
                     cmd.add("/c")
                 } else {
