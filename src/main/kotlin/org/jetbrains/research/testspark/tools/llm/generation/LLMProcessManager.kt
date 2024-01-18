@@ -122,7 +122,6 @@ class LLMProcessManager(
 
             // Bad response checking
             if (generatedTestSuite == null) {
-                warningMessage = TestSparkBundle.message("emptyResponse")
                 messageToPrompt = requestResult.first
                 continue
             }
