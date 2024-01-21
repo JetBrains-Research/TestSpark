@@ -103,7 +103,7 @@ class LLMChatService {
      * @return True if the token is set, false otherwise.
      */
     private fun updateToken(project: Project): Boolean {
-        requestManager.token = SettingsArguments.llmUserToken()
+        requestManager.token = SettingsArguments.getToken()
         return isCorrectToken(project)
     }
 

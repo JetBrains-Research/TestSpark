@@ -42,14 +42,14 @@ fun loadGrazieInfo(): Info? {
  * @param modelSelector The combo box used for selecting models.
  * @param llmUserTokenField The text field used for entering the user token.
  * @param defaultModulesArray An array of default module names.
- * @param lastChosenModule The name of the last chosen module.
+ * @param lastChosenOpenAIModule The name of the last chosen module.
  */
 fun addLLMPanelListeners(
     platformSelector: ComboBox<String>,
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
     defaultModulesArray: Array<String>,
-    lastChosenModule: String,
+    lastChosenOpenAIModule: String,
 ) {
     llmUserTokenField.document.addDocumentListener(object : DocumentListener {
         override fun insertUpdate(e: DocumentEvent?) {
@@ -58,7 +58,7 @@ fun addLLMPanelListeners(
                 modelSelector,
                 llmUserTokenField,
                 defaultModulesArray,
-                lastChosenModule,
+                lastChosenOpenAIModule,
             )
         }
 
@@ -68,7 +68,7 @@ fun addLLMPanelListeners(
                 modelSelector,
                 llmUserTokenField,
                 defaultModulesArray,
-                lastChosenModule,
+                lastChosenOpenAIModule,
             )
         }
 
@@ -78,18 +78,25 @@ fun addLLMPanelListeners(
                 modelSelector,
                 llmUserTokenField,
                 defaultModulesArray,
-                lastChosenModule,
+                lastChosenOpenAIModule,
             )
         }
     })
 
     platformSelector.addItemListener {
+        val settingsState = SettingsApplicationService.getInstance().state!!
+        if (platformSelector.selectedItem!!.toString() == "Grazie") {
+            llmUserTokenField.text = settingsState.grazieToken
+        } else {
+            llmUserTokenField.text = settingsState.openAIToken
+        }
+
         updateModelSelector(
             platformSelector,
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            lastChosenModule,
+            lastChosenOpenAIModule,
         )
     }
 }
@@ -112,22 +119,25 @@ fun updateModelSelector(
     val settingsState = SettingsApplicationService.getInstance().state!!
 
     if (platformSelector.selectedItem!!.toString() == "Grazie") {
+//        TODO uncomment
+//        val modules = getGrazieModules(llmUserTokenField.text, lastChosenModule)
         val info = loadGrazieInfo()
         val availableProfiles = info?.availableProfiles() ?: emptySet()
         modelSelector.model = DefaultComboBoxModel(availableProfiles.toTypedArray())
+//        if (modules.contains(settingsState.grazieModel)) modelSelector.selectedItem = settingsState.grazieModel
         modelSelector.isEnabled = true
-        return
-    }
-    ApplicationManager.getApplication().executeOnPooledThread {
-        val modules = getOpenAIModules(llmUserTokenField.text, lastChosenModule)
-        modelSelector.removeAllItems()
-        if (modules != null) {
-            modelSelector.model = DefaultComboBoxModel(modules)
-            if (modules.contains(settingsState.model)) modelSelector.selectedItem = settingsState.model
-            modelSelector.isEnabled = true
-        } else {
-            modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
-            modelSelector.isEnabled = false
+    } else {
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val modules = getOpenAIModules(llmUserTokenField.text, lastChosenModule)
+            modelSelector.removeAllItems()
+            if (modules != null) {
+                modelSelector.model = DefaultComboBoxModel(modules)
+                if (modules.contains(settingsState.openAIModel)) modelSelector.selectedItem = settingsState.openAIModel
+                modelSelector.isEnabled = true
+            } else {
+                modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
+                modelSelector.isEnabled = false
+            }
         }
     }
 }
