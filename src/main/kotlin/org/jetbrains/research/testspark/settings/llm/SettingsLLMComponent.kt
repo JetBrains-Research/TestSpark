@@ -43,9 +43,6 @@ class SettingsLLMComponent {
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
     private var promptEditorTabbedPane = creatTabbedPane()
 
-    private var lastChosenOpenAIModule = ""
-    private var lastChosenGrazieModule = ""
-
     // Maximum number of LLM requests
     private var maxLLMRequestsField =
         JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxLLMRequest, 1, 20))
@@ -147,7 +144,6 @@ class SettingsLLMComponent {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            lastChosenOpenAIModule
         )
 
         addHighlighterListeners()
@@ -249,14 +245,12 @@ class SettingsLLMComponent {
     var openAIModel: String
         get() = modelSelector.item
         set(newAlg) {
-            lastChosenOpenAIModule = newAlg
             modelSelector.item = newAlg
         }
 
     var grazieModel: String
         get() = modelSelector.item
         set(newAlg) {
-            lastChosenGrazieModule = newAlg
             modelSelector.item = newAlg
         }
 

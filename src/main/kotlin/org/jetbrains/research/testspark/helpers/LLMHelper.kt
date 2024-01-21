@@ -49,7 +49,6 @@ fun addLLMPanelListeners(
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
     defaultModulesArray: Array<String>,
-    lastChosenOpenAIModule: String,
 ) {
     llmUserTokenField.document.addDocumentListener(object : DocumentListener {
         override fun insertUpdate(e: DocumentEvent?) {
@@ -58,7 +57,6 @@ fun addLLMPanelListeners(
                 modelSelector,
                 llmUserTokenField,
                 defaultModulesArray,
-                lastChosenOpenAIModule,
             )
         }
 
@@ -68,7 +66,6 @@ fun addLLMPanelListeners(
                 modelSelector,
                 llmUserTokenField,
                 defaultModulesArray,
-                lastChosenOpenAIModule,
             )
         }
 
@@ -78,7 +75,6 @@ fun addLLMPanelListeners(
                 modelSelector,
                 llmUserTokenField,
                 defaultModulesArray,
-                lastChosenOpenAIModule,
             )
         }
     })
@@ -96,7 +92,6 @@ fun addLLMPanelListeners(
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            lastChosenOpenAIModule,
         )
     }
 }
@@ -114,21 +109,18 @@ fun updateModelSelector(
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
     defaultModulesArray: Array<String>,
-    lastChosenModule: String,
 ) {
     val settingsState = SettingsApplicationService.getInstance().state!!
 
     if (platformSelector.selectedItem!!.toString() == "Grazie") {
-//        TODO uncomment
-//        val modules = getGrazieModules(llmUserTokenField.text, lastChosenModule)
         val info = loadGrazieInfo()
-        val availableProfiles = info?.availableProfiles() ?: emptySet()
-        modelSelector.model = DefaultComboBoxModel(availableProfiles.toTypedArray())
-//        if (modules.contains(settingsState.grazieModel)) modelSelector.selectedItem = settingsState.grazieModel
+        val modules = info?.availableProfiles() ?: emptySet()
+        modelSelector.model = DefaultComboBoxModel(modules.toTypedArray())
+        if (modules.contains(settingsState.grazieModel)) modelSelector.selectedItem = settingsState.grazieModel
         modelSelector.isEnabled = true
     } else {
         ApplicationManager.getApplication().executeOnPooledThread {
-            val modules = getOpenAIModules(llmUserTokenField.text, lastChosenModule)
+            val modules = getOpenAIModules(llmUserTokenField.text)
             modelSelector.removeAllItems()
             if (modules != null) {
                 modelSelector.model = DefaultComboBoxModel(modules)
@@ -148,7 +140,7 @@ fun updateModelSelector(
  * @param token Authorization token for the OpenAI API.
  * @return An array of model names if request is successful, otherwise null.
  */
-private fun getOpenAIModules(token: String, lastChosenModule: String): Array<String>? {
+private fun getOpenAIModules(token: String): Array<String>? {
     val url = "https://api.openai.com/v1/models"
 
     val httpRequest = HttpRequests.request(url).tuner {
@@ -174,8 +166,6 @@ private fun getOpenAIModules(token: String, lastChosenModule: String): Array<Str
 
     val gptComparator = Comparator<String> { s1, s2 ->
         when {
-            s1 == lastChosenModule -> -1
-            s2 == lastChosenModule -> 1
             s1.contains("gpt") && s2.contains("gpt") -> s2.compareTo(s1)
             s1.contains("gpt") -> -1
             s2.contains("gpt") -> 1

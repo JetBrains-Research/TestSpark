@@ -33,7 +33,6 @@ class LLMPanelFactory : ToolPanelFactory {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            "",
         )
     }
 
@@ -81,7 +80,6 @@ class LLMPanelFactory : ToolPanelFactory {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            "",
         )
 
         val bottomButtons = JPanel()
