@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import java.net.HttpURLConnection
 
 /**
- * This class represents a manager for making requests to the LLM (Live Learning Model).
+ * This class represents a manager for making requests to the LLM (Large Language Model).
  */
 class OpenAIRequestManager : RequestManager() {
 
