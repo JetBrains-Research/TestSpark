@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 
@@ -13,18 +14,32 @@ class SettingsArguments {
         val settingsState = SettingsApplicationService.getInstance().state
 
         /**
-         * Retrieves the LLM user token from the application settings.
+         * Retrieves the OpenAI token from the application's settings.
          *
-         * @return The LLM user token.
+         * @return The OpenAI token as a string.
          */
-        fun llmUserToken(): String = settingsState!!.llmUserToken
+        fun openAIToken(): String = settingsState!!.openAIToken
 
         /**
-         * Retrieves the module from the settings state.
+         * Retrieves the Grazie token from the settings state.
          *
-         * @return The module as a string.
+         * @return The Grazie token as a string.
          */
-        fun model(): String = settingsState!!.model
+        fun grazieToken(): String = settingsState!!.grazieToken
+
+        /**
+         * Opens the AI model associated with the given settings state.
+         *
+         * @return The AI model as a string.
+         */
+        fun openAIModel(): String = settingsState!!.openAIModel
+
+        /**
+         * Retrieves the Grazie model from the application's settings state.
+         *
+         * @return The Grazie model as a String.
+         */
+        fun grazieModel(): String = settingsState!!.grazieModel
 
         /**
          * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.
@@ -39,21 +54,23 @@ class SettingsArguments {
          * @param project the project for which to retrieve the maximum input parameters depth value
          * @return The maximum depth for input parameters.
          */
-        fun maxInputParamsDepth(project: Project): Int = settingsState!!.maxInputParamsDepth - project.service<TestGenerationDataService>().inputParamsDepthReducing
+        fun maxInputParamsDepth(project: Project): Int =
+            settingsState!!.maxInputParamsDepth - project.service<TestGenerationDataService>().inputParamsDepthReducing
 
         /**
          * Returns the maximum depth of polymorphism.
          *
          * @return The maximum depth of polymorphism.
          */
-        fun maxPolyDepth(project: Project): Int = settingsState!!.maxPolyDepth - project.service<TestGenerationDataService>().polyDepthReducing
+        fun maxPolyDepth(project: Project): Int =
+            settingsState!!.maxPolyDepth - project.service<TestGenerationDataService>().polyDepthReducing
 
         /**
          * Checks if the token is set for the user in the settings.
          *
          * @return true if the token is set, false otherwise
          */
-        fun isTokenSet(): Boolean = settingsState!!.llmUserToken.isNotEmpty()
+        fun isTokenSet(): Boolean = getToken().isNotEmpty()
 
         /**
          * Return the selected LLm platform
@@ -61,5 +78,18 @@ class SettingsArguments {
          * @return selected LLM platform
          */
         fun llmPlatform(): String = settingsState!!.llmPlatform
+
+        /**
+         * Retrieves the token for the current user.
+         *
+         * @return The token as a string.
+         */
+        fun getToken(): String {
+            return if (llmPlatform() == TestSparkLabelsBundle.defaultValue("grazie")) {
+                grazieToken()
+            } else {
+                openAIToken()
+            }
+        }
     }
 }

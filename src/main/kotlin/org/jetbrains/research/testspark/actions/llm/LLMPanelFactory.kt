@@ -21,8 +21,7 @@ class LLMPanelFactory : ToolPanelFactory {
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
-    private var platformSelector = ComboBox(arrayOf("OpenAI"))
-    private var lastChosenModule = ""
+    private var platformSelector = ComboBox(arrayOf(TestSparkLabelsBundle.defaultValue("openAI")))
     private val backLlmButton = JButton("Back")
     private val okLlmButton = JButton("OK")
 
@@ -34,7 +33,6 @@ class LLMPanelFactory : ToolPanelFactory {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            lastChosenModule,
         )
     }
 
@@ -65,14 +63,18 @@ class LLMPanelFactory : ToolPanelFactory {
         titlePanel.add(textTitle)
 
         if (isGrazieClassLoaded()) {
-            platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
+            platformSelector.model = DefaultComboBoxModel(arrayOf(TestSparkLabelsBundle.defaultValue("grazie"), TestSparkLabelsBundle.defaultValue("openAI")))
             platformSelector.selectedItem = settingsState.llmPlatform
         } else {
             platformSelector.isEnabled = false
         }
 
         llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
-        llmUserTokenField.text = settingsState.llmUserToken
+        if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
+            llmUserTokenField.text = settingsState.grazieToken
+        } else {
+            llmUserTokenField.text = settingsState.openAIToken
+        }
 
         modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
         modelSelector.isEnabled = false
@@ -82,7 +84,6 @@ class LLMPanelFactory : ToolPanelFactory {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            lastChosenModule,
         )
 
         val bottomButtons = JPanel()
@@ -131,7 +132,12 @@ class LLMPanelFactory : ToolPanelFactory {
      */
     override fun settingsStateUpdate() {
         settingsState.llmPlatform = platformSelector.selectedItem!!.toString()
-        settingsState.llmUserToken = llmUserTokenField.text
-        settingsState.model = modelSelector.selectedItem!!.toString()
+        if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
+            settingsState.grazieToken = llmUserTokenField.text
+            settingsState.grazieModel = modelSelector.selectedItem!!.toString()
+        } else {
+            settingsState.openAIToken = llmUserTokenField.text
+            settingsState.openAIModel = modelSelector.selectedItem!!.toString()
+        }
     }
 }
