@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 

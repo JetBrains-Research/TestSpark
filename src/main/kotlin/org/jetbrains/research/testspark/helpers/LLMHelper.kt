@@ -4,6 +4,7 @@ import com.google.gson.JsonParser
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.tools.llm.generation.Info
 import java.net.HttpURLConnection
@@ -11,7 +12,6 @@ import javax.swing.DefaultComboBoxModel
 import javax.swing.JTextField
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 
 /**
  * Checks if the Grazie class is loaded.

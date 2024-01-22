@@ -85,10 +85,11 @@ class SettingsArguments {
          * @return The token as a string.
          */
         fun getToken(): String {
-            return if (llmPlatform() == TestSparkLabelsBundle.defaultValue("grazie"))
+            return if (llmPlatform() == TestSparkLabelsBundle.defaultValue("grazie")) {
                 grazieToken()
-            else
+            } else {
                 openAIToken()
+            }
         }
     }
 }
