@@ -70,7 +70,11 @@ class LLMPanelFactory : ToolPanelFactory {
         }
 
         llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
-        llmUserTokenField.text = ""
+        if (platformSelector.selectedItem!!.toString() == "Grazie") {
+            llmUserTokenField.text = settingsState.grazieToken
+        } else {
+            llmUserTokenField.text = settingsState.openAIToken
+        }
 
         modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
         modelSelector.isEnabled = false

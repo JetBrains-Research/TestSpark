@@ -121,7 +121,6 @@ fun updateModelSelector(
     } else {
         ApplicationManager.getApplication().executeOnPooledThread {
             val modules = getOpenAIModules(llmUserTokenField.text)
-            modelSelector.removeAllItems()
             if (modules != null) {
                 modelSelector.model = DefaultComboBoxModel(modules)
                 if (modules.contains(settingsState.openAIModel)) modelSelector.selectedItem = settingsState.openAIModel
