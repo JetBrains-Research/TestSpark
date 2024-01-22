@@ -342,7 +342,7 @@ class TestCasePanelFactory(
         updateTestCaseInformation()
 
         val lastRunCode = lastRunCodes[currentRequestNumber - 1]
-        languageTextField.editor!!.markupModel.removeAllHighlighters()
+        languageTextField.editor?.markupModel?.removeAllHighlighters()
 
         resetButton.isEnabled = testCase.testCode != initialCodes[currentRequestNumber - 1]
         resetToLastRunButton.isEnabled = testCase.testCode != lastRunCode
@@ -603,6 +603,13 @@ class TestCasePanelFactory(
         languageTextField.document.setText(currentCodes[currentRequestNumber - 1])
         updateUI()
     }
+
+    /**
+     * Checks if the item is marked as removed.
+     *
+     * @return true if the item is removed, false otherwise.
+     */
+    fun isRemoved() = isRemoved
 
     /**
      * Returns the indexes of lines that are modified between two lists of strings.

@@ -59,7 +59,9 @@ class TopButtonsPanelFactory(private val project: Project) {
     fun updateTopLabels() {
         var numberOfPassedTests = 0
         for (testCasePanelFactory in testCasePanelFactories) {
-            if (testCasePanelFactory.getError() == "") {
+            if (testCasePanelFactory.isRemoved()) continue
+            val error = testCasePanelFactory.getError()
+            if ((error is String) && error.isEmpty()) {
                 numberOfPassedTests++
             }
         }
