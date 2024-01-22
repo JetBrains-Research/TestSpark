@@ -342,7 +342,7 @@ class TestCasePanelFactory(
         updateTestCaseInformation()
 
         val lastRunCode = lastRunCodes[currentRequestNumber - 1]
-        languageTextField.editor!!.markupModel.removeAllHighlighters()
+        languageTextField.editor?.markupModel?.removeAllHighlighters()
 
         resetButton.isEnabled = testCase.testCode != initialCodes[currentRequestNumber - 1]
         resetToLastRunButton.isEnabled = testCase.testCode != lastRunCode
