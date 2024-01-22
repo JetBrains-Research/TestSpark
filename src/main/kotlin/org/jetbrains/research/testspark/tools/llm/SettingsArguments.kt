@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 
@@ -84,7 +85,7 @@ class SettingsArguments {
          * @return The token as a string.
          */
         fun getToken(): String {
-            return if (llmPlatform() == "Grazie")
+            return if (llmPlatform() == TestSparkLabelsBundle.defaultValue("grazie"))
                 grazieToken()
             else
                 openAIToken()

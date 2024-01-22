@@ -11,6 +11,7 @@ import javax.swing.DefaultComboBoxModel
 import javax.swing.JTextField
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 
 /**
  * Checks if the Grazie class is loaded.
@@ -42,7 +43,6 @@ fun loadGrazieInfo(): Info? {
  * @param modelSelector The combo box used for selecting models.
  * @param llmUserTokenField The text field used for entering the user token.
  * @param defaultModulesArray An array of default module names.
- * @param lastChosenOpenAIModule The name of the last chosen module.
  */
 fun addLLMPanelListeners(
     platformSelector: ComboBox<String>,
@@ -81,7 +81,7 @@ fun addLLMPanelListeners(
 
     platformSelector.addItemListener {
         val settingsState = SettingsApplicationService.getInstance().state!!
-        if (platformSelector.selectedItem!!.toString() == "Grazie") {
+        if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
             llmUserTokenField.text = settingsState.grazieToken
         } else {
             llmUserTokenField.text = settingsState.openAIToken
@@ -112,7 +112,7 @@ fun updateModelSelector(
 ) {
     val settingsState = SettingsApplicationService.getInstance().state!!
 
-    if (platformSelector.selectedItem!!.toString() == "Grazie") {
+    if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
         val info = loadGrazieInfo()
         val modules = info?.availableProfiles() ?: emptySet()
         modelSelector.model = DefaultComboBoxModel(modules.toTypedArray())

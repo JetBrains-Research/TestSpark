@@ -37,7 +37,7 @@ class SettingsLLMComponent {
     // Models
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
-    private var platformSelector = ComboBox(arrayOf("OpenAI"))
+    private var platformSelector = ComboBox(arrayOf(TestSparkLabelsBundle.defaultValue("openAI")))
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
@@ -177,7 +177,7 @@ class SettingsLLMComponent {
     private fun createSettingsPanel() {
         // Check if the Grazie platform access is available in the current build
         if (isGrazieClassLoaded()) {
-            platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
+            platformSelector.model = DefaultComboBoxModel(arrayOf(TestSparkLabelsBundle.defaultValue("grazie"), TestSparkLabelsBundle.defaultValue("openAI")))
         } else {
             platformSelector.isEnabled = false
         }

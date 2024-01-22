@@ -6,6 +6,7 @@ import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 
 /**
  * This class allows to configure some LLM-related settings via the Large Language Model page in the Settings dialog,
@@ -77,7 +78,7 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun apply() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        if (settingsComponent!!.llmPlatform == "Grazie") {
+        if (settingsComponent!!.llmPlatform == TestSparkLabelsBundle.defaultValue("grazie")) {
             settingsState.grazieToken = settingsComponent!!.grazieToken
             settingsState.grazieModel = settingsComponent!!.grazieModel
         } else {
