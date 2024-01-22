@@ -605,6 +605,13 @@ class TestCasePanelFactory(
     }
 
     /**
+     * Checks if the item is marked as removed.
+     *
+     * @return true if the item is removed, false otherwise.
+     */
+    fun isRemoved() = isRemoved
+
+    /**
      * Returns the indexes of lines that are modified between two lists of strings.
      *
      * @param source The source list of strings.
