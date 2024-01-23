@@ -11,8 +11,10 @@ fun properties(key: String) = project.findProperty(key).toString()
 
 val thunderdomeVersion = "1.0.5"
 
-val spaceUsername = System.getProperty("space.username")?.toString().orEmpty()
-val spacePassword = System.getProperty("space.pass")?.toString().orEmpty()
+val spaceUsername =
+    System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
+val spacePassword =
+    System.getProperty("space.pass")?.toString() ?: project.properties["spacePassword"]?.toString() ?: ""
 
 plugins {
     // Java support
