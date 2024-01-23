@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.tools.template.generation
 
 import com.intellij.openapi.progress.ProgressIndicator
-import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.CodeTypeWrapper
 import org.jetbrains.research.testspark.data.Technique
 
 /**
@@ -17,7 +17,7 @@ interface ProcessManager {
      */
     fun runTestGenerator(
         indicator: ProgressIndicator,
-        codeType: FragmentToTestData,
+        codeType: CodeTypeWrapper,
         packageName: String,
     )
 

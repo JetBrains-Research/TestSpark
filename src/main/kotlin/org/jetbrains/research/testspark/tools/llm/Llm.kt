@@ -9,7 +9,7 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testspark.data.CodeType
-import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.CodeTypeWrapper
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.helpers.getSurroundingClass
 import org.jetbrains.research.testspark.helpers.getSurroundingLine
@@ -27,7 +27,7 @@ import org.jetbrains.research.testspark.tools.template.Tool
  */
 class Llm(override val name: String = "LLM") : Tool {
 
-    private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestData): LLMProcessManager {
+    private fun getLLMProcessManager(e: AnActionEvent, codeType: CodeTypeWrapper): LLMProcessManager {
         val project: Project = e.project!!
 
         val classesToTest = mutableListOf<PsiClass>()
@@ -57,7 +57,7 @@ class Llm(override val name: String = "LLM") : Tool {
             // generate the prompt using Prompt manager
             PromptManager(project, classesToTest[0], classesToTest)
                 .generatePrompt(
-                    codeType
+                    codeType,
                 ),
         )
     }
@@ -72,7 +72,7 @@ class Llm(override val name: String = "LLM") : Tool {
         if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
             return
         }
-        val codeType = FragmentToTestData(CodeType.CLASS)
+        val codeType = CodeTypeWrapper(CodeType.CLASS)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 
@@ -89,7 +89,7 @@ class Llm(override val name: String = "LLM") : Tool {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
-        val codeType = FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod))
+        val codeType = CodeTypeWrapper(CodeType.METHOD, generateMethodDescriptor(psiMethod))
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 
@@ -99,11 +99,13 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param e The AnActionEvent that triggered the generation of tests.
      */
     override fun generateTestsForLine(e: AnActionEvent) {
-        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) return
+        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
+            return
+        }
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
-        val codeType = FragmentToTestData(CodeType.LINE, selectedLine)
+        val codeType = CodeTypeWrapper(CodeType.LINE, selectedLine)
         createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
     }
 

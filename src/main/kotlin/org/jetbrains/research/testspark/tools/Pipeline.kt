@@ -10,7 +10,7 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.DataFilesUtil
-import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.CodeTypeWrapper
 import org.jetbrains.research.testspark.helpers.getSurroundingClass
 import org.jetbrains.research.testspark.services.ClearService
 import org.jetbrains.research.testspark.services.ProjectContextService
@@ -51,7 +51,7 @@ class Pipeline(
     /**
      * Builds the project and launches generation on a separate thread.
      */
-    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
+    fun runTestGeneration(processManager: ProcessManager, codeType: CodeTypeWrapper) {
         project.service<ClearService>().clear(project)
 
         // Add collector logging
