@@ -147,7 +147,7 @@ dependencies {
         // Dependencies for hasGrazieAccess variant
         "hasGrazieAccessImplementation"(kotlin("stdlib"))
         "hasGrazieAccessImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:1.0.1")
+        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:1.0.4")
     }
 }
 
