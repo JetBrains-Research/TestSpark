@@ -21,7 +21,6 @@ import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.TestCase
-import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.CollectorService
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
