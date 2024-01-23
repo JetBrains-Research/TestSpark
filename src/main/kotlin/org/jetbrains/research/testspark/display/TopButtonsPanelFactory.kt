@@ -2,8 +2,8 @@ package org.jetbrains.research.testspark.display
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.TestSparkBundle
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Dimension
 import javax.swing.Box
@@ -59,7 +59,9 @@ class TopButtonsPanelFactory(private val project: Project) {
     fun updateTopLabels() {
         var numberOfPassedTests = 0
         for (testCasePanelFactory in testCasePanelFactories) {
-            if (testCasePanelFactory.getError() == "") {
+            if (testCasePanelFactory.isRemoved()) continue
+            val error = testCasePanelFactory.getError()
+            if ((error is String) && error.isEmpty()) {
                 numberOfPassedTests++
             }
         }

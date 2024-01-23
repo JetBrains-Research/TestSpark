@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.settings
 
-import org.jetbrains.research.testspark.TestSparkDefaultsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 
 /**
  * This class is the actual data class that stores the values of the Plugin Settings entries.

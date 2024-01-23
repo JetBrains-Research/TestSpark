@@ -153,13 +153,11 @@
                            displayType="BALLOON"/>
         <notificationGroup id="EvoSuite Execution Error"
                            displayType="BALLOON"/>
-        <notificationGroup id="Test Validation Error"
-                           displayType="BALLOON"/>
         <notificationGroup id="Build Execution Error"
                            displayType="BALLOON"/>
-        <notificationGroup id="Validation Result"
-                           displayType="BALLOON"/>
         <notificationGroup id="LLM Execution Error"
+                           displayType="BALLOON"/>
+        <notificationGroup id="Test case copied"
                            displayType="BALLOON"/>
 
         <statistics.counterUsagesCollector implementationClass="org.jetbrains.research.testspark.collectors.FeedbackSentCollector"/>
@@ -173,9 +171,6 @@
     </extensions>
 
     <projectListeners>
-        <listener
-                class="org.jetbrains.research.testspark.listener.TestGenerationResultListenerImpl"
-                topic="org.jetbrains.research.testspark.tools.TestGenerationResultListener"/>
         <listener
                 class="org.jetbrains.research.testspark.listener.TelemetrySubmitListenerImpl"
                 topic="com.intellij.openapi.startup.ProjectActivity"/>

@@ -14,7 +14,6 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
-import org.jetbrains.research.testspark.editor.Workspace
 import java.io.File
 import java.util.Locale
 
@@ -197,7 +196,7 @@ class JavaClassBuilderService(private val project: Project) {
     fun formatJavaCode(code: String): String {
         var result = ""
         WriteCommandAction.runWriteCommandAction(project) {
-            val fileName = project.service<Workspace>().resultPath!! + File.separatorChar + "Formatted.java"
+            val fileName = project.service<ProjectContextService>().resultPath!! + File.separatorChar + "Formatted.java"
             // create a temporary PsiFile
             val psiFile: PsiFile = PsiFileFactory.getInstance(project)
                 .createFileFromText(

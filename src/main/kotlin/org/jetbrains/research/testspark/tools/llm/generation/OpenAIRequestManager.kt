@@ -5,18 +5,18 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
-import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import java.net.HttpURLConnection
 
 /**
- * This class represents a manager for making requests to the LLM (Live Learning Model).
+ * This class represents a manager for making requests to the LLM (Large Language Model).
  */
 class OpenAIRequestManager : RequestManager() {
 
     private val url = "https://api.openai.com/v1/chat/completions"
-    private val model = SettingsArguments.model()
+    private val model = SettingsArguments.openAIModel()
 
     private val httpRequest = HttpRequests.post(url, "application/json").tuner {
         it.setRequestProperty("Authorization", "Bearer $token")
@@ -26,9 +26,8 @@ class OpenAIRequestManager : RequestManager() {
         prompt: String,
         indicator: ProgressIndicator,
         project: Project,
-        llmErrorManager: LLMErrorManager
+        llmErrorManager: LLMErrorManager,
     ): TestsAssembler {
-
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(model, chatHistory)
 

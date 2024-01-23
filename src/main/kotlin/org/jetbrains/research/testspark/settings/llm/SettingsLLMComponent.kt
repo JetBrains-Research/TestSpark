@@ -12,10 +12,10 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.actions.llm.addLLMPanelListeners
-import org.jetbrains.research.testspark.actions.llm.isGrazieClassLoaded
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
+import org.jetbrains.research.testspark.helpers.isGrazieClassLoaded
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.FlowLayout
@@ -37,13 +37,11 @@ class SettingsLLMComponent {
     // Models
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
-    private var platformSelector = ComboBox(arrayOf("OpenAI"))
+    private var platformSelector = ComboBox(arrayOf(TestSparkLabelsBundle.defaultValue("openAI")))
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
     private var promptEditorTabbedPane = creatTabbedPane()
-
-    private var lastChosenModule = ""
 
     // Maximum number of LLM requests
     private var maxLLMRequestsField =
@@ -146,7 +144,6 @@ class SettingsLLMComponent {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            lastChosenModule,
         )
 
         addHighlighterListeners()
@@ -180,7 +177,7 @@ class SettingsLLMComponent {
     private fun createSettingsPanel() {
         // Check if the Grazie platform access is available in the current build
         if (isGrazieClassLoaded()) {
-            platformSelector.model = DefaultComboBoxModel(arrayOf("Grazie", "OpenAI"))
+            platformSelector.model = DefaultComboBoxModel(arrayOf(TestSparkLabelsBundle.defaultValue("grazie"), TestSparkLabelsBundle.defaultValue("openAI")))
         } else {
             platformSelector.isEnabled = false
         }
@@ -233,16 +230,27 @@ class SettingsLLMComponent {
         return (promptEditorTabbedPane.getComponentAt(editorType.index) as JPanel).getComponent(0) as EditorTextField
     }
 
-    var llmUserToken: String
+    var openAIToken: String
         get() = llmUserTokenField.text
         set(newText) {
             llmUserTokenField.text = newText
         }
 
-    var model: String
+    var grazieToken: String
+        get() = llmUserTokenField.text
+        set(newText) {
+            llmUserTokenField.text = newText
+        }
+
+    var openAIModel: String
         get() = modelSelector.item
         set(newAlg) {
-            lastChosenModule = newAlg
+            modelSelector.item = newAlg
+        }
+
+    var grazieModel: String
+        get() = modelSelector.item
+        set(newAlg) {
             modelSelector.item = newAlg
         }
 

@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.DataFilesUtil
+import org.jetbrains.research.testspark.data.DataFilesUtil
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
