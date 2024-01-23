@@ -16,7 +16,7 @@ import java.net.HttpURLConnection
 class OpenAIRequestManager : RequestManager() {
 
     private val url = "https://api.openai.com/v1/chat/completions"
-    private val model = SettingsArguments.model()
+    private val model = SettingsArguments.openAIModel()
 
     private val httpRequest = HttpRequests.post(url, "application/json").tuner {
         it.setRequestProperty("Authorization", "Bearer $token")
