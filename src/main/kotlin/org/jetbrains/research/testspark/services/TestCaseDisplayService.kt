@@ -154,16 +154,16 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Add collector logging
         project.service<CollectorService>().testGenerationFinishedCollector.logEvent(
-            System.currentTimeMillis() - project.service<Workspace>().testGenerationStartTime!!,
-            project.service<Workspace>().technique!!,
-            project.service<Workspace>().codeType!!,
+            System.currentTimeMillis() - project.service<CollectorService>().data.testGenerationStartTime!!,
+            project.service<CollectorService>().data.technique!!,
+            project.service<CollectorService>().data.codeType!!,
         )
 
         // Add collector logging
         project.service<CollectorService>().generatedTestsCollector.logEvent(
             report.testCaseList.size,
-            project.service<Workspace>().technique!!,
-            project.service<Workspace>().codeType!!,
+            project.service<CollectorService>().data.technique!!,
+            project.service<CollectorService>().data.codeType!!,
         )
     }
 
@@ -285,8 +285,8 @@ class TestCaseDisplayService(private val project: Project) {
         // Add collector logging
         project.service<CollectorService>().integratedTestsCollector.logEvent(
             selectedTestCases.size,
-            project.service<Workspace>().technique!!,
-            project.service<Workspace>().codeType!!,
+            project.service<CollectorService>().data.technique!!,
+            project.service<CollectorService>().data.codeType!!,
             modifiedTestsCount,
         )
 

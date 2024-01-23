@@ -9,12 +9,12 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.CodeTypeWrapper
+import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.helpers.getSurroundingClass
 import org.jetbrains.research.testspark.services.ClearService
-import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.CollectorService
+import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 
@@ -44,6 +44,8 @@ class Pipeline(
 
         project.service<ProjectContextService>().classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!
 
+        project.service<CollectorService>().data.id = project.service<TestStorageProcessingService>().id
+
         DataFilesUtil.makeTmp()
         DataFilesUtil.makeDir(project.service<ProjectContextService>().baseDir!!)
     }
@@ -53,6 +55,10 @@ class Pipeline(
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: CodeTypeWrapper) {
         project.service<ClearService>().clear(project)
+
+        project.service<CollectorService>().data.technique = processManager.getTechnique()
+        project.service<CollectorService>().data.codeType = codeType.type!!
+        project.service<CollectorService>().data.testGenerationStartTime = System.currentTimeMillis()
 
         // Add collector logging
         project.service<CollectorService>().testGenerationStartedCollector.logEvent(

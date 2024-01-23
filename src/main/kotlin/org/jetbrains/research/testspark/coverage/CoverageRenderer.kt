@@ -108,7 +108,7 @@ class CoverageRenderer(
             HintHint(editor, point),
         )
 
-        project.service<CollectorService>().coverageStatusShowedCollector.logEvent(project.service<Workspace>().id!!)
+        project.service<CollectorService>().coverageStatusShowedCollector.logEvent(project.service<CollectorService>().data.id!!)
     }
 
     /**

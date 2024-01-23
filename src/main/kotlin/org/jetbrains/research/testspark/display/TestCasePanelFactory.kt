@@ -167,8 +167,8 @@ class TestCasePanelFactory(
             project.service<CollectorService>().likedDislikedCollector.logEvent(
                 true,
                 getTestId(),
-                project.service<Workspace>().technique!!,
-                project.service<Workspace>().codeType!!,
+                project.service<CollectorService>().data.technique!!,
+                project.service<CollectorService>().data.codeType!!,
                 testCase.testCode != initialCodes[currentRequestNumber - 1],
             )
         }
@@ -184,8 +184,8 @@ class TestCasePanelFactory(
             project.service<CollectorService>().likedDislikedCollector.logEvent(
                 false,
                 getTestId(),
-                project.service<Workspace>().technique!!,
-                project.service<Workspace>().codeType!!,
+                project.service<CollectorService>().data.technique!!,
+                project.service<CollectorService>().data.codeType!!,
                 testCase.testCode != initialCodes[currentRequestNumber - 1],
             )
         }
@@ -417,9 +417,9 @@ class TestCasePanelFactory(
                     if (processStopped(project, indicator)) return
 
                     project.service<CollectorService>().feedbackSentCollector.logEvent(
-                        project.service<Workspace>().id!! + "_" + testCase.id,
-                        project.service<Workspace>().technique!!,
-                        project.service<Workspace>().codeType!!,
+                        project.service<CollectorService>().data.id!! + "_" + testCase.id,
+                        project.service<CollectorService>().data.technique!!,
+                        project.service<CollectorService>().data.codeType!!,
                         testCase.testCode != initialCodes[currentRequestNumber - 1],
                     )
 
@@ -697,7 +697,7 @@ class TestCasePanelFactory(
      *
      * @return The test ID as a string.
      */
-    private fun getTestId(): String = project.service<Workspace>().id!! + "_" + testCase.id
+    private fun getTestId(): String = project.service<CollectorService>().data.id!! + "_" + testCase.id
 
     /**
      * A custom JTextField with a hint text that is displayed when the field is empty and not in focus.

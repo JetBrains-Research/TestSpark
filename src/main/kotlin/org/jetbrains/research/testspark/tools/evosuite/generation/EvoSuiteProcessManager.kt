@@ -16,8 +16,8 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.CodeTypeWrapper
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.data.Technique
+import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.RunCommandLineService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService

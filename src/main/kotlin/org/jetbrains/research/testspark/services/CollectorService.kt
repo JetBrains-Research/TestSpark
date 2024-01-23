@@ -8,6 +8,7 @@ import org.jetbrains.research.testspark.collectors.IntegratedTestsCollector
 import org.jetbrains.research.testspark.collectors.LikedDislikedCollector
 import org.jetbrains.research.testspark.collectors.TestGenerationFinishedCollector
 import org.jetbrains.research.testspark.collectors.TestGenerationStartedCollector
+import org.jetbrains.research.testspark.data.CollectorsData
 
 @Service(Service.Level.PROJECT)
 class CollectorService {
@@ -18,4 +19,6 @@ class CollectorService {
     val testGenerationFinishedCollector = TestGenerationFinishedCollector()
     val generatedTestsCollector = GeneratedTestsCollector()
     val integratedTestsCollector = IntegratedTestsCollector()
+
+    val data: CollectorsData = CollectorsData()
 }
