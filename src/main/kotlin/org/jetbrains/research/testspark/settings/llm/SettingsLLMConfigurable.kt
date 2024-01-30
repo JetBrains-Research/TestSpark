@@ -81,9 +81,13 @@ class SettingsLLMConfigurable : Configurable {
         if (settingsComponent!!.llmPlatform == TestSparkLabelsBundle.defaultValue("grazie")) {
             settingsState.grazieToken = settingsComponent!!.grazieToken
             settingsState.grazieModel = settingsComponent!!.grazieModel
+            settingsComponent!!.openAIToken = settingsState.openAIToken
+            settingsComponent!!.openAIModel = settingsState.openAIToken
         } else {
             settingsState.openAIToken = settingsComponent!!.openAIToken
             settingsState.openAIModel = settingsComponent!!.openAIModel
+            settingsComponent!!.grazieToken = settingsState.grazieToken
+            settingsComponent!!.grazieModel = settingsState.grazieModel
         }
         settingsState.llmPlatform = settingsComponent!!.llmPlatform
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest

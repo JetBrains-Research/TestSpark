@@ -5,17 +5,14 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
-import org.jetbrains.research.testspark.helpers.isGrazieClassLoaded
-import org.jetbrains.research.testspark.helpers.updateModelSelector
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import java.awt.Font
-import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 
 class LLMPanelFactory : ToolPanelFactory {
     private val defaultModulesArray = arrayOf("")
@@ -27,12 +24,21 @@ class LLMPanelFactory : ToolPanelFactory {
 
     private val settingsState = SettingsApplicationService.getInstance().state!!
 
+    private var openAIToken = settingsState.openAIToken
+    private var openAIModel = settingsState.openAIModel
+    private var grazieToken = settingsState.grazieToken
+    private var grazieModel = settingsState.grazieModel
+
     init {
         addLLMPanelListeners(
             platformSelector,
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
+            openAIToken,
+            openAIModel,
+            grazieToken,
+            grazieModel,
         )
     }
 
@@ -62,29 +68,7 @@ class LLMPanelFactory : ToolPanelFactory {
         val titlePanel = JPanel()
         titlePanel.add(textTitle)
 
-        if (isGrazieClassLoaded()) {
-            platformSelector.model = DefaultComboBoxModel(arrayOf(TestSparkLabelsBundle.defaultValue("grazie"), TestSparkLabelsBundle.defaultValue("openAI")))
-            platformSelector.selectedItem = settingsState.llmPlatform
-        } else {
-            platformSelector.isEnabled = false
-        }
-
-        llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
-        if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-            llmUserTokenField.text = settingsState.grazieToken
-        } else {
-            llmUserTokenField.text = settingsState.openAIToken
-        }
-
-        modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
-        modelSelector.isEnabled = false
-
-        updateModelSelector(
-            platformSelector,
-            modelSelector,
-            llmUserTokenField,
-            defaultModulesArray,
-        )
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, defaultModulesArray)
 
         val bottomButtons = JPanel()
 
@@ -132,12 +116,9 @@ class LLMPanelFactory : ToolPanelFactory {
      */
     override fun settingsStateUpdate() {
         settingsState.llmPlatform = platformSelector.selectedItem!!.toString()
-        if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-            settingsState.grazieToken = llmUserTokenField.text
-            settingsState.grazieModel = modelSelector.selectedItem!!.toString()
-        } else {
-            settingsState.openAIToken = llmUserTokenField.text
-            settingsState.openAIModel = modelSelector.selectedItem!!.toString()
-        }
+        settingsState.openAIToken = openAIToken
+        settingsState.openAIModel = openAIToken
+        settingsState.grazieToken = grazieToken
+        settingsState.grazieModel = grazieModel
     }
 }

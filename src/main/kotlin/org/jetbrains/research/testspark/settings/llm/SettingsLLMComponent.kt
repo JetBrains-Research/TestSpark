@@ -15,18 +15,18 @@ import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
-import org.jetbrains.research.testspark.helpers.isGrazieClassLoaded
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.FlowLayout
 import java.awt.Font
 import javax.swing.BorderFactory
 import javax.swing.BoxLayout
-import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
+import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 
 class SettingsLLMComponent {
     var panel: JPanel? = null
@@ -56,11 +56,12 @@ class SettingsLLMComponent {
         JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
 
     init {
+        // Adds additional style (width, tooltips)
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, defaultModulesArray)
+        stylizePanel()
+
         // Adds the panel components
         createSettingsPanel()
-
-        // Adds additional style (width, tooltips)
-        stylizePanel()
 
         // Adds listeners
         addListeners()
@@ -144,6 +145,10 @@ class SettingsLLMComponent {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
+            openAIToken,
+            openAIModel,
+            grazieToken,
+            grazieModel
         )
 
         addHighlighterListeners()
@@ -162,10 +167,7 @@ class SettingsLLMComponent {
     }
 
     private fun stylizePanel() {
-        llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
         maxLLMRequestsField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumNumberOfRequests")
-        modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
-        modelSelector.isEnabled = false
         maxInputParamsDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("parametersDepth")
         maxPolyDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumPolyDepth")
         promptSeparator.toolTipText = TestSparkToolTipsBundle.defaultValue("promptEditor")
@@ -175,13 +177,6 @@ class SettingsLLMComponent {
      * Create the main panel for LLM-related settings page
      */
     private fun createSettingsPanel() {
-        // Check if the Grazie platform access is available in the current build
-        if (isGrazieClassLoaded()) {
-            platformSelector.model = DefaultComboBoxModel(arrayOf(TestSparkLabelsBundle.defaultValue("grazie"), TestSparkLabelsBundle.defaultValue("openAI")))
-        } else {
-            platformSelector.isEnabled = false
-        }
-
         panel = FormBuilder.createFormBuilder()
             .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("LLMSettings")))
             .addLabeledComponent(
@@ -230,29 +225,13 @@ class SettingsLLMComponent {
         return (promptEditorTabbedPane.getComponentAt(editorType.index) as JPanel).getComponent(0) as EditorTextField
     }
 
-    var openAIToken: String
-        get() = llmUserTokenField.text
-        set(newText) {
-            llmUserTokenField.text = newText
-        }
+    var openAIToken: String = TestSparkDefaultsBundle.defaultValue("openAIToken")
 
-    var grazieToken: String
-        get() = llmUserTokenField.text
-        set(newText) {
-            llmUserTokenField.text = newText
-        }
+    var grazieToken: String = TestSparkDefaultsBundle.defaultValue("grazieToken")
 
-    var openAIModel: String
-        get() = modelSelector.item
-        set(newAlg) {
-            modelSelector.item = newAlg
-        }
+    var openAIModel: String = TestSparkDefaultsBundle.defaultValue("openAIModel")
 
-    var grazieModel: String
-        get() = modelSelector.item
-        set(newAlg) {
-            modelSelector.item = newAlg
-        }
+    var grazieModel: String = TestSparkDefaultsBundle.defaultValue("grazieModel")
 
     var llmPlatform: String
         get() = platformSelector.item
