@@ -5,14 +5,16 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.data.LLMPlatform
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
+import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.Font
 import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
-import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 
 class LLMPanelFactory : ToolPanelFactory {
     private val defaultModulesArray = arrayOf("")
@@ -24,10 +26,8 @@ class LLMPanelFactory : ToolPanelFactory {
 
     private val settingsState = SettingsApplicationService.getInstance().state!!
 
-    private var openAIToken = settingsState.openAIToken
-    private var openAIModel = settingsState.openAIModel
-    private var grazieToken = settingsState.grazieToken
-    private var grazieModel = settingsState.grazieModel
+    private val openAIPlatform: LLMPlatform = LLMPlatform(SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.name, SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.token, SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.model)
+    private val graziePlatform: LLMPlatform = LLMPlatform(SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.name, SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.token, SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.model)
 
     init {
         addLLMPanelListeners(
@@ -35,10 +35,8 @@ class LLMPanelFactory : ToolPanelFactory {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            openAIToken,
-            openAIModel,
-            grazieToken,
-            grazieModel,
+            openAIPlatform,
+            graziePlatform,
         )
     }
 
@@ -116,9 +114,9 @@ class LLMPanelFactory : ToolPanelFactory {
      */
     override fun settingsStateUpdate() {
         settingsState.llmPlatform = platformSelector.selectedItem!!.toString()
-        settingsState.openAIToken = openAIToken
-        settingsState.openAIModel = openAIToken
-        settingsState.grazieToken = grazieToken
-        settingsState.grazieModel = grazieModel
+        settingsState.openAIPlatform.token = openAIPlatform.token
+        settingsState.openAIPlatform.model = openAIPlatform.model
+        settingsState.graziePlatform.token = graziePlatform.token
+        settingsState.graziePlatform.model = graziePlatform.model
     }
 }

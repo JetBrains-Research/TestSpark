@@ -1,3 +1,10 @@
 package org.jetbrains.research.testspark.data
 
-data class LLMPlatform(val name: String, val token: String, val model: String)
+/**
+ * Class representing a LLM (Low-Level Middleware) platform.
+ *
+ * @property name The name of the platform.
+ * @property token The token used for authentication.
+ * @property model The model of the platform.
+ */
+data class LLMPlatform(val name: String, var token: String, var model: String)

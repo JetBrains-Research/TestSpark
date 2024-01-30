@@ -14,7 +14,9 @@ import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.data.LLMPlatform
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
+import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.FlowLayout
@@ -25,8 +27,6 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
-import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 
 class SettingsLLMComponent {
     var panel: JPanel? = null
@@ -54,6 +54,64 @@ class SettingsLLMComponent {
     // Maximum polymorphism depth
     private var maxPolyDepthField =
         JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
+
+    val openAIPlatform: LLMPlatform = LLMPlatform(SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.name, SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.token, SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.model)
+
+    val graziePlatform: LLMPlatform = LLMPlatform(SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.name, SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.token, SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.model)
+
+    var llmPlatform: String
+        get() = platformSelector.item
+        set(newAlg) {
+            platformSelector.item = newAlg
+        }
+
+    var maxLLMRequest: Int
+        get() = maxLLMRequestsField.number
+        set(value) {
+            maxLLMRequestsField.number = value
+        }
+
+    var maxInputParamsDepth: Int
+        get() = maxInputParamsDepthField.number
+        set(value) {
+            maxInputParamsDepthField.number = value
+        }
+
+    var maxPolyDepth: Int
+        get() = maxPolyDepthField.number
+        set(value) {
+            maxPolyDepthField.number = value
+        }
+
+    var classPrompt: String
+        get() = getEditorTextField(PromptEditorType.CLASS).document.text
+        set(value) {
+            ApplicationManager.getApplication().runWriteAction {
+                val editorTextField =
+                    getEditorTextField(PromptEditorType.CLASS)
+                editorTextField.document.setText(value)
+            }
+        }
+
+    var methodPrompt: String
+        get() = getEditorTextField(PromptEditorType.METHOD).document.text
+        set(value) {
+            ApplicationManager.getApplication().runWriteAction {
+                val editorTextField =
+                    getEditorTextField(PromptEditorType.METHOD)
+                editorTextField.document.setText(value)
+            }
+        }
+
+    var linePrompt: String
+        get() = getEditorTextField(PromptEditorType.LINE).document.text
+        set(value) {
+            ApplicationManager.getApplication().runWriteAction {
+                val editorTextField =
+                    getEditorTextField(PromptEditorType.LINE)
+                editorTextField.document.setText(value)
+            }
+        }
 
     init {
         // Adds additional style (width, tooltips)
@@ -145,10 +203,8 @@ class SettingsLLMComponent {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            openAIToken,
-            openAIModel,
-            grazieToken,
-            grazieModel
+            openAIPlatform,
+            graziePlatform,
         )
 
         addHighlighterListeners()
@@ -224,66 +280,4 @@ class SettingsLLMComponent {
     private fun getEditorTextField(editorType: PromptEditorType): EditorTextField {
         return (promptEditorTabbedPane.getComponentAt(editorType.index) as JPanel).getComponent(0) as EditorTextField
     }
-
-    var openAIToken: String = TestSparkDefaultsBundle.defaultValue("openAIToken")
-
-    var grazieToken: String = TestSparkDefaultsBundle.defaultValue("grazieToken")
-
-    var openAIModel: String = TestSparkDefaultsBundle.defaultValue("openAIModel")
-
-    var grazieModel: String = TestSparkDefaultsBundle.defaultValue("grazieModel")
-
-    var llmPlatform: String
-        get() = platformSelector.item
-        set(newAlg) {
-            platformSelector.item = newAlg
-        }
-
-    var maxLLMRequest: Int
-        get() = maxLLMRequestsField.number
-        set(value) {
-            maxLLMRequestsField.number = value
-        }
-
-    var maxInputParamsDepth: Int
-        get() = maxInputParamsDepthField.number
-        set(value) {
-            maxInputParamsDepthField.number = value
-        }
-
-    var maxPolyDepth: Int
-        get() = maxPolyDepthField.number
-        set(value) {
-            maxPolyDepthField.number = value
-        }
-
-    var classPrompt: String
-        get() = getEditorTextField(PromptEditorType.CLASS).document.text
-        set(value) {
-            ApplicationManager.getApplication().runWriteAction {
-                val editorTextField =
-                    getEditorTextField(PromptEditorType.CLASS)
-                editorTextField.document.setText(value)
-            }
-        }
-
-    var methodPrompt: String
-        get() = getEditorTextField(PromptEditorType.METHOD).document.text
-        set(value) {
-            ApplicationManager.getApplication().runWriteAction {
-                val editorTextField =
-                    getEditorTextField(PromptEditorType.METHOD)
-                editorTextField.document.setText(value)
-            }
-        }
-
-    var linePrompt: String
-        get() = getEditorTextField(PromptEditorType.LINE).document.text
-        set(value) {
-            ApplicationManager.getApplication().runWriteAction {
-                val editorTextField =
-                    getEditorTextField(PromptEditorType.LINE)
-                editorTextField.document.setText(value)
-            }
-        }
 }

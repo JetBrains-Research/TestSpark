@@ -6,6 +6,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.data.LLMPlatform
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.tools.llm.generation.Info
 import java.net.HttpURLConnection
@@ -57,14 +58,14 @@ private fun updateModelSelector(
         val info = loadGrazieInfo()
         val modules = info?.availableProfiles() ?: emptySet()
         modelSelector.model = DefaultComboBoxModel(modules.toTypedArray())
-        if (modules.contains(settingsState.grazieModel)) modelSelector.selectedItem = settingsState.grazieModel
+        if (modules.contains(settingsState.graziePlatform.model)) modelSelector.selectedItem = settingsState.graziePlatform.model
         modelSelector.isEnabled = true
     } else {
         ApplicationManager.getApplication().executeOnPooledThread {
             val modules = getOpenAIModules(llmUserTokenField.text)
             if (modules != null) {
                 modelSelector.model = DefaultComboBoxModel(modules)
-                if (modules.contains(settingsState.openAIModel)) modelSelector.selectedItem = settingsState.openAIModel
+                if (modules.contains(settingsState.openAIPlatform.model)) modelSelector.selectedItem = settingsState.openAIPlatform.model
                 modelSelector.isEnabled = true
             } else {
                 modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
@@ -75,14 +76,17 @@ private fun updateModelSelector(
 }
 
 /**
+ * Updates LlmUserTokenField based on the selected platform in the platformSelector ComboBox.
  *
+ * @param platformSelector The ComboBox that allows the user to select a platform.
+ * @param llmUserTokenField The JTextField that displays the user token for the selected platform.
  */
 private fun updateLlmUserTokenField(platformSelector: ComboBox<String>, llmUserTokenField: JTextField) {
     val settingsState = SettingsApplicationService.getInstance().state!!
     if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-        llmUserTokenField.text = settingsState.grazieToken
+        llmUserTokenField.text = settingsState.graziePlatform.token
     } else {
-        llmUserTokenField.text = settingsState.openAIToken
+        llmUserTokenField.text = settingsState.openAIPlatform.token
     }
 }
 
@@ -146,10 +150,8 @@ fun addLLMPanelListeners(
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
     defaultModulesArray: Array<String>,
-    openAIToken: String,
-    openAIModel: String,
-    grazieToken: String,
-    grazieModel: String,
+    openAIPlatform: LLMPlatform,
+    graziePlatform: LLMPlatform,
 ) {
     llmUserTokenField.document.addDocumentListener(object : DocumentListener {
         override fun insertUpdate(e: DocumentEvent?) {
@@ -166,9 +168,9 @@ fun addLLMPanelListeners(
 
         private fun updateToken() {
             if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-                grazieToken = llmUserTokenField.text
+                graziePlatform.token = llmUserTokenField.text
             } else {
-                openAIToken = llmUserTokenField.text
+                openAIPlatform.token = llmUserTokenField.text
             }
 
             updateModelSelector(
@@ -193,9 +195,9 @@ fun addLLMPanelListeners(
 
     modelSelector.addItemListener {
         if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-            grazieModel = modelSelector.item
+            graziePlatform.model = modelSelector.item
         } else {
-            openAIModel = modelSelector.item
+            openAIPlatform.model = modelSelector.item
         }
     }
 }

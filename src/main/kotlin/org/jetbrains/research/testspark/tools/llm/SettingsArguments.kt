@@ -18,28 +18,28 @@ class SettingsArguments {
          *
          * @return The OpenAI token as a string.
          */
-        fun openAIToken(): String = settingsState!!.openAIToken
+        fun openAIToken(): String = settingsState!!.openAIPlatform.token
 
         /**
          * Retrieves the Grazie token from the settings state.
          *
          * @return The Grazie token as a string.
          */
-        fun grazieToken(): String = settingsState!!.grazieToken
+        fun grazieToken(): String = settingsState!!.graziePlatform.token
 
         /**
          * Opens the AI model associated with the given settings state.
          *
          * @return The AI model as a string.
          */
-        fun openAIModel(): String = settingsState!!.openAIModel
+        fun openAIModel(): String = settingsState!!.openAIPlatform.model
 
         /**
          * Retrieves the Grazie model from the application's settings state.
          *
          * @return The Grazie model as a String.
          */
-        fun grazieModel(): String = settingsState!!.grazieModel
+        fun grazieModel(): String = settingsState!!.graziePlatform.model
 
         /**
          * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.
