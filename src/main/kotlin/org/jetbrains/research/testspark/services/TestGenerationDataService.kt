@@ -1,11 +1,11 @@
-package org.jetbrains.research.testspark.data
+package org.jetbrains.research.testspark.services
 
+import com.intellij.openapi.components.Service
+import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 
-/**
- * Data with test generation results that include additional information beyond the test cases themselves.
- */
-class TestGenerationData {
+@Service(Service.Level.PROJECT)
+class TestGenerationDataService {
     // Result processing
     var testGenerationResultList: MutableList<Report?> = mutableListOf()
     var resultName: String = ""

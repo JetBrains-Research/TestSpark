@@ -20,3 +20,5 @@ src/test/resources/project/untitled/.idea/
 src/test/resources/project/untitled/target/
 src/test/resources/project/untitled/untitled.iml
 .jqwik-database
+
+ktlint

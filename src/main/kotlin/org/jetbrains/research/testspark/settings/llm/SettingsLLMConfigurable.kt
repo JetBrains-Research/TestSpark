@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -31,8 +32,10 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        settingsComponent!!.llmUserToken = settingsState.llmUserToken
-        settingsComponent!!.model = settingsState.model
+        settingsComponent!!.openAIToken = settingsState.openAIToken
+        settingsComponent!!.grazieToken = settingsState.grazieToken
+        settingsComponent!!.openAIModel = settingsState.openAIModel
+        settingsComponent!!.grazieModel = settingsState.grazieModel
         settingsComponent!!.llmPlatform = settingsState.llmPlatform
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
@@ -49,8 +52,10 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        var modified: Boolean = settingsComponent!!.llmUserToken != settingsState.llmUserToken
-        modified = modified or (settingsComponent!!.model != settingsState.model)
+        var modified: Boolean = settingsComponent!!.openAIToken != settingsState.openAIToken
+        modified = modified or (settingsComponent!!.grazieToken != settingsState.grazieToken)
+        modified = modified or (settingsComponent!!.openAIModel != settingsState.openAIModel)
+        modified = modified or (settingsComponent!!.grazieModel != settingsState.grazieModel)
         modified = modified or (settingsComponent!!.llmPlatform != settingsState.llmPlatform)
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
@@ -73,8 +78,13 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun apply() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        settingsState.llmUserToken = settingsComponent!!.llmUserToken
-        settingsState.model = settingsComponent!!.model
+        if (settingsComponent!!.llmPlatform == TestSparkLabelsBundle.defaultValue("grazie")) {
+            settingsState.grazieToken = settingsComponent!!.grazieToken
+            settingsState.grazieModel = settingsComponent!!.grazieModel
+        } else {
+            settingsState.openAIToken = settingsComponent!!.openAIToken
+            settingsState.openAIModel = settingsComponent!!.openAIModel
+        }
         settingsState.llmPlatform = settingsComponent!!.llmPlatform
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth

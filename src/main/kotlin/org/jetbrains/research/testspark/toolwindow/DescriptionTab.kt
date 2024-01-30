@@ -4,7 +4,7 @@ import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.settings.SettingsPluginConfigurable
 import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable

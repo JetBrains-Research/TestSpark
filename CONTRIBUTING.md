@@ -126,7 +126,7 @@ All the classes related to TestSpark `Settings/Preferences` page can be found in
     - `LLMErrorManager` LLMErrorManager is a class that handles error and warning messages for LLM (Live Logic Monitor).
   - `generation`
     - `LLMProcessManager` LLMProcessManager is a class that implements the ProcessManager interface and is responsible for generating tests using the LLM tool.
-    - `LLMRequestManager` this class represents a manager for making requests to the LLM (Live Learning Model).
+    - `LLMRequestManager` this class represents a manager for making requests to the LLM (Large Language Model).
     - `PromptManager` a class that manages prompts for generating unit tests.
     - `TestCoverageCollector` responsible for collecting test coverage data and generating a report
     - `TestsAssembler` assembler class for generating and organizing test cases.
