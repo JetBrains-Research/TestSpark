@@ -35,13 +35,15 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.openAIPlatform.model = settingsState.openAIPlatform.model
         settingsComponent!!.graziePlatform.token = settingsState.graziePlatform.token
         settingsComponent!!.graziePlatform.model = settingsState.graziePlatform.model
-        settingsComponent!!.llmPlatform = settingsState.llmPlatform
+//        settingsComponent!!.llmPlatform = settingsState.llmPlatform
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
         settingsComponent!!.classPrompt = settingsState.classPrompt
         settingsComponent!!.methodPrompt = settingsState.methodPrompt
         settingsComponent!!.linePrompt = settingsState.linePrompt
+
+        settingsComponent!!.updateTokenAndModel()
     }
 
     /**
@@ -55,7 +57,7 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.openAIPlatform.model != settingsState.openAIPlatform.model)
         modified = modified or (settingsComponent!!.graziePlatform.token != settingsState.graziePlatform.token)
         modified = modified or (settingsComponent!!.graziePlatform.model != settingsState.graziePlatform.model)
-        modified = modified or (settingsComponent!!.llmPlatform != settingsState.llmPlatform)
+//        modified = modified or (settingsComponent!!.llmPlatform != settingsState.llmPlatform)
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)

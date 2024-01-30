@@ -280,4 +280,14 @@ class SettingsLLMComponent {
     private fun getEditorTextField(editorType: PromptEditorType): EditorTextField {
         return (promptEditorTabbedPane.getComponentAt(editorType.index) as JPanel).getComponent(0) as EditorTextField
     }
+
+    fun updateTokenAndModel() {
+        if (llmPlatform == graziePlatform.name) {
+            llmUserTokenField.text = graziePlatform.token
+            if (modelSelector.isEnabled) modelSelector.selectedItem = graziePlatform.model
+        } else {
+            llmUserTokenField.text = openAIPlatform.token
+            if (modelSelector.isEnabled) modelSelector.selectedItem = openAIPlatform.model
+        }
+    }
 }
