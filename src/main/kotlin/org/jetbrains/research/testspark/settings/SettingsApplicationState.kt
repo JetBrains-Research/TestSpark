@@ -57,12 +57,17 @@ data class SettingsApplicationState(
         val criterionMethodNoException: Boolean = TestSparkDefaultsBundle.defaultValue("criterionMethodNoException").toBoolean()
         val criterionCBranch: Boolean = TestSparkDefaultsBundle.defaultValue("criterionCBranch").toBoolean()
         val llmPlatforms: List<LLMPlatform> = listOf(
-            LLMPlatform(TestSparkDefaultsBundle.defaultValue("openAI"),
+            LLMPlatform(
+                TestSparkDefaultsBundle.defaultValue("openAI"),
                 TestSparkDefaultsBundle.defaultValue("openAIToken"),
-                TestSparkDefaultsBundle.defaultValue("openAIModel")),
-            LLMPlatform(TestSparkDefaultsBundle.defaultValue("grazie"),
+                TestSparkDefaultsBundle.defaultValue("openAIModel"),
+            ),
+            LLMPlatform(
+                TestSparkDefaultsBundle.defaultValue("grazie"),
                 TestSparkDefaultsBundle.defaultValue("grazieToken"),
-                TestSparkDefaultsBundle.defaultValue("grazieModel")))
+                TestSparkDefaultsBundle.defaultValue("grazieModel"),
+            ),
+        )
         var currentLLMPlatformName: String = TestSparkDefaultsBundle.defaultValue("llmPlatform")
         val maxLLMRequest: Int = TestSparkDefaultsBundle.defaultValue("maxLLMRequest").toInt()
         val maxInputParamsDepth: Int = TestSparkDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()

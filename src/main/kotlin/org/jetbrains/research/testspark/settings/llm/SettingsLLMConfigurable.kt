@@ -35,7 +35,7 @@ class SettingsLLMConfigurable : Configurable {
             settingsComponent!!.llmPlatforms[index].token = settingsState.llmPlatforms[index].token
             settingsComponent!!.llmPlatforms[index].model = settingsState.llmPlatforms[index].model
         }
-//        settingsComponent!!.llmPlatform = settingsState.llmPlatform
+        settingsComponent!!.currentLLMPlatformName = settingsState.currentLLMPlatformName
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
@@ -58,7 +58,7 @@ class SettingsLLMConfigurable : Configurable {
             modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.llmPlatforms[index].token)
             modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.llmPlatforms[index].model)
         }
-//        modified = modified or (settingsComponent!!.llmPlatform != settingsState.llmPlatform)
+        modified = modified or (settingsComponent!!.currentLLMPlatformName != settingsState.currentLLMPlatformName)
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)

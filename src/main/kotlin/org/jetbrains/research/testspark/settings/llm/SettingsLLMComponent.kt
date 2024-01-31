@@ -12,6 +12,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.LLMPlatform
@@ -27,7 +28,6 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 
 class SettingsLLMComponent {
     var panel: JPanel? = null
@@ -57,12 +57,17 @@ class SettingsLLMComponent {
         JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
 
     val llmPlatforms: List<LLMPlatform> = listOf(
-        LLMPlatform(TestSparkDefaultsBundle.defaultValue("openAI"),
+        LLMPlatform(
+            TestSparkDefaultsBundle.defaultValue("openAI"),
             TestSparkDefaultsBundle.defaultValue("openAIToken"),
-            TestSparkDefaultsBundle.defaultValue("openAIModel")),
-        LLMPlatform(TestSparkDefaultsBundle.defaultValue("grazie"),
+            TestSparkDefaultsBundle.defaultValue("openAIModel"),
+        ),
+        LLMPlatform(
+            TestSparkDefaultsBundle.defaultValue("grazie"),
             TestSparkDefaultsBundle.defaultValue("grazieToken"),
-            TestSparkDefaultsBundle.defaultValue("grazieModel")))
+            TestSparkDefaultsBundle.defaultValue("grazieModel"),
+        ),
+    )
 
     var currentLLMPlatformName: String
         get() = platformSelector.item

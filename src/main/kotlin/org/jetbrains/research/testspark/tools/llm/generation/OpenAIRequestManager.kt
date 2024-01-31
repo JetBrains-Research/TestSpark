@@ -6,10 +6,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import java.net.HttpURLConnection
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 
 /**
  * This class represents a manager for making requests to the LLM (Large Language Model).

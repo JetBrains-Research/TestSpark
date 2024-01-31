@@ -4,6 +4,7 @@ import com.google.gson.JsonParser
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.LLMPlatform
 import org.jetbrains.research.testspark.services.SettingsApplicationService
@@ -13,7 +14,6 @@ import javax.swing.DefaultComboBoxModel
 import javax.swing.JTextField
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 
 /**
  * Checks if the Grazie class is loaded.
@@ -54,26 +54,28 @@ private fun updateModelSelector(
 ) {
     val settingsState = SettingsApplicationService.getInstance().state!!
 
-    for (llmPlatform in settingsState.llmPlatforms) {
-        // TODO create more common implementation
-        if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("grazie")) {
-            val info = loadGrazieInfo()
-            val modules = info?.availableProfiles() ?: emptySet()
-            modelSelector.model = DefaultComboBoxModel(modules.toTypedArray())
-            if (modules.contains(llmPlatform.model)) modelSelector.selectedItem = llmPlatform.model
-            modelSelector.isEnabled = true
+    // TODO create more common implementation
+    if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("grazie")) {
+        val info = loadGrazieInfo()
+        val modules = info?.availableProfiles() ?: emptySet()
+        modelSelector.model = DefaultComboBoxModel(modules.toTypedArray())
+        for (llmPlatform in settingsState.llmPlatforms) {
+            if (modules.contains(llmPlatform.model) && platformSelector.selectedItem!!.toString() == llmPlatform.name) modelSelector.selectedItem = llmPlatform.model
         }
-        if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("openAI")) {
-            ApplicationManager.getApplication().executeOnPooledThread {
-                val modules = getOpenAIModules(llmUserTokenField.text)
-                if (modules != null) {
-                    modelSelector.model = DefaultComboBoxModel(modules)
-                    if (modules.contains(llmPlatform.model)) modelSelector.selectedItem = llmPlatform.model
-                    modelSelector.isEnabled = true
-                } else {
-                    modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
-                    modelSelector.isEnabled = false
+        modelSelector.isEnabled = true
+    }
+    if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("openAI")) {
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val modules = getOpenAIModules(llmUserTokenField.text)
+            if (modules != null) {
+                modelSelector.model = DefaultComboBoxModel(modules)
+                for (llmPlatform in settingsState.llmPlatforms) {
+                    if (modules.contains(llmPlatform.model) && platformSelector.selectedItem!!.toString() == llmPlatform.name) modelSelector.selectedItem = llmPlatform.model
                 }
+                modelSelector.isEnabled = true
+            } else {
+                modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
+                modelSelector.isEnabled = false
             }
         }
     }
@@ -222,7 +224,12 @@ fun stylizeMainComponents(
 
     // Check if the Grazie platform access is available in the current build
     if (isGrazieClassLoaded()) {
-        platformSelector.model = DefaultComboBoxModel(arrayOf(TestSparkDefaultsBundle.defaultValue("grazie"), TestSparkDefaultsBundle.defaultValue("openAI")))
+        platformSelector.model = DefaultComboBoxModel(
+            arrayOf(
+                TestSparkDefaultsBundle.defaultValue("grazie"),
+                TestSparkDefaultsBundle.defaultValue("openAI"),
+            ),
+        )
         platformSelector.selectedItem = settingsState.currentLLMPlatformName
     } else {
         platformSelector.isEnabled = false
@@ -248,10 +255,15 @@ fun stylizeMainComponents(
  */
 fun getLLLMPlatforms(): List<LLMPlatform> {
     return listOf(
-        LLMPlatform(TestSparkDefaultsBundle.defaultValue("openAI"),
+        LLMPlatform(
+            TestSparkDefaultsBundle.defaultValue("openAI"),
             TestSparkDefaultsBundle.defaultValue("openAIToken"),
-            TestSparkDefaultsBundle.defaultValue("openAIModel")),
-        LLMPlatform(TestSparkDefaultsBundle.defaultValue("grazie"),
+            TestSparkDefaultsBundle.defaultValue("openAIModel"),
+        ),
+        LLMPlatform(
+            TestSparkDefaultsBundle.defaultValue("grazie"),
             TestSparkDefaultsBundle.defaultValue("grazieToken"),
-            TestSparkDefaultsBundle.defaultValue("grazieModel")))
+            TestSparkDefaultsBundle.defaultValue("grazieModel"),
+        ),
+    )
 }

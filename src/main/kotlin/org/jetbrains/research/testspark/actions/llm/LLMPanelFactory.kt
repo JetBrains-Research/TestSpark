@@ -4,9 +4,11 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.LLMPlatform
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
+import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import java.awt.Font
@@ -14,8 +16,6 @@ import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
-import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 
 class LLMPanelFactory : ToolPanelFactory {
     private val defaultModulesArray = arrayOf("")
