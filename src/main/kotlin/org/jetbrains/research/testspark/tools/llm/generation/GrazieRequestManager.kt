@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
@@ -31,7 +32,7 @@ class GrazieRequestManager : RequestManager() {
                 with(requestError) {
                     when {
                         contains("invalid: 401") -> llmErrorManager.errorProcess(
-                            "Invalid Token for Grazie provided!",
+                            TestSparkBundle.message("wrongToken"),
                             project,
                         )
 
@@ -42,7 +43,7 @@ class GrazieRequestManager : RequestManager() {
                 testsAssembler = requestResult.second
             }
         } catch (e: ClassNotFoundException) {
-            llmErrorManager.errorProcess("Grazie test generation feature is not available in this build.", project)
+            llmErrorManager.errorProcess(TestSparkBundle.message("grazieError"), project)
         }
 
         return testsAssembler

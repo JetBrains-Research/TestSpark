@@ -55,16 +55,19 @@ private fun updateModelSelector(
 
     // TODO create more common implementation
     if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("grazie")) {
-        val modules = loadGrazieInfo()?.availableProfiles()?.toTypedArray() ?: arrayOf("")
-        if (modules != null) {
-            modelSelector.model = DefaultComboBoxModel(modules)
-            for (llmPlatform in settingsState.llmPlatforms) {
-                if (modules.contains(llmPlatform.model) && platformSelector.selectedItem!!.toString() == llmPlatform.name) modelSelector.selectedItem = llmPlatform.model
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val modules = loadGrazieInfo()?.availableProfiles()?.toTypedArray() ?: arrayOf("")
+            if (modules != null) {
+                modelSelector.model = DefaultComboBoxModel(modules)
+                for (llmPlatform in settingsState.llmPlatforms) {
+                    if (modules.contains(llmPlatform.model) && platformSelector.selectedItem!!.toString() == llmPlatform.name) modelSelector.selectedItem =
+                        llmPlatform.model
+                }
+                modelSelector.isEnabled = true
+            } else {
+                modelSelector.model = DefaultComboBoxModel(arrayOf(""))
+                modelSelector.isEnabled = false
             }
-            modelSelector.isEnabled = true
-        } else {
-            modelSelector.model = DefaultComboBoxModel(arrayOf(""))
-            modelSelector.isEnabled = false
         }
     }
     if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("openAI")) {
