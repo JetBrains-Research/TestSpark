@@ -2,7 +2,9 @@ package org.jetbrains.research.testspark.settings
 
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
-import org.jetbrains.research.testspark.data.LLMPlatform
+import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
+import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
+import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIPlatform
 
 /**
  * This class is the actual data class that stores the values of the EvoSuite Settings entries.
@@ -56,18 +58,7 @@ data class SettingsApplicationState(
         val criterionMethod: Boolean = TestSparkDefaultsBundle.defaultValue("criterionMethod").toBoolean()
         val criterionMethodNoException: Boolean = TestSparkDefaultsBundle.defaultValue("criterionMethodNoException").toBoolean()
         val criterionCBranch: Boolean = TestSparkDefaultsBundle.defaultValue("criterionCBranch").toBoolean()
-        val llmPlatforms: List<LLMPlatform> = listOf(
-            LLMPlatform(
-                TestSparkDefaultsBundle.defaultValue("openAI"),
-                TestSparkDefaultsBundle.defaultValue("openAIToken"),
-                TestSparkDefaultsBundle.defaultValue("openAIModel"),
-            ),
-            LLMPlatform(
-                TestSparkDefaultsBundle.defaultValue("grazie"),
-                TestSparkDefaultsBundle.defaultValue("grazieToken"),
-                TestSparkDefaultsBundle.defaultValue("grazieModel"),
-            ),
-        )
+        val llmPlatforms: List<LLMPlatform> = listOf(OpenAIPlatform(), GraziePlatform())
         var currentLLMPlatformName: String = TestSparkDefaultsBundle.defaultValue("llmPlatform")
         val maxLLMRequest: Int = TestSparkDefaultsBundle.defaultValue("maxLLMRequest").toInt()
         val maxInputParamsDepth: Int = TestSparkDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()

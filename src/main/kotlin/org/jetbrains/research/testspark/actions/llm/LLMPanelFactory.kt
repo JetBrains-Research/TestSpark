@@ -6,11 +6,11 @@ import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.data.LLMPlatform
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.Font
 import javax.swing.JButton
 import javax.swing.JLabel
@@ -63,7 +63,7 @@ class LLMPanelFactory : ToolPanelFactory {
         val titlePanel = JPanel()
         titlePanel.add(textTitle)
 
-        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField)
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
 
         val bottomButtons = JPanel()
 

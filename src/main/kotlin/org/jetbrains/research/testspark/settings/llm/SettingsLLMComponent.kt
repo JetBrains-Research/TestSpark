@@ -15,11 +15,12 @@ import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.data.LLMPlatform
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
+import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
 import java.awt.Font
 import javax.swing.BorderFactory
@@ -55,18 +56,7 @@ class SettingsLLMComponent {
     private var maxPolyDepthField =
         JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
 
-    val llmPlatforms: List<LLMPlatform> = listOf(
-        LLMPlatform(
-            TestSparkDefaultsBundle.defaultValue("openAI"),
-            TestSparkDefaultsBundle.defaultValue("openAIToken"),
-            TestSparkDefaultsBundle.defaultValue("openAIModel"),
-        ),
-        LLMPlatform(
-            TestSparkDefaultsBundle.defaultValue("grazie"),
-            TestSparkDefaultsBundle.defaultValue("grazieToken"),
-            TestSparkDefaultsBundle.defaultValue("grazieModel"),
-        ),
-    )
+    val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
 
     var currentLLMPlatformName: String
         get() = platformSelector.item
@@ -124,7 +114,7 @@ class SettingsLLMComponent {
 
     init {
         // Adds additional style (width, tooltips)
-        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField)
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
         stylizePanel()
 
         // Adds the panel components
@@ -182,7 +172,7 @@ class SettingsLLMComponent {
             button.font = Font("Monochrome", Font.BOLD, 12)
 
             // add actionListener for button
-            button.addActionListener { event ->
+            button.addActionListener { _ ->
                 val editor = editorTextField.editor
 
                 editor?.let { editor ->
