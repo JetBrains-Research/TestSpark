@@ -162,4 +162,8 @@ class TopButtonsPanelFactory(private val project: Project) {
         runTestButton.isBorderPainted = true
         return runTestButton
     }
+
+    fun clear() {
+        testCasePanelFactories.clear()
+    }
 }

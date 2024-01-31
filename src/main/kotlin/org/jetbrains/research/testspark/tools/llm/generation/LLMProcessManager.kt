@@ -209,7 +209,6 @@ class LLMProcessManager(
             report,
             getPackageFromTestSuiteCode(generatedTestSuite.toString()),
             getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), project.service<ProjectContextService>().classFQN!!),
-            indicator,
         )
     }
 

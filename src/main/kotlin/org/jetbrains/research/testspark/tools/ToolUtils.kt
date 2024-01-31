@@ -61,9 +61,8 @@ fun saveData(
     report: Report,
     packageLine: String,
     importsCode: MutableSet<String>,
-    indicator: ProgressIndicator,
 ) {
-    project.service<TestGenerationDataService>().resultName = project.service<TestStorageProcessingService>().testResultName!!
+    project.service<TestGenerationDataService>().resultName = project.service<TestStorageProcessingService>().testResultName
     project.service<TestGenerationDataService>().fileUrl = project.service<ProjectContextService>().fileUrl!!
     project.service<TestGenerationDataService>().packageLine = packageLine
     project.service<TestGenerationDataService>().importsCode.addAll(importsCode)

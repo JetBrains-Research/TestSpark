@@ -114,13 +114,13 @@ class SettingsLLMComponent {
             button.font = Font("Monochrome", Font.BOLD, 12)
 
             // add actionListener for button
-            button.addActionListener { event ->
+            button.addActionListener { _ ->
                 val editor = editorTextField.editor
 
-                editor?.let { editor ->
-                    val offset = editor.caretModel.offset
+                editor?.let { e ->
+                    val offset = e.caretModel.offset
                     val document = editorTextField.document
-                    WriteCommandAction.runWriteCommandAction(editor.project) {
+                    WriteCommandAction.runWriteCommandAction(e.project) {
                         document.insertString(offset, "\$${it.text}")
                     }
                 }
