@@ -54,11 +54,7 @@ class Llm(override val name: String = "LLM") : Tool {
         }
         return LLMProcessManager(
             project,
-            // generate the prompt using Prompt manager
-            PromptManager(project, classesToTest[0], classesToTest)
-                .generatePrompt(
-                    codeType,
-                ),
+            PromptManager(project, classesToTest[0], classesToTest),
         )
     }
 

@@ -9,6 +9,7 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 
 abstract class RequestManager {
+    enum class SendResult { OK, TOOLONG, OTHER }
     open var token: String = SettingsArguments.getToken()
     open val chatHistory = mutableListOf<ChatMessage>()
 
@@ -38,7 +39,14 @@ abstract class RequestManager {
 
         // Send Request to LLM
         log.info("Sending Request ...")
-        val testsAssembler = send(prompt, indicator, project, llmErrorManager)
+        val sendResultPair = send(prompt, indicator, project, llmErrorManager)
+        val sendResult = sendResultPair.first
+
+        if (sendResult == SendResult.TOOLONG) {
+            return Pair(TestSparkBundle.message("tooLongPrompt"), null)
+        }
+
+        val testsAssembler = sendResultPair.second
 
         // we remove the user request because we don't users requests in chat history
         if (isUserFeedback) {
@@ -74,8 +82,8 @@ abstract class RequestManager {
 
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
 
-        if(testSuiteGeneratedByLLM == null){
-            LLMErrorManager().warningProcess(TestSparkBundle.message("emptyResponse")+"LLM response: $response", project)
+        if (testSuiteGeneratedByLLM == null) {
+            LLMErrorManager().warningProcess(TestSparkBundle.message("emptyResponse") + "LLM response: $response", project)
             return Pair("The provided code is not parsable. Please give the correct code", null)
         }
 
@@ -87,7 +95,7 @@ abstract class RequestManager {
         indicator: ProgressIndicator,
         project: Project,
         llmErrorManager: LLMErrorManager,
-    ): TestsAssembler
+    ): Pair<SendResult, TestsAssembler>
 
     open fun processUserFeedbackResponse(
         testsAssembler: TestsAssembler,

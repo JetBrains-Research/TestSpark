@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 
@@ -13,8 +14,9 @@ class GrazieRequestManager : RequestManager() {
         indicator: ProgressIndicator,
         project: Project,
         llmErrorManager: LLMErrorManager,
-    ): TestsAssembler {
+    ): Pair<SendResult, TestsAssembler> {
         var testsAssembler = TestsAssembler(project, indicator)
+        var sendResult = SendResult.OK
 
         try {
             val className = "org.jetbrains.research.grazie.Request"
@@ -25,12 +27,26 @@ class GrazieRequestManager : RequestManager() {
             if (requestError.isNotEmpty()) {
                 with(requestError) {
                     when {
-                        contains("invalid: 401") -> llmErrorManager.errorProcess(
-                            "Invalid Token for Grazie provided!",
-                            project,
-                        )
+                        contains("invalid: 401") -> {
+                            llmErrorManager.errorProcess(
+                                "Invalid Token for Grazie provided!",
+                                project,
+                            )
+                            sendResult = SendResult.OTHER
+                        }
 
-                        else -> llmErrorManager.errorProcess(requestError, project)
+                        contains("invalid: 413 Payload Too Large") -> {
+                            llmErrorManager.warningProcess(
+                                TestSparkBundle.message("tooLongPrompt"),
+                                project,
+                            )
+                            sendResult = SendResult.TOOLONG
+                        }
+
+                        else -> {
+                            llmErrorManager.errorProcess(requestError, project)
+                            sendResult = SendResult.OTHER
+                        }
                     }
                 }
             } else {
@@ -40,7 +56,7 @@ class GrazieRequestManager : RequestManager() {
             llmErrorManager.errorProcess("Grazie test generation feature is not available in this build.", project)
         }
 
-        return testsAssembler
+        return Pair(sendResult, testsAssembler)
     }
 
     private fun getMessages(): List<Pair<String, String>> {

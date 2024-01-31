@@ -27,12 +27,13 @@ class OpenAIRequestManager : RequestManager() {
         indicator: ProgressIndicator,
         project: Project,
         llmErrorManager: LLMErrorManager,
-    ): TestsAssembler {
+    ): Pair<SendResult, TestsAssembler> {
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(model, chatHistory)
 
         // Prepare the test assembler
         val testsAssembler = TestsAssembler(project, indicator)
+        var sendResult = SendResult.OK
 
         try {
             httpRequest.connect {
@@ -41,31 +42,43 @@ class OpenAIRequestManager : RequestManager() {
                 // check response
                 when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
                     HttpURLConnection.HTTP_OK -> testsAssembler.receiveResponse(it)
-                    HttpURLConnection.HTTP_INTERNAL_ERROR -> llmErrorManager.errorProcess(
-                        TestSparkBundle.message("serverProblems"),
-                        project,
-                    )
+                    HttpURLConnection.HTTP_INTERNAL_ERROR -> {
+                        llmErrorManager.errorProcess(
+                            TestSparkBundle.message("serverProblems"),
+                            project,
+                        )
+                        sendResult = SendResult.OTHER
+                    }
 
-                    HttpURLConnection.HTTP_BAD_REQUEST -> llmErrorManager.errorProcess(
-                        TestSparkBundle.message("tooLongPrompt"),
-                        project,
-                    )
+                    HttpURLConnection.HTTP_BAD_REQUEST -> {
+                        llmErrorManager.warningProcess(
+                            TestSparkBundle.message("tooLongPrompt"),
+                            project,
+                        )
+                        sendResult = SendResult.TOOLONG
+                    }
 
-                    HttpURLConnection.HTTP_UNAUTHORIZED -> llmErrorManager.errorProcess(
-                        TestSparkBundle.message("wrongToken"),
-                        project,
-                    )
+                    HttpURLConnection.HTTP_UNAUTHORIZED -> {
+                        llmErrorManager.errorProcess(
+                            TestSparkBundle.message("wrongToken"),
+                            project,
+                        )
+                        sendResult = SendResult.OTHER
+                    }
 
-                    else -> llmErrorManager.errorProcess(
-                        llmErrorManager.createRequestErrorMessage(responseCode),
-                        project,
-                    )
+                    else -> {
+                        llmErrorManager.errorProcess(
+                            llmErrorManager.createRequestErrorMessage(responseCode),
+                            project,
+                        )
+                        sendResult = SendResult.OTHER
+                    }
                 }
             }
         } catch (e: HttpStatusException) {
             log.info("Error in sending request: ${e.message}")
         }
 
-        return testsAssembler
+        return Pair(sendResult, testsAssembler)
     }
 }
