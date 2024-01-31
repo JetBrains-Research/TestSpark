@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.tools.llm.generation
+package org.jetbrains.research.testspark.tools.llm.generation.openai
 
 import com.google.gson.GsonBuilder
 import com.intellij.openapi.progress.ProgressIndicator
@@ -9,6 +9,8 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
+import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
 import java.net.HttpURLConnection
 
 /**

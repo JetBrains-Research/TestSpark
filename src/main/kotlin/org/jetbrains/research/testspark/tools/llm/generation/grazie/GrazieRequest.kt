@@ -1,6 +1,8 @@
-package org.jetbrains.research.testspark.tools.llm.generation
+package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
-interface Request {
+import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
+
+interface GrazieRequest {
 
     fun request(
         token: String,

@@ -8,7 +8,7 @@ import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.LLMPlatform
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.tools.llm.generation.Info
+import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import java.net.HttpURLConnection
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JTextField
@@ -29,10 +29,10 @@ private fun isGrazieClassLoaded(): Boolean {
     }
 }
 
-private fun loadGrazieInfo(): Info? {
+private fun loadGrazieInfo(): GrazieInfo? {
     val className = "org.jetbrains.research.grazie.Info"
     return try {
-        Class.forName(className).getDeclaredConstructor().newInstance() as Info
+        Class.forName(className).getDeclaredConstructor().newInstance() as GrazieInfo
     } catch (e: ClassNotFoundException) {
         null
     }
@@ -60,8 +60,10 @@ private fun updateModelSelector(
             if (modules != null) {
                 modelSelector.model = DefaultComboBoxModel(modules)
                 for (llmPlatform in settingsState.llmPlatforms) {
-                    if (modules.contains(llmPlatform.model) && platformSelector.selectedItem!!.toString() == llmPlatform.name) modelSelector.selectedItem =
-                        llmPlatform.model
+                    if (modules.contains(llmPlatform.model) && platformSelector.selectedItem!!.toString() == llmPlatform.name) {
+                        modelSelector.selectedItem =
+                            llmPlatform.model
+                    }
                 }
                 modelSelector.isEnabled = true
             } else {
