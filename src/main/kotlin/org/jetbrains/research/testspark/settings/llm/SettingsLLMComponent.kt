@@ -36,8 +36,7 @@ class SettingsLLMComponent {
     private var llmUserTokenField = JTextField(30)
 
     // Models
-    private val defaultModulesArray = arrayOf("")
-    private var modelSelector = ComboBox(defaultModulesArray)
+    private var modelSelector = ComboBox(arrayOf(""))
     private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
 
     // Prompt Editor
@@ -125,7 +124,7 @@ class SettingsLLMComponent {
 
     init {
         // Adds additional style (width, tooltips)
-        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, defaultModulesArray)
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField)
         stylizePanel()
 
         // Adds the panel components
@@ -212,7 +211,6 @@ class SettingsLLMComponent {
             platformSelector,
             modelSelector,
             llmUserTokenField,
-            defaultModulesArray,
             llmPlatforms,
         )
 

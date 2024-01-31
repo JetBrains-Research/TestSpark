@@ -50,19 +50,22 @@ private fun updateModelSelector(
     platformSelector: ComboBox<String>,
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
-    defaultModulesArray: Array<String>,
 ) {
     val settingsState = SettingsApplicationService.getInstance().state!!
 
     // TODO create more common implementation
     if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("grazie")) {
-        val info = loadGrazieInfo()
-        val modules = info?.availableProfiles() ?: emptySet()
-        modelSelector.model = DefaultComboBoxModel(modules.toTypedArray())
-        for (llmPlatform in settingsState.llmPlatforms) {
-            if (modules.contains(llmPlatform.model) && platformSelector.selectedItem!!.toString() == llmPlatform.name) modelSelector.selectedItem = llmPlatform.model
+        val modules = loadGrazieInfo()?.availableProfiles()?.toTypedArray() ?: arrayOf("")
+        if (modules != null) {
+            modelSelector.model = DefaultComboBoxModel(modules)
+            for (llmPlatform in settingsState.llmPlatforms) {
+                if (modules.contains(llmPlatform.model) && platformSelector.selectedItem!!.toString() == llmPlatform.name) modelSelector.selectedItem = llmPlatform.model
+            }
+            modelSelector.isEnabled = true
+        } else {
+            modelSelector.model = DefaultComboBoxModel(arrayOf(""))
+            modelSelector.isEnabled = false
         }
-        modelSelector.isEnabled = true
     }
     if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("openAI")) {
         ApplicationManager.getApplication().executeOnPooledThread {
@@ -74,7 +77,7 @@ private fun updateModelSelector(
                 }
                 modelSelector.isEnabled = true
             } else {
-                modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
+                modelSelector.model = DefaultComboBoxModel(arrayOf(""))
                 modelSelector.isEnabled = false
             }
         }
@@ -155,7 +158,6 @@ fun addLLMPanelListeners(
     platformSelector: ComboBox<String>,
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
-    defaultModulesArray: Array<String>,
     llmPlatforms: List<LLMPlatform>,
 ) {
     llmUserTokenField.document.addDocumentListener(object : DocumentListener {
@@ -182,7 +184,6 @@ fun addLLMPanelListeners(
                 platformSelector,
                 modelSelector,
                 llmUserTokenField,
-                defaultModulesArray,
             )
         }
     })
@@ -194,7 +195,6 @@ fun addLLMPanelListeners(
             platformSelector,
             modelSelector,
             llmUserTokenField,
-            defaultModulesArray,
         )
     }
 
@@ -218,7 +218,6 @@ fun stylizeMainComponents(
     platformSelector: ComboBox<String>,
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
-    defaultModulesArray: Array<String>,
 ) {
     val settingsState = SettingsApplicationService.getInstance().state!!
 
@@ -244,7 +243,6 @@ fun stylizeMainComponents(
         platformSelector,
         modelSelector,
         llmUserTokenField,
-        defaultModulesArray,
     )
 }
 

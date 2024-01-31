@@ -18,8 +18,7 @@ import javax.swing.JPanel
 import javax.swing.JTextField
 
 class LLMPanelFactory : ToolPanelFactory {
-    private val defaultModulesArray = arrayOf("")
-    private var modelSelector = ComboBox(defaultModulesArray)
+    private var modelSelector = ComboBox(arrayOf(""))
     private var llmUserTokenField = JTextField(30)
     private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
     private val backLlmButton = JButton("Back")
@@ -34,7 +33,6 @@ class LLMPanelFactory : ToolPanelFactory {
             platformSelector,
             modelSelector,
             llmUserTokenField,
-            defaultModulesArray,
             llmPlatforms,
         )
     }
@@ -65,7 +63,7 @@ class LLMPanelFactory : ToolPanelFactory {
         val titlePanel = JPanel()
         titlePanel.add(textTitle)
 
-        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, defaultModulesArray)
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField)
 
         val bottomButtons = JPanel()
 
