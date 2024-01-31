@@ -27,6 +27,7 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 
 class SettingsLLMComponent {
     var panel: JPanel? = null
@@ -37,7 +38,7 @@ class SettingsLLMComponent {
     // Models
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
-    private var platformSelector = ComboBox(arrayOf(TestSparkLabelsBundle.defaultValue("openAI")))
+    private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
@@ -55,11 +56,15 @@ class SettingsLLMComponent {
     private var maxPolyDepthField =
         JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
 
-    val openAIPlatform: LLMPlatform = LLMPlatform(SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.name, SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.token, SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.model)
+    val llmPlatforms: List<LLMPlatform> = listOf(
+        LLMPlatform(TestSparkDefaultsBundle.defaultValue("openAI"),
+            TestSparkDefaultsBundle.defaultValue("openAIToken"),
+            TestSparkDefaultsBundle.defaultValue("openAIModel")),
+        LLMPlatform(TestSparkDefaultsBundle.defaultValue("grazie"),
+            TestSparkDefaultsBundle.defaultValue("grazieToken"),
+            TestSparkDefaultsBundle.defaultValue("grazieModel")))
 
-    val graziePlatform: LLMPlatform = LLMPlatform(SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.name, SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.token, SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.model)
-
-    var llmPlatform: String
+    var currentLLMPlatformName: String
         get() = platformSelector.item
         set(newAlg) {
             platformSelector.item = newAlg
@@ -203,8 +208,7 @@ class SettingsLLMComponent {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            openAIPlatform,
-            graziePlatform,
+            llmPlatforms,
         )
 
         addHighlighterListeners()
@@ -282,12 +286,11 @@ class SettingsLLMComponent {
     }
 
     fun updateTokenAndModel() {
-        if (llmPlatform == graziePlatform.name) {
-            llmUserTokenField.text = graziePlatform.token
-            if (modelSelector.isEnabled) modelSelector.selectedItem = graziePlatform.model
-        } else {
-            llmUserTokenField.text = openAIPlatform.token
-            if (modelSelector.isEnabled) modelSelector.selectedItem = openAIPlatform.model
+        for (llmPlatform in llmPlatforms) {
+            if (currentLLMPlatformName == llmPlatform.name) {
+                llmUserTokenField.text = llmPlatform.token
+                if (modelSelector.isEnabled) modelSelector.selectedItem = llmPlatform.model
+            }
         }
     }
 }

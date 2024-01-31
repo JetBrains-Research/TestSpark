@@ -4,7 +4,6 @@ import com.google.gson.JsonParser
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.LLMPlatform
 import org.jetbrains.research.testspark.services.SettingsApplicationService
@@ -14,6 +13,7 @@ import javax.swing.DefaultComboBoxModel
 import javax.swing.JTextField
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 
 /**
  * Checks if the Grazie class is loaded.
@@ -54,22 +54,26 @@ private fun updateModelSelector(
 ) {
     val settingsState = SettingsApplicationService.getInstance().state!!
 
-    if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-        val info = loadGrazieInfo()
-        val modules = info?.availableProfiles() ?: emptySet()
-        modelSelector.model = DefaultComboBoxModel(modules.toTypedArray())
-        if (modules.contains(settingsState.graziePlatform.model)) modelSelector.selectedItem = settingsState.graziePlatform.model
-        modelSelector.isEnabled = true
-    } else {
-        ApplicationManager.getApplication().executeOnPooledThread {
-            val modules = getOpenAIModules(llmUserTokenField.text)
-            if (modules != null) {
-                modelSelector.model = DefaultComboBoxModel(modules)
-                if (modules.contains(settingsState.openAIPlatform.model)) modelSelector.selectedItem = settingsState.openAIPlatform.model
-                modelSelector.isEnabled = true
-            } else {
-                modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
-                modelSelector.isEnabled = false
+    for (llmPlatform in settingsState.llmPlatforms) {
+        // TODO create more common implementation
+        if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("grazie")) {
+            val info = loadGrazieInfo()
+            val modules = info?.availableProfiles() ?: emptySet()
+            modelSelector.model = DefaultComboBoxModel(modules.toTypedArray())
+            if (modules.contains(llmPlatform.model)) modelSelector.selectedItem = llmPlatform.model
+            modelSelector.isEnabled = true
+        }
+        if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("openAI")) {
+            ApplicationManager.getApplication().executeOnPooledThread {
+                val modules = getOpenAIModules(llmUserTokenField.text)
+                if (modules != null) {
+                    modelSelector.model = DefaultComboBoxModel(modules)
+                    if (modules.contains(llmPlatform.model)) modelSelector.selectedItem = llmPlatform.model
+                    modelSelector.isEnabled = true
+                } else {
+                    modelSelector.model = DefaultComboBoxModel(defaultModulesArray)
+                    modelSelector.isEnabled = false
+                }
             }
         }
     }
@@ -83,10 +87,10 @@ private fun updateModelSelector(
  */
 private fun updateLlmUserTokenField(platformSelector: ComboBox<String>, llmUserTokenField: JTextField) {
     val settingsState = SettingsApplicationService.getInstance().state!!
-    if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-        llmUserTokenField.text = settingsState.graziePlatform.token
-    } else {
-        llmUserTokenField.text = settingsState.openAIPlatform.token
+    for (llmPlatform in settingsState.llmPlatforms) {
+        if (platformSelector.selectedItem!!.toString() == llmPlatform.name) {
+            llmUserTokenField.text = llmPlatform.token
+        }
     }
 }
 
@@ -150,8 +154,7 @@ fun addLLMPanelListeners(
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
     defaultModulesArray: Array<String>,
-    openAIPlatform: LLMPlatform,
-    graziePlatform: LLMPlatform,
+    llmPlatforms: List<LLMPlatform>,
 ) {
     llmUserTokenField.document.addDocumentListener(object : DocumentListener {
         override fun insertUpdate(e: DocumentEvent?) {
@@ -167,10 +170,10 @@ fun addLLMPanelListeners(
         }
 
         private fun updateToken() {
-            if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-                graziePlatform.token = llmUserTokenField.text
-            } else {
-                openAIPlatform.token = llmUserTokenField.text
+            for (llmPlatform in llmPlatforms) {
+                if (platformSelector.selectedItem!!.toString() == llmPlatform.name) {
+                    llmPlatform.token = llmUserTokenField.text
+                }
             }
 
             updateModelSelector(
@@ -194,10 +197,10 @@ fun addLLMPanelListeners(
     }
 
     modelSelector.addItemListener {
-        if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-            graziePlatform.model = modelSelector.item
-        } else {
-            openAIPlatform.model = modelSelector.item
+        for (llmPlatform in llmPlatforms) {
+            if (platformSelector.selectedItem!!.toString() == llmPlatform.name) {
+                llmPlatform.model = modelSelector.item
+            }
         }
     }
 }
@@ -219,8 +222,8 @@ fun stylizeMainComponents(
 
     // Check if the Grazie platform access is available in the current build
     if (isGrazieClassLoaded()) {
-        platformSelector.model = DefaultComboBoxModel(arrayOf(TestSparkLabelsBundle.defaultValue("grazie"), TestSparkLabelsBundle.defaultValue("openAI")))
-        platformSelector.selectedItem = settingsState.llmPlatform
+        platformSelector.model = DefaultComboBoxModel(arrayOf(TestSparkDefaultsBundle.defaultValue("grazie"), TestSparkDefaultsBundle.defaultValue("openAI")))
+        platformSelector.selectedItem = settingsState.currentLLMPlatformName
     } else {
         platformSelector.isEnabled = false
     }
@@ -236,4 +239,19 @@ fun stylizeMainComponents(
         llmUserTokenField,
         defaultModulesArray,
     )
+}
+
+/**
+ * Retrieves the list of LLMPlatforms.
+ *
+ * @return The list of LLMPlatforms.
+ */
+fun getLLLMPlatforms(): List<LLMPlatform> {
+    return listOf(
+        LLMPlatform(TestSparkDefaultsBundle.defaultValue("openAI"),
+            TestSparkDefaultsBundle.defaultValue("openAIToken"),
+            TestSparkDefaultsBundle.defaultValue("openAIModel")),
+        LLMPlatform(TestSparkDefaultsBundle.defaultValue("grazie"),
+            TestSparkDefaultsBundle.defaultValue("grazieToken"),
+            TestSparkDefaultsBundle.defaultValue("grazieModel")))
 }

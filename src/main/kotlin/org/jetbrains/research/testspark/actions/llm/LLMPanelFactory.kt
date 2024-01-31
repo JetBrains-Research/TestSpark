@@ -9,25 +9,25 @@ import org.jetbrains.research.testspark.data.LLMPlatform
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.Font
 import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
+import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 
 class LLMPanelFactory : ToolPanelFactory {
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
-    private var platformSelector = ComboBox(arrayOf(TestSparkLabelsBundle.defaultValue("openAI")))
+    private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
     private val backLlmButton = JButton("Back")
     private val okLlmButton = JButton("OK")
 
     private val settingsState = SettingsApplicationService.getInstance().state!!
 
-    private val openAIPlatform: LLMPlatform = LLMPlatform(SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.name, SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.token, SettingsApplicationState.DefaultSettingsApplicationState.openAIPlatform.model)
-    private val graziePlatform: LLMPlatform = LLMPlatform(SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.name, SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.token, SettingsApplicationState.DefaultSettingsApplicationState.graziePlatform.model)
+    private val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
 
     init {
         addLLMPanelListeners(
@@ -35,8 +35,7 @@ class LLMPanelFactory : ToolPanelFactory {
             modelSelector,
             llmUserTokenField,
             defaultModulesArray,
-            openAIPlatform,
-            graziePlatform,
+            llmPlatforms,
         )
     }
 
@@ -113,10 +112,10 @@ class LLMPanelFactory : ToolPanelFactory {
      * Note: This method assumes all the required UI components (`platformSelector`, `llmUserTokenField`, and `modelSelector`) are properly initialized and have values selected.
      */
     override fun settingsStateUpdate() {
-        settingsState.llmPlatform = platformSelector.selectedItem!!.toString()
-        settingsState.openAIPlatform.token = openAIPlatform.token
-        settingsState.openAIPlatform.model = openAIPlatform.model
-        settingsState.graziePlatform.token = graziePlatform.token
-        settingsState.graziePlatform.model = graziePlatform.model
+        settingsState.currentLLMPlatformName = platformSelector.selectedItem!!.toString()
+        for (index in llmPlatforms.indices) {
+            settingsState.llmPlatforms[index].token = llmPlatforms[index].token
+            settingsState.llmPlatforms[index].model = llmPlatforms[index].model
+        }
     }
 }

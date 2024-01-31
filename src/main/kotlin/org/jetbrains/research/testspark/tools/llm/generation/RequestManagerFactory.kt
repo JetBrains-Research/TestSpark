@@ -9,7 +9,7 @@ interface RequestManagerFactory {
 
 class StandardRequestManagerFactory : RequestManagerFactory {
     override fun getRequestManager(): RequestManager {
-        return when (val platform = SettingsArguments.llmPlatform()) {
+        return when (val platform = SettingsArguments.currentLLMPlatformName()) {
             TestSparkLabelsBundle.defaultValue("grazie") -> GrazieRequestManager()
             TestSparkLabelsBundle.defaultValue("openAI") -> OpenAIRequestManager()
             else -> throw IllegalStateException("Unknown selected platform: $platform")

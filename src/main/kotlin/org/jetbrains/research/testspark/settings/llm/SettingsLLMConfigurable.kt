@@ -31,10 +31,10 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        settingsComponent!!.openAIPlatform.token = settingsState.openAIPlatform.token
-        settingsComponent!!.openAIPlatform.model = settingsState.openAIPlatform.model
-        settingsComponent!!.graziePlatform.token = settingsState.graziePlatform.token
-        settingsComponent!!.graziePlatform.model = settingsState.graziePlatform.model
+        for (index in settingsComponent!!.llmPlatforms.indices) {
+            settingsComponent!!.llmPlatforms[index].token = settingsState.llmPlatforms[index].token
+            settingsComponent!!.llmPlatforms[index].model = settingsState.llmPlatforms[index].model
+        }
 //        settingsComponent!!.llmPlatform = settingsState.llmPlatform
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
@@ -53,10 +53,11 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        var modified: Boolean = settingsComponent!!.openAIPlatform.token != settingsState.openAIPlatform.token
-        modified = modified or (settingsComponent!!.openAIPlatform.model != settingsState.openAIPlatform.model)
-        modified = modified or (settingsComponent!!.graziePlatform.token != settingsState.graziePlatform.token)
-        modified = modified or (settingsComponent!!.graziePlatform.model != settingsState.graziePlatform.model)
+        var modified = false
+        for (index in settingsComponent!!.llmPlatforms.indices) {
+            modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.llmPlatforms[index].token)
+            modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.llmPlatforms[index].model)
+        }
 //        modified = modified or (settingsComponent!!.llmPlatform != settingsState.llmPlatform)
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
@@ -79,18 +80,16 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun apply() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        if (settingsComponent!!.llmPlatform == settingsComponent!!.graziePlatform.name) {
-            settingsState.graziePlatform.token = settingsComponent!!.graziePlatform.token
-            settingsState.graziePlatform.model = settingsComponent!!.graziePlatform.model
-            settingsComponent!!.openAIPlatform.token = settingsState.openAIPlatform.token
-            settingsComponent!!.openAIPlatform.model = settingsState.openAIPlatform.model
-        } else {
-            settingsState.openAIPlatform.token = settingsComponent!!.openAIPlatform.token
-            settingsState.openAIPlatform.model = settingsComponent!!.openAIPlatform.model
-            settingsComponent!!.graziePlatform.token = settingsState.graziePlatform.token
-            settingsComponent!!.graziePlatform.model = settingsState.graziePlatform.model
+        for (index in settingsComponent!!.llmPlatforms.indices) {
+            if (settingsComponent!!.currentLLMPlatformName == settingsComponent!!.llmPlatforms[index].name) {
+                settingsState.llmPlatforms[index].token = settingsComponent!!.llmPlatforms[index].token
+                settingsState.llmPlatforms[index].model = settingsComponent!!.llmPlatforms[index].model
+            } else {
+                settingsComponent!!.llmPlatforms[index].token = settingsState.llmPlatforms[index].token
+                settingsComponent!!.llmPlatforms[index].model = settingsState.llmPlatforms[index].model
+            }
         }
-        settingsState.llmPlatform = settingsComponent!!.llmPlatform
+        settingsState.currentLLMPlatformName = settingsComponent!!.currentLLMPlatformName
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
         settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth

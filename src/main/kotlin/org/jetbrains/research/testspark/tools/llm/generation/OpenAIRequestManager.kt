@@ -9,14 +9,13 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import java.net.HttpURLConnection
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 
 /**
  * This class represents a manager for making requests to the LLM (Large Language Model).
  */
 class OpenAIRequestManager : RequestManager() {
-
     private val url = "https://api.openai.com/v1/chat/completions"
-    private val model = SettingsArguments.openAIModel()
 
     private val httpRequest = HttpRequests.post(url, "application/json").tuner {
         it.setRequestProperty("Authorization", "Bearer $token")
@@ -29,6 +28,10 @@ class OpenAIRequestManager : RequestManager() {
         llmErrorManager: LLMErrorManager,
     ): TestsAssembler {
         // Prepare the chat
+        var model = ""
+        for (llmPlatform in SettingsArguments.llmPlatforms()) {
+            if (llmPlatform.name == TestSparkDefaultsBundle.defaultValue("openAI")) model = llmPlatform.model
+        }
         val llmRequestBody = OpenAIRequestBody(model, chatHistory)
 
         // Prepare the test assembler
