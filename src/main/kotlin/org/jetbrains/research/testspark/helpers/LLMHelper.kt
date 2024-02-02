@@ -42,21 +42,18 @@ private fun updateModelSelector(
 ) {
     val settingsState = SettingsApplicationService.getInstance().state!!
 
-    for (llmPlatform in settingsState.llmPlatforms) {
-        if (platformSelector.selectedItem!!.toString() == llmPlatform.name) {
+    for (index in settingsState.llmPlatforms.indices) {
+        if (platformSelector.selectedItem!!.toString() == settingsState.llmPlatforms[index].name) {
             ApplicationManager.getApplication().executeOnPooledThread {
-                val modules = llmPlatform.getModels(llmUserTokenField.text)
+                val modules = settingsState.llmPlatforms[index].getModels(llmUserTokenField.text)
                 modelSelector.model = DefaultComboBoxModel(modules)
-                if (modules.contains(llmPlatform.model)) modelSelector.selectedItem = llmPlatform.model
+                if (modules.contains(settingsState.llmPlatforms[index].model)) {
+                    modelSelector.selectedItem = settingsState.llmPlatforms[index].model
+                    llmPlatforms[index].model = settingsState.llmPlatforms[index].model
+                }
                 modelSelector.isEnabled = true
                 if (modules.contentEquals(arrayOf(""))) modelSelector.isEnabled = false
             }
-        }
-    }
-
-    for (llmPlatform in llmPlatforms) {
-        if (platformSelector.selectedItem!!.toString() == llmPlatform.name) {
-            llmPlatform.model = modelSelector.item
         }
     }
 }
@@ -73,14 +70,10 @@ private fun updateLlmUserTokenField(
     llmPlatforms: List<LLMPlatform>,
 ) {
     val settingsState = SettingsApplicationService.getInstance().state!!
-    for (llmPlatform in settingsState.llmPlatforms) {
-        if (platformSelector.selectedItem!!.toString() == llmPlatform.name) {
-            llmUserTokenField.text = llmPlatform.token
-        }
-    }
-    for (llmPlatform in llmPlatforms) {
-        if (platformSelector.selectedItem!!.toString() == llmPlatform.name) {
-            llmPlatform.token = llmUserTokenField.text
+    for (index in settingsState.llmPlatforms.indices) {
+        if (platformSelector.selectedItem!!.toString() == settingsState.llmPlatforms[index].name) {
+            llmUserTokenField.text = settingsState.llmPlatforms[index].token
+            llmPlatforms[index].token = llmUserTokenField.text
         }
     }
 }

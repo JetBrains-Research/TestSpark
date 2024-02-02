@@ -81,13 +81,8 @@ class SettingsLLMConfigurable : Configurable {
     override fun apply() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         for (index in settingsComponent!!.llmPlatforms.indices) {
-            if (settingsComponent!!.currentLLMPlatformName == settingsComponent!!.llmPlatforms[index].name) {
-                settingsState.llmPlatforms[index].token = settingsComponent!!.llmPlatforms[index].token
-                settingsState.llmPlatforms[index].model = settingsComponent!!.llmPlatforms[index].model
-            } else {
-                settingsComponent!!.llmPlatforms[index].token = settingsState.llmPlatforms[index].token
-                settingsComponent!!.llmPlatforms[index].model = settingsState.llmPlatforms[index].model
-            }
+            settingsState.llmPlatforms[index].token = settingsComponent!!.llmPlatforms[index].token
+            settingsState.llmPlatforms[index].model = settingsComponent!!.llmPlatforms[index].model
         }
         settingsState.currentLLMPlatformName = settingsComponent!!.currentLLMPlatformName
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
