@@ -1,6 +1,8 @@
 package org.jetbrains.research.testspark.display
 
 import com.intellij.lang.Language
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
@@ -16,8 +18,8 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
-import org.jetbrains.research.testspark.TestSparkBundle
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
@@ -181,6 +183,14 @@ class TestCasePanelFactory(
                 ),
                 null,
             )
+            NotificationGroupManager.getInstance()
+                .getNotificationGroup("Test case copied")
+                .createNotification(
+                    "",
+                    TestSparkBundle.message("testCaseCopied"),
+                    NotificationType.INFORMATION,
+                )
+                .notify(project)
         }
 
         updateRequestLabel()
@@ -332,7 +342,7 @@ class TestCasePanelFactory(
         updateTestCaseInformation()
 
         val lastRunCode = lastRunCodes[currentRequestNumber - 1]
-        languageTextField.editor!!.markupModel.removeAllHighlighters()
+        languageTextField.editor?.markupModel?.removeAllHighlighters()
 
         resetButton.isEnabled = testCase.testCode != initialCodes[currentRequestNumber - 1]
         resetToLastRunButton.isEnabled = testCase.testCode != lastRunCode
@@ -405,9 +415,19 @@ class TestCasePanelFactory(
                         )
                         addTest(modifiedTest)
                     } else {
+                        NotificationGroupManager.getInstance()
+                            .getNotificationGroup("LLM Execution Error")
+                            .createNotification(
+                                TestSparkBundle.message("llmWarningTitle"),
+                                TestSparkBundle.message("noRequestFromLLM"),
+                                NotificationType.WARNING,
+                            )
+                            .notify(project)
+
                         loadingLabel.isVisible = false
                         sendButton.isEnabled = true
                     }
+
                     if (processStopped(project, indicator)) return
 
                     indicator.stop()
@@ -587,6 +607,13 @@ class TestCasePanelFactory(
         languageTextField.document.setText(currentCodes[currentRequestNumber - 1])
         updateUI()
     }
+
+    /**
+     * Checks if the item is marked as removed.
+     *
+     * @return true if the item is removed, false otherwise.
+     */
+    fun isRemoved() = isRemoved
 
     /**
      * Returns the indexes of lines that are modified between two lists of strings.

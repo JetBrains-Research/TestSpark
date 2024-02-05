@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.services
 import com.intellij.openapi.components.Service
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.table.JBTable
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import java.awt.Dimension
 import javax.swing.JScrollPane
 import javax.swing.table.AbstractTableModel

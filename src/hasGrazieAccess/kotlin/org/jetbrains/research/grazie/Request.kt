@@ -11,13 +11,13 @@ class Request : Request {
     override fun request(
         token: String,
         messages: List<Pair<String, String>>,
+        profile: String,
         testsAssembler: TestsAssembler,
     ): Pair<String, TestsAssembler> {
         val generation = TestGeneration(token)
         var errorMessage = ""
-
         runBlocking {
-            generation.generate(messages).catch {
+            generation.generate(messages, profile).catch {
                 errorMessage = it.message.toString()
             }.collect {
                 testsAssembler.receiveResponse(it)

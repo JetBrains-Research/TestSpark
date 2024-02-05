@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMPanelFactory
 import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
@@ -49,11 +50,7 @@ class TestSparkAction : AnAction() {
      * @param e the AnActionEvent object representing the event
      */
     override fun update(e: AnActionEvent) {
-        if (getCurrentListOfCodeTypes(e) == null) {
-            e.presentation.isEnabled = false
-        } else {
-            e.presentation.isEnabled = true
-        }
+        e.presentation.isEnabled = getCurrentListOfCodeTypes(e) != null
     }
 
     /**

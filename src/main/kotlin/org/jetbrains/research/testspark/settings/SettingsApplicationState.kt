@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.settings
 
-import org.jetbrains.research.testspark.TestSparkDefaultsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 
 /**
@@ -24,8 +24,10 @@ data class SettingsApplicationState(
     var criterionMethodNoException: Boolean = DefaultSettingsApplicationState.criterionMethodNoException,
     var criterionCBranch: Boolean = DefaultSettingsApplicationState.criterionCBranch,
     var minimize: Boolean = DefaultSettingsApplicationState.minimize,
-    var llmUserToken: String = DefaultSettingsApplicationState.llmUserToken,
-    var model: String = DefaultSettingsApplicationState.model,
+    var openAIToken: String = DefaultSettingsApplicationState.openAIToken,
+    var grazieToken: String = DefaultSettingsApplicationState.grazieToken,
+    var openAIModel: String = DefaultSettingsApplicationState.openAIModel,
+    var grazieModel: String = DefaultSettingsApplicationState.grazieModel,
     var llmPlatform: String = DefaultSettingsApplicationState.llmPlatform,
     var maxLLMRequest: Int = DefaultSettingsApplicationState.maxLLMRequest,
     var maxInputParamsDepth: Int = DefaultSettingsApplicationState.maxInputParamsDepth,
@@ -56,8 +58,10 @@ data class SettingsApplicationState(
         val criterionMethod: Boolean = TestSparkDefaultsBundle.defaultValue("criterionMethod").toBoolean()
         val criterionMethodNoException: Boolean = TestSparkDefaultsBundle.defaultValue("criterionMethodNoException").toBoolean()
         val criterionCBranch: Boolean = TestSparkDefaultsBundle.defaultValue("criterionCBranch").toBoolean()
-        val llmUserToken: String = TestSparkDefaultsBundle.defaultValue("llmToken")
-        var model: String = TestSparkDefaultsBundle.defaultValue("model")
+        val openAIToken: String = TestSparkDefaultsBundle.defaultValue("openAIToken")
+        val grazieToken: String = TestSparkDefaultsBundle.defaultValue("grazieToken")
+        var openAIModel: String = TestSparkDefaultsBundle.defaultValue("openAIModel")
+        var grazieModel: String = TestSparkDefaultsBundle.defaultValue("grazieModel")
         var llmPlatform: String = TestSparkDefaultsBundle.defaultValue("llmPlatform")
         val maxLLMRequest: Int = TestSparkDefaultsBundle.defaultValue("maxLLMRequest").toInt()
         val maxInputParamsDepth: Int = TestSparkDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()

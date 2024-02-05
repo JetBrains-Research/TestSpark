@@ -11,8 +11,10 @@ fun properties(key: String) = project.findProperty(key).toString()
 
 val thunderdomeVersion = "1.0.5"
 
-val spaceUsername = System.getProperty("space.username")?.toString().orEmpty()
-val spacePassword = System.getProperty("space.pass")?.toString().orEmpty()
+val spaceUsername =
+    System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
+val spacePassword =
+    System.getProperty("space.pass")?.toString() ?: project.properties["spacePassword"]?.toString() ?: ""
 
 plugins {
     // Java support
@@ -147,7 +149,7 @@ dependencies {
         // Dependencies for hasGrazieAccess variant
         "hasGrazieAccessImplementation"(kotlin("stdlib"))
         "hasGrazieAccessImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:1.0.1")
+        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:1.0.4")
     }
 }
 
