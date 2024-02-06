@@ -147,11 +147,10 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.add(testCasePanel)
             addSeparator()
             testCasePanels[testCase.testName] = testCasePanel
-
-            // Update the number of selected tests (all tests are selected by default)
-            testsSelected = testCasePanels.size
-            topButtonsPanelFactory.updateTopLabels()
         }
+
+        // Update the number of selected tests (all tests are selected by default)
+        testsSelected = testCasePanels.size
 
         topButtonsPanelFactory.setTestCasePanelFactoriesArray(testCasePanelFactories)
         topButtonsPanelFactory.updateTopLabels()
@@ -546,6 +545,8 @@ class TestCaseDisplayService(private val project: Project) {
         // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()
         removeSelectedTestCases(testCasePanelsToRemove)
+
+        topButtonsPanelFactory.clear()
     }
 
     /**

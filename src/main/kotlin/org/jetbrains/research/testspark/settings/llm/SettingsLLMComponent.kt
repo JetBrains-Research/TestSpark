@@ -175,10 +175,10 @@ class SettingsLLMComponent {
             button.addActionListener { _ ->
                 val editor = editorTextField.editor
 
-                editor?.let { editor ->
-                    val offset = editor.caretModel.offset
+                editor?.let { e ->
+                    val offset = e.caretModel.offset
                     val document = editorTextField.document
-                    WriteCommandAction.runWriteCommandAction(editor.project) {
+                    WriteCommandAction.runWriteCommandAction(e.project) {
                         document.insertString(offset, "\$${it.text}")
                     }
                 }

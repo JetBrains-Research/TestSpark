@@ -194,7 +194,6 @@ class EvoSuiteProcessManager(
                 Report(testGenerationResult),
                 getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
                 getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
-                indicator,
             )
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
