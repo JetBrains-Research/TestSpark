@@ -4,35 +4,36 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
-import org.jetbrains.research.testspark.helpers.isGrazieClassLoaded
-import org.jetbrains.research.testspark.helpers.updateModelSelector
+import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
+import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.Font
-import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
 class LLMPanelFactory : ToolPanelFactory {
-    private val defaultModulesArray = arrayOf("")
-    private var modelSelector = ComboBox(defaultModulesArray)
+    private var modelSelector = ComboBox(arrayOf(""))
     private var llmUserTokenField = JTextField(30)
-    private var platformSelector = ComboBox(arrayOf(TestSparkLabelsBundle.defaultValue("openAI")))
+    private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
     private val backLlmButton = JButton("Back")
     private val okLlmButton = JButton("OK")
 
     private val settingsState = SettingsApplicationService.getInstance().state!!
+
+    private val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
 
     init {
         addLLMPanelListeners(
             platformSelector,
             modelSelector,
             llmUserTokenField,
-            defaultModulesArray,
+            llmPlatforms,
         )
     }
 
@@ -62,29 +63,7 @@ class LLMPanelFactory : ToolPanelFactory {
         val titlePanel = JPanel()
         titlePanel.add(textTitle)
 
-        if (isGrazieClassLoaded()) {
-            platformSelector.model = DefaultComboBoxModel(arrayOf(TestSparkLabelsBundle.defaultValue("grazie"), TestSparkLabelsBundle.defaultValue("openAI")))
-            platformSelector.selectedItem = settingsState.llmPlatform
-        } else {
-            platformSelector.isEnabled = false
-        }
-
-        llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
-        if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-            llmUserTokenField.text = settingsState.grazieToken
-        } else {
-            llmUserTokenField.text = settingsState.openAIToken
-        }
-
-        modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
-        modelSelector.isEnabled = false
-
-        updateModelSelector(
-            platformSelector,
-            modelSelector,
-            llmUserTokenField,
-            defaultModulesArray,
-        )
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
 
         val bottomButtons = JPanel()
 
@@ -131,13 +110,10 @@ class LLMPanelFactory : ToolPanelFactory {
      * Note: This method assumes all the required UI components (`platformSelector`, `llmUserTokenField`, and `modelSelector`) are properly initialized and have values selected.
      */
     override fun settingsStateUpdate() {
-        settingsState.llmPlatform = platformSelector.selectedItem!!.toString()
-        if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
-            settingsState.grazieToken = llmUserTokenField.text
-            settingsState.grazieModel = modelSelector.selectedItem!!.toString()
-        } else {
-            settingsState.openAIToken = llmUserTokenField.text
-            settingsState.openAIModel = modelSelector.selectedItem!!.toString()
+        settingsState.currentLLMPlatformName = platformSelector.selectedItem!!.toString()
+        for (index in llmPlatforms.indices) {
+            settingsState.llmPlatforms[index].token = llmPlatforms[index].token
+            settingsState.llmPlatforms[index].model = llmPlatforms[index].model
         }
     }
 }

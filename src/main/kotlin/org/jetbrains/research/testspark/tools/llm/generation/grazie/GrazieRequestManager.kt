@@ -1,14 +1,15 @@
-package org.jetbrains.research.testspark.tools.llm.generation
+package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
+import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
 
 class GrazieRequestManager : RequestManager() {
-    private val model = SettingsArguments.grazieModel()
-
     override fun send(
         prompt: String,
         indicator: ProgressIndicator,
@@ -20,7 +21,13 @@ class GrazieRequestManager : RequestManager() {
 
         try {
             val className = "org.jetbrains.research.grazie.Request"
-            val request: Request = Class.forName(className).getDeclaredConstructor().newInstance() as Request
+            val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
+
+            var model = ""
+            for (llmPlatform in SettingsArguments.llmPlatforms()) {
+                if (llmPlatform.name == TestSparkDefaultsBundle.defaultValue("grazie")) model = llmPlatform.model
+            }
+
             val requestResult = request.request(token, getMessages(), model, TestsAssembler(project, indicator))
             val requestError = requestResult.first
 
@@ -29,7 +36,7 @@ class GrazieRequestManager : RequestManager() {
                     when {
                         contains("invalid: 401") -> {
                             llmErrorManager.errorProcess(
-                                "Invalid Token for Grazie provided!",
+                                TestSparkBundle.message("wrongToken"),
                                 project,
                             )
                             sendResult = SendResult.OTHER
@@ -53,7 +60,7 @@ class GrazieRequestManager : RequestManager() {
                 testsAssembler = requestResult.second
             }
         } catch (e: ClassNotFoundException) {
-            llmErrorManager.errorProcess("Grazie test generation feature is not available in this build.", project)
+            llmErrorManager.errorProcess(TestSparkBundle.message("grazieError"), project)
         }
 
         return Pair(sendResult, testsAssembler)

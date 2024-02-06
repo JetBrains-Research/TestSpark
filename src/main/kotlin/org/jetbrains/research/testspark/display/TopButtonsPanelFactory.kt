@@ -95,7 +95,7 @@ class TopButtonsPanelFactory(private val project: Project) {
      * Toggles check boxes so that they are either all selected or all not selected,
      *  depending on the provided parameter.
      *
-     *  @param selected whether the check boxes have to be selected or not
+     *  @param selected whether the checkboxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean) {
         project.service<TestCaseDisplayService>().getTestCasePanels().forEach { (_, jPanel) ->
@@ -161,5 +161,9 @@ class TopButtonsPanelFactory(private val project: Project) {
         runTestButton.isContentAreaFilled = false
         runTestButton.isBorderPainted = true
         return runTestButton
+    }
+
+    fun clear() {
+        testCasePanelFactories.clear()
     }
 }
