@@ -18,7 +18,6 @@ import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
@@ -41,7 +40,7 @@ import java.io.File
  */
 class LLMProcessManager(
     private val project: Project,
-    private val prompt: String,
+    private val promptManager: PromptManager
 ) : ProcessManager {
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private val testFileName: String = "GeneratedTest.java"
@@ -65,11 +64,6 @@ class LLMProcessManager(
 
         if (processStopped(project, indicator)) return
 
-        if (!isPromptLengthWithinLimit(prompt)) {
-            llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPrompt"), project)
-            return
-        }
-
         // update build path
         var buildPath = project.service<ProjectContextService>().projectClassPath!!
         if (settingsProjectState.buildPath.isEmpty()) {
@@ -91,7 +85,7 @@ class LLMProcessManager(
 
         var requestsCount = 0
         var warningMessage = ""
-        var messageToPrompt = prompt
+        var messageToPrompt = promptManager.generatePrompt(codeType)
         var generatedTestSuite: TestSuiteGeneratedByLLM? = null
 
         // notify LLMChatService to restart the chat process.
@@ -116,6 +110,17 @@ class LLMProcessManager(
             if (warningMessage.isNotEmpty()) llmErrorManager.warningProcess(warningMessage, project)
             val requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
                 project.service<LLMChatService>().testGenerationRequest(messageToPrompt, indicator, packageName, project, llmErrorManager)
+
+            if (requestResult.first == TestSparkBundle.message("tooLongPrompt")) {
+                if (promptManager.reducePromptSize()) {
+                    messageToPrompt = promptManager.generatePrompt(codeType)
+                    requestsCount--
+                    continue
+                } else {
+                    llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPromptRequest"), project)
+                    return
+                }
+            }
             generatedTestSuite = requestResult.second
 
             // Process stopped checking
@@ -123,7 +128,6 @@ class LLMProcessManager(
 
             // Bad response checking
             if (generatedTestSuite == null) {
-                warningMessage = TestSparkBundle.message("emptyResponse")
                 messageToPrompt = requestResult.first
                 continue
             }

@@ -1,8 +1,10 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
@@ -18,7 +20,6 @@ import org.jetbrains.research.testspark.services.PromptKeyword
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 
@@ -40,47 +41,46 @@ class PromptManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     fun generatePrompt(codeType: FragmentToTestData): String {
-        var prompt: String
-        while (true) {
-            prompt = when (codeType.type!!) {
-                CodeType.CLASS -> generatePromptForClass()
-                CodeType.METHOD -> generatePromptForMethod(codeType.objectDescription)
-                CodeType.LINE -> generatePromptForLine(codeType.objectIndex)
-            }
-
-            // Too big prompt processing
-            if (!isPromptLengthWithinLimit(prompt)) {
-                // depth of polymorphism reducing
-                if (SettingsArguments.maxPolyDepth(project) > 1) {
-                    project.service<TestGenerationDataService>().polyDepthReducing++
-                    log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
-                    continue
-                }
-
-                // depth of input params reducing
-                if (SettingsArguments.maxInputParamsDepth(project) > 1) {
-                    project.service<TestGenerationDataService>().inputParamsDepthReducing++
-                    log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
-                    continue
+        val prompt = ApplicationManager.getApplication().runReadAction(
+            Computable {
+                when (codeType.type!!) {
+                    CodeType.CLASS -> generatePromptForClass()
+                    CodeType.METHOD -> generatePromptForMethod(codeType.objectDescription)
+                    CodeType.LINE -> generatePromptForLine(codeType.objectIndex)
                 }
             }
-            break
-        }
-
-        // Show warning in case of depth reduction
-        val polyDepthReducing = project.service<TestGenerationDataService>().polyDepthReducing
-        val inputParamsDepthReducing = project.service<TestGenerationDataService>().inputParamsDepthReducing
-        if ((polyDepthReducing != 0 || inputParamsDepthReducing != 0) && isPromptLengthWithinLimit(prompt)) {
-            llmErrorManager.warningProcess(
-                TestSparkBundle.message("promptReduction") + "\n" +
-                    "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
-                    "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
-                project,
-            )
-        }
-
+        )
         log.info("Prompt is:\n$prompt")
         return prompt
+    }
+
+    fun reducePromptSize(): Boolean {
+        // reducing depth of polymorphism
+        if (SettingsArguments.maxPolyDepth(project) > 1) {
+            project.service<TestGenerationDataService>().polyDepthReducing++
+            log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
+            showPromptReductionWarning()
+            return true
+        }
+
+        // reducing depth of input params
+        if (SettingsArguments.maxInputParamsDepth(project) > 1) {
+            project.service<TestGenerationDataService>().inputParamsDepthReducing++
+            log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
+            showPromptReductionWarning()
+            return true
+        }
+
+        return false
+    }
+
+    private fun showPromptReductionWarning() {
+        llmErrorManager.warningProcess(
+            TestSparkBundle.message("promptReduction") + "\n" +
+                "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
+                "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
+            project,
+        )
     }
 
     /**
@@ -256,7 +256,7 @@ class PromptManager(
         polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     ): String {
         val keyword = "\$${PromptKeyword.POLYMORPHISM.text}"
-        if (isPromptValid(PromptKeyword.METHODS, classPrompt)) {
+        if (isPromptValid(PromptKeyword.POLYMORPHISM, classPrompt)) {
             var fullText = ""
 
             polymorphismRelations.forEach { entry ->

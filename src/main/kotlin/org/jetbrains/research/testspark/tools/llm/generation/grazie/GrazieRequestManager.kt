@@ -15,8 +15,9 @@ class GrazieRequestManager : RequestManager() {
         indicator: ProgressIndicator,
         project: Project,
         llmErrorManager: LLMErrorManager,
-    ): TestsAssembler {
+    ): Pair<SendResult, TestsAssembler> {
         var testsAssembler = TestsAssembler(project, indicator)
+        var sendResult = SendResult.OK
 
         try {
             val className = "org.jetbrains.research.grazie.Request"
@@ -33,12 +34,26 @@ class GrazieRequestManager : RequestManager() {
             if (requestError.isNotEmpty()) {
                 with(requestError) {
                     when {
-                        contains("invalid: 401") -> llmErrorManager.errorProcess(
-                            TestSparkBundle.message("wrongToken"),
-                            project,
-                        )
+                        contains("invalid: 401") -> {
+                            llmErrorManager.errorProcess(
+                                TestSparkBundle.message("wrongToken"),
+                                project,
+                            )
+                            sendResult = SendResult.OTHER
+                        }
 
-                        else -> llmErrorManager.errorProcess(requestError, project)
+                        contains("invalid: 413 Payload Too Large") -> {
+                            llmErrorManager.warningProcess(
+                                TestSparkBundle.message("tooLongPrompt"),
+                                project,
+                            )
+                            sendResult = SendResult.TOOLONG
+                        }
+
+                        else -> {
+                            llmErrorManager.errorProcess(requestError, project)
+                            sendResult = SendResult.OTHER
+                        }
                     }
                 }
             } else {
@@ -48,7 +63,7 @@ class GrazieRequestManager : RequestManager() {
             llmErrorManager.errorProcess(TestSparkBundle.message("grazieError"), project)
         }
 
-        return testsAssembler
+        return Pair(sendResult, testsAssembler)
     }
 
     private fun getMessages(): List<Pair<String, String>> {
