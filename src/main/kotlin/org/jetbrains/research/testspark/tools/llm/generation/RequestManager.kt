@@ -40,7 +40,7 @@ abstract class RequestManager {
         log.info("Sending Request ...")
         val testsAssembler = send(prompt, indicator, project, llmErrorManager)
 
-        // we remove the user request because we don't users requests in chat history
+        // we remove the user request because we don't store user's requests in chat history
         if (isUserFeedback) {
             chatHistory.removeLast()
         }

@@ -42,7 +42,7 @@ class SettingsLLMComponent {
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
-    private var promptEditorTabbedPane = creatTabbedPane()
+    private var promptEditorTabbedPane = createTabbedPane()
 
     // Maximum number of LLM requests
     private var maxLLMRequestsField =
@@ -135,7 +135,7 @@ class SettingsLLMComponent {
         }
     }
 
-    private fun creatTabbedPane(): JBTabbedPane {
+    private fun createTabbedPane(): JBTabbedPane {
         val tabbedPane = JBTabbedPane()
 
         // Add tabs for each testing level
