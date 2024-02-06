@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -32,17 +31,19 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        settingsComponent!!.openAIToken = settingsState.openAIToken
-        settingsComponent!!.grazieToken = settingsState.grazieToken
-        settingsComponent!!.openAIModel = settingsState.openAIModel
-        settingsComponent!!.grazieModel = settingsState.grazieModel
-        settingsComponent!!.llmPlatform = settingsState.llmPlatform
+        for (index in settingsComponent!!.llmPlatforms.indices) {
+            settingsComponent!!.llmPlatforms[index].token = settingsState.llmPlatforms[index].token
+            settingsComponent!!.llmPlatforms[index].model = settingsState.llmPlatforms[index].model
+        }
+        settingsComponent!!.currentLLMPlatformName = settingsState.currentLLMPlatformName
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
         settingsComponent!!.classPrompt = settingsState.classPrompt
         settingsComponent!!.methodPrompt = settingsState.methodPrompt
         settingsComponent!!.linePrompt = settingsState.linePrompt
+
+        settingsComponent!!.updateTokenAndModel()
     }
 
     /**
@@ -52,11 +53,12 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        var modified: Boolean = settingsComponent!!.openAIToken != settingsState.openAIToken
-        modified = modified or (settingsComponent!!.grazieToken != settingsState.grazieToken)
-        modified = modified or (settingsComponent!!.openAIModel != settingsState.openAIModel)
-        modified = modified or (settingsComponent!!.grazieModel != settingsState.grazieModel)
-        modified = modified or (settingsComponent!!.llmPlatform != settingsState.llmPlatform)
+        var modified = false
+        for (index in settingsComponent!!.llmPlatforms.indices) {
+            modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.llmPlatforms[index].token)
+            modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.llmPlatforms[index].model)
+        }
+        modified = modified or (settingsComponent!!.currentLLMPlatformName != settingsState.currentLLMPlatformName)
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
@@ -78,14 +80,11 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun apply() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        if (settingsComponent!!.llmPlatform == TestSparkLabelsBundle.defaultValue("grazie")) {
-            settingsState.grazieToken = settingsComponent!!.grazieToken
-            settingsState.grazieModel = settingsComponent!!.grazieModel
-        } else {
-            settingsState.openAIToken = settingsComponent!!.openAIToken
-            settingsState.openAIModel = settingsComponent!!.openAIModel
+        for (index in settingsComponent!!.llmPlatforms.indices) {
+            settingsState.llmPlatforms[index].token = settingsComponent!!.llmPlatforms[index].token
+            settingsState.llmPlatforms[index].model = settingsComponent!!.llmPlatforms[index].model
         }
-        settingsState.llmPlatform = settingsComponent!!.llmPlatform
+        settingsState.currentLLMPlatformName = settingsComponent!!.currentLLMPlatformName
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
         settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth

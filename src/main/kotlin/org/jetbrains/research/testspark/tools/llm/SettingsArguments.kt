@@ -2,9 +2,9 @@ package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
+import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 
 /**
  * A class that provides access to various settings arguments.
@@ -14,32 +14,11 @@ class SettingsArguments {
         val settingsState = SettingsApplicationService.getInstance().state
 
         /**
-         * Retrieves the OpenAI token from the application's settings.
+         * Retrieves the list of LLM platforms from the settings state.
          *
-         * @return The OpenAI token as a string.
+         * @return The list of LLM platforms.
          */
-        fun openAIToken(): String = settingsState!!.openAIToken
-
-        /**
-         * Retrieves the Grazie token from the settings state.
-         *
-         * @return The Grazie token as a string.
-         */
-        fun grazieToken(): String = settingsState!!.grazieToken
-
-        /**
-         * Opens the AI model associated with the given settings state.
-         *
-         * @return The AI model as a string.
-         */
-        fun openAIModel(): String = settingsState!!.openAIModel
-
-        /**
-         * Retrieves the Grazie model from the application's settings state.
-         *
-         * @return The Grazie model as a String.
-         */
-        fun grazieModel(): String = settingsState!!.grazieModel
+        fun llmPlatforms(): List<LLMPlatform> = settingsState!!.llmPlatforms
 
         /**
          * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.
@@ -77,7 +56,7 @@ class SettingsArguments {
          *
          * @return selected LLM platform
          */
-        fun llmPlatform(): String = settingsState!!.llmPlatform
+        fun currentLLMPlatformName(): String = settingsState!!.currentLLMPlatformName
 
         /**
          * Retrieves the token for the current user.
@@ -85,11 +64,12 @@ class SettingsArguments {
          * @return The token as a string.
          */
         fun getToken(): String {
-            return if (llmPlatform() == TestSparkLabelsBundle.defaultValue("grazie")) {
-                grazieToken()
-            } else {
-                openAIToken()
+            for (llmPlatform in llmPlatforms()) {
+                if (currentLLMPlatformName() == llmPlatform.name) {
+                    return llmPlatform.token
+                }
             }
+            return ""
         }
     }
 }
