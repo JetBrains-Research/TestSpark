@@ -2,6 +2,9 @@ package org.jetbrains.research.testspark.settings
 
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
+import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
+import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIPlatform
 
 /**
  * This class is the actual data class that stores the values of the EvoSuite Settings entries.
@@ -24,11 +27,8 @@ data class SettingsApplicationState(
     var criterionMethodNoException: Boolean = DefaultSettingsApplicationState.criterionMethodNoException,
     var criterionCBranch: Boolean = DefaultSettingsApplicationState.criterionCBranch,
     var minimize: Boolean = DefaultSettingsApplicationState.minimize,
-    var openAIToken: String = DefaultSettingsApplicationState.openAIToken,
-    var grazieToken: String = DefaultSettingsApplicationState.grazieToken,
-    var openAIModel: String = DefaultSettingsApplicationState.openAIModel,
-    var grazieModel: String = DefaultSettingsApplicationState.grazieModel,
-    var llmPlatform: String = DefaultSettingsApplicationState.llmPlatform,
+    val llmPlatforms: List<LLMPlatform> = DefaultSettingsApplicationState.llmPlatforms.toList(),
+    var currentLLMPlatformName: String = DefaultSettingsApplicationState.currentLLMPlatformName,
     var maxLLMRequest: Int = DefaultSettingsApplicationState.maxLLMRequest,
     var maxInputParamsDepth: Int = DefaultSettingsApplicationState.maxInputParamsDepth,
     var maxPolyDepth: Int = DefaultSettingsApplicationState.maxPolyDepth,
@@ -58,11 +58,8 @@ data class SettingsApplicationState(
         val criterionMethod: Boolean = TestSparkDefaultsBundle.defaultValue("criterionMethod").toBoolean()
         val criterionMethodNoException: Boolean = TestSparkDefaultsBundle.defaultValue("criterionMethodNoException").toBoolean()
         val criterionCBranch: Boolean = TestSparkDefaultsBundle.defaultValue("criterionCBranch").toBoolean()
-        val openAIToken: String = TestSparkDefaultsBundle.defaultValue("openAIToken")
-        val grazieToken: String = TestSparkDefaultsBundle.defaultValue("grazieToken")
-        var openAIModel: String = TestSparkDefaultsBundle.defaultValue("openAIModel")
-        var grazieModel: String = TestSparkDefaultsBundle.defaultValue("grazieModel")
-        var llmPlatform: String = TestSparkDefaultsBundle.defaultValue("llmPlatform")
+        val llmPlatforms: List<LLMPlatform> = listOf(OpenAIPlatform(), GraziePlatform())
+        var currentLLMPlatformName: String = TestSparkDefaultsBundle.defaultValue("llmPlatform")
         val maxLLMRequest: Int = TestSparkDefaultsBundle.defaultValue("maxLLMRequest").toInt()
         val maxInputParamsDepth: Int = TestSparkDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
         val maxPolyDepth: Int = TestSparkDefaultsBundle.defaultValue("maxPolyDepth").toInt()

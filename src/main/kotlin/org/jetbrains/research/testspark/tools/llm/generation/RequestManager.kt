@@ -5,6 +5,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 
 abstract class RequestManager {
@@ -39,7 +40,7 @@ abstract class RequestManager {
         log.info("Sending Request ...")
         val testsAssembler = send(prompt, indicator, project, llmErrorManager)
 
-        // we remove the user request because we don't users requests in chat history
+        // we remove the user request because we don't store user's requests in chat history
         if (isUserFeedback) {
             chatHistory.removeLast()
         }
