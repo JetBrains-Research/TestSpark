@@ -12,17 +12,19 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
-import org.jetbrains.research.testspark.helpers.isGrazieClassLoaded
+import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
+import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
 import java.awt.Font
 import javax.swing.BorderFactory
 import javax.swing.BoxLayout
-import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JSeparator
@@ -35,9 +37,8 @@ class SettingsLLMComponent {
     private var llmUserTokenField = JTextField(30)
 
     // Models
-    private val defaultModulesArray = arrayOf("")
-    private var modelSelector = ComboBox(defaultModulesArray)
-    private var platformSelector = ComboBox(arrayOf(TestSparkLabelsBundle.defaultValue("openAI")))
+    private var modelSelector = ComboBox(arrayOf(""))
+    private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
@@ -55,12 +56,69 @@ class SettingsLLMComponent {
     private var maxPolyDepthField =
         JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
 
+    val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
+
+    var currentLLMPlatformName: String
+        get() = platformSelector.item
+        set(newAlg) {
+            platformSelector.item = newAlg
+        }
+
+    var maxLLMRequest: Int
+        get() = maxLLMRequestsField.number
+        set(value) {
+            maxLLMRequestsField.number = value
+        }
+
+    var maxInputParamsDepth: Int
+        get() = maxInputParamsDepthField.number
+        set(value) {
+            maxInputParamsDepthField.number = value
+        }
+
+    var maxPolyDepth: Int
+        get() = maxPolyDepthField.number
+        set(value) {
+            maxPolyDepthField.number = value
+        }
+
+    var classPrompt: String
+        get() = getEditorTextField(PromptEditorType.CLASS).document.text
+        set(value) {
+            ApplicationManager.getApplication().runWriteAction {
+                val editorTextField =
+                    getEditorTextField(PromptEditorType.CLASS)
+                editorTextField.document.setText(value)
+            }
+        }
+
+    var methodPrompt: String
+        get() = getEditorTextField(PromptEditorType.METHOD).document.text
+        set(value) {
+            ApplicationManager.getApplication().runWriteAction {
+                val editorTextField =
+                    getEditorTextField(PromptEditorType.METHOD)
+                editorTextField.document.setText(value)
+            }
+        }
+
+    var linePrompt: String
+        get() = getEditorTextField(PromptEditorType.LINE).document.text
+        set(value) {
+            ApplicationManager.getApplication().runWriteAction {
+                val editorTextField =
+                    getEditorTextField(PromptEditorType.LINE)
+                editorTextField.document.setText(value)
+            }
+        }
+
     init {
+        // Adds additional style (width, tooltips)
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
+        stylizePanel()
+
         // Adds the panel components
         createSettingsPanel()
-
-        // Adds additional style (width, tooltips)
-        stylizePanel()
 
         // Adds listeners
         addListeners()
@@ -114,7 +172,7 @@ class SettingsLLMComponent {
             button.font = Font("Monochrome", Font.BOLD, 12)
 
             // add actionListener for button
-            button.addActionListener { event ->
+            button.addActionListener { _ ->
                 val editor = editorTextField.editor
 
                 editor?.let { editor ->
@@ -143,7 +201,7 @@ class SettingsLLMComponent {
             platformSelector,
             modelSelector,
             llmUserTokenField,
-            defaultModulesArray,
+            llmPlatforms,
         )
 
         addHighlighterListeners()
@@ -162,10 +220,7 @@ class SettingsLLMComponent {
     }
 
     private fun stylizePanel() {
-        llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
         maxLLMRequestsField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumNumberOfRequests")
-        modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
-        modelSelector.isEnabled = false
         maxInputParamsDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("parametersDepth")
         maxPolyDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumPolyDepth")
         promptSeparator.toolTipText = TestSparkToolTipsBundle.defaultValue("promptEditor")
@@ -175,13 +230,6 @@ class SettingsLLMComponent {
      * Create the main panel for LLM-related settings page
      */
     private fun createSettingsPanel() {
-        // Check if the Grazie platform access is available in the current build
-        if (isGrazieClassLoaded()) {
-            platformSelector.model = DefaultComboBoxModel(arrayOf(TestSparkLabelsBundle.defaultValue("grazie"), TestSparkLabelsBundle.defaultValue("openAI")))
-        } else {
-            platformSelector.isEnabled = false
-        }
-
         panel = FormBuilder.createFormBuilder()
             .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("LLMSettings")))
             .addLabeledComponent(
@@ -230,81 +278,12 @@ class SettingsLLMComponent {
         return (promptEditorTabbedPane.getComponentAt(editorType.index) as JPanel).getComponent(0) as EditorTextField
     }
 
-    var openAIToken: String
-        get() = llmUserTokenField.text
-        set(newText) {
-            llmUserTokenField.text = newText
-        }
-
-    var grazieToken: String
-        get() = llmUserTokenField.text
-        set(newText) {
-            llmUserTokenField.text = newText
-        }
-
-    var openAIModel: String
-        get() = modelSelector.item
-        set(newAlg) {
-            modelSelector.item = newAlg
-        }
-
-    var grazieModel: String
-        get() = modelSelector.item
-        set(newAlg) {
-            modelSelector.item = newAlg
-        }
-
-    var llmPlatform: String
-        get() = platformSelector.item
-        set(newAlg) {
-            platformSelector.item = newAlg
-        }
-
-    var maxLLMRequest: Int
-        get() = maxLLMRequestsField.number
-        set(value) {
-            maxLLMRequestsField.number = value
-        }
-
-    var maxInputParamsDepth: Int
-        get() = maxInputParamsDepthField.number
-        set(value) {
-            maxInputParamsDepthField.number = value
-        }
-
-    var maxPolyDepth: Int
-        get() = maxPolyDepthField.number
-        set(value) {
-            maxPolyDepthField.number = value
-        }
-
-    var classPrompt: String
-        get() = getEditorTextField(PromptEditorType.CLASS).document.text
-        set(value) {
-            ApplicationManager.getApplication().runWriteAction {
-                val editorTextField =
-                    getEditorTextField(PromptEditorType.CLASS)
-                editorTextField.document.setText(value)
+    fun updateTokenAndModel() {
+        for (llmPlatform in llmPlatforms) {
+            if (currentLLMPlatformName == llmPlatform.name) {
+                llmUserTokenField.text = llmPlatform.token
+                if (modelSelector.isEnabled) modelSelector.selectedItem = llmPlatform.model
             }
         }
-
-    var methodPrompt: String
-        get() = getEditorTextField(PromptEditorType.METHOD).document.text
-        set(value) {
-            ApplicationManager.getApplication().runWriteAction {
-                val editorTextField =
-                    getEditorTextField(PromptEditorType.METHOD)
-                editorTextField.document.setText(value)
-            }
-        }
-
-    var linePrompt: String
-        get() = getEditorTextField(PromptEditorType.LINE).document.text
-        set(value) {
-            ApplicationManager.getApplication().runWriteAction {
-                val editorTextField =
-                    getEditorTextField(PromptEditorType.LINE)
-                editorTextField.document.setText(value)
-            }
-        }
+    }
 }

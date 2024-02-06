@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.tools.llm.generation
+package org.jetbrains.research.testspark.tools.llm.generation.openai
 
 data class OpenAIRequestBody(
     val model: String,
