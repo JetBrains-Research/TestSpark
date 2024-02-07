@@ -476,23 +476,26 @@ class TestCasePanelFactory(
         loadingLabel.isVisible = true
         runTestButton.isEnabled = false
 
-        SwingUtilities.invokeLater {
-            val newTestCase = project.service<TestStorageProcessingService>()
-                .processNewTestCase(
-                    "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
-                    testCase.id,
-                    testCase.testName,
-                    testCase.testCode,
-                )
-            testCase.coveredLines = newTestCase.coveredLines
+        ProgressManager.getInstance()
+            .run(object : Task.Backgroundable(project, "Executing ${testCase.testName}") {
+                override fun run(indicator: ProgressIndicator) {
+                    val newTestCase = project.service<TestStorageProcessingService>()
+                        .processNewTestCase(
+                            "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                            testCase.id,
+                            testCase.testName,
+                            testCase.testCode,
+                        )
+                    testCase.coveredLines = newTestCase.coveredLines
 
-            testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
+                    testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
-            lastRunCodes[currentRequestNumber - 1] = testCase.testCode
-            loadingLabel.isVisible = false
+                    lastRunCodes[currentRequestNumber - 1] = testCase.testCode
+                    loadingLabel.isVisible = false
 
-            updateUI()
-        }
+                    SwingUtilities.invokeLater {updateUI()}
+                }
+            })
     }
 
     /**
