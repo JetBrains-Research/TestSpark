@@ -70,7 +70,7 @@ class TestSparkAction : AnAction() {
 
         private val cardLayout = CardLayout()
 
-        private val llmPanelFactory = LLMPanelFactory()
+        private val llmPanelFactory = LLMPanelFactory(e.project!!)
         private val evoSuitePanelFactory = EvoSuitePanelFactory()
 
         init {

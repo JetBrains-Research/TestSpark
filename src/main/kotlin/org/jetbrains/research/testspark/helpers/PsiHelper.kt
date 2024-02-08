@@ -24,6 +24,7 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
 import com.intellij.psi.PsiSubstitutor
 import com.intellij.psi.PsiType
+import com.intellij.psi.impl.source.PsiMethodImpl
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
@@ -364,8 +365,8 @@ fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*>? {
  * @param project The project to retrieve the test samples from.
  * @return A list of strings, representing the names of the test samples.
  */
-fun getTestSamples(project: Project): List<String> {
-    val testSamples = listOf<String>()
+fun getTestSamples(project: Project): Array<PsiMethod> {
+    val testSamples = mutableListOf<PsiMethod>()
 
     val projectFileIndex: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
     val javaFileType: FileType = FileTypeManager.getInstance().getFileTypeByExtension("java")
@@ -377,31 +378,20 @@ fun getTestSamples(project: Project): List<String> {
                 val psiClass = psiJavaFile.classes[
                     psiJavaFile.classes.stream().map { it.name }.toArray()
                         .indexOf(psiJavaFile.name.removeSuffix(".java"))]
-                if (isTestClass(psiClass)) {
-                    testSamples.plus(psiClass.name)
+                // Iterate over methods
+                psiClass.allMethods.forEach { method ->
+                    // Get list of method annotations
+                    val annotations = method.modifierList.annotations
+                    // Check if '@Test' (from JUnit) annotation exists
+                    annotations.forEach { annotation ->
+                        if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
+                            testSamples.plus(method)
+                        }
+                    }
                 }
             }
         }
         true
     }
-    return testSamples
-}
-
-fun isTestClass(psiClass: PsiClass): Boolean {
-    // Get all methods of your class
-    val methods = psiClass.allMethods
-
-    // Iterate over methods
-    methods.forEach { method ->
-        // Get list of method annotations
-        val annotations = method.modifierList.annotations
-        // Check if '@Test' (from JUnit) annotation exists
-        annotations.forEach { annotation ->
-            if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
-                return true
-            }
-        }
-    }
-
-    return false
+    return testSamples.toTypedArray()
 }

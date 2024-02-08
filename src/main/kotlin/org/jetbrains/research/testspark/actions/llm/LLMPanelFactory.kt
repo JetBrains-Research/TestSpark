@@ -1,6 +1,8 @@
 package org.jetbrains.research.testspark.actions.llm
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.psi.PsiMethod
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
@@ -16,18 +18,24 @@ import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.helpers.getTestSamples
 
-class LLMPanelFactory : ToolPanelFactory {
+class LLMPanelFactory(project: Project) : ToolPanelFactory {
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
     private var platformSelector = ComboBox(arrayOf(TestSparkLabelsBundle.defaultValue("openAI")))
+    private var testSamples: Array<PsiMethod> = arrayOf()
+    private var testSamplesSelector = ComboBox(arrayOf(""))
     private val backLlmButton = JButton("Back")
     private val okLlmButton = JButton("OK")
 
     private val settingsState = SettingsApplicationService.getInstance().state!!
 
     init {
+        testSamples = getTestSamples(project)
+        testSamplesSelector = ComboBox(arrayOf("Do not provide any template") + testSamples.map { it.name }.toTypedArray())
+
         addLLMPanelListeners(
             platformSelector,
             modelSelector,
@@ -115,6 +123,12 @@ class LLMPanelFactory : ToolPanelFactory {
             .addLabeledComponent(
                 JBLabel(TestSparkLabelsBundle.defaultValue("model")),
                 modelSelector,
+                10,
+                false,
+            )
+            .addLabeledComponent(
+                JBLabel(TestSparkLabelsBundle.defaultValue("model")),
+                testSamplesSelector,
                 10,
                 false,
             )
