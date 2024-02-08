@@ -37,6 +37,7 @@ import java.awt.RenderingHints
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
+import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.FocusManager
@@ -50,6 +51,7 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+import kotlin.collections.HashMap
 
 class TestCasePanelFactory(
     private val project: Project,
@@ -469,33 +471,54 @@ class TestCasePanelFactory(
      * label in the test case upper panel, removes all highlighters from the language text field,
      * and updates the UI.
      */
-    fun runTest() {
+    private fun runTest() {
+
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
 
         loadingLabel.isVisible = true
-        runTestButton.isEnabled = false
+        if (!runTestButton.isEnabled) return
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, "Executing ${testCase.testName}") {
+            .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
-                    val newTestCase = project.service<TestStorageProcessingService>()
-                        .processNewTestCase(
-                            "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
-                            testCase.id,
-                            testCase.testName,
-                            testCase.testCode,
-                        )
-                    testCase.coveredLines = newTestCase.coveredLines
-
-                    testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
-
-                    lastRunCodes[currentRequestNumber - 1] = testCase.testCode
-                    loadingLabel.isVisible = false
-
-                    SwingUtilities.invokeLater {updateUI()}
+                    runTest(indicator)
                 }
             })
+    }
+
+    fun addTask(tasks: Queue<(ProgressIndicator) -> Unit>) {
+        if (isRemoved) return
+        if (!runTestButton.isEnabled) return
+
+        loadingLabel.isVisible = true
+        if (!runTestButton.isEnabled) return
+
+        tasks.add { indicator ->
+            runTest(indicator)
+        }
+    }
+
+    private fun runTest(indicator: ProgressIndicator) {
+        indicator.text = "Executing ${testCase.testName}"
+
+        val newTestCase = project.service<TestStorageProcessingService>()
+            .processNewTestCase(
+                "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                testCase.id,
+                testCase.testName,
+                testCase.testCode,
+            )
+
+        testCase.coveredLines = newTestCase.coveredLines
+
+        testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
+
+        lastRunCodes[currentRequestNumber - 1] = testCase.testCode
+        loadingLabel.isVisible = false
+        SwingUtilities.invokeLater {
+            updateUI()
+        }
     }
 
     /**
