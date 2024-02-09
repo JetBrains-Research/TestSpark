@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.actions.evosuite
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.actions.TestSparkAction
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
@@ -41,7 +42,7 @@ class EvoSuitePanelFactory : ToolPanelFactory {
      *
      * @return the JPanel containing the EvoSuite setup GUI components
      */
-    override fun getPanel(): JPanel {
+    override fun getPanel(junit: TestSparkAction.TestSparkActionWindow.JUnit?): JPanel {
         val textTitle = JLabel("EvoSuite Setup")
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 

@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.settings
 
+import org.jetbrains.research.testspark.actions.TestSparkAction.TestSparkActionWindow.JUnit
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
@@ -35,6 +36,7 @@ data class SettingsApplicationState(
     var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
     var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
     var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
+    var junitVersion: JUnit = DefaultSettingsApplicationState.junitVersion
 ) {
 
     /**
@@ -66,6 +68,7 @@ data class SettingsApplicationState(
         val classPrompt: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
         val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
         val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
+        val junitVersion: JUnit = JUnit.JUnit4
     }
 
     // TODO remove from here

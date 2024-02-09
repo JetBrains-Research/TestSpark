@@ -5,9 +5,9 @@ import org.junit.runner.Request;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
-public class SingleJUnitTestRunner {
-    public static void main(String... args) throws ClassNotFoundException {
-        String[] classAndMethod = args[0].split("#");
+public class SingleJUnitTestRunner4 {
+  public static void main(String... args) throws ClassNotFoundException {
+    String[] classAndMethod = args[0].split("#");
         Request request = Request.method(Class.forName(classAndMethod[0]),
                 classAndMethod[1]);
 
@@ -18,5 +18,6 @@ public class SingleJUnitTestRunner {
         }
 
         System.exit(result.wasSuccessful() ? 0 : 1);
-    }
+
+  }
 }

@@ -35,7 +35,7 @@ class PromptManager(
     private val cut: PsiClass,
     private val classesToTest: MutableList<PsiClass>,
 ) {
-    val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
+    val settingsState: SettingsApplicationState = SettingsArguments.settingsState!!
 
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
@@ -187,7 +187,7 @@ class PromptManager(
     private fun insertTestingPlatform(classPrompt: String): String {
         if (isPromptValid(PromptKeyword.TESTING_PLATFORM, classPrompt)) {
             val keyword = "\$${PromptKeyword.TESTING_PLATFORM.text}"
-            return classPrompt.replace(keyword, "JUnit 4", ignoreCase = false)
+            return classPrompt.replace(keyword, settingsState.junitVersion.showName, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.TESTING_PLATFORM.text}")
         }
