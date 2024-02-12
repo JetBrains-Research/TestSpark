@@ -19,8 +19,8 @@ class EvoSuitePanelFactory : ToolPanelFactory {
 
     private var javaPathTextField = JTextField(30)
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
-    private val backEvoSuiteButton = JButton("Back")
-    private val okEvoSuiteButton = JButton("OK")
+    private val backEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
+    private val okEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
 
     /**
      * Retrieves the back button.
@@ -34,7 +34,7 @@ class EvoSuitePanelFactory : ToolPanelFactory {
      *
      * @return The reference to the "OK" button.
      */
-    override fun getOkButton() = okEvoSuiteButton
+    override fun getFinishedButton() = okEvoSuiteButton
 
     /**
      * Returns the EvoSuite panel for setting up EvoSuite configurations.
@@ -42,7 +42,7 @@ class EvoSuitePanelFactory : ToolPanelFactory {
      * @return the JPanel containing the EvoSuite setup GUI components
      */
     override fun getPanel(): JPanel {
-        val textTitle = JLabel("EvoSuite Setup")
+        val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("evosuiteSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()
@@ -88,7 +88,7 @@ class EvoSuitePanelFactory : ToolPanelFactory {
     /**
      * Updates the state of the settings.
      */
-    override fun settingsStateUpdate() {
+    override fun applyUpdates() {
         settingsState.javaPath = javaPathTextField.text
         settingsState.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm
     }

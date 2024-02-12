@@ -1,8 +1,6 @@
 package org.jetbrains.research.testspark.actions.llm
 
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.psi.PsiMethod
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
@@ -18,24 +16,18 @@ import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
-import org.jetbrains.research.testspark.helpers.getTestSamples
 
-class LLMPanelFactory(project: Project) : ToolPanelFactory {
+class LLMSetupPanelFactory : ToolPanelFactory {
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
     private var platformSelector = ComboBox(arrayOf(TestSparkLabelsBundle.defaultValue("openAI")))
-    private var testSamples: Array<PsiMethod> = arrayOf()
-    private var testSamplesSelector = ComboBox(arrayOf(""))
-    private val backLlmButton = JButton("Back")
-    private val okLlmButton = JButton("OK")
+    private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
+    private val okLlmButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
 
     private val settingsState = SettingsApplicationService.getInstance().state!!
 
     init {
-        testSamples = getTestSamples(project)
-        testSamplesSelector = ComboBox(arrayOf("Do not provide any template") + testSamples.map { it.name }.toTypedArray())
-
         addLLMPanelListeners(
             platformSelector,
             modelSelector,
@@ -56,7 +48,7 @@ class LLMPanelFactory(project: Project) : ToolPanelFactory {
      *
      * @return The reference to the "OK" button.
      */
-    override fun getOkButton() = okLlmButton
+    override fun getFinishedButton() = okLlmButton
 
     /**
      * Retrieves the LLM panel.
@@ -64,7 +56,7 @@ class LLMPanelFactory(project: Project) : ToolPanelFactory {
      * @return The JPanel object representing the LLM setup panel.
      */
     override fun getPanel(): JPanel {
-        val textTitle = JLabel("LLM Setup")
+        val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("llmSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()
@@ -126,12 +118,6 @@ class LLMPanelFactory(project: Project) : ToolPanelFactory {
                 10,
                 false,
             )
-            .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("model")),
-                testSamplesSelector,
-                10,
-                false,
-            )
             .addComponentFillVertically(bottomButtons, 10)
             .panel
     }
@@ -144,7 +130,7 @@ class LLMPanelFactory(project: Project) : ToolPanelFactory {
      *
      * Note: This method assumes all the required UI components (`platformSelector`, `llmUserTokenField`, and `modelSelector`) are properly initialized and have values selected.
      */
-    override fun settingsStateUpdate() {
+    override fun applyUpdates() {
         settingsState.llmPlatform = platformSelector.selectedItem!!.toString()
         if (platformSelector.selectedItem!!.toString() == TestSparkLabelsBundle.defaultValue("grazie")) {
             settingsState.grazieToken = llmUserTokenField.text

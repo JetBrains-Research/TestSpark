@@ -2,14 +2,8 @@ package org.jetbrains.research.testspark.helpers
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
-import com.intellij.openapi.fileTypes.FileType
-import com.intellij.openapi.fileTypes.FileTypeManager
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
@@ -19,12 +13,10 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
-import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
 import com.intellij.psi.PsiSubstitutor
 import com.intellij.psi.PsiType
-import com.intellij.psi.impl.source.PsiMethodImpl
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
@@ -357,41 +349,4 @@ fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*>? {
     line?.let { result.add("<html><b><font color='orange'>line</font> $line</b></html>") }
 
     return result.toArray()
-}
-
-/**
- * Retrieves a list of test samples from the given project.
- *
- * @param project The project to retrieve the test samples from.
- * @return A list of strings, representing the names of the test samples.
- */
-fun getTestSamples(project: Project): Array<PsiMethod> {
-    val testSamples = mutableListOf<PsiMethod>()
-
-    val projectFileIndex: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
-    val javaFileType: FileType = FileTypeManager.getInstance().getFileTypeByExtension("java")
-
-    projectFileIndex.iterateContent { file ->
-        if (file.fileType === javaFileType) {
-            WriteCommandAction.runWriteCommandAction(project) {
-                val psiJavaFile = (PsiManager.getInstance(project).findFile(file) as PsiJavaFile)
-                val psiClass = psiJavaFile.classes[
-                    psiJavaFile.classes.stream().map { it.name }.toArray()
-                        .indexOf(psiJavaFile.name.removeSuffix(".java"))]
-                // Iterate over methods
-                psiClass.allMethods.forEach { method ->
-                    // Get list of method annotations
-                    val annotations = method.modifierList.annotations
-                    // Check if '@Test' (from JUnit) annotation exists
-                    annotations.forEach { annotation ->
-                        if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
-                            testSamples.plus(method)
-                        }
-                    }
-                }
-            }
-        }
-        true
-    }
-    return testSamples.toTypedArray()
 }

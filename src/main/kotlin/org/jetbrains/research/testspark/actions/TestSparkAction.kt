@@ -4,7 +4,8 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
-import org.jetbrains.research.testspark.actions.llm.LLMPanelFactory
+import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
+import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 import org.jetbrains.research.testspark.tools.Manager
@@ -23,6 +24,7 @@ import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
@@ -66,19 +68,21 @@ class TestSparkAction : AnAction() {
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
-        private val nextButton = JButton("Next")
+        private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
 
         private val cardLayout = CardLayout()
 
-        private val llmPanelFactory = LLMPanelFactory(e.project!!)
+        private val llmSetupPanelFactory = LLMSetupPanelFactory()
+        private val llmSampleSelectorFactory = LLMSampleSelectorFactory(e.project!!)
         private val evoSuitePanelFactory = EvoSuitePanelFactory()
 
         init {
             val panel = JPanel(cardLayout)
 
             panel.add(getMainPanel(), "1")
-            panel.add(llmPanelFactory.getPanel(), "2")
-            panel.add(evoSuitePanelFactory.getPanel(), "3")
+            panel.add(evoSuitePanelFactory.getPanel(), "2")
+            panel.add(llmSetupPanelFactory.getPanel(), "3")
+            panel.add(llmSampleSelectorFactory.getPanel(), "4")
 
             addListeners(panel)
 
@@ -170,19 +174,36 @@ class TestSparkAction : AnAction() {
 
             nextButton.addActionListener {
                 cardLayout.next(panel)
-                if (evoSuiteButton.isSelected) {
+                if (llmButton.isSelected) {
                     cardLayout.next(panel)
                 }
                 pack()
             }
 
-            llmPanelFactory.getBackButton().addActionListener {
+            evoSuitePanelFactory.getBackButton().addActionListener {
                 cardLayout.previous(panel)
                 pack()
             }
 
-            llmPanelFactory.getOkButton().addActionListener {
-                llmPanelFactory.settingsStateUpdate()
+            llmSetupPanelFactory.getBackButton().addActionListener {
+                cardLayout.previous(panel)
+                cardLayout.previous(panel)
+                pack()
+            }
+
+            llmSetupPanelFactory.getFinishedButton().addActionListener {
+                llmSetupPanelFactory.applyUpdates()
+                cardLayout.next(panel)
+                pack()
+            }
+
+            llmSampleSelectorFactory.getBackButton().addActionListener {
+                cardLayout.previous(panel)
+                pack()
+            }
+
+            llmSampleSelectorFactory.getFinishedButton().addActionListener {
+                llmSampleSelectorFactory.applyUpdates()
                 if (codeTypeButtons[0].isSelected) {
                     Manager.generateTestsForClassByLlm(e)
                 } else if (codeTypeButtons[1].isSelected) {
@@ -191,14 +212,8 @@ class TestSparkAction : AnAction() {
                 dispose()
             }
 
-            evoSuitePanelFactory.getBackButton().addActionListener {
-                cardLayout.previous(panel)
-                cardLayout.previous(panel)
-                pack()
-            }
-
-            evoSuitePanelFactory.getOkButton().addActionListener {
-                evoSuitePanelFactory.settingsStateUpdate()
+            evoSuitePanelFactory.getFinishedButton().addActionListener {
+                evoSuitePanelFactory.applyUpdates()
                 if (codeTypeButtons[0].isSelected) {
                     Manager.generateTestsForClassByEvoSuite(e)
                 } else if (codeTypeButtons[1].isSelected) {

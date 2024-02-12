@@ -8,7 +8,7 @@ interface ToolPanelFactory {
 
     fun getBackButton(): JButton
 
-    fun getOkButton(): JButton
+    fun getFinishedButton(): JButton
 
-    fun settingsStateUpdate()
+    fun applyUpdates()
 }
