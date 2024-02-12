@@ -52,7 +52,7 @@ fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
  * Saves the data related to test generation in the specified project's workspace.
  *
  * @param project The project in which the test generation data will be saved.
- * @param report The report object to be added to the test generation result list.\
+ * @param report The report object to be added to the test generation result list.
  * @param packageLine The package declaration line of the test generation data.
  * @param importsCode The import statements code of the test generation data.
  */
@@ -61,9 +61,8 @@ fun saveData(
     report: Report,
     packageLine: String,
     importsCode: MutableSet<String>,
-    indicator: ProgressIndicator,
 ) {
-    project.service<TestGenerationDataService>().resultName = project.service<TestStorageProcessingService>().testResultName!!
+    project.service<TestGenerationDataService>().resultName = project.service<TestStorageProcessingService>().testResultName
     project.service<TestGenerationDataService>().fileUrl = project.service<ProjectContextService>().fileUrl!!
     project.service<TestGenerationDataService>().packageLine = packageLine
     project.service<TestGenerationDataService>().importsCode.addAll(importsCode)
@@ -140,15 +139,4 @@ fun processStopped(project: Project, indicator: ProgressIndicator): Boolean {
         return true
     }
     return false
-}
-
-/**
- * Checks if the length of the given text is within the specified limit.
- *
- * @param text The text to check.
- * @param limit The maximum length limit in bytes. Defaults to 16384 bytes (4096 * 4).
- * @return `true` if the length of the text is within the limit, `false` otherwise.
- */
-fun isPromptLengthWithinLimit(text: String, limit: Int = 4096 * 4): Boolean { // Average of 4 bytes per token
-    return text.toByteArray(Charsets.UTF_8).size <= limit
 }

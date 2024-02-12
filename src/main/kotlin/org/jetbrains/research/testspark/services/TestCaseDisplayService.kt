@@ -66,13 +66,19 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var testsSelected: Int = 0
 
-    // Default color for the editors in the tool window
+    /**
+     * Default color for the editors in the tool window
+     */
     private var defaultEditorColor: Color? = null
 
-    // Content Manager to be able to add / remove tabs from tool window
+    /**
+     * Content Manager to be able to add / remove tabs from tool window
+     */
     private var contentManager: ContentManager? = null
 
-    // Variable to keep reference to the coverage visualisation content
+    /**
+     * Variable to keep reference to the coverage visualisation content
+     */
     private var content: Content? = null
 
     init {
@@ -141,11 +147,10 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.add(testCasePanel)
             addSeparator()
             testCasePanels[testCase.testName] = testCasePanel
-
-            // Update the number of selected tests (all tests are selected by default)
-            testsSelected = testCasePanels.size
-            topButtonsPanelFactory.updateTopLabels()
         }
+
+        // Update the number of selected tests (all tests are selected by default)
+        testsSelected = testCasePanels.size
 
         topButtonsPanelFactory.setTestCasePanelFactoriesArray(testCasePanelFactories)
         topButtonsPanelFactory.updateTopLabels()
@@ -289,18 +294,31 @@ class TestCaseDisplayService(private val project: Project) {
             LocalFileSystem.getInstance().findFileByPath(project.basePath!!),
         )
 
-        // Cancel button pressed
+        /**
+         * Cancel button pressed
+         */
         if (fileChooser.isEmpty()) return
 
-        // Chosen files by user
+        /**
+         * Chosen files by user
+         */
         val chosenFile = fileChooser[0]
 
-        // Virtual file of a final java file
+        /**
+         * Virtual file of a final java file
+         */
         var virtualFile: VirtualFile? = null
-        // PsiClass of a final java file
+
+        /**
+         * PsiClass of a final java file
+         */
         var psiClass: PsiClass? = null
-        // PsiJavaFile of a final java file
+
+        /**
+         * PsiJavaFile of a final java file
+         */
         var psiJavaFile: PsiJavaFile? = null
+
         if (chosenFile.isDirectory) {
             // Input new file data
             var className: String
@@ -527,6 +545,8 @@ class TestCaseDisplayService(private val project: Project) {
         // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()
         removeSelectedTestCases(testCasePanelsToRemove)
+
+        topButtonsPanelFactory.clear()
     }
 
     /**

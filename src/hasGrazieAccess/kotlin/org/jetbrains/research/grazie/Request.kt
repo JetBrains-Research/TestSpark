@@ -3,10 +3,10 @@ package org.jetbrains.research.grazie
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.research.testSpark.grazie.TestGeneration
-import org.jetbrains.research.testspark.tools.llm.generation.Request
 import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
+import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieRequest
 
-class Request : Request {
+class Request : GrazieRequest {
 
     override fun request(
         token: String,

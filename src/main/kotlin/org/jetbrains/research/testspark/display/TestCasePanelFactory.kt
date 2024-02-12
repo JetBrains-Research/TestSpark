@@ -37,6 +37,7 @@ import java.awt.RenderingHints
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
+import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.FocusManager
@@ -50,6 +51,7 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+import kotlin.collections.HashMap
 
 class TestCasePanelFactory(
     private val project: Project,
@@ -469,28 +471,52 @@ class TestCasePanelFactory(
      * label in the test case upper panel, removes all highlighters from the language text field,
      * and updates the UI.
      */
-    fun runTest() {
+    private fun runTest() {
+
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
 
         loadingLabel.isVisible = true
-        runTestButton.isEnabled = false
+        if (!runTestButton.isEnabled) return
 
+        ProgressManager.getInstance()
+            .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
+                override fun run(indicator: ProgressIndicator) {
+                    runTest(indicator)
+                }
+            })
+    }
+
+    fun addTask(tasks: Queue<(ProgressIndicator) -> Unit>) {
+        if (isRemoved) return
+        if (!runTestButton.isEnabled) return
+
+        loadingLabel.isVisible = true
+        if (!runTestButton.isEnabled) return
+
+        tasks.add { indicator ->
+            runTest(indicator)
+        }
+    }
+
+    private fun runTest(indicator: ProgressIndicator) {
+        indicator.text = "Executing ${testCase.testName}"
+
+        val newTestCase = project.service<TestStorageProcessingService>()
+            .processNewTestCase(
+                "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                testCase.id,
+                testCase.testName,
+                testCase.testCode,
+            )
+
+        testCase.coveredLines = newTestCase.coveredLines
+
+        testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
+
+        lastRunCodes[currentRequestNumber - 1] = testCase.testCode
+        loadingLabel.isVisible = false
         SwingUtilities.invokeLater {
-            val newTestCase = project.service<TestStorageProcessingService>()
-                .processNewTestCase(
-                    "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
-                    testCase.id,
-                    testCase.testName,
-                    testCase.testCode,
-                )
-            testCase.coveredLines = newTestCase.coveredLines
-
-            testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
-
-            lastRunCodes[currentRequestNumber - 1] = testCase.testCode
-            loadingLabel.isVisible = false
-
             updateUI()
         }
     }
@@ -499,11 +525,13 @@ class TestCasePanelFactory(
      * Resets the button listener for the reset button. When the reset button is clicked,
      * this method is called to perform the necessary actions.
      *
-     * This method updates the language text field with the test code from the current test case,
-     * sets the border of the language text field based on the test name and test code,
-     * updates the current test case in the workspace,
-     * disables the reset button,
-     * adds the current test to the passed or failed tests in the*/
+     * This method does the following:
+     * 1. Updates the language text field with the test code from the current test case.
+     * 2. Sets the border of the language text field based on the test name and test code.
+     * 3. Updates the current test case in the workspace.
+     * 4. Disables the reset button.
+     * 5. Adds the current test to the passed or failed tests in the
+     */
     private fun reset() {
         WriteCommandAction.runWriteCommandAction(project) {
             languageTextField.document.setText(initialCodes[currentRequestNumber - 1])
@@ -529,8 +557,10 @@ class TestCasePanelFactory(
     /**
      * Removes the button listener for the test case.
      *
-     * This method is responsible for removing the highlighting of the test, removing the test case from the cache,
-     * and updating the UI.
+     * This method is responsible for:
+     * 1. Removing the highlighting of the test.
+     * 2. Removing the test case from the cache.
+     * 3. Updating the UI.
      */
     private fun remove() {
         // Remove the test case from the cache
