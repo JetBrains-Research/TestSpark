@@ -4,8 +4,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.JUnitCombobox
-import org.jetbrains.research.testspark.actions.TestSparkAction
-import org.jetbrains.research.testspark.actions.TestSparkAction.TestSparkActionWindow.JUnit
+import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
@@ -60,7 +59,7 @@ class LLMPanelFactory : ToolPanelFactory {
      *
      * @return The JPanel object representing the LLM setup panel.
      */
-    override fun getPanel(junit: JUnit?): JPanel {
+    override fun getPanel(junit: JUnitVersion?): JPanel {
         junitSelector.detected = junit
 
         val textTitle = JLabel("LLM Setup")
@@ -127,6 +126,6 @@ class LLMPanelFactory : ToolPanelFactory {
             settingsState.llmPlatforms[index].token = llmPlatforms[index].token
             settingsState.llmPlatforms[index].model = llmPlatforms[index].model
         }
-        settingsState.junitVersion = (junitSelector.selectedItem!! as JUnit)
+        settingsState.junitVersion = (junitSelector.selectedItem!! as JUnitVersion)
     }
 }

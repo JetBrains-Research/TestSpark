@@ -8,9 +8,9 @@ import com.intellij.openapi.roots.LibraryOrderEntry
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.ui.ComboBox
-import org.jetbrains.research.testspark.actions.TestSparkAction.TestSparkActionWindow.JUnit
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMPanelFactory
+import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 import org.jetbrains.research.testspark.tools.Manager
@@ -22,9 +22,9 @@ import java.awt.event.WindowFocusListener
 import javax.swing.*
 
 
-class JUnitCombobox : ComboBox<JUnit>(JUnit.values()) {
+class JUnitCombobox : ComboBox<JUnitVersion>(JUnitVersion.values()) {
 
-    var detected: JUnit? = null
+    var detected: JUnitVersion? = null
 
     init {
       renderer = object : DefaultListCellRenderer() {
@@ -36,7 +36,7 @@ class JUnitCombobox : ComboBox<JUnit>(JUnit.values()) {
               cellHasFocus: Boolean
           ): Component {
               var v = value
-              if (value is JUnit) {
+              if (value is JUnitVersion) {
                   v = value.showName
                   if (value == detected) {
                       v += " (Detected)"
@@ -83,10 +83,6 @@ class TestSparkAction : AnAction() {
      * @property e The AnActionEvent object.
      */
     class TestSparkActionWindow(val e: AnActionEvent) : JFrame("TestSpark") {
-        enum class JUnit(val groupId: String, val version: Int, val libJar: String, val showName: String = "JUnit $version") {
-            JUnit5("org.junit.jupiter", 5, "junit-jupiter-api-5.10.0.jar"),
-            JUnit4("junit", 4, "junit-4.13.jar")
-        }
 
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
@@ -124,7 +120,7 @@ class TestSparkAction : AnAction() {
             isVisible = true
         }
 
-        private fun findJUnitDependency(e: AnActionEvent): JUnit? {
+        private fun findJUnitDependency(e: AnActionEvent): JUnitVersion? {
             val project = e.project!!
             val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)?.firstOrNull() ?: return null
 
@@ -134,7 +130,7 @@ class TestSparkAction : AnAction() {
             for (orderEntry in ModuleRootManager.getInstance(module).orderEntries) {
                 if (orderEntry is LibraryOrderEntry) {
                     val libraryName = orderEntry.library?.name ?: continue
-                    for (junit in JUnit.values()) {
+                    for (junit in JUnitVersion.values()) {
                         if (libraryName.contains(junit.groupId)) {
                             return junit
                         }

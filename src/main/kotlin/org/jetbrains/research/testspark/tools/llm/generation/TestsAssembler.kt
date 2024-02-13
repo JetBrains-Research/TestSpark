@@ -111,6 +111,7 @@ class TestsAssembler(
                 .map { it.groupValues[0] }
                 .toSet()
 
+            // TODO: replace for JUnit5 case
             // save RunWith
             val detectedRunWith = runWithPattern.find(rawText, startIndex = 0)?.groupValues?.get(0)
             if (detectedRunWith != null) {
