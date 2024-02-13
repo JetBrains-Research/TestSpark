@@ -63,7 +63,7 @@ abstract class RequestManager {
     open fun processResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
-        project: Project
+        project: Project,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
         if (testsAssembler.rawText.isEmpty()) {
             return Pair("", null)

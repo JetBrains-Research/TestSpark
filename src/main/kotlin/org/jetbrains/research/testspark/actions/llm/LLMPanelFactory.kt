@@ -3,10 +3,10 @@ package org.jetbrains.research.testspark.actions.llm
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.display.JUnitCombobox
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
@@ -106,7 +106,7 @@ class LLMPanelFactory : ToolPanelFactory {
                 JBLabel(TestSparkLabelsBundle.defaultValue("junitVersion")),
                 junitSelector,
                 10,
-                false
+                false,
             )
             .addComponentFillVertically(bottomButtons, 10)
             .panel

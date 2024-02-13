@@ -180,7 +180,6 @@ class TestStorageProcessingService(private val project: Project) {
 
         val junitVersion = SettingsArguments.settingsState!!.junitVersion.version
 
-
         // run the test method with jacoco agent
         val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
             arrayListOf(
@@ -188,7 +187,7 @@ class TestStorageProcessingService(private val project: Project) {
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<ProjectContextService>().classFQN}",
                 "-cp",
                 "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
-                "org.jetbrains.research.SingleJUnitTestRunner${junitVersion}",
+                "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
             ),
         )

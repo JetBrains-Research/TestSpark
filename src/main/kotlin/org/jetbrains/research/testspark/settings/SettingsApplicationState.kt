@@ -1,8 +1,8 @@
 package org.jetbrains.research.testspark.settings
 
-import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIPlatform
@@ -36,7 +36,7 @@ data class SettingsApplicationState(
     var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
     var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
     var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
-    var junitVersion: JUnitVersion = DefaultSettingsApplicationState.junitVersion
+    var junitVersion: JUnitVersion = DefaultSettingsApplicationState.junitVersion,
 ) {
 
     /**

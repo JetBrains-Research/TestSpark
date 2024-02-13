@@ -20,7 +20,6 @@ import java.awt.event.WindowEvent
 import java.awt.event.WindowFocusListener
 import javax.swing.*
 
-
 /**
  * Represents an action to be performed in the TestSpark plugin.
  *
