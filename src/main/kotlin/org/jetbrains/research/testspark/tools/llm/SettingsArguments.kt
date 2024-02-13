@@ -12,7 +12,6 @@ import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
  */
 class SettingsArguments {
     companion object {
-        // TODO: replace with call?
         val settingsState: SettingsApplicationState?
             get() = SettingsApplicationService.getInstance().state
 
