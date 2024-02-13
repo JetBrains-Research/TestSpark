@@ -28,8 +28,6 @@ public class SingleJUnitTestRunner5 {
 
     TestExecutionSummary result = listener.getSummary();
     List<TestExecutionSummary.Failure> failures = result.getFailures();
-    System.out.println("getTestsSucceededCount() - " + result.getTestsSucceededCount());
-    failures.forEach(failure -> System.out.println("failure - " + failure.getException()));
     for (TestExecutionSummary.Failure failure : failures) {
       System.err.println(Arrays.toString(failure.getException().getStackTrace()) + "\n ===");
     }
