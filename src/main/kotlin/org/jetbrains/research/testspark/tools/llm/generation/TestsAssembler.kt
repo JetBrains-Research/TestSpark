@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.services.TestGenerationDataService
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestLine
@@ -111,19 +112,17 @@ class TestsAssembler(
                 .map { it.groupValues[0] }
                 .toSet()
 
-            // TODO: replace for JUnit5 case
+            val junitVersion = SettingsArguments.settingsState!!.junitVersion
+
             // save RunWith
-            val detectedRunWith = runWithPattern.find(rawText, startIndex = 0)?.groupValues?.get(0)
-            if (detectedRunWith != null) {
-                val runWith = detectedRunWith
-                    .split("@RunWith(")[1]
-                    .split(")")[0]
+            val runWith = junitVersion.runWithAnnotationMeta.extract(rawText)
+            if (runWith != null) {
                 testSuite.runWith = runWith
                 project.service<TestGenerationDataService>().runWith = runWith
-                project.service<TestGenerationDataService>().importsCode.add("import org.junit.runner.RunWith;")
+                project.service<TestGenerationDataService>().importsCode.add(junitVersion.runWithAnnotationMeta.import)
             } else {
                 project.service<TestGenerationDataService>().runWith = ""
-                project.service<TestGenerationDataService>().importsCode.remove("import org.junit.runner.RunWith;")
+                project.service<TestGenerationDataService>().importsCode.remove(junitVersion.runWithAnnotationMeta.import)
             }
 
             val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
