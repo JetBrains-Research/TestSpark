@@ -15,10 +15,19 @@ import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
-import java.awt.*
+import java.awt.CardLayout
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.Toolkit
 import java.awt.event.WindowEvent
 import java.awt.event.WindowFocusListener
-import javax.swing.*
+import javax.swing.BoxLayout
+import javax.swing.ButtonGroup
+import javax.swing.JButton
+import javax.swing.JFrame
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JRadioButton
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
