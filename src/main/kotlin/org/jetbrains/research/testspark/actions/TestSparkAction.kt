@@ -7,7 +7,6 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.roots.LibraryOrderEntry
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.openapi.ui.ComboBox
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMPanelFactory
 import org.jetbrains.research.testspark.data.JUnitVersion
@@ -21,32 +20,6 @@ import java.awt.event.WindowEvent
 import java.awt.event.WindowFocusListener
 import javax.swing.*
 
-
-class JUnitCombobox : ComboBox<JUnitVersion>(JUnitVersion.values()) {
-
-    var detected: JUnitVersion? = null
-
-    init {
-      renderer = object : DefaultListCellRenderer() {
-          override fun getListCellRendererComponent(
-              list: JList<*>?,
-              value: Any?,
-              index: Int,
-              isSelected: Boolean,
-              cellHasFocus: Boolean
-          ): Component {
-              var v = value
-              if (value is JUnitVersion) {
-                  v = value.showName
-                  if (value == detected) {
-                      v += " (Detected)"
-                  }
-              }
-              return super.getListCellRendererComponent(list, v, index, isSelected, cellHasFocus)
-          }
-      }
-    }
-}
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
