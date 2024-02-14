@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.actions.llm
 
+import com.intellij.lang.Language
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
@@ -9,27 +10,57 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
+import com.intellij.ui.LanguageTextField
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.containers.stream
 import com.intellij.util.ui.FormBuilder
-import java.awt.FlowLayout
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.services.TestSamplesService
 import java.awt.Font
+import javax.swing.ButtonGroup
+import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
-import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.createButton
-import org.jetbrains.research.testspark.services.TestSamplesService
+import javax.swing.JRadioButton
+import javax.swing.ScrollPaneConstants
 
 class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory {
+    private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
+        JRadioButton(TestSparkLabelsBundle.defaultValue("provideTestSample")),
+        JRadioButton(TestSparkLabelsBundle.defaultValue("selectTestSample")),
+        JRadioButton(TestSparkLabelsBundle.defaultValue("noTestSample")),
+    )
+    private val selectionTypeButtonGroup = ButtonGroup()
+
+    private val radioButtonsPanel = JPanel()
+
     private var testSamplesSelector = ComboBox(arrayOf(""))
     private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
     private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
 
+    private val languageTextField = LanguageTextField(
+        Language.findLanguageByID("JAVA"),
+        project,
+        createTestSampleClass("// provide test method code here"),
+        TestCaseDocumentCreator("TestSample"),
+        false,
+    )
+
+    private val languageTextFieldScrollPane = JBScrollPane(
+        languageTextField,
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
+    )
+
     init {
         collectTestSamples()
-        testSamplesSelector = ComboBox(arrayOf("Please select") + project.service<TestSamplesService>().testSamples.toTypedArray())
+
+        // TODO provide correct array
+        testSamplesSelector.model = DefaultComboBoxModel(arrayOf("None") + arrayOf("A", "B", "C"))
+//        testSamplesSelector = ComboBox(arrayOf("Please select") + project.service<TestSamplesService>().testSamples.toTypedArray())
     }
 
     /**
@@ -58,10 +89,16 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
         val titlePanel = JPanel()
         titlePanel.add(textTitle)
 
-        val middlePanel = JPanel(FlowLayout(FlowLayout.LEFT))
-        middlePanel.add(testSamplesSelector)
-        middlePanel.add(createButton(TestSparkIcons.showCode, TestSparkLabelsBundle.defaultValue("showCode")))
-        middlePanel.add(createButton(TestSparkIcons.add, TestSparkLabelsBundle.defaultValue("addTestSample")))
+        for (button in selectionTypeButtons) {
+            selectionTypeButtonGroup.add(button)
+            radioButtonsPanel.add(button)
+        }
+
+        val mainPanel = FormBuilder.createFormBuilder()
+            .addComponentFillVertically(radioButtonsPanel, 10)
+            .addComponentFillVertically(testSamplesSelector, 10)
+            .addComponentFillVertically(languageTextFieldScrollPane, 10)
+            .panel
 
         val bottomButtons = JPanel()
         backLlmButton.isOpaque = false
@@ -75,7 +112,7 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
             .setFormLeftIndent(10)
             .addVerticalGap(5)
             .addComponent(titlePanel)
-            .addComponent(middlePanel)
+            .addComponent(mainPanel)
             .addComponentFillVertically(bottomButtons, 10)
             .panel
     }
@@ -98,7 +135,8 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
                 val psiJavaFile = (PsiManager.getInstance(project).findFile(file) as PsiJavaFile)
                 val psiClass = psiJavaFile.classes[
                     psiJavaFile.classes.stream().map { it.name }.toArray()
-                        .indexOf(psiJavaFile.name.removeSuffix(".java"))]
+                        .indexOf(psiJavaFile.name.removeSuffix(".java")),
+                ]
                 psiClass.allMethods.forEach { method ->
                     val annotations = method.modifierList.annotations
                     annotations.forEach { annotation ->
@@ -113,5 +151,11 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
             }
             true
         }
+    }
+
+    private fun createTestSampleClass(methodCode: String): String {
+        return "public class TestSample {\n" +
+            "   $methodCode\n" +
+            "}"
     }
 }

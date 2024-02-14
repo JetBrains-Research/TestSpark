@@ -48,7 +48,7 @@ class PromptManager(
                     CodeType.METHOD -> generatePromptForMethod(codeType.objectDescription)
                     CodeType.LINE -> generatePromptForLine(codeType.objectIndex)
                 }
-            }
+            },
         )
         log.info("Prompt is:\n$prompt")
         return prompt

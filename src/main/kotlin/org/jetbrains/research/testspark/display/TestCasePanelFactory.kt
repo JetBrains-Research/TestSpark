@@ -472,7 +472,6 @@ class TestCasePanelFactory(
      * and updates the UI.
      */
     private fun runTest() {
-
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
 
