@@ -5,27 +5,34 @@
 ## Unreleased
 
 ## 0.1.9
+
 ### Fixed
 - a bug related to predicting if a prompt is larger than maximum prompt size
 - Test execution tasks will run in background (test execution does not freeze the IDE)
 - minor bug in displaying number of passed tests
+
 ### Changed
 - Better default prompt
 - Better user's request handling
+
 ### Added
 - Model selection for JetBrains AI Assistant platform
 
 ## 0.1.8
+
 ### Fixed
 - Windows compatibility issue
+
 ### Changed
 - Improve and refactor the test execution process.
 
 ## 0.1.7
+
 ### Fixed
 - Minor bugs in new test generation UI
 
 ## 0.1.6
+
 ### Fixed
 - Minor bugs in general test generation process
 
@@ -38,6 +45,7 @@
 - New UI for requesting a test generation process
 
 ## 0.1.5
+
 ### Fixed
 - Minor bugs in LLM-based test generation process
 
