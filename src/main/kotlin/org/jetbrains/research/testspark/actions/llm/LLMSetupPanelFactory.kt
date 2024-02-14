@@ -74,6 +74,9 @@ class LLMSetupPanelFactory : ToolPanelFactory {
 
         okLlmButton.isOpaque = false
         okLlmButton.isContentAreaFilled = false
+        if (!SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
+            okLlmButton.text = TestSparkLabelsBundle.defaultValue("ok")
+        }
         bottomButtons.add(okLlmButton)
 
         return FormBuilder.createFormBuilder()

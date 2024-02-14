@@ -26,6 +26,7 @@ import java.awt.Font
 import javax.swing.BorderFactory
 import javax.swing.BoxLayout
 import javax.swing.JButton
+import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
@@ -55,6 +56,8 @@ class SettingsLLMComponent {
     // Maximum polymorphism depth
     private var maxPolyDepthField =
         JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
+
+    private val provideTestSamplesCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("provideTestSamples"), true)
 
     val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
 
@@ -110,6 +113,12 @@ class SettingsLLMComponent {
                     getEditorTextField(PromptEditorType.LINE)
                 editorTextField.document.setText(value)
             }
+        }
+
+    var provideTestSamplesCheckBoxSelected: Boolean
+        get() = provideTestSamplesCheckBox.isSelected
+        set(newStatus) {
+            provideTestSamplesCheckBox.isSelected = newStatus
         }
 
     init {
@@ -224,6 +233,7 @@ class SettingsLLMComponent {
         maxInputParamsDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("parametersDepth")
         maxPolyDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumPolyDepth")
         promptSeparator.toolTipText = TestSparkToolTipsBundle.defaultValue("promptEditor")
+        provideTestSamplesCheckBox.toolTipText = TestSparkToolTipsBundle.defaultValue("provideTestSamples")
     }
 
     /**
@@ -268,6 +278,7 @@ class SettingsLLMComponent {
                 10,
                 false,
             )
+            .addComponent(provideTestSamplesCheckBox, 10)
             .addComponent(promptSeparator, 15)
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)

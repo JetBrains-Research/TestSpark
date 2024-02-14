@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.components.service
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
@@ -25,6 +26,9 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
@@ -193,8 +197,13 @@ class TestSparkAction : AnAction() {
 
             llmSetupPanelFactory.getFinishedButton().addActionListener {
                 llmSetupPanelFactory.applyUpdates()
-                cardLayout.next(panel)
-                pack()
+                if (SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
+                    cardLayout.next(panel)
+                    pack()
+                } else {
+                    startLLMGeneration()
+                    dispose()
+                }
             }
 
             llmSampleSelectorFactory.getBackButton().addActionListener {
@@ -204,13 +213,7 @@ class TestSparkAction : AnAction() {
 
             llmSampleSelectorFactory.getFinishedButton().addActionListener {
                 llmSampleSelectorFactory.applyUpdates()
-                if (codeTypeButtons[0].isSelected) {
-                    Manager.generateTestsForClassByLlm(e)
-                } else if (codeTypeButtons[1].isSelected) {
-                    Manager.generateTestsForMethodByLlm(e)
-                } else if (codeTypeButtons[2].isSelected) {
-                    Manager.generateTestsForLineByLlm(e)
-                }
+                startLLMGeneration()
                 dispose()
             }
 
@@ -224,6 +227,16 @@ class TestSparkAction : AnAction() {
                     Manager.generateTestsForLineByEvoSuite(e)
                 }
                 dispose()
+            }
+        }
+
+        private fun startLLMGeneration() {
+            if (codeTypeButtons[0].isSelected) {
+                Manager.generateTestsForClassByLlm(e)
+            } else if (codeTypeButtons[1].isSelected) {
+                Manager.generateTestsForMethodByLlm(e)
+            } else if (codeTypeButtons[2].isSelected) {
+                Manager.generateTestsForLineByLlm(e)
             }
         }
 

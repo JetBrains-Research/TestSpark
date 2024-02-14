@@ -35,6 +35,7 @@ data class SettingsApplicationState(
     var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
     var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
     var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
+    var provideTestSamplesCheckBoxSelected: Boolean = DefaultSettingsApplicationState.provideTestSamplesCheckBoxSelected
 ) {
 
     /**
@@ -66,6 +67,7 @@ data class SettingsApplicationState(
         val classPrompt: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
         val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
         val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
+        val provideTestSamplesCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
     }
 
     // TODO remove from here
