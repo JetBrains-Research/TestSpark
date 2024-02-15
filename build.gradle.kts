@@ -1,4 +1,5 @@
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
 import java.net.URL
@@ -355,6 +356,17 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
 
     from(libSrcPath)
     into(libDestDir)
+}
+
+tasks.create<RunIdeTask>("headless"){
+    args = listOfNotNull("testspark")
+
+    jvmArgs(
+        "-Xmx16G",
+        "-Djava.awt.headless=true",
+        "--add-exports",
+        "java.base/jdk.internal.vm=ALL-UNNAMED"
+    )
 }
 
 fun spaceCredentialsProvided() = spaceUsername.isNotEmpty() && spacePassword.isNotEmpty()
