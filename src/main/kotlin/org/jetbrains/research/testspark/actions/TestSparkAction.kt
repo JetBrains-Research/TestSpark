@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
+import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
@@ -13,6 +14,7 @@ import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
+import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Dimension
 import java.awt.Font
@@ -81,9 +83,9 @@ class TestSparkAction : AnAction() {
             val panel = JPanel(cardLayout)
 
             panel.add(getMainPanel(), "1")
-            panel.add(evoSuitePanelFactory.getPanel(), "2")
-            panel.add(llmSetupPanelFactory.getPanel(), "3")
-            panel.add(llmSampleSelectorFactory.getPanel(), "4")
+            panel.add(createCardPanel(evoSuitePanelFactory), "2")
+            panel.add(createCardPanel(llmSetupPanelFactory), "3")
+            panel.add(createCardPanel(llmSampleSelectorFactory), "4")
 
             addListeners(panel)
 
@@ -97,6 +99,15 @@ class TestSparkAction : AnAction() {
             setLocation(x, y)
 
             isVisible = true
+        }
+
+        private fun createCardPanel(toolPanelFactory: ToolPanelFactory): JPanel {
+            val cardPanel = JPanel(BorderLayout())
+            cardPanel.add(toolPanelFactory.getTitlePanel(), BorderLayout.NORTH)
+            cardPanel.add(toolPanelFactory.getMiddlePanel(), BorderLayout.CENTER)
+            cardPanel.add(toolPanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+
+            return cardPanel
         }
 
         /**

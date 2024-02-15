@@ -23,51 +23,34 @@ class EvoSuitePanelFactory : ToolPanelFactory {
     private val okEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
 
     /**
-     * Retrieves the back button.
+     * Returns the title panel for the component.
      *
-     * @return The back button.
+     * @return the title panel as a JPanel instance.
      */
-    override fun getBackButton() = backEvoSuiteButton
-
-    /**
-     * Retrieves the reference to the "OK" button.
-     *
-     * @return The reference to the "OK" button.
-     */
-    override fun getFinishedButton() = okEvoSuiteButton
-
-    /**
-     * Returns the EvoSuite panel for setting up EvoSuite configurations.
-     *
-     * @return the JPanel containing the EvoSuite setup GUI components
-     */
-    override fun getPanel(): JPanel {
+    override fun getTitlePanel(): JPanel {
         val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("evosuiteSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()
         titlePanel.add(textTitle)
 
-        val bottomButtons = JPanel()
+        return titlePanel
+    }
 
-        backEvoSuiteButton.isOpaque = false
-        backEvoSuiteButton.isContentAreaFilled = false
-        bottomButtons.add(backEvoSuiteButton)
-
-        okEvoSuiteButton.isOpaque = false
-        okEvoSuiteButton.isContentAreaFilled = false
-        bottomButtons.add(okEvoSuiteButton)
+    /**
+     * Returns the middle panel.
+     *
+     * @return the middle panel as a JPanel.
+     */
+    override fun getMiddlePanel(): JPanel {
+        javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
+        javaPathTextField.text = settingsState.javaPath
 
         algorithmSelector.setMinimumAndPreferredWidth(300)
         algorithmSelector.selectedItem = settingsState.algorithm
 
-        javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
-        javaPathTextField.text = settingsState.javaPath
-
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
-            .addVerticalGap(5)
-            .addComponent(titlePanel)
             .addLabeledComponent(
                 JBLabel(TestSparkLabelsBundle.defaultValue("javaPath")),
                 javaPathTextField,
@@ -80,10 +63,41 @@ class EvoSuitePanelFactory : ToolPanelFactory {
                 10,
                 false,
             )
-            .addComponentFillVertically(JPanel(), 30)
-            .addComponentFillVertically(bottomButtons, 10)
             .panel
     }
+
+    /**
+     * Returns the bottom panel for the current view.
+     *
+     * @return The bottom panel for the current view.
+     */
+    override fun getBottomPanel(): JPanel {
+        val bottomButtons = JPanel()
+
+        backEvoSuiteButton.isOpaque = false
+        backEvoSuiteButton.isContentAreaFilled = false
+        bottomButtons.add(backEvoSuiteButton)
+
+        okEvoSuiteButton.isOpaque = false
+        okEvoSuiteButton.isContentAreaFilled = false
+        bottomButtons.add(okEvoSuiteButton)
+
+        return bottomButtons
+    }
+
+    /**
+     * Retrieves the back button.
+     *
+     * @return The back button.
+     */
+    override fun getBackButton() = backEvoSuiteButton
+
+    /**
+     * Retrieves the reference to the "OK" button.
+     *
+     * @return The reference to the "OK" button.
+     */
+    override fun getFinishedButton() = okEvoSuiteButton
 
     /**
      * Updates the state of the settings.

@@ -39,50 +39,33 @@ class LLMSetupPanelFactory : ToolPanelFactory {
     }
 
     /**
-     * Retrieves the back button.
+     * Returns the title panel for the setup.
      *
-     * @return The back button.
+     * @return the title panel containing the setup title label.
      */
-    override fun getBackButton() = backLlmButton
-
-    /**
-     * Retrieves the reference to the "OK" button.
-     *
-     * @return The reference to the "OK" button.
-     */
-    override fun getFinishedButton() = okLlmButton
-
-    /**
-     * Retrieves the LLM panel.
-     *
-     * @return The JPanel object representing the LLM setup panel.
-     */
-    override fun getPanel(): JPanel {
+    override fun getTitlePanel(): JPanel {
         val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("llmSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()
         titlePanel.add(textTitle)
 
+        return titlePanel
+    }
+
+    /**
+     * Retrieves the middle panel of the UI.
+     *
+     * This method returns a JPanel object that represents the middle panel of the user interface.
+     * The middle panel contains several components including a platform selector, a model selector,
+     * and a user token field. These components are stylized using the `stylizeMainComponents` method.
+     * The UI labels for the platform, token, and model components are retrieved using the
+     * `TestSpark*/
+    override fun getMiddlePanel(): JPanel {
         stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
-
-        val bottomButtons = JPanel()
-
-        backLlmButton.isOpaque = false
-        backLlmButton.isContentAreaFilled = false
-        bottomButtons.add(backLlmButton)
-
-        okLlmButton.isOpaque = false
-        okLlmButton.isContentAreaFilled = false
-        if (!SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
-            okLlmButton.text = TestSparkLabelsBundle.defaultValue("ok")
-        }
-        bottomButtons.add(okLlmButton)
 
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
-            .addVerticalGap(5)
-            .addComponent(titlePanel)
             .addLabeledComponent(
                 JBLabel(TestSparkLabelsBundle.defaultValue("llmPlatform")),
                 platformSelector,
@@ -101,9 +84,44 @@ class LLMSetupPanelFactory : ToolPanelFactory {
                 10,
                 false,
             )
-            .addComponentFillVertically(bottomButtons, 10)
             .panel
     }
+
+    /**
+     * Returns the bottom panel for the UI.
+     *
+     * @return The JPanel representing the bottom panel of the UI.
+     */
+    override fun getBottomPanel(): JPanel {
+        val bottomPanel = JPanel()
+
+        backLlmButton.isOpaque = false
+        backLlmButton.isContentAreaFilled = false
+        bottomPanel.add(backLlmButton)
+
+        okLlmButton.isOpaque = false
+        okLlmButton.isContentAreaFilled = false
+        if (!SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
+            okLlmButton.text = TestSparkLabelsBundle.defaultValue("ok")
+        }
+        bottomPanel.add(okLlmButton)
+
+        return bottomPanel
+    }
+
+    /**
+     * Retrieves the back button.
+     *
+     * @return The back button.
+     */
+    override fun getBackButton() = backLlmButton
+
+    /**
+     * Retrieves the reference to the "OK" button.
+     *
+     * @return The reference to the "OK" button.
+     */
+    override fun getFinishedButton() = okLlmButton
 
     /**
      * Updates the settings state based on the selected values from the UI components.

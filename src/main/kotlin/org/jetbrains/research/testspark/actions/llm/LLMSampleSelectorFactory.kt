@@ -11,14 +11,18 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
 import com.intellij.ui.LanguageTextField
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.containers.stream
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.services.TestSamplesService
 import java.awt.Font
+import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
@@ -29,9 +33,8 @@ import javax.swing.ScrollPaneConstants
 
 class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory {
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
-        JRadioButton(TestSparkLabelsBundle.defaultValue("provideTestSample")),
-        JRadioButton(TestSparkLabelsBundle.defaultValue("selectTestSample")),
-        JRadioButton(TestSparkLabelsBundle.defaultValue("noTestSample")),
+        JRadioButton("<html><b>${TestSparkLabelsBundle.defaultValue("provideTestSample")}</b></html>"),
+        JRadioButton("<html><b>${TestSparkLabelsBundle.defaultValue("noTestSample")}</b></html>"),
     )
     private val selectionTypeButtonGroup = ButtonGroup()
 
@@ -49,18 +52,109 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
         false,
     )
 
-    private val languageTextFieldScrollPane = JBScrollPane(
+    private var languageTextFieldScrollPane = JBScrollPane(
         languageTextField,
         ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
 
-    init {
-        collectTestSamples()
+    private val resetButton = createButton(TestSparkIcons.reset, TestSparkLabelsBundle.defaultValue("resetTip"))
 
+    private val selectionLabel = JBLabel(TestSparkLabelsBundle.defaultValue("selectSamples"))
+
+    init {
+        addCollectors()
+
+        collectTestSamples()
         // TODO provide correct array
-        testSamplesSelector.model = DefaultComboBoxModel(arrayOf("None") + arrayOf("A", "B", "C"))
+        testSamplesSelector.model = DefaultComboBoxModel(
+            arrayOf("Manually provide") + arrayOf(
+                createMethodName("A"),
+                createMethodName("B"),
+                createMethodName("C"),
+            ),
+        )
 //        testSamplesSelector = ComboBox(arrayOf("Please select") + project.service<TestSamplesService>().testSamples.toTypedArray())
+    }
+
+    /**
+     * Adds action listeners to the selectionTypeButtons array to enable the nextButton if any button is selected.
+     */
+    private fun addCollectors() {
+        selectionTypeButtons[0].addActionListener {
+            nextButton.isEnabled = true
+            enabledComponents(true)
+        }
+        selectionTypeButtons[1].addActionListener {
+            nextButton.isEnabled = true
+            enabledComponents(false)
+        }
+    }
+
+    /**
+     * Returns a JPanel object representing the title panel.
+     * The panel contains a JLabel with the text "llmSampleSelectorFactory",
+     * rendered in a bold 20pt Monochrome font.
+     *
+     * @return a JPanel object representing the title panel
+     */
+    override fun getTitlePanel(): JPanel {
+        val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("llmSampleSelectorFactory"))
+        textTitle.font = Font("Monochrome", Font.BOLD, 20)
+
+        val titlePanel = JPanel()
+        titlePanel.add(textTitle)
+
+        return titlePanel
+    }
+
+    /**
+     * Returns the middle panel containing radio buttons, a test samples selector, and a language text field scroll pane.
+     *
+     * @return the middle panel as a JPanel
+     */
+    override fun getMiddlePanel(): JPanel {
+        for (button in selectionTypeButtons) {
+            selectionTypeButtonGroup.add(button)
+            radioButtonsPanel.add(button)
+        }
+
+        val testSamplesAndResetButtonPanel = JPanel()
+        testSamplesAndResetButtonPanel.layout = BoxLayout(testSamplesAndResetButtonPanel, BoxLayout.X_AXIS)
+        testSamplesAndResetButtonPanel.add(testSamplesSelector)
+        testSamplesAndResetButtonPanel.add(resetButton)
+
+        enabledComponents(false)
+
+        return FormBuilder.createFormBuilder()
+            .setFormLeftIndent(10)
+            .addComponentFillVertically(radioButtonsPanel, 10)
+            .addLabeledComponent(
+                selectionLabel,
+                testSamplesAndResetButtonPanel,
+                10,
+                false,
+            )
+            .addComponentFillVertically(languageTextFieldScrollPane, 10)
+            .panel
+    }
+
+    /**
+     * Retrieves the bottom panel containing the back and next buttons.
+     *
+     * @return The JPanel containing the back and next buttons.
+     */
+    override fun getBottomPanel(): JPanel {
+        val bottomPanel = JPanel()
+        backLlmButton.isOpaque = false
+        backLlmButton.isContentAreaFilled = false
+        bottomPanel.add(backLlmButton)
+        nextButton.isOpaque = false
+        nextButton.isContentAreaFilled = false
+        nextButton.isEnabled = false
+        bottomPanel.add(nextButton)
+
+        return bottomPanel
     }
 
     /**
@@ -77,48 +171,8 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
      */
     override fun getFinishedButton() = nextButton
 
-    /**
-     * Retrieves the LLM panel.
-     *
-     * @return The JPanel object representing the LLM setup panel.
-     */
-    override fun getPanel(): JPanel {
-        val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("llmSampleSelectorFactory"))
-        textTitle.font = Font("Monochrome", Font.BOLD, 20)
-
-        val titlePanel = JPanel()
-        titlePanel.add(textTitle)
-
-        for (button in selectionTypeButtons) {
-            selectionTypeButtonGroup.add(button)
-            radioButtonsPanel.add(button)
-        }
-
-        val mainPanel = FormBuilder.createFormBuilder()
-            .addComponentFillVertically(radioButtonsPanel, 10)
-            .addComponentFillVertically(testSamplesSelector, 10)
-            .addComponentFillVertically(languageTextFieldScrollPane, 10)
-            .panel
-
-        val bottomButtons = JPanel()
-        backLlmButton.isOpaque = false
-        backLlmButton.isContentAreaFilled = false
-        bottomButtons.add(backLlmButton)
-        nextButton.isOpaque = false
-        nextButton.isContentAreaFilled = false
-        bottomButtons.add(nextButton)
-
-        return FormBuilder.createFormBuilder()
-            .setFormLeftIndent(10)
-            .addVerticalGap(5)
-            .addComponent(titlePanel)
-            .addComponent(mainPanel)
-            .addComponentFillVertically(bottomButtons, 10)
-            .panel
-    }
-
     override fun applyUpdates() {
-        // TODO implement
+        // TODO implement adding code to the code
     }
 
     /**
@@ -157,5 +211,16 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
         return "public class TestSample {\n" +
             "   $methodCode\n" +
             "}"
+    }
+
+    private fun createMethodName(methodName: String): String =
+        "<html><b><font color='orange'>method</font> $methodName</b></html>"
+
+    private fun enabledComponents(isEnabled: Boolean) {
+        resetButton.isEnabled = isEnabled
+        selectionLabel.isEnabled = isEnabled
+        testSamplesSelector.isEnabled = isEnabled
+        languageTextField.isEnabled = isEnabled
+        languageTextFieldScrollPane.isEnabled = isEnabled
     }
 }
