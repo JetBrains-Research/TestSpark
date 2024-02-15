@@ -1,8 +1,10 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
@@ -10,17 +12,14 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.TestSparkBundle
-import org.jetbrains.research.testspark.actions.getClassFullText
-import org.jetbrains.research.testspark.actions.getSignatureString
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.services.PROMPT_KEYWORD
+import org.jetbrains.research.testspark.services.PromptKeyword
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.isPromptLengthWithinLimit
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 
@@ -42,50 +41,46 @@ class PromptManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     fun generatePrompt(codeType: FragmentToTestData): String {
-        var prompt: String
-        while (true) {
-            prompt = when (codeType.type!!) {
-                CodeType.CLASS -> generatePromptForClass()
-                CodeType.METHOD -> generatePromptForMethod(codeType.objectDescription)
-                CodeType.LINE -> generatePromptForLine(codeType.objectIndex)
-            }
-
-            // Too big prompt processing
-            if (!isPromptLengthWithinLimit(prompt)) {
-                // depth of polymorphism reducing
-                if (SettingsArguments.maxPolyDepth(project) > 1) {
-                    project.service<Workspace>().testGenerationData.polyDepthReducing++
-                    log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
-                    continue
-                }
-
-                // depth of input params reducing
-                if (SettingsArguments.maxInputParamsDepth(project) > 1) {
-                    project.service<Workspace>().testGenerationData.inputParamsDepthReducing++
-                    log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
-                    continue
+        val prompt = ApplicationManager.getApplication().runReadAction(
+            Computable {
+                when (codeType.type!!) {
+                    CodeType.CLASS -> generatePromptForClass()
+                    CodeType.METHOD -> generatePromptForMethod(codeType.objectDescription)
+                    CodeType.LINE -> generatePromptForLine(codeType.objectIndex)
                 }
             }
-            break
-        }
-
-        // Show warning in case of depth reduction
-        if ((
-            project.service<Workspace>().testGenerationData.polyDepthReducing != 0 ||
-                project.service<Workspace>().testGenerationData.inputParamsDepthReducing != 0
-            ) &&
-            isPromptLengthWithinLimit(prompt)
-        ) {
-            llmErrorManager.warningProcess(
-                TestSparkBundle.message("promptReduction") + "\n" +
-                    "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
-                    "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
-                project,
-            )
-        }
-
+        )
         log.info("Prompt is:\n$prompt")
         return prompt
+    }
+
+    fun reducePromptSize(): Boolean {
+        // reducing depth of polymorphism
+        if (SettingsArguments.maxPolyDepth(project) > 1) {
+            project.service<TestGenerationDataService>().polyDepthReducing++
+            log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
+            showPromptReductionWarning()
+            return true
+        }
+
+        // reducing depth of input params
+        if (SettingsArguments.maxInputParamsDepth(project) > 1) {
+            project.service<TestGenerationDataService>().inputParamsDepthReducing++
+            log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
+            showPromptReductionWarning()
+            return true
+        }
+
+        return false
+    }
+
+    private fun showPromptReductionWarning() {
+        llmErrorManager.warningProcess(
+            TestSparkBundle.message("promptReduction") + "\n" +
+                "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
+                "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
+            project,
+        )
     }
 
     /**
@@ -164,7 +159,7 @@ class PromptManager(
         return linePrompt
     }
 
-    private fun isPromptValid(keyword: PROMPT_KEYWORD, prompt: String): Boolean {
+    private fun isPromptValid(keyword: PromptKeyword, prompt: String): Boolean {
         val keywordText = keyword.text
         val isMandatory = keyword.mandatory
 
@@ -172,44 +167,44 @@ class PromptManager(
     }
 
     private fun insertLanguage(classPrompt: String): String {
-        if (isPromptValid(PROMPT_KEYWORD.LANGUAGE, classPrompt)) {
-            val keyword = "\$${PROMPT_KEYWORD.LANGUAGE.text}"
+        if (isPromptValid(PromptKeyword.LANGUAGE, classPrompt)) {
+            val keyword = "\$${PromptKeyword.LANGUAGE.text}"
             return classPrompt.replace(keyword, "Java", ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.LANGUAGE.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.LANGUAGE.text}")
         }
     }
 
     private fun insertName(classPrompt: String, classDisplayName: String): String {
-        if (isPromptValid(PROMPT_KEYWORD.NAME, classPrompt)) {
-            val keyword = "\$${PROMPT_KEYWORD.NAME.text}"
+        if (isPromptValid(PromptKeyword.NAME, classPrompt)) {
+            val keyword = "\$${PromptKeyword.NAME.text}"
             return classPrompt.replace(keyword, classDisplayName, ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.NAME.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.NAME.text}")
         }
     }
 
     private fun insertTestingPlatform(classPrompt: String): String {
-        if (isPromptValid(PROMPT_KEYWORD.TESTING_PLATFORM, classPrompt)) {
-            val keyword = "\$${PROMPT_KEYWORD.TESTING_PLATFORM.text}"
+        if (isPromptValid(PromptKeyword.TESTING_PLATFORM, classPrompt)) {
+            val keyword = "\$${PromptKeyword.TESTING_PLATFORM.text}"
             return classPrompt.replace(keyword, "JUnit 4", ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.TESTING_PLATFORM.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.TESTING_PLATFORM.text}")
         }
     }
 
     private fun insertMockingFramework(classPrompt: String): String {
-        if (isPromptValid(PROMPT_KEYWORD.MOCKING_FRAMEWORK, classPrompt)) {
-            val keyword = "\$${PROMPT_KEYWORD.MOCKING_FRAMEWORK.text}"
+        if (isPromptValid(PromptKeyword.MOCKING_FRAMEWORK, classPrompt)) {
+            val keyword = "\$${PromptKeyword.MOCKING_FRAMEWORK.text}"
             return classPrompt.replace(keyword, "Mockito 5", ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.MOCKING_FRAMEWORK.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.MOCKING_FRAMEWORK.text}")
         }
     }
 
     private fun insertCodeUnderTest(classPrompt: String, classFullText: String): String {
-        if (isPromptValid(PROMPT_KEYWORD.CODE, classPrompt)) {
-            val keyword = "\$${PROMPT_KEYWORD.CODE.text}"
+        if (isPromptValid(PromptKeyword.CODE, classPrompt)) {
+            val keyword = "\$${PromptKeyword.CODE.text}"
             var fullText = "```\n${classFullText}\n```\n"
 
             for (i in 2..classesToTest.size) {
@@ -222,14 +217,14 @@ class PromptManager(
             }
             return classPrompt.replace(keyword, fullText, ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.CODE.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.CODE.text}")
         }
     }
 
     private fun insertMethodsSignatures(classPrompt: String, interestingPsiClasses: MutableSet<PsiClass>): String {
-        val keyword = "\$${PROMPT_KEYWORD.METHODS.text}"
+        val keyword = "\$${PromptKeyword.METHODS.text}"
 
-        if (isPromptValid(PROMPT_KEYWORD.METHODS, classPrompt)) {
+        if (isPromptValid(PromptKeyword.METHODS, classPrompt)) {
             var fullText = ""
             for (interestingPsiClass: PsiClass in interestingPsiClasses) {
                 if (interestingPsiClass.qualifiedName!!.startsWith("java")) {
@@ -247,16 +242,21 @@ class PromptManager(
             }
             return classPrompt.replace(keyword, fullText, ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.METHODS.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.METHODS.text}")
         }
+    }
+
+    private fun PsiMethod.getSignatureString(): String {
+        val bodyStart = body?.startOffsetInParent ?: this.textLength
+        return text.substring(0, bodyStart).replace('\n', ' ').trim()
     }
 
     private fun insertPolymorphismRelations(
         classPrompt: String,
         polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
     ): String {
-        val keyword = "\$${PROMPT_KEYWORD.POLYMORPHISM.text}"
-        if (isPromptValid(PROMPT_KEYWORD.METHODS, classPrompt)) {
+        val keyword = "\$${PromptKeyword.POLYMORPHISM.text}"
+        if (isPromptValid(PromptKeyword.POLYMORPHISM, classPrompt)) {
             var fullText = ""
 
             polymorphismRelations.forEach { entry ->
@@ -267,7 +267,7 @@ class PromptManager(
             }
             return classPrompt.replace(keyword, fullText, ignoreCase = false)
         } else {
-            throw IllegalStateException("The prompt must contain ${PROMPT_KEYWORD.POLYMORPHISM.text}")
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.POLYMORPHISM.text}")
         }
     }
 
@@ -408,5 +408,35 @@ class PromptManager(
         val startLine = document.getLineNumber(textRange.startOffset) + 1
         val endLine = document.getLineNumber(textRange.endOffset) + 1
         return lineNumber in startLine..endLine
+    }
+
+    /**
+     * Returns the full text of a given class including the package, imports, and class code.
+     *
+     * @param cl The PsiClass object representing the class.
+     * @return The full text of the class.
+     */
+    private fun getClassFullText(cl: PsiClass): String {
+        var fullText = ""
+        val fileText = cl.containingFile.text
+
+        // get package
+        packagePattern.findAll(fileText, 0).map {
+            it.groupValues[0]
+        }.forEach {
+            fullText += "$it\n\n"
+        }
+
+        // get imports
+        importPattern.findAll(fileText, 0).map {
+            it.groupValues[0]
+        }.forEach {
+            fullText += "$it\n"
+        }
+
+        // Add class code
+        fullText += cl.text
+
+        return fullText
     }
 }

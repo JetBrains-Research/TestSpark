@@ -31,15 +31,19 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun reset() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        settingsComponent!!.llmUserToken = settingsState.llmUserToken
-        settingsComponent!!.model = settingsState.model
-        settingsComponent!!.llmPlatform = settingsState.llmPlatform
+        for (index in settingsComponent!!.llmPlatforms.indices) {
+            settingsComponent!!.llmPlatforms[index].token = settingsState.llmPlatforms[index].token
+            settingsComponent!!.llmPlatforms[index].model = settingsState.llmPlatforms[index].model
+        }
+        settingsComponent!!.currentLLMPlatformName = settingsState.currentLLMPlatformName
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
         settingsComponent!!.classPrompt = settingsState.classPrompt
         settingsComponent!!.methodPrompt = settingsState.methodPrompt
         settingsComponent!!.linePrompt = settingsState.linePrompt
+
+        settingsComponent!!.updateTokenAndModel()
     }
 
     /**
@@ -49,9 +53,12 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun isModified(): Boolean {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        var modified: Boolean = settingsComponent!!.llmUserToken != settingsState.llmUserToken
-        modified = modified or (settingsComponent!!.model != settingsState.model)
-        modified = modified or (settingsComponent!!.llmPlatform != settingsState.llmPlatform)
+        var modified = false
+        for (index in settingsComponent!!.llmPlatforms.indices) {
+            modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.llmPlatforms[index].token)
+            modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.llmPlatforms[index].model)
+        }
+        modified = modified or (settingsComponent!!.currentLLMPlatformName != settingsState.currentLLMPlatformName)
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
@@ -73,9 +80,11 @@ class SettingsLLMConfigurable : Configurable {
      */
     override fun apply() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
-        settingsState.llmUserToken = settingsComponent!!.llmUserToken
-        settingsState.model = settingsComponent!!.model
-        settingsState.llmPlatform = settingsComponent!!.llmPlatform
+        for (index in settingsComponent!!.llmPlatforms.indices) {
+            settingsState.llmPlatforms[index].token = settingsComponent!!.llmPlatforms[index].token
+            settingsState.llmPlatforms[index].model = settingsComponent!!.llmPlatforms[index].model
+        }
+        settingsState.currentLLMPlatformName = settingsComponent!!.currentLLMPlatformName
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
         settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth

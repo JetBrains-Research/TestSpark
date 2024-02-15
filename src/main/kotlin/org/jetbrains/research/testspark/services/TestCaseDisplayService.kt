@@ -27,11 +27,10 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
-import org.jetbrains.research.testspark.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
-import org.jetbrains.research.testspark.editor.Workspace
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -67,13 +66,19 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var testsSelected: Int = 0
 
-    // Default color for the editors in the tool window
+    /**
+     * Default color for the editors in the tool window
+     */
     private var defaultEditorColor: Color? = null
 
-    // Content Manager to be able to add / remove tabs from tool window
+    /**
+     * Content Manager to be able to add / remove tabs from tool window
+     */
     private var contentManager: ContentManager? = null
 
-    // Variable to keep reference to the coverage visualisation content
+    /**
+     * Variable to keep reference to the coverage visualisation content
+     */
     private var content: Content? = null
 
     init {
@@ -96,7 +101,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     fun displayTestCases() {
         val report = project.service<ReportLockingService>().getReport()
-        val editor = project.service<Workspace>().editor!!
+        val editor = project.service<EditorService>().editor!!
 
         allTestCasePanel.removeAll()
         testCasePanels.clear()
@@ -118,10 +123,11 @@ class TestCaseDisplayService(private val project: Project) {
                 // Update the number of selected tests
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
-                if (checkbox.isSelected)
+                if (checkbox.isSelected) {
                     project.service<ReportLockingService>().selectTestCase(testCase.id)
-                else
+                } else {
                     project.service<ReportLockingService>().unselectTestCase(testCase.id)
+                }
 
                 updateUI()
             }
@@ -141,11 +147,10 @@ class TestCaseDisplayService(private val project: Project) {
             allTestCasePanel.add(testCasePanel)
             addSeparator()
             testCasePanels[testCase.testName] = testCasePanel
-
-            // Update the number of selected tests (all tests are selected by default)
-            testsSelected = testCasePanels.size
-            topButtonsPanelFactory.updateTopLabels()
         }
+
+        // Update the number of selected tests (all tests are selected by default)
+        testsSelected = testCasePanels.size
 
         topButtonsPanelFactory.setTestCasePanelFactoriesArray(testCasePanelFactories)
         topButtonsPanelFactory.updateTopLabels()
@@ -224,7 +229,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Removes all coverage highlighting from the editor.
      */
     private fun removeAllHighlights() {
-        project.service<Workspace>().editor?.markupModel?.removeAllHighlighters()
+        project.service<EditorService>().editor?.markupModel?.removeAllHighlighters()
     }
 
     /**
@@ -289,18 +294,31 @@ class TestCaseDisplayService(private val project: Project) {
             LocalFileSystem.getInstance().findFileByPath(project.basePath!!),
         )
 
-        // Cancel button pressed
+        /**
+         * Cancel button pressed
+         */
         if (fileChooser.isEmpty()) return
 
-        // Chosen files by user
+        /**
+         * Chosen files by user
+         */
         val chosenFile = fileChooser[0]
 
-        // Virtual file of a final java file
+        /**
+         * Virtual file of a final java file
+         */
         var virtualFile: VirtualFile? = null
-        // PsiClass of a final java file
+
+        /**
+         * PsiClass of a final java file
+         */
         var psiClass: PsiClass? = null
-        // PsiJavaFile of a final java file
+
+        /**
+         * PsiJavaFile of a final java file
+         */
         var psiJavaFile: PsiJavaFile? = null
+
         if (chosenFile.isDirectory) {
             // Input new file data
             var className: String
@@ -350,8 +368,8 @@ class TestCaseDisplayService(private val project: Project) {
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
 
-                if (project.service<Workspace>().testGenerationData.runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<Workspace>().testGenerationData.runWith})")
+                if (project.service<TestGenerationDataService>().runWith.isNotEmpty()) {
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<TestGenerationDataService>().runWith})")
                 }
 
                 psiJavaFile!!.add(psiClass!!)
@@ -437,23 +455,23 @@ class TestCaseDisplayService(private val project: Project) {
         // insert other info to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             selectedClass.rBrace!!.textRange.startOffset,
-            project.service<Workspace>().testGenerationData.otherInfo + "\n",
+            project.service<TestGenerationDataService>().otherInfo + "\n",
         )
 
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            project.service<Workspace>().testGenerationData.importsCode.joinToString("\n") + "\n\n",
+            project.service<TestGenerationDataService>().importsCode.joinToString("\n") + "\n\n",
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
             .insertString(
                 0,
-                if (project.service<Workspace>().testGenerationData.packageLine.isEmpty()) {
+                if (project.service<TestGenerationDataService>().packageLine.isEmpty()) {
                     ""
                 } else {
-                    "package ${project.service<Workspace>().testGenerationData.packageLine};\n\n"
+                    "package ${project.service<TestGenerationDataService>().packageLine};\n\n"
                 },
             )
     }
@@ -469,7 +487,7 @@ class TestCaseDisplayService(private val project: Project) {
             val currentFile = documentManager.getFile(it.document)
             if (currentFile != null) {
                 if (currentFile.presentableUrl == fileUrl) {
-                    project.service<Workspace>().editor = it
+                    project.service<EditorService>().editor = it
                 }
             }
         }
@@ -527,6 +545,8 @@ class TestCaseDisplayService(private val project: Project) {
         // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()
         removeSelectedTestCases(testCasePanelsToRemove)
+
+        topButtonsPanelFactory.clear()
     }
 
     /**

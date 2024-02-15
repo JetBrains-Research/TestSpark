@@ -6,11 +6,12 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
-import org.jetbrains.research.testspark.editor.Workspace
 
 @Service(Service.Level.PROJECT)
 class ReportLockingService(private val project: Project) {
-    // final report
+    /**
+     * Final report
+     */
     private var report: Report? = null
 
     private val unselectedTestCases = HashMap<Int, TestCase>()
@@ -26,9 +27,9 @@ class ReportLockingService(private val project: Project) {
     fun receiveReport(report: Report) {
         this.report = report
 
-        project.service<TestCaseDisplayService>().updateEditorForFileUrl(project.service<Workspace>().testGenerationData.fileUrl)
+        project.service<TestCaseDisplayService>().updateEditorForFileUrl(project.service<TestGenerationDataService>().fileUrl)
 
-        if (project.service<Workspace>().editor != null) {
+        if (project.service<EditorService>().editor != null) {
             project.service<TestCaseDisplayService>().displayTestCases()
             project.service<CoverageVisualisationService>().showCoverage(report)
         } else {

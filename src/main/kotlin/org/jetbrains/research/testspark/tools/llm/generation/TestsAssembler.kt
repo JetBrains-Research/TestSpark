@@ -7,10 +7,9 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
-import org.jetbrains.research.testspark.TestSparkBundle
-import org.jetbrains.research.testspark.actions.importPattern
-import org.jetbrains.research.testspark.actions.runWithPattern
-import org.jetbrains.research.testspark.editor.Workspace
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.services.TestGenerationDataService
+import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestLine
 import org.jetbrains.research.testspark.tools.llm.test.TestLineType
@@ -119,11 +118,11 @@ class TestsAssembler(
                     .split("@RunWith(")[1]
                     .split(")")[0]
                 testSuite.runWith = runWith
-                project.service<Workspace>().testGenerationData.runWith = runWith
-                project.service<Workspace>().testGenerationData.importsCode.add("import org.junit.runner.RunWith;")
+                project.service<TestGenerationDataService>().runWith = runWith
+                project.service<TestGenerationDataService>().importsCode.add("import org.junit.runner.RunWith;")
             } else {
-                project.service<Workspace>().testGenerationData.runWith = ""
-                project.service<Workspace>().testGenerationData.importsCode.remove("import org.junit.runner.RunWith;")
+                project.service<TestGenerationDataService>().runWith = ""
+                project.service<TestGenerationDataService>().importsCode.remove("import org.junit.runner.RunWith;")
             }
 
             val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
@@ -135,7 +134,7 @@ class TestsAssembler(
             if (otherInfo.isNotBlank()) {
                 testSuite.otherInfo = otherInfo
             }
-            project.service<Workspace>().testGenerationData.otherInfo = otherInfo
+            project.service<TestGenerationDataService>().otherInfo = otherInfo
 
             // Save the main test cases
             testSet.forEach ca@{

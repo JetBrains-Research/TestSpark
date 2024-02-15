@@ -1,6 +1,9 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieRequestManager
+import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIRequestManager
 
 interface RequestManagerFactory {
     fun getRequestManager(): RequestManager
@@ -8,9 +11,9 @@ interface RequestManagerFactory {
 
 class StandardRequestManagerFactory : RequestManagerFactory {
     override fun getRequestManager(): RequestManager {
-        return when (val platform = SettingsArguments.llmPlatform()) {
-            "Grazie" -> GrazieRequestManager()
-            "OpenAI" -> OpenAIRequestManager()
+        return when (val platform = SettingsArguments.currentLLMPlatformName()) {
+            TestSparkDefaultsBundle.defaultValue("grazie") -> GrazieRequestManager()
+            TestSparkDefaultsBundle.defaultValue("openAI") -> OpenAIRequestManager()
             else -> throw IllegalStateException("Unknown selected platform: $platform")
         }
     }

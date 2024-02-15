@@ -6,11 +6,12 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
-import org.jetbrains.research.testspark.DataFilesUtil
+import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.services.ProjectContextService
+import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
@@ -51,7 +52,7 @@ fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
  * Saves the data related to test generation in the specified project's workspace.
  *
  * @param project The project in which the test generation data will be saved.
- * @param report The report object to be added to the test generation result list.\
+ * @param report The report object to be added to the test generation result list.
  * @param packageLine The package declaration line of the test generation data.
  * @param importsCode The import statements code of the test generation data.
  */
@@ -60,13 +61,11 @@ fun saveData(
     report: Report,
     packageLine: String,
     importsCode: MutableSet<String>,
-    indicator: ProgressIndicator,
 ) {
-    val workspace = project.service<Workspace>()
-    workspace.testGenerationData.resultName = project.service<TestStorageProcessingService>().testResultName!!
-    workspace.testGenerationData.fileUrl = project.service<Workspace>().fileUrl!!
-    workspace.testGenerationData.packageLine = packageLine
-    workspace.testGenerationData.importsCode.addAll(importsCode)
+    project.service<TestGenerationDataService>().resultName = project.service<TestStorageProcessingService>().testResultName
+    project.service<TestGenerationDataService>().fileUrl = project.service<ProjectContextService>().fileUrl!!
+    project.service<TestGenerationDataService>().packageLine = packageLine
+    project.service<TestGenerationDataService>().importsCode.addAll(importsCode)
 
     project.service<TestsExecutionResultService>().initExecutionResult(report.testCaseList.values.map { it.id })
 
@@ -75,23 +74,14 @@ fun saveData(
         testCase.testCode = project.service<JavaClassBuilderService>().generateCode(
             project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
             code,
-            workspace.testGenerationData.importsCode,
-            workspace.testGenerationData.packageLine,
-            workspace.testGenerationData.runWith,
-            workspace.testGenerationData.otherInfo,
+            project.service<TestGenerationDataService>().importsCode,
+            project.service<TestGenerationDataService>().packageLine,
+            project.service<TestGenerationDataService>().runWith,
+            project.service<TestGenerationDataService>().otherInfo,
         )
     }
 
-    workspace.testGenerationData.testGenerationResultList.add(report)
-}
-
-/**
- * Clears the data before test generation for a specific test result.
- *
- * @param project The project for which the test generation data needs to be cleared.
- */
-fun clearDataBeforeTestGeneration(project: Project) {
-    project.service<Workspace>().clear(project)
+    project.service<TestGenerationDataService>().testGenerationResultList.add(report)
 }
 
 /**
@@ -149,15 +139,4 @@ fun processStopped(project: Project, indicator: ProgressIndicator): Boolean {
         return true
     }
     return false
-}
-
-/**
- * Checks if the length of the given text is within the specified limit.
- *
- * @param text The text to check.
- * @param limit The maximum length limit in bytes. Defaults to 16384 bytes (4096 * 4).
- * @return `true` if the length of the text is within the limit, `false` otherwise.
- */
-fun isPromptLengthWithinLimit(text: String, limit: Int = 4096 * 4): Boolean { // Average of 4 bytes per token
-    return text.toByteArray(Charsets.UTF_8).size <= limit
 }

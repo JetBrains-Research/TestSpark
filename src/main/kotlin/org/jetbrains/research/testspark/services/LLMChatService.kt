@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.services
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
@@ -103,7 +103,7 @@ class LLMChatService {
      * @return True if the token is set, false otherwise.
      */
     private fun updateToken(project: Project): Boolean {
-        requestManager.token = SettingsArguments.llmUserToken()
+        requestManager.token = SettingsArguments.getToken()
         return isCorrectToken(project)
     }
 

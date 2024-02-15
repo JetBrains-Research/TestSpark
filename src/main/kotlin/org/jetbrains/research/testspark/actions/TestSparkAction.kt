@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMPanelFactory
 import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
@@ -49,11 +50,7 @@ class TestSparkAction : AnAction() {
      * @param e the AnActionEvent object representing the event
      */
     override fun update(e: AnActionEvent) {
-        if (getCurrentListOfCodeTypes(e) == null) {
-            e.presentation.isEnabled = false
-        } else {
-            e.presentation.isEnabled = true
-        }
+        e.presentation.isEnabled = getCurrentListOfCodeTypes(e) != null
     }
 
     /**
@@ -190,7 +187,9 @@ class TestSparkAction : AnAction() {
                     Manager.generateTestsForClassByLlm(e)
                 } else if (codeTypeButtons[1].isSelected) {
                     Manager.generateTestsForMethodByLlm(e)
-                } else if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByLlm(e)
+                } else if (codeTypeButtons[2].isSelected) {
+                    Manager.generateTestsForLineByLlm(e)
+                }
                 dispose()
             }
 
@@ -206,7 +205,9 @@ class TestSparkAction : AnAction() {
                     Manager.generateTestsForClassByEvoSuite(e)
                 } else if (codeTypeButtons[1].isSelected) {
                     Manager.generateTestsForMethodByEvoSuite(e)
-                } else if (codeTypeButtons[2].isSelected) Manager.generateTestsForLineByEvoSuite(e)
+                } else if (codeTypeButtons[2].isSelected) {
+                    Manager.generateTestsForLineByEvoSuite(e)
+                }
                 dispose()
             }
         }
@@ -216,7 +217,8 @@ class TestSparkAction : AnAction() {
          * The "Next" button is enabled only if a test generator button (llmButton or evoSuiteButton) and at least one
          * code type button (from codeTypeButtons) are selected.
          *
-         * This method should be called whenever*/
+         * This method should be called whenever the mentioned above buttons are clicked.
+         */
         private fun updateNextButton() {
             val isTestGeneratorButtonGroupSelected = llmButton.isSelected || evoSuiteButton.isSelected
             var isCodeTypeButtonGroupSelected = false

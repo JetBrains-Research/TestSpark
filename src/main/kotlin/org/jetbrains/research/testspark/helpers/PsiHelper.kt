@@ -1,15 +1,13 @@
-package org.jetbrains.research.testspark.actions
+package org.jetbrains.research.testspark.helpers
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiClassType
 import com.intellij.psi.PsiCodeBlock
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
@@ -17,40 +15,89 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiStatement
+import com.intellij.psi.PsiSubstitutor
+import com.intellij.psi.PsiType
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
-import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.tools.Pipeline
+import com.intellij.util.containers.stream
+import java.util.stream.Collectors
 
-fun createPipeline(e: AnActionEvent): Pipeline {
-    val project: Project = e.project!!
+// Grammar taken from: https://docs.oracle.com/javase/specs/jvms/se11/html/jvms-4.html#jvms-4.3
 
-    val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+/**
+ * Helper for generating method descriptors for methods.
+ *
+ * @param psiMethod the method to extract the descriptor from
+ * @return the method descriptor
+ */
+fun generateMethodDescriptor(psiMethod: PsiMethod): String {
+    val parameterTypes =
+        psiMethod.getSignature(PsiSubstitutor.EMPTY)
+            .parameterTypes
+            .stream()
+            .map { i -> generateFieldType(i) }
+            .collect(Collectors.joining())
 
-    val settingsProjectState = project.service<SettingsProjectService>().state
-    val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
+    val returnType = generateReturnDescriptor(psiMethod)
 
-    return Pipeline(e, packageName)
+    return "${psiMethod.name}($parameterTypes)$returnType"
 }
 
-fun PsiMethod.getSignatureString(): String {
-    val bodyStart = body?.startOffsetInParent ?: this.textLength
-    return text.substring(0, bodyStart).replace('\n', ' ').trim()
+/**
+ * Generates the return descriptor for a method.
+ *
+ * @param psiMethod the method
+ * @return the return descriptor
+ */
+fun generateReturnDescriptor(psiMethod: PsiMethod): String {
+    if (psiMethod.returnType == null || psiMethod.returnType!!.canonicalText == "void") {
+        // void method
+        return "V"
+    }
+
+    return generateFieldType(psiMethod.returnType!!)
 }
 
-fun createLLMPipeline(e: AnActionEvent): Pipeline {
-    val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-    val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
+/**
+ * Generates the field descriptor for a type.
+ *
+ * @param psiType the type to generate the descriptor for
+ * @return the field descriptor
+ */
+fun generateFieldType(psiType: PsiType): String {
+    // arrays (ArrayType)
+    if (psiType.arrayDimensions > 0) {
+        val arrayType = generateFieldType(psiType.deepComponentType)
+        return "[".repeat(psiType.arrayDimensions) + arrayType
+    }
 
-    val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)!!
+    //  objects (ObjectType)
+    if (psiType is PsiClassType) {
+        val classType = psiType.resolve()
+        if (classType != null) {
+            val className = classType.qualifiedName?.replace('.', '/')
 
-    val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
-    packageList.removeLast()
+            // no need to handle generics: they are not part of method descriptors
 
-    val packageName = packageList.joinToString(".")
+            return "L$className;"
+        }
+    }
 
-    return Pipeline(e, packageName)
+    // primitives (BaseType)
+    psiType.canonicalText.let {
+        return when (it) {
+            "int" -> "I"
+            "long" -> "J"
+            "float" -> "F"
+            "double" -> "D"
+            "boolean" -> "Z"
+            "byte" -> "B"
+            "char" -> "C"
+            "short" -> "S"
+            else -> throw IllegalArgumentException("Unknown type: $it")
+        }
+    }
 }
 
 /**
@@ -61,7 +108,10 @@ fun createLLMPipeline(e: AnActionEvent): Pipeline {
  * @param caret the current (primary) caret that did the click
  * @return PsiClass element if it has been found, null otherwise
  */
-fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass? {
+fun getSurroundingClass(
+    psiFile: PsiFile,
+    caret: Caret,
+): PsiClass? {
     // Get the classes of the PSI file
     val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
 
@@ -84,7 +134,10 @@ fun getSurroundingClass(psiFile: PsiFile, caret: Caret): PsiClass? {
  * @param caret the current (primary) caret that did the click
  * @return PsiMethod element if has been found, null otherwise
  */
-fun getSurroundingMethod(psiFile: PsiFile, caret: Caret): PsiMethod? {
+fun getSurroundingMethod(
+    psiFile: PsiFile,
+    caret: Caret,
+): PsiMethod? {
     // Get the methods of the PSI file
     val methodElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiMethod::class.java)
 
@@ -110,7 +163,10 @@ fun getSurroundingMethod(psiFile: PsiFile, caret: Caret): PsiMethod? {
  * @param caret the current (primary) caret that did the click
  * @return line number if the constraints are satisfied else null
  */
-fun getSurroundingLine(psiFile: PsiFile, caret: Caret): Int? {
+fun getSurroundingLine(
+    psiFile: PsiFile,
+    caret: Caret,
+): Int? {
     val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return null
 
     val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
@@ -197,7 +253,11 @@ private fun validateClass(psiClass: PsiClass): Boolean {
  * @param psiFile containing PSI file
  * @return true if the line is valid, false otherwise
  */
-private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFile): Boolean {
+private fun validateLine(
+    selectedLine: Int,
+    psiMethod: PsiMethod,
+    psiFile: PsiFile,
+): Boolean {
     val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
 
     val psiMethodBody: PsiCodeBlock = psiMethod.body ?: return false
@@ -219,7 +279,10 @@ private fun validateLine(selectedLine: Int, psiMethod: PsiMethod, psiFile: PsiFi
  * @param caret the current (primary) caret that did the click
  * @return true if the caret is within the PSI element, false otherwise
  */
-private fun withinElement(psiElement: PsiElement, caret: Caret): Boolean {
+private fun withinElement(
+    psiElement: PsiElement,
+    caret: Caret,
+): Boolean {
     return (psiElement.startOffset <= caret.offset) && (psiElement.endOffset >= caret.offset)
 }
 
@@ -286,49 +349,4 @@ fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*>? {
     line?.let { result.add("<html><b><font color='orange'>line</font> $line</b></html>") }
 
     return result.toArray()
-}
-
-val importPattern = Regex(
-    pattern = "^import\\s+(static\\s)?((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
-    options = setOf(RegexOption.MULTILINE),
-)
-
-val packagePattern = Regex(
-    pattern = "^package\\s+((?:[a-zA-Z_]\\w*\\.)*[a-zA-Z_](?:\\w*\\.?)*)(?:\\.\\*)?;",
-    options = setOf(RegexOption.MULTILINE),
-)
-
-val runWithPattern = Regex(
-    pattern = "@RunWith\\([^)]*\\)",
-    options = setOf(RegexOption.MULTILINE),
-)
-
-/**
- * Returns the full text of a given class including the package, imports, and class code.
- *
- * @param cl The PsiClass object representing the class.
- * @return The full text of the class.
- */
-fun getClassFullText(cl: PsiClass): String {
-    var fullText = ""
-    val fileText = cl.containingFile.text
-
-    // get package
-    packagePattern.findAll(fileText, 0).map {
-        it.groupValues[0]
-    }.forEach {
-        fullText += "$it\n\n"
-    }
-
-    // get imports
-    importPattern.findAll(fileText, 0).map {
-        it.groupValues[0]
-    }.forEach {
-        fullText += "$it\n"
-    }
-
-    // Add class code
-    fullText += cl.text
-
-    return fullText
 }

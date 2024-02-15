@@ -36,6 +36,15 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.1.9</h4>
+            <ul>
+                <li>Model selection for JetBrains AI Assistant platform</li>
+                <li>Better user's request handling</li>
+                <li>Better default prompt</li>
+                <li>Fixed a minor bug in displaying number of passed tests</li>
+                <li>Test execution tasks will run in background now</li>
+                <li>Fixed a bug related to predicting if a prompt is larger than the maximum prompt size</li>
+            </ul>
         <h4>0.1.8</h4>
             <ul>
                 <li>Fixed Windows compatibility issues</li>
@@ -153,21 +162,16 @@
                            displayType="BALLOON"/>
         <notificationGroup id="EvoSuite Execution Error"
                            displayType="BALLOON"/>
-        <notificationGroup id="Test Validation Error"
-                           displayType="BALLOON"/>
         <notificationGroup id="Build Execution Error"
                            displayType="BALLOON"/>
-        <notificationGroup id="Validation Result"
-                           displayType="BALLOON"/>
         <notificationGroup id="LLM Execution Error"
+                           displayType="BALLOON"/>
+        <notificationGroup id="Test case copied"
                            displayType="BALLOON"/>
 
     </extensions>
 
     <projectListeners>
-        <listener
-                class="org.jetbrains.research.testspark.listener.TestGenerationResultListenerImpl"
-                topic="org.jetbrains.research.testspark.tools.TestGenerationResultListener"/>
         <listener
                 class="org.jetbrains.research.testspark.listener.TelemetrySubmitListenerImpl"
                 topic="com.intellij.openapi.startup.ProjectActivity"/>

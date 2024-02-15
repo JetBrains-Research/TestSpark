@@ -2,8 +2,9 @@ package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.editor.Workspace
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.services.TestGenerationDataService
+import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 
 /**
  * A class that provides access to various settings arguments.
@@ -13,18 +14,11 @@ class SettingsArguments {
         val settingsState = SettingsApplicationService.getInstance().state
 
         /**
-         * Retrieves the LLM user token from the application settings.
+         * Retrieves the list of LLM platforms from the settings state.
          *
-         * @return The LLM user token.
+         * @return The list of LLM platforms.
          */
-        fun llmUserToken(): String = settingsState!!.llmUserToken
-
-        /**
-         * Retrieves the module from the settings state.
-         *
-         * @return The module as a string.
-         */
-        fun model(): String = settingsState!!.model
+        fun llmPlatforms(): List<LLMPlatform> = settingsState!!.llmPlatforms
 
         /**
          * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.
@@ -39,27 +33,43 @@ class SettingsArguments {
          * @param project the project for which to retrieve the maximum input parameters depth value
          * @return The maximum depth for input parameters.
          */
-        fun maxInputParamsDepth(project: Project): Int = settingsState!!.maxInputParamsDepth - project.service<Workspace>().testGenerationData.inputParamsDepthReducing
+        fun maxInputParamsDepth(project: Project): Int =
+            settingsState!!.maxInputParamsDepth - project.service<TestGenerationDataService>().inputParamsDepthReducing
 
         /**
          * Returns the maximum depth of polymorphism.
          *
          * @return The maximum depth of polymorphism.
          */
-        fun maxPolyDepth(project: Project): Int = settingsState!!.maxPolyDepth - project.service<Workspace>().testGenerationData.polyDepthReducing
+        fun maxPolyDepth(project: Project): Int =
+            settingsState!!.maxPolyDepth - project.service<TestGenerationDataService>().polyDepthReducing
 
         /**
          * Checks if the token is set for the user in the settings.
          *
          * @return true if the token is set, false otherwise
          */
-        fun isTokenSet(): Boolean = settingsState!!.llmUserToken.isNotEmpty()
+        fun isTokenSet(): Boolean = getToken().isNotEmpty()
 
         /**
          * Return the selected LLm platform
          *
          * @return selected LLM platform
          */
-        fun llmPlatform(): String = settingsState!!.llmPlatform
+        fun currentLLMPlatformName(): String = settingsState!!.currentLLMPlatformName
+
+        /**
+         * Retrieves the token for the current user.
+         *
+         * @return The token as a string.
+         */
+        fun getToken(): String {
+            for (llmPlatform in llmPlatforms()) {
+                if (currentLLMPlatformName() == llmPlatform.name) {
+                    return llmPlatform.token
+                }
+            }
+            return ""
+        }
     }
 }
