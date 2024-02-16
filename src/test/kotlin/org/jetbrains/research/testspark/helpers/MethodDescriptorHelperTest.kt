@@ -2,16 +2,19 @@ package org.jetbrains.research.testspark.helpers
 
 import com.intellij.psi.impl.PsiJavaParserFacadeImpl
 import org.assertj.core.api.Assertions.assertThat
+import org.jetbrains.research.testspark.core.helpers.generateFieldType
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
 class MethodDescriptorHelperTest {
-
     @ParameterizedTest
     @MethodSource("primitiveFieldTypeTestGenerator")
-    fun primitiveFieldTypeTest(text: String, expected: String) {
+    fun primitiveFieldTypeTest(
+        text: String,
+        expected: String,
+    ) {
         val psiType = PsiJavaParserFacadeImpl.getPrimitiveType(text)
         assertThat(generateFieldType(psiType)).isEqualTo(expected)
     }
