@@ -104,6 +104,8 @@ dependencies {
     implementation(files("lib/byte-buddy-agent-1.14.6.jar"))
     implementation(files("lib/JUnitRunner.jar"))
 
+    implementation(project(":core"))
+
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
     implementation("junit:junit:4.13")
@@ -182,6 +184,7 @@ tasks {
     compileKotlin {
         dependsOn("updateEvosuite")
         dependsOn("copyJUnitRunnerLib")
+        dependsOn(":core:buildPlugin")
     }
     // Set the JVM compatibility versions
     properties("javaVersion").let {
