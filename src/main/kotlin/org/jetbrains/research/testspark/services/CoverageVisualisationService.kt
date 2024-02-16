@@ -53,7 +53,7 @@ class CoverageVisualisationService(private val project: Project) {
      */
     fun clear() {
         currentHighlightedData ?: return
-        currentHighlightedData!!.editor.markupModel ?: return
+        currentHighlightedData!!.editor.markupModel
         currentHighlightedData!!.editor.markupModel.removeAllHighlighters()
     }
 
@@ -76,7 +76,8 @@ class CoverageVisualisationService(private val project: Project) {
 
         updateCoverage(
             testReport.allCoveredLines,
-            testReport.testCaseList.values.stream().map { it.id }.toList().toHashSet(),
+            testReport.testCaseList.values.asSequence().map { it.id }.toList().toHashSet(),
+//            testReport.testCaseList.values.stream().map { it.id }.toList().toHashSet(),
             testReport,
         )
     }
