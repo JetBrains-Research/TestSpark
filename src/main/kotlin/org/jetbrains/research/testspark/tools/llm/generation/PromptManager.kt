@@ -5,23 +5,13 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.search.searches.ClassInheritorsSearch
-import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.generation.importPattern
-import org.jetbrains.research.testspark.core.generation.packagePattern
 import org.jetbrains.research.testspark.core.generation.prompt.PromptGenerator
 import org.jetbrains.research.testspark.core.generation.prompt.configuration.GenerationSettings
 import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptTemplates
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.core.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.services.PromptKeyword
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -46,29 +36,31 @@ class PromptManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     fun generatePrompt(codeType: FragmentToTestData): String {
-        val promptGenerator = PromptGenerator(
-            project,
-            cut,
-            classesToTest,
-            GenerationSettings(
-                maxInputParamsDepth = SettingsArguments.maxInputParamsDepth(project)
-            ),
-            PromptTemplates(
-                classPrompt = settingsState.classPrompt,
-                methodPrompt = settingsState.methodPrompt,
-                linePrompt = settingsState.linePrompt,
+        val promptGenerator =
+            PromptGenerator(
+                project,
+                cut,
+                classesToTest,
+                GenerationSettings(
+                    maxInputParamsDepth = SettingsArguments.maxInputParamsDepth(project),
+                ),
+                PromptTemplates(
+                    classPrompt = settingsState.classPrompt,
+                    methodPrompt = settingsState.methodPrompt,
+                    linePrompt = settingsState.linePrompt,
+                ),
             )
-        )
 
-        val prompt = ApplicationManager.getApplication().runReadAction(
-            Computable {
-                when (codeType.type!!) {
-                    CodeType.CLASS -> promptGenerator.generatePromptForClass()
-                    CodeType.METHOD -> promptGenerator.generatePromptForMethod(codeType.objectDescription)
-                    CodeType.LINE -> promptGenerator.generatePromptForLine(codeType.objectIndex)
-                }
-            }
-        )
+        val prompt =
+            ApplicationManager.getApplication().runReadAction(
+                Computable {
+                    when (codeType.type!!) {
+                        CodeType.CLASS -> promptGenerator.generatePromptForClass()
+                        CodeType.METHOD -> promptGenerator.generatePromptForMethod(codeType.objectDescription)
+                        CodeType.LINE -> promptGenerator.generatePromptForLine(codeType.objectIndex)
+                    }
+                },
+            )
 
         log.info("Prompt is:\n$prompt")
         return prompt
