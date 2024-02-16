@@ -92,7 +92,7 @@ class TestCasePanelFactory(
 
     private val languageTextFieldScrollPane = JBScrollPane(
         languageTextField,
-        ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
 

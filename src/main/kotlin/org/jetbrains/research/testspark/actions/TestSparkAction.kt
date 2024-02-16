@@ -226,7 +226,7 @@ class TestSparkAction : AnAction() {
                 llmSetupPanelFactory.applyUpdates()
                 if (SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
                     cardLayout.next(panel)
-                    pack()
+                    size = Dimension(width, 500)
                 } else {
                     startLLMGeneration()
                 }

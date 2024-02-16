@@ -55,7 +55,7 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
 
     private var languageTextFieldScrollPane = JBScrollPane(
         languageTextField,
-        ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
 
@@ -129,7 +129,7 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
 
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
-            .addComponentFillVertically(radioButtonsPanel, 10)
+            .addComponent(radioButtonsPanel, 10)
             .addLabeledComponent(
                 selectionLabel,
                 testSamplesAndResetButtonPanel,
