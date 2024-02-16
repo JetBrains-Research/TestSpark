@@ -167,6 +167,7 @@ class TestSparkAction : AnAction() {
             this.addWindowFocusListener(object : WindowFocusListener {
                 override fun windowGainedFocus(e: WindowEvent) {
                 }
+
                 override fun windowLostFocus(e: WindowEvent) {
                     dispose()
                 }
@@ -185,11 +186,23 @@ class TestSparkAction : AnAction() {
             }
 
             nextButton.addActionListener {
-                cardLayout.next(panel)
-                if (llmButton.isSelected) {
+                if (llmButton.isSelected && !SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected && !SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
+                    startLLMGeneration()
+                } else if (llmButton.isSelected && !SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected) {
                     cardLayout.next(panel)
+                    cardLayout.next(panel)
+                    cardLayout.next(panel)
+                    pack()
+                } else if (llmButton.isSelected) {
+                    cardLayout.next(panel)
+                    cardLayout.next(panel)
+                    pack()
+                } else if (evoSuiteButton.isSelected && !SettingsApplicationService.getInstance().state!!.evosuiteSetupCheckBoxSelected) {
+                    startEvoSuiteGeneration()
+                } else {
+                    cardLayout.next(panel)
+                    pack()
                 }
-                pack()
             }
 
             evoSuitePanelFactory.getBackButton().addActionListener {
@@ -210,32 +223,40 @@ class TestSparkAction : AnAction() {
                     pack()
                 } else {
                     startLLMGeneration()
-                    dispose()
                 }
             }
 
             llmSampleSelectorFactory.getBackButton().addActionListener {
-                cardLayout.previous(panel)
+                if (SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected) {
+                    cardLayout.previous(panel)
+                } else {
+                    cardLayout.previous(panel)
+                    cardLayout.previous(panel)
+                    cardLayout.previous(panel)
+                }
                 pack()
             }
 
             llmSampleSelectorFactory.getFinishedButton().addActionListener {
                 llmSampleSelectorFactory.applyUpdates()
                 startLLMGeneration()
-                dispose()
             }
 
             evoSuitePanelFactory.getFinishedButton().addActionListener {
                 evoSuitePanelFactory.applyUpdates()
-                if (codeTypeButtons[0].isSelected) {
-                    Manager.generateTestsForClassByEvoSuite(e)
-                } else if (codeTypeButtons[1].isSelected) {
-                    Manager.generateTestsForMethodByEvoSuite(e)
-                } else if (codeTypeButtons[2].isSelected) {
-                    Manager.generateTestsForLineByEvoSuite(e)
-                }
-                dispose()
+                startEvoSuiteGeneration()
             }
+        }
+
+        private fun startEvoSuiteGeneration() {
+            if (codeTypeButtons[0].isSelected) {
+                Manager.generateTestsForClassByEvoSuite(e)
+            } else if (codeTypeButtons[1].isSelected) {
+                Manager.generateTestsForMethodByEvoSuite(e)
+            } else if (codeTypeButtons[2].isSelected) {
+                Manager.generateTestsForLineByEvoSuite(e)
+            }
+            dispose()
         }
 
         private fun startLLMGeneration() {
@@ -246,6 +267,7 @@ class TestSparkAction : AnAction() {
             } else if (codeTypeButtons[2].isSelected) {
                 Manager.generateTestsForLineByLlm(e)
             }
+            dispose()
         }
 
         /**
@@ -262,6 +284,14 @@ class TestSparkAction : AnAction() {
                 isCodeTypeButtonGroupSelected = isCodeTypeButtonGroupSelected || button.isSelected
             }
             nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
+
+            if ((llmButton.isSelected && !SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected && !SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) ||
+                (evoSuiteButton.isSelected && !SettingsApplicationService.getInstance().state!!.evosuiteSetupCheckBoxSelected)
+            ) {
+                nextButton.text = TestSparkLabelsBundle.defaultValue("ok")
+            } else {
+                nextButton.text = TestSparkLabelsBundle.defaultValue("next")
+            }
         }
     }
 

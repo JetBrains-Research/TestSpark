@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.actions.llm
 
 import com.intellij.lang.Language
-import com.intellij.openapi.components.service
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
@@ -20,7 +19,6 @@ import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
-import org.jetbrains.research.testspark.services.TestSamplesService
 import java.awt.Font
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
@@ -44,10 +42,13 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
     private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
     private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
 
+    private val testNames = mutableListOf("Manually provide")
+    private val testCodes = mutableListOf(createTestSampleClass("// provide test method code here"))
+
     private val languageTextField = LanguageTextField(
         Language.findLanguageByID("JAVA"),
         project,
-        createTestSampleClass("// provide test method code here"),
+        testCodes[0],
         TestCaseDocumentCreator("TestSample"),
         false,
     )
@@ -66,15 +67,8 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
         addCollectors()
 
         collectTestSamples()
-        // TODO provide correct array
-        testSamplesSelector.model = DefaultComboBoxModel(
-            arrayOf("Manually provide") + arrayOf(
-                createMethodName("A"),
-                createMethodName("B"),
-                createMethodName("C"),
-            ),
-        )
-//        testSamplesSelector = ComboBox(arrayOf("Please select") + project.service<TestSamplesService>().testSamples.toTypedArray())
+
+        testSamplesSelector.model = DefaultComboBoxModel(testNames.toTypedArray())
     }
 
     /**
@@ -88,6 +82,13 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
         selectionTypeButtons[1].addActionListener {
             nextButton.isEnabled = true
             enabledComponents(false)
+        }
+        testSamplesSelector.addActionListener {
+            for (index in testNames.indices) {
+                if (testNames[index] == testSamplesSelector.selectedItem) {
+                    languageTextField.text = testCodes[index]
+                }
+            }
         }
     }
 
@@ -195,10 +196,8 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
                     val annotations = method.modifierList.annotations
                     annotations.forEach { annotation ->
                         if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
-                            // TODO next line is incorrect for some reason
-                            project.service<TestSamplesService>().testSamples.plus(method.name)
-                            println(method.name)
-                            println(method.text)
+                            testNames.add(createMethodName(method.name))
+                            testCodes.add(createTestSampleClass(method.text))
                         }
                     }
                 }

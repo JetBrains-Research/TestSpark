@@ -36,6 +36,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
         settingsComponent!!.assertions = settingsState.assertions
         settingsComponent!!.seed = settingsState.seed
         settingsComponent!!.algorithm = settingsState.algorithm
+        settingsComponent!!.evosuiteSetupCheckBoxSelected = settingsState.evosuiteSetupCheckBoxSelected
         settingsComponent!!.configurationId = settingsState.configurationId
         settingsComponent!!.clientOnThread = settingsState.clientOnThread
         settingsComponent!!.junitCheck = settingsState.junitCheck
@@ -62,6 +63,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
         modified = modified or (settingsComponent!!.seed != settingsState.seed)
         modified = modified or (settingsComponent!!.algorithm != settingsState.algorithm)
+        modified = modified or (settingsComponent!!.evosuiteSetupCheckBoxSelected != settingsState.evosuiteSetupCheckBoxSelected)
         modified = modified or (settingsComponent!!.configurationId != settingsState.configurationId)
         modified = modified or (settingsComponent!!.clientOnThread != settingsState.clientOnThread)
         modified = modified or (settingsComponent!!.junitCheck != settingsState.junitCheck)
@@ -86,6 +88,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions
         settingsState.algorithm = settingsComponent!!.algorithm
+        settingsState.evosuiteSetupCheckBoxSelected = settingsComponent!!.evosuiteSetupCheckBoxSelected
         settingsState.configurationId = settingsComponent!!.configurationId
         settingsState.clientOnThread = settingsComponent!!.clientOnThread
         settingsState.junitCheck = settingsComponent!!.junitCheck

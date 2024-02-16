@@ -57,7 +57,9 @@ class SettingsLLMComponent {
     private var maxPolyDepthField =
         JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
 
-    private val provideTestSamplesCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("provideTestSamples"), true)
+    private val provideTestSamplesCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("provideTestSamplesCheckBox"), true)
+
+    private val llmSetupCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("llmSetupCheckBox"), true)
 
     val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
 
@@ -113,6 +115,12 @@ class SettingsLLMComponent {
                     getEditorTextField(PromptEditorType.LINE)
                 editorTextField.document.setText(value)
             }
+        }
+
+    var llmSetupCheckBoxSelected: Boolean
+        get() = llmSetupCheckBox.isSelected
+        set(newStatus) {
+            llmSetupCheckBox.isSelected = newStatus
         }
 
     var provideTestSamplesCheckBoxSelected: Boolean
@@ -278,6 +286,7 @@ class SettingsLLMComponent {
                 10,
                 false,
             )
+            .addComponent(llmSetupCheckBox, 10)
             .addComponent(provideTestSamplesCheckBox, 10)
             .addComponent(promptSeparator, 15)
             .addComponent(promptEditorTabbedPane, 15)

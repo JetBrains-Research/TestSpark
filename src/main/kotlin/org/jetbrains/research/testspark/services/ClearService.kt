@@ -19,7 +19,6 @@ class ClearService {
         project.service<CoverageVisualisationService>().clear()
         project.service<TestGenerationDataService>().clear()
         project.service<TestsExecutionResultService>().clear()
-        project.service<TestSamplesService>().clear()
         DataFilesUtil.cleanFolder(project.service<ProjectContextService>().resultPath!!)
     }
 }

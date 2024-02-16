@@ -36,6 +36,8 @@ data class SettingsApplicationState(
     var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
     var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
     var provideTestSamplesCheckBoxSelected: Boolean = DefaultSettingsApplicationState.provideTestSamplesCheckBoxSelected,
+    var llmSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.llmSetupCheckBoxSelected,
+    var evosuiteSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.evosuiteSetupCheckBoxSelected,
 ) {
 
     /**
@@ -68,6 +70,8 @@ data class SettingsApplicationState(
         val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
         val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
         val provideTestSamplesCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
+        val llmSetupCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
+        val evosuiteSetupCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
     }
 
     // TODO remove from here
