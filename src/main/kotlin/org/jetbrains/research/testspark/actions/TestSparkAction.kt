@@ -3,6 +3,20 @@ package org.jetbrains.research.testspark.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import java.awt.BorderLayout
+import java.awt.CardLayout
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.Toolkit
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+import javax.swing.BoxLayout
+import javax.swing.ButtonGroup
+import javax.swing.JButton
+import javax.swing.JFrame
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JRadioButton
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
@@ -14,20 +28,7 @@ import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
-import java.awt.BorderLayout
-import java.awt.CardLayout
-import java.awt.Dimension
-import java.awt.Font
-import java.awt.Toolkit
-import java.awt.event.WindowEvent
-import java.awt.event.WindowFocusListener
-import javax.swing.BoxLayout
-import javax.swing.ButtonGroup
-import javax.swing.JButton
-import javax.swing.JFrame
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JRadioButton
+
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
@@ -36,6 +37,12 @@ import javax.swing.JRadioButton
  * It creates a dialog wrapper and displays it when the associated action is performed.
  */
 class TestSparkAction : AnAction() {
+    class VisibilityController {
+        var isVisible = false
+    }
+
+    private val visibilityController = VisibilityController()
+
     /**
      * Handles the action performed event.
      *
@@ -46,7 +53,7 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(e)
+        TestSparkActionWindow(e, visibilityController)
     }
 
     /**
@@ -63,7 +70,7 @@ class TestSparkAction : AnAction() {
      *
      * @property e The AnActionEvent object.
      */
-    class TestSparkActionWindow(val e: AnActionEvent) : JFrame("TestSpark") {
+    class TestSparkActionWindow(val e: AnActionEvent, private val visibilityController: VisibilityController) : JFrame("TestSpark") {
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
@@ -80,25 +87,28 @@ class TestSparkAction : AnAction() {
         private val evoSuitePanelFactory = EvoSuitePanelFactory()
 
         init {
-            val panel = JPanel(cardLayout)
+            if (!visibilityController.isVisible) {
+                visibilityController.isVisible = true
+                isVisible = true
 
-            panel.add(getMainPanel(), "1")
-            panel.add(createCardPanel(evoSuitePanelFactory), "2")
-            panel.add(createCardPanel(llmSetupPanelFactory), "3")
-            panel.add(createCardPanel(llmSampleSelectorFactory), "4")
+                val panel = JPanel(cardLayout)
 
-            addListeners(panel)
+                panel.add(getMainPanel(), "1")
+                panel.add(createCardPanel(evoSuitePanelFactory), "2")
+                panel.add(createCardPanel(llmSetupPanelFactory), "3")
+                panel.add(createCardPanel(llmSampleSelectorFactory), "4")
 
-            add(panel)
+                addListeners(panel)
 
-            pack()
+                add(panel)
 
-            val dimension: Dimension = Toolkit.getDefaultToolkit().screenSize
-            val x = (dimension.width - size.width) / 2
-            val y = (dimension.height - size.height) / 2
-            setLocation(x, y)
+                pack()
 
-            isVisible = true
+                val dimension: Dimension = Toolkit.getDefaultToolkit().screenSize
+                val x = (dimension.width - size.width) / 2
+                val y = (dimension.height - size.height) / 2
+                setLocation(x, y)
+            }
         }
 
         private fun createCardPanel(toolPanelFactory: ToolPanelFactory): JPanel {
@@ -164,12 +174,9 @@ class TestSparkAction : AnAction() {
          * @param panel the JPanel to add listeners to
          */
         private fun addListeners(panel: JPanel) {
-            this.addWindowFocusListener(object : WindowFocusListener {
-                override fun windowGainedFocus(e: WindowEvent) {
-                }
-
-                override fun windowLostFocus(e: WindowEvent) {
-                    dispose()
+            addWindowListener(object : WindowAdapter() {
+                override fun windowClosing(e: WindowEvent?) {
+                    visibilityController.isVisible = false
                 }
             })
 
@@ -256,6 +263,7 @@ class TestSparkAction : AnAction() {
             } else if (codeTypeButtons[2].isSelected) {
                 Manager.generateTestsForLineByEvoSuite(e)
             }
+            visibilityController.isVisible = false
             dispose()
         }
 
@@ -267,6 +275,7 @@ class TestSparkAction : AnAction() {
             } else if (codeTypeButtons[2].isSelected) {
                 Manager.generateTestsForLineByLlm(e)
             }
+            visibilityController.isVisible = false
             dispose()
         }
 
