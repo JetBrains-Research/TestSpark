@@ -218,7 +218,7 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
     override fun getFinishedButton() = nextButton
 
     override fun applyUpdates() {
-        // TODO implement adding code to the code
+        // TODO implement adding sample (languageTextField.text) to the prompt
     }
 
     /**
