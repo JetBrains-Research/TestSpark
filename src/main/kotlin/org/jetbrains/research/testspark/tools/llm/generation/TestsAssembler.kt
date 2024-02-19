@@ -8,6 +8,8 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.generation.importPattern
+import org.jetbrains.research.testspark.core.generation.runWithPattern
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
@@ -51,9 +53,7 @@ class TestsAssembler(
      *
      * @param httpRequest the httpRequest sent to OpenAI
      */
-    fun receiveResponse(
-        httpRequest: HttpRequests.Request,
-    ) {
+    fun receiveResponse(httpRequest: HttpRequests.Request) {
         while (true) {
             if (processStopped(project, indicator)) return
 
@@ -64,12 +64,13 @@ class TestsAssembler(
 
             text = text.removePrefix("data: ")
 
-            val choices = Gson().fromJson(
-                JsonParser.parseString(text)
-                    .asJsonObject["choices"]
-                    .asJsonArray[0].asJsonObject,
-                OpenAIChoice::class.java,
-            )
+            val choices =
+                Gson().fromJson(
+                    JsonParser.parseString(text)
+                        .asJsonObject["choices"]
+                        .asJsonArray[0].asJsonObject,
+                    OpenAIChoice::class.java,
+                )
 
             if (choices.finishedReason == "stop") break
 
@@ -107,16 +108,18 @@ class TestsAssembler(
             testSuite.packageString = packageName
 
             // save imports
-            testSuite.imports = importPattern.findAll(rawText, 0)
-                .map { it.groupValues[0] }
-                .toSet()
+            testSuite.imports =
+                importPattern.findAll(rawText, 0)
+                    .map { it.groupValues[0] }
+                    .toSet()
 
             // save RunWith
             val detectedRunWith = runWithPattern.find(rawText, startIndex = 0)?.groupValues?.get(0)
             if (detectedRunWith != null) {
-                val runWith = detectedRunWith
-                    .split("@RunWith(")[1]
-                    .split(")")[0]
+                val runWith =
+                    detectedRunWith
+                        .split("@RunWith(")[1]
+                        .split(")")[0]
                 testSuite.runWith = runWith
                 project.service<TestGenerationDataService>().runWith = runWith
                 project.service<TestGenerationDataService>().importsCode.add("import org.junit.runner.RunWith;")
@@ -143,9 +146,10 @@ class TestsAssembler(
 
                 // Get expected Exception
                 if (rawTest.startsWith("@Test(expected =")) {
-                    currentTest.expectedException = rawTest
-                        .split(")")[0]
-                        .trim()
+                    currentTest.expectedException =
+                        rawTest
+                            .split(")")[0]
+                            .trim()
                 }
 
                 // Get unexpected exceptions
@@ -153,28 +157,32 @@ class TestsAssembler(
                     println("WARNING: The raw Test does not contain public void:\n $rawTest")
                     return@ca
                 }
-                val interestingPartOfSignature = rawTest
-                    .split("public void")[1]
-                    .split("{")[0]
-                    .split("()")[1]
-                    .trim()
-                if (interestingPartOfSignature.contains("throws")) {
-                    currentTest.throwsException = interestingPartOfSignature
-                        .split("throws")[1]
+                val interestingPartOfSignature =
+                    rawTest
+                        .split("public void")[1]
+                        .split("{")[0]
+                        .split("()")[1]
                         .trim()
+                if (interestingPartOfSignature.contains("throws")) {
+                    currentTest.throwsException =
+                        interestingPartOfSignature
+                            .split("throws")[1]
+                            .trim()
                 }
 
                 // Get test's name
-                currentTest.name = rawTest
-                    .split("public void ")[1]
-                    .split("()")[0]
-                    .trim()
+                currentTest.name =
+                    rawTest
+                        .split("public void ")[1]
+                        .split("()")[0]
+                        .trim()
 
                 // Get test's body
                 // remove opening bracket
-                var testBody = rawTest.split("{").toMutableList().apply {
-                    removeFirst()
-                }.joinToString("{").trim()
+                var testBody =
+                    rawTest.split("{").toMutableList().apply {
+                        removeFirst()
+                    }.joinToString("{").trim()
 
                 // remove closing bracket
 
@@ -197,12 +205,13 @@ class TestsAssembler(
                 lines.forEach { rawLine ->
                     val line = rawLine.trim()
 
-                    val type: TestLineType = when {
-                        line.startsWith("//") -> TestLineType.COMMENT
-                        line.isBlank() -> TestLineType.BREAK
-                        line.lowercase().startsWith("assert") -> TestLineType.ASSERTION
-                        else -> TestLineType.CODE
-                    }
+                    val type: TestLineType =
+                        when {
+                            line.startsWith("//") -> TestLineType.COMMENT
+                            line.isBlank() -> TestLineType.BREAK
+                            line.lowercase().startsWith("assert") -> TestLineType.ASSERTION
+                            else -> TestLineType.CODE
+                        }
 
                     currentTest.lines.add(TestLine(type, line))
                 }

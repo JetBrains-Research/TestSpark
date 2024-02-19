@@ -13,10 +13,17 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.generation.importPattern
+import org.jetbrains.research.testspark.core.generation.packagePattern
+import org.jetbrains.research.testspark.core.generation.prompt.PromptGenerator
+import org.jetbrains.research.testspark.core.generation.prompt.PromptKeyword
+import org.jetbrains.research.testspark.core.generation.prompt.configuration.ClassRepresentation
+import org.jetbrains.research.testspark.core.generation.prompt.configuration.MethodRepresentation
+import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptGenerationContext
+import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptTemplates
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.services.PromptKeyword
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -41,17 +48,81 @@ class PromptManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     fun generatePrompt(codeType: FragmentToTestData): String {
+        val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
+
+        val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation)
+        val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cut)
+            .map(this::createClassRepresentation).toMap()
+
+        val context = PromptGenerationContext(
+            cut = createClassRepresentation(cut),
+            classesToTest = classesToTest.map(this::createClassRepresentation),
+            polymorphismRelations = polymorphismRelations,
+        )
+
+        val promptTemplates = PromptTemplates(
+            classPrompt = settingsState.classPrompt,
+            methodPrompt = settingsState.methodPrompt,
+            linePrompt = settingsState.linePrompt,
+        )
+
+        val promptGenerator = PromptGenerator(context, promptTemplates)
+
         val prompt = ApplicationManager.getApplication().runReadAction(
             Computable {
                 when (codeType.type!!) {
-                    CodeType.CLASS -> generatePromptForClass()
-                    CodeType.METHOD -> generatePromptForMethod(codeType.objectDescription)
-                    CodeType.LINE -> generatePromptForLine(codeType.objectIndex)
+                    CodeType.CLASS -> {
+                        promptGenerator.generatePromptForClass(interestingClasses, polymorphismRelations)
+                    } // generatePromptForClass()
+                    CodeType.METHOD -> {
+                        val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
+                        val method = createMethodRepresentation(psiMethod)
+                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
+
+                        promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, polymorphismRelations)
+                    } // generatePromptForMethod(codeType.objectDescription)
+                    CodeType.LINE -> {
+                        val lineNumber = codeType.objectIndex
+                        val psiMethod = getPsiMethod(cut, getMethodDescriptor(cut, lineNumber))!!
+
+                        // get code of line under test
+                        val document = PsiDocumentManager.getInstance(project).getDocument(cut.containingFile)
+                        val lineStartOffset = document!!.getLineStartOffset(lineNumber - 1)
+                        val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
+
+                        val lineUnderTest = document.getText(TextRange.create(lineStartOffset, lineEndOffset))
+                        val method = createMethodRepresentation(psiMethod)
+                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
+
+                        promptGenerator.generatePromptForLine(
+                            lineUnderTest, method, interestingClassesFromMethod, polymorphismRelations)
+                    } // generatePromptForLine(codeType.objectIndex)
                 }
-            }
+            },
         )
         log.info("Prompt is:\n$prompt")
         return prompt
+    }
+
+    private fun createMethodRepresentation(psiMethod: PsiMethod): MethodRepresentation {
+        return MethodRepresentation(psiMethod.getSignatureString(), psiMethod.name, psiMethod.text)
+    }
+
+    private fun createClassRepresentation(psiClass: PsiClass): ClassRepresentation {
+        return ClassRepresentation(
+            psiClass.qualifiedName!!,
+            getClassFullText(psiClass),
+            psiClass.allMethods.map(this::createMethodRepresentation),
+        )
+    }
+
+    private fun createClassRepresentation(
+        entry: Map.Entry<PsiClass, MutableList<PsiClass>>,
+    ): Pair<ClassRepresentation, List<ClassRepresentation>> {
+        val key = createClassRepresentation(entry.key)
+        val value = entry.value.map(this::createClassRepresentation)
+
+        return key to value // mapOf(key to value).entries.first()
     }
 
     fun reducePromptSize(): Boolean {
@@ -83,6 +154,7 @@ class PromptManager(
         )
     }
 
+    /*
     /**
      * Generates a prompt for generating unit tests in Java for a given class.
      *
@@ -120,10 +192,11 @@ class PromptManager(
         methodPrompt = insertMockingFramework(methodPrompt)
         methodPrompt = insertCodeUnderTest(methodPrompt, psiMethod.text)
         methodPrompt = insertMethodsSignatures(methodPrompt, getInterestingPsiClasses(psiMethod))
-        methodPrompt = insertPolymorphismRelations(
-            methodPrompt,
-            getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut),
-        )
+        methodPrompt =
+            insertPolymorphismRelations(
+                methodPrompt,
+                getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut),
+            )
 
         return methodPrompt
     }
@@ -151,15 +224,19 @@ class PromptManager(
         linePrompt = insertMockingFramework(linePrompt)
         linePrompt = insertCodeUnderTest(linePrompt, psiMethod.text)
         linePrompt = insertMethodsSignatures(linePrompt, getInterestingPsiClasses(psiMethod))
-        linePrompt = insertPolymorphismRelations(
-            linePrompt,
-            getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut),
-        )
+        linePrompt =
+            insertPolymorphismRelations(
+                linePrompt,
+                getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut),
+            )
 
         return linePrompt
     }
 
-    private fun isPromptValid(keyword: PromptKeyword, prompt: String): Boolean {
+    private fun isPromptValid(
+        keyword: PromptKeyword,
+        prompt: String,
+    ): Boolean {
         val keywordText = keyword.text
         val isMandatory = keyword.mandatory
 
@@ -175,7 +252,10 @@ class PromptManager(
         }
     }
 
-    private fun insertName(classPrompt: String, classDisplayName: String): String {
+    private fun insertName(
+        classPrompt: String,
+        classDisplayName: String,
+    ): String {
         if (isPromptValid(PromptKeyword.NAME, classPrompt)) {
             val keyword = "\$${PromptKeyword.NAME.text}"
             return classPrompt.replace(keyword, classDisplayName, ignoreCase = false)
@@ -202,7 +282,10 @@ class PromptManager(
         }
     }
 
-    private fun insertCodeUnderTest(classPrompt: String, classFullText: String): String {
+    private fun insertCodeUnderTest(
+        classPrompt: String,
+        classFullText: String,
+    ): String {
         if (isPromptValid(PromptKeyword.CODE, classPrompt)) {
             val keyword = "\$${PromptKeyword.CODE.text}"
             var fullText = "```\n${classFullText}\n```\n"
@@ -221,7 +304,10 @@ class PromptManager(
         }
     }
 
-    private fun insertMethodsSignatures(classPrompt: String, interestingPsiClasses: MutableSet<PsiClass>): String {
+    private fun insertMethodsSignatures(
+        classPrompt: String,
+        interestingPsiClasses: MutableSet<PsiClass>,
+    ): String {
         val keyword = "\$${PromptKeyword.METHODS.text}"
 
         if (isPromptValid(PromptKeyword.METHODS, classPrompt)) {
@@ -246,11 +332,6 @@ class PromptManager(
         }
     }
 
-    private fun PsiMethod.getSignatureString(): String {
-        val bodyStart = body?.startOffsetInParent ?: this.textLength
-        return text.substring(0, bodyStart).replace('\n', ' ').trim()
-    }
-
     private fun insertPolymorphismRelations(
         classPrompt: String,
         polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
@@ -269,6 +350,12 @@ class PromptManager(
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.POLYMORPHISM.text}")
         }
+    }
+    */
+
+    private fun PsiMethod.getSignatureString(): String {
+        val bodyStart = body?.startOffsetInParent ?: this.textLength
+        return text.substring(0, bodyStart).replace('\n', ' ').trim()
     }
 
     /**
@@ -373,7 +460,10 @@ class PromptManager(
      * @param methodDescriptor The method descriptor to match against.
      * @return The matching PsiMethod if found, otherwise an empty string.
      */
-    private fun getPsiMethod(psiClass: PsiClass, methodDescriptor: String): PsiMethod? {
+    private fun getPsiMethod(
+        psiClass: PsiClass,
+        methodDescriptor: String,
+    ): PsiMethod? {
         for (currentPsiMethod in psiClass.allMethods) {
             if (generateMethodDescriptor(currentPsiMethod) == methodDescriptor) return currentPsiMethod
         }
@@ -387,7 +477,10 @@ class PromptManager(
      * @param lineNumber the line number within the file where the method is located
      * @return the method descriptor as a String, or an empty string if no method is found
      */
-    private fun getMethodDescriptor(psiClass: PsiClass, lineNumber: Int): String {
+    private fun getMethodDescriptor(
+        psiClass: PsiClass,
+        lineNumber: Int,
+    ): String {
         for (currentPsiMethod in psiClass.allMethods) {
             if (isLineInPsiMethod(currentPsiMethod, lineNumber)) return generateMethodDescriptor(currentPsiMethod)
         }
@@ -401,7 +494,10 @@ class PromptManager(
      * @param lineNumber The line number to check.
      * @return `true` if the line number is within the range of the method, `false` otherwise.
      */
-    private fun isLineInPsiMethod(method: PsiMethod, lineNumber: Int): Boolean {
+    private fun isLineInPsiMethod(
+        method: PsiMethod,
+        lineNumber: Int,
+    ): Boolean {
         val psiFile = method.containingFile ?: return false
         val document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
         val textRange = method.textRange
