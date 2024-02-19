@@ -1,6 +1,8 @@
 package org.jetbrains.research.testspark.actions.llm
 
 import com.intellij.lang.Language
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
@@ -42,13 +44,14 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
     private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
     private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
 
-    private val testNames = mutableListOf("Manually provide")
-    private val testCodes = mutableListOf(createTestSampleClass("// provide test method code here"))
+    private val testNames = mutableListOf("<html><b>provide manually</b></html>")
+    private val initialTestCodes = mutableListOf(createTestSampleClass("", "// provide test method code here"))
+    private val currentTestCodes = mutableListOf(createTestSampleClass("", "// provide test method code here"))
 
     private val languageTextField = LanguageTextField(
         Language.findLanguageByID("JAVA"),
         project,
-        testCodes[0],
+        initialTestCodes[0],
         TestCaseDocumentCreator("TestSample"),
         false,
     )
@@ -75,6 +78,15 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
      * Adds action listeners to the selectionTypeButtons array to enable the nextButton if any button is selected.
      */
     private fun addCollectors() {
+        languageTextField.document.addDocumentListener(object : DocumentListener {
+            override fun documentChanged(event: DocumentEvent) {
+                for (index in testNames.indices) {
+                    if (testNames[index] == testSamplesSelector.selectedItem) {
+                        currentTestCodes[index] = languageTextField.text
+                    }
+                }
+            }
+        })
         selectionTypeButtons[0].addActionListener {
             nextButton.isEnabled = true
             enabledComponents(true)
@@ -86,7 +98,15 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
         testSamplesSelector.addActionListener {
             for (index in testNames.indices) {
                 if (testNames[index] == testSamplesSelector.selectedItem) {
-                    languageTextField.text = testCodes[index]
+                    languageTextField.text = currentTestCodes[index]
+                }
+            }
+        }
+        resetButton.addActionListener {
+            for (index in testNames.indices) {
+                if (testNames[index] == testSamplesSelector.selectedItem) {
+                    currentTestCodes[index] = initialTestCodes[index]
+                    languageTextField.text = currentTestCodes[index]
                 }
             }
         }
@@ -192,12 +212,16 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
                     psiJavaFile.classes.stream().map { it.name }.toArray()
                         .indexOf(psiJavaFile.name.removeSuffix(".java")),
                 ]
+                val imports = psiJavaFile.importList?.allImportStatements?.map { it.text }?.toList()
+                    ?.joinToString("\n") ?: ""
                 psiClass.allMethods.forEach { method ->
                     val annotations = method.modifierList.annotations
                     annotations.forEach { annotation ->
                         if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
+                            val code: String = createTestSampleClass(imports, method.text)
                             testNames.add(createMethodName(method.name))
-                            testCodes.add(createTestSampleClass(method.text))
+                            initialTestCodes.add(code)
+                            currentTestCodes.add(code)
                         }
                     }
                 }
@@ -206,8 +230,11 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
         }
     }
 
-    private fun createTestSampleClass(methodCode: String): String {
-        return "public class TestSample {\n" +
+    private fun createTestSampleClass(imports: String, methodCode: String): String {
+        var normalizedImports = imports
+        if (normalizedImports.isNotBlank()) normalizedImports += "\n\n"
+        return normalizedImports +
+            "public class TestSample {\n" +
             "   $methodCode\n" +
             "}"
     }
