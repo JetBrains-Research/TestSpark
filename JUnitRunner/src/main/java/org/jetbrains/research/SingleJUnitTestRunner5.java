@@ -1,5 +1,6 @@
 package org.jetbrains.research;
 
+import org.junit.platform.engine.discovery.MethodSelector;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -13,11 +14,12 @@ import java.util.List;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectMethod;
 
 public class SingleJUnitTestRunner5 {
-  public static void main(String... args) throws ClassNotFoundException {
-    String[] classAndMethod = args[0].split("#");
+  public static void main(String... args) {
+    String classAndMethod = args[0];
+    MethodSelector methodSelector = selectMethod(classAndMethod);
     LauncherDiscoveryRequest request =
         LauncherDiscoveryRequestBuilder.request()
-            .selectors(selectMethod(Class.forName(classAndMethod[0]).getClassLoader(), classAndMethod[1]))
+            .selectors(methodSelector)
             .build();
 
     Launcher launcher = LauncherFactory.create();

@@ -9,6 +9,12 @@ import javax.swing.JList
 class JUnitCombobox : ComboBox<JUnitVersion>(JUnitVersion.values()) {
 
     var detected: JUnitVersion? = null
+        set(value) {
+            field = value
+            value?.let {
+                this.selectedItem = value
+            }
+        }
 
     init {
         renderer = object : DefaultListCellRenderer() {

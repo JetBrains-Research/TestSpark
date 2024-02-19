@@ -44,15 +44,14 @@ class TestStorageProcessingService(private val project: Project) {
     private fun getPath(buildPath: String): String {
         // create the path for the command
         val junitVersion = SettingsArguments.settingsState!!.junitVersion
-        val junitPath = getLibrary(junitVersion.libJar)
+        val separator = DataFilesUtil.classpathSeparator
+        val junitPath = junitVersion.libJar.joinToString(separator.toString()) { getLibrary(it) }
         val mockitoPath = getLibrary("mockito-core-5.0.0.jar")
         val hamcrestPath = getLibrary("hamcrest-core-1.3.jar")
         val byteBuddy = getLibrary("byte-buddy-1.14.6.jar")
         val byteBuddyAgent = getLibrary("byte-buddy-agent-1.14.6.jar")
-        val sep = DataFilesUtil.classpathSeparator
-        return "$junitPath${sep}$hamcrestPath${sep}$mockitoPath${sep}$byteBuddy${sep}$byteBuddyAgent${sep}$buildPath"
+        return "$junitPath${separator}$hamcrestPath${separator}$mockitoPath${separator}$byteBuddy${separator}$byteBuddyAgent${separator}$buildPath"
     }
-
     /**
      * Retrieves the absolute path of the specified library.
      *
