@@ -1,8 +1,10 @@
 package org.jetbrains.research.testspark.actions.llm
 
 import com.intellij.lang.Language
+import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
@@ -21,6 +23,7 @@ import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
+import org.jetbrains.research.testspark.display.getModifiedLines
 import java.awt.Font
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
@@ -33,8 +36,8 @@ import javax.swing.ScrollPaneConstants
 
 class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory {
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
-        JRadioButton("<html><b>${TestSparkLabelsBundle.defaultValue("provideTestSample")}</b></html>"),
-        JRadioButton("<html><b>${TestSparkLabelsBundle.defaultValue("noTestSample")}</b></html>"),
+        JRadioButton(TestSparkLabelsBundle.defaultValue("provideTestSample")),
+        JRadioButton(TestSparkLabelsBundle.defaultValue("noTestSample")),
     )
     private val selectionTypeButtonGroup = ButtonGroup()
 
@@ -80,21 +83,41 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
     private fun addCollectors() {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
+                languageTextField.editor?.markupModel?.removeAllHighlighters()
+
                 for (index in testNames.indices) {
                     if (testNames[index] == testSamplesSelector.selectedItem) {
                         currentTestCodes[index] = languageTextField.text
+
+                        val modifiedLineIndexes = getModifiedLines(
+                            initialTestCodes[index].split("\n"),
+                            currentTestCodes[index].split("\n"),
+                        )
+
+                        for (line in modifiedLineIndexes) {
+                            languageTextField.editor!!.markupModel.addLineHighlighter(
+                                DiffColors.DIFF_MODIFIED,
+                                line,
+                                HighlighterLayer.FIRST,
+                            )
+                        }
+
+                        resetButton.isEnabled = initialTestCodes[index] != currentTestCodes[index]
                     }
                 }
             }
         })
+
         selectionTypeButtons[0].addActionListener {
             nextButton.isEnabled = true
             enabledComponents(true)
         }
+
         selectionTypeButtons[1].addActionListener {
             nextButton.isEnabled = true
             enabledComponents(false)
         }
+
         testSamplesSelector.addActionListener {
             for (index in testNames.indices) {
                 if (testNames[index] == testSamplesSelector.selectedItem) {
@@ -102,6 +125,7 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
                 }
             }
         }
+
         resetButton.addActionListener {
             for (index in testNames.indices) {
                 if (testNames[index] == testSamplesSelector.selectedItem) {
@@ -149,6 +173,7 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
 
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
+            .addComponent(JPanel(), 0)
             .addComponent(radioButtonsPanel, 10)
             .addLabeledComponent(
                 selectionLabel,
@@ -243,7 +268,7 @@ class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory 
         "<html><b><font color='orange'>method</font> $methodName</b></html>"
 
     private fun enabledComponents(isEnabled: Boolean) {
-        resetButton.isEnabled = isEnabled
+        resetButton.isEnabled = false
         selectionLabel.isEnabled = isEnabled
         testSamplesSelector.isEnabled = isEnabled
         languageTextField.isEnabled = isEnabled
