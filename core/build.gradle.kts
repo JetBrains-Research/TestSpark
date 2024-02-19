@@ -1,5 +1,4 @@
 
-
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
@@ -37,6 +36,8 @@ tasks {
         untilBuild.set(properties("pluginUntilBuild"))
     }
 }
+
+
 tasks.test {
     useJUnitPlatform()
 }
