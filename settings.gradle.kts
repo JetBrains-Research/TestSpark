@@ -3,4 +3,4 @@ plugins {
 }
 rootProject.name = "TestSpark"
 include("JUnitRunner")
-include("PromptGenerator")
+include("core")

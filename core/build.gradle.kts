@@ -10,11 +10,12 @@ repositories {
 
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
+    compileOnly(kotlin("stdlib"))
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(19)
+    jvmToolchain(17)
 }

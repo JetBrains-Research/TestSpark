@@ -104,6 +104,8 @@ dependencies {
     implementation(files("lib/byte-buddy-agent-1.14.6.jar"))
     implementation(files("lib/JUnitRunner.jar"))
 
+    implementation(project(":core"))
+
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
     implementation("junit:junit:4.13")
@@ -182,6 +184,7 @@ tasks {
     compileKotlin {
         dependsOn("updateEvosuite")
         dependsOn("copyJUnitRunnerLib")
+        dependsOn(":core:compileKotlin")
     }
     // Set the JVM compatibility versions
     properties("javaVersion").let {
@@ -264,7 +267,6 @@ tasks {
 }
 
 abstract class CopyJUnitRunnerLib : DefaultTask() {
-
     @TaskAction
     fun execute() {
         val libName = "JUnitRunner.jar"
@@ -315,12 +317,13 @@ abstract class UpdateEvoSuite : DefaultTask() {
         logger.info("Specified evosuite jar not found, downloading release $jarName")
         val downloadUrl =
             "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$version/release.zip"
-        val stream = try {
-            URL(downloadUrl).openStream()
-        } catch (e: Exception) {
-            logger.error("Error fetching latest evosuite custom release - $e")
-            return
-        }
+        val stream =
+            try {
+                URL(downloadUrl).openStream()
+            } catch (e: Exception) {
+                logger.error("Error fetching latest evosuite custom release - $e")
+                return
+            }
 
         ZipInputStream(stream).use { zipInputStream ->
             while (zipInputStream.nextEntry != null) {
