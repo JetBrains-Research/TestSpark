@@ -13,7 +13,7 @@ class PromptGenerator(
         var classPrompt = promptTemplates.classPrompt
 
         classPrompt = insertLanguage(classPrompt)
-        classPrompt = insertName(classPrompt, context.cut.qualifiedName)
+        classPrompt = insertName(classPrompt, context.cut.qualifiedName!!)
         classPrompt = insertTestingPlatform(classPrompt)
         classPrompt = insertMockingFramework(classPrompt)
         classPrompt = insertCodeUnderTest(classPrompt, context.cut.fullText)
@@ -139,9 +139,20 @@ class PromptGenerator(
         if (isPromptValid(PromptKeyword.METHODS, classPrompt)) {
             var fullText = ""
             for (interestingClass in interestingClasses) {
+                if (interestingClass.qualifiedName!!.startsWith("java")) {
+                    continue
+                }
+
                 fullText += "=== methods in ${interestingClass.qualifiedName}:\n"
 
                 for (method in interestingClass.methods) {
+                    // Skip java methods
+                    // TODO: checks for java methods should be done by a caller to make
+                    //       this class as abstract and language agnostic as possible.
+                    if (method.containingClassQualifiedName.startsWith("java")) {
+                        continue
+                    }
+
                     fullText += " - ${method.signature}\n"
                 }
             }
@@ -161,6 +172,7 @@ class PromptGenerator(
 
             polymorphismRelations.forEach { entry ->
                 for (currentSubClass in entry.value) {
+                    currentSubClass.qualifiedName ?: continue
                     fullText += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
                 }
             }

@@ -7,8 +7,7 @@ data class PromptGenerationContext(
 )
 
 data class ClassRepresentation(
-    val qualifiedName: String,
-    // TODO: nulls are not good! rethink this part
+    val qualifiedName: String?,
     val fullText: String,
     val methods: List<MethodRepresentation>,
 )
@@ -17,6 +16,7 @@ data class MethodRepresentation(
     val signature: String,
     val name: String,
     val text: String,
+    val containingClassQualifiedName: String
 )
 
 data class PromptTemplates(

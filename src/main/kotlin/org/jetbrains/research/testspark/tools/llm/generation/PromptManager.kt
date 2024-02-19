@@ -104,7 +104,12 @@ class PromptManager(
     }
 
     private fun createMethodRepresentation(psiMethod: PsiMethod): MethodRepresentation {
-        return MethodRepresentation(psiMethod.getSignatureString(), psiMethod.name, psiMethod.text)
+        return MethodRepresentation(
+            signature = psiMethod.getSignatureString(),
+            name = psiMethod.name,
+            text = psiMethod.text,
+            containingClassQualifiedName = psiMethod.containingClass!!.qualifiedName!!,
+        )
     }
 
     private fun createClassRepresentation(psiClass: PsiClass): ClassRepresentation {
