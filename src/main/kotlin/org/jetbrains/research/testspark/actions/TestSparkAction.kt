@@ -3,10 +3,11 @@ package org.jetbrains.research.testspark.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
-import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
+import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
@@ -21,7 +22,6 @@ import java.awt.Font
 import java.awt.Toolkit
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
-import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
 import javax.swing.JButton
 import javax.swing.JFrame
@@ -110,7 +110,7 @@ class TestSparkAction : AnAction() {
             }
         }
 
-        private fun createCardPanel(toolPanelFactory: ToolPanelFactory): JPanel {
+        private fun createCardPanel(toolPanelFactory: PanelFactory): JPanel {
             val cardPanel = JPanel(BorderLayout())
             cardPanel.add(toolPanelFactory.getTitlePanel(), BorderLayout.NORTH)
             cardPanel.add(toolPanelFactory.getMiddlePanel(), BorderLayout.CENTER)
@@ -127,16 +127,11 @@ class TestSparkAction : AnAction() {
          * @return the main panel for the test generator UI
          */
         private fun getMainPanel(): JPanel {
-            val mainPanel = JPanel()
-            mainPanel.setLayout(BoxLayout(mainPanel, BoxLayout.Y_AXIS))
-
             val panelTitle = JPanel()
-            val iconTitle = JLabel(TestSparkIcons.pluginIcon)
             val textTitle = JLabel("Welcome to TestSpark!")
             textTitle.font = Font("Monochrome", Font.BOLD, 20)
-            panelTitle.add(iconTitle)
+            panelTitle.add(JLabel(TestSparkIcons.pluginIcon))
             panelTitle.add(textTitle)
-            mainPanel.add(panelTitle)
 
             testGeneratorButtonGroup.add(llmButton)
             testGeneratorButtonGroup.add(evoSuiteButton)
@@ -145,7 +140,6 @@ class TestSparkAction : AnAction() {
             testGeneratorPanel.add(JLabel("Select the test generator:"))
             testGeneratorPanel.add(llmButton)
             testGeneratorPanel.add(evoSuiteButton)
-            mainPanel.add(testGeneratorPanel)
 
             for (codeType in codeTypes) {
                 val button = JRadioButton(codeType as String)
@@ -157,14 +151,29 @@ class TestSparkAction : AnAction() {
             codesToTestPanel.add(JLabel("Select the code type:"))
             if (codeTypeButtons.size == 1) codeTypeButtons[0].isSelected = true
             for (button in codeTypeButtons) codesToTestPanel.add(button)
-            mainPanel.add(codesToTestPanel)
+
+            val middlePanel = FormBuilder.createFormBuilder()
+                .setFormLeftIndent(10)
+                .addComponent(
+                    testGeneratorPanel,
+                    10,
+                )
+                .addComponent(
+                    codesToTestPanel,
+                    10,
+                )
+                .panel
 
             val nextButtonPanel = JPanel()
             nextButton.isEnabled = false
             nextButtonPanel.add(nextButton)
-            mainPanel.add(nextButtonPanel)
 
-            return mainPanel
+            val cardPanel = JPanel(BorderLayout())
+            cardPanel.add(panelTitle, BorderLayout.NORTH)
+            cardPanel.add(middlePanel, BorderLayout.CENTER)
+            cardPanel.add(nextButtonPanel, BorderLayout.SOUTH)
+
+            return cardPanel
         }
 
         /**

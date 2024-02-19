@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.actions.template
 import javax.swing.JButton
 import javax.swing.JPanel
 
-interface ToolPanelFactory {
+interface PanelFactory {
     fun getTitlePanel(): JPanel
 
     fun getMiddlePanel(): JPanel

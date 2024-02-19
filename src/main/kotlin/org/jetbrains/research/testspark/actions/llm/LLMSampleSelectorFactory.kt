@@ -18,7 +18,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.containers.stream
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
+import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
@@ -34,7 +34,7 @@ import javax.swing.JPanel
 import javax.swing.JRadioButton
 import javax.swing.ScrollPaneConstants
 
-class LLMSampleSelectorFactory(private val project: Project) : ToolPanelFactory {
+class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
         JRadioButton(TestSparkLabelsBundle.defaultValue("provideTestSample")),
         JRadioButton(TestSparkLabelsBundle.defaultValue("noTestSample")),
