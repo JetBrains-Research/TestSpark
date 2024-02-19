@@ -9,13 +9,7 @@ class PromptGenerator(
     private val context: PromptGenerationContext,
     private val promptTemplates: PromptTemplates,
 ) {
-    /**
-     * @param polymorphismRelations - A mutable map where the key represents an interesting PsiClass and the value is a list of its detected subclasses.
-     */
-    fun generatePromptForClass(
-        interestingClasses: List<ClassRepresentation>,
-        polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
-    ): String {
+    fun generatePromptForClass(interestingClasses: List<ClassRepresentation>): String {
         var classPrompt = promptTemplates.classPrompt
 
         classPrompt = insertLanguage(classPrompt)
@@ -24,7 +18,7 @@ class PromptGenerator(
         classPrompt = insertMockingFramework(classPrompt)
         classPrompt = insertCodeUnderTest(classPrompt, context.cut.fullText)
         classPrompt = insertMethodsSignatures(classPrompt, interestingClasses)
-        classPrompt = insertPolymorphismRelations(classPrompt, polymorphismRelations)
+        classPrompt = insertPolymorphismRelations(classPrompt, context.polymorphismRelations)
 
         return classPrompt
     }
@@ -32,7 +26,6 @@ class PromptGenerator(
     fun generatePromptForMethod(
         method: MethodRepresentation,
         interestingClassesFromMethod: List<ClassRepresentation>,
-        polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
     ): String {
         var methodPrompt = promptTemplates.methodPrompt
 
@@ -42,7 +35,7 @@ class PromptGenerator(
         methodPrompt = insertMockingFramework(methodPrompt)
         methodPrompt = insertCodeUnderTest(methodPrompt, method.text)
         methodPrompt = insertMethodsSignatures(methodPrompt, interestingClassesFromMethod)
-        methodPrompt = insertPolymorphismRelations(methodPrompt, polymorphismRelations)
+        methodPrompt = insertPolymorphismRelations(methodPrompt, context.polymorphismRelations)
 
         return methodPrompt
     }
@@ -51,7 +44,6 @@ class PromptGenerator(
         lineUnderTest: String,
         method: MethodRepresentation,
         interestingClassesFromMethod: List<ClassRepresentation>,
-        polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
     ): String {
         var linePrompt = promptTemplates.linePrompt
 
@@ -61,7 +53,7 @@ class PromptGenerator(
         linePrompt = insertMockingFramework(linePrompt)
         linePrompt = insertCodeUnderTest(linePrompt, method.text)
         linePrompt = insertMethodsSignatures(linePrompt, interestingClassesFromMethod)
-        linePrompt = insertPolymorphismRelations(linePrompt, polymorphismRelations)
+        linePrompt = insertPolymorphismRelations(linePrompt, context.polymorphismRelations)
 
         return linePrompt
     }

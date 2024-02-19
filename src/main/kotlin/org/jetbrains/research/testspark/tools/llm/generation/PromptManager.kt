@@ -72,14 +72,14 @@ class PromptManager(
 
                 when (codeType.type!!) {
                     CodeType.CLASS -> {
-                        promptGenerator.generatePromptForClass(interestingClasses, polymorphismRelations)
+                        promptGenerator.generatePromptForClass(interestingClasses)
                     }
                     CodeType.METHOD -> {
                         val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
                         val method = createMethodRepresentation(psiMethod)
                         val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
 
-                        promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, polymorphismRelations)
+                        promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod)
                     }
                     CodeType.LINE -> {
                         val lineNumber = codeType.objectIndex
@@ -94,8 +94,7 @@ class PromptManager(
                         val method = createMethodRepresentation(psiMethod)
                         val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
 
-                        promptGenerator.generatePromptForLine(
-                            lineUnderTest, method, interestingClassesFromMethod, polymorphismRelations)
+                        promptGenerator.generatePromptForLine(lineUnderTest, method, interestingClassesFromMethod)
                     }
                 }
             },
