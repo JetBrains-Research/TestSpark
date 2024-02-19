@@ -9,8 +9,24 @@ class PromptGenerator(
     private val context: PromptGenerationContext,
     private val promptTemplates: PromptTemplates,
 ) {
+    /**
+     * Generates a prompt for generating unit tests in Java for a given class.
+     *
+     * @return The generated prompt.
+     */
     fun generatePromptForClass(interestingClasses: List<ClassRepresentation>): String {
-        var classPrompt = promptTemplates.classPrompt
+        val prompt = PromptBuilder(promptTemplates.classPrompt)
+            .insertLanguage("Java")
+            .insertName(context.cut.qualifiedName!!)
+            .insertTestingPlatform("JUnit 4")
+            .insertMockingFramework("Mockito 5")
+            .insertCodeUnderTest(context.cut.fullText, context.classesToTest)
+            .insertMethodsSignatures(interestingClasses)
+            .insertPolymorphismRelations(context.polymorphismRelations)
+            .build()
+
+        return prompt
+        /*var classPrompt = promptTemplates.classPrompt
 
         classPrompt = insertLanguage(classPrompt)
         classPrompt = insertName(classPrompt, context.cut.qualifiedName!!)
@@ -20,14 +36,30 @@ class PromptGenerator(
         classPrompt = insertMethodsSignatures(classPrompt, interestingClasses)
         classPrompt = insertPolymorphismRelations(classPrompt, context.polymorphismRelations)
 
-        return classPrompt
+        return classPrompt*/
     }
 
+    /**
+     * Generates a prompt for a method.
+     *
+     * @return The generated prompt.
+     */
     fun generatePromptForMethod(
         method: MethodRepresentation,
         interestingClassesFromMethod: List<ClassRepresentation>,
     ): String {
-        var methodPrompt = promptTemplates.methodPrompt
+        val prompt = PromptBuilder(promptTemplates.methodPrompt)
+            .insertLanguage("Java")
+            .insertName("${context.cut.qualifiedName}.${method.name}")
+            .insertTestingPlatform("JUnit 4")
+            .insertMockingFramework("Mockito 5")
+            .insertCodeUnderTest(method.text, context.classesToTest)
+            .insertMethodsSignatures(interestingClassesFromMethod)
+            .insertPolymorphismRelations(context.polymorphismRelations)
+            .build()
+
+        return prompt
+        /*var methodPrompt = promptTemplates.methodPrompt
 
         methodPrompt = insertLanguage(methodPrompt)
         methodPrompt = insertName(methodPrompt, "${context.cut.qualifiedName}.${method.name}")
@@ -37,15 +69,32 @@ class PromptGenerator(
         methodPrompt = insertMethodsSignatures(methodPrompt, interestingClassesFromMethod)
         methodPrompt = insertPolymorphismRelations(methodPrompt, context.polymorphismRelations)
 
-        return methodPrompt
+        return methodPrompt*/
     }
 
+    /**
+     * Generates a prompt for a specific line number in the code.
+     *
+     * @param lineUnderTest the textual content of the line which to generate the prompt
+     * @return the generated prompt string
+     */
     fun generatePromptForLine(
         lineUnderTest: String,
         method: MethodRepresentation,
         interestingClassesFromMethod: List<ClassRepresentation>,
     ): String {
-        var linePrompt = promptTemplates.linePrompt
+        val prompt = PromptBuilder(promptTemplates.linePrompt)
+            .insertLanguage("Java")
+            .insertName(lineUnderTest.trim())
+            .insertTestingPlatform("JUnit 4")
+            .insertMockingFramework("Mockito 5")
+            .insertCodeUnderTest(method.text, context.classesToTest)
+            .insertMethodsSignatures(interestingClassesFromMethod)
+            .insertPolymorphismRelations(context.polymorphismRelations)
+            .build()
+
+        return prompt
+        /*var linePrompt = promptTemplates.linePrompt
 
         linePrompt = insertLanguage(linePrompt)
         linePrompt = insertName(linePrompt, lineUnderTest.trim())
@@ -55,130 +104,6 @@ class PromptGenerator(
         linePrompt = insertMethodsSignatures(linePrompt, interestingClassesFromMethod)
         linePrompt = insertPolymorphismRelations(linePrompt, context.polymorphismRelations)
 
-        return linePrompt
-    }
-
-    // TODO: move the below methods into a PromptBuilder class
-    private fun isPromptValid(
-        keyword: PromptKeyword,
-        prompt: String,
-    ): Boolean {
-        val keywordText = keyword.text
-        val isMandatory = keyword.mandatory
-
-        return (prompt.contains(keywordText) || !isMandatory)
-    }
-
-    private fun insertLanguage(classPrompt: String): String {
-        if (isPromptValid(PromptKeyword.LANGUAGE, classPrompt)) {
-            val keyword = "\$${PromptKeyword.LANGUAGE.text}"
-            return classPrompt.replace(keyword, "Java", ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.LANGUAGE.text}")
-        }
-    }
-
-    private fun insertName(
-        classPrompt: String,
-        classDisplayName: String,
-    ): String {
-        if (isPromptValid(PromptKeyword.NAME, classPrompt)) {
-            val keyword = "\$${PromptKeyword.NAME.text}"
-            return classPrompt.replace(keyword, classDisplayName, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.NAME.text}")
-        }
-    }
-
-    private fun insertTestingPlatform(classPrompt: String): String {
-        if (isPromptValid(PromptKeyword.TESTING_PLATFORM, classPrompt)) {
-            val keyword = "\$${PromptKeyword.TESTING_PLATFORM.text}"
-            return classPrompt.replace(keyword, "JUnit 4", ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.TESTING_PLATFORM.text}")
-        }
-    }
-
-    private fun insertMockingFramework(classPrompt: String): String {
-        if (isPromptValid(PromptKeyword.MOCKING_FRAMEWORK, classPrompt)) {
-            val keyword = "\$${PromptKeyword.MOCKING_FRAMEWORK.text}"
-            return classPrompt.replace(keyword, "Mockito 5", ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.MOCKING_FRAMEWORK.text}")
-        }
-    }
-
-    private fun insertCodeUnderTest(
-        classPrompt: String,
-        classFullText: String,
-    ): String {
-        if (isPromptValid(PromptKeyword.CODE, classPrompt)) {
-            val keyword = "\$${PromptKeyword.CODE.text}"
-            var fullText = "```\n${classFullText}\n```\n"
-
-            for (i in 2..context.classesToTest.size) {
-                val subClass = context.classesToTest[i - 2]
-                val superClass = context.classesToTest[i - 1]
-
-                fullText += "${subClass.qualifiedName} extends ${superClass.qualifiedName}. " +
-                    "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
-                    "```\n"
-            }
-            return classPrompt.replace(keyword, fullText, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.CODE.text}")
-        }
-    }
-
-    private fun insertMethodsSignatures(
-        classPrompt: String,
-        interestingClasses: List<ClassRepresentation>,
-    ): String {
-        val keyword = "\$${PromptKeyword.METHODS.text}"
-
-        if (isPromptValid(PromptKeyword.METHODS, classPrompt)) {
-            var fullText = ""
-            for (interestingClass in interestingClasses) {
-                if (interestingClass.qualifiedName!!.startsWith("java")) {
-                    continue
-                }
-
-                fullText += "=== methods in ${interestingClass.qualifiedName}:\n"
-
-                for (method in interestingClass.methods) {
-                    // Skip java methods
-                    // TODO: checks for java methods should be done by a caller to make
-                    //       this class as abstract and language agnostic as possible.
-                    if (method.containingClassQualifiedName.startsWith("java")) {
-                        continue
-                    }
-
-                    fullText += " - ${method.signature}\n"
-                }
-            }
-            return classPrompt.replace(keyword, fullText, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.METHODS.text}")
-        }
-    }
-
-    private fun insertPolymorphismRelations(
-        classPrompt: String,
-        polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
-    ): String {
-        val keyword = "\$${PromptKeyword.POLYMORPHISM.text}"
-        if (isPromptValid(PromptKeyword.POLYMORPHISM, classPrompt)) {
-            var fullText = ""
-
-            polymorphismRelations.forEach { entry ->
-                for (currentSubClass in entry.value) {
-                    currentSubClass.qualifiedName ?: continue
-                    fullText += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
-                }
-            }
-            return classPrompt.replace(keyword, fullText, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.POLYMORPHISM.text}")
-        }
+        return linePrompt*/
     }
 }
