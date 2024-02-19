@@ -48,39 +48,39 @@ class PromptManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
     fun generatePrompt(codeType: FragmentToTestData): String {
-        val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
-
-        val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation)
-        val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cut)
-            .map(this::createClassRepresentation).toMap()
-
-        val context = PromptGenerationContext(
-            cut = createClassRepresentation(cut),
-            classesToTest = classesToTest.map(this::createClassRepresentation),
-            polymorphismRelations = polymorphismRelations,
-        )
-
-        val promptTemplates = PromptTemplates(
-            classPrompt = settingsState.classPrompt,
-            methodPrompt = settingsState.methodPrompt,
-            linePrompt = settingsState.linePrompt,
-        )
-
-        val promptGenerator = PromptGenerator(context, promptTemplates)
-
         val prompt = ApplicationManager.getApplication().runReadAction(
             Computable {
+                val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
+
+                val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation)
+                val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cut)
+                    .map(this::createClassRepresentation).toMap()
+
+                val context = PromptGenerationContext(
+                    cut = createClassRepresentation(cut),
+                    classesToTest = classesToTest.map(this::createClassRepresentation),
+                    polymorphismRelations = polymorphismRelations,
+                )
+
+                val promptTemplates = PromptTemplates(
+                    classPrompt = settingsState.classPrompt,
+                    methodPrompt = settingsState.methodPrompt,
+                    linePrompt = settingsState.linePrompt,
+                )
+
+                val promptGenerator = PromptGenerator(context, promptTemplates)
+
                 when (codeType.type!!) {
                     CodeType.CLASS -> {
                         promptGenerator.generatePromptForClass(interestingClasses, polymorphismRelations)
-                    } // generatePromptForClass()
+                    }
                     CodeType.METHOD -> {
                         val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
                         val method = createMethodRepresentation(psiMethod)
                         val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
 
                         promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, polymorphismRelations)
-                    } // generatePromptForMethod(codeType.objectDescription)
+                    }
                     CodeType.LINE -> {
                         val lineNumber = codeType.objectIndex
                         val psiMethod = getPsiMethod(cut, getMethodDescriptor(cut, lineNumber))!!
@@ -96,7 +96,7 @@ class PromptManager(
 
                         promptGenerator.generatePromptForLine(
                             lineUnderTest, method, interestingClassesFromMethod, polymorphismRelations)
-                    } // generatePromptForLine(codeType.objectIndex)
+                    }
                 }
             },
         )
