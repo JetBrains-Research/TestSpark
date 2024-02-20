@@ -16,7 +16,7 @@ internal class PromptBuilder(private var prompt: String) {
     fun insertLanguage(language: String) = apply {
         if (isPromptValid(PromptKeyword.LANGUAGE, prompt)) {
             val keyword = "\$${PromptKeyword.LANGUAGE.text}"
-            prompt.replace(keyword, language, ignoreCase = false)
+            prompt = prompt.replace(keyword, language, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.LANGUAGE.text}")
         }
@@ -25,7 +25,7 @@ internal class PromptBuilder(private var prompt: String) {
     fun insertName(classDisplayName: String) = apply {
         if (isPromptValid(PromptKeyword.NAME, prompt)) {
             val keyword = "\$${PromptKeyword.NAME.text}"
-            prompt.replace(keyword, classDisplayName, ignoreCase = false)
+            prompt = prompt.replace(keyword, classDisplayName, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.NAME.text}")
         }
@@ -34,7 +34,7 @@ internal class PromptBuilder(private var prompt: String) {
     fun insertTestingPlatform(testingPlatformName: String) = apply {
         if (isPromptValid(PromptKeyword.TESTING_PLATFORM, prompt)) {
             val keyword = "\$${PromptKeyword.TESTING_PLATFORM.text}"
-            prompt.replace(keyword, testingPlatformName, ignoreCase = false)
+            prompt = prompt.replace(keyword, testingPlatformName, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.TESTING_PLATFORM.text}")
         }
@@ -43,7 +43,7 @@ internal class PromptBuilder(private var prompt: String) {
     fun insertMockingFramework(mockingFrameworkName: String) = apply {
         if (isPromptValid(PromptKeyword.MOCKING_FRAMEWORK, prompt)) {
             val keyword = "\$${PromptKeyword.MOCKING_FRAMEWORK.text}"
-            prompt.replace(keyword, mockingFrameworkName, ignoreCase = false)
+            prompt = prompt.replace(keyword, mockingFrameworkName, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.MOCKING_FRAMEWORK.text}")
         }
@@ -62,7 +62,7 @@ internal class PromptBuilder(private var prompt: String) {
                     "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
                     "```\n"
             }
-            prompt.replace(keyword, fullText, ignoreCase = false)
+            prompt = prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.CODE.text}")
         }
@@ -91,7 +91,7 @@ internal class PromptBuilder(private var prompt: String) {
                     fullText += " - ${method.signature}\n"
                 }
             }
-            prompt.replace(keyword, fullText, ignoreCase = false)
+            prompt = prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.METHODS.text}")
         }
@@ -110,7 +110,7 @@ internal class PromptBuilder(private var prompt: String) {
                     fullText += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
                 }
             }
-            prompt.replace(keyword, fullText, ignoreCase = false)
+            prompt = prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.POLYMORPHISM.text}")
         }
