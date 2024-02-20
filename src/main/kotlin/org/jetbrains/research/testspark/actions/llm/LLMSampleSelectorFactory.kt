@@ -6,18 +6,11 @@ import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.editor.markup.HighlighterLayer
-import com.intellij.openapi.fileTypes.FileType
-import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.psi.PsiJavaFile
-import com.intellij.psi.PsiManager
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.util.containers.stream
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
@@ -25,6 +18,7 @@ import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.display.getModifiedLines
+import org.jetbrains.research.testspark.services.LLMTestSampleService
 import java.awt.Font
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
@@ -34,7 +28,6 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
 import javax.swing.ScrollPaneConstants
-import org.jetbrains.research.testspark.services.LLMTestSampleService
 
 class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
@@ -50,8 +43,8 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
 
     private val testNames = mutableListOf("<html><b>provide manually</b></html>")
-    private val initialTestCodes = mutableListOf(createTestSampleClass("", "// provide test method code here"))
-    private val currentTestCodes = mutableListOf(createTestSampleClass("", "// provide test method code here"))
+    private val initialTestCodes = mutableListOf(project.service<LLMTestSampleService>().createTestSampleClass("", "// provide test method code here"))
+    private val currentTestCodes = mutableListOf(project.service<LLMTestSampleService>().createTestSampleClass("", "// provide test method code here"))
 
     private val languageTextField = LanguageTextField(
         Language.findLanguageByID("JAVA"),
@@ -74,7 +67,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     init {
         addListeners()
 
-        collectTestSamples()
+        project.service<LLMTestSampleService>().collectTestSamples(project, testNames, initialTestCodes, currentTestCodes)
 
         testSamplesSelector.model = DefaultComboBoxModel(testNames.toTypedArray())
     }
@@ -226,52 +219,6 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
             project.service<LLMTestSampleService>().setTestSample(null)
         }
     }
-
-    /**
-     * Retrieves a list of test samples from the given project.
-     *
-     * @return A list of strings, representing the names of the test samples.
-     */
-    private fun collectTestSamples() {
-        val projectFileIndex: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
-        val javaFileType: FileType = FileTypeManager.getInstance().getFileTypeByExtension("java")
-
-        projectFileIndex.iterateContent { file ->
-            if (file.fileType === javaFileType) {
-                val psiJavaFile = (PsiManager.getInstance(project).findFile(file) as PsiJavaFile)
-                val psiClass = psiJavaFile.classes[
-                    psiJavaFile.classes.stream().map { it.name }.toArray()
-                        .indexOf(psiJavaFile.name.removeSuffix(".java")),
-                ]
-                val imports = psiJavaFile.importList?.allImportStatements?.map { it.text }?.toList()
-                    ?.joinToString("\n") ?: ""
-                psiClass.allMethods.forEach { method ->
-                    val annotations = method.modifierList.annotations
-                    annotations.forEach { annotation ->
-                        if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
-                            val code: String = createTestSampleClass(imports, method.text)
-                            testNames.add(createMethodName(method.name))
-                            initialTestCodes.add(code)
-                            currentTestCodes.add(code)
-                        }
-                    }
-                }
-            }
-            true
-        }
-    }
-
-    private fun createTestSampleClass(imports: String, methodCode: String): String {
-        var normalizedImports = imports
-        if (normalizedImports.isNotBlank()) normalizedImports += "\n\n"
-        return normalizedImports +
-            "public class TestSample {\n" +
-            "   $methodCode\n" +
-            "}"
-    }
-
-    private fun createMethodName(methodName: String): String =
-        "<html><b><font color='orange'>method</font> $methodName</b></html>"
 
     private fun enabledComponents(isEnabled: Boolean) {
         resetButton.isEnabled = false

@@ -25,7 +25,7 @@ enum class PromptKeyword(val text: String, val description: String, val mandator
     ),
     METHODS("METHODS", "Signature of methods used in the code under tests", false),
     POLYMORPHISM("POLYMORPHISM", "Polymorphism relations between classes involved in the code under test.", false),
-    TEST_SAMPLE("TEST_SAMPLE", "TODO.", false),//TODO
+    TEST_SAMPLE("TEST_SAMPLE", "TODO.", false), // TODO
     ;
 
     fun getOffsets(prompt: String): Pair<Int, Int>? {
