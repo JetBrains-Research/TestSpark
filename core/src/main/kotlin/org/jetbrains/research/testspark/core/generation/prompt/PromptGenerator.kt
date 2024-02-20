@@ -26,17 +26,6 @@ class PromptGenerator(
             .build()
 
         return prompt
-        /*var classPrompt = promptTemplates.classPrompt
-
-        classPrompt = insertLanguage(classPrompt)
-        classPrompt = insertName(classPrompt, context.cut.qualifiedName!!)
-        classPrompt = insertTestingPlatform(classPrompt)
-        classPrompt = insertMockingFramework(classPrompt)
-        classPrompt = insertCodeUnderTest(classPrompt, context.cut.fullText)
-        classPrompt = insertMethodsSignatures(classPrompt, interestingClasses)
-        classPrompt = insertPolymorphismRelations(classPrompt, context.polymorphismRelations)
-
-        return classPrompt*/
     }
 
     /**
@@ -59,17 +48,6 @@ class PromptGenerator(
             .build()
 
         return prompt
-        /*var methodPrompt = promptTemplates.methodPrompt
-
-        methodPrompt = insertLanguage(methodPrompt)
-        methodPrompt = insertName(methodPrompt, "${context.cut.qualifiedName}.${method.name}")
-        methodPrompt = insertTestingPlatform(methodPrompt)
-        methodPrompt = insertMockingFramework(methodPrompt)
-        methodPrompt = insertCodeUnderTest(methodPrompt, method.text)
-        methodPrompt = insertMethodsSignatures(methodPrompt, interestingClassesFromMethod)
-        methodPrompt = insertPolymorphismRelations(methodPrompt, context.polymorphismRelations)
-
-        return methodPrompt*/
     }
 
     /**
@@ -94,16 +72,5 @@ class PromptGenerator(
             .build()
 
         return prompt
-        /*var linePrompt = promptTemplates.linePrompt
-
-        linePrompt = insertLanguage(linePrompt)
-        linePrompt = insertName(linePrompt, lineUnderTest.trim())
-        linePrompt = insertTestingPlatform(linePrompt)
-        linePrompt = insertMockingFramework(linePrompt)
-        linePrompt = insertCodeUnderTest(linePrompt, method.text)
-        linePrompt = insertMethodsSignatures(linePrompt, interestingClassesFromMethod)
-        linePrompt = insertPolymorphismRelations(linePrompt, context.polymorphismRelations)
-
-        return linePrompt*/
     }
 }
