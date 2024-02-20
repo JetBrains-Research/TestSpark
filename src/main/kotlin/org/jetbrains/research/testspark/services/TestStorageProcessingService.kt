@@ -52,6 +52,7 @@ class TestStorageProcessingService(private val project: Project) {
         val byteBuddyAgent = getLibrary("byte-buddy-agent-1.14.6.jar")
         return "$junitPath${separator}$hamcrestPath${separator}$mockitoPath${separator}$byteBuddy${separator}$byteBuddyAgent${separator}$buildPath"
     }
+
     /**
      * Retrieves the absolute path of the specified library.
      *
