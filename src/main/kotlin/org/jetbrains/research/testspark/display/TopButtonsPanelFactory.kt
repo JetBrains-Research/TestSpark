@@ -1,11 +1,16 @@
 package org.jetbrains.research.testspark.display
 
 import com.intellij.openapi.components.service
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Dimension
+import java.util.LinkedList
+import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
@@ -144,9 +149,29 @@ class TopButtonsPanelFactory(private val project: Project) {
 
         runAllButton.isEnabled = false
 
+        // add each test generation task to queue
+        val tasks: Queue<(ProgressIndicator) -> Unit> = LinkedList()
         for (testCasePanelFactory in testCasePanelFactories) {
-            // todo use doClick() function after removing JOptionPane
-            testCasePanelFactory.runTest()
+            testCasePanelFactory.addTask(tasks)
+        }
+        // run tasks one after each other
+        executeTasks(tasks)
+    }
+
+    private fun executeTasks(tasks: Queue<(ProgressIndicator) -> Unit>) {
+        val nextTask = tasks.poll()
+
+        nextTask?.let { task ->
+            ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Test execution") {
+                override fun run(indicator: ProgressIndicator) {
+                    task(indicator)
+                }
+
+                override fun onFinished() {
+                    super.onFinished()
+                    executeTasks(tasks)
+                }
+            })
         }
     }
 
