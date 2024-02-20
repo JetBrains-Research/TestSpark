@@ -16,7 +16,6 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.generation.importPattern
 import org.jetbrains.research.testspark.core.generation.packagePattern
 import org.jetbrains.research.testspark.core.generation.prompt.PromptGenerator
-import org.jetbrains.research.testspark.core.generation.prompt.PromptKeyword
 import org.jetbrains.research.testspark.core.generation.prompt.configuration.ClassRepresentation
 import org.jetbrains.research.testspark.core.generation.prompt.configuration.MethodRepresentation
 import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptGenerationContext
@@ -355,7 +354,7 @@ class PromptManager(
             throw IllegalStateException("The prompt must contain ${PromptKeyword.POLYMORPHISM.text}")
         }
     }
-    */
+     */
 
     private fun PsiMethod.getSignatureString(): String {
         val bodyStart = body?.startOffsetInParent ?: this.textLength

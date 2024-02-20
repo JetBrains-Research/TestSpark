@@ -59,8 +59,8 @@ internal class PromptBuilder(private var prompt: String) {
                 val superClass = classesToTest[i - 1]
 
                 fullText += "${subClass.qualifiedName} extends ${superClass.qualifiedName}. " +
-                        "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
-                        "```\n"
+                    "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
+                    "```\n"
             }
             prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
@@ -98,7 +98,7 @@ internal class PromptBuilder(private var prompt: String) {
     }
 
     fun insertPolymorphismRelations(
-        polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>
+        polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
     ) = apply {
         val keyword = "\$${PromptKeyword.POLYMORPHISM.text}"
         if (isPromptValid(PromptKeyword.POLYMORPHISM, prompt)) {

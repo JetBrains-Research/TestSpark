@@ -16,7 +16,7 @@ data class MethodRepresentation(
     val signature: String,
     val name: String,
     val text: String,
-    val containingClassQualifiedName: String
+    val containingClassQualifiedName: String,
 )
 
 data class PromptTemplates(
