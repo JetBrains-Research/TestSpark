@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.actions.llm
 
 import com.intellij.lang.Language
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -33,6 +34,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
 import javax.swing.ScrollPaneConstants
+import org.jetbrains.research.testspark.services.LLMTestSampleService
 
 class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
@@ -70,7 +72,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     private val selectionLabel = JBLabel(TestSparkLabelsBundle.defaultValue("selectSamples"))
 
     init {
-        addCollectors()
+        addListeners()
 
         collectTestSamples()
 
@@ -80,7 +82,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     /**
      * Adds action listeners to the selectionTypeButtons array to enable the nextButton if any button is selected.
      */
-    private fun addCollectors() {
+    private fun addListeners() {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 languageTextField.editor?.markupModel?.removeAllHighlighters()
@@ -218,7 +220,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     override fun getFinishedButton() = nextButton
 
     override fun applyUpdates() {
-        // TODO implement adding sample (languageTextField.text) to the prompt
+        project.service<LLMTestSampleService>().setTestSample(languageTextField.text)
     }
 
     /**

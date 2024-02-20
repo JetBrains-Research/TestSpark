@@ -16,6 +16,7 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
+import org.jetbrains.research.testspark.services.LLMTestSampleService
 import org.jetbrains.research.testspark.services.PromptKeyword
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
@@ -275,8 +276,17 @@ class PromptManager(
     }
 
     private fun insertTestSample(prompt: String): String {
-        // TODO receive a testSample
-        return prompt
+        val keyword = "\$${PromptKeyword.TEST_SAMPLE.text}"
+
+        if (isPromptValid(PromptKeyword.TEST_SAMPLE, prompt)) {
+            var fullText = project.service<LLMTestSampleService>().getTestSample()
+            if (fullText.isNotBlank()) {
+                fullText = "Use this test sample:\n$fullText\n"
+            }
+            return prompt.replace(keyword, fullText, ignoreCase = false)
+        } else {
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.TEST_SAMPLE.text}")
+        }
     }
 
     /**
