@@ -16,7 +16,11 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.generation.importPattern
 import org.jetbrains.research.testspark.core.generation.packagePattern
 import org.jetbrains.research.testspark.core.generation.prompt.PromptGenerator
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.*
+import org.jetbrains.research.testspark.core.generation.prompt.configuration.ClassRepresentation
+import org.jetbrains.research.testspark.core.generation.prompt.configuration.MethodRepresentation
+import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptConfiguration
+import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptGenerationContext
+import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptTemplates
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
@@ -60,7 +64,7 @@ class PromptManager(
                         desiredLanguage = "Java",
                         desiredTestingPlatform = "JUnit 4",
                         desiredMockingFramework = "Mockito 5",
-                    )
+                    ),
                 )
 
                 val promptTemplates = PromptTemplates(
