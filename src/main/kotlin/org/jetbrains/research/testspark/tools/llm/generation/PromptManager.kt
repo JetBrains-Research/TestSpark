@@ -281,7 +281,7 @@ class PromptManager(
         if (isPromptValid(PromptKeyword.TEST_SAMPLE, prompt)) {
             var fullText = project.service<LLMTestSampleService>().getTestSample()
             if (fullText.isNotBlank()) {
-                fullText = "Use this test sample:\n$fullText\n"
+                fullText = "Use this test sample:\n```\n$fullText\n```\n"
             }
             return prompt.replace(keyword, fullText, ignoreCase = false)
         } else {

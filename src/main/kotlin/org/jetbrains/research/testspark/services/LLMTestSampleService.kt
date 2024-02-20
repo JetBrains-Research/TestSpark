@@ -6,13 +6,9 @@ import com.intellij.openapi.components.Service
 class LLMTestSampleService {
     private var testSample: String? = null
 
-    fun setTestSample(testSample: String) {
+    fun setTestSample(testSample: String?) {
         this.testSample = testSample
     }
 
     fun getTestSample(): String = testSample ?: ""
-
-    fun clear() {
-        testSample = null
-    }
 }

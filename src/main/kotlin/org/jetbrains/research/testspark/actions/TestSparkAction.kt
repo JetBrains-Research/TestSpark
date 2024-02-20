@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.components.service
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
@@ -28,6 +29,7 @@ import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
+import org.jetbrains.research.testspark.services.LLMTestSampleService
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
@@ -264,6 +266,8 @@ class TestSparkAction : AnAction() {
         }
 
         private fun startEvoSuiteGeneration() {
+            e.project!!.service<LLMTestSampleService>().setTestSample(null)
+
             if (codeTypeButtons[0].isSelected) {
                 Manager.generateTestsForClassByEvoSuite(e)
             } else if (codeTypeButtons[1].isSelected) {
@@ -276,6 +280,10 @@ class TestSparkAction : AnAction() {
         }
 
         private fun startLLMGeneration() {
+            if (!SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
+                e.project!!.service<LLMTestSampleService>().setTestSample(null)
+            }
+
             if (codeTypeButtons[0].isSelected) {
                 Manager.generateTestsForClassByLlm(e)
             } else if (codeTypeButtons[1].isSelected) {

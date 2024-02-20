@@ -220,7 +220,11 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     override fun getFinishedButton() = nextButton
 
     override fun applyUpdates() {
-        project.service<LLMTestSampleService>().setTestSample(languageTextField.text)
+        if (selectionTypeButtons[0].isSelected) {
+            project.service<LLMTestSampleService>().setTestSample(languageTextField.text)
+        } else {
+            project.service<LLMTestSampleService>().setTestSample(null)
+        }
     }
 
     /**
