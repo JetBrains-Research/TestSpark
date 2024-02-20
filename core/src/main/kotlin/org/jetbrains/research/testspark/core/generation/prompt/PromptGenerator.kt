@@ -10,16 +10,18 @@ class PromptGenerator(
     private val promptTemplates: PromptTemplates,
 ) {
     /**
-     * Generates a prompt for generating unit tests in Java for a given class.
+     * Generates a prompt for a given class under test. It accepts the list of interesting classes and inserts their method signatures.
      *
+     * @param interestingClasses The list of ClassRepresentation objects.
      * @return The generated prompt.
+     * @throws IllegalStateException If any of the required keywords are missing in the prompt template.
      */
     fun generatePromptForClass(interestingClasses: List<ClassRepresentation>): String {
         val prompt = PromptBuilder(promptTemplates.classPrompt)
-            .insertLanguage("Java")
+            .insertLanguage(context.promptConfiguration.desiredLanguage)
             .insertName(context.cut.qualifiedName!!)
-            .insertTestingPlatform("JUnit 4")
-            .insertMockingFramework("Mockito 5")
+            .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
+            .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
             .insertCodeUnderTest(context.cut.fullText, context.classesToTest)
             .insertMethodsSignatures(interestingClasses)
             .insertPolymorphismRelations(context.polymorphismRelations)
@@ -29,19 +31,22 @@ class PromptGenerator(
     }
 
     /**
-     * Generates a prompt for a method.
+     * Generates a prompt for a given method representation and a list of interesting classes.
      *
+     * @param method The representation of a method to be tested.
+     * @param interestingClassesFromMethod A list of interesting classes related to the method.
      * @return The generated prompt.
+     * @throws IllegalStateException If any of the required keywords are missing in the prompt template.
      */
     fun generatePromptForMethod(
         method: MethodRepresentation,
         interestingClassesFromMethod: List<ClassRepresentation>,
     ): String {
         val prompt = PromptBuilder(promptTemplates.methodPrompt)
-            .insertLanguage("Java")
+            .insertLanguage(context.promptConfiguration.desiredLanguage)
             .insertName("${context.cut.qualifiedName}.${method.name}")
-            .insertTestingPlatform("JUnit 4")
-            .insertMockingFramework("Mockito 5")
+            .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
+            .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
             .insertCodeUnderTest(method.text, context.classesToTest)
             .insertMethodsSignatures(interestingClassesFromMethod)
             .insertPolymorphismRelations(context.polymorphismRelations)
@@ -51,10 +56,14 @@ class PromptGenerator(
     }
 
     /**
-     * Generates a prompt for a specific line number in the code.
+     * Generates a prompt for a given line under test.
+     * It accepts the code of a line under test, a representation of the method that contains the line, and the set of interesting classes (e.g., the containing class of the method, classes listed in parameters of the method and constructors of the containing class).
      *
-     * @param lineUnderTest the textual content of the line which to generate the prompt
-     * @return the generated prompt string
+     * @param lineUnderTest The source code of the line to be tested.
+     * @param method The representation of the method that contains the line.
+     * @param interestingClassesFromMethod A list of interesting classes related to the method.
+     * @return The generated prompt.
+     * @throws IllegalStateException If any of the required keywords are missing in the prompt template.
      */
     fun generatePromptForLine(
         lineUnderTest: String,
@@ -62,10 +71,10 @@ class PromptGenerator(
         interestingClassesFromMethod: List<ClassRepresentation>,
     ): String {
         val prompt = PromptBuilder(promptTemplates.linePrompt)
-            .insertLanguage("Java")
+            .insertLanguage(context.promptConfiguration.desiredLanguage)
             .insertName(lineUnderTest.trim())
-            .insertTestingPlatform("JUnit 4")
-            .insertMockingFramework("Mockito 5")
+            .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
+            .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
             .insertCodeUnderTest(method.text, context.classesToTest)
             .insertMethodsSignatures(interestingClassesFromMethod)
             .insertPolymorphismRelations(context.polymorphismRelations)

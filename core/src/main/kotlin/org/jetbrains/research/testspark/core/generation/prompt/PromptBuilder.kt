@@ -80,7 +80,7 @@ internal class PromptBuilder(private var prompt: String) {
 
                 fullText += "=== methods in ${interestingClass.qualifiedName}:\n"
 
-                for (method in interestingClass.methods) {
+                for (method in interestingClass.allMethods) {
                     // Skip java methods
                     // TODO: checks for java methods should be done by a caller to make
                     //       this class as abstract and language agnostic as possible.
