@@ -359,7 +359,10 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
 }
 
 tasks.create<RunIdeTask>("headless"){
-    args = listOfNotNull("testspark")
+    val prj: String? by project
+//    val out: String? by project
+
+    args = listOfNotNull("testspark", prj)
 
     jvmArgs(
         "-Xmx16G",

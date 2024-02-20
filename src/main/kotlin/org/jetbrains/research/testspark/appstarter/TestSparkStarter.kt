@@ -9,14 +9,14 @@ class TestSparkStarter: ApplicationStarter {
     override val commandName: String ="testspark"
 
     override fun main(args: List<String>) {
-        println("Hello from TestSpark CLI")
-//        println("Hello from TestSpark CLI");
-//        val projectPath = args[1]
+        val projectPath = args[1]
 //
-//
-//        val project = ProjectUtil.openOrImport(projectPath, null, true) ?: run {
-//            println("couldn't find project in $projectPath")
-//            exitProcess(1)
-//        }
+        println("Test generation requested for $projectPath")
+        val project = ProjectUtil.openOrImport(projectPath, null, true) ?: run {
+            println("couldn't find project in $projectPath")
+            exitProcess(1)
+        }
+
+        println("Detected project: ${project}")
     }
 }
