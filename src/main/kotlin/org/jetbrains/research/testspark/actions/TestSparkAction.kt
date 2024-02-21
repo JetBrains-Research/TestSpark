@@ -3,8 +3,13 @@ package org.jetbrains.research.testspark.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.roots.LibraryOrderEntry
+import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMPanelFactory
+import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 import org.jetbrains.research.testspark.tools.Manager
@@ -59,6 +64,7 @@ class TestSparkAction : AnAction() {
      * @property e The AnActionEvent object.
      */
     class TestSparkActionWindow(val e: AnActionEvent) : JFrame("TestSpark") {
+
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
@@ -74,11 +80,12 @@ class TestSparkAction : AnAction() {
         private val evoSuitePanelFactory = EvoSuitePanelFactory()
 
         init {
+            val junit = findJUnitDependency(e)
             val panel = JPanel(cardLayout)
 
             panel.add(getMainPanel(), "1")
-            panel.add(llmPanelFactory.getPanel(), "2")
-            panel.add(evoSuitePanelFactory.getPanel(), "3")
+            panel.add(llmPanelFactory.getPanel(junit), "2")
+            panel.add(evoSuitePanelFactory.getPanel(junit), "3")
 
             addListeners(panel)
 
@@ -92,6 +99,26 @@ class TestSparkAction : AnAction() {
             setLocation(x, y)
 
             isVisible = true
+        }
+
+        private fun findJUnitDependency(e: AnActionEvent): JUnitVersion? {
+            val project = e.project!!
+            val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)?.firstOrNull() ?: return null
+
+            val index = ProjectRootManager.getInstance(project).fileIndex
+            val module = index.getModuleForFile(virtualFile) ?: return null
+
+            for (orderEntry in ModuleRootManager.getInstance(module).orderEntries) {
+                if (orderEntry is LibraryOrderEntry) {
+                    val libraryName = orderEntry.library?.name ?: continue
+                    for (junit in JUnitVersion.values()) {
+                        if (libraryName.contains(junit.groupId)) {
+                            return junit
+                        }
+                    }
+                }
+            }
+            return null
         }
 
         /**

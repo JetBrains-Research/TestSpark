@@ -40,7 +40,7 @@ import java.io.File
  */
 class LLMProcessManager(
     private val project: Project,
-    private val promptManager: PromptManager
+    private val promptManager: PromptManager,
 ) : ProcessManager {
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private val testFileName: String = "GeneratedTest.java"
