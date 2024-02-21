@@ -120,7 +120,7 @@ internal class PromptBuilder(private var prompt: String) {
         val keyword = "\$${PromptKeyword.TEST_SAMPLE.text}"
 
         if (isPromptValid(PromptKeyword.TEST_SAMPLE, prompt)) {
-            // TODO uncomment
+            // TODO fix the problem
             var fullText = project.service<LLMTestSampleService>().getTestSample()
             if (fullText.isNotBlank()) {
                 fullText = "Use this test sample:\n```\n$fullText\n```\n"
