@@ -4,6 +4,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 
 /**
@@ -11,7 +12,8 @@ import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
  */
 class SettingsArguments {
     companion object {
-        val settingsState = SettingsApplicationService.getInstance().state
+        val settingsState: SettingsApplicationState?
+            get() = SettingsApplicationService.getInstance().state
 
         /**
          * Retrieves the list of LLM platforms from the settings state.

@@ -109,6 +109,12 @@ dependencies {
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
     implementation("junit:junit:4.13")
+
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+    implementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    implementation("org.junit.platform:junit-platform-launcher:1.10.0")
+    implementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+
     // https://mvnrepository.com/artifact/org.jacoco/org.jacoco.core
     implementation("org.jacoco:org.jacoco.core:0.8.8")
     // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-core

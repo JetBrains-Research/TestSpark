@@ -6,6 +6,8 @@ import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.ToolPanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.data.JUnitVersion
+import org.jetbrains.research.testspark.display.JUnitCombobox
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
@@ -23,6 +25,7 @@ class LLMPanelFactory : ToolPanelFactory {
     private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
     private val backLlmButton = JButton("Back")
     private val okLlmButton = JButton("OK")
+    private val junitSelector = JUnitCombobox()
 
     private val settingsState = SettingsApplicationService.getInstance().state!!
 
@@ -56,7 +59,9 @@ class LLMPanelFactory : ToolPanelFactory {
      *
      * @return The JPanel object representing the LLM setup panel.
      */
-    override fun getPanel(): JPanel {
+    override fun getPanel(junit: JUnitVersion?): JPanel {
+        junitSelector.detected = junit
+
         val textTitle = JLabel("LLM Setup")
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
@@ -97,6 +102,12 @@ class LLMPanelFactory : ToolPanelFactory {
                 10,
                 false,
             )
+            .addLabeledComponent(
+                JBLabel(TestSparkLabelsBundle.defaultValue("junitVersion")),
+                junitSelector,
+                10,
+                false,
+            )
             .addComponentFillVertically(bottomButtons, 10)
             .panel
     }
@@ -115,5 +126,6 @@ class LLMPanelFactory : ToolPanelFactory {
             settingsState.llmPlatforms[index].token = llmPlatforms[index].token
             settingsState.llmPlatforms[index].model = llmPlatforms[index].model
         }
+        settingsState.junitVersion = (junitSelector.selectedItem!! as JUnitVersion)
     }
 }

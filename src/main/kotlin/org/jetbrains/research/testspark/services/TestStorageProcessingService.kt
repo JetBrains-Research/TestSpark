@@ -13,6 +13,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.tools.getBuildPath
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
 import java.util.UUID
@@ -42,13 +43,14 @@ class TestStorageProcessingService(private val project: Project) {
      */
     private fun getPath(buildPath: String): String {
         // create the path for the command
-        val junitPath = getLibrary("junit-4.13.jar")
+        val junitVersion = SettingsArguments.settingsState!!.junitVersion
+        val separator = DataFilesUtil.classpathSeparator
+        val junitPath = junitVersion.libJar.joinToString(separator.toString()) { getLibrary(it) }
         val mockitoPath = getLibrary("mockito-core-5.0.0.jar")
         val hamcrestPath = getLibrary("hamcrest-core-1.3.jar")
         val byteBuddy = getLibrary("byte-buddy-1.14.6.jar")
         val byteBuddyAgent = getLibrary("byte-buddy-agent-1.14.6.jar")
-        val sep = DataFilesUtil.classpathSeparator
-        return "$junitPath${sep}$hamcrestPath${sep}$mockitoPath${sep}$byteBuddy${sep}$byteBuddyAgent${sep}$buildPath"
+        return "$junitPath${separator}$hamcrestPath${separator}$mockitoPath${separator}$byteBuddy${separator}$byteBuddyAgent${separator}$buildPath"
     }
 
     /**
@@ -176,6 +178,8 @@ class TestStorageProcessingService(private val project: Project) {
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
         name += "$className#$testCaseName"
 
+        val junitVersion = SettingsArguments.settingsState!!.junitVersion.version
+
         // run the test method with jacoco agent
         val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
             arrayListOf(
@@ -183,7 +187,7 @@ class TestStorageProcessingService(private val project: Project) {
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<ProjectContextService>().classFQN}",
                 "-cp",
                 "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
-                "org.jetbrains.research.SingleJUnitTestRunner",
+                "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
             ),
         )

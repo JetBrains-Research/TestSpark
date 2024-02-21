@@ -24,7 +24,6 @@ import org.jetbrains.research.testspark.core.generation.prompt.configuration.Pro
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -42,7 +41,7 @@ class PromptManager(
     private val cut: PsiClass,
     private val classesToTest: MutableList<PsiClass>,
 ) {
-    val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
+    val settingsState: SettingsApplicationState = SettingsArguments.settingsState!!
 
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
@@ -62,7 +61,7 @@ class PromptManager(
                     polymorphismRelations = polymorphismRelations,
                     promptConfiguration = PromptConfiguration(
                         desiredLanguage = "Java",
-                        desiredTestingPlatform = "JUnit 4",
+                        desiredTestingPlatform = settingsState.junitVersion.showName,
                         desiredMockingFramework = "Mockito 5",
                     ),
                 )
