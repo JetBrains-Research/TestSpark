@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.settings
 
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIPlatform
@@ -35,6 +36,7 @@ data class SettingsApplicationState(
     var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
     var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
     var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
+    var junitVersion: JUnitVersion = DefaultSettingsApplicationState.junitVersion,
     var provideTestSamplesCheckBoxSelected: Boolean = DefaultSettingsApplicationState.provideTestSamplesCheckBoxSelected,
     var llmSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.llmSetupCheckBoxSelected,
     var evosuiteSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.evosuiteSetupCheckBoxSelected,
@@ -69,6 +71,7 @@ data class SettingsApplicationState(
         val classPrompt: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
         val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
         val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
+        val junitVersion: JUnitVersion = JUnitVersion.JUnit4
         val provideTestSamplesCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
         val llmSetupCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
         val evosuiteSetupCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()

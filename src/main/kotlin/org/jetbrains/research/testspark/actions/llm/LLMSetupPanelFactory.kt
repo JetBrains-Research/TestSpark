@@ -6,6 +6,8 @@ import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.data.JUnitVersion
+import org.jetbrains.research.testspark.display.JUnitCombobox
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
@@ -24,6 +26,7 @@ class LLMSetupPanelFactory : PanelFactory {
     private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
     private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
     private val okLlmButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
+    private val junitSelector = JUnitCombobox()
 
     private val settingsState = SettingsApplicationService.getInstance().state!!
 
@@ -43,7 +46,9 @@ class LLMSetupPanelFactory : PanelFactory {
      *
      * @return the title panel containing the setup title label.
      */
-    override fun getTitlePanel(): JPanel {
+    override fun getPanel(junit: JUnitVersion?): JPanel {
+        junitSelector.detected = junit
+
         val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("llmSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
@@ -81,6 +86,12 @@ class LLMSetupPanelFactory : PanelFactory {
             .addLabeledComponent(
                 JBLabel(TestSparkLabelsBundle.defaultValue("model")),
                 modelSelector,
+                10,
+                false,
+            )
+            .addLabeledComponent(
+                JBLabel(TestSparkLabelsBundle.defaultValue("junitVersion")),
+                junitSelector,
                 10,
                 false,
             )
@@ -137,5 +148,6 @@ class LLMSetupPanelFactory : PanelFactory {
             settingsState.llmPlatforms[index].token = llmPlatforms[index].token
             settingsState.llmPlatforms[index].model = llmPlatforms[index].model
         }
+        settingsState.junitVersion = (junitSelector.selectedItem!! as JUnitVersion)
     }
 }
