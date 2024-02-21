@@ -3,12 +3,12 @@ package org.jetbrains.research.testspark.actions
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.components.service
-import com.intellij.util.ui.FormBuilder
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.components.service
 import com.intellij.openapi.roots.LibraryOrderEntry
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
@@ -97,14 +97,14 @@ class TestSparkAction : AnAction() {
                 visibilityController.isVisible = true
                 isVisible = true
 
-                val junit = findJUnitDependency(e)
-
                 val panel = JPanel(cardLayout)
 
+                val junit = findJUnitDependency(e)
+
                 panel.add(getMainPanel(), "1")
-                panel.add(createCardPanel(evoSuitePanelFactory), "2")
-                panel.add(createCardPanel(llmSetupPanelFactory), "3")
-                panel.add(createCardPanel(llmSampleSelectorFactory), "4")
+                panel.add(createCardPanel(evoSuitePanelFactory, junit), "2")
+                panel.add(createCardPanel(llmSetupPanelFactory, junit), "3")
+                panel.add(createCardPanel(llmSampleSelectorFactory, junit), "4")
 
                 addListeners(panel)
 
@@ -119,10 +119,10 @@ class TestSparkAction : AnAction() {
             }
         }
 
-        private fun createCardPanel(toolPanelFactory: PanelFactory): JPanel {
+        private fun createCardPanel(toolPanelFactory: PanelFactory, junit: JUnitVersion?): JPanel {
             val cardPanel = JPanel(BorderLayout())
             cardPanel.add(toolPanelFactory.getTitlePanel(), BorderLayout.NORTH)
-            cardPanel.add(toolPanelFactory.getMiddlePanel(), BorderLayout.CENTER)
+            cardPanel.add(toolPanelFactory.getMiddlePanel(junit), BorderLayout.CENTER)
             cardPanel.add(toolPanelFactory.getBottomPanel(), BorderLayout.SOUTH)
 
             return cardPanel

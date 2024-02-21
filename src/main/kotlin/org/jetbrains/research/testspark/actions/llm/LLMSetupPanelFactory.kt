@@ -46,9 +46,7 @@ class LLMSetupPanelFactory : PanelFactory {
      *
      * @return the title panel containing the setup title label.
      */
-    override fun getPanel(junit: JUnitVersion?): JPanel {
-        junitSelector.detected = junit
-
+    override fun getTitlePanel(): JPanel {
         val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("llmSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
@@ -66,8 +64,10 @@ class LLMSetupPanelFactory : PanelFactory {
      * and a user token field. These components are stylized using the `stylizeMainComponents` method.
      * The UI labels for the platform, token, and model components are retrieved using the
      * `TestSpark*/
-    override fun getMiddlePanel(): JPanel {
+    override fun getMiddlePanel(junit: JUnitVersion?): JPanel {
         stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
+
+        junitSelector.detected = junit
 
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)

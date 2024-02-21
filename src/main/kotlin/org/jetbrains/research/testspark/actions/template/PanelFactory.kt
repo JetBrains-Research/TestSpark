@@ -1,12 +1,13 @@
 package org.jetbrains.research.testspark.actions.template
 
+import org.jetbrains.research.testspark.data.JUnitVersion
 import javax.swing.JButton
 import javax.swing.JPanel
 
 interface PanelFactory {
     fun getTitlePanel(): JPanel
 
-    fun getMiddlePanel(): JPanel
+    fun getMiddlePanel(junit: JUnitVersion?): JPanel
 
     fun getBottomPanel(): JPanel
 

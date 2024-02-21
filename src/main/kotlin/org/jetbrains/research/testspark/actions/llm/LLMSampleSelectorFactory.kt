@@ -14,6 +14,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
@@ -153,7 +154,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
      *
      * @return the middle panel as a JPanel
      */
-    override fun getMiddlePanel(): JPanel {
+    override fun getMiddlePanel(junit: JUnitVersion?): JPanel {
         for (button in selectionTypeButtons) {
             selectionTypeButtonGroup.add(button)
             radioButtonsPanel.add(button)

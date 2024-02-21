@@ -28,7 +28,7 @@ class EvoSuitePanelFactory : PanelFactory {
      *
      * @return the title panel as a JPanel instance.
      */
-    override fun getTitlePanel(junit: JUnitVersion?): JPanel {
+    override fun getTitlePanel(): JPanel {
         val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("evosuiteSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
@@ -43,7 +43,7 @@ class EvoSuitePanelFactory : PanelFactory {
      *
      * @return the middle panel as a JPanel.
      */
-    override fun getMiddlePanel(): JPanel {
+    override fun getMiddlePanel(junit: JUnitVersion?): JPanel {
         javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
         javaPathTextField.text = settingsState.javaPath
 

@@ -63,6 +63,6 @@ class LLMTestSampleService {
             "}"
     }
 
-    fun createMethodName(methodName: String): String =
+    private fun createMethodName(methodName: String): String =
         "<html><b><font color='orange'>method</font> $methodName</b></html>"
 }

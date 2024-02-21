@@ -6,16 +6,17 @@ enum class PromptKeyword(val text: String, val description: String, val mandator
     LANGUAGE("LANGUAGE", "Programming language of the project under test (only Java supported at this point)", true),
     TESTING_PLATFORM(
         "TESTING_PLATFORM",
-        "testing platform used in the project (Only JUnit 4 is supported at this point)",
+        "Testing platform used in the project (Only JUnit 4 is supported at this point)",
         true,
     ),
     MOCKING_FRAMEWORK(
         "MOCKING_FRAMEWORK",
-        "mock framework that can be used in generated test (Only Mockito is supported at this point)",
+        "Mock framework that can be used in generated test (Only Mockito is supported at this point)",
         false,
     ),
-    METHODS("METHODS", "signature of methods used in the code under tests", false),
-    POLYMORPHISM("POLYMORPHISM", "polymorphism relations between classes involved in the code under test.", false),
+    METHODS("METHODS", "Signature of methods used in the code under tests", false),
+    POLYMORPHISM("POLYMORPHISM", "Polymorphism relations between classes involved in the code under test", false),
+    TEST_SAMPLE("TEST_SAMPLE", "TODO.", false), // TODO
     ;
 
     fun getOffsets(prompt: String): Pair<Int, Int>? {

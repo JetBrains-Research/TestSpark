@@ -25,6 +25,7 @@ class PromptGenerator(
             .insertCodeUnderTest(context.cut.fullText, context.classesToTest)
             .insertMethodsSignatures(interestingClasses)
             .insertPolymorphismRelations(context.polymorphismRelations)
+            .insertTestSample()
             .build()
 
         return prompt
@@ -50,6 +51,7 @@ class PromptGenerator(
             .insertCodeUnderTest(method.text, context.classesToTest)
             .insertMethodsSignatures(interestingClassesFromMethod)
             .insertPolymorphismRelations(context.polymorphismRelations)
+            .insertTestSample()
             .build()
 
         return prompt
@@ -78,6 +80,7 @@ class PromptGenerator(
             .insertCodeUnderTest(method.text, context.classesToTest)
             .insertMethodsSignatures(interestingClassesFromMethod)
             .insertPolymorphismRelations(context.polymorphismRelations)
+            .insertTestSample()
             .build()
 
         return prompt
