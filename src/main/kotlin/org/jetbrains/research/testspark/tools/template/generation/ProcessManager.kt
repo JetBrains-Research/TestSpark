@@ -15,7 +15,7 @@ interface ProcessManager {
      * @param packageName The package name of the code fragment.
      */
     fun runTestGenerator(
-        indicator: ProgressIndicator,
+        indicator: ProgressIndicator?,
         codeType: FragmentToTestData,
         packageName: String,
     )

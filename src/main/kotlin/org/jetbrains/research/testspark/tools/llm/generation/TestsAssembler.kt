@@ -29,7 +29,7 @@ import org.jetbrains.research.testspark.tools.processStopped
  */
 class TestsAssembler(
     val project: Project,
-    val indicator: ProgressIndicator,
+    val indicator: ProgressIndicator?,
 ) {
     private val log: Logger = Logger.getInstance(this.javaClass)
     var rawText = ""
@@ -55,7 +55,7 @@ class TestsAssembler(
      */
     fun receiveResponse(httpRequest: HttpRequests.Request) {
         while (true) {
-            if (processStopped(project, indicator)) return
+            if (indicator != null && processStopped(project, indicator)) return
 
             Thread.sleep(50L)
             var text = httpRequest.reader.readLine()
@@ -76,7 +76,9 @@ class TestsAssembler(
 
             // Collect the response and update the progress bar
             rawText = rawText.plus(choices.delta.content)
-            updateProgressBar()
+            indicator?.let {
+                updateProgressBar()
+            }
         }
 
         log.debug(rawText)
@@ -86,7 +88,7 @@ class TestsAssembler(
         val generatedTestsCount = rawText.split("@Test").size - 1
 
         if (lastTestCount != generatedTestsCount) {
-            indicator.text = TestSparkBundle.message("generatingTestNumber") + generatedTestsCount
+            indicator?.text = TestSparkBundle.message("generatingTestNumber") + generatedTestsCount
             lastTestCount = generatedTestsCount
         }
     }

@@ -71,7 +71,7 @@ class EvoSuiteErrorManager : ErrorManager {
         handler: OSProcessHandler,
         project: Project,
         evoSuiteProcessTimeout: Long,
-        indicator: ProgressIndicator,
+        indicator: ProgressIndicator?,
     ): Boolean {
         if (processStopped(project, indicator)) return false
 

@@ -12,7 +12,7 @@ import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
 class GrazieRequestManager : RequestManager() {
     override fun send(
         prompt: String,
-        indicator: ProgressIndicator,
+        indicator: ProgressIndicator?,
         project: Project,
         llmErrorManager: LLMErrorManager,
     ): Pair<SendResult, TestsAssembler> {

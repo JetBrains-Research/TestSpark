@@ -29,16 +29,24 @@ class Llm(override val name: String = "LLM") : Tool {
 
     private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestData): LLMProcessManager {
         val project: Project = e.project!!
-
-        val classesToTest = mutableListOf<PsiClass>()
-        // check if cut has any none java super class
-        val maxPolymorphismDepth = SettingsArguments.maxPolyDepth(project)
-
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)!!
 
+        val classesToTest = getClassesUnderTest(project, cutPsiClass)
+        return LLMProcessManager(
+            project,
+            PromptManager(project, classesToTest[0], classesToTest),
+        )
+    }
+
+    fun getClassesUnderTest(project: Project, cutPsiClass: PsiClass): MutableList<PsiClass> {
+        val classesToTest = mutableListOf<PsiClass>()
         var currentPsiClass = cutPsiClass
+
+        // check if cut has any none java super class
+        val maxPolymorphismDepth = SettingsArguments.maxPolyDepth(project)
+
         for (index in 0 until maxPolymorphismDepth) {
             if (!classesToTest.contains(currentPsiClass)) {
                 classesToTest.add(currentPsiClass)
@@ -52,10 +60,8 @@ class Llm(override val name: String = "LLM") : Tool {
             }
             currentPsiClass = currentPsiClass.superClass!!
         }
-        return LLMProcessManager(
-            project,
-            PromptManager(project, classesToTest[0], classesToTest),
-        )
+
+        return classesToTest
     }
 
     /**

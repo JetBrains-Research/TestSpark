@@ -29,7 +29,7 @@ abstract class RequestManager {
      */
     open fun request(
         prompt: String,
-        indicator: ProgressIndicator,
+        indicator: ProgressIndicator?,
         packageName: String,
         project: Project,
         llmErrorManager: LLMErrorManager,
@@ -93,7 +93,7 @@ abstract class RequestManager {
 
     abstract fun send(
         prompt: String,
-        indicator: ProgressIndicator,
+        indicator: ProgressIndicator?,
         project: Project,
         llmErrorManager: LLMErrorManager,
     ): Pair<SendResult, TestsAssembler>

@@ -39,7 +39,7 @@ class LLMChatService {
      */
     fun testGenerationRequest(
         messageToPrompt: String,
-        indicator: ProgressIndicator,
+        indicator: ProgressIndicator?,
         packageName: String,
         project: Project,
         llmErrorManager: LLMErrorManager,

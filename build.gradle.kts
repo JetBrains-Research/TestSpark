@@ -374,9 +374,10 @@ tasks.create<RunIdeTask>("headless"){
     val cp: String? by project
     val llm: String? by project
     val token: String? by project
-//    val out: String? by project
+    val prompt: String? by project
+    val out: String? by project
 
-    args = listOfNotNull("testspark", root, file, cut, cp, llm, token)
+    args = listOfNotNull("testspark", root, file, cut, cp, llm, token, prompt, out)
 
     jvmArgs(
         "-Xmx16G",

@@ -56,7 +56,7 @@ class LLMProcessManager(
      * @param packageName The package name of the code being tested.
      */
     override fun runTestGenerator(
-        indicator: ProgressIndicator,
+        indicator: ProgressIndicator?,
         codeType: FragmentToTestData,
         packageName: String,
     ) {
@@ -75,7 +75,7 @@ class LLMProcessManager(
             llmErrorManager.errorProcess(TestSparkBundle.message("emptyBuildPath"), project)
             return
         }
-        indicator.text = TestSparkBundle.message("searchMessage")
+        indicator?.text = TestSparkBundle.message("searchMessage")
 
         log.info("Generated tests suite received")
 
@@ -181,7 +181,7 @@ class LLMProcessManager(
                 }
 
             // Compile the test file
-            indicator.text = TestSparkBundle.message("compilationTestsChecking")
+            indicator?.text = TestSparkBundle.message("compilationTestsChecking")
             val separateCompilationResult = project.service<TestStorageProcessingService>().compileTestCases(generatedTestCasesPaths, buildPath, testCases)
             val commonCompilationResult = project.service<TestStorageProcessingService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 

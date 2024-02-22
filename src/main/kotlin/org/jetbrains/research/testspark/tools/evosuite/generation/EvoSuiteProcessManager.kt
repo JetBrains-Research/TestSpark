@@ -65,7 +65,7 @@ class EvoSuiteProcessManager(
      * @param indicator the progress indicator
      */
     override fun runTestGenerator(
-        indicator: ProgressIndicator,
+        indicator: ProgressIndicator?,
         codeType: FragmentToTestData,
         packageName: String,
     ) {
@@ -126,7 +126,7 @@ class EvoSuiteProcessManager(
             log.info("Starting EvoSuite with arguments: $cmdString")
 
 //            indicator.isIndeterminate = false
-            indicator.text = TestSparkBundle.message("searchMessage")
+            indicator?.text = TestSparkBundle.message("searchMessage")
             val evoSuiteProcess = GeneralCommandLine(cmd)
             evoSuiteProcess.charset = Charset.forName("UTF-8")
             evoSuiteProcess.setWorkDirectory(projectPath)
@@ -164,15 +164,15 @@ class EvoSuiteProcessManager(
                         }
 
                     if (progress != null && coverage != null) {
-                        indicator.fraction = if (progress >= coverage) progress else coverage
+                        indicator?.fraction = if (progress >= coverage) progress else coverage
                     } else if (progress != null) {
-                        indicator.fraction = progress
+                        indicator?.fraction = progress
                     } else if (coverage != null) {
-                        indicator.fraction = coverage
+                        indicator?.fraction = coverage
                     }
 
-                    if (indicator.fraction == 1.0 && indicator.text != TestSparkBundle.message("testCasesSaving")) {
-                        indicator.text = TestSparkBundle.message("testCasesSaving")
+                    if (indicator?.fraction == 1.0 && indicator.text != TestSparkBundle.message("testCasesSaving")) {
+                        indicator?.text = TestSparkBundle.message("testCasesSaving")
                     }
                 }
             })

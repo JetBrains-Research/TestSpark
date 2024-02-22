@@ -25,7 +25,7 @@ class OpenAIRequestManager : RequestManager() {
 
     override fun send(
         prompt: String,
-        indicator: ProgressIndicator,
+        indicator: ProgressIndicator?,
         project: Project,
         llmErrorManager: LLMErrorManager,
     ): Pair<SendResult, TestsAssembler> {
