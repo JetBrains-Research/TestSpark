@@ -121,10 +121,11 @@ internal class PromptBuilder(private var prompt: String) {
 
         if (isPromptValid(PromptKeyword.TEST_SAMPLE, prompt)) {
             // TODO fix the problem
-            var fullText = project.service<LLMTestSampleService>().getTestSample()
-            if (fullText.isNotBlank()) {
-                fullText = "Use this test sample:\n```\n$fullText\n```\n"
-            }
+            val fullText = ""
+//            var fullText = project.service<LLMTestSampleService>().getTestSample()
+//            if (fullText.isNotBlank()) {
+//                fullText = "Use this test sample:\n```\n$fullText\n```\n"
+//            }
             prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.TEST_SAMPLE.text}")

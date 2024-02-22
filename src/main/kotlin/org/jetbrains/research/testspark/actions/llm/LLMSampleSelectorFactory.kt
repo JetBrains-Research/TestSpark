@@ -12,6 +12,7 @@ import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import java.awt.CardLayout
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.JUnitVersion
@@ -43,9 +44,15 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
     private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
 
-    private val testNames = mutableListOf("<html><b>provide manually</b></html>")
-    private val initialTestCodes = mutableListOf(project.service<LLMTestSampleService>().createTestSampleClass("", "// provide test method code here"))
-    private val currentTestCodes = mutableListOf(project.service<LLMTestSampleService>().createTestSampleClass("", "// provide test method code here"))
+    private val selectionPanel = JPanel()
+    private val testSamplePanel = JPanel()
+
+    private val defaultTestName = "<html>provide manually</html>"
+    private val defaultTestCode = "// provide test method code here"
+
+    private val testNames = mutableListOf(defaultTestName)
+    private val initialTestCodes = mutableListOf(project.service<LLMTestSampleService>().createTestSampleClass("", defaultTestCode))
+    private val currentTestCodes = mutableListOf(project.service<LLMTestSampleService>().createTestSampleClass("", defaultTestCode))
 
     private val languageTextField = LanguageTextField(
         Language.findLanguageByID("JAVA"),
@@ -62,8 +69,19 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     )
 
     private val resetButton = createButton(TestSparkIcons.reset, TestSparkLabelsBundle.defaultValue("resetTip"))
+    private val addButton = createButton(TestSparkIcons.add, TestSparkLabelsBundle.defaultValue("addTip"))
 
     private val selectionLabel = JBLabel(TestSparkLabelsBundle.defaultValue("selectSamples"))
+
+    private var formBuilder = FormBuilder.createFormBuilder()
+        .setFormLeftIndent(10)
+        .addComponent(JPanel(), 0)
+        .addComponent(radioButtonsPanel, 10)
+        .addComponent(selectionPanel, 10)
+        .addComponent(testSamplePanel, 10)
+        .addComponent(languageTextFieldScrollPane, 10)
+
+    private var middlePanel = formBuilder.panel
 
     init {
         addListeners()
@@ -120,6 +138,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
                     languageTextField.text = currentTestCodes[index]
                 }
             }
+            middlePanel.revalidate()
         }
 
         resetButton.addActionListener {
@@ -129,6 +148,13 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
                     languageTextField.text = currentTestCodes[index]
                 }
             }
+        }
+
+        addButton.addActionListener {
+            formBuilder = formBuilder
+                .addComponent(JButton("ABC"), 10)
+            middlePanel = formBuilder.panel
+            middlePanel.revalidate()
         }
     }
 
@@ -160,25 +186,17 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
             radioButtonsPanel.add(button)
         }
 
-        val testSamplesAndResetButtonPanel = JPanel()
-        testSamplesAndResetButtonPanel.layout = BoxLayout(testSamplesAndResetButtonPanel, BoxLayout.X_AXIS)
-        testSamplesAndResetButtonPanel.add(testSamplesSelector)
-        testSamplesAndResetButtonPanel.add(resetButton)
+        selectionPanel.add(selectionLabel)
+
+        testSamplePanel.layout = BoxLayout(testSamplePanel, BoxLayout.X_AXIS)
+        testSamplePanel.add(testSamplesSelector)
+        testSamplePanel.add(resetButton)
+        testSamplePanel.add(addButton)
 
         enabledComponents(false)
 
-        return FormBuilder.createFormBuilder()
-            .setFormLeftIndent(10)
-            .addComponent(JPanel(), 0)
-            .addComponent(radioButtonsPanel, 10)
-            .addLabeledComponent(
-                selectionLabel,
-                testSamplesAndResetButtonPanel,
-                10,
-                false,
-            )
-            .addComponentFillVertically(languageTextFieldScrollPane, 10)
-            .panel
+        middlePanel.revalidate()
+        return middlePanel
     }
 
     /**
@@ -223,6 +241,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
 
     private fun enabledComponents(isEnabled: Boolean) {
         resetButton.isEnabled = false
+        addButton.isEnabled = isEnabled
         selectionLabel.isEnabled = isEnabled
         testSamplesSelector.isEnabled = isEnabled
         languageTextField.isEnabled = isEnabled

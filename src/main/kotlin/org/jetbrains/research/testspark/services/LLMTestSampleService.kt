@@ -6,8 +6,10 @@ import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
+import com.intellij.psi.PsiMethod
 import com.intellij.util.containers.stream
 
 @Service(Service.Level.PROJECT)
@@ -43,7 +45,7 @@ class LLMTestSampleService {
                     annotations.forEach { annotation ->
                         if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
                             val code: String = createTestSampleClass(imports, method.text)
-                            testNames.add(createMethodName(method.name))
+                            testNames.add(createMethodName(psiClass, method))
                             initialTestCodes.add(code)
                             currentTestCodes.add(code)
                         }
@@ -63,6 +65,6 @@ class LLMTestSampleService {
             "}"
     }
 
-    private fun createMethodName(methodName: String): String =
-        "<html><b><font color='orange'>method</font> $methodName</b></html>"
+    private fun createMethodName(psiClass: PsiClass, method: PsiMethod): String =
+        "<html>${psiClass.qualifiedName}#${method.name}</html>"
 }

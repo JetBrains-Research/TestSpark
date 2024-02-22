@@ -8,6 +8,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.roots.LibraryOrderEntry
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
@@ -76,7 +77,8 @@ class TestSparkAction : AnAction() {
      *
      * @property e The AnActionEvent object.
      */
-    class TestSparkActionWindow(val e: AnActionEvent, private val visibilityController: VisibilityController) : JFrame("TestSpark") {
+    class TestSparkActionWindow(val e: AnActionEvent, private val visibilityController: VisibilityController) :
+        JFrame("TestSpark") {
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
@@ -104,7 +106,14 @@ class TestSparkAction : AnAction() {
                 panel.add(getMainPanel(), "1")
                 panel.add(createCardPanel(evoSuitePanelFactory, junit), "2")
                 panel.add(createCardPanel(llmSetupPanelFactory, junit), "3")
-                panel.add(createCardPanel(llmSampleSelectorFactory, junit), "4")
+
+                panel.add(
+                    JBScrollPane(
+                        createCardPanel(llmSampleSelectorFactory, junit),
+                        JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                        JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+                    ), "4"
+                )
 
                 addListeners(panel)
 
