@@ -27,7 +27,7 @@ class LLMTestSampleService {
      *
      * @return A list of strings, representing the names of the test samples.
      */
-    fun collectTestSamples(project: Project, testNames: MutableList<String>, initialTestCodes: MutableList<String>, currentTestCodes: MutableList<String>) {
+    fun collectTestSamples(project: Project, testNames: MutableList<String>, initialTestCodes: MutableList<String>) {
         val projectFileIndex: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
         val javaFileType: FileType = FileTypeManager.getInstance().getFileTypeByExtension("java")
 
@@ -47,7 +47,6 @@ class LLMTestSampleService {
                             val code: String = createTestSampleClass(imports, method.text)
                             testNames.add(createMethodName(psiClass, method))
                             initialTestCodes.add(code)
-                            currentTestCodes.add(code)
                         }
                     }
                 }
