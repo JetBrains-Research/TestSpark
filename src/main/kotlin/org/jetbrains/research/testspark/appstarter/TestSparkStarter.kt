@@ -2,30 +2,24 @@ package org.jetbrains.research.testspark.appstarter
 
 import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.application.ApplicationStarter
-import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.components.service
-import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.openapi.progress.ProgressIndicatorProvider
-import com.intellij.openapi.progress.util.ProgressIndicatorBase
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
-import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import java.io.File
 import kotlin.system.exitProcess
+
 
 class TestSparkStarter: ApplicationStarter {
     @Deprecated("Specify it as `id` for extension definition in a plugin descriptor")
@@ -58,16 +52,7 @@ class TestSparkStarter: ApplicationStarter {
         }
         println("Detected project: ${project}")
 
-        // update settings
-        project.service<ProjectContextService>().projectClassPath = classPath
-        project.service<SettingsProjectService>().state.buildPath = classPath
-        SettingsArguments.settingsState?.currentLLMPlatformName = TestSparkDefaultsBundle.defaultValue("grazie")
-        SettingsArguments.settingsState!!.llmPlatforms[1].token = token
-        SettingsArguments.settingsState!!.llmPlatforms[1].model = model
-        SettingsArguments.settingsState!!.classPrompt = File(promptTemplateFile).readText()
-        project.service<ProjectContextService>().resultPath = output
-
-//        open target file
+        //        open target file
         val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath) ?: run {
             println("couldn't open file $filePath")
             exitProcess(1)
@@ -82,29 +67,52 @@ class TestSparkStarter: ApplicationStarter {
 
         println("PsiClass ${targetPsiClass.qualifiedName} is detected! Start the test generation process.")
 
-        // get target classes
-        val classesToTest =  Llm().getClassesUnderTest(project, targetPsiClass)
+        // update settings
+        project.service<ProjectContextService>().projectClassPath = classPath
+        project.service<SettingsProjectService>().state.buildPath = classPath
+        SettingsArguments.settingsState?.currentLLMPlatformName = TestSparkDefaultsBundle.defaultValue("grazie")
+        SettingsArguments.settingsState!!.llmPlatforms[1].token = token
+        SettingsArguments.settingsState!!.llmPlatforms[1].model = model
+        SettingsArguments.settingsState!!.classPrompt = File(promptTemplateFile).readText()
+        project.service<ProjectContextService>().resultPath = output
+        project.service<ProjectContextService>().classFQN = targetPsiClass.qualifiedName
+        project.service<ProjectContextService>().fileUrl = output
+        // TODO project.service<ProjectContextService>().fileUrl
 
-        // get package name
-        val packageList = targetPsiClass.qualifiedName.toString().split(".").toMutableList()
-        packageList.removeLast()
+        // Continue when the project is indexed
+        println("Indexing project...")
+        DumbService.getInstance(project).runWhenSmart{
+            println("Indexing is done")
+            // get target classes
+            val classesToTest =  Llm().getClassesUnderTest(project, targetPsiClass)
 
-        val packageName = packageList.joinToString(".")
+            println("Detected CUTs: $classesToTest")
 
-        val llmProcessManager = LLMProcessManager(
-            project,
-            PromptManager(project,targetPsiClass,classesToTest)
-        )
+            // get package name
+            val packageList = targetPsiClass.qualifiedName.toString().split(".").toMutableList()
+            packageList.removeLast()
 
-        llmProcessManager.runTestGenerator(indicator=null,
-            FragmentToTestData(CodeType.CLASS),
-            packageName
+            val packageName = packageList.joinToString(".")
+
+            val llmProcessManager = LLMProcessManager(
+                project,
+                PromptManager(project,targetPsiClass,classesToTest)
             )
 
+            llmProcessManager.runTestGenerator(indicator=null,
+                FragmentToTestData(CodeType.CLASS),
+                packageName
+            )
 
-        // ToDo integrate with current implementation of LLM-based test generation in TestSpark
+            // ToDo add test generation with Jacoco for tests in out variable
+        }
+
+
+
+
 
     }
+
 
     private fun detectPsiClass(classes: Array<PsiClass>, classUnderTestName: String): PsiClass? {
         for (psiClass in classes){

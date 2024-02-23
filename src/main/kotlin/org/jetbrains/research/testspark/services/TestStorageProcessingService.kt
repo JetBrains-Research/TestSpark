@@ -10,6 +10,8 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
+import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -31,9 +33,12 @@ class TestStorageProcessingService(private val project: Project) {
 
     val resultPath = "$testResultDirectory$testResultName"
 
-    private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
-    private val log = Logger.getInstance(this::class.java)
+    // If projectSdk is not set, it means that we are in headless mode, and we can use the JDk used for running TestSpark
+    private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk?.homeDirectory
+        ?: LocalFileSystem.getInstance().findFileByPath(System.getProperty("java.home"))!!
+
+    private val log = Logger.getInstance(this.javaClass)
 
     /**
      * Generates the path for the command by concatenating the necessary paths.
