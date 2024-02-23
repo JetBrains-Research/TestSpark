@@ -16,7 +16,7 @@ class PromptGenerator(
      * @return The generated prompt.
      * @throws IllegalStateException If any of the required keywords are missing in the prompt template.
      */
-    fun generatePromptForClass(interestingClasses: List<ClassRepresentation>): String {
+    fun generatePromptForClass(interestingClasses: List<ClassRepresentation>, testSamplesCode: String): String {
         val prompt = PromptBuilder(promptTemplates.classPrompt)
             .insertLanguage(context.promptConfiguration.desiredLanguage)
             .insertName(context.cut.qualifiedName!!)
@@ -25,7 +25,7 @@ class PromptGenerator(
             .insertCodeUnderTest(context.cut.fullText, context.classesToTest)
             .insertMethodsSignatures(interestingClasses)
             .insertPolymorphismRelations(context.polymorphismRelations)
-            .insertTestSample()
+            .insertTestSample(testSamplesCode)
             .build()
 
         return prompt
@@ -42,6 +42,7 @@ class PromptGenerator(
     fun generatePromptForMethod(
         method: MethodRepresentation,
         interestingClassesFromMethod: List<ClassRepresentation>,
+        testSamplesCode: String,
     ): String {
         val prompt = PromptBuilder(promptTemplates.methodPrompt)
             .insertLanguage(context.promptConfiguration.desiredLanguage)
@@ -51,7 +52,7 @@ class PromptGenerator(
             .insertCodeUnderTest(method.text, context.classesToTest)
             .insertMethodsSignatures(interestingClassesFromMethod)
             .insertPolymorphismRelations(context.polymorphismRelations)
-            .insertTestSample()
+            .insertTestSample(testSamplesCode)
             .build()
 
         return prompt
@@ -71,6 +72,7 @@ class PromptGenerator(
         lineUnderTest: String,
         method: MethodRepresentation,
         interestingClassesFromMethod: List<ClassRepresentation>,
+        testSamplesCode: String,
     ): String {
         val prompt = PromptBuilder(promptTemplates.linePrompt)
             .insertLanguage(context.promptConfiguration.desiredLanguage)
@@ -80,7 +82,7 @@ class PromptGenerator(
             .insertCodeUnderTest(method.text, context.classesToTest)
             .insertMethodsSignatures(interestingClassesFromMethod)
             .insertPolymorphismRelations(context.polymorphismRelations)
-            .insertTestSample()
+            .insertTestSample(testSamplesCode)
             .build()
 
         return prompt

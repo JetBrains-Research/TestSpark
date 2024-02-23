@@ -116,17 +116,15 @@ internal class PromptBuilder(private var prompt: String) {
         }
     }
 
-    fun insertTestSample() = apply {
+    fun insertTestSample(testSamplesCode: String) = apply {
         val keyword = "\$${PromptKeyword.TEST_SAMPLE.text}"
 
         if (isPromptValid(PromptKeyword.TEST_SAMPLE, prompt)) {
-            // TODO fix the problem
-            val fullText = ""
-//            var fullText = project.service<LLMTestSampleService>().getTestSample()
-//            if (fullText.isNotBlank()) {
-//                fullText = "Use this test sample:\n```\n$fullText\n```\n"
-//            }
-            prompt.replace(keyword, fullText, ignoreCase = false)
+            var fullText = testSamplesCode
+            if (fullText.isNotBlank()) {
+                fullText = "Use this test sample:\n```\n$fullText\n```\n"
+            }
+            prompt = prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.TEST_SAMPLE.text}")
         }

@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.components.service
 import com.intellij.openapi.roots.LibraryOrderEntry
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
@@ -18,7 +17,6 @@ import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
-import org.jetbrains.research.testspark.services.LLMTestSampleService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
@@ -306,31 +304,31 @@ class TestSparkAction : AnAction() {
         }
 
         private fun startEvoSuiteGeneration() {
-            e.project!!.service<LLMTestSampleService>().setTestSample(null)
+            val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
             if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByEvoSuite(e)
+                Manager.generateTestsForClassByEvoSuite(e, testSamplesCode)
             } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByEvoSuite(e)
+                Manager.generateTestsForMethodByEvoSuite(e, testSamplesCode)
             } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByEvoSuite(e)
+                Manager.generateTestsForLineByEvoSuite(e, testSamplesCode)
             }
+
             visibilityController.isVisible = false
             dispose()
         }
 
         private fun startLLMGeneration() {
-            if (!SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
-                e.project!!.service<LLMTestSampleService>().setTestSample(null)
-            }
+            val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
             if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByLlm(e)
+                Manager.generateTestsForClassByLlm(e, testSamplesCode)
             } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByLlm(e)
+                Manager.generateTestsForMethodByLlm(e, testSamplesCode)
             } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByLlm(e)
+                Manager.generateTestsForLineByLlm(e, testSamplesCode)
             }
+
             visibilityController.isVisible = false
             dispose()
         }

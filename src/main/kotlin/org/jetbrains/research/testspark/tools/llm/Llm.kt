@@ -27,7 +27,7 @@ import org.jetbrains.research.testspark.tools.template.Tool
  */
 class Llm(override val name: String = "LLM") : Tool {
 
-    private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestData): LLMProcessManager {
+    private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestData, testSamplesCode: String): LLMProcessManager {
         val project: Project = e.project!!
 
         val classesToTest = mutableListOf<PsiClass>()
@@ -55,6 +55,7 @@ class Llm(override val name: String = "LLM") : Tool {
         return LLMProcessManager(
             project,
             PromptManager(project, classesToTest[0], classesToTest),
+            testSamplesCode,
         )
     }
 
@@ -64,12 +65,12 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param e the AnActionEvent object containing information about the action event
      * @throws IllegalArgumentException if the project in the AnActionEvent object is null
      */
-    override fun generateTestsForClass(e: AnActionEvent) {
+    override fun generateTestsForClass(e: AnActionEvent, testSamplesCode: String) {
         if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
-        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
+        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType, testSamplesCode), codeType)
     }
 
     /**
@@ -78,7 +79,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param e The AnActionEvent that triggered the method generation.
      * @throws IllegalStateException if the project or the surrounding method is null.
      */
-    override fun generateTestsForMethod(e: AnActionEvent) {
+    override fun generateTestsForMethod(e: AnActionEvent, testSamplesCode: String) {
         if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
             return
         }
@@ -86,7 +87,7 @@ class Llm(override val name: String = "LLM") : Tool {
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
         val codeType = FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod))
-        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
+        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType, testSamplesCode), codeType)
     }
 
     /**
@@ -94,7 +95,7 @@ class Llm(override val name: String = "LLM") : Tool {
      *
      * @param e The AnActionEvent that triggered the generation of tests.
      */
-    override fun generateTestsForLine(e: AnActionEvent) {
+    override fun generateTestsForLine(e: AnActionEvent, testSamplesCode: String) {
         if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
             return
         }
@@ -102,7 +103,7 @@ class Llm(override val name: String = "LLM") : Tool {
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
         val codeType = FragmentToTestData(CodeType.LINE, selectedLine)
-        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType), codeType)
+        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType, testSamplesCode), codeType)
     }
 
     private fun createLLMPipeline(e: AnActionEvent): Pipeline {

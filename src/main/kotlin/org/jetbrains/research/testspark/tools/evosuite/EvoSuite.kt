@@ -37,12 +37,12 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         return EvoSuiteProcessManager(project, buildPath)
     }
 
-    override fun generateTestsForClass(e: AnActionEvent) {
+    override fun generateTestsForClass(e: AnActionEvent, testSamplesCode: String) {
         log.info("Starting tests generation for class by EvoSuite")
         createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestData(CodeType.CLASS))
     }
 
-    override fun generateTestsForMethod(e: AnActionEvent) {
+    override fun generateTestsForMethod(e: AnActionEvent, testSamplesCode: String) {
         log.info("Starting tests generation for method by EvoSuite")
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
@@ -50,7 +50,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         createPipeline(e).runTestGeneration(getEvoSuiteProcessManager(e), FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod)))
     }
 
-    override fun generateTestsForLine(e: AnActionEvent) {
+    override fun generateTestsForLine(e: AnActionEvent, testSamplesCode: String) {
         log.info("Starting tests generation for line by EvoSuite")
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!

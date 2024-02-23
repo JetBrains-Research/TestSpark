@@ -13,19 +13,19 @@ interface Tool {
      *
      * @param e The AnActionEvent representing the event when the method is invoked.
      */
-    fun generateTestsForClass(e: AnActionEvent)
+    fun generateTestsForClass(e: AnActionEvent, testSamplesCode: String)
 
     /**
      * Generates tests for a given method.
      *
      * @param e the AnActionEvent object representing the action event
      */
-    fun generateTestsForMethod(e: AnActionEvent)
+    fun generateTestsForMethod(e: AnActionEvent, testSamplesCode: String)
 
     /**
      * Generates test cases for a given line of code based on the provided AnActionEvent.
      *
      * @param e The AnActionEvent representing the context in which the method is called.
      */
-    fun generateTestsForLine(e: AnActionEvent)
+    fun generateTestsForLine(e: AnActionEvent, testSamplesCode: String)
 }

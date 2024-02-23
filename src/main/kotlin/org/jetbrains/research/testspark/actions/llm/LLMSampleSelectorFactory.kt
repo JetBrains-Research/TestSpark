@@ -37,7 +37,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
 
     private val testSamplePanelFactories: MutableList<TestSamplePanelFactory> = mutableListOf()
 
-    private var numberOfTestSamples = 1
+    private var testSamplesCode: String = ""
 
     private var formBuilder = FormBuilder.createFormBuilder()
         .setFormLeftIndent(10)
@@ -68,7 +68,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
         }
 
         addButton.addActionListener {
-            val testSamplePanelFactory = TestSamplePanelFactory(project, middlePanel, testNames, initialTestCodes, numberOfTestSamples++)
+            val testSamplePanelFactory = TestSamplePanelFactory(project, middlePanel, testNames, initialTestCodes)
             testSamplePanelFactories.add(testSamplePanelFactory)
             val testSamplePanel = testSamplePanelFactory.getTestSamplePanel()
             val codeScrollPanel = testSamplePanelFactory.getCodeScrollPanel()
@@ -165,10 +165,9 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
 
     override fun applyUpdates() {
         if (selectionTypeButtons[0].isSelected) {
-//            TODO uncomment
-//            project.service<LLMTestSampleService>().setTestSample(languageTextField.text)
-        } else {
-            project.service<LLMTestSampleService>().setTestSample(null)
+            for (testSamplePanelFactory in testSamplePanelFactories) {
+                testSamplesCode += testSamplePanelFactory.getCode() + "\n"
+            }
         }
     }
 
@@ -179,4 +178,6 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
             testSamplePanelFactory.enabledComponents(isEnabled)
         }
     }
+
+    fun getTestSamplesCode(): String = testSamplesCode
 }

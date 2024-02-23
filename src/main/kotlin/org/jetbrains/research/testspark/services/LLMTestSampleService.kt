@@ -14,14 +14,6 @@ import com.intellij.util.containers.stream
 
 @Service(Service.Level.PROJECT)
 class LLMTestSampleService {
-    private var testSample: String? = null
-
-    fun setTestSample(testSample: String?) {
-        this.testSample = testSample
-    }
-
-    fun getTestSample(): String = testSample ?: ""
-
     /**
      * Retrieves a list of test samples from the given project.
      *

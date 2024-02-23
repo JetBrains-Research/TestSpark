@@ -25,7 +25,6 @@ class TestSamplePanelFactory(
     private val middlePanel: JPanel,
     private val testNames: MutableList<String>,
     private val initialTestCodes: MutableList<String>,
-    index: Int,
 ) {
     private val currentTestCodes = initialTestCodes.toMutableList()
 
@@ -128,4 +127,6 @@ class TestSamplePanelFactory(
         languageTextField.isEnabled = isEnabled
         languageTextFieldScrollPane.isEnabled = isEnabled
     }
+
+    fun getCode(): String = languageTextField.text
 }

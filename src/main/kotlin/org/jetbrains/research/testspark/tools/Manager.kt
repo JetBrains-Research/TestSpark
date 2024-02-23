@@ -26,10 +26,10 @@ class Manager {
          *
          * @param e The AnActionEvent object representing the action event.
          */
-        fun generateTestsForClassByEvoSuite(e: AnActionEvent) {
+        fun generateTestsForClassByEvoSuite(e: AnActionEvent, testSamplesCode: String) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForClass(e)
+            EvoSuite().generateTestsForClass(e, testSamplesCode)
             display(e, 1)
         }
 
@@ -38,10 +38,10 @@ class Manager {
          *
          * @param e the AnActionEvent representing the action event.
          */
-        fun generateTestsForClassByLlm(e: AnActionEvent) {
+        fun generateTestsForClassByLlm(e: AnActionEvent, testSamplesCode: String) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForClass(e)
+            Llm().generateTestsForClass(e, testSamplesCode)
             display(e, 1)
         }
 
@@ -50,10 +50,10 @@ class Manager {
          *
          * @param e The AnActionEvent object representing the user action.
          */
-        fun generateTestsForMethodByEvoSuite(e: AnActionEvent) {
+        fun generateTestsForMethodByEvoSuite(e: AnActionEvent, testSamplesCode: String) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForMethod(e)
+            EvoSuite().generateTestsForMethod(e, testSamplesCode)
             display(e, 1)
         }
 
@@ -62,10 +62,10 @@ class Manager {
          *
          * @param e The AnActionEvent object containing information about the action event.
          */
-        fun generateTestsForMethodByLlm(e: AnActionEvent) {
+        fun generateTestsForMethodByLlm(e: AnActionEvent, testSamplesCode: String) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForMethod(e)
+            Llm().generateTestsForMethod(e, testSamplesCode)
             display(e, 1)
         }
 
@@ -74,10 +74,10 @@ class Manager {
          *
          * @param e AnActionEvent representing the action event.
          */
-        fun generateTestsForLineByEvoSuite(e: AnActionEvent) {
+        fun generateTestsForLineByEvoSuite(e: AnActionEvent, testSamplesCode: String) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForLine(e)
+            EvoSuite().generateTestsForLine(e, testSamplesCode)
             display(e, 1)
         }
 
@@ -86,10 +86,10 @@ class Manager {
          *
          * @param e The AnActionEvent containing the information about the action
          */
-        fun generateTestsForLineByLlm(e: AnActionEvent) {
+        fun generateTestsForLineByLlm(e: AnActionEvent, testSamplesCode: String) {
             if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForLine(e)
+            Llm().generateTestsForLine(e, testSamplesCode)
             display(e, 1)
         }
 
