@@ -9,21 +9,23 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
-import javax.swing.BoxLayout
-import javax.swing.DefaultComboBoxModel
-import javax.swing.JPanel
-import javax.swing.ScrollPaneConstants
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.display.getModifiedLines
+import javax.swing.BoxLayout
+import javax.swing.DefaultComboBoxModel
+import javax.swing.JButton
+import javax.swing.JPanel
+import javax.swing.ScrollPaneConstants
 
 class TestSamplePanelFactory(
-    private val project: Project,
+    project: Project,
     private val middlePanel: JPanel,
     private val testNames: MutableList<String>,
-    private val initialTestCodes: MutableList<String>
+    private val initialTestCodes: MutableList<String>,
+    index: Int,
 ) {
     private val currentTestCodes = initialTestCodes.toMutableList()
 
@@ -44,6 +46,8 @@ class TestSamplePanelFactory(
     private var testSamplesSelector = ComboBox(arrayOf(""))
 
     private val resetButton = createButton(TestSparkIcons.reset, TestSparkLabelsBundle.defaultValue("resetTip"))
+
+    private val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTip"))
 
     init {
         addListeners()
@@ -100,12 +104,15 @@ class TestSamplePanelFactory(
         }
     }
 
+    fun getRemoveButton(): JButton = removeButton
+
     fun getTestSamplePanel(): JPanel {
         val testSamplePanel = JPanel()
 
         testSamplePanel.layout = BoxLayout(testSamplePanel, BoxLayout.X_AXIS)
         testSamplePanel.add(testSamplesSelector)
         testSamplePanel.add(resetButton)
+        testSamplePanel.add(removeButton)
 
         return testSamplePanel
     }
@@ -116,6 +123,7 @@ class TestSamplePanelFactory(
 
     fun enabledComponents(isEnabled: Boolean) {
         resetButton.isEnabled = false
+        removeButton.isEnabled = isEnabled
         testSamplesSelector.isEnabled = isEnabled
         languageTextField.isEnabled = isEnabled
         languageTextFieldScrollPane.isEnabled = isEnabled

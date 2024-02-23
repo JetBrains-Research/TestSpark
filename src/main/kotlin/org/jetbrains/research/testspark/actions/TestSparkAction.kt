@@ -111,8 +111,9 @@ class TestSparkAction : AnAction() {
                     JBScrollPane(
                         createCardPanel(llmSampleSelectorFactory, junit),
                         JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                        JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
-                    ), "4"
+                        JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
+                    ),
+                    "4",
                 )
 
                 addListeners(panel)

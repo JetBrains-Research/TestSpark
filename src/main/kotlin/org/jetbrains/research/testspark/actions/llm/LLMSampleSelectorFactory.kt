@@ -37,6 +37,8 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
 
     private val testSamplePanelFactories: MutableList<TestSamplePanelFactory> = mutableListOf()
 
+    private var numberOfTestSamples = 1
+
     private var formBuilder = FormBuilder.createFormBuilder()
         .setFormLeftIndent(10)
         .addComponent(JPanel(), 0)
@@ -66,12 +68,22 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
         }
 
         addButton.addActionListener {
-            val testSamplePanelFactory = TestSamplePanelFactory(project, middlePanel, testNames, initialTestCodes)
+            val testSamplePanelFactory = TestSamplePanelFactory(project, middlePanel, testNames, initialTestCodes, numberOfTestSamples++)
+            testSamplePanelFactories.add(testSamplePanelFactory)
+            val testSamplePanel = testSamplePanelFactory.getTestSamplePanel()
+            val codeScrollPanel = testSamplePanelFactory.getCodeScrollPanel()
             formBuilder = formBuilder
-                .addComponent(testSamplePanelFactory.getTestSamplePanel(), 10)
-                .addComponent(testSamplePanelFactory.getCodeScrollPanel(), 10)
+                .addComponent(testSamplePanel, 10)
+                .addComponent(codeScrollPanel, 10)
             middlePanel = formBuilder.panel
             middlePanel.revalidate()
+
+            testSamplePanelFactory.getRemoveButton().addActionListener {
+                testSamplePanelFactories.remove(testSamplePanelFactory)
+                middlePanel.remove(testSamplePanel)
+                middlePanel.remove(codeScrollPanel)
+                middlePanel.revalidate()
+            }
         }
     }
 
