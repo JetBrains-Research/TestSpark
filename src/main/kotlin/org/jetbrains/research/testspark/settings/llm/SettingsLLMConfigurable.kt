@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -11,7 +12,6 @@ import javax.swing.JComponent
  * This class allows to configure some LLM-related settings via the Large Language Model page in the Settings dialog,
  *   observes the changes and manages the UI and state.
  */
-
 class SettingsLLMConfigurable : Configurable {
 
     var settingsComponent: SettingsLLMComponent? = null
@@ -32,8 +32,14 @@ class SettingsLLMConfigurable : Configurable {
     override fun reset() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         for (index in settingsComponent!!.llmPlatforms.indices) {
-            settingsComponent!!.llmPlatforms[index].token = settingsState.llmPlatforms[index].token
-            settingsComponent!!.llmPlatforms[index].model = settingsState.llmPlatforms[index].model
+            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI")) {
+                settingsComponent!!.llmPlatforms[index].token = settingsState.openAIToken
+                settingsComponent!!.llmPlatforms[index].model = settingsState.openAIModel
+            }
+            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie")) {
+                settingsComponent!!.llmPlatforms[index].token = settingsState.grazieToken
+                settingsComponent!!.llmPlatforms[index].model = settingsState.grazieModel
+            }
         }
         settingsComponent!!.currentLLMPlatformName = settingsState.currentLLMPlatformName
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
@@ -57,8 +63,14 @@ class SettingsLLMConfigurable : Configurable {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         var modified = false
         for (index in settingsComponent!!.llmPlatforms.indices) {
-            modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.llmPlatforms[index].token)
-            modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.llmPlatforms[index].model)
+            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI")) {
+                modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.openAIToken)
+                modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.openAIModel)
+            }
+            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie")) {
+                modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.grazieToken)
+                modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.grazieModel)
+            }
         }
         modified = modified or (settingsComponent!!.currentLLMPlatformName != settingsState.currentLLMPlatformName)
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
@@ -86,8 +98,14 @@ class SettingsLLMConfigurable : Configurable {
     override fun apply() {
         val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         for (index in settingsComponent!!.llmPlatforms.indices) {
-            settingsState.llmPlatforms[index].token = settingsComponent!!.llmPlatforms[index].token
-            settingsState.llmPlatforms[index].model = settingsComponent!!.llmPlatforms[index].model
+            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI")) {
+                settingsState.openAIToken = settingsComponent!!.llmPlatforms[index].token
+                settingsState.openAIModel = settingsComponent!!.llmPlatforms[index].model
+            }
+            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie")) {
+                settingsState.grazieToken = settingsComponent!!.llmPlatforms[index].token
+                settingsState.grazieModel = settingsComponent!!.llmPlatforms[index].model
+            }
         }
         settingsState.currentLLMPlatformName = settingsComponent!!.currentLLMPlatformName
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest

@@ -6,6 +6,8 @@ import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
+import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
+import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIPlatform
 
 /**
  * A class that provides access to various settings arguments.
@@ -20,7 +22,10 @@ class SettingsArguments {
          *
          * @return The list of LLM platforms.
          */
-        fun llmPlatforms(): List<LLMPlatform> = settingsState!!.llmPlatforms
+        fun llmPlatforms(): List<LLMPlatform> = listOf(
+            OpenAIPlatform(token = settingsState!!.openAIToken, model = settingsState!!.openAIModel),
+            GraziePlatform(token = settingsState!!.grazieToken, model = settingsState!!.grazieModel),
+        )
 
         /**
          * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.

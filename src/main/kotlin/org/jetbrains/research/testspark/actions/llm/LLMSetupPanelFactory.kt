@@ -145,8 +145,14 @@ class LLMSetupPanelFactory : PanelFactory {
     override fun applyUpdates() {
         settingsState.currentLLMPlatformName = platformSelector.selectedItem!!.toString()
         for (index in llmPlatforms.indices) {
-            settingsState.llmPlatforms[index].token = llmPlatforms[index].token
-            settingsState.llmPlatforms[index].model = llmPlatforms[index].model
+            if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI")) {
+                settingsState.openAIToken = llmPlatforms[index].token
+                settingsState.openAIModel = llmPlatforms[index].model
+            }
+            if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie")) {
+                settingsState.grazieToken = llmPlatforms[index].token
+                settingsState.grazieModel = llmPlatforms[index].model
+            }
         }
         settingsState.junitVersion = (junitSelector.selectedItem!! as JUnitVersion)
     }

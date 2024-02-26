@@ -1,12 +1,17 @@
 package org.jetbrains.research.testspark.helpers
 
+import com.google.gson.JsonParser
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.util.io.HttpRequests
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
+import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIPlatform
+import java.net.HttpURLConnection
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JTextField
 import javax.swing.event.DocumentEvent
@@ -41,20 +46,31 @@ private fun updateModelSelector(
     llmPlatforms: List<LLMPlatform>,
 ) {
     val settingsState = SettingsApplicationService.getInstance().state!!
-
-    for (index in settingsState.llmPlatforms.indices) {
-        if (platformSelector.selectedItem!!.toString() == settingsState.llmPlatforms[index].name) {
-            ApplicationManager.getApplication().executeOnPooledThread {
-                val modules = settingsState.llmPlatforms[index].getModels(llmUserTokenField.text)
-                modelSelector.model = DefaultComboBoxModel(modules)
-                if (modules.contains(settingsState.llmPlatforms[index].model)) {
-                    modelSelector.selectedItem = settingsState.llmPlatforms[index].model
-                    llmPlatforms[index].model = settingsState.llmPlatforms[index].model
-                }
-                modelSelector.isEnabled = true
-                if (modules.contentEquals(arrayOf(""))) modelSelector.isEnabled = false
+    ApplicationManager.getApplication().executeOnPooledThread {
+        var modules = arrayOf("")
+        if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("openAI")) {
+            modules = getOpenAIModels(llmUserTokenField.text)
+        }
+        if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("grazie")) {
+            modules = getGrazieModels(llmUserTokenField.text)
+        }
+        modelSelector.model = DefaultComboBoxModel(modules)
+        for (index in llmPlatforms.indices) {
+            if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI") &&
+                llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+            ) {
+                modelSelector.selectedItem = settingsState.openAIModel
+                llmPlatforms[index].model = settingsState.openAIModel
+            }
+            if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie") &&
+                llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+            ) {
+                modelSelector.selectedItem = settingsState.grazieModel
+                llmPlatforms[index].model = settingsState.grazieModel
             }
         }
+        modelSelector.isEnabled = true
+        if (modules.contentEquals(arrayOf(""))) modelSelector.isEnabled = false
     }
 }
 
@@ -70,10 +86,18 @@ private fun updateLlmUserTokenField(
     llmPlatforms: List<LLMPlatform>,
 ) {
     val settingsState = SettingsApplicationService.getInstance().state!!
-    for (index in settingsState.llmPlatforms.indices) {
-        if (platformSelector.selectedItem!!.toString() == settingsState.llmPlatforms[index].name) {
-            llmUserTokenField.text = settingsState.llmPlatforms[index].token
-            llmPlatforms[index].token = llmUserTokenField.text
+    for (index in llmPlatforms.indices) {
+        if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI") &&
+            llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+        ) {
+            llmUserTokenField.text = settingsState.openAIToken
+            llmPlatforms[index].token = settingsState.openAIToken
+        }
+        if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie") &&
+            llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+        ) {
+            llmUserTokenField.text = settingsState.grazieToken
+            llmPlatforms[index].token = settingsState.grazieToken
         }
     }
 }
@@ -166,4 +190,67 @@ fun stylizeMainComponents(
  */
 fun getLLLMPlatforms(): List<LLMPlatform> {
     return listOf(OpenAIPlatform(), GraziePlatform())
+}
+
+/**
+ * Retrieves a list of available models from the OpenAI API.
+ *
+ * @param providedToken The authentication token provided by OpenAI.
+ * @return An array of model IDs, sorted in descending order. If an error occurs during the request, an array with an empty string is returned.
+ * @throws HttpRequests.HttpStatusException if an HTTP request error occurs.
+ */
+fun getOpenAIModels(providedToken: String): Array<String> {
+    val url = "https://api.openai.com/v1/models"
+
+    val httpRequest = HttpRequests.request(url).tuner {
+        it.setRequestProperty("Authorization", "Bearer $providedToken")
+    }
+
+    val models = mutableListOf<String>()
+
+    try {
+        httpRequest.connect {
+            if ((it.connection as HttpURLConnection).responseCode == HttpURLConnection.HTTP_OK) {
+                val jsonObject = JsonParser.parseString(it.readString()).asJsonObject
+                val dataArray = jsonObject.getAsJsonArray("data")
+                for (dataObject in dataArray) {
+                    val id = dataObject.asJsonObject.getAsJsonPrimitive("id").asString
+                    models.add(id)
+                }
+            }
+        }
+    } catch (e: HttpRequests.HttpStatusException) {
+        return arrayOf("")
+    }
+
+    val gptComparator = Comparator<String> { s1, s2 ->
+        when {
+            s1.contains("gpt") && s2.contains("gpt") -> s2.compareTo(s1)
+            s1.contains("gpt") -> -1
+            s2.contains("gpt") -> 1
+            else -> s1.compareTo(s2)
+        }
+    }
+
+    if (models.isNotEmpty()) {
+        return models.sortedWith(gptComparator).toTypedArray().filter { !it.contains("vision") }
+            .toTypedArray()
+    }
+
+    return arrayOf("")
+}
+
+/**
+ * Retrieves the available Grazie models.
+ *
+ * @param providedToken the provided token to obtain the models
+ * @return an array of string representing the available Grazie models
+ */
+fun getGrazieModels(providedToken: String): Array<String> {
+    val className = "org.jetbrains.research.grazie.Info"
+    return try {
+        (Class.forName(className).getDeclaredConstructor().newInstance() as GrazieInfo).availableProfiles().toTypedArray()
+    } catch (e: ClassNotFoundException) {
+        arrayOf("")
+    }
 }
