@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.actions
 
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -34,6 +36,7 @@ import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 
 /**
  * Represents an action to be performed in the TestSpark plugin.
@@ -124,6 +127,15 @@ class TestSparkAction : AnAction() {
                 val x = (dimension.width - size.width) / 2
                 val y = (dimension.height - size.height) / 2
                 setLocation(x, y)
+            } else {
+                NotificationGroupManager.getInstance()
+                    .getNotificationGroup("Generation Error")
+                    .createNotification(
+                        TestSparkBundle.message("generationWindowWarningTitle"),
+                        TestSparkBundle.message("generationWindowWarningMessage"),
+                        NotificationType.WARNING,
+                    )
+                    .notify(e.project)
             }
         }
 
