@@ -14,6 +14,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
@@ -37,15 +38,20 @@ import java.awt.RenderingHints
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
+import java.awt.event.ActionEvent
 import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.FocusManager
 import javax.swing.JButton
 import javax.swing.JCheckBox
+import javax.swing.JComboBox
 import javax.swing.JLabel
+import javax.swing.JMenuItem
 import javax.swing.JOptionPane
 import javax.swing.JPanel
+import javax.swing.JPopupMenu
+import javax.swing.JTextArea
 import javax.swing.JTextField
 import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
@@ -109,7 +115,7 @@ class TestCasePanelFactory(
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
 
-    private val requestField = HintTextField(TestSparkLabelsBundle.defaultValue("requestFieldHint"))
+    private val requestComboBox = ComboBox(arrayOf("<User's request here>", "Option 2", "Option 3"))
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
@@ -235,7 +241,7 @@ class TestCasePanelFactory(
         val requestPanel = JPanel()
         requestPanel.layout = BoxLayout(requestPanel, BoxLayout.X_AXIS)
         requestPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
-        requestPanel.add(requestField)
+        requestPanel.add(requestComboBox)
         requestPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         requestPanel.add(sendButton)
         requestPanel.add(Box.createRigidArea(Dimension(15, 0)))
@@ -273,27 +279,9 @@ class TestCasePanelFactory(
         resetToLastRunButton.addActionListener { resetToLastRun() }
         removeButton.addActionListener { remove() }
 
-        sendButton.isEnabled = false
         sendButton.addActionListener { sendRequest() }
 
-        // Add a document listener to listen for changes
-        requestField.document.addDocumentListener(object : DocumentListener, javax.swing.event.DocumentListener {
-            override fun insertUpdate(e: javax.swing.event.DocumentEvent?) {
-                textChanged()
-            }
-
-            override fun removeUpdate(e: javax.swing.event.DocumentEvent?) {
-                textChanged()
-            }
-
-            override fun changedUpdate(e: javax.swing.event.DocumentEvent?) {
-                textChanged()
-            }
-
-            private fun textChanged() {
-                sendButton.isEnabled = requestField.text.isNotBlank()
-            }
-        })
+        requestComboBox.isEditable = true
 
         return panel
     }
@@ -406,7 +394,7 @@ class TestCasePanelFactory(
                     val modifiedTest = project.service<LLMChatService>()
                         .testModificationRequest(
                             initialCodes[currentRequestNumber - 1],
-                            requestField.text,
+                            requestComboBox.editor.item.toString(),
                             indicator,
                             project,
                         )
@@ -456,7 +444,8 @@ class TestCasePanelFactory(
             lastRunCodes.add(code)
             currentCodes.add(code)
 
-            requestField.text = ""
+            requestComboBox.selectedItem = requestComboBox.getItemAt(0)
+            sendButton.isEnabled = true
             loadingLabel.isVisible = false
 
             switchToAnotherCode()
