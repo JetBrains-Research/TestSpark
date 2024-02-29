@@ -32,32 +32,24 @@ import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 import java.awt.Dimension
-import java.awt.Graphics
-import java.awt.Graphics2D
-import java.awt.RenderingHints
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
-import java.awt.event.ActionEvent
 import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
-import javax.swing.FocusManager
 import javax.swing.JButton
 import javax.swing.JCheckBox
-import javax.swing.JComboBox
 import javax.swing.JLabel
-import javax.swing.JMenuItem
 import javax.swing.JOptionPane
 import javax.swing.JPanel
-import javax.swing.JPopupMenu
-import javax.swing.JTextArea
-import javax.swing.JTextField
 import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 import kotlin.collections.HashMap
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 
 class TestCasePanelFactory(
     private val project: Project,
@@ -65,6 +57,8 @@ class TestCasePanelFactory(
     editor: Editor,
     private val checkbox: JCheckBox,
 ) {
+    private val settingsState: SettingsApplicationState = SettingsArguments.settingsState!!
+
     private val panel = JPanel()
     private val previousButtons =
         createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
@@ -115,7 +109,8 @@ class TestCasePanelFactory(
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
 
-    private val requestComboBox = ComboBox(arrayOf("<User's request here>", "Option 2", "Option 3"))
+    private val requestJLabel = JLabel("Ask LLM for code modifications:")
+    private val requestComboBox = ComboBox(arrayOf("") + settingsState.defaultLLMRequests)
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
@@ -241,6 +236,8 @@ class TestCasePanelFactory(
         val requestPanel = JPanel()
         requestPanel.layout = BoxLayout(requestPanel, BoxLayout.X_AXIS)
         requestPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
+        requestPanel.add(requestJLabel)
+        requestPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         requestPanel.add(requestComboBox)
         requestPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
         requestPanel.add(sendButton)
@@ -684,24 +681,5 @@ class TestCasePanelFactory(
             project.service<JavaClassBuilderService>()
                 .getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
-    }
-
-    /**
-     * A custom JTextField with a hint text that is displayed when the field is empty and not in focus.
-     */
-    class HintTextField(private val hint: String) : JTextField() {
-        override fun paintComponent(pG: Graphics) {
-            super.paintComponent(pG)
-            if (getText().isEmpty() && FocusManager.getCurrentKeyboardFocusManager().focusOwner !== this) {
-                val g = pG as Graphics2D
-                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-                g.color = disabledTextColor
-                g.drawString(
-                    hint,
-                    getInsets().left + 5,
-                    getInsets().top + (1.3 * pG.getFontMetrics().maxAscent).toInt(),
-                )
-            }
-        }
     }
 }
