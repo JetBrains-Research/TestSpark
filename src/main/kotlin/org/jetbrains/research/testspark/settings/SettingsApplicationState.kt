@@ -36,7 +36,7 @@ data class SettingsApplicationState(
     var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
     var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
     var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
-    var defaultLLMRequests: List<String> = DefaultSettingsApplicationState.defaultLLMRequests,
+    var defaultLLMRequests: String = DefaultSettingsApplicationState.defaultLLMRequests,
     var junitVersion: JUnitVersion = DefaultSettingsApplicationState.junitVersion,
 ) {
 
@@ -69,7 +69,7 @@ data class SettingsApplicationState(
         val classPrompt: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
         val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
         val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
-        val defaultLLMRequests: List<String> = TestSparkDefaultsBundle.defaultValue("defaultLLMRequests").split("\n")
+        val defaultLLMRequests: String = TestSparkDefaultsBundle.defaultValue("defaultLLMRequests")
         val junitVersion: JUnitVersion = JUnitVersion.JUnit4
     }
 

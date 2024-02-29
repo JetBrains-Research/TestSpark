@@ -11,6 +11,7 @@ import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
+import java.awt.Dimension
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
@@ -29,8 +30,11 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 
 class SettingsLLMComponent {
+    private val settingsState: SettingsApplicationState = SettingsArguments.settingsState!!
+
     var panel: JPanel? = null
 
     // LLM Token
@@ -40,21 +44,23 @@ class SettingsLLMComponent {
     private var modelSelector = ComboBox(arrayOf(""))
     private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
 
+    // Default LLM Requests
+    private var defaultLLMRequestsSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("defaultLLMRequestsSeparator"))
+    private val defaultLLMRequestsFormBuilder = FormBuilder.createFormBuilder()
+    private val defaultLLMRequestsFormPanel = defaultLLMRequestsFormBuilder.panel
+
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
     private var promptEditorTabbedPane = createTabbedPane()
 
     // Maximum number of LLM requests
-    private var maxLLMRequestsField =
-        JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxLLMRequest, 1, 20))
+    private var maxLLMRequestsField = JBIntSpinner(UINumericRange(settingsState.maxLLMRequest, 1, 20))
 
     // The depth of input parameters used in class under tests
-    private var maxInputParamsDepthField =
-        JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxInputParamsDepth, 1, 5))
+    private var maxInputParamsDepthField = JBIntSpinner(UINumericRange(settingsState.maxInputParamsDepth, 1, 5))
 
     // Maximum polymorphism depth
-    private var maxPolyDepthField =
-        JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
+    private var maxPolyDepthField = JBIntSpinner(UINumericRange(settingsState.maxPolyDepth, 1, 5))
 
     val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
 
@@ -116,6 +122,8 @@ class SettingsLLMComponent {
         // Adds additional style (width, tooltips)
         stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
         stylizePanel()
+
+        fillDefaultLLMRequestsPanel()
 
         // Adds the panel components
         createSettingsPanel()
@@ -189,6 +197,18 @@ class SettingsLLMComponent {
             btnPanel.add(JBLabel("${it.description} - ${if (it.mandatory) "mandatory" else "optional"}"))
 
             panel.add(btnPanel)
+        }
+    }
+
+    private fun fillDefaultLLMRequestsPanel() {
+        val defaultLLMRequestsList = settingsState.defaultLLMRequests.split("\n")
+        for (defaultLLMRequest in defaultLLMRequestsList) {
+            val defaultLLMRequestPanel = JPanel()
+            val textField = JTextField(defaultLLMRequest)
+            textField.columns = 30
+            defaultLLMRequestPanel.add(textField)
+
+            defaultLLMRequestsFormBuilder.addComponent(textField, 10)
         }
     }
 
@@ -268,6 +288,8 @@ class SettingsLLMComponent {
                 10,
                 false,
             )
+            .addComponent(defaultLLMRequestsSeparator, 15)
+            .addComponent(defaultLLMRequestsFormPanel, 15)
             .addComponent(promptSeparator, 15)
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)
