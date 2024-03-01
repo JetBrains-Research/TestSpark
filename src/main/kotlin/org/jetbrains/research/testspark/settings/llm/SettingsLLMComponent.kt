@@ -11,15 +11,21 @@ import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
 import java.awt.Font
@@ -29,9 +35,6 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
-import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.createButton
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 
 class SettingsLLMComponent {
     private val settingsState: SettingsApplicationState = SettingsArguments.settingsState!!
@@ -46,12 +49,10 @@ class SettingsLLMComponent {
     private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
 
     // Default LLM Requests
-    private var defaultLLMRequestsSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("defaultLLMRequestsSeparator"))
-    private val defaultLLMRequestsFormBuilder = FormBuilder.createFormBuilder()
-    private var defaultLLMRequestsPanel = defaultLLMRequestsFormBuilder.panel
+    private var defaultLLMRequestsSeparator =
+        JXTitledSeparator(TestSparkLabelsBundle.defaultValue("defaultLLMRequestsSeparator"))
+    private var commonDefaultLLMRequestsPanel = JPanel()
     private val defaultLLMRequestPanels = mutableListOf<JPanel>()
-    private val removeButtons = mutableListOf<JButton>()
-    private val textFields = mutableListOf<JTextField>()
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
@@ -122,12 +123,21 @@ class SettingsLLMComponent {
             }
         }
 
+    var defaultLLMRequests: String
+        get() = Json.encodeToString(
+            ListSerializer(String.serializer()),
+            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }.map { (it.getComponent(0) as JTextField).text },
+        )
+        set(value) {
+            fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), value))
+        }
+
     init {
         // Adds additional style (width, tooltips)
         stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
         stylizePanel()
 
-        fillDefaultLLMRequestsPanel()
+        fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), settingsState.defaultLLMRequests))
 
         // Adds the panel components
         createSettingsPanel()
@@ -204,25 +214,32 @@ class SettingsLLMComponent {
         }
     }
 
-    private fun fillDefaultLLMRequestsPanel() {
-        val defaultLLMRequestsList = settingsState.defaultLLMRequests.split("\n")
+    private fun fillDefaultLLMRequestsPanel(defaultLLMRequestsList: List<String>) {
+        defaultLLMRequestPanels.clear()
+        commonDefaultLLMRequestsPanel.removeAll()
+
+        commonDefaultLLMRequestsPanel.layout = BoxLayout(commonDefaultLLMRequestsPanel, BoxLayout.Y_AXIS)
+
         for (defaultLLMRequest in defaultLLMRequestsList) {
             val defaultLLMRequestPanel = JPanel(FlowLayout(FlowLayout.LEFT))
 
             val textField = JTextField(defaultLLMRequest)
             textField.columns = 30
             defaultLLMRequestPanel.add(textField)
-            textFields.add(textField)
 
             val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeRequest"))
             defaultLLMRequestPanel.add(removeButton)
-            removeButtons.add(removeButton)
 
-            defaultLLMRequestsFormBuilder.addComponent(defaultLLMRequestPanel, 10)
+            commonDefaultLLMRequestsPanel.add(defaultLLMRequestPanel)
             defaultLLMRequestPanels.add(defaultLLMRequestPanel)
+
+            removeButton.addActionListener {
+                textField.text = ""
+                commonDefaultLLMRequestsPanel.remove(defaultLLMRequestPanel)
+                commonDefaultLLMRequestsPanel.revalidate()
+            }
         }
-        defaultLLMRequestsPanel = defaultLLMRequestsFormBuilder.panel
-        defaultLLMRequestsPanel.revalidate()
+        commonDefaultLLMRequestsPanel.revalidate()
     }
 
     /**
@@ -236,13 +253,6 @@ class SettingsLLMComponent {
             llmUserTokenField,
             llmPlatforms,
         )
-
-        for (index in removeButtons.indices) {
-            removeButtons[index].addActionListener {
-                defaultLLMRequestsPanel.remove(defaultLLMRequestPanels[index])
-                defaultLLMRequestsPanel.revalidate()
-            }
-        }
 
         addHighlighterListeners()
     }
@@ -309,7 +319,7 @@ class SettingsLLMComponent {
                 false,
             )
             .addComponent(defaultLLMRequestsSeparator, 15)
-            .addComponent(defaultLLMRequestsPanel, 15)
+            .addComponent(commonDefaultLLMRequestsPanel, 15)
             .addComponent(promptSeparator, 15)
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)
