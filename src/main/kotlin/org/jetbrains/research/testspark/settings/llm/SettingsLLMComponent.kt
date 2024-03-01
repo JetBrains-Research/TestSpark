@@ -11,7 +11,6 @@ import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
-import java.awt.Dimension
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
@@ -30,6 +29,8 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 
 class SettingsLLMComponent {
@@ -47,7 +48,10 @@ class SettingsLLMComponent {
     // Default LLM Requests
     private var defaultLLMRequestsSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("defaultLLMRequestsSeparator"))
     private val defaultLLMRequestsFormBuilder = FormBuilder.createFormBuilder()
-    private val defaultLLMRequestsFormPanel = defaultLLMRequestsFormBuilder.panel
+    private var defaultLLMRequestsPanel = defaultLLMRequestsFormBuilder.panel
+    private val defaultLLMRequestPanels = mutableListOf<JPanel>()
+    private val removeButtons = mutableListOf<JButton>()
+    private val textFields = mutableListOf<JTextField>()
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
@@ -203,13 +207,22 @@ class SettingsLLMComponent {
     private fun fillDefaultLLMRequestsPanel() {
         val defaultLLMRequestsList = settingsState.defaultLLMRequests.split("\n")
         for (defaultLLMRequest in defaultLLMRequestsList) {
-            val defaultLLMRequestPanel = JPanel()
+            val defaultLLMRequestPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+
             val textField = JTextField(defaultLLMRequest)
             textField.columns = 30
             defaultLLMRequestPanel.add(textField)
+            textFields.add(textField)
 
-            defaultLLMRequestsFormBuilder.addComponent(textField, 10)
+            val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeRequest"))
+            defaultLLMRequestPanel.add(removeButton)
+            removeButtons.add(removeButton)
+
+            defaultLLMRequestsFormBuilder.addComponent(defaultLLMRequestPanel, 10)
+            defaultLLMRequestPanels.add(defaultLLMRequestPanel)
         }
+        defaultLLMRequestsPanel = defaultLLMRequestsFormBuilder.panel
+        defaultLLMRequestsPanel.revalidate()
     }
 
     /**
@@ -223,6 +236,13 @@ class SettingsLLMComponent {
             llmUserTokenField,
             llmPlatforms,
         )
+
+        for (index in removeButtons.indices) {
+            removeButtons[index].addActionListener {
+                defaultLLMRequestsPanel.remove(defaultLLMRequestPanels[index])
+                defaultLLMRequestsPanel.revalidate()
+            }
+        }
 
         addHighlighterListeners()
     }
@@ -289,7 +309,7 @@ class SettingsLLMComponent {
                 false,
             )
             .addComponent(defaultLLMRequestsSeparator, 15)
-            .addComponent(defaultLLMRequestsFormPanel, 15)
+            .addComponent(defaultLLMRequestsPanel, 15)
             .addComponent(promptSeparator, 15)
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)
