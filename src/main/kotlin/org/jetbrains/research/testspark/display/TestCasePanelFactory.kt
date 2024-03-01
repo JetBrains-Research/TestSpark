@@ -19,6 +19,9 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.TestCase
@@ -109,8 +112,8 @@ class TestCasePanelFactory(
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
 
-    private val requestJLabel = JLabel("Ask LLM for code modifications:")
-    private val requestComboBox = ComboBox(arrayOf("") + settingsState.defaultLLMRequests)
+    private val requestJLabel = JLabel(TestSparkLabelsBundle.defaultValue("requestJLabel"))
+    private val requestComboBox = ComboBox(arrayOf("") + Json.decodeFromString(ListSerializer(String.serializer()), settingsState.defaultLLMRequests))
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 

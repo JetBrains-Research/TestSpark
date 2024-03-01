@@ -53,6 +53,7 @@ class SettingsLLMComponent {
         JXTitledSeparator(TestSparkLabelsBundle.defaultValue("defaultLLMRequestsSeparator"))
     private var commonDefaultLLMRequestsPanel = JPanel()
     private val defaultLLMRequestPanels = mutableListOf<JPanel>()
+    private val addDefaultLLMRequestsButtonPanel = JPanel(FlowLayout(FlowLayout.LEFT))
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
@@ -139,6 +140,8 @@ class SettingsLLMComponent {
 
         fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), settingsState.defaultLLMRequests))
 
+        fillAddDefaultLLMRequestsButtonPanel()
+
         // Adds the panel components
         createSettingsPanel()
 
@@ -214,6 +217,28 @@ class SettingsLLMComponent {
         }
     }
 
+    /**
+     * Fills the addDefaultLLMRequestsButtonPanel with a button for adding default LLM requests.
+     */
+    private fun fillAddDefaultLLMRequestsButtonPanel() {
+        val addDefaultLLMRequestsButton = JButton(TestSparkLabelsBundle.defaultValue("addRequest"), TestSparkIcons.add)
+
+        addDefaultLLMRequestsButton.isOpaque = false
+        addDefaultLLMRequestsButton.isContentAreaFilled = false
+        addDefaultLLMRequestsButton.addActionListener {
+            addDefaultLLMRequestToPanel("")
+
+            addDefaultLLMRequestsButtonPanel.revalidate()
+        }
+
+        addDefaultLLMRequestsButtonPanel.add(addDefaultLLMRequestsButton)
+    }
+
+    /**
+     * Clears the default LLM request panels and fills the commonDefaultLLMRequestsPanel with the given list of default LLM requests.
+     *
+     * @param defaultLLMRequestsList The list of default LLM requests to fill the panel with.
+     */
     private fun fillDefaultLLMRequestsPanel(defaultLLMRequestsList: List<String>) {
         defaultLLMRequestPanels.clear()
         commonDefaultLLMRequestsPanel.removeAll()
@@ -221,25 +246,35 @@ class SettingsLLMComponent {
         commonDefaultLLMRequestsPanel.layout = BoxLayout(commonDefaultLLMRequestsPanel, BoxLayout.Y_AXIS)
 
         for (defaultLLMRequest in defaultLLMRequestsList) {
-            val defaultLLMRequestPanel = JPanel(FlowLayout(FlowLayout.LEFT))
-
-            val textField = JTextField(defaultLLMRequest)
-            textField.columns = 30
-            defaultLLMRequestPanel.add(textField)
-
-            val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeRequest"))
-            defaultLLMRequestPanel.add(removeButton)
-
-            commonDefaultLLMRequestsPanel.add(defaultLLMRequestPanel)
-            defaultLLMRequestPanels.add(defaultLLMRequestPanel)
-
-            removeButton.addActionListener {
-                textField.text = ""
-                commonDefaultLLMRequestsPanel.remove(defaultLLMRequestPanel)
-                commonDefaultLLMRequestsPanel.revalidate()
-            }
+            addDefaultLLMRequestToPanel(defaultLLMRequest)
         }
+
         commonDefaultLLMRequestsPanel.revalidate()
+    }
+
+    /**
+     * Adds a default LLM request to the panel.
+     *
+     * @param defaultLLMRequest the default LLM request to be added
+     */
+    private fun addDefaultLLMRequestToPanel(defaultLLMRequest: String) {
+        val defaultLLMRequestPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+
+        val textField = JTextField(defaultLLMRequest)
+        textField.columns = 30
+        defaultLLMRequestPanel.add(textField)
+
+        val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeRequest"))
+        defaultLLMRequestPanel.add(removeButton)
+
+        commonDefaultLLMRequestsPanel.add(defaultLLMRequestPanel)
+        defaultLLMRequestPanels.add(defaultLLMRequestPanel)
+
+        removeButton.addActionListener {
+            textField.text = ""
+            commonDefaultLLMRequestsPanel.remove(defaultLLMRequestPanel)
+            commonDefaultLLMRequestsPanel.revalidate()
+        }
     }
 
     /**
@@ -320,6 +355,7 @@ class SettingsLLMComponent {
             )
             .addComponent(defaultLLMRequestsSeparator, 15)
             .addComponent(commonDefaultLLMRequestsPanel, 15)
+            .addComponent(addDefaultLLMRequestsButtonPanel, 15)
             .addComponent(promptSeparator, 15)
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)
