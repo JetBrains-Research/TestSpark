@@ -2,10 +2,8 @@ package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.services.PromptParserService
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import javax.swing.JComponent
 
 /**
@@ -14,7 +12,7 @@ import javax.swing.JComponent
  */
 class SettingsLLMConfigurable : Configurable {
 
-    var settingsComponent: SettingsLLMComponent? = null
+    private var settingsComponent: SettingsLLMComponent? = null
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
@@ -30,26 +28,25 @@ class SettingsLLMConfigurable : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         for (index in settingsComponent!!.llmPlatforms.indices) {
-            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI")) {
-                settingsComponent!!.llmPlatforms[index].token = settingsState.openAIToken
-                settingsComponent!!.llmPlatforms[index].model = settingsState.openAIModel
+            if (settingsComponent!!.llmPlatforms[index].name == SettingsArguments.settingsState!!.openAIName) {
+                settingsComponent!!.llmPlatforms[index].token = SettingsArguments.settingsState!!.openAIToken
+                settingsComponent!!.llmPlatforms[index].model = SettingsArguments.settingsState!!.openAIModel
             }
-            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie")) {
-                settingsComponent!!.llmPlatforms[index].token = settingsState.grazieToken
-                settingsComponent!!.llmPlatforms[index].model = settingsState.grazieModel
+            if (settingsComponent!!.llmPlatforms[index].name == SettingsArguments.settingsState!!.grazieName) {
+                settingsComponent!!.llmPlatforms[index].token = SettingsArguments.settingsState!!.grazieToken
+                settingsComponent!!.llmPlatforms[index].model = SettingsArguments.settingsState!!.grazieModel
             }
         }
-        settingsComponent!!.currentLLMPlatformName = settingsState.currentLLMPlatformName
-        settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
-        settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
-        settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
-        settingsComponent!!.classPrompt = settingsState.classPrompt
-        settingsComponent!!.methodPrompt = settingsState.methodPrompt
-        settingsComponent!!.linePrompt = settingsState.linePrompt
-        settingsComponent!!.llmSetupCheckBoxSelected = settingsState.llmSetupCheckBoxSelected
-        settingsComponent!!.provideTestSamplesCheckBoxSelected = settingsState.provideTestSamplesCheckBoxSelected
+        settingsComponent!!.currentLLMPlatformName = SettingsArguments.settingsState!!.currentLLMPlatformName
+        settingsComponent!!.maxLLMRequest = SettingsArguments.settingsState!!.maxLLMRequest
+        settingsComponent!!.maxPolyDepth = SettingsArguments.settingsState!!.maxPolyDepth
+        settingsComponent!!.maxInputParamsDepth = SettingsArguments.settingsState!!.maxInputParamsDepth
+        settingsComponent!!.classPrompt = SettingsArguments.settingsState!!.classPrompt
+        settingsComponent!!.methodPrompt = SettingsArguments.settingsState!!.methodPrompt
+        settingsComponent!!.linePrompt = SettingsArguments.settingsState!!.linePrompt
+        settingsComponent!!.llmSetupCheckBoxSelected = SettingsArguments.settingsState!!.llmSetupCheckBoxSelected
+        settingsComponent!!.provideTestSamplesCheckBoxSelected = SettingsArguments.settingsState!!.provideTestSamplesCheckBoxSelected
 
         settingsComponent!!.updateTokenAndModel()
     }
@@ -60,34 +57,33 @@ class SettingsLLMConfigurable : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         var modified = false
         for (index in settingsComponent!!.llmPlatforms.indices) {
-            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI")) {
-                modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.openAIToken)
-                modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.openAIModel)
+            if (settingsComponent!!.llmPlatforms[index].name == SettingsArguments.settingsState!!.openAIName) {
+                modified = modified or (settingsComponent!!.llmPlatforms[index].token != SettingsArguments.settingsState!!.openAIToken)
+                modified = modified or (settingsComponent!!.llmPlatforms[index].model != SettingsArguments.settingsState!!.openAIModel)
             }
-            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie")) {
-                modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.grazieToken)
-                modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.grazieModel)
+            if (settingsComponent!!.llmPlatforms[index].name == SettingsArguments.settingsState!!.grazieName) {
+                modified = modified or (settingsComponent!!.llmPlatforms[index].token != SettingsArguments.settingsState!!.grazieToken)
+                modified = modified or (settingsComponent!!.llmPlatforms[index].model != SettingsArguments.settingsState!!.grazieModel)
             }
         }
-        modified = modified or (settingsComponent!!.currentLLMPlatformName != settingsState.currentLLMPlatformName)
-        modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
-        modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
-        modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
+        modified = modified or (settingsComponent!!.currentLLMPlatformName != SettingsArguments.settingsState!!.currentLLMPlatformName)
+        modified = modified or (settingsComponent!!.maxLLMRequest != SettingsArguments.settingsState!!.maxLLMRequest)
+        modified = modified or (settingsComponent!!.maxPolyDepth != SettingsArguments.settingsState!!.maxPolyDepth)
+        modified = modified or (settingsComponent!!.maxInputParamsDepth != SettingsArguments.settingsState!!.maxInputParamsDepth)
         // class prompt
-        modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
+        modified = modified or (settingsComponent!!.classPrompt != SettingsArguments.settingsState!!.classPrompt)
         modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.classPrompt)
         // method prompt
-        modified = modified or (settingsComponent!!.methodPrompt != settingsState.methodPrompt)
+        modified = modified or (settingsComponent!!.methodPrompt != SettingsArguments.settingsState!!.methodPrompt)
         modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.methodPrompt)
         // line prompt
-        modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
+        modified = modified or (settingsComponent!!.linePrompt != SettingsArguments.settingsState!!.linePrompt)
         modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.linePrompt)
 
-        modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
-        modified = modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != settingsState.provideTestSamplesCheckBoxSelected)
+        modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != SettingsArguments.settingsState!!.llmSetupCheckBoxSelected)
+        modified = modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != SettingsArguments.settingsState!!.provideTestSamplesCheckBoxSelected)
 
         return modified
     }
@@ -96,26 +92,25 @@ class SettingsLLMConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         for (index in settingsComponent!!.llmPlatforms.indices) {
-            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI")) {
-                settingsState.openAIToken = settingsComponent!!.llmPlatforms[index].token
-                settingsState.openAIModel = settingsComponent!!.llmPlatforms[index].model
+            if (settingsComponent!!.llmPlatforms[index].name == SettingsArguments.settingsState!!.openAIName) {
+                SettingsArguments.settingsState!!.openAIToken = settingsComponent!!.llmPlatforms[index].token
+                SettingsArguments.settingsState!!.openAIModel = settingsComponent!!.llmPlatforms[index].model
             }
-            if (settingsComponent!!.llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie")) {
-                settingsState.grazieToken = settingsComponent!!.llmPlatforms[index].token
-                settingsState.grazieModel = settingsComponent!!.llmPlatforms[index].model
+            if (settingsComponent!!.llmPlatforms[index].name == SettingsArguments.settingsState!!.grazieName) {
+                SettingsArguments.settingsState!!.grazieToken = settingsComponent!!.llmPlatforms[index].token
+                SettingsArguments.settingsState!!.grazieModel = settingsComponent!!.llmPlatforms[index].model
             }
         }
-        settingsState.currentLLMPlatformName = settingsComponent!!.currentLLMPlatformName
-        settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
-        settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
-        settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth
-        settingsState.classPrompt = settingsComponent!!.classPrompt
-        settingsState.methodPrompt = settingsComponent!!.methodPrompt
-        settingsState.linePrompt = settingsComponent!!.linePrompt
-        settingsState.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
-        settingsState.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
+        SettingsArguments.settingsState!!.currentLLMPlatformName = settingsComponent!!.currentLLMPlatformName
+        SettingsArguments.settingsState!!.maxLLMRequest = settingsComponent!!.maxLLMRequest
+        SettingsArguments.settingsState!!.maxPolyDepth = settingsComponent!!.maxPolyDepth
+        SettingsArguments.settingsState!!.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth
+        SettingsArguments.settingsState!!.classPrompt = settingsComponent!!.classPrompt
+        SettingsArguments.settingsState!!.methodPrompt = settingsComponent!!.methodPrompt
+        SettingsArguments.settingsState!!.linePrompt = settingsComponent!!.linePrompt
+        SettingsArguments.settingsState!!.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
+        SettingsArguments.settingsState!!.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
     }
 
     /**

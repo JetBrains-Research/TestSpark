@@ -4,9 +4,8 @@ import com.google.gson.JsonParser
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
@@ -45,27 +44,26 @@ private fun updateModelSelector(
     llmUserTokenField: JTextField,
     llmPlatforms: List<LLMPlatform>,
 ) {
-    val settingsState = SettingsApplicationService.getInstance().state!!
     ApplicationManager.getApplication().executeOnPooledThread {
         var modules = arrayOf("")
-        if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("openAI")) {
+        if (platformSelector.selectedItem!!.toString() == SettingsArguments.settingsState!!.openAIName) {
             modules = getOpenAIModels(llmUserTokenField.text)
         }
-        if (platformSelector.selectedItem!!.toString() == TestSparkDefaultsBundle.defaultValue("grazie")) {
-            modules = getGrazieModels(llmUserTokenField.text)
+        if (platformSelector.selectedItem!!.toString() == SettingsArguments.settingsState!!.grazieName) {
+            modules = getGrazieModels()
         }
         modelSelector.model = DefaultComboBoxModel(modules)
         for (index in llmPlatforms.indices) {
-            if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI") &&
+            if (llmPlatforms[index].name == SettingsArguments.settingsState!!.openAIName &&
                 llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
             ) {
-                modelSelector.selectedItem = settingsState.openAIModel
+                modelSelector.selectedItem = SettingsArguments.settingsState!!.openAIModel
                 llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
             }
-            if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie") &&
+            if (llmPlatforms[index].name == SettingsArguments.settingsState!!.grazieName &&
                 llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
             ) {
-                modelSelector.selectedItem = settingsState.grazieModel
+                modelSelector.selectedItem = SettingsArguments.settingsState!!.grazieModel
                 llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
             }
         }
@@ -85,19 +83,18 @@ private fun updateLlmUserTokenField(
     llmUserTokenField: JTextField,
     llmPlatforms: List<LLMPlatform>,
 ) {
-    val settingsState = SettingsApplicationService.getInstance().state!!
     for (index in llmPlatforms.indices) {
-        if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI") &&
+        if (llmPlatforms[index].name == SettingsArguments.settingsState!!.openAIName &&
             llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
         ) {
-            llmUserTokenField.text = settingsState.openAIToken
-            llmPlatforms[index].token = settingsState.openAIToken
+            llmUserTokenField.text = SettingsArguments.settingsState!!.openAIToken
+            llmPlatforms[index].token = SettingsArguments.settingsState!!.openAIToken
         }
-        if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie") &&
+        if (llmPlatforms[index].name == SettingsArguments.settingsState!!.grazieName &&
             llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
         ) {
-            llmUserTokenField.text = settingsState.grazieToken
-            llmPlatforms[index].token = settingsState.grazieToken
+            llmUserTokenField.text = SettingsArguments.settingsState!!.grazieToken
+            llmPlatforms[index].token = SettingsArguments.settingsState!!.grazieToken
         }
     }
 }
@@ -166,12 +163,10 @@ fun stylizeMainComponents(
     llmUserTokenField: JTextField,
     llmPlatforms: List<LLMPlatform>,
 ) {
-    val settingsState = SettingsApplicationService.getInstance().state!!
-
     // Check if the Grazie platform access is available in the current build
     if (isGrazieClassLoaded()) {
         platformSelector.model = DefaultComboBoxModel(llmPlatforms.map { it.name }.toTypedArray())
-        platformSelector.selectedItem = settingsState.currentLLMPlatformName
+        platformSelector.selectedItem = SettingsArguments.settingsState!!.currentLLMPlatformName
     } else {
         platformSelector.isEnabled = false
     }
@@ -243,10 +238,9 @@ fun getOpenAIModels(providedToken: String): Array<String> {
 /**
  * Retrieves the available Grazie models.
  *
- * @param providedToken the provided token to obtain the models
  * @return an array of string representing the available Grazie models
  */
-fun getGrazieModels(providedToken: String): Array<String> {
+fun getGrazieModels(): Array<String> {
     val className = "org.jetbrains.research.grazie.Info"
     return try {
         (Class.forName(className).getDeclaredConstructor().newInstance() as GrazieInfo).availableProfiles().toTypedArray()

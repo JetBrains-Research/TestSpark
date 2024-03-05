@@ -4,7 +4,7 @@ import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 
 class GraziePlatform(
-    override val name: String = TestSparkDefaultsBundle.defaultValue("grazie"),
+    override val name: String = TestSparkDefaultsBundle.defaultValue("grazieName"),
     override var token: String = TestSparkDefaultsBundle.defaultValue("grazieToken"),
     override var model: String = TestSparkDefaultsBundle.defaultValue("grazieModel"),
 ) : LLMPlatform

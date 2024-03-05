@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -59,8 +58,8 @@ class SettingsArguments {
          * @return The token as a string.
          */
         fun getToken(): String = when (currentLLMPlatformName()) {
-            TestSparkDefaultsBundle.defaultValue("openAI") -> settingsState!!.openAIToken
-            TestSparkDefaultsBundle.defaultValue("grazie") -> settingsState!!.grazieToken
+            settingsState!!.openAIName -> settingsState!!.openAIToken
+            settingsState!!.grazieName -> settingsState!!.grazieToken
             else -> ""
         }
 
@@ -70,8 +69,8 @@ class SettingsArguments {
          * @return The token as a string.
          */
         fun getModel(): String = when (currentLLMPlatformName()) {
-            TestSparkDefaultsBundle.defaultValue("openAI") -> settingsState!!.openAIModel
-            TestSparkDefaultsBundle.defaultValue("grazie") -> settingsState!!.grazieModel
+            settingsState!!.openAIName -> settingsState!!.openAIModel
+            settingsState!!.grazieName -> settingsState!!.grazieModel
             else -> ""
         }
     }

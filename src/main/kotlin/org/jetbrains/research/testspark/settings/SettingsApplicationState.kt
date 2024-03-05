@@ -25,8 +25,10 @@ data class SettingsApplicationState(
     var criterionMethodNoException: Boolean = DefaultSettingsApplicationState.criterionMethodNoException,
     var criterionCBranch: Boolean = DefaultSettingsApplicationState.criterionCBranch,
     var minimize: Boolean = DefaultSettingsApplicationState.minimize,
+    var openAIName: String = DefaultSettingsApplicationState.openAIName,
     var openAIToken: String = DefaultSettingsApplicationState.openAIToken,
     var openAIModel: String = DefaultSettingsApplicationState.openAIModel,
+    var grazieName: String = DefaultSettingsApplicationState.grazieName,
     var grazieToken: String = DefaultSettingsApplicationState.grazieToken,
     var grazieModel: String = DefaultSettingsApplicationState.grazieModel,
     var currentLLMPlatformName: String = DefaultSettingsApplicationState.currentLLMPlatformName,
@@ -63,11 +65,13 @@ data class SettingsApplicationState(
         val criterionMethod: Boolean = TestSparkDefaultsBundle.defaultValue("criterionMethod").toBoolean()
         val criterionMethodNoException: Boolean = TestSparkDefaultsBundle.defaultValue("criterionMethodNoException").toBoolean()
         val criterionCBranch: Boolean = TestSparkDefaultsBundle.defaultValue("criterionCBranch").toBoolean()
+        val openAIName: String = TestSparkDefaultsBundle.defaultValue("openAIName")
         val openAIToken: String = TestSparkDefaultsBundle.defaultValue("openAIToken")
         val openAIModel: String = TestSparkDefaultsBundle.defaultValue("openAIModel")
+        val grazieName: String = TestSparkDefaultsBundle.defaultValue("grazieName")
         val grazieToken: String = TestSparkDefaultsBundle.defaultValue("grazieToken")
         val grazieModel: String = TestSparkDefaultsBundle.defaultValue("grazieModel")
-        var currentLLMPlatformName: String = TestSparkDefaultsBundle.defaultValue("llmPlatform")
+        var currentLLMPlatformName: String = TestSparkDefaultsBundle.defaultValue("openAIName")
         val maxLLMRequest: Int = TestSparkDefaultsBundle.defaultValue("maxLLMRequest").toInt()
         val maxInputParamsDepth: Int = TestSparkDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
         val maxPolyDepth: Int = TestSparkDefaultsBundle.defaultValue("maxPolyDepth").toInt()

@@ -4,14 +4,13 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.display.JUnitCombobox
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
-import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.Font
 import javax.swing.JButton
@@ -23,12 +22,10 @@ class LLMSetupPanelFactory : PanelFactory {
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
-    private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
+    private var platformSelector = ComboBox(arrayOf(SettingsArguments.settingsState!!.openAIName))
     private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
     private val okLlmButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
     private val junitSelector = JUnitCombobox()
-
-    private val settingsState = SettingsApplicationService.getInstance().state!!
 
     private val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
 
@@ -112,7 +109,7 @@ class LLMSetupPanelFactory : PanelFactory {
 
         okLlmButton.isOpaque = false
         okLlmButton.isContentAreaFilled = false
-        if (!SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
+        if (!SettingsArguments.settingsState!!.provideTestSamplesCheckBoxSelected) {
             okLlmButton.text = TestSparkLabelsBundle.defaultValue("ok")
         }
         bottomPanel.add(okLlmButton)
@@ -143,17 +140,17 @@ class LLMSetupPanelFactory : PanelFactory {
      * Note: This method assumes all the required UI components (`platformSelector`, `llmUserTokenField`, and `modelSelector`) are properly initialized and have values selected.
      */
     override fun applyUpdates() {
-        settingsState.currentLLMPlatformName = platformSelector.selectedItem!!.toString()
+        SettingsArguments.settingsState!!.currentLLMPlatformName = platformSelector.selectedItem!!.toString()
         for (index in llmPlatforms.indices) {
-            if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("openAI")) {
-                settingsState.openAIToken = llmPlatforms[index].token
-                settingsState.openAIModel = llmPlatforms[index].model
+            if (llmPlatforms[index].name == SettingsArguments.settingsState!!.openAIName) {
+                SettingsArguments.settingsState!!.openAIToken = llmPlatforms[index].token
+                SettingsArguments.settingsState!!.openAIModel = llmPlatforms[index].model
             }
-            if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie")) {
-                settingsState.grazieToken = llmPlatforms[index].token
-                settingsState.grazieModel = llmPlatforms[index].model
+            if (llmPlatforms[index].name == SettingsArguments.settingsState!!.grazieName) {
+                SettingsArguments.settingsState!!.grazieToken = llmPlatforms[index].token
+                SettingsArguments.settingsState!!.grazieModel = llmPlatforms[index].model
             }
         }
-        settingsState.junitVersion = (junitSelector.selectedItem!! as JUnitVersion)
+        SettingsArguments.settingsState!!.junitVersion = junitSelector.selectedItem!! as JUnitVersion
     }
 }
