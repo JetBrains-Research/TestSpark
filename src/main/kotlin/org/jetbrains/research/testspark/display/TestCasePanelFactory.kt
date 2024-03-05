@@ -396,7 +396,7 @@ class TestCasePanelFactory(
      */
     private fun sendRequest() {
         loadingLabel.isVisible = true
-        sendButton.isEnabled = false
+        enableComponents(false)
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
@@ -427,7 +427,7 @@ class TestCasePanelFactory(
                             .notify(project)
 
                         loadingLabel.isVisible = false
-                        sendButton.isEnabled = true
+                        enableComponents(true)
                     }
 
                     if (processStopped(project, indicator)) return
@@ -435,6 +435,16 @@ class TestCasePanelFactory(
                     indicator.stop()
                 }
             })
+    }
+
+    private fun enableComponents(isEnabled: Boolean) {
+        nextButtons.isEnabled = isEnabled
+        previousButtons.isEnabled = isEnabled
+        runTestButton.isEnabled = isEnabled
+        resetToLastRunButton.isEnabled = isEnabled
+        resetButton.isEnabled = isEnabled
+        removeButton.isEnabled = isEnabled
+        sendButton.isEnabled = isEnabled
     }
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
@@ -457,7 +467,9 @@ class TestCasePanelFactory(
             currentCodes.add(code)
 
             requestField.text = ""
+
             loadingLabel.isVisible = false
+            enableComponents(true)
 
             switchToAnotherCode()
         }
@@ -476,7 +488,7 @@ class TestCasePanelFactory(
         if (!runTestButton.isEnabled) return
 
         loadingLabel.isVisible = true
-        if (!runTestButton.isEnabled) return
+        enableComponents(false)
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
@@ -491,7 +503,7 @@ class TestCasePanelFactory(
         if (!runTestButton.isEnabled) return
 
         loadingLabel.isVisible = true
-        if (!runTestButton.isEnabled) return
+        enableComponents(false)
 
         tasks.add { indicator ->
             runTest(indicator)
@@ -514,7 +526,10 @@ class TestCasePanelFactory(
         testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
         lastRunCodes[currentRequestNumber - 1] = testCase.testCode
+
         loadingLabel.isVisible = false
+        enableComponents(true)
+
         SwingUtilities.invokeLater {
             updateUI()
         }
@@ -589,8 +604,6 @@ class TestCasePanelFactory(
     /**
      * Retrieves the error message for a given test case.
      *
-     * @param testCaseId the id of the test case
-     * @param testCaseCode the code of the test case
      * @return the error message for the test case
      */
     fun getError() = project.service<TestsExecutionResultService>().getError(testCase.id, testCase.testCode)
@@ -598,7 +611,6 @@ class TestCasePanelFactory(
     /**
      * Returns the border for a given test case.
      *
-     * @param testCaseId the id of the test case
      * @return the border for the test case
      */
     private fun getBorder(): Border {
