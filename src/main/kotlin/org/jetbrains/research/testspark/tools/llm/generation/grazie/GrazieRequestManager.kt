@@ -3,7 +3,6 @@ package org.jetbrains.research.testspark.tools.llm.generation.grazie
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
@@ -23,12 +22,7 @@ class GrazieRequestManager : RequestManager() {
             val className = "org.jetbrains.research.grazie.Request"
             val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
 
-            var model = ""
-            for (llmPlatform in SettingsArguments.llmPlatforms()) {
-                if (llmPlatform.name == TestSparkDefaultsBundle.defaultValue("grazie")) model = llmPlatform.model
-            }
-
-            val requestResult = request.request(token, getMessages(), model, TestsAssembler(project, indicator))
+            val requestResult = request.request(token, getMessages(), SettingsArguments.getModel(), TestsAssembler(project, indicator))
             val requestError = requestResult.first
 
             if (requestError.isNotEmpty()) {

@@ -60,13 +60,13 @@ private fun updateModelSelector(
                 llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
             ) {
                 modelSelector.selectedItem = settingsState.openAIModel
-                llmPlatforms[index].model = settingsState.openAIModel
+                llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
             }
             if (llmPlatforms[index].name == TestSparkDefaultsBundle.defaultValue("grazie") &&
                 llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
             ) {
                 modelSelector.selectedItem = settingsState.grazieModel
-                llmPlatforms[index].model = settingsState.grazieModel
+                llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
             }
         }
         modelSelector.isEnabled = true

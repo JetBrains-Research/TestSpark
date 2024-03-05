@@ -2,12 +2,10 @@ package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
-import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
-import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIPlatform
 
 /**
  * A class that provides access to various settings arguments.
@@ -16,16 +14,6 @@ class SettingsArguments {
     companion object {
         val settingsState: SettingsApplicationState?
             get() = SettingsApplicationService.getInstance().state
-
-        /**
-         * Retrieves the list of LLM platforms from the settings state.
-         *
-         * @return The list of LLM platforms.
-         */
-        fun llmPlatforms(): List<LLMPlatform> = listOf(
-            OpenAIPlatform(token = settingsState!!.openAIToken, model = settingsState!!.openAIModel),
-            GraziePlatform(token = settingsState!!.grazieToken, model = settingsState!!.grazieModel),
-        )
 
         /**
          * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.
@@ -70,13 +58,21 @@ class SettingsArguments {
          *
          * @return The token as a string.
          */
-        fun getToken(): String {
-            for (llmPlatform in llmPlatforms()) {
-                if (currentLLMPlatformName() == llmPlatform.name) {
-                    return llmPlatform.token
-                }
-            }
-            return ""
+        fun getToken(): String = when (currentLLMPlatformName()) {
+            TestSparkDefaultsBundle.defaultValue("openAI") -> settingsState!!.openAIToken
+            TestSparkDefaultsBundle.defaultValue("grazie") -> settingsState!!.grazieToken
+            else -> ""
+        }
+
+        /**
+         * Retrieves the token for the current user.
+         *
+         * @return The token as a string.
+         */
+        fun getModel(): String = when (currentLLMPlatformName()) {
+            TestSparkDefaultsBundle.defaultValue("openAI") -> settingsState!!.openAIModel
+            TestSparkDefaultsBundle.defaultValue("grazie") -> settingsState!!.grazieModel
+            else -> ""
         }
     }
 }
