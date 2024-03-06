@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.tools.evosuite
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiFile
@@ -49,9 +48,9 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @param fileUrl The URL of the file being tested.
      * @param testSamplesCode The code to be used as test samples.
      */
-    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
+    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
         log.info("Starting tests generation for class by EvoSuite")
-        createPipeline(project, psiFile, caret, fileUrl).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.CLASS))
+        createPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.CLASS))
     }
 
     /**
@@ -63,10 +62,10 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @param fileUrl The URL of the file containing the method.
      * @param testSamplesCode The sample code for the test cases.
      */
-    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
+    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
         log.info("Starting tests generation for method by EvoSuite")
-        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
-        createPipeline(project, psiFile, caret, fileUrl).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod)))
+        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caretOffset)!!
+        createPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod)))
     }
 
     /**
@@ -78,10 +77,10 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @param fileUrl The URL of the code file.
      * @param testSamplesCode The code samples used for testing.
      */
-    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
+    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
         log.info("Starting tests generation for line by EvoSuite")
-        val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
-        createPipeline(project, psiFile, caret, fileUrl).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.LINE, selectedLine))
+        val selectedLine: Int = getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
+        createPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.LINE, selectedLine))
     }
 
     /**
@@ -94,12 +93,12 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @param fileUrl The URL of the file associated with the pipeline. Can be null.
      * @return The created pipeline object.
      */
-    private fun createPipeline(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?): Pipeline {
+    private fun createPipeline(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?): Pipeline {
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
         val settingsProjectState = project.service<SettingsProjectService>().state
         val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
 
-        return Pipeline(project, psiFile, caret, fileUrl, packageName)
+        return Pipeline(project, psiFile, caretOffset, fileUrl, packageName)
     }
 }

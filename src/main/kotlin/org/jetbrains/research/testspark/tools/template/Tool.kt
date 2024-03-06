@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools.template
 
-import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
@@ -13,33 +12,39 @@ interface Tool {
     /**
      * Generates tests for a given class.
      *
-     * @param project the current project
-     * @param psiFile the PsiFile containing the class
-     * @param caret the Caret position in the editor
-     * @param fileUrl the URL of the file
-     * @param testSamplesCode the sample code used for generating tests
+     * @param project The project context.
+     * @param psiFile The PsiFile object representing the class.
+     * @param caretOffset The offset of the caret within the class.
+     * @param fileUrl The URL of the file.
+     * @param testSamplesCode The sample code for generating the tests.
+     *
+     * @see Project
+     * @see PsiFile
      */
-    fun generateTestsForClass(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String)
+    fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String)
 
     /**
      * Generates test cases for a given method.
      *
-     * @param project the current project
-     * @param psiFile the PSI file containing the method
-     * @param caret the caret position within the method
-     * @param fileUrl the URL of the file containing the method
-     * @param testSamplesCode the code snippet representing test samples
+     * @param project The current project.
+     * @param psiFile The PSI file object representing the source file.
+     * @param caretOffset The offset of the caret position.
+     * @param fileUrl The URL of the file where the method is defined (optional).
+     * @param testSamplesCode The code snippets for test samples (optional).
      */
-    fun generateTestsForMethod(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String)
+    fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String)
 
     /**
-     * Generates tests for a given line in a PSI file.
+     * Generates tests for a specific line in a project.
      *
-     * @param project The current project.
-     * @param psiFile The PSI file containing the line.
-     * @param caret The caret position on the line.
-     * @param fileUrl The URL of the file containing the PSI file.
-     * @param testSamplesCode The code for the test samples.
+     * @param project The project in which the line belongs.
+     * @param psiFile The PSI file where the line is located.
+     * @param caretOffset The offset of the caret in the line.
+     * @param fileUrl The URL of the file.
+     * @param testSamplesCode The code containing the test samples.
+     *
+     * @see Project
+     * @see PsiFile
      */
-    fun generateTestsForLine(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String)
+    fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String)
 }

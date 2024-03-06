@@ -90,6 +90,7 @@ class TestSparkAction : AnAction() {
         private val project: Project = e.project!!
         private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         private val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
+        private val caretOffset: Int = caret.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
@@ -326,11 +327,11 @@ class TestSparkAction : AnAction() {
             val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
             if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByEvoSuite(project, psiFile, caret, fileUrl, testSamplesCode)
+                Manager.generateTestsForClassByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByEvoSuite(project, psiFile, caret, fileUrl, testSamplesCode)
+                Manager.generateTestsForMethodByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByEvoSuite(project, psiFile, caret, fileUrl, testSamplesCode)
+                Manager.generateTestsForLineByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             }
 
             visibilityController.isVisible = false
@@ -341,11 +342,11 @@ class TestSparkAction : AnAction() {
             val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
             if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByLlm(project, psiFile, caret, fileUrl, testSamplesCode)
+                Manager.generateTestsForClassByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByLlm(project, psiFile, caret, fileUrl, testSamplesCode)
+                Manager.generateTestsForMethodByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByLlm(project, psiFile, caret, fileUrl, testSamplesCode)
+                Manager.generateTestsForLineByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             }
 
             visibilityController.isVisible = false

@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -21,16 +20,16 @@ import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
  *
- * @param project The project in which the pipeline runs.
- * @param psiFile The current PsiFile object.
- * @param caret The current Caret object.
- * @param fileUrl The URL of the file being processed, if any.
- * @param packageName The package name of the file being processed.
+ * @param project the project in which the pipeline is executed
+ * @param psiFile the PSI file in which the pipeline is executed
+ * @param caretOffset the offset of the caret position in the PSI file
+ * @param fileUrl the URL of the file being processed, if applicable
+ * @param packageName the package name of the file being processed
  */
 class Pipeline(
     private val project: Project,
     psiFile: PsiFile,
-    caret: Caret,
+    caretOffset: Int,
     fileUrl: String?,
     private val packageName: String,
 ) {
@@ -40,7 +39,7 @@ class Pipeline(
         project.service<ProjectContextService>().baseDir = "${project.service<TestStorageProcessingService>().testResultDirectory}${project.service<TestStorageProcessingService>().testResultName}-validation"
         project.service<ProjectContextService>().fileUrl = fileUrl
 
-        project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(psiFile, caret)
+        project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(psiFile, caretOffset)
         project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
 
         project.service<ProjectContextService>().classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!
