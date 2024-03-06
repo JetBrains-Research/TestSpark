@@ -25,6 +25,16 @@ import org.jetbrains.research.testspark.tools.template.Tool
  */
 class Llm(override val name: String = "LLM") : Tool {
 
+    /**
+     * Returns an instance of LLMProcessManager based on the provided parameters.
+     *
+     * @param project The current project.
+     * @param psiFile The PSI file containing the code.
+     * @param caret The caret position in the editor.
+     * @param codeType The type of code fragment being tested.
+     * @param testSamplesCode The code samples used for testing.
+     * @return An instance of LLMProcessManager.
+     */
     private fun getLLMProcessManager(project: Project, psiFile: PsiFile, caret: Caret, codeType: FragmentToTestData, testSamplesCode: String): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClass>()
         // check if cut has any none java super class
@@ -54,56 +64,69 @@ class Llm(override val name: String = "LLM") : Tool {
     }
 
     /**
-     * Generates tests for a given class.
+     * Generates tests for a given class in the project.
      *
-     * @param project The current project.
-     * @param psiFile The PSI file containing the class.
-     * @param caret The caret position.
-     * @param testSamplesCode The code for test samples.
+     * @param project The project where the class is located.
+     * @param psiFile The PSI file representing the class.
+     * @param caret The caret position in the class file.
+     * @param fileUrl The URL of the class file.
+     * @param testSamplesCode The code samples to be used for generating tests.
      */
-    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
+    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
         if (project.service<LLMChatService>().isCorrectToken(project)) {
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
-        createLLMPipeline(project, psiFile, caret).runTestGeneration(getLLMProcessManager(project, psiFile, caret, codeType, testSamplesCode), codeType)
+        createLLMPipeline(project, psiFile, caret, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caret, codeType, testSamplesCode), codeType)
     }
 
     /**
-     * Generates tests for a given method.
+     * Generates tests for a given method in the project.
      *
-     * @param project The current project.
-     * @param psiFile The PSI file in which the method is located.
-     * @param caret The position of the caret in the editor.
-     * @param testSamplesCode The code of the test samples to be used.
+     * @param project the current project
+     * @param psiFile the PSI file containing the method
+     * @param caret the caret position in the file
+     * @param fileUrl the URL of the file
+     * @param testSamplesCode the code for test samples
      */
-    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
+    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
         if (!project.service<LLMChatService>().isCorrectToken(project)) {
             return
         }
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
         val codeType = FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod))
-        createLLMPipeline(project, psiFile, caret).runTestGeneration(getLLMProcessManager(project, psiFile, caret, codeType, testSamplesCode), codeType)
+        createLLMPipeline(project, psiFile, caret, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caret, codeType, testSamplesCode), codeType)
     }
 
     /**
-     * Generates tests for a selected line of code in a given project and PsiFile.
+     * Generates tests for a specific line of code.
      *
-     * @param project The current project in which the code is located.
-     * @param psiFile The PsiFile containing the code.
-     * @param caret The caret representing the current selection.
-     * @param testSamplesCode The test samples code to be used in the test generation process.
+     * @param project The project in which the code is located.
+     * @param psiFile The PSI file containing the code.
+     * @param caret The caret position in the code editor.
+     * @param fileUrl The URL of the file containing the code.
+     * @param testSamplesCode The code representing test samples.
      */
-    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
+    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
         if (!project.service<LLMChatService>().isCorrectToken(project)) {
             return
         }
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
         val codeType = FragmentToTestData(CodeType.LINE, selectedLine)
-        createLLMPipeline(project, psiFile, caret).runTestGeneration(getLLMProcessManager(project, psiFile, caret, codeType, testSamplesCode), codeType)
+        createLLMPipeline(project, psiFile, caret, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caret, codeType, testSamplesCode), codeType)
     }
 
-    private fun createLLMPipeline(project: Project, psiFile: PsiFile, caret: Caret): Pipeline {
+    /**
+     * Creates a Low-Level Management (LLM) pipeline.
+     *
+     * @param project The project in which the pipeline belongs.
+     * @param psiFile The PSI file in which the pipeline is created.
+     * @param caret The caret position in the PSI file.
+     * @param fileUrl The URL of the file.
+     *
+     * @return The created LLM pipeline.
+     */
+    private fun createLLMPipeline(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?): Pipeline {
         val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)!!
 
         val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
@@ -111,6 +134,6 @@ class Llm(override val name: String = "LLM") : Tool {
 
         val packageName = packageList.joinToString(".")
 
-        return Pipeline(project, psiFile, caret, packageName)
+        return Pipeline(project, psiFile, caret, fileUrl, packageName)
     }
 }

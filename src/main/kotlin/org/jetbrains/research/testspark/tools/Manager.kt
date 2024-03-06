@@ -24,17 +24,22 @@ class Manager {
         val tools: List<Tool> = listOf(EvoSuite(), Llm())
 
         /**
-         * Generates tests for a class using EvoSuite.
+         * Generates tests for a given class using EvoSuite.
          *
-         * @param project The project in which the class exists.
-         * @param psiFile The PSI file containing the class.
-         * @param caret The caret indicating the position within the class.
-         * @param testSamplesCode The sample code to be used for test generation.
+         * @param project The project in which the class is located.
+         * @param psiFile The PsiFile containing the class.
+         * @param caret The caret object representing the current position in the file.
+         * @param fileUrl The URL of the class file.
+         * @param testSamplesCode The code for the sample tests.
+         *
+         * @see RunnerService.isGeneratorRunning
+         * @see EvoSuite.generateTestsForClass
+         * @see RunnerService.display
          */
         fun generateTestsForClassByEvoSuite(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
             if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForClass(project, psiFile, caret, testSamplesCode)
+            EvoSuite().generateTestsForClass(project, psiFile, caret, fileUrl, testSamplesCode)
             display(project, 1)
         }
 
@@ -43,73 +48,78 @@ class Manager {
          *
          * @param project The project in which the class is located.
          * @param psiFile The PsiFile representing the class.
-         * @param caret The caret indicating the current position in the class.
-         * @param testSamplesCode The code containing the test samples.
+         * @param caret The Caret object representing the current cursor position.
+         * @param fileUrl The URL of the file containing the class.
+         * @param testSamplesCode The code to be used as test samples.
          */
         fun generateTestsForClassByLlm(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
             if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForClass(project, psiFile, caret, testSamplesCode)
+            Llm().generateTestsForClass(project, psiFile, caret, fileUrl, testSamplesCode)
             display(project, 1)
         }
 
         /**
          * Generates tests for a given method using EvoSuite.
          *
-         * @param project The project the method belongs to.
-         * @param psiFile The PsiFile containing the method.
-         * @param caret The caret position in the PsiFile.
-         * @param testSamplesCode The code used as test samples.
+         * @param project   The current project.
+         * @param psiFile   The PSI file containing the method.
+         * @param caret     The caret position in the editor.
+         * @param fileUrl   The URL of the file being tested.
+         * @param testSamplesCode   The sample code for testing.
          */
         fun generateTestsForMethodByEvoSuite(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
             if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForMethod(project, psiFile, caret, testSamplesCode)
+            EvoSuite().generateTestsForMethod(project, psiFile, caret, fileUrl, testSamplesCode)
             display(project, 1)
         }
 
         /**
-         * Generates tests for a method based on the Local Language Model (LLM).
+         * Generates tests for a method using the Llm technique.
+         *
+         * @param project The project where the method is located.
+         * @param psiFile The PSI file where the method is located.
+         * @param caret The caret position in the PSI file.
+         * @param fileUrl The URL of the file where the method is located.
+         * @param testSamplesCode The code samples used for generating tests.
+         */
+        fun generateTestsForMethodByLlm(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
+
+            Llm().generateTestsForMethod(project, psiFile, caret, fileUrl, testSamplesCode)
+            display(project, 1)
+        }
+
+        /**
+         * Generates tests for a specific line in a file using EvoSuite.
          *
          * @param project The current project.
-         * @param psiFile The PSI (Program Structure Interface) file.
-         * @param caret The current caret position in the file.
+         * @param psiFile The PSI file in which the line exists.
+         * @param caret The caret position.
+         * @param fileUrl The URL of the file.
+         * @param testSamplesCode The code representing the test samples.
+         */
+        fun generateTestsForLineByEvoSuite(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
+
+            EvoSuite().generateTestsForLine(project, psiFile, caret, fileUrl, testSamplesCode)
+            display(project, 1)
+        }
+
+        /**
+         * Generates tests for a line of code using the Language Level Migration Assistant (LLM).
+         *
+         * @param project The current IntelliJ project.
+         * @param psiFile The PsiFile object representing the code file.
+         * @param caret The Caret object representing the cursor position.
+         * @param fileUrl The URL of the file to generate tests for. Can be null.
          * @param testSamplesCode The code for the test samples.
          */
-        fun generateTestsForMethodByLlm(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
+        fun generateTestsForLineByLlm(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
             if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForMethod(project, psiFile, caret, testSamplesCode)
-            display(project, 1)
-        }
-
-        /**
-         * Generates tests for a specific line using EvoSuite.
-         *
-         * @param project The project in which the file is located.
-         * @param psiFile The PSI file containing the line to generate tests for.
-         * @param caret The caret position representing the line to generate tests for.
-         * @param testSamplesCode The code samples to be used as input for generating tests.
-         */
-        fun generateTestsForLineByEvoSuite(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
-            if (project.service<RunnerService>().isGeneratorRunning()) return
-
-            EvoSuite().generateTestsForLine(project, psiFile, caret, testSamplesCode)
-            display(project, 1)
-        }
-
-        /**
-         * Generates tests for a line of code using the Llm engine.
-         *
-         * @param project the current project
-         * @param psiFile the PSI file containing the code
-         * @param caret the caret position in the file
-         * @param testSamplesCode the code for generating the test samples
-         */
-        fun generateTestsForLineByLlm(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
-            if (project.service<RunnerService>().isGeneratorRunning()) return
-
-            Llm().generateTestsForLine(project, psiFile, caret, testSamplesCode)
+            Llm().generateTestsForLine(project, psiFile, caret, fileUrl, testSamplesCode)
             display(project, 1)
         }
 

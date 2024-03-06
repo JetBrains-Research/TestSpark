@@ -27,6 +27,12 @@ import java.io.File
 class EvoSuite(override val name: String = "EvoSuite") : Tool {
     private val log = Logger.getInstance(this::class.java)
 
+    /**
+     * Returns a new instance of EvoSuiteProcessManager for the given project.
+     *
+     * @param project The IntelliJ IDEA project for which the EvoSuiteProcessManager is created.
+     * @return The EvoSuiteProcessManager instance created for the given project.
+     */
     private fun getEvoSuiteProcessManager(project: Project): EvoSuiteProcessManager {
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val settingsProjectState = project.service<SettingsProjectService>().state
@@ -34,29 +40,66 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         return EvoSuiteProcessManager(project, buildPath)
     }
 
-    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
+    /**
+     * Generates tests for a class using EvoSuite.
+     *
+     * @param project The current project.
+     * @param psiFile The PsiFile containing the class to generate tests for.
+     * @param caret The caret position within the PsiFile.
+     * @param fileUrl The URL of the file being tested.
+     * @param testSamplesCode The code to be used as test samples.
+     */
+    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
         log.info("Starting tests generation for class by EvoSuite")
-        createPipeline(project, psiFile, caret).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.CLASS))
+        createPipeline(project, psiFile, caret, fileUrl).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.CLASS))
     }
 
-    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
+    /**
+     * Generates tests for a given method using EvoSuite.
+     *
+     * @param project The current project.
+     * @param psiFile The PSI file containing the method.
+     * @param caret The caret position within the PSI file.
+     * @param fileUrl The URL of the file containing the method.
+     * @param testSamplesCode The sample code for the test cases.
+     */
+    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
         log.info("Starting tests generation for method by EvoSuite")
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
-        createPipeline(project, psiFile, caret).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod)))
+        createPipeline(project, psiFile, caret, fileUrl).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod)))
     }
 
-    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
+    /**
+     * Generates tests for a specific line of code using EvoSuite.
+     *
+     * @param project The project in which the code is located.
+     * @param psiFile The PsiFile object representing the code file.
+     * @param caret The Caret object representing the current cursor position.
+     * @param fileUrl The URL of the code file.
+     * @param testSamplesCode The code samples used for testing.
+     */
+    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
         log.info("Starting tests generation for line by EvoSuite")
         val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
-        createPipeline(project, psiFile, caret).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.LINE, selectedLine))
+        createPipeline(project, psiFile, caret, fileUrl).runTestGeneration(getEvoSuiteProcessManager(project), FragmentToTestData(CodeType.LINE, selectedLine))
     }
 
-    private fun createPipeline(project: Project, psiFile: PsiFile, caret: Caret): Pipeline {
+    /**
+     * Creates a pipeline object for the given project, psiFile, caret, and fileUrl.
+     * The packageName is determined based on the projectClassPath and the buildPath from the project settings.
+     *
+     * @param project The project for which to create the pipeline.
+     * @param psiFile The psiFile associated with the pipeline.
+     * @param caret The caret position in the psiFile.
+     * @param fileUrl The URL of the file associated with the pipeline. Can be null.
+     * @return The created pipeline object.
+     */
+    private fun createPipeline(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?): Pipeline {
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
         val settingsProjectState = project.service<SettingsProjectService>().state
         val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
 
-        return Pipeline(project, psiFile, caret, packageName)
+        return Pipeline(project, psiFile, caret, fileUrl, packageName)
     }
 }

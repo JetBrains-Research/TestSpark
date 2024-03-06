@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.progress.ProgressIndicator
@@ -20,22 +19,26 @@ import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 
 /**
- * Pipeline class represents a pipeline for running the test generation process.
+ * Pipeline class represents a pipeline for generating tests in a project.
  *
- * @param e The AnActionEvent instance that triggered the pipeline.
- * @param packageName The name of the package where the target class resides.
+ * @param project The project in which the pipeline runs.
+ * @param psiFile The current PsiFile object.
+ * @param caret The current Caret object.
+ * @param fileUrl The URL of the file being processed, if any.
+ * @param packageName The package name of the file being processed.
  */
 class Pipeline(
     private val project: Project,
     psiFile: PsiFile,
     caret: Caret,
+    fileUrl: String?,
     private val packageName: String,
 ) {
     init {
         project.service<ProjectContextService>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
         project.service<ProjectContextService>().resultPath = project.service<TestStorageProcessingService>().resultPath
         project.service<ProjectContextService>().baseDir = "${project.service<TestStorageProcessingService>().testResultDirectory}${project.service<TestStorageProcessingService>().testResultName}-validation"
-        project.service<ProjectContextService>().fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
+        project.service<ProjectContextService>().fileUrl = fileUrl
 
         project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(psiFile, caret)
         project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
