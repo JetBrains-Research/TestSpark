@@ -89,8 +89,7 @@ class TestSparkAction : AnAction() {
         private val codeTypes = getCurrentListOfCodeTypes(e)!!
         private val project: Project = e.project!!
         private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        private val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        private val caretOffset: Int = caret.offset
+        private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
