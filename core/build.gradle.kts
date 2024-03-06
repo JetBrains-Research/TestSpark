@@ -5,9 +5,9 @@ plugins {
 
 group = "org.jetbrains.research"
 val spaceUsername =
-  System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
+    System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
 val spacePublish =
-  System.getProperty("space.publish")?.toString() ?: project.properties["spacePublish"]?.toString() ?: ""
+    System.getProperty("space.publish")?.toString() ?: project.properties["spacePublish"]?.toString() ?: ""
 
 repositories {
     mavenCentral()
