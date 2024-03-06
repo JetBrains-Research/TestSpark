@@ -1,13 +1,15 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -24,21 +26,18 @@ import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
  * @param packageName The name of the package where the target class resides.
  */
 class Pipeline(
-    e: AnActionEvent,
+    private val project: Project,
+    psiFile: PsiFile,
+    caret: Caret,
     private val packageName: String,
 ) {
-    private val project = e.project!!
-
     init {
         project.service<ProjectContextService>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
         project.service<ProjectContextService>().resultPath = project.service<TestStorageProcessingService>().resultPath
         project.service<ProjectContextService>().baseDir = "${project.service<TestStorageProcessingService>().testResultDirectory}${project.service<TestStorageProcessingService>().testResultName}-validation"
         project.service<ProjectContextService>().fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
-        project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(
-            e.dataContext.getData(CommonDataKeys.PSI_FILE)!!,
-            e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!,
-        )
+        project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(psiFile, caret)
         project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
 
         project.service<ProjectContextService>().classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!

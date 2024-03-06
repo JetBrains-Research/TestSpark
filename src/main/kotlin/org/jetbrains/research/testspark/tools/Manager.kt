@@ -1,9 +1,11 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiFile
 import com.intellij.util.concurrency.AppExecutorUtil
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.services.ErrorService
@@ -24,93 +26,113 @@ class Manager {
         /**
          * Generates tests for a class using EvoSuite.
          *
-         * @param e The AnActionEvent object representing the action event.
+         * @param project The project in which the class exists.
+         * @param psiFile The PSI file containing the class.
+         * @param caret The caret indicating the position within the class.
+         * @param testSamplesCode The sample code to be used for test generation.
          */
-        fun generateTestsForClassByEvoSuite(e: AnActionEvent, testSamplesCode: String) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForClassByEvoSuite(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForClass(e, testSamplesCode)
-            display(e, 1)
+            EvoSuite().generateTestsForClass(project, psiFile, caret, testSamplesCode)
+            display(project, 1)
         }
 
         /**
-         * Generates tests for a class using Llm tool.
+         * Generates tests for a class using Llm.
          *
-         * @param e the AnActionEvent representing the action event.
+         * @param project The project in which the class is located.
+         * @param psiFile The PsiFile representing the class.
+         * @param caret The caret indicating the current position in the class.
+         * @param testSamplesCode The code containing the test samples.
          */
-        fun generateTestsForClassByLlm(e: AnActionEvent, testSamplesCode: String) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForClassByLlm(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForClass(e, testSamplesCode)
-            display(e, 1)
+            Llm().generateTestsForClass(project, psiFile, caret, testSamplesCode)
+            display(project, 1)
         }
 
         /**
-         * Generates tests for a specific method using EvoSuite.
+         * Generates tests for a given method using EvoSuite.
          *
-         * @param e The AnActionEvent object representing the user action.
+         * @param project The project the method belongs to.
+         * @param psiFile The PsiFile containing the method.
+         * @param caret The caret position in the PsiFile.
+         * @param testSamplesCode The code used as test samples.
          */
-        fun generateTestsForMethodByEvoSuite(e: AnActionEvent, testSamplesCode: String) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForMethodByEvoSuite(project: Project, psiFile: PsiFile, caret: Caret, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForMethod(e, testSamplesCode)
-            display(e, 1)
+            EvoSuite().generateTestsForMethod(project, psiFile, caret, testSamplesCode)
+            display(project, 1)
         }
 
         /**
-         * Generates tests for a given method based on Llm tool.
+         * Generates tests for a method based on the Local Language Model (LLM).
          *
-         * @param e The AnActionEvent object containing information about the action event.
+         * @param project The current project.
+         * @param psiFile The PSI (Program Structure Interface) file.
+         * @param caret The current caret position in the file.
+         * @param testSamplesCode The code for the test samples.
          */
-        fun generateTestsForMethodByLlm(e: AnActionEvent, testSamplesCode: String) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForMethodByLlm(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForMethod(e, testSamplesCode)
-            display(e, 1)
+            Llm().generateTestsForMethod(project, psiFile, caret, testSamplesCode)
+            display(project, 1)
         }
 
         /**
-         * Generates tests for a specific line using EvoSuite tool.
+         * Generates tests for a specific line using EvoSuite.
          *
-         * @param e AnActionEvent representing the action event.
+         * @param project The project in which the file is located.
+         * @param psiFile The PSI file containing the line to generate tests for.
+         * @param caret The caret position representing the line to generate tests for.
+         * @param testSamplesCode The code samples to be used as input for generating tests.
          */
-        fun generateTestsForLineByEvoSuite(e: AnActionEvent, testSamplesCode: String) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForLineByEvoSuite(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForLine(e, testSamplesCode)
-            display(e, 1)
+            EvoSuite().generateTestsForLine(project, psiFile, caret, testSamplesCode)
+            display(project, 1)
         }
 
         /**
-         * Generates tests for a line using Llm tool.
+         * Generates tests for a line of code using the Llm engine.
          *
-         * @param e The AnActionEvent containing the information about the action
+         * @param project the current project
+         * @param psiFile the PSI file containing the code
+         * @param caret the caret position in the file
+         * @param testSamplesCode the code for generating the test samples
          */
-        fun generateTestsForLineByLlm(e: AnActionEvent, testSamplesCode: String) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForLineByLlm(project: Project, psiFile: PsiFile, caret: Caret, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForLine(e, testSamplesCode)
-            display(e, 1)
+            Llm().generateTestsForLine(project, psiFile, caret, testSamplesCode)
+            display(project, 1)
         }
 
         /**
-         * Displays the given AnActionEvent and the number of used tools.
+         * Displays the given project with the specified number of used tools.
+         * This method is executed asynchronously.
          *
-         * @param e The AnActionEvent to be displayed.
-         * @param numberOfUsedTool The number of used tools to be displayed.
+         * @param project The project to be displayed.
+         * @param numberOfUsedTool The number of used tools in the project.
          */
-        private fun display(e: AnActionEvent, numberOfUsedTool: Int) =
-            AppExecutorUtil.getAppScheduledExecutorService().execute(Display(e, numberOfUsedTool))
+        private fun display(project: Project, numberOfUsedTool: Int) =
+            AppExecutorUtil.getAppScheduledExecutorService().execute(Display(project, numberOfUsedTool))
     }
 }
 
 /**
- * A private class that displays the test generation result to the user.
+ * The Display class represents a display of test generation results in a project.
+ * It implements the Runnable interface to run the display in a separate thread.
  *
- * @param event The action event that triggered the display.
- * @param numberOfUsedTool The number of test generation tools used.
+ * @property project The project in which the display is shown.
+ * @property numberOfUsedTool The number of tools used for the test generation.
  */
-private class Display(private val event: AnActionEvent, private val numberOfUsedTool: Int) : Runnable {
+private class Display(private val project: Project, private val numberOfUsedTool: Int) : Runnable {
     private val log = Logger.getInstance(this::class.java)
 
     override fun run() {
@@ -120,10 +142,10 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
         // waiting for the generation result
         while (true) {
             // checks if all generator are finished their work
-            if (event.project!!.service<TestGenerationDataService>().testGenerationResultList.size != numberOfUsedTool) {
+            if (project.service<TestGenerationDataService>().testGenerationResultList.size != numberOfUsedTool) {
                 // there is some error during the process running
-                if (event.project!!.service<ErrorService>().isErrorOccurred()) break
-                log.info("Found ${event.project!!.service<TestGenerationDataService>().testGenerationResultList.size} number of results")
+                if (project.service<ErrorService>().isErrorOccurred()) break
+                log.info("Found ${project.service<TestGenerationDataService>().testGenerationResultList.size} number of results")
                 log.info("Waiting for other generation results")
                 Thread.sleep(sleepDurationMillis)
                 continue
@@ -132,13 +154,13 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
             log.info("Found all $numberOfUsedTool generation results")
 
             ApplicationManager.getApplication().invokeLater {
-                event.project!!.service<ReportLockingService>().receiveReport(getMergeResult(numberOfUsedTool))
+                project.service<ReportLockingService>().receiveReport(getMergeResult(numberOfUsedTool))
             }
 
             break
         }
 
-        event.project!!.service<RunnerService>().clear()
+        project.service<RunnerService>().clear()
     }
 
     /**
@@ -151,7 +173,7 @@ private class Display(private val event: AnActionEvent, private val numberOfUsed
         log.info("Merging $numberOfUsedTool generation results")
 
         if (numberOfUsedTool == 1) {
-            return event.project!!.service<TestGenerationDataService>().testGenerationResultList[0]!!
+            return project.service<TestGenerationDataService>().testGenerationResultList[0]!!
         }
         TODO("implement merge")
     }
