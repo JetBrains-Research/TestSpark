@@ -21,6 +21,9 @@ class SettingsArguments(
     private val classFQN: String,
     baseDir: String,
 ) {
+    private val settingsState: SettingsApplicationState?
+        get() = SettingsApplicationService.getInstance().state
+
     private var command: MutableList<String> = mutableListOf(
         algorithmsToGenerateMap[settingsState!!.algorithm]!!,
         "-serializeResult",
@@ -80,9 +83,6 @@ class SettingsArguments(
     }
 
     companion object {
-        val settingsState: SettingsApplicationState?
-            get() = SettingsApplicationService.getInstance().state
-
         private const val generateSuite = "-generateSuite"
         private const val generateMOSuite = "-generateMOSuite"
         private const val generateTests = "-generateTests"

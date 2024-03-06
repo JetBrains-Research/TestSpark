@@ -8,7 +8,6 @@ import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.data.JUnitVersion
-import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import java.awt.Font
 import javax.swing.JButton
 import javax.swing.JLabel
@@ -43,10 +42,10 @@ class EvoSuitePanelFactory : PanelFactory {
      */
     override fun getMiddlePanel(junit: JUnitVersion?): JPanel {
         javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
-        javaPathTextField.text = SettingsArguments.settingsState!!.javaPath
+        javaPathTextField.text = settingsState.javaPath
 
         algorithmSelector.setMinimumAndPreferredWidth(300)
-        algorithmSelector.selectedItem = SettingsArguments.settingsState!!.algorithm
+        algorithmSelector.selectedItem = settingsState.algorithm
 
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
@@ -102,7 +101,7 @@ class EvoSuitePanelFactory : PanelFactory {
      * Updates the state of the settings.
      */
     override fun applyUpdates() {
-        SettingsArguments.settingsState!!.javaPath = javaPathTextField.text
-        SettingsArguments.settingsState!!.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm
+        settingsState.javaPath = javaPathTextField.text
+        settingsState.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm
     }
 }

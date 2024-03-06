@@ -18,8 +18,8 @@ import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.PromptParserService
+import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
 import java.awt.Font
@@ -32,6 +32,9 @@ import javax.swing.JSeparator
 import javax.swing.JTextField
 
 class SettingsLLMComponent {
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
+
     var panel: JPanel? = null
 
     // LLM Token
@@ -39,7 +42,7 @@ class SettingsLLMComponent {
 
     // Models
     private var modelSelector = ComboBox(arrayOf(""))
-    private var platformSelector = ComboBox(arrayOf(SettingsArguments.settingsState!!.openAIName))
+    private var platformSelector = ComboBox(arrayOf(settingsState.openAIName))
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
@@ -131,7 +134,7 @@ class SettingsLLMComponent {
 
     init {
         // Adds additional style (width, tooltips)
-        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         stylizePanel()
 
         // Adds the panel components
@@ -219,6 +222,7 @@ class SettingsLLMComponent {
             modelSelector,
             llmUserTokenField,
             llmPlatforms,
+            settingsState,
         )
 
         addHighlighterListeners()

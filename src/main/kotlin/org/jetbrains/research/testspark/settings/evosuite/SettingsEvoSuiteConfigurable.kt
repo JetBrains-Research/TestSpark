@@ -2,7 +2,8 @@ package org.jetbrains.research.testspark.settings.evosuite
 
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.ui.Messages
-import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
+import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
 
 /**
@@ -12,6 +13,8 @@ import javax.swing.JComponent
  * It provides controller functionality for the TestSparkSettingsState.
  */
 class SettingsEvoSuiteConfigurable : Configurable {
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
 
     var settingsComponent: SettingsEvoSuiteComponent? = null
 
@@ -29,24 +32,24 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        settingsComponent!!.javaPath = SettingsArguments.settingsState!!.javaPath
-        settingsComponent!!.sandbox = SettingsArguments.settingsState!!.sandbox
-        settingsComponent!!.assertions = SettingsArguments.settingsState!!.assertions
-        settingsComponent!!.seed = SettingsArguments.settingsState!!.seed
-        settingsComponent!!.algorithm = SettingsArguments.settingsState!!.algorithm
-        settingsComponent!!.evosuiteSetupCheckBoxSelected = SettingsArguments.settingsState!!.evosuiteSetupCheckBoxSelected
-        settingsComponent!!.configurationId = SettingsArguments.settingsState!!.configurationId
-        settingsComponent!!.clientOnThread = SettingsArguments.settingsState!!.clientOnThread
-        settingsComponent!!.junitCheck = SettingsArguments.settingsState!!.junitCheck
-        settingsComponent!!.criterionLine = SettingsArguments.settingsState!!.criterionLine
-        settingsComponent!!.criterionBranch = SettingsArguments.settingsState!!.criterionBranch
-        settingsComponent!!.criterionException = SettingsArguments.settingsState!!.criterionException
-        settingsComponent!!.criterionWeakMutation = SettingsArguments.settingsState!!.criterionWeakMutation
-        settingsComponent!!.criterionOutput = SettingsArguments.settingsState!!.criterionOutput
-        settingsComponent!!.criterionMethod = SettingsArguments.settingsState!!.criterionMethod
-        settingsComponent!!.criterionMethodNoException = SettingsArguments.settingsState!!.criterionMethodNoException
-        settingsComponent!!.criterionCBranch = SettingsArguments.settingsState!!.criterionCBranch
-        settingsComponent!!.minimize = SettingsArguments.settingsState!!.minimize
+        settingsComponent!!.javaPath = settingsState.javaPath
+        settingsComponent!!.sandbox = settingsState.sandbox
+        settingsComponent!!.assertions = settingsState.assertions
+        settingsComponent!!.seed = settingsState.seed
+        settingsComponent!!.algorithm = settingsState.algorithm
+        settingsComponent!!.evosuiteSetupCheckBoxSelected = settingsState.evosuiteSetupCheckBoxSelected
+        settingsComponent!!.configurationId = settingsState.configurationId
+        settingsComponent!!.clientOnThread = settingsState.clientOnThread
+        settingsComponent!!.junitCheck = settingsState.junitCheck
+        settingsComponent!!.criterionLine = settingsState.criterionLine
+        settingsComponent!!.criterionBranch = settingsState.criterionBranch
+        settingsComponent!!.criterionException = settingsState.criterionException
+        settingsComponent!!.criterionWeakMutation = settingsState.criterionWeakMutation
+        settingsComponent!!.criterionOutput = settingsState.criterionOutput
+        settingsComponent!!.criterionMethod = settingsState.criterionMethod
+        settingsComponent!!.criterionMethodNoException = settingsState.criterionMethodNoException
+        settingsComponent!!.criterionCBranch = settingsState.criterionCBranch
+        settingsComponent!!.minimize = settingsState.minimize
     }
 
     /**
@@ -55,24 +58,24 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        var modified: Boolean = settingsComponent!!.sandbox != SettingsArguments.settingsState!!.sandbox
-        modified = modified or (settingsComponent!!.javaPath != SettingsArguments.settingsState!!.javaPath)
-        modified = modified or (settingsComponent!!.assertions != SettingsArguments.settingsState!!.assertions)
-        modified = modified or (settingsComponent!!.seed != SettingsArguments.settingsState!!.seed)
-        modified = modified or (settingsComponent!!.algorithm != SettingsArguments.settingsState!!.algorithm)
-        modified = modified or (settingsComponent!!.evosuiteSetupCheckBoxSelected != SettingsArguments.settingsState!!.evosuiteSetupCheckBoxSelected)
-        modified = modified or (settingsComponent!!.configurationId != SettingsArguments.settingsState!!.configurationId)
-        modified = modified or (settingsComponent!!.clientOnThread != SettingsArguments.settingsState!!.clientOnThread)
-        modified = modified or (settingsComponent!!.junitCheck != SettingsArguments.settingsState!!.junitCheck)
-        modified = modified or (settingsComponent!!.criterionLine != SettingsArguments.settingsState!!.criterionLine)
-        modified = modified or (settingsComponent!!.criterionBranch != SettingsArguments.settingsState!!.criterionBranch)
-        modified = modified or (settingsComponent!!.criterionException != SettingsArguments.settingsState!!.criterionException)
-        modified = modified or (settingsComponent!!.criterionWeakMutation != SettingsArguments.settingsState!!.criterionWeakMutation)
-        modified = modified or (settingsComponent!!.criterionOutput != SettingsArguments.settingsState!!.criterionOutput)
-        modified = modified or (settingsComponent!!.criterionMethod != SettingsArguments.settingsState!!.criterionMethod)
-        modified = modified or (settingsComponent!!.criterionMethodNoException != SettingsArguments.settingsState!!.criterionMethodNoException)
-        modified = modified or (settingsComponent!!.criterionCBranch != SettingsArguments.settingsState!!.criterionCBranch)
-        modified = modified or (settingsComponent!!.minimize != SettingsArguments.settingsState!!.minimize)
+        var modified: Boolean = settingsComponent!!.sandbox != settingsState.sandbox
+        modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
+        modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
+        modified = modified or (settingsComponent!!.seed != settingsState.seed)
+        modified = modified or (settingsComponent!!.algorithm != settingsState.algorithm)
+        modified = modified or (settingsComponent!!.evosuiteSetupCheckBoxSelected != settingsState.evosuiteSetupCheckBoxSelected)
+        modified = modified or (settingsComponent!!.configurationId != settingsState.configurationId)
+        modified = modified or (settingsComponent!!.clientOnThread != settingsState.clientOnThread)
+        modified = modified or (settingsComponent!!.junitCheck != settingsState.junitCheck)
+        modified = modified or (settingsComponent!!.criterionLine != settingsState.criterionLine)
+        modified = modified or (settingsComponent!!.criterionBranch != settingsState.criterionBranch)
+        modified = modified or (settingsComponent!!.criterionException != settingsState.criterionException)
+        modified = modified or (settingsComponent!!.criterionWeakMutation != settingsState.criterionWeakMutation)
+        modified = modified or (settingsComponent!!.criterionOutput != settingsState.criterionOutput)
+        modified = modified or (settingsComponent!!.criterionMethod != settingsState.criterionMethod)
+        modified = modified or (settingsComponent!!.criterionMethodNoException != settingsState.criterionMethodNoException)
+        modified = modified or (settingsComponent!!.criterionCBranch != settingsState.criterionCBranch)
+        modified = modified or (settingsComponent!!.minimize != settingsState.minimize)
         return modified
     }
 
@@ -80,23 +83,23 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        SettingsArguments.settingsState!!.javaPath = settingsComponent!!.javaPath
-        SettingsArguments.settingsState!!.sandbox = settingsComponent!!.sandbox
-        SettingsArguments.settingsState!!.assertions = settingsComponent!!.assertions
-        SettingsArguments.settingsState!!.algorithm = settingsComponent!!.algorithm
-        SettingsArguments.settingsState!!.evosuiteSetupCheckBoxSelected = settingsComponent!!.evosuiteSetupCheckBoxSelected
-        SettingsArguments.settingsState!!.configurationId = settingsComponent!!.configurationId
-        SettingsArguments.settingsState!!.clientOnThread = settingsComponent!!.clientOnThread
-        SettingsArguments.settingsState!!.junitCheck = settingsComponent!!.junitCheck
-        SettingsArguments.settingsState!!.criterionLine = settingsComponent!!.criterionLine
-        SettingsArguments.settingsState!!.criterionBranch = settingsComponent!!.criterionBranch
-        SettingsArguments.settingsState!!.criterionException = settingsComponent!!.criterionException
-        SettingsArguments.settingsState!!.criterionWeakMutation = settingsComponent!!.criterionWeakMutation
-        SettingsArguments.settingsState!!.criterionOutput = settingsComponent!!.criterionOutput
-        SettingsArguments.settingsState!!.criterionMethod = settingsComponent!!.criterionMethod
-        SettingsArguments.settingsState!!.criterionMethodNoException = settingsComponent!!.criterionMethodNoException
-        SettingsArguments.settingsState!!.criterionCBranch = settingsComponent!!.criterionCBranch
-        SettingsArguments.settingsState!!.minimize = settingsComponent!!.minimize
+        settingsState.javaPath = settingsComponent!!.javaPath
+        settingsState.sandbox = settingsComponent!!.sandbox
+        settingsState.assertions = settingsComponent!!.assertions
+        settingsState.algorithm = settingsComponent!!.algorithm
+        settingsState.evosuiteSetupCheckBoxSelected = settingsComponent!!.evosuiteSetupCheckBoxSelected
+        settingsState.configurationId = settingsComponent!!.configurationId
+        settingsState.clientOnThread = settingsComponent!!.clientOnThread
+        settingsState.junitCheck = settingsComponent!!.junitCheck
+        settingsState.criterionLine = settingsComponent!!.criterionLine
+        settingsState.criterionBranch = settingsComponent!!.criterionBranch
+        settingsState.criterionException = settingsComponent!!.criterionException
+        settingsState.criterionWeakMutation = settingsComponent!!.criterionWeakMutation
+        settingsState.criterionOutput = settingsComponent!!.criterionOutput
+        settingsState.criterionMethod = settingsComponent!!.criterionMethod
+        settingsState.criterionMethodNoException = settingsComponent!!.criterionMethodNoException
+        settingsState.criterionCBranch = settingsComponent!!.criterionCBranch
+        settingsState.minimize = settingsComponent!!.minimize
 
         val seed = settingsComponent!!.seed.toLongOrNull()
         if (settingsComponent!!.seed != "" && seed == null) {
@@ -106,7 +109,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
             )
             return
         }
-        SettingsArguments.settingsState!!.seed = settingsComponent!!.seed
+        settingsState.seed = settingsComponent!!.seed
     }
 
     /**

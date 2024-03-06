@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.settings.SettingsApplicationState
  */
 class SettingsArguments {
     companion object {
-        val settingsState: SettingsApplicationState?
+        private val settingsState: SettingsApplicationState?
             get() = SettingsApplicationService.getInstance().state
 
         /**

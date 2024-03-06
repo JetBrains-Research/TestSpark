@@ -5,7 +5,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
@@ -43,27 +43,28 @@ private fun updateModelSelector(
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
     llmPlatforms: List<LLMPlatform>,
+    settingsState: SettingsApplicationState,
 ) {
     ApplicationManager.getApplication().executeOnPooledThread {
         var modules = arrayOf("")
-        if (platformSelector.selectedItem!!.toString() == SettingsArguments.settingsState!!.openAIName) {
+        if (platformSelector.selectedItem!!.toString() == settingsState.openAIName) {
             modules = getOpenAIModels(llmUserTokenField.text)
         }
-        if (platformSelector.selectedItem!!.toString() == SettingsArguments.settingsState!!.grazieName) {
+        if (platformSelector.selectedItem!!.toString() == settingsState.grazieName) {
             modules = getGrazieModels()
         }
         modelSelector.model = DefaultComboBoxModel(modules)
         for (index in llmPlatforms.indices) {
-            if (llmPlatforms[index].name == SettingsArguments.settingsState!!.openAIName &&
+            if (llmPlatforms[index].name == settingsState.openAIName &&
                 llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
             ) {
-                modelSelector.selectedItem = SettingsArguments.settingsState!!.openAIModel
+                modelSelector.selectedItem = settingsState.openAIModel
                 llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
             }
-            if (llmPlatforms[index].name == SettingsArguments.settingsState!!.grazieName &&
+            if (llmPlatforms[index].name == settingsState.grazieName &&
                 llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
             ) {
-                modelSelector.selectedItem = SettingsArguments.settingsState!!.grazieModel
+                modelSelector.selectedItem = settingsState.grazieModel
                 llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
             }
         }
@@ -82,19 +83,20 @@ private fun updateLlmUserTokenField(
     platformSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
     llmPlatforms: List<LLMPlatform>,
+    settingsState: SettingsApplicationState,
 ) {
     for (index in llmPlatforms.indices) {
-        if (llmPlatforms[index].name == SettingsArguments.settingsState!!.openAIName &&
+        if (llmPlatforms[index].name == settingsState.openAIName &&
             llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
         ) {
-            llmUserTokenField.text = SettingsArguments.settingsState!!.openAIToken
-            llmPlatforms[index].token = SettingsArguments.settingsState!!.openAIToken
+            llmUserTokenField.text = settingsState.openAIToken
+            llmPlatforms[index].token = settingsState.openAIToken
         }
-        if (llmPlatforms[index].name == SettingsArguments.settingsState!!.grazieName &&
+        if (llmPlatforms[index].name == settingsState.grazieName &&
             llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
         ) {
-            llmUserTokenField.text = SettingsArguments.settingsState!!.grazieToken
-            llmPlatforms[index].token = SettingsArguments.settingsState!!.grazieToken
+            llmUserTokenField.text = settingsState.grazieToken
+            llmPlatforms[index].token = settingsState.grazieToken
         }
     }
 }
@@ -112,6 +114,7 @@ fun addLLMPanelListeners(
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
     llmPlatforms: List<LLMPlatform>,
+    settingsState: SettingsApplicationState,
 ) {
     llmUserTokenField.document.addDocumentListener(object : DocumentListener {
         override fun insertUpdate(e: DocumentEvent?) {
@@ -132,13 +135,13 @@ fun addLLMPanelListeners(
                     llmPlatform.token = llmUserTokenField.text
                 }
             }
-            updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
+            updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         }
     })
 
     platformSelector.addItemListener {
-        updateLlmUserTokenField(platformSelector, llmUserTokenField, llmPlatforms)
-        updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
+        updateLlmUserTokenField(platformSelector, llmUserTokenField, llmPlatforms, settingsState)
+        updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
     }
 
     modelSelector.addItemListener {
@@ -162,20 +165,21 @@ fun stylizeMainComponents(
     modelSelector: ComboBox<String>,
     llmUserTokenField: JTextField,
     llmPlatforms: List<LLMPlatform>,
+    settingsState: SettingsApplicationState,
 ) {
     // Check if the Grazie platform access is available in the current build
     if (isGrazieClassLoaded()) {
         platformSelector.model = DefaultComboBoxModel(llmPlatforms.map { it.name }.toTypedArray())
-        platformSelector.selectedItem = SettingsArguments.settingsState!!.currentLLMPlatformName
+        platformSelector.selectedItem = settingsState.currentLLMPlatformName
     } else {
         platformSelector.isEnabled = false
     }
 
     llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
-    updateLlmUserTokenField(platformSelector, llmUserTokenField, llmPlatforms)
+    updateLlmUserTokenField(platformSelector, llmUserTokenField, llmPlatforms, settingsState)
 
     modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
-    updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
+    updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
 }
 
 /**
