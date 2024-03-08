@@ -3,13 +3,19 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.project.NoAccessDuringPsiEvents
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.PsiShortNamesCache
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
@@ -238,17 +244,41 @@ class PromptManager(
         interestingPsiClasses: MutableSet<PsiClass>,
         cutPsiClass: PsiClass,
     ): MutableMap<PsiClass, MutableList<PsiClass>> {
+        println("isDumb: "+DumbService.isDumb(project).toString())
         val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
 
         val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
         interestingPsiClasses.add(cutPsiClass)
 
+        ApplicationManager.getApplication().runReadAction {
+            val projectFileIndex = ProjectRootManager.getInstance(project).fileIndex
+            projectFileIndex.iterateContent { virtualFile ->
+                val psiFile = PsiManager.getInstance(project).findFile(virtualFile)
+                if (psiFile is PsiJavaFile) {
+                    val psiClasses = psiFile.classes
+                    psiClasses.forEach { psiClass ->
+                        DumbService.getInstance(project).runWithAlternativeResolveEnabled< PsiClass > {
+                            psiClass.superClass
+                        }
+                        println("$psiClass ***** ${psiClass.superClass}")
+                    }
+                }
+                true
+            }
+        }
         interestingPsiClasses.forEach { currentInterestingClass ->
-            val scope = GlobalSearchScope.projectScope(project)
-            val query = ClassInheritorsSearch.search(currentInterestingClass, scope, false)
-            val detectedSubClasses: Collection<PsiClass> = query.findAll()
+            var detectedSubClasses: Collection<PsiClass>? = null
+//            while(true){
+                val scope = GlobalSearchScope.projectScope(project)
+                val query = ClassInheritorsSearch.search(currentInterestingClass, false)
+                detectedSubClasses= query.findAll()
+            PsiShortNamesCache.getInstance(project).getClassesByName(currentInterestingClass.name!!, GlobalSearchScope.projectScope(project))
+//                if (detectedSubClasses.size >0)
+//                    break
+//            }
 
-            detectedSubClasses.forEach { detectedSubClass ->
+            println("isDumb: "+NoAccessDuringPsiEvents.isInsideEventProcessing())
+            detectedSubClasses!!.forEach { detectedSubClass ->
                 if (!polymorphismRelations.contains(currentInterestingClass)) {
                     polymorphismRelations[currentInterestingClass] = ArrayList()
                 }

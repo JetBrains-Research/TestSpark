@@ -383,7 +383,8 @@ tasks.create<RunIdeTask>("headless"){
         "-Xmx16G",
         "-Djava.awt.headless=true",
         "--add-exports",
-        "java.base/jdk.internal.vm=ALL-UNNAMED"
+        "java.base/jdk.internal.vm=ALL-UNNAMED",
+        "-Didea.system.path"
     )
 }
 

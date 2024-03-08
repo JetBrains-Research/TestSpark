@@ -1,29 +1,39 @@
 package org.jetbrains.research.testspark.appstarter
 
+import com.intellij.externalSystem.ImportedLibraryProperties
 import com.intellij.ide.impl.ProjectUtil
+import com.intellij.ide.starters.shared.MAVEN_PROJECT
 import com.intellij.openapi.application.ApplicationStarter
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.modules
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
+import com.intellij.remote.RemoteProcessUtil
+import com.intellij.testFramework.fixtures.MavenDependencyUtil
+import org.apache.xmlbeans.impl.tool.MavenPlugin
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import java.io.File
+import java.io.IOException
 import kotlin.system.exitProcess
 
 
-class TestSparkStarter: ApplicationStarter {
+class TestSparkStarter : ApplicationStarter {
     @Deprecated("Specify it as `id` for extension definition in a plugin descriptor")
-    override val commandName: String ="testspark"
+    override val commandName: String = "testspark"
 
     override fun main(args: List<String>) {
 
@@ -50,41 +60,50 @@ class TestSparkStarter: ApplicationStarter {
             println("couldn't find project in $projectPath")
             exitProcess(1)
         }
+//        val mavenProjectsManager: MavenProjectsManager = MavenProjectsManager.getInstance(project)
         println("Detected project: ${project}")
-
-        //        open target file
-        val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath) ?: run {
-            println("couldn't open file $filePath")
-            exitProcess(1)
-        }
-
-        // get target PsiClass
-        val psiFile = PsiManager.getInstance(project).findFile(virtualFile) as PsiJavaFile
-        val targetPsiClass = detectPsiClass(psiFile.classes, classUnderTestName) ?: run {
-            println("couldn't find $classUnderTestName in $filePath")
-            exitProcess(1)
-        }
-
-        println("PsiClass ${targetPsiClass.qualifiedName} is detected! Start the test generation process.")
-
-        // update settings
-        project.service<ProjectContextService>().projectClassPath = classPath
-        project.service<SettingsProjectService>().state.buildPath = classPath
-        SettingsArguments.settingsState?.currentLLMPlatformName = TestSparkDefaultsBundle.defaultValue("grazie")
-        SettingsArguments.settingsState!!.llmPlatforms[1].token = token
-        SettingsArguments.settingsState!!.llmPlatforms[1].model = model
-        SettingsArguments.settingsState!!.classPrompt = File(promptTemplateFile).readText()
-        project.service<ProjectContextService>().resultPath = output
-        project.service<ProjectContextService>().classFQN = targetPsiClass.qualifiedName
-        project.service<ProjectContextService>().fileUrl = output
-        // TODO project.service<ProjectContextService>().fileUrl
-
         // Continue when the project is indexed
         println("Indexing project...")
-        DumbService.getInstance(project).runWhenSmart{
+
+        DumbService.getInstance(project).runWhenSmart {
+            //        open target file
+            val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath) ?: run {
+                println("couldn't open file $filePath")
+                exitProcess(1)
+            }
+
+
+//            if (isMavenProject(projectPath))
+//            MavenDependencyUtil.addFromMaven()
+//                refreshMaven(projectPath)
+            // get target PsiClass
+            val psiFile = PsiManager.getInstance(project).findFile(virtualFile) as PsiJavaFile
+            val targetPsiClass = detectPsiClass(psiFile.classes, classUnderTestName) ?: run {
+                println("couldn't find $classUnderTestName in $filePath")
+                exitProcess(1)
+            }
+
+            println("PsiClass ${targetPsiClass.qualifiedName} is detected! Start the test generation process.")
+
+            // update settings
+            project.service<ProjectContextService>().projectClassPath = classPath
+            project.service<SettingsProjectService>().state.buildPath = classPath
+            SettingsArguments.settingsState?.currentLLMPlatformName = TestSparkDefaultsBundle.defaultValue("grazie")
+            SettingsArguments.settingsState!!.llmPlatforms[1].token = token
+            SettingsArguments.settingsState!!.llmPlatforms[1].model = model
+            SettingsArguments.settingsState!!.classPrompt = File(promptTemplateFile).readText()
+            project.service<ProjectContextService>().resultPath = output
+            project.service<ProjectContextService>().classFQN = targetPsiClass.qualifiedName
+            project.service<ProjectContextService>().fileUrl = output
+            project.service<ProjectContextService>().cutPsiClass = targetPsiClass
+            project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project)
+                .getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
+//        CompilerModuleExtension.getInstance(project.service<ProjectContextService>().cutModule!!)?.compilerOutputPath = psiFile.virtualFile
+
+
             println("Indexing is done")
             // get target classes
-            val classesToTest =  Llm().getClassesUnderTest(project, targetPsiClass)
+            val classesToTest = Llm().getClassesUnderTest(project, targetPsiClass)
 
             println("Detected CUTs: $classesToTest")
 
@@ -96,30 +115,76 @@ class TestSparkStarter: ApplicationStarter {
 
             val llmProcessManager = LLMProcessManager(
                 project,
-                PromptManager(project,targetPsiClass,classesToTest)
+                PromptManager(project, targetPsiClass, classesToTest)
             )
 
-            llmProcessManager.runTestGenerator(indicator=null,
+            llmProcessManager.runTestGenerator(
+                indicator = null,
                 FragmentToTestData(CodeType.CLASS),
                 packageName
             )
 
-            // ToDo add test generation with Jacoco for tests in out variable
+            // Run test file
+            runTests(project, output, packageList, classPath)
         }
-
-
-
-
-
     }
+
+    private fun runTests(project: Project, out: String, packageList: MutableList<String>, classPath: String) {
+        val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
+        println("Run tests in $targetDirectory")
+        File(targetDirectory).walk().forEach {
+            if (it.name.endsWith(".class")) {
+                println("Running test ${it.name}")
+                var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
+                testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
+                // Test is compiled and it is ready to run jacoco
+                project.service<TestStorageProcessingService>().createXmlFromJacoco(
+                    it.nameWithoutExtension,
+                    "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
+                    testcaseName,
+                    classPath,
+                    packageList.joinToString("."),
+                    out,
+                )
+            }
+        }
+    }
+//    private fun removeRedundantTestFiles(out: String, packageList: MutableList<String>) {
+//        val targetDirectory= "$out${File.separator}${packageList.joinToString(File.separator)}"
+//        println("Only keep useful test files inside $targetDirectory")
+//        File(targetDirectory).walk().forEach {
+//            if(!it.name.startsWith("GeneratedTest."))
+//                it.delete()
+//        }
+//    }
 
 
     private fun detectPsiClass(classes: Array<PsiClass>, classUnderTestName: String): PsiClass? {
-        for (psiClass in classes){
-            if(psiClass.qualifiedName == classUnderTestName){
+        for (psiClass in classes) {
+            if (psiClass.qualifiedName == classUnderTestName) {
                 return psiClass
             }
         }
         return null
+    }
+
+
+    fun isMavenProject(projectPath: String): Boolean {
+        val pom = File("$projectPath/pom.xml")
+        return pom.exists()
+    }
+
+    fun refreshMaven(directoryPath: String) {
+        val processBuilder = ProcessBuilder()
+        processBuilder.command("mvn", "clean", "install")
+        processBuilder.directory(File(directoryPath))
+        try {
+            val process = processBuilder.start()
+            process.waitFor()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
+        }
     }
 }

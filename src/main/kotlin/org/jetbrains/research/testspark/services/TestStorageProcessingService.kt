@@ -11,7 +11,6 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -31,7 +30,7 @@ class TestStorageProcessingService(private val project: Project) {
     val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
     val testResultName = "test_gen_result_$id"
 
-    val resultPath = "$testResultDirectory$testResultName"
+    var resultPath = "$testResultDirectory$testResultName"
 
 
     // If projectSdk is not set, it means that we are in headless mode, and we can use the JDk used for running TestSpark
@@ -160,12 +159,13 @@ class TestStorageProcessingService(private val project: Project) {
      * @param generatedTestPackage The package where the generated test class is located.
      * @return An empty string if the test execution is successful, otherwise an error message.
      */
-    private fun createXmlFromJacoco(
+    fun createXmlFromJacoco(
         className: String,
         dataFileName: String,
         testCaseName: String,
         projectBuildPath: String,
         generatedTestPackage: String,
+        providedResultPath: String? = null
     ): String {
         // find the proper javac
         val javaRunner = File(javaHomeDirectory.path).walk()
@@ -184,6 +184,10 @@ class TestStorageProcessingService(private val project: Project) {
         name += "$className#$testCaseName"
 
         val junitVersion = SettingsArguments.settingsState!!.junitVersion.version
+        // If the result path is provided to this method (in headless mode), the jacoco output directory should be changed accordingly
+        providedResultPath?.let {
+            resultPath = it
+        }
 
         // run the test method with jacoco agent
         val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
@@ -191,7 +195,7 @@ class TestStorageProcessingService(private val project: Project) {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<ProjectContextService>().classFQN}",
                 "-cp",
-                "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
+                "${getPath(projectBuildPath)}${System.getProperty("path.separator")}${getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
             ),
@@ -210,7 +214,10 @@ class TestStorageProcessingService(private val project: Project) {
 
         // for classpath containing cut
         command.add("--classfiles")
-        command.add(CompilerModuleExtension.getInstance(project.service<ProjectContextService>().cutModule!!)?.compilerOutputPath!!.path)
+        if(providedResultPath == null)
+            command.add(CompilerModuleExtension.getInstance(project.service<ProjectContextService>().cutModule!!)?.compilerOutputPath!!.path)
+        else
+            command.add(projectBuildPath)
 
         // for each source folder
         sourceRoots.forEach { root ->
