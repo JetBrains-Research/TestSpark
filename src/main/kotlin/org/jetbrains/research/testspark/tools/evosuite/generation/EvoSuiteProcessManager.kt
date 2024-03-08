@@ -20,6 +20,7 @@ import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.RunCommandLineService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -47,6 +48,9 @@ class EvoSuiteProcessManager(
 ) : ProcessManager {
     private val log = Logger.getInstance(this::class.java)
 
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
+
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
     private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
 
@@ -54,7 +58,6 @@ class EvoSuiteProcessManager(
     private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
     private var evoSuitePath = "$pluginsPath${sep}TestSpark${sep}lib${sep}evosuite-$evosuiteVersion.jar"
 
-    private val settingsApplicationState = SettingsApplicationService.getInstance().state!!
     private val settingsProjectState = project.service<SettingsProjectService>().state
 
     private val evoSuiteErrorManager: EvoSuiteErrorManager = EvoSuiteErrorManager()
@@ -73,7 +76,7 @@ class EvoSuiteProcessManager(
             if (processStopped(project, indicator)) return
 
             val regex = Regex("version \"(.*?)\"")
-            val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(settingsApplicationState.javaPath, "-version")))
+            val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(settingsState.javaPath, "-version")))
                 ?.groupValues
                 ?.get(1)
                 ?.split(".")
@@ -102,8 +105,8 @@ class EvoSuiteProcessManager(
                 CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
             }
 
-            if (settingsApplicationState.seed.isNotBlank()) command.add("-seed=${settingsApplicationState.seed}")
-            if (settingsApplicationState.configurationId.isNotBlank()) command.add("-Dconfiguration_id=${settingsApplicationState.configurationId}")
+            if (settingsState.seed.isNotBlank()) command.add("-seed=${settingsState.seed}")
+            if (settingsState.configurationId.isNotBlank()) command.add("-Dconfiguration_id=${settingsState.configurationId}")
 
             // update build path
             var buildPath = projectClassPath
@@ -116,7 +119,7 @@ class EvoSuiteProcessManager(
 
             // construct command
             val cmd = ArrayList<String>()
-            cmd.add(settingsApplicationState.javaPath)
+            cmd.add(settingsState.javaPath)
             cmd.add("-Djdk.attach.allowAttachSelf=true")
             cmd.add("-jar")
             cmd.add(evoSuitePath)

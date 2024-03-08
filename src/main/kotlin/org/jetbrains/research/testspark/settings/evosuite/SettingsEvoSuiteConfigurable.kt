@@ -13,6 +13,8 @@ import javax.swing.JComponent
  * It provides controller functionality for the TestSparkSettingsState.
  */
 class SettingsEvoSuiteConfigurable : Configurable {
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
 
     var settingsComponent: SettingsEvoSuiteComponent? = null
 
@@ -30,7 +32,6 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         settingsComponent!!.javaPath = settingsState.javaPath
         settingsComponent!!.sandbox = settingsState.sandbox
         settingsComponent!!.assertions = settingsState.assertions
@@ -57,7 +58,6 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         var modified: Boolean = settingsComponent!!.sandbox != settingsState.sandbox
         modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
@@ -83,7 +83,6 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         settingsState.javaPath = settingsComponent!!.javaPath
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions

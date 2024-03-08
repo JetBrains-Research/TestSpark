@@ -165,8 +165,8 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
 
     override fun applyUpdates() {
         if (selectionTypeButtons[0].isSelected) {
-            for (testSamplePanelFactory in testSamplePanelFactories) {
-                testSamplesCode += testSamplePanelFactory.getCode() + "\n"
+            for (index in testSamplePanelFactories.indices) {
+                testSamplesCode += "Test sample number ${index + 1}\n```\n${testSamplePanelFactories[index].getCode()}\n```\n"
             }
         }
     }

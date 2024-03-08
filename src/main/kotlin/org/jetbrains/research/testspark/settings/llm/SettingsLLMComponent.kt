@@ -12,13 +12,13 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.PromptParserService
+import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
@@ -32,6 +32,9 @@ import javax.swing.JSeparator
 import javax.swing.JTextField
 
 class SettingsLLMComponent {
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
+
     var panel: JPanel? = null
 
     // LLM Token
@@ -39,7 +42,7 @@ class SettingsLLMComponent {
 
     // Models
     private var modelSelector = ComboBox(arrayOf(""))
-    private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
+    private var platformSelector = ComboBox(arrayOf(settingsState.openAIName))
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
@@ -131,7 +134,7 @@ class SettingsLLMComponent {
 
     init {
         // Adds additional style (width, tooltips)
-        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         stylizePanel()
 
         // Adds the panel components
@@ -219,6 +222,7 @@ class SettingsLLMComponent {
             modelSelector,
             llmUserTokenField,
             llmPlatforms,
+            settingsState,
         )
 
         addHighlighterListeners()

@@ -101,16 +101,18 @@ fun generateFieldType(psiType: PsiType): String {
 }
 
 /**
- * Gets the class on which the user has clicked (the click has to be inside the contents of the class).
- * NB! This has to be a concrete class, so enums, abstract classes and interfaces do not count.
+ * Returns the surrounding PsiClass object based on the caret position within the specified PsiFile.
+ * The surrounding class is determined by finding the PsiClass objects within the PsiFile and checking
+ * if the caret is within any of them. Additionally, the found class should satisfy the constraints
+ * specified by the validateClass() function.
  *
- * @param psiFile the current PSI file (where the user makes a click)
- * @param caret the current (primary) caret that did the click
- * @return PsiClass element if it has been found, null otherwise
+ * @param psiFile The PsiFile object containing the class hierarchy.
+ * @param caretOffset The offset of the caret position within the PsiFile.
+ * @return The surrounding PsiClass object if found, null otherwise.
  */
 fun getSurroundingClass(
     psiFile: PsiFile,
-    caret: Caret,
+    caretOffset: Int,
 ): PsiClass? {
     // Get the classes of the PSI file
     val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
@@ -118,7 +120,7 @@ fun getSurroundingClass(
     // Get the surrounding PSI class (i.e. the cursor has to be within that class)
     var surroundingClass: PsiClass? = null
     for (psiClass: PsiClass in classElements) {
-        if (withinElement(psiClass, caret)) {
+        if (withinElement(psiClass, caretOffset)) {
             // Check the constraints on a class
             if (!validateClass(psiClass)) continue
             surroundingClass = psiClass
@@ -128,15 +130,15 @@ fun getSurroundingClass(
 }
 
 /**
- * Gets the method on which the user has clicked (the click has to be inside the contents of the method).
+ * Returns the surrounding method of the given PSI file based on the caret offset.
  *
- * @param psiFile the current PSI file (where the user makes the click)
- * @param caret the current (primary) caret that did the click
- * @return PsiMethod element if has been found, null otherwise
+ * @param psiFile The PSI file in which to search for the surrounding method.
+ * @param caretOffset The caret offset within the PSI file.
+ * @return The surrounding method if found, otherwise null.
  */
 fun getSurroundingMethod(
     psiFile: PsiFile,
-    caret: Caret,
+    caretOffset: Int,
 ): PsiMethod? {
     // Get the methods of the PSI file
     val methodElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiMethod::class.java)
@@ -144,7 +146,7 @@ fun getSurroundingMethod(
     // Get the surrounding PSI method (i.e. the cursor has to be within that method)
     var surroundingMethod: PsiMethod? = null
     for (method: PsiMethod in methodElements) {
-        if (isMethodConcrete(method) && withinElement(method, caret)) {
+        if (isMethodConcrete(method) && withinElement(method, caretOffset)) {
             val surroundingClass: PsiClass = PsiTreeUtil.getParentOfType(method, PsiClass::class.java) ?: continue
             // Check the constraints on the surrounding class
             if (!validateClass(surroundingClass)) continue
@@ -155,23 +157,21 @@ fun getSurroundingMethod(
 }
 
 /**
- * Gets the selected line if the constraints on the selected line are satisfied,
- *   so that EvoSuite can generate tests for it.
- * Namely, the line is within a method, it is not blank and contains (part of) a statement.
+ * Returns the line number of the selected line where the caret is positioned.
  *
- * @param psiFile the current PSI file (where the user makes the click)
- * @param caret the current (primary) caret that did the click
- * @return line number if the constraints are satisfied else null
+ * @param psiFile the PSI file where the caret is positioned
+ * @param caretOffset the caret offset within the PSI file
+ * @return the line number of the selected line, or null if unable to determine
  */
 fun getSurroundingLine(
     psiFile: PsiFile,
-    caret: Caret,
+    caretOffset: Int,
 ): Int? {
-    val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret) ?: return null
+    val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caretOffset) ?: return null
 
     val doc: Document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
 
-    val selectedLine: Int = doc.getLineNumber(caret.offset)
+    val selectedLine: Int = doc.getLineNumber(caretOffset)
     val selectedLineText: String =
         doc.getText(TextRange(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine)))
 
@@ -273,17 +273,17 @@ private fun validateLine(
 }
 
 /**
- * Checks if the caret is within the given PsiElement.
+ * Determines whether a given PsiElement contains a specified caret offset.
  *
- * @param psiElement PSI element of interest
- * @param caret the current (primary) caret that did the click
- * @return true if the caret is within the PSI element, false otherwise
+ * @param psiElement The PsiElement to check if it contains the caret offset.
+ * @param caretOffset The caret offset to check.
+ * @return `true` if the PsiElement contains the caret offset, `false` otherwise.
  */
 private fun withinElement(
     psiElement: PsiElement,
-    caret: Caret,
+    caretOffset: Int,
 ): Boolean {
-    return (psiElement.startOffset <= caret.offset) && (psiElement.endOffset >= caret.offset)
+    return (psiElement.startOffset <= caretOffset) && (psiElement.endOffset >= caretOffset)
 }
 
 /**
@@ -337,12 +337,12 @@ fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*>? {
 
     if (psiFile !is PsiJavaFile) return result.toArray()
 
-    val psiClass: PsiClass? = getSurroundingClass(psiFile, caret)
+    val psiClass: PsiClass? = getSurroundingClass(psiFile, caret.offset)
 
     psiClass ?: return null
 
-    val psiMethod: PsiMethod? = getSurroundingMethod(psiFile, caret)
-    val line: Int? = getSurroundingLine(psiFile, caret)?.plus(1)
+    val psiMethod: PsiMethod? = getSurroundingMethod(psiFile, caret.offset)
+    val line: Int? = getSurroundingLine(psiFile, caret.offset)?.plus(1)
 
     result.add(getClassDisplayName(psiClass))
     psiMethod?.let { result.add(getMethodDisplayName(it)) }

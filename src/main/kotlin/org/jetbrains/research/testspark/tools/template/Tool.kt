@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.tools.template
 
-import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiFile
 
 /**
  * Represents a tool that can generate tests.
@@ -9,23 +10,41 @@ interface Tool {
     val name: String
 
     /**
-     * Generates tests for the given class.
+     * Generates tests for a given class.
      *
-     * @param e The AnActionEvent representing the event when the method is invoked.
+     * @param project The project context.
+     * @param psiFile The PsiFile object representing the class.
+     * @param caretOffset The offset of the caret within the class.
+     * @param fileUrl The URL of the file.
+     * @param testSamplesCode The sample code for generating the tests.
+     *
+     * @see Project
+     * @see PsiFile
      */
-    fun generateTestsForClass(e: AnActionEvent, testSamplesCode: String)
+    fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String)
 
     /**
-     * Generates tests for a given method.
+     * Generates test cases for a given method.
      *
-     * @param e the AnActionEvent object representing the action event
+     * @param project The current project.
+     * @param psiFile The PSI file object representing the source file.
+     * @param caretOffset The offset of the caret position.
+     * @param fileUrl The URL of the file where the method is defined (optional).
+     * @param testSamplesCode The code snippets for test samples (optional).
      */
-    fun generateTestsForMethod(e: AnActionEvent, testSamplesCode: String)
+    fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String)
 
     /**
-     * Generates test cases for a given line of code based on the provided AnActionEvent.
+     * Generates tests for a specific line in a project.
      *
-     * @param e The AnActionEvent representing the context in which the method is called.
+     * @param project The project in which the line belongs.
+     * @param psiFile The PSI file where the line is located.
+     * @param caretOffset The offset of the caret in the line.
+     * @param fileUrl The URL of the file.
+     * @param testSamplesCode The code containing the test samples.
+     *
+     * @see Project
+     * @see PsiFile
      */
-    fun generateTestsForLine(e: AnActionEvent, testSamplesCode: String)
+    fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String)
 }

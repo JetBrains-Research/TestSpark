@@ -122,7 +122,7 @@ internal class PromptBuilder(private var prompt: String) {
         if (isPromptValid(PromptKeyword.TEST_SAMPLE, prompt)) {
             var fullText = testSamplesCode
             if (fullText.isNotBlank()) {
-                fullText = "Use this test sample:\n```\n$fullText\n```\n"
+                fullText = "Use this test samples:\n$fullText\n"
             }
             prompt = prompt.replace(keyword, fullText, ignoreCase = false)
         } else {

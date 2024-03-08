@@ -1,9 +1,6 @@
 package org.jetbrains.research.testspark.tools.llm
 
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
@@ -27,16 +24,22 @@ import org.jetbrains.research.testspark.tools.template.Tool
  */
 class Llm(override val name: String = "LLM") : Tool {
 
-    private fun getLLMProcessManager(e: AnActionEvent, codeType: FragmentToTestData, testSamplesCode: String): LLMProcessManager {
-        val project: Project = e.project!!
-
+    /**
+     * Returns an instance of the LLMProcessManager.
+     *
+     * @param project The current project.
+     * @param psiFile The PSI file.
+     * @param caretOffset The caret offset in the file.
+     * @param codeType The type of code fragment to convert to test data.
+     * @param testSamplesCode The test samples code.
+     * @return An instance of LLMProcessManager.
+     */
+    private fun getLLMProcessManager(project: Project, psiFile: PsiFile, caretOffset: Int, codeType: FragmentToTestData, testSamplesCode: String): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClass>()
         // check if cut has any none java super class
         val maxPolymorphismDepth = SettingsArguments.maxPolyDepth(project)
 
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)!!
+        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caretOffset)!!
 
         var currentPsiClass = cutPsiClass
         for (index in 0 until maxPolymorphismDepth) {
@@ -60,63 +63,75 @@ class Llm(override val name: String = "LLM") : Tool {
     }
 
     /**
-     * Generates tests for a given class.
+     * Generates test cases for a class in the specified project.
      *
-     * @param e the AnActionEvent object containing information about the action event
-     * @throws IllegalArgumentException if the project in the AnActionEvent object is null
+     * @param project The project containing the class.
+     * @param psiFile The PSI file representation of the class.
+     * @param caretOffset The caret offset in the class.
+     * @param fileUrl The URL of the class file. It can be null.
+     * @param testSamplesCode The code of the test samples.
      */
-    override fun generateTestsForClass(e: AnActionEvent, testSamplesCode: String) {
-        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
+    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+        if (!project.service<LLMChatService>().isCorrectToken(project)) {
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
-        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType, testSamplesCode), codeType)
+        createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, codeType, testSamplesCode), codeType)
     }
 
     /**
      * Generates tests for a given method.
      *
-     * @param e The AnActionEvent that triggered the method generation.
-     * @throws IllegalStateException if the project or the surrounding method is null.
+     * @param project the project in which the method is located
+     * @param psiFile the PSI file in which the method is located
+     * @param caretOffset the offset of the caret position in the PSI file
+     * @param fileUrl the URL of the file to generate tests for (optional)
+     * @param testSamplesCode the code of the test samples to use for test generation
      */
-    override fun generateTestsForMethod(e: AnActionEvent, testSamplesCode: String) {
-        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
+    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+        if (!project.service<LLMChatService>().isCorrectToken(project)) {
             return
         }
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caret)!!
+        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caretOffset)!!
         val codeType = FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod))
-        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType, testSamplesCode), codeType)
+        createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, codeType, testSamplesCode), codeType)
     }
 
     /**
      * Generates tests for a specific line of code.
      *
-     * @param e The AnActionEvent that triggered the generation of tests.
+     * @param project The current project.
+     * @param psiFile The PSI file containing the code.
+     * @param caretOffset The offset position of the caret.
+     * @param fileUrl The URL of the file.
+     * @param testSamplesCode The code for the test samples.
      */
-    override fun generateTestsForLine(e: AnActionEvent, testSamplesCode: String) {
-        if (!e.project!!.service<LLMChatService>().isCorrectToken(e.project!!)) {
+    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+        if (!project.service<LLMChatService>().isCorrectToken(project)) {
             return
         }
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-        val selectedLine: Int = getSurroundingLine(psiFile, caret)?.plus(1)!!
+        val selectedLine: Int = getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
         val codeType = FragmentToTestData(CodeType.LINE, selectedLine)
-        createLLMPipeline(e).runTestGeneration(getLLMProcessManager(e, codeType, testSamplesCode), codeType)
+        createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, codeType, testSamplesCode), codeType)
     }
 
-    private fun createLLMPipeline(e: AnActionEvent): Pipeline {
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val caret: Caret = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!
-
-        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caret)!!
+    /**
+     * Creates a LLMPipeline instance.
+     *
+     * @param project the project of the pipeline
+     * @param psiFile the PSI file associated with the pipeline
+     * @param caretOffset the offset of the caret position within the PSI file
+     * @param fileUrl the URL of the file to be processed by the pipeline
+     * @return a LLMPipeline instance
+     */
+    private fun createLLMPipeline(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?): Pipeline {
+        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caretOffset)!!
 
         val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
         packageList.removeLast()
 
         val packageName = packageList.joinToString(".")
 
-        return Pipeline(e, packageName)
+        return Pipeline(project, psiFile, caretOffset, fileUrl, packageName)
     }
 }

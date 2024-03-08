@@ -1,18 +1,23 @@
 package org.jetbrains.research.testspark.actions
 
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.LibraryOrderEntry
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.psi.PsiFile
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
 import org.jetbrains.research.testspark.actions.template.PanelFactory
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestSparkIcons
@@ -75,12 +80,16 @@ class TestSparkAction : AnAction() {
      *
      * @property e The AnActionEvent object.
      */
-    class TestSparkActionWindow(val e: AnActionEvent, private val visibilityController: VisibilityController) :
+    class TestSparkActionWindow(e: AnActionEvent, private val visibilityController: VisibilityController) :
         JFrame("TestSpark") {
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
         private val codeTypes = getCurrentListOfCodeTypes(e)!!
+        private val project: Project = e.project!!
+        private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+        private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
+        private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
@@ -89,7 +98,7 @@ class TestSparkAction : AnAction() {
         private val cardLayout = CardLayout()
 
         private val llmSetupPanelFactory = LLMSetupPanelFactory()
-        private val llmSampleSelectorFactory = LLMSampleSelectorFactory(e.project!!)
+        private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project)
         private val evoSuitePanelFactory = EvoSuitePanelFactory()
 
         init {
@@ -124,6 +133,15 @@ class TestSparkAction : AnAction() {
                 val x = (dimension.width - size.width) / 2
                 val y = (dimension.height - size.height) / 2
                 setLocation(x, y)
+            } else {
+                NotificationGroupManager.getInstance()
+                    .getNotificationGroup("Generation Error")
+                    .createNotification(
+                        TestSparkBundle.message("generationWindowWarningTitle"),
+                        TestSparkBundle.message("generationWindowWarningMessage"),
+                        NotificationType.WARNING,
+                    )
+                    .notify(e.project)
             }
         }
 
@@ -307,11 +325,11 @@ class TestSparkAction : AnAction() {
             val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
             if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByEvoSuite(e, testSamplesCode)
+                Manager.generateTestsForClassByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByEvoSuite(e, testSamplesCode)
+                Manager.generateTestsForMethodByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByEvoSuite(e, testSamplesCode)
+                Manager.generateTestsForLineByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             }
 
             visibilityController.isVisible = false
@@ -322,11 +340,11 @@ class TestSparkAction : AnAction() {
             val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
             if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByLlm(e, testSamplesCode)
+                Manager.generateTestsForClassByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByLlm(e, testSamplesCode)
+                Manager.generateTestsForMethodByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByLlm(e, testSamplesCode)
+                Manager.generateTestsForLineByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
             }
 
             visibilityController.isVisible = false

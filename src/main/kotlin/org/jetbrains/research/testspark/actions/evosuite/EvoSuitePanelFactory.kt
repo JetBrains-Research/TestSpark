@@ -8,7 +8,6 @@ import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.data.JUnitVersion
-import org.jetbrains.research.testspark.services.SettingsApplicationService
 import java.awt.Font
 import javax.swing.JButton
 import javax.swing.JLabel
@@ -16,8 +15,6 @@ import javax.swing.JPanel
 import javax.swing.JTextField
 
 class EvoSuitePanelFactory : PanelFactory {
-    private val settingsState = SettingsApplicationService.getInstance().state!!
-
     private var javaPathTextField = JTextField(30)
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
     private val backEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
