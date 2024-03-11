@@ -92,7 +92,7 @@ class TestCasePanelFactory(
 
     private val languageTextFieldScrollPane = JBScrollPane(
         languageTextField,
-        ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
 
@@ -396,7 +396,7 @@ class TestCasePanelFactory(
      */
     private fun sendRequest() {
         loadingLabel.isVisible = true
-        sendButton.isEnabled = false
+        enableComponents(false)
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
@@ -427,7 +427,7 @@ class TestCasePanelFactory(
                             .notify(project)
 
                         loadingLabel.isVisible = false
-                        sendButton.isEnabled = true
+                        enableComponents(true)
                     }
 
                     if (processStopped(project, indicator)) return
@@ -435,6 +435,16 @@ class TestCasePanelFactory(
                     indicator.stop()
                 }
             })
+    }
+
+    private fun enableComponents(isEnabled: Boolean) {
+        nextButtons.isEnabled = isEnabled
+        previousButtons.isEnabled = isEnabled
+        runTestButton.isEnabled = isEnabled
+        resetToLastRunButton.isEnabled = isEnabled
+        resetButton.isEnabled = isEnabled
+        removeButton.isEnabled = isEnabled
+        sendButton.isEnabled = isEnabled
     }
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
@@ -457,7 +467,9 @@ class TestCasePanelFactory(
             currentCodes.add(code)
 
             requestField.text = ""
+
             loadingLabel.isVisible = false
+            enableComponents(true)
 
             switchToAnotherCode()
         }
@@ -476,7 +488,7 @@ class TestCasePanelFactory(
         if (!runTestButton.isEnabled) return
 
         loadingLabel.isVisible = true
-        if (!runTestButton.isEnabled) return
+        enableComponents(false)
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
@@ -491,7 +503,7 @@ class TestCasePanelFactory(
         if (!runTestButton.isEnabled) return
 
         loadingLabel.isVisible = true
-        if (!runTestButton.isEnabled) return
+        enableComponents(false)
 
         tasks.add { indicator ->
             runTest(indicator)
@@ -514,7 +526,10 @@ class TestCasePanelFactory(
         testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
         lastRunCodes[currentRequestNumber - 1] = testCase.testCode
+
         loadingLabel.isVisible = false
+        enableComponents(true)
+
         SwingUtilities.invokeLater {
             updateUI()
         }
@@ -589,8 +604,6 @@ class TestCasePanelFactory(
     /**
      * Retrieves the error message for a given test case.
      *
-     * @param testCaseId the id of the test case
-     * @param testCaseCode the code of the test case
      * @return the error message for the test case
      */
     fun getError() = project.service<TestsExecutionResultService>().getError(testCase.id, testCase.testCode)
@@ -598,7 +611,6 @@ class TestCasePanelFactory(
     /**
      * Returns the border for a given test case.
      *
-     * @param testCaseId the id of the test case
      * @return the border for the test case
      */
     private fun getBorder(): Border {
@@ -639,53 +651,6 @@ class TestCasePanelFactory(
      * @return true if the item is removed, false otherwise.
      */
     fun isRemoved() = isRemoved
-
-    /**
-     * Returns the indexes of lines that are modified between two lists of strings.
-     *
-     * @param source The source list of strings.
-     * @param target The target list of strings.
-     * @return The indexes of modified lines.
-     */
-    private fun getModifiedLines(source: List<String>, target: List<String>): List<Int> {
-        val dp = Array(source.size + 1) { IntArray(target.size + 1) }
-
-        for (i in 1..source.size) {
-            for (j in 1..target.size) {
-                if (source[i - 1] == target[j - 1]) {
-                    dp[i][j] = dp[i - 1][j - 1] + 1
-                } else {
-                    dp[i][j] = maxOf(dp[i - 1][j], dp[i][j - 1])
-                }
-            }
-        }
-
-        var i = source.size
-        var j = target.size
-
-        val modifiedLineIndexes = mutableListOf<Int>()
-
-        while (i > 0 && j > 0) {
-            if (source[i - 1] == target[j - 1]) {
-                i--
-                j--
-            } else if (dp[i][j] == dp[i - 1][j]) {
-                i--
-            } else if (dp[i][j] == dp[i][j - 1]) {
-                modifiedLineIndexes.add(j - 1)
-                j--
-            }
-        }
-
-        while (j > 0) {
-            modifiedLineIndexes.add(j - 1)
-            j--
-        }
-
-        modifiedLineIndexes.reverse()
-
-        return modifiedLineIndexes
-    }
 
     /**
      * Updates the current test case with the specified test name and test code.

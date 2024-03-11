@@ -116,5 +116,19 @@ internal class PromptBuilder(private var prompt: String) {
         }
     }
 
+    fun insertTestSample(testSamplesCode: String) = apply {
+        val keyword = "\$${PromptKeyword.TEST_SAMPLE.text}"
+
+        if (isPromptValid(PromptKeyword.TEST_SAMPLE, prompt)) {
+            var fullText = testSamplesCode
+            if (fullText.isNotBlank()) {
+                fullText = "Use this test samples:\n$fullText\n"
+            }
+            prompt = prompt.replace(keyword, fullText, ignoreCase = false)
+        } else {
+            throw IllegalStateException("The prompt must contain ${PromptKeyword.TEST_SAMPLE.text}")
+        }
+    }
+
     fun build(): String = prompt
 }

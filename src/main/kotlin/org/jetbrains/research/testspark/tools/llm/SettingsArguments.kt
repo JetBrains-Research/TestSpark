@@ -5,22 +5,14 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 
 /**
  * A class that provides access to various settings arguments.
  */
 class SettingsArguments {
     companion object {
-        val settingsState: SettingsApplicationState?
+        private val settingsState: SettingsApplicationState?
             get() = SettingsApplicationService.getInstance().state
-
-        /**
-         * Retrieves the list of LLM platforms from the settings state.
-         *
-         * @return The list of LLM platforms.
-         */
-        fun llmPlatforms(): List<LLMPlatform> = settingsState!!.llmPlatforms
 
         /**
          * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.
@@ -65,13 +57,21 @@ class SettingsArguments {
          *
          * @return The token as a string.
          */
-        fun getToken(): String {
-            for (llmPlatform in llmPlatforms()) {
-                if (currentLLMPlatformName() == llmPlatform.name) {
-                    return llmPlatform.token
-                }
-            }
-            return ""
+        fun getToken(): String = when (currentLLMPlatformName()) {
+            settingsState!!.openAIName -> settingsState!!.openAIToken
+            settingsState!!.grazieName -> settingsState!!.grazieToken
+            else -> ""
+        }
+
+        /**
+         * Retrieves the token for the current user.
+         *
+         * @return The token as a string.
+         */
+        fun getModel(): String = when (currentLLMPlatformName()) {
+            settingsState!!.openAIName -> settingsState!!.openAIModel
+            settingsState!!.grazieName -> settingsState!!.grazieModel
+            else -> ""
         }
     }
 }
