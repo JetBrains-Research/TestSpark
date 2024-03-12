@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.data
+package org.jetbrains.research.testspark.core.data
 
 data class RunWithAnnotationMeta(val annotationName: String, val import: String) {
 

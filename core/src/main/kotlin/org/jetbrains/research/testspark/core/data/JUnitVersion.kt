@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.data
+package org.jetbrains.research.testspark.core.data
 
 enum class JUnitVersion(
     val groupId: String,

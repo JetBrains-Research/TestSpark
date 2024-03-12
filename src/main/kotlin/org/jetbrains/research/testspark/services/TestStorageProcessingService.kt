@@ -14,7 +14,7 @@ import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
+import org.jetbrains.research.testspark.core.parsing.test.TestCaseGeneratedByLLM
 import java.io.File
 import java.util.UUID
 import kotlin.collections.ArrayList

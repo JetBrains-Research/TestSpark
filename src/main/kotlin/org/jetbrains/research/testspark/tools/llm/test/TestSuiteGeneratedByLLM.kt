@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.tools.llm.test
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.core.parsing.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 
 /**

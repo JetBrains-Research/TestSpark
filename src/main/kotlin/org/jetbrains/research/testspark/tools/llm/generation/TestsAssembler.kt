@@ -8,14 +8,14 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.generation.importPattern
+import org.jetbrains.research.testspark.core.parsing.parsers.JavaTestSuiteParser
+import org.jetbrains.research.testspark.core.parsing.parsers.TestSuiteParser
+import org.jetbrains.research.testspark.core.parsing.test.ParsedTestSuite
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
-import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
-import org.jetbrains.research.testspark.tools.llm.test.TestLine
-import org.jetbrains.research.testspark.tools.llm.test.TestLineType
+import org.jetbrains.research.testspark.core.parsing.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 
@@ -102,6 +102,42 @@ class TestsAssembler(
      * @return A TestSuiteGeneratedByLLM object containing the extracted test cases and package name.
      */
     fun returnTestSuite(packageName: String): TestSuiteGeneratedByLLM? {
+        val junitVersion = settingsState.junitVersion
+
+        val testSuiteParser = createTestSuiteParser()
+        val testSuite: ParsedTestSuite? = testSuiteParser.parseTestSuite(packageName, rawText, junitVersion)
+
+        // save RunWith
+        if (testSuite?.runWith?.isNotBlank() == true) {
+            project.service<TestGenerationDataService>().runWith = testSuite.runWith
+            project.service<TestGenerationDataService>().importsCode.add(junitVersion.runWithAnnotationMeta.import)
+        }
+        else {
+            project.service<TestGenerationDataService>().runWith = ""
+            project.service<TestGenerationDataService>().importsCode.remove(junitVersion.runWithAnnotationMeta.import)
+        }
+
+        // save annotations and pre-set methods
+        project.service<TestGenerationDataService>().otherInfo = testSuite?.otherInfo ?: ""
+
+        if (testSuite != null) {
+            // logging generated test cases
+            testSuite.testCases.forEach { testCase -> log.info("Generated test case: $testCase") }
+
+            return TestSuiteGeneratedByLLM(
+                project = project,
+                imports = testSuite.imports,
+                packageString = testSuite.packageString,
+                runWith = testSuite.runWith,
+                otherInfo = testSuite.otherInfo,
+                testCases = testSuite.testCases
+            )
+        }
+        else {
+            return null
+        }
+
+        /*
         if (rawText.isBlank()) return null
         try {
             val testSuite = TestSuiteGeneratedByLLM(project)
@@ -226,5 +262,10 @@ class TestsAssembler(
         } catch (e: Exception) {
             return null
         }
+        */
+    }
+
+    private fun createTestSuiteParser(): TestSuiteParser {
+        return JavaTestSuiteParser()
     }
 }
