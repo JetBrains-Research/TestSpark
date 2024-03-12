@@ -8,14 +8,14 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.parsing.parsers.JavaTestSuiteParser
+import org.jetbrains.research.testspark.core.data.JUnitVersion
+import org.jetbrains.research.testspark.core.parsing.parsers.java.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.parsing.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.core.parsing.test.ParsedTestSuite
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
-import org.jetbrains.research.testspark.core.parsing.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 
@@ -104,8 +104,8 @@ class TestsAssembler(
     fun returnTestSuite(packageName: String): TestSuiteGeneratedByLLM? {
         val junitVersion = settingsState.junitVersion
 
-        val testSuiteParser = createTestSuiteParser()
-        val testSuite: ParsedTestSuite? = testSuiteParser.parseTestSuite(packageName, rawText, junitVersion)
+        val testSuiteParser = createTestSuiteParser(packageName, junitVersion)
+        val testSuite: ParsedTestSuite? = testSuiteParser.parseTestSuite(rawText)
 
         // save RunWith
         if (testSuite?.runWith?.isNotBlank() == true) {
@@ -265,7 +265,7 @@ class TestsAssembler(
         */
     }
 
-    private fun createTestSuiteParser(): TestSuiteParser {
-        return JavaTestSuiteParser()
+    private fun createTestSuiteParser(packageName: String, jUnitVersion: JUnitVersion): TestSuiteParser {
+        return JUnitTestSuiteParser(packageName, jUnitVersion)
     }
 }
