@@ -50,6 +50,7 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.linePrompt = settingsState.linePrompt
         settingsComponent!!.llmSetupCheckBoxSelected = settingsState.llmSetupCheckBoxSelected
         settingsComponent!!.provideTestSamplesCheckBoxSelected = settingsState.provideTestSamplesCheckBoxSelected
+        settingsComponent!!.defaultLLMRequests = settingsState.defaultLLMRequests
 
         settingsComponent!!.updateTokenAndModel()
     }
@@ -88,6 +89,8 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
         modified = modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != settingsState.provideTestSamplesCheckBoxSelected)
 
+        modified = modified or (settingsComponent!!.defaultLLMRequests != settingsState.defaultLLMRequests)
+
         return modified
     }
 
@@ -112,6 +115,7 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.classPrompt = settingsComponent!!.classPrompt
         settingsState.methodPrompt = settingsComponent!!.methodPrompt
         settingsState.linePrompt = settingsComponent!!.linePrompt
+        settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests
         settingsState.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
         settingsState.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
     }

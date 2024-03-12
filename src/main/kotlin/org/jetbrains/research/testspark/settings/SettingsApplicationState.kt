@@ -38,6 +38,7 @@ data class SettingsApplicationState(
     var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
     var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
     var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
+    var defaultLLMRequests: String = DefaultSettingsApplicationState.defaultLLMRequests,
     var junitVersion: JUnitVersion = DefaultSettingsApplicationState.junitVersion,
     var provideTestSamplesCheckBoxSelected: Boolean = DefaultSettingsApplicationState.provideTestSamplesCheckBoxSelected,
     var llmSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.llmSetupCheckBoxSelected,
@@ -78,6 +79,7 @@ data class SettingsApplicationState(
         val classPrompt: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
         val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
         val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
+        val defaultLLMRequests: String = TestSparkDefaultsBundle.defaultValue("defaultLLMRequests")
         val junitVersion: JUnitVersion = JUnitVersion.JUnit4
         val provideTestSamplesCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
         val llmSetupCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()

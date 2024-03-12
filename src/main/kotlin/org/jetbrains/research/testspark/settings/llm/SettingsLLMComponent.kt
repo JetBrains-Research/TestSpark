@@ -11,15 +11,21 @@ import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
 import java.awt.Font
@@ -44,21 +50,25 @@ class SettingsLLMComponent {
     private var modelSelector = ComboBox(arrayOf(""))
     private var platformSelector = ComboBox(arrayOf(settingsState.openAIName))
 
+    // Default LLM Requests
+    private var defaultLLMRequestsSeparator =
+        JXTitledSeparator(TestSparkLabelsBundle.defaultValue("defaultLLMRequestsSeparator"))
+    private var commonDefaultLLMRequestsPanel = JPanel()
+    private val defaultLLMRequestPanels = mutableListOf<JPanel>()
+    private val addDefaultLLMRequestsButtonPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
     private var promptEditorTabbedPane = createTabbedPane()
 
     // Maximum number of LLM requests
-    private var maxLLMRequestsField =
-        JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxLLMRequest, 1, 20))
+    private var maxLLMRequestsField = JBIntSpinner(UINumericRange(settingsState.maxLLMRequest, 1, 20))
 
     // The depth of input parameters used in class under tests
-    private var maxInputParamsDepthField =
-        JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxInputParamsDepth, 1, 5))
+    private var maxInputParamsDepthField = JBIntSpinner(UINumericRange(settingsState.maxInputParamsDepth, 1, 5))
 
     // Maximum polymorphism depth
-    private var maxPolyDepthField =
-        JBIntSpinner(UINumericRange(SettingsApplicationState.DefaultSettingsApplicationState.maxPolyDepth, 1, 5))
+    private var maxPolyDepthField = JBIntSpinner(UINumericRange(settingsState.maxPolyDepth, 1, 5))
 
     private val provideTestSamplesCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("provideTestSamplesCheckBox"), true)
 
@@ -132,10 +142,23 @@ class SettingsLLMComponent {
             provideTestSamplesCheckBox.isSelected = newStatus
         }
 
+    var defaultLLMRequests: String
+        get() = Json.encodeToString(
+            ListSerializer(String.serializer()),
+            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }.map { (it.getComponent(0) as JTextField).text },
+        )
+        set(value) {
+            fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), value))
+        }
+
     init {
         // Adds additional style (width, tooltips)
         stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         stylizePanel()
+
+        fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), settingsState.defaultLLMRequests))
+
+        fillAddDefaultLLMRequestsButtonPanel()
 
         // Adds the panel components
         createSettingsPanel()
@@ -209,6 +232,66 @@ class SettingsLLMComponent {
             btnPanel.add(JBLabel("${it.description} - ${if (it.mandatory) "mandatory" else "optional"}"))
 
             panel.add(btnPanel)
+        }
+    }
+
+    /**
+     * Fills the addDefaultLLMRequestsButtonPanel with a button for adding default LLM requests.
+     */
+    private fun fillAddDefaultLLMRequestsButtonPanel() {
+        val addDefaultLLMRequestsButton = JButton(TestSparkLabelsBundle.defaultValue("addRequest"), TestSparkIcons.add)
+
+        addDefaultLLMRequestsButton.isOpaque = false
+        addDefaultLLMRequestsButton.isContentAreaFilled = false
+        addDefaultLLMRequestsButton.addActionListener {
+            addDefaultLLMRequestToPanel("")
+
+            addDefaultLLMRequestsButtonPanel.revalidate()
+        }
+
+        addDefaultLLMRequestsButtonPanel.add(addDefaultLLMRequestsButton)
+    }
+
+    /**
+     * Clears the default LLM request panels and fills the commonDefaultLLMRequestsPanel with the given list of default LLM requests.
+     *
+     * @param defaultLLMRequestsList The list of default LLM requests to fill the panel with.
+     */
+    private fun fillDefaultLLMRequestsPanel(defaultLLMRequestsList: List<String>) {
+        defaultLLMRequestPanels.clear()
+        commonDefaultLLMRequestsPanel.removeAll()
+
+        commonDefaultLLMRequestsPanel.layout = BoxLayout(commonDefaultLLMRequestsPanel, BoxLayout.Y_AXIS)
+
+        for (defaultLLMRequest in defaultLLMRequestsList) {
+            addDefaultLLMRequestToPanel(defaultLLMRequest)
+        }
+
+        commonDefaultLLMRequestsPanel.revalidate()
+    }
+
+    /**
+     * Adds a default LLM request to the panel.
+     *
+     * @param defaultLLMRequest the default LLM request to be added
+     */
+    private fun addDefaultLLMRequestToPanel(defaultLLMRequest: String) {
+        val defaultLLMRequestPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+
+        val textField = JTextField(defaultLLMRequest)
+        textField.columns = 30
+        defaultLLMRequestPanel.add(textField)
+
+        val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeRequest"))
+        defaultLLMRequestPanel.add(removeButton)
+
+        commonDefaultLLMRequestsPanel.add(defaultLLMRequestPanel)
+        defaultLLMRequestPanels.add(defaultLLMRequestPanel)
+
+        removeButton.addActionListener {
+            textField.text = ""
+            commonDefaultLLMRequestsPanel.remove(defaultLLMRequestPanel)
+            commonDefaultLLMRequestsPanel.revalidate()
         }
     }
 
@@ -292,6 +375,9 @@ class SettingsLLMComponent {
             )
             .addComponent(llmSetupCheckBox, 10)
             .addComponent(provideTestSamplesCheckBox, 10)
+            .addComponent(defaultLLMRequestsSeparator, 15)
+            .addComponent(commonDefaultLLMRequestsPanel, 15)
+            .addComponent(addDefaultLLMRequestsButtonPanel, 15)
             .addComponent(promptSeparator, 15)
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)
