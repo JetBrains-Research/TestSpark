@@ -58,12 +58,12 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
      */
     private fun addListeners() {
         selectionTypeButtons[0].addActionListener {
-            nextButton.isEnabled = true
+            updateNextButton()
             enabledComponents(true)
         }
 
         selectionTypeButtons[1].addActionListener {
-            nextButton.isEnabled = true
+            updateNextButton()
             enabledComponents(false)
         }
 
@@ -83,7 +83,19 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
                 middlePanel.remove(testSamplePanel)
                 middlePanel.remove(codeScrollPanel)
                 middlePanel.revalidate()
+
+                updateNextButton()
             }
+
+            updateNextButton()
+        }
+    }
+
+    private fun updateNextButton() {
+        if (selectionTypeButtons[0].isSelected) {
+            nextButton.isEnabled = testSamplePanelFactories.isNotEmpty()
+        } else {
+            nextButton.isEnabled = true
         }
     }
 
@@ -115,6 +127,8 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
             radioButtonsPanel.add(button)
         }
 
+        selectionTypeButtons[1].isSelected = true
+
         addButtonPanel.add(addButton)
 
         enabledComponents(false)
@@ -136,7 +150,6 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
         bottomPanel.add(backLlmButton)
         nextButton.isOpaque = false
         nextButton.isContentAreaFilled = false
-        nextButton.isEnabled = false
         bottomPanel.add(nextButton)
 
         return bottomPanel
