@@ -51,7 +51,14 @@ class JUnitTestSuiteParser(
                 val rawTest = "@Test$it"
 
                 val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
-                val currentTest = testCaseParser.parse(rawTest, isLastTestCaseInTestSuite) ?: return@ca
+                val result: TestCaseParseResult = testCaseParser.parse(rawTest, isLastTestCaseInTestSuite)
+
+                if (result.errorOccurred) {
+                    println("WARNING: ${result.errorMessage}")
+                    return@ca
+                }
+
+                val currentTest = result.testCase!!
 
                 // TODO: make logging work
                 // log.info("New test case: $currentTest")
@@ -75,8 +82,14 @@ class JUnitTestSuiteParser(
     }
 }
 
+private data class TestCaseParseResult(
+    val testCase: TestCaseGeneratedByLLM?,
+    val errorMessage: String,
+    val errorOccurred: Boolean,
+)
+
 private class JUnitTestCaseParser {
-    fun parse(rawTest: String, isLastTestCaseInTestSuite: Boolean): TestCaseGeneratedByLLM? {
+    fun parse(rawTest: String, isLastTestCaseInTestSuite: Boolean): TestCaseParseResult {
         var expectedException = ""
         var throwsException = ""
         val testLines: MutableList<TestLine> = mutableListOf()
@@ -88,8 +101,11 @@ private class JUnitTestCaseParser {
 
         // Get unexpected exceptions
         if (!rawTest.contains("public void")) {
-            println("WARNING: The raw Test does not contain public void:\n $rawTest")
-            return null
+            return TestCaseParseResult(
+                testCase = null,
+                errorMessage = "The raw Test does not contain public void:\n $rawTest",
+                errorOccurred = true,
+            )
         }
         val interestingPartOfSignature = rawTest.split("public void")[1]
             .split("{")[0]
@@ -118,7 +134,7 @@ private class JUnitTestCaseParser {
             if (tempList.isNotEmpty()) {
                 tempList.removeLast()
             } else {
-                println("WARNING: the final test does not have to brackets:\n $testBody")
+                println("WARNING: the final test does not have the enclosing bracket:\n $testBody")
             }
         }
 
@@ -146,6 +162,10 @@ private class JUnitTestCaseParser {
             lines = testLines,
         )
 
-        return currentTest
+        return TestCaseParseResult(
+            testCase = currentTest,
+            errorMessage = "",
+            errorOccurred = false,
+        )
     }
 }
