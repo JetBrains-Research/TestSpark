@@ -40,6 +40,8 @@ import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
 import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -241,9 +243,14 @@ class TestCasePanelFactory(
         requestPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         requestPanel.add(requestJLabel)
         requestPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
-        requestPanel.add(requestComboBox)
-        requestPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
-        requestPanel.add(sendButton)
+
+        // temporary panel to avoid IDEA's bug
+        val requestComboBoxAndSendButtonPanel = JPanel()
+        requestComboBoxAndSendButtonPanel.layout = BoxLayout(requestComboBoxAndSendButtonPanel, BoxLayout.X_AXIS)
+        requestComboBoxAndSendButtonPanel.add(requestComboBox)
+        requestComboBoxAndSendButtonPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
+        requestComboBoxAndSendButtonPanel.add(sendButton)
+        requestPanel.add(requestComboBoxAndSendButtonPanel)
         requestPanel.add(Box.createRigidArea(Dimension(15, 0)))
 
         val buttonsPanel = JPanel()
