@@ -30,8 +30,11 @@ class LLMTestSampleService {
                     psiJavaFile.classes.stream().map { it.name }.toArray()
                         .indexOf(psiJavaFile.name.removeSuffix(".java")),
                 ]
-                val imports = psiJavaFile.importList?.allImportStatements?.map { it.text }?.toList()
+                var imports = psiJavaFile.importList?.allImportStatements?.map { it.text }?.toList()
                     ?.joinToString("\n") ?: ""
+                if (psiClass.qualifiedName != null && psiClass.qualifiedName!!.contains(".")) {
+                    imports += "\nimport ${psiClass.qualifiedName?.substringBeforeLast(".") + ".*"};"
+                }
                 psiClass.allMethods.forEach { method ->
                     val annotations = method.modifierList.annotations
                     annotations.forEach { annotation ->
