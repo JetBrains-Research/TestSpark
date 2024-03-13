@@ -40,8 +40,6 @@ import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
-import java.awt.event.KeyAdapter
-import java.awt.event.KeyEvent
 import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
