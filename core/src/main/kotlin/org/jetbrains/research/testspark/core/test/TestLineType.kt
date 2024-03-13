@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.core.parsing.test
+package org.jetbrains.research.testspark.core.test
 
 /**
  * Represents the types of lines that can be found in a test file.

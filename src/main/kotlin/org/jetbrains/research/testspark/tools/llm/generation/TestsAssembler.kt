@@ -9,14 +9,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.parsing.parsers.java.JUnitTestSuiteParser
-import org.jetbrains.research.testspark.core.parsing.parsers.TestSuiteParser
-import org.jetbrains.research.testspark.core.parsing.test.ParsedTestSuite
+import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
-import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 
 /**
@@ -105,7 +104,7 @@ class TestsAssembler(
         val junitVersion = settingsState.junitVersion
 
         val testSuiteParser = createTestSuiteParser(packageName, junitVersion)
-        val testSuite: ParsedTestSuite? = testSuiteParser.parseTestSuite(rawText)
+        val testSuite: TestSuiteGeneratedByLLM? = testSuiteParser.parseTestSuite(rawText)
 
         // save RunWith
         if (testSuite?.runWith?.isNotBlank() == true) {
@@ -120,21 +119,9 @@ class TestsAssembler(
         // save annotations and pre-set methods
         project.service<TestGenerationDataService>().otherInfo = testSuite?.otherInfo ?: ""
 
-        if (testSuite != null) {
-            // logging generated test cases
-            testSuite.testCases.forEach { testCase -> log.info("Generated test case: $testCase") }
-
-            return TestSuiteGeneratedByLLM(
-                imports = testSuite.imports,
-                packageString = testSuite.packageString,
-                runWith = testSuite.runWith,
-                otherInfo = testSuite.otherInfo,
-                testCases = testSuite.testCases,
-            )
-        }
-        else {
-            return null
-        }
+        // logging generated test cases if any
+        testSuite?.testCases?.forEach { testCase -> log.info("Generated test case: $testCase") }
+        return testSuite
     }
 
     private fun createTestSuiteParser(packageName: String, jUnitVersion: JUnitVersion): TestSuiteParser {

@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.components.Service
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.core.parsing.test.TestCaseGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.TestCaseGeneratedByLLM
 
 @Service(Service.Level.PROJECT)
 class TestGenerationDataService {

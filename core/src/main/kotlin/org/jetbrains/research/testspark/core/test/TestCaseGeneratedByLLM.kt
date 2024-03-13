@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.core.parsing.test
+package org.jetbrains.research.testspark.core.test
 
 /**
  *

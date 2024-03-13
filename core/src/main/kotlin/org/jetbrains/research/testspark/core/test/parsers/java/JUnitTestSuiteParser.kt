@@ -1,19 +1,19 @@
-package org.jetbrains.research.testspark.core.parsing.parsers.java
+package org.jetbrains.research.testspark.core.test.parsers.java
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.generation.importPattern
-import org.jetbrains.research.testspark.core.parsing.parsers.TestSuiteParser
-import org.jetbrains.research.testspark.core.parsing.test.ParsedTestSuite
-import org.jetbrains.research.testspark.core.parsing.test.TestCaseGeneratedByLLM
-import org.jetbrains.research.testspark.core.parsing.test.TestLine
-import org.jetbrains.research.testspark.core.parsing.test.TestLineType
+import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
+import org.jetbrains.research.testspark.core.test.TestCaseGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.TestLine
+import org.jetbrains.research.testspark.core.test.TestLineType
+import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
 
 
 class JUnitTestSuiteParser(
     private val packageName: String,
     private val junitVersion: JUnitVersion
 ) : TestSuiteParser {
-    override fun parseTestSuite(rawText: String): ParsedTestSuite? {
+    override fun parseTestSuite(rawText: String): TestSuiteGeneratedByLLM? {
         if (rawText.isBlank()) {
             return null
         }
@@ -67,7 +67,7 @@ class JUnitTestSuiteParser(
                 testCases.add(currentTest)
             }
 
-            val testSuite = ParsedTestSuite(
+            val testSuite = TestSuiteGeneratedByLLM(
                 imports = imports,
                 packageString = packageName,
                 runWith = runWith,

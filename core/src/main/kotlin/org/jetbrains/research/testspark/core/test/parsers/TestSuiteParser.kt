@@ -1,6 +1,6 @@
-package org.jetbrains.research.testspark.core.parsing.parsers
+package org.jetbrains.research.testspark.core.test.parsers
 
-import org.jetbrains.research.testspark.core.parsing.test.ParsedTestSuite
+import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
 
 interface TestSuiteParser {
     /**
@@ -9,5 +9,5 @@ interface TestSuiteParser {
      * @param rawText The raw text provided by the LLM that contains the generated test cases.
      * @return A GeneratedTestSuite instance containing the extracted test cases.
      */
-    fun parseTestSuite(rawText: String): ParsedTestSuite?
+    fun parseTestSuite(rawText: String): TestSuiteGeneratedByLLM?
 }
