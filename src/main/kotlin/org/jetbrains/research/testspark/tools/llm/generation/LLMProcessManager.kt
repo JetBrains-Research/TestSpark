@@ -21,6 +21,7 @@ import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.core.parsing.test.TestCaseGeneratedByLLM
+import org.jetbrains.research.testspark.tools.llm.test.TestSuitePresenter
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
@@ -143,24 +144,31 @@ class LLMProcessManager(
 
             // Save the generated TestSuite into a temp file
             val generatedTestCasesPaths: MutableList<String> = mutableListOf()
+            val testSuitePresenter = TestSuitePresenter(project)
+
             if (isLastIteration(requestsCount)) {
                 generatedTestSuite.updateTestCases(project.service<TestGenerationDataService>().compilableTestCases.toMutableList())
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
-                    generatedTestCasesPaths.add(
-                        project.service<TestStorageProcessingService>().saveGeneratedTest(
-                            generatedTestSuite.packageString,
-                            generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
-                            project.service<ProjectContextService>().resultPath!!,
-                            "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java",
-                        ),
+                    val testFileName = "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
+
+                    val testCaseRepresentation = testSuitePresenter
+                        .toStringSingleTestCaseWithoutExpectedException(generatedTestSuite, testCaseIndex)
+
+                    val saveFilepath = project.service<TestStorageProcessingService>().saveGeneratedTest(
+                        generatedTestSuite.packageString,
+                        testCaseRepresentation,
+                        project.service<ProjectContextService>().resultPath!!,
+                        testFileName
                     )
+
+                    generatedTestCasesPaths.add(saveFilepath)
                 }
             }
 
             val generatedTestPath: String = project.service<TestStorageProcessingService>().saveGeneratedTest(
                 generatedTestSuite.packageString,
-                generatedTestSuite.toStringWithoutExpectedException(),
+                testSuitePresenter.toStringWithoutExpectedException(generatedTestSuite),
                 project.service<ProjectContextService>().resultPath!!,
                 testFileName,
             )
@@ -209,11 +217,15 @@ class LLMProcessManager(
 
         log.info("Result is ready")
 
+        val testSuitePresenter = TestSuitePresenter(project)
+        val testSuiteRepresentation =
+            if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null
+
         saveData(
             project,
             report,
-            getPackageFromTestSuiteCode(generatedTestSuite.toString()),
-            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), project.service<ProjectContextService>().classFQN!!),
+            getPackageFromTestSuiteCode(testSuiteRepresentation/*generatedTestSuite.toString()*/),
+            getImportsCodeFromTestSuiteCode(testSuiteRepresentation/*generatedTestSuite.toString()*/, project.service<ProjectContextService>().classFQN!!),
         )
     }
 

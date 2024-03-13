@@ -34,6 +34,7 @@ import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.test.TestSuitePresenter
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 import java.awt.Dimension
@@ -436,9 +437,11 @@ class TestCasePanelFactory(
     }
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
+        val testSuitePresenter = TestSuitePresenter(project)
+
         WriteCommandAction.runWriteCommandAction(project) {
             project.service<ErrorService>().clear()
-            val code = testSuite.toString()
+            val code = testSuitePresenter.toString(testSuite) /*testSuite.toString()*/
             testCase.testName =
                 project.service<JavaClassBuilderService>()
                     .getTestMethodNameFromClassWithTestCase(testCase.testName, code)

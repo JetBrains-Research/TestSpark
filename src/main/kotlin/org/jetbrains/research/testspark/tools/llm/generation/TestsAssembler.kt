@@ -125,12 +125,11 @@ class TestsAssembler(
             testSuite.testCases.forEach { testCase -> log.info("Generated test case: $testCase") }
 
             return TestSuiteGeneratedByLLM(
-                project = project,
                 imports = testSuite.imports,
                 packageString = testSuite.packageString,
                 runWith = testSuite.runWith,
                 otherInfo = testSuite.otherInfo,
-                testCases = testSuite.testCases
+                testCases = testSuite.testCases,
             )
         }
         else {
