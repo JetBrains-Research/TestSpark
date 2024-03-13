@@ -4,15 +4,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.DumbService
-import com.intellij.openapi.project.NoAccessDuringPsiEvents
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiJavaFile
-import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.PsiShortNamesCache
@@ -250,22 +246,13 @@ class PromptManager(
         val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
         interestingPsiClasses.add(cutPsiClass)
 
-        ApplicationManager.getApplication().runReadAction {
-            val projectFileIndex = ProjectRootManager.getInstance(project).fileIndex
-            projectFileIndex.iterateContent { virtualFile ->
-                val psiFile = PsiManager.getInstance(project).findFile(virtualFile)
-                if (psiFile is PsiJavaFile) {
-                    val psiClasses = psiFile.classes
-                    psiClasses.forEach { psiClass ->
-                        DumbService.getInstance(project).runWithAlternativeResolveEnabled< PsiClass > {
-                            psiClass.superClass
-                        }
-                        println("$psiClass ***** ${psiClass.superClass}")
-                    }
-                }
-                true
-            }
-        }
+//        ApplicationManager.getApplication().runReadAction {
+//            val projectFileIndex = ProjectRootManager.getInstance(project).fileIndex
+////            projectFileIndex.iterateContent { virtualFile ->
+////                val psiFile = PsiManager.getInstance(project).findFile(virtualFile)
+////                true
+////            }
+//        }
         interestingPsiClasses.forEach { currentInterestingClass ->
             var detectedSubClasses: Collection<PsiClass>? = null
 //            while(true){
@@ -277,7 +264,6 @@ class PromptManager(
 //                    break
 //            }
 
-            println("isDumb: "+NoAccessDuringPsiEvents.isInsideEventProcessing())
             detectedSubClasses!!.forEach { detectedSubClass ->
                 if (!polymorphismRelations.contains(currentInterestingClass)) {
                     polymorphismRelations[currentInterestingClass] = ArrayList()
