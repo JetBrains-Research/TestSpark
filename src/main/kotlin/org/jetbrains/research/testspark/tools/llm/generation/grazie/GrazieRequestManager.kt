@@ -41,7 +41,7 @@ class GrazieRequestManager : RequestManager() {
                                 TestSparkBundle.message("tooLongPrompt"),
                                 project,
                             )
-                            sendResult = SendResult.TOOLONG
+                            sendResult = SendResult.TOO_LONG
                         }
 
                         else -> {

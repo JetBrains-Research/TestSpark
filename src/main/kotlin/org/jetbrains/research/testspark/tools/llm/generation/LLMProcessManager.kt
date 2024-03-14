@@ -148,7 +148,8 @@ class LLMProcessManager(
 
             if (isLastIteration(requestsCount)) {
                 generatedTestSuite.updateTestCases(project.service<TestGenerationDataService>().compilableTestCases.toMutableList())
-            } else {
+            }
+            else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
                     val testFileName = "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
 
@@ -195,7 +196,7 @@ class LLMProcessManager(
             val commonCompilationResult = project.service<TestStorageProcessingService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!separateCompilationResult && !isLastIteration(requestsCount)) {
-                log.info("Incorrect result: \n$generatedTestSuite")
+                log.info("Incorrect result: \n${testSuitePresenter.toString(generatedTestSuite)}")
                 warningMessage = TestSparkBundle.message("compilationError")
                 messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${commonCompilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```"
                 continue

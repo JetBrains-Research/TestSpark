@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.services
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.data.DataFilesUtil
+import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 
 @Service(Service.Level.PROJECT)
 class ClearService {

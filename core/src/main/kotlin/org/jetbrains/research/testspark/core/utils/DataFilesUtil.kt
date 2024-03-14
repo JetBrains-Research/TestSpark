@@ -1,14 +1,13 @@
-package org.jetbrains.research.testspark.data
+package org.jetbrains.research.testspark.core.utils
 
-import com.intellij.openapi.util.io.FileUtilRt
 import java.io.File
 import java.util.Locale
 
 class DataFilesUtil {
     companion object {
-        fun makeTmp() {
+        fun makeTmp(tempDir: String) {
             val sep = File.separatorChar
-            val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
+            val testResultDirectory = "${tempDir}${sep}testSparkResults${sep}"
 
             val tmpDir = File(testResultDirectory)
 

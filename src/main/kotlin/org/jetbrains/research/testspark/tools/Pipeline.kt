@@ -9,13 +9,15 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.data.DataFilesUtil
+import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.getSurroundingClass
 import org.jetbrains.research.testspark.services.ClearService
 import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
+import com.intellij.openapi.util.io.FileUtilRt
+
 
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
@@ -44,7 +46,7 @@ class Pipeline(
 
         project.service<ProjectContextService>().classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!
 
-        DataFilesUtil.makeTmp()
+        DataFilesUtil.makeTmp(FileUtilRt.getTempDirectory())
         DataFilesUtil.makeDir(project.service<ProjectContextService>().baseDir!!)
     }
 

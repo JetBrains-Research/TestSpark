@@ -9,8 +9,21 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
 import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
 
+enum class ErrorCode {
+    OK,
+    PROMPT_TOO_LONG,
+    EMPTY_LLM_RESPONSE,
+    TEST_SUITE_PARSING_FAILURE,
+}
+
+data class LLMResponse(
+    val errorCode: ErrorCode,
+    val testSuite: TestSuiteGeneratedByLLM?,
+)
+
+
 abstract class RequestManager {
-    enum class SendResult { OK, TOOLONG, OTHER }
+    enum class SendResult { OK, TOO_LONG, OTHER }
     open var token: String = SettingsArguments.getToken()
     open val chatHistory = mutableListOf<ChatMessage>()
 
@@ -39,11 +52,11 @@ abstract class RequestManager {
         chatHistory.add(ChatMessage("user", prompt))
 
         // Send Request to LLM
-        log.info("Sending Request ...")
+        log.info("Sending Request...")
         val sendResultPair = send(prompt, indicator, project, llmErrorManager)
         val sendResult = sendResultPair.first
 
-        if (sendResult == SendResult.TOOLONG) {
+        if (sendResult == SendResult.TOO_LONG) {
             return Pair(TestSparkBundle.message("tooLongPrompt"), null)
         }
 
