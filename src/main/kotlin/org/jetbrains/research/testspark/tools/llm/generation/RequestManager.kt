@@ -3,22 +3,18 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
 import org.jetbrains.research.testspark.core.generation.network.LLMResponse
-import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
-
 
 
 abstract class RequestManager(var token: String) {
     enum class SendResult {
         OK,
-        TOO_LONG,
+        PROMPT_TOO_LONG,
         OTHER,
     }
 
-    // var token: String = SettingsArguments.getToken()
     val chatHistory = mutableListOf<ChatMessage>()
 
     protected val log: Logger = Logger.getInstance(this.javaClass)
@@ -30,7 +26,6 @@ abstract class RequestManager(var token: String) {
      * @param indicator the progress indicator to show progress during the request
      * @param packageName the name of the package for the generated TestSuite
      * @param project the project associated with the request
-     * @param llmErrorManager the error manager to handle errors during the request
      * @param isUserFeedback indicates if this request is a test generation request or a user feedback
      * @return the generated TestSuite, or null and prompt message
      */
@@ -39,7 +34,6 @@ abstract class RequestManager(var token: String) {
         indicator: ProgressIndicator,
         packageName: String,
         project: Project,
-        llmErrorManager: LLMErrorManager,
         isUserFeedback: Boolean = false,
     ): LLMResponse {
         // save the prompt in chat history
@@ -48,9 +42,9 @@ abstract class RequestManager(var token: String) {
         // Send Request to LLM
         log.info("Sending Request...")
 
-        val (sendResult, testsAssembler) = send(prompt, indicator, project, llmErrorManager)
+        val (sendResult, testsAssembler) = send(prompt, indicator, project)
 
-        if (sendResult == SendResult.TOO_LONG) {
+        if (sendResult == SendResult.PROMPT_TOO_LONG) {
             return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, testsAssembler.rawText, null)
         }
 
@@ -95,7 +89,6 @@ abstract class RequestManager(var token: String) {
         prompt: String,
         indicator: ProgressIndicator,
         project: Project,
-        llmErrorManager: LLMErrorManager,
     ): Pair<SendResult, TestsAssembler>
 
     open fun processUserFeedbackResponse(

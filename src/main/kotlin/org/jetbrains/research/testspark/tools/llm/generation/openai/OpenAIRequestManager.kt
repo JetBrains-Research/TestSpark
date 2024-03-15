@@ -22,11 +22,12 @@ class OpenAIRequestManager : RequestManager(token = SettingsArguments.getToken()
         it.setRequestProperty("Authorization", "Bearer $token")
     }
 
+    private val llmErrorManager = LLMErrorManager()
+
     override fun send(
         prompt: String,
         indicator: ProgressIndicator,
         project: Project,
-        llmErrorManager: LLMErrorManager,
     ): Pair<SendResult, TestsAssembler> {
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(SettingsArguments.getModel(), chatHistory)
@@ -55,7 +56,7 @@ class OpenAIRequestManager : RequestManager(token = SettingsArguments.getToken()
                             TestSparkBundle.message("tooLongPrompt"),
                             project,
                         )
-                        sendResult = SendResult.TOO_LONG
+                        sendResult = SendResult.PROMPT_TOO_LONG
                     }
 
                     HttpURLConnection.HTTP_UNAUTHORIZED -> {

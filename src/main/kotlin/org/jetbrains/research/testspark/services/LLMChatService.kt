@@ -31,7 +31,6 @@ class LLMChatService {
      * @param indicator: A ProgressIndicator object that represents the indication of the test generation progress.
      * @param packageName: A string that represents the package name where the tests will be generated.
      * @param project: A Project object that represents the current project in which the tests are to be generated.
-     * @param llmErrorManager: An LLMErrorManager object used to handle any errors that might occur during the test generation process.
      *
      * @return A Pair object containing a String and a TestSuiteGeneratedByLLM object.
      * The string component of the Pair represents the parsing result
@@ -43,9 +42,8 @@ class LLMChatService {
         indicator: ProgressIndicator,
         packageName: String,
         project: Project,
-        llmErrorManager: LLMErrorManager,
     ): LLMResponse {
-        return requestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
+        return requestManager.request(messageToPrompt, indicator, packageName, project)
     }
 
     /**
@@ -89,7 +87,6 @@ class LLMChatService {
             indicator,
             packageName,
             project,
-            LLMErrorManager(),
             isUserFeedback = true,
         )
 

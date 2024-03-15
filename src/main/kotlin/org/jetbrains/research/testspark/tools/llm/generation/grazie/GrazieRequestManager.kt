@@ -9,11 +9,12 @@ import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
 
 class GrazieRequestManager : RequestManager(token = SettingsArguments.getToken()) {
+    private val llmErrorManager = LLMErrorManager()
+
     override fun send(
         prompt: String,
         indicator: ProgressIndicator,
         project: Project,
-        llmErrorManager: LLMErrorManager,
     ): Pair<SendResult, TestsAssembler> {
         var testsAssembler = TestsAssembler(project, indicator)
         var sendResult = SendResult.OK
@@ -41,7 +42,7 @@ class GrazieRequestManager : RequestManager(token = SettingsArguments.getToken()
                                 TestSparkBundle.message("tooLongPrompt"),
                                 project,
                             )
-                            sendResult = SendResult.TOO_LONG
+                            sendResult = SendResult.PROMPT_TOO_LONG
                         }
 
                         else -> {
@@ -53,7 +54,8 @@ class GrazieRequestManager : RequestManager(token = SettingsArguments.getToken()
             } else {
                 testsAssembler = requestResult.second
             }
-        } catch (e: ClassNotFoundException) {
+        }
+        catch (e: ClassNotFoundException) {
             llmErrorManager.errorProcess(TestSparkBundle.message("grazieError"), project)
         }
 
