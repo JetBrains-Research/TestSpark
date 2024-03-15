@@ -41,6 +41,7 @@ import java.io.File
 class LLMProcessManager(
     private val project: Project,
     private val promptManager: PromptManager,
+    private val testSamplesCode: String,
 ) : ProcessManager {
     private val settingsProjectState = project.service<SettingsProjectService>().state
     private val testFileName: String = "GeneratedTest.java"
@@ -85,7 +86,7 @@ class LLMProcessManager(
 
         var requestsCount = 0
         var warningMessage = ""
-        var messageToPrompt = promptManager.generatePrompt(codeType)
+        var messageToPrompt = promptManager.generatePrompt(codeType, testSamplesCode)
         var generatedTestSuite: TestSuiteGeneratedByLLM? = null
 
         // notify LLMChatService to restart the chat process.
@@ -113,7 +114,7 @@ class LLMProcessManager(
 
             if (requestResult.first == TestSparkBundle.message("tooLongPrompt")) {
                 if (promptManager.reducePromptSize()) {
-                    messageToPrompt = promptManager.generatePrompt(codeType)
+                    messageToPrompt = promptManager.generatePrompt(codeType, testSamplesCode)
                     requestsCount--
                     continue
                 } else {

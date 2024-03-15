@@ -21,10 +21,11 @@ class SettingsArguments(
     private val classFQN: String,
     baseDir: String,
 ) {
-    private val settingsState = SettingsApplicationService.getInstance().state!!
+    private val settingsState: SettingsApplicationState?
+        get() = SettingsApplicationService.getInstance().state
 
     private var command: MutableList<String> = mutableListOf(
-        algorithmsToGenerateMap[settingsState.algorithm]!!,
+        algorithmsToGenerateMap[settingsState!!.algorithm]!!,
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
         "-base_dir", """"$baseDir"""",
@@ -73,12 +74,10 @@ class SettingsArguments(
      * Finalizes the parameter construction by applying the user runtime settings
      */
     fun build(isLineCoverage: Boolean = false): MutableList<String> {
-        val settingsState = SettingsApplicationService.getInstance().state
-
         if (settingsState != null) {
-            val params = settingsState.serializeChangesFromDefault()
+            val params = settingsState!!.serializeChangesFromDefault()
             command.addAll(params)
-            command.add(createCriterionString(settingsState, isLineCoverage))
+            command.add(createCriterionString(settingsState!!, isLineCoverage))
         }
         return command
     }

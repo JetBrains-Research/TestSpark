@@ -23,6 +23,8 @@ class SettingsEvoSuiteComponent {
     private var configurationIdTextField = JTextField()
     private var seedTextField = JTextField()
 
+    private val evosuiteSetupCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("evosuiteSetupCheckBox"), true)
+
     // EvoSuite checkboxes options
     private var sandboxCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("sandbox"))
     private var assertionsCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("assertionCreation"))
@@ -68,6 +70,7 @@ class SettingsEvoSuiteComponent {
             .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("defaultSearch")), algorithmSelector, 10, false)
             .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("seed")), seedTextField, 10, false)
             .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("configId")), configurationIdTextField, 5, false)
+            .addComponent(evosuiteSetupCheckBox, 10)
             // Checkboxes settings
             .addComponent(sandboxCheckBox, 10)
             .addComponent(assertionsCheckBox, 10)
@@ -113,6 +116,12 @@ class SettingsEvoSuiteComponent {
     fun getPreferredFocusedComponent(): JComponent {
         return algorithmSelector
     }
+
+    var evosuiteSetupCheckBoxSelected: Boolean
+        get() = evosuiteSetupCheckBox.isSelected
+        set(newStatus) {
+            evosuiteSetupCheckBox.isSelected = newStatus
+        }
 
     // Settings "changers"
 

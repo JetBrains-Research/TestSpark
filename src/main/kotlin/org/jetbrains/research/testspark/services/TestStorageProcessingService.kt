@@ -12,8 +12,8 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import java.io.File
 import java.util.UUID
@@ -35,6 +35,9 @@ class TestStorageProcessingService(private val project: Project) {
 
     private val log = Logger.getInstance(this::class.java)
 
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
+
     /**
      * Generates the path for the command by concatenating the necessary paths.
      *
@@ -43,7 +46,7 @@ class TestStorageProcessingService(private val project: Project) {
      */
     private fun getPath(buildPath: String): String {
         // create the path for the command
-        val junitVersion = SettingsArguments.settingsState!!.junitVersion
+        val junitVersion = settingsState.junitVersion
         val separator = DataFilesUtil.classpathSeparator
         val junitPath = junitVersion.libJar.joinToString(separator.toString()) { getLibrary(it) }
         val mockitoPath = getLibrary("mockito-core-5.0.0.jar")
@@ -178,7 +181,7 @@ class TestStorageProcessingService(private val project: Project) {
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
         name += "$className#$testCaseName"
 
-        val junitVersion = SettingsArguments.settingsState!!.junitVersion.version
+        val junitVersion = settingsState.junitVersion.version
 
         // run the test method with jacoco agent
         val testExecutionError = project.service<RunCommandLineService>().runCommandLine(

@@ -1,13 +1,13 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -18,27 +18,28 @@ import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 
 /**
- * Pipeline class represents a pipeline for running the test generation process.
+ * Pipeline class represents a pipeline for generating tests in a project.
  *
- * @param e The AnActionEvent instance that triggered the pipeline.
- * @param packageName The name of the package where the target class resides.
+ * @param project the project in which the pipeline is executed
+ * @param psiFile the PSI file in which the pipeline is executed
+ * @param caretOffset the offset of the caret position in the PSI file
+ * @param fileUrl the URL of the file being processed, if applicable
+ * @param packageName the package name of the file being processed
  */
 class Pipeline(
-    e: AnActionEvent,
+    private val project: Project,
+    psiFile: PsiFile,
+    caretOffset: Int,
+    fileUrl: String?,
     private val packageName: String,
 ) {
-    private val project = e.project!!
-
     init {
         project.service<ProjectContextService>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
         project.service<ProjectContextService>().resultPath = project.service<TestStorageProcessingService>().resultPath
         project.service<ProjectContextService>().baseDir = "${project.service<TestStorageProcessingService>().testResultDirectory}${project.service<TestStorageProcessingService>().testResultName}-validation"
-        project.service<ProjectContextService>().fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
+        project.service<ProjectContextService>().fileUrl = fileUrl
 
-        project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(
-            e.dataContext.getData(CommonDataKeys.PSI_FILE)!!,
-            e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!,
-        )
+        project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(psiFile, caretOffset)
         project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
 
         project.service<ProjectContextService>().classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!
