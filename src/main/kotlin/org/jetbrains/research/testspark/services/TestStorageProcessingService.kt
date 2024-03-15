@@ -15,6 +15,7 @@ import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.core.test.TestCaseGeneratedByLLM
+import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import java.io.File
 import java.util.UUID
 import kotlin.collections.ArrayList
@@ -85,7 +86,7 @@ class TestStorageProcessingService(private val project: Project) {
             .first()
 
         // compile file
-        val errorMsg = project.service<RunCommandLineService>().runCommandLine(
+        val errorMsg = CommandLineRunner.run(
             arrayListOf(
                 javaCompile.absolutePath,
                 "-cp",
@@ -184,7 +185,7 @@ class TestStorageProcessingService(private val project: Project) {
         val junitVersion = settingsState.junitVersion.version
 
         // run the test method with jacoco agent
-        val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
+        val testExecutionError = CommandLineRunner.run(
             arrayListOf(
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<ProjectContextService>().classFQN}",
@@ -222,7 +223,7 @@ class TestStorageProcessingService(private val project: Project) {
 
         log.info("Runs command: ${command.joinToString(" ")}")
 
-        project.service<RunCommandLineService>().runCommandLine(command as ArrayList<String>)
+        CommandLineRunner.run(command as ArrayList<String>)
 
         return testExecutionError
     }

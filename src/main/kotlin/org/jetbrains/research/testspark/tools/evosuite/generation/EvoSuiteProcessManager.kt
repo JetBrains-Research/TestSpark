@@ -13,11 +13,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.services.ProjectContextService
-import org.jetbrains.research.testspark.services.RunCommandLineService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -76,7 +76,7 @@ class EvoSuiteProcessManager(
             if (processStopped(project, indicator)) return
 
             val regex = Regex("version \"(.*?)\"")
-            val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(settingsState.javaPath, "-version")))
+            val version = regex.find(CommandLineRunner.run(arrayListOf(settingsState.javaPath, "-version")))
                 ?.groupValues
                 ?.get(1)
                 ?.split(".")
