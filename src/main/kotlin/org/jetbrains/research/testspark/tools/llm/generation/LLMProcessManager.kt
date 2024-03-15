@@ -117,40 +117,6 @@ class LLMProcessManager(
                 llmErrorManager.warningProcess(warningMessage, project)
             }
 
-            /*
-            val requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
-                project.service<LLMChatService>().testGenerationRequest(messageToPrompt, indicator, packageName, project, llmErrorManager)
-
-            if (requestResult.first == TestSparkBundle.message("tooLongPrompt")) {
-                if (promptManager.reducePromptSize()) {
-                    messageToPrompt = promptManager.generatePrompt(codeType, testSamplesCode)
-                    requestsCount--
-                    continue
-                } else {
-                    llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPromptRequest"), project)
-                    return
-                }
-            }
-            generatedTestSuite = requestResult.second
-
-            // Process stopped checking
-            if (processStopped(project, indicator)) return
-
-            // Bad response checking
-            if (generatedTestSuite == null) {
-                messageToPrompt = requestResult.first
-                continue
-            }
-
-            // Empty response checking
-            if (generatedTestSuite.testCases.isEmpty()) {
-                warningMessage = TestSparkBundle.message("emptyResponse")
-                messageToPrompt =
-                    "You have provided an empty answer! Please answer my previous question with the same formats."
-                continue
-            }
-            */
-
             val response: LLMResponse =
                 project.service<LLMChatService>().testGenerationRequest(messageToPrompt, indicator, packageName, project, llmErrorManager)
 

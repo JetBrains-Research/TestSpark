@@ -44,7 +44,7 @@ class LLMChatService {
         packageName: String,
         project: Project,
         llmErrorManager: LLMErrorManager,
-    ): LLMResponse /*Pair<String, TestSuiteGeneratedByLLM?>*/ {
+    ): LLMResponse {
         return requestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
     }
 

@@ -9,7 +9,6 @@ import org.jetbrains.research.testspark.core.generation.network.LLMResponse
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
-import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
 
 
 
@@ -38,7 +37,7 @@ abstract class RequestManager {
         project: Project,
         llmErrorManager: LLMErrorManager,
         isUserFeedback: Boolean = false,
-    ): LLMResponse /*Pair<String, TestSuiteGeneratedByLLM?>*/ {
+    ): LLMResponse {
         // save the prompt in chat history
         chatHistory.add(ChatMessage("user", prompt))
 
@@ -49,7 +48,6 @@ abstract class RequestManager {
 
         if (sendResult == SendResult.TOO_LONG) {
             return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, null)
-            // return Pair(TestSparkBundle.message("tooLongPrompt"), null)
         }
 
         val testsAssembler = sendResultPair.second
@@ -69,10 +67,7 @@ abstract class RequestManager {
         testsAssembler: TestsAssembler,
         packageName: String,
         project: Project,
-    ): LLMResponse /*Pair<String, TestSuiteGeneratedByLLM?>*/ {
-        // if (testsAssembler.rawText.isEmpty()) {
-            // return Pair("", null)
-        // }
+    ): LLMResponse {
         // save the full response in the chat history
         val response = testsAssembler.rawText
         log.info("The full response: \n $response")
@@ -81,10 +76,6 @@ abstract class RequestManager {
         // check if response is empty
         if (response.isEmpty() || response.isBlank()) {
             return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
-            /*return Pair(
-                "You have provided an empty answer! Please answer my previous question with the same formats",
-                null,
-            )*/
         }
 
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
@@ -93,11 +84,9 @@ abstract class RequestManager {
             LLMErrorManager().warningProcess(TestSparkBundle.message("emptyResponse") + "LLM response: $response", project)
 
             return LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
-            // return Pair("The provided code is not parsable. Please give the correct code", null)
         }
 
         return LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM.reformat())
-        // return Pair("", testSuiteGeneratedByLLM.reformat())
     }
 
     abstract fun send(
@@ -110,13 +99,12 @@ abstract class RequestManager {
     open fun processUserFeedbackResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
-    ): LLMResponse /*Pair<String, TestSuiteGeneratedByLLM?>*/ {
+    ): LLMResponse {
         val response = testsAssembler.rawText
         log.info("The full response: \n $response")
 
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
 
         return LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM)
-        // return Pair("", testSuiteGeneratedByLLM)
     }
 }
