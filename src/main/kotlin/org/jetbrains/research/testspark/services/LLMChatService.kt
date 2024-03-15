@@ -4,6 +4,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.generation.network.LLMResponse
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
@@ -43,7 +44,7 @@ class LLMChatService {
         packageName: String,
         project: Project,
         llmErrorManager: LLMErrorManager,
-    ): Pair<String, TestSuiteGeneratedByLLM?> {
+    ): LLMResponse /*Pair<String, TestSuiteGeneratedByLLM?>*/ {
         return requestManager.request(messageToPrompt, indicator, packageName, project, llmErrorManager)
     }
 
@@ -83,7 +84,7 @@ class LLMChatService {
             }
         }
 
-        val requestResult = requestManager.request(
+        val response = requestManager.request(
             prompt,
             indicator,
             packageName,
@@ -92,7 +93,7 @@ class LLMChatService {
             isUserFeedback = true,
         )
 
-        return requestResult.second
+        return response.testSuite
     }
 
     /**

@@ -5,6 +5,8 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.generation.network.LLMResponse
+import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
@@ -100,7 +102,9 @@ class LLMProcessManager(
             log.info("New iterations of requests")
 
             // Process stopped checking
-            if (processStopped(project, indicator)) return
+            if (processStopped(project, indicator)) {
+                return
+            }
 
             // Ending loop checking
             if (isLastIteration(requestsCount) && project.service<TestGenerationDataService>().compilableTestCases.isEmpty()) {
@@ -109,7 +113,11 @@ class LLMProcessManager(
             }
 
             // Send request to LLM
-            if (warningMessage.isNotEmpty()) llmErrorManager.warningProcess(warningMessage, project)
+            if (warningMessage.isNotEmpty()) {
+                llmErrorManager.warningProcess(warningMessage, project)
+            }
+
+            /*
             val requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
                 project.service<LLMChatService>().testGenerationRequest(messageToPrompt, indicator, packageName, project, llmErrorManager)
 
@@ -140,6 +148,49 @@ class LLMProcessManager(
                 messageToPrompt =
                     "You have provided an empty answer! Please answer my previous question with the same formats."
                 continue
+            }
+            */
+
+            val response: LLMResponse =
+                project.service<LLMChatService>().testGenerationRequest(messageToPrompt, indicator, packageName, project, llmErrorManager)
+
+            when(response.errorCode) {
+                ResponseErrorCode.OK -> {
+                    log.info("Test suite generated successfully: $generatedTestSuite")
+                }
+                ResponseErrorCode.PROMPT_TOO_LONG -> {
+                    if (promptManager.reducePromptSize()) {
+                        messageToPrompt = promptManager.generatePrompt(codeType, testSamplesCode)
+                        requestsCount--
+                        continue
+                    } else {
+                        llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPromptRequest"), project)
+                        return
+                    }
+                }
+                ResponseErrorCode.EMPTY_LLM_RESPONSE -> {
+                    messageToPrompt = "You have provided an empty answer! Please answer my previous question with the same formats"
+                    continue
+                }
+                ResponseErrorCode.TEST_SUITE_PARSING_FAILURE -> {
+                    messageToPrompt = "The provided code is not parsable. Please, generate the correct code"
+                    continue
+                }
+            }
+
+            generatedTestSuite = response.testSuite!!
+
+            // Empty response checking
+            if (generatedTestSuite.testCases.isEmpty()) {
+                warningMessage = TestSparkBundle.message("emptyResponse")
+                messageToPrompt =
+                    "You have provided an empty answer! Please answer my previous question with the same formats."
+                continue
+            }
+
+            // Process stopped checking
+            if (processStopped(project, indicator)) {
+                return
             }
 
             // Save the generated TestSuite into a temp file

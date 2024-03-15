@@ -4,22 +4,13 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
+import org.jetbrains.research.testspark.core.generation.network.LLMResponse
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
 import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
 
-enum class ErrorCode {
-    OK,
-    PROMPT_TOO_LONG,
-    EMPTY_LLM_RESPONSE,
-    TEST_SUITE_PARSING_FAILURE,
-}
-
-data class LLMResponse(
-    val errorCode: ErrorCode,
-    val testSuite: TestSuiteGeneratedByLLM?,
-)
 
 
 abstract class RequestManager {
@@ -47,7 +38,7 @@ abstract class RequestManager {
         project: Project,
         llmErrorManager: LLMErrorManager,
         isUserFeedback: Boolean = false,
-    ): Pair<String, TestSuiteGeneratedByLLM?> {
+    ): LLMResponse /*Pair<String, TestSuiteGeneratedByLLM?>*/ {
         // save the prompt in chat history
         chatHistory.add(ChatMessage("user", prompt))
 
@@ -57,7 +48,8 @@ abstract class RequestManager {
         val sendResult = sendResultPair.first
 
         if (sendResult == SendResult.TOO_LONG) {
-            return Pair(TestSparkBundle.message("tooLongPrompt"), null)
+            return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, null)
+            // return Pair(TestSparkBundle.message("tooLongPrompt"), null)
         }
 
         val testsAssembler = sendResultPair.second
@@ -77,10 +69,10 @@ abstract class RequestManager {
         testsAssembler: TestsAssembler,
         packageName: String,
         project: Project,
-    ): Pair<String, TestSuiteGeneratedByLLM?> {
-        if (testsAssembler.rawText.isEmpty()) {
-            return Pair("", null)
-        }
+    ): LLMResponse /*Pair<String, TestSuiteGeneratedByLLM?>*/ {
+        // if (testsAssembler.rawText.isEmpty()) {
+            // return Pair("", null)
+        // }
         // save the full response in the chat history
         val response = testsAssembler.rawText
         log.info("The full response: \n $response")
@@ -88,20 +80,24 @@ abstract class RequestManager {
 
         // check if response is empty
         if (response.isEmpty() || response.isBlank()) {
-            return Pair(
+            return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
+            /*return Pair(
                 "You have provided an empty answer! Please answer my previous question with the same formats",
                 null,
-            )
+            )*/
         }
 
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
 
         if (testSuiteGeneratedByLLM == null) {
             LLMErrorManager().warningProcess(TestSparkBundle.message("emptyResponse") + "LLM response: $response", project)
-            return Pair("The provided code is not parsable. Please give the correct code", null)
+
+            return LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
+            // return Pair("The provided code is not parsable. Please give the correct code", null)
         }
 
-        return Pair("", testSuiteGeneratedByLLM.reformat())
+        return LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM.reformat())
+        // return Pair("", testSuiteGeneratedByLLM.reformat())
     }
 
     abstract fun send(
@@ -114,12 +110,13 @@ abstract class RequestManager {
     open fun processUserFeedbackResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
-    ): Pair<String, TestSuiteGeneratedByLLM?> {
+    ): LLMResponse /*Pair<String, TestSuiteGeneratedByLLM?>*/ {
         val response = testsAssembler.rawText
         log.info("The full response: \n $response")
 
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
 
-        return Pair("", testSuiteGeneratedByLLM)
+        return LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM)
+        // return Pair("", testSuiteGeneratedByLLM)
     }
 }
