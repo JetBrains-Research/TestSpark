@@ -15,7 +15,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.jdesktop.swingx.JXTitledSeparator
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
@@ -24,6 +23,7 @@ import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.PromptParserService
+import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
@@ -32,12 +32,14 @@ import java.awt.Font
 import javax.swing.BorderFactory
 import javax.swing.BoxLayout
 import javax.swing.JButton
+import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
 
 class SettingsLLMComponent {
-    private val settingsState: SettingsApplicationState = SettingsArguments.settingsState!!
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
 
     var panel: JPanel? = null
 
@@ -46,7 +48,7 @@ class SettingsLLMComponent {
 
     // Models
     private var modelSelector = ComboBox(arrayOf(""))
-    private var platformSelector = ComboBox(arrayOf(TestSparkDefaultsBundle.defaultValue("openAI")))
+    private var platformSelector = ComboBox(arrayOf(settingsState.openAIName))
 
     // Default LLM Requests
     private var defaultLLMRequestsSeparator =
@@ -67,6 +69,10 @@ class SettingsLLMComponent {
 
     // Maximum polymorphism depth
     private var maxPolyDepthField = JBIntSpinner(UINumericRange(settingsState.maxPolyDepth, 1, 5))
+
+    private val provideTestSamplesCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("provideTestSamplesCheckBox"), true)
+
+    private val llmSetupCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("llmSetupCheckBox"), true)
 
     val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
 
@@ -133,9 +139,21 @@ class SettingsLLMComponent {
             fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), value))
         }
 
+    var llmSetupCheckBoxSelected: Boolean
+        get() = llmSetupCheckBox.isSelected
+        set(newStatus) {
+            llmSetupCheckBox.isSelected = newStatus
+        }
+
+    var provideTestSamplesCheckBoxSelected: Boolean
+        get() = provideTestSamplesCheckBox.isSelected
+        set(newStatus) {
+            provideTestSamplesCheckBox.isSelected = newStatus
+        }
+
     init {
         // Adds additional style (width, tooltips)
-        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms)
+        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         stylizePanel()
 
         fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), settingsState.defaultLLMRequests))
@@ -287,6 +305,7 @@ class SettingsLLMComponent {
             modelSelector,
             llmUserTokenField,
             llmPlatforms,
+            settingsState,
         )
 
         addHighlighterListeners()
@@ -309,6 +328,7 @@ class SettingsLLMComponent {
         maxInputParamsDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("parametersDepth")
         maxPolyDepthField.toolTipText = TestSparkToolTipsBundle.defaultValue("maximumPolyDepth")
         promptSeparator.toolTipText = TestSparkToolTipsBundle.defaultValue("promptEditor")
+        provideTestSamplesCheckBox.toolTipText = TestSparkToolTipsBundle.defaultValue("provideTestSamples")
     }
 
     /**
@@ -353,6 +373,8 @@ class SettingsLLMComponent {
                 10,
                 false,
             )
+            .addComponent(llmSetupCheckBox, 10)
+            .addComponent(provideTestSamplesCheckBox, 10)
             .addComponent(defaultLLMRequestsSeparator, 15)
             .addComponent(commonDefaultLLMRequestsPanel, 15)
             .addComponent(addDefaultLLMRequestsButtonPanel, 15)

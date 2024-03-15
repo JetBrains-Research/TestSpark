@@ -24,6 +24,7 @@ import org.jetbrains.research.testspark.core.generation.prompt.configuration.Pro
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
+import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -41,12 +42,13 @@ class PromptManager(
     private val cut: PsiClass,
     private val classesToTest: MutableList<PsiClass>,
 ) {
-    val settingsState: SettingsApplicationState = SettingsArguments.settingsState!!
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
 
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
-    fun generatePrompt(codeType: FragmentToTestData): String {
+    fun generatePrompt(codeType: FragmentToTestData, testSamplesCode: String): String {
         val prompt = ApplicationManager.getApplication().runReadAction(
             Computable {
                 val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
@@ -76,14 +78,14 @@ class PromptManager(
 
                 when (codeType.type!!) {
                     CodeType.CLASS -> {
-                        promptGenerator.generatePromptForClass(interestingClasses)
+                        promptGenerator.generatePromptForClass(interestingClasses, testSamplesCode)
                     }
                     CodeType.METHOD -> {
                         val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
                         val method = createMethodRepresentation(psiMethod)
                         val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
 
-                        promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod)
+                        promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, testSamplesCode)
                     }
                     CodeType.LINE -> {
                         val lineNumber = codeType.objectIndex
@@ -98,7 +100,7 @@ class PromptManager(
                         val method = createMethodRepresentation(psiMethod)
                         val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
 
-                        promptGenerator.generatePromptForLine(lineUnderTest, method, interestingClassesFromMethod)
+                        promptGenerator.generatePromptForLine(lineUnderTest, method, interestingClassesFromMethod, testSamplesCode)
                     }
                 }
             },

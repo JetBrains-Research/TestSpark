@@ -9,8 +9,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.generation.importPattern
+import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestLine
@@ -31,6 +32,9 @@ class TestsAssembler(
     val project: Project,
     val indicator: ProgressIndicator,
 ) {
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
+
     private val log: Logger = Logger.getInstance(this.javaClass)
     var rawText = ""
     private var lastTestCount = 0
@@ -113,7 +117,7 @@ class TestsAssembler(
                     .map { it.groupValues[0] }
                     .toSet()
 
-            val junitVersion = SettingsArguments.settingsState!!.junitVersion
+            val junitVersion = settingsState.junitVersion
 
             // save RunWith
             val runWith = junitVersion.runWithAnnotationMeta.extract(rawText)

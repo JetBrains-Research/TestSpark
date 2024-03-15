@@ -11,10 +11,11 @@ import javax.swing.JComponent
  * This class allows to configure some LLM-related settings via the Large Language Model page in the Settings dialog,
  *   observes the changes and manages the UI and state.
  */
-
 class SettingsLLMConfigurable : Configurable {
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
 
-    var settingsComponent: SettingsLLMComponent? = null
+    private var settingsComponent: SettingsLLMComponent? = null
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
@@ -30,10 +31,15 @@ class SettingsLLMConfigurable : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         for (index in settingsComponent!!.llmPlatforms.indices) {
-            settingsComponent!!.llmPlatforms[index].token = settingsState.llmPlatforms[index].token
-            settingsComponent!!.llmPlatforms[index].model = settingsState.llmPlatforms[index].model
+            if (settingsComponent!!.llmPlatforms[index].name == settingsState.openAIName) {
+                settingsComponent!!.llmPlatforms[index].token = settingsState.openAIToken
+                settingsComponent!!.llmPlatforms[index].model = settingsState.openAIModel
+            }
+            if (settingsComponent!!.llmPlatforms[index].name == settingsState.grazieName) {
+                settingsComponent!!.llmPlatforms[index].token = settingsState.grazieToken
+                settingsComponent!!.llmPlatforms[index].model = settingsState.grazieModel
+            }
         }
         settingsComponent!!.currentLLMPlatformName = settingsState.currentLLMPlatformName
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
@@ -42,6 +48,8 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.classPrompt = settingsState.classPrompt
         settingsComponent!!.methodPrompt = settingsState.methodPrompt
         settingsComponent!!.linePrompt = settingsState.linePrompt
+        settingsComponent!!.llmSetupCheckBoxSelected = settingsState.llmSetupCheckBoxSelected
+        settingsComponent!!.provideTestSamplesCheckBoxSelected = settingsState.provideTestSamplesCheckBoxSelected
         settingsComponent!!.defaultLLMRequests = settingsState.defaultLLMRequests
 
         settingsComponent!!.updateTokenAndModel()
@@ -53,11 +61,16 @@ class SettingsLLMConfigurable : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         var modified = false
         for (index in settingsComponent!!.llmPlatforms.indices) {
-            modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.llmPlatforms[index].token)
-            modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.llmPlatforms[index].model)
+            if (settingsComponent!!.llmPlatforms[index].name == settingsState.openAIName) {
+                modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.openAIToken)
+                modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.openAIModel)
+            }
+            if (settingsComponent!!.llmPlatforms[index].name == settingsState.grazieName) {
+                modified = modified or (settingsComponent!!.llmPlatforms[index].token != settingsState.grazieToken)
+                modified = modified or (settingsComponent!!.llmPlatforms[index].model != settingsState.grazieModel)
+            }
         }
         modified = modified or (settingsComponent!!.currentLLMPlatformName != settingsState.currentLLMPlatformName)
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
@@ -73,6 +86,9 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
         modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.linePrompt)
 
+        modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
+        modified = modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != settingsState.provideTestSamplesCheckBoxSelected)
+
         modified = modified or (settingsComponent!!.defaultLLMRequests != settingsState.defaultLLMRequests)
 
         return modified
@@ -82,10 +98,15 @@ class SettingsLLMConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         for (index in settingsComponent!!.llmPlatforms.indices) {
-            settingsState.llmPlatforms[index].token = settingsComponent!!.llmPlatforms[index].token
-            settingsState.llmPlatforms[index].model = settingsComponent!!.llmPlatforms[index].model
+            if (settingsComponent!!.llmPlatforms[index].name == settingsState.openAIName) {
+                settingsState.openAIToken = settingsComponent!!.llmPlatforms[index].token
+                settingsState.openAIModel = settingsComponent!!.llmPlatforms[index].model
+            }
+            if (settingsComponent!!.llmPlatforms[index].name == settingsState.grazieName) {
+                settingsState.grazieToken = settingsComponent!!.llmPlatforms[index].token
+                settingsState.grazieModel = settingsComponent!!.llmPlatforms[index].model
+            }
         }
         settingsState.currentLLMPlatformName = settingsComponent!!.currentLLMPlatformName
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
@@ -94,6 +115,8 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.classPrompt = settingsComponent!!.classPrompt
         settingsState.methodPrompt = settingsComponent!!.methodPrompt
         settingsState.linePrompt = settingsComponent!!.linePrompt
+        settingsState.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
+        settingsState.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
         settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests
     }
 
