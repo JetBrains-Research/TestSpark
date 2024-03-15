@@ -55,14 +55,13 @@ abstract class RequestManager(var token: String) {
 
         return when (isUserFeedback) {
             true -> processUserFeedbackResponse(testsAssembler, packageName)
-            false -> processResponse(testsAssembler, packageName, project)
+            false -> processResponse(testsAssembler, packageName)
         }
     }
 
     open fun processResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
-        project: Project,
     ): LLMResponse {
         // save the full response in the chat history
         val response = testsAssembler.rawText
@@ -96,6 +95,7 @@ abstract class RequestManager(var token: String) {
         packageName: String,
     ): LLMResponse {
         val response = testsAssembler.rawText
+
         log.info("The full response: \n $response")
 
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
