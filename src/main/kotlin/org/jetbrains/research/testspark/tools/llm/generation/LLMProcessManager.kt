@@ -139,6 +139,7 @@ class LLMProcessManager(
                     continue
                 }
                 ResponseErrorCode.TEST_SUITE_PARSING_FAILURE -> {
+                    llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse") + "LLM response: $response", project)
                     messageToPrompt = "The provided code is not parsable. Please, generate the correct code"
                     continue
                 }

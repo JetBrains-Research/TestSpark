@@ -6,18 +6,22 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
 import org.jetbrains.research.testspark.core.generation.network.LLMResponse
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
 
 
 
-abstract class RequestManager {
-    enum class SendResult { OK, TOO_LONG, OTHER }
-    open var token: String = SettingsArguments.getToken()
-    open val chatHistory = mutableListOf<ChatMessage>()
+abstract class RequestManager(var token: String) {
+    enum class SendResult {
+        OK,
+        TOO_LONG,
+        OTHER,
+    }
 
-    open val log: Logger = Logger.getInstance(this.javaClass)
+    // var token: String = SettingsArguments.getToken()
+    val chatHistory = mutableListOf<ChatMessage>()
+
+    protected val log: Logger = Logger.getInstance(this.javaClass)
 
     /**
      * Sends a request to LLM with the given prompt and returns the generated TestSuite.
@@ -43,14 +47,12 @@ abstract class RequestManager {
 
         // Send Request to LLM
         log.info("Sending Request...")
-        val sendResultPair = send(prompt, indicator, project, llmErrorManager)
-        val sendResult = sendResultPair.first
+
+        val (sendResult, testsAssembler) = send(prompt, indicator, project, llmErrorManager)
 
         if (sendResult == SendResult.TOO_LONG) {
-            return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, null)
+            return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, testsAssembler.rawText, null)
         }
-
-        val testsAssembler = sendResultPair.second
 
         // we remove the user request because we don't store user's requests in chat history
         if (isUserFeedback) {
@@ -70,23 +72,23 @@ abstract class RequestManager {
     ): LLMResponse {
         // save the full response in the chat history
         val response = testsAssembler.rawText
+
         log.info("The full response: \n $response")
         chatHistory.add(ChatMessage("assistant", response))
 
         // check if response is empty
         if (response.isEmpty() || response.isBlank()) {
-            return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
+            return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, response, null)
         }
 
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
 
-        if (testSuiteGeneratedByLLM == null) {
-            LLMErrorManager().warningProcess(TestSparkBundle.message("emptyResponse") + "LLM response: $response", project)
-
-            return LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
+        return if (testSuiteGeneratedByLLM == null) {
+            LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, response, null)
         }
-
-        return LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM.reformat())
+        else {
+            LLMResponse(ResponseErrorCode.OK, response, testSuiteGeneratedByLLM.reformat())
+        }
     }
 
     abstract fun send(
@@ -105,6 +107,6 @@ abstract class RequestManager {
 
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
 
-        return LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM)
+        return LLMResponse(ResponseErrorCode.OK, response, testSuiteGeneratedByLLM)
     }
 }

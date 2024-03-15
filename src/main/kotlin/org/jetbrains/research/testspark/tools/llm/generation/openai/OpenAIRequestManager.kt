@@ -15,7 +15,7 @@ import java.net.HttpURLConnection
 /**
  * This class represents a manager for making requests to the LLM (Large Language Model).
  */
-class OpenAIRequestManager : RequestManager() {
+class OpenAIRequestManager : RequestManager(token = SettingsArguments.getToken()) {
     private val url = "https://api.openai.com/v1/chat/completions"
 
     private val httpRequest = HttpRequests.post(url, "application/json").tuner {

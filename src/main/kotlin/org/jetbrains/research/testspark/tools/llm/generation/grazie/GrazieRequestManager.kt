@@ -8,7 +8,7 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
 
-class GrazieRequestManager : RequestManager() {
+class GrazieRequestManager : RequestManager(token = SettingsArguments.getToken()) {
     override fun send(
         prompt: String,
         indicator: ProgressIndicator,
