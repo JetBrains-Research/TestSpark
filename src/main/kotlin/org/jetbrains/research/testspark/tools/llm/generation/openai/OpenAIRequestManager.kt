@@ -43,7 +43,7 @@ class OpenAIRequestManager : RequestManager(token = SettingsArguments.getToken()
 
                 // check response
                 when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
-                    HttpURLConnection.HTTP_OK -> testsAssembler.receiveResponse(it)
+                    HttpURLConnection.HTTP_OK -> testsAssembler.consume(it)
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         llmErrorManager.errorProcess(
                             TestSparkBundle.message("serverProblems"),

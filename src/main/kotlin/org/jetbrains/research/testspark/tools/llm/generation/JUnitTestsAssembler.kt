@@ -36,7 +36,6 @@ class JUnitTestsAssembler(
 
     private val log: Logger = Logger.getInstance(this.javaClass)
 
-    // var rawText = ""
     private var lastTestCount = 0
 
     /**
@@ -44,7 +43,7 @@ class JUnitTestsAssembler(
      *
      * @param text part of the LLM response
      */
-    fun receiveResponse(text: String) {
+    override fun consume(text: String) {
         if (text.isEmpty()) return
 
         // Collect the response and update the progress bar
@@ -57,7 +56,7 @@ class JUnitTestsAssembler(
      *
      * @param httpRequest the httpRequest sent to OpenAI
      */
-    fun receiveResponse(httpRequest: HttpRequests.Request) {
+    fun consume(httpRequest: HttpRequests.Request) {
         while (true) {
             if (processStopped(project, indicator)) return
 

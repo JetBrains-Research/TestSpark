@@ -6,10 +6,11 @@ abstract class TestsAssembler {
 
     /**
      * Receives a text chunk of the response of an LLM.
+     * Derived classes must call this method in order to store a piece of content and further get if from the getContent method.
      *
      * @param text part of the LLM response
      */
-    fun consume(text: String) {
+    open fun consume(text: String) {
         rawText = rawText.plus(text)
     }
 

@@ -17,7 +17,7 @@ class GrazieRequestManager : RequestManager(token = SettingsArguments.getToken()
         indicator: ProgressIndicator,
         project: Project,
     ): Pair<SendResult, TestsAssembler> {
-        var testsAssembler = JUnitTestsAssembler(project, indicator)
+        var testsAssembler: TestsAssembler = JUnitTestsAssembler(project, indicator)
         var sendResult = SendResult.OK
 
         try {

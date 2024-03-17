@@ -122,7 +122,7 @@ class LLMProcessManager(
 
             when(response.errorCode) {
                 ResponseErrorCode.OK -> {
-                    log.info("Test suite generated successfully: $generatedTestSuite")
+                    log.info("Test suite generated successfully: ${response.testSuite!!}")
                 }
                 ResponseErrorCode.PROMPT_TOO_LONG -> {
                     if (promptManager.reducePromptSize()) {

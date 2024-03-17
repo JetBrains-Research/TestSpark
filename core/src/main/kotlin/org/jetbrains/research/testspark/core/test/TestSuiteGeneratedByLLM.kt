@@ -26,11 +26,6 @@ data class TestSuiteGeneratedByLLM(
         return testCases.isEmpty()
     }
 
-    // TODO: remove (needed to track what no one uses it anymore)
-    override fun toString(): String {
-        throw RuntimeException("toString of TestSuiteGeneratedByLLM")
-    }
-
     /**
      * Sets the test cases for this object.
      *
