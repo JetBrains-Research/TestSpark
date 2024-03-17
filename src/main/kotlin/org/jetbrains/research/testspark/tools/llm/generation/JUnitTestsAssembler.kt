@@ -9,7 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.test.BasicTestsAssembler
+import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.services.SettingsApplicationService
@@ -25,13 +25,12 @@ import org.jetbrains.research.testspark.tools.processStopped
  * @property project The project to which the tests belong.
  * @property indicator The progress indicator to display the progress of test generation.
  * @property log The logger for logging debug information.
-// * @property rawText The raw text containing the generated tests.
  * @property lastTestCount The count of the last generated tests.
  */
-class TestsAssembler(
+class JUnitTestsAssembler(
     val project: Project,
     val indicator: ProgressIndicator,
-) : BasicTestsAssembler() {
+) : TestsAssembler() {
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!
 
@@ -49,7 +48,6 @@ class TestsAssembler(
         if (text.isEmpty()) return
 
         // Collect the response and update the progress bar
-        // rawText = rawText.plus(text)
         super.consume(text)
         updateProgressBar()
     }
@@ -81,12 +79,10 @@ class TestsAssembler(
             if (choices.finishedReason == "stop") break
 
             // Collect the response and update the progress bar
-            // rawText = rawText.plus(choices.delta.content)
             super.consume(choices.delta.content)
             updateProgressBar()
         }
 
-        // log.debug(rawText)
         log.debug(super.getContent())
     }
 

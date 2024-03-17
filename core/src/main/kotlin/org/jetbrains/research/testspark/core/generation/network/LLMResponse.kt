@@ -13,7 +13,6 @@ enum class ResponseErrorCode {
 
 data class LLMResponse(
     val errorCode: ResponseErrorCode,
-    val llmResponseMessage: String,
     val testSuite: TestSuiteGeneratedByLLM?,
 ) {
     init {

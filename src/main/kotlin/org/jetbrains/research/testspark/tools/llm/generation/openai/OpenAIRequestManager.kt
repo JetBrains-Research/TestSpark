@@ -6,10 +6,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
-import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
+import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import java.net.HttpURLConnection
 
 /**
@@ -33,7 +34,7 @@ class OpenAIRequestManager : RequestManager(token = SettingsArguments.getToken()
         val llmRequestBody = OpenAIRequestBody(SettingsArguments.getModel(), chatHistory)
 
         // Prepare the test assembler
-        val testsAssembler = TestsAssembler(project, indicator)
+        val testsAssembler = JUnitTestsAssembler(project, indicator)
         var sendResult = SendResult.OK
 
         try {

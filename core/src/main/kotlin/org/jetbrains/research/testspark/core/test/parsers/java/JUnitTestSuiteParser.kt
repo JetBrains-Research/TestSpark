@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
 
 class JUnitTestSuiteParser(
     private val packageName: String,
-    private val junitVersion: JUnitVersion
+    private val junitVersion: JUnitVersion,
 ) : TestSuiteParser {
     override fun parseTestSuite(rawText: String): TestSuiteGeneratedByLLM? {
         if (rawText.isBlank()) {

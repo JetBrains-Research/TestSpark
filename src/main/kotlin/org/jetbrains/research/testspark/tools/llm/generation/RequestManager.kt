@@ -5,6 +5,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.generation.network.LLMResponse
 import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
+import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
 
 
@@ -45,7 +46,7 @@ abstract class RequestManager(var token: String) {
         val (sendResult, testsAssembler) = send(prompt, indicator, project)
 
         if (sendResult == SendResult.PROMPT_TOO_LONG) {
-            return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, testsAssembler.rawText, null)
+            return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, null)
         }
 
         // we remove the user request because we don't store user's requests in chat history
@@ -64,23 +65,23 @@ abstract class RequestManager(var token: String) {
         packageName: String,
     ): LLMResponse {
         // save the full response in the chat history
-        val response = testsAssembler.rawText
+        val response = testsAssembler.getContent()
 
         log.info("The full response: \n $response")
         chatHistory.add(ChatMessage("assistant", response))
 
         // check if response is empty
         if (response.isEmpty() || response.isBlank()) {
-            return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, response, null)
+            return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
         }
 
-        val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
+        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite(packageName)
 
         return if (testSuiteGeneratedByLLM == null) {
-            LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, response, null)
+            LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
         }
         else {
-            LLMResponse(ResponseErrorCode.OK, response, testSuiteGeneratedByLLM.reformat())
+            LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM.reformat())
         }
     }
 
@@ -94,12 +95,12 @@ abstract class RequestManager(var token: String) {
         testsAssembler: TestsAssembler,
         packageName: String,
     ): LLMResponse {
-        val response = testsAssembler.rawText
+        val response = testsAssembler.getContent()
 
         log.info("The full response: \n $response")
 
-        val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
+        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite(packageName)
 
-        return LLMResponse(ResponseErrorCode.OK, response, testSuiteGeneratedByLLM)
+        return LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM)
     }
 }

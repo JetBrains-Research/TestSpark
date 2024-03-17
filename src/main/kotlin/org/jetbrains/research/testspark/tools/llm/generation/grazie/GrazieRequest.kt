@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
-import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
+import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 
 interface GrazieRequest {
 
@@ -8,6 +8,6 @@ interface GrazieRequest {
         token: String,
         messages: List<Pair<String, String>>,
         profile: String,
-        testsAssembler: TestsAssembler,
-    ): Pair<String, TestsAssembler>
+        testsAssembler: JUnitTestsAssembler,
+    ): Pair<String, JUnitTestsAssembler>
 }

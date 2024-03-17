@@ -6,7 +6,8 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
-import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
+import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
+import org.jetbrains.research.testspark.core.test.TestsAssembler
 
 class GrazieRequestManager : RequestManager(token = SettingsArguments.getToken()) {
     private val llmErrorManager = LLMErrorManager()
@@ -16,14 +17,14 @@ class GrazieRequestManager : RequestManager(token = SettingsArguments.getToken()
         indicator: ProgressIndicator,
         project: Project,
     ): Pair<SendResult, TestsAssembler> {
-        var testsAssembler = TestsAssembler(project, indicator)
+        var testsAssembler = JUnitTestsAssembler(project, indicator)
         var sendResult = SendResult.OK
 
         try {
             val className = "org.jetbrains.research.grazie.Request"
             val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
 
-            val requestResult = request.request(token, getMessages(), SettingsArguments.getModel(), TestsAssembler(project, indicator))
+            val requestResult = request.request(token, getMessages(), SettingsArguments.getModel(), JUnitTestsAssembler(project, indicator))
             val requestError = requestResult.first
 
             if (requestError.isNotEmpty()) {
