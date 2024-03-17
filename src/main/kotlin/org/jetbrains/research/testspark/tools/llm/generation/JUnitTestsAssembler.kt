@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
+import org.jetbrains.research.testspark.core.test.BasicTestsAssembler
 import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.services.SettingsApplicationService
@@ -24,18 +25,19 @@ import org.jetbrains.research.testspark.tools.processStopped
  * @property project The project to which the tests belong.
  * @property indicator The progress indicator to display the progress of test generation.
  * @property log The logger for logging debug information.
- * @property rawText The raw text containing the generated tests.
+// * @property rawText The raw text containing the generated tests.
  * @property lastTestCount The count of the last generated tests.
  */
 class TestsAssembler(
     val project: Project,
     val indicator: ProgressIndicator,
-) {
+) : BasicTestsAssembler() {
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!
 
     private val log: Logger = Logger.getInstance(this.javaClass)
-    var rawText = ""
+
+    // var rawText = ""
     private var lastTestCount = 0
 
     /**
@@ -47,7 +49,8 @@ class TestsAssembler(
         if (text.isEmpty()) return
 
         // Collect the response and update the progress bar
-        rawText = rawText.plus(text)
+        // rawText = rawText.plus(text)
+        super.consume(text)
         updateProgressBar()
     }
 
@@ -78,15 +81,17 @@ class TestsAssembler(
             if (choices.finishedReason == "stop") break
 
             // Collect the response and update the progress bar
-            rawText = rawText.plus(choices.delta.content)
+            // rawText = rawText.plus(choices.delta.content)
+            super.consume(choices.delta.content)
             updateProgressBar()
         }
 
-        log.debug(rawText)
+        // log.debug(rawText)
+        log.debug(super.getContent())
     }
 
     private fun updateProgressBar() {
-        val generatedTestsCount = rawText.split("@Test").size - 1
+        val generatedTestsCount = super.getContent().split("@Test").size - 1
 
         if (lastTestCount != generatedTestsCount) {
             indicator.text = TestSparkBundle.message("generatingTestNumber") + generatedTestsCount
@@ -94,17 +99,11 @@ class TestsAssembler(
         }
     }
 
-    /**
-     * Extracts test cases from raw text and generates a TestSuite using the given package name.
-     *
-     * @param packageName The package name to be set in the generated TestSuite.
-     * @return A TestSuiteGeneratedByLLM object containing the extracted test cases and package name.
-     */
-    fun returnTestSuite(packageName: String): TestSuiteGeneratedByLLM? {
+    override fun assembleTestSuite(packageName: String): TestSuiteGeneratedByLLM? {
         val junitVersion = settingsState.junitVersion
 
-        val testSuiteParser = createTestSuiteParser(packageName, junitVersion)
-        val testSuite: TestSuiteGeneratedByLLM? = testSuiteParser.parseTestSuite(rawText)
+        val parser = createTestSuiteParser(packageName, junitVersion)
+        val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(super.getContent())
 
         // save RunWith
         if (testSuite?.runWith?.isNotBlank() == true) {
