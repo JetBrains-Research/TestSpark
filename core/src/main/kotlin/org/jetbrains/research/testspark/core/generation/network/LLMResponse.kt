@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.core.generation.network
 
-import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
 
 

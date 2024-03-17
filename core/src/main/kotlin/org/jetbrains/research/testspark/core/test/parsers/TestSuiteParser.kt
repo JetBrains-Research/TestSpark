@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.core.test.parsers
 
-import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
 interface TestSuiteParser {
     /**

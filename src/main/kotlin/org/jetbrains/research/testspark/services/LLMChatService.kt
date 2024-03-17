@@ -8,7 +8,7 @@ import org.jetbrains.research.testspark.core.generation.network.LLMResponse
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
-import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
 @Service(Service.Level.PROJECT)
 class LLMChatService {

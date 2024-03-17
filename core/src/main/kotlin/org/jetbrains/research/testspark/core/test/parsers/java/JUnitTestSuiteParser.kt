@@ -3,10 +3,10 @@ package org.jetbrains.research.testspark.core.test.parsers.java
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.generation.importPattern
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
-import org.jetbrains.research.testspark.core.test.TestCaseGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.TestLine
-import org.jetbrains.research.testspark.core.test.TestLineType
-import org.jetbrains.research.testspark.core.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.data.TestLine
+import org.jetbrains.research.testspark.core.test.data.TestLineType
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
 
 class JUnitTestSuiteParser(
