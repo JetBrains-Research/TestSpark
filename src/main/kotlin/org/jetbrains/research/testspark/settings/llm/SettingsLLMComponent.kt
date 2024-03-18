@@ -11,6 +11,7 @@ import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
+import java.awt.Dimension
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -29,12 +30,15 @@ import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
 import java.awt.Font
 import javax.swing.BorderFactory
+import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
+import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
+import org.jdesktop.swingx.JXButton
 
 class SettingsLLMComponent {
     private val settingsState: SettingsApplicationState
@@ -192,6 +196,13 @@ class SettingsLLMComponent {
         // initiate the panel
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+
+        val previousButton = createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
+        var requestNumber: String = "%d / %d"
+        var requestLabel: JLabel = JLabel(requestNumber)
+        val nextButton = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
+        panel.add(getButtonsPanel(previousButton, requestLabel, nextButton))
+
         // Add editor text field (the prompt editor) to the panel
         val editorTextField = EditorTextField()
         editorTextField.setOneLineMode(false)
@@ -205,7 +216,7 @@ class SettingsLLMComponent {
 
     private fun addPromptButtons(panel: JPanel) {
         val keywords = service<PromptParserService>().getKeywords()
-        val editorTextField = panel.getComponent(0) as EditorTextField
+        val editorTextField = panel.getComponent(1) as EditorTextField
         keywords.forEach {
             val btnPanel = JPanel(FlowLayout(FlowLayout.LEFT))
 
@@ -383,8 +394,17 @@ class SettingsLLMComponent {
             .panel
     }
 
+    private fun getButtonsPanel(previousButton: JButton, requestLabel: JLabel, nextButton: JButton): JPanel {
+        val buttonsPanel = JPanel()
+        buttonsPanel.layout = BoxLayout(buttonsPanel, BoxLayout.X_AXIS)
+        buttonsPanel.add(previousButton)
+        buttonsPanel.add(requestLabel)
+        buttonsPanel.add(nextButton)
+        return buttonsPanel
+    }
+
     private fun getEditorTextField(editorType: PromptEditorType): EditorTextField {
-        return (promptEditorTabbedPane.getComponentAt(editorType.index) as JPanel).getComponent(0) as EditorTextField
+        return (promptEditorTabbedPane.getComponentAt(editorType.index) as JPanel).getComponent(1) as EditorTextField
     }
 
     fun updateTokenAndModel() {

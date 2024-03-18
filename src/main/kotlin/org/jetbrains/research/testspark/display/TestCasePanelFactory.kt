@@ -64,11 +64,11 @@ class TestCasePanelFactory(
         get() = SettingsApplicationService.getInstance().state!!
 
     private val panel = JPanel()
-    private val previousButtons =
+    private val previousButton =
         createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
     private var requestNumber: String = "%d / %d"
     private var requestLabel: JLabel = JLabel(requestNumber)
-    private val nextButtons = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
+    private val nextButton = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
     private val errorLabel = JLabel(TestSparkIcons.showError)
     private val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
     private val likeButton = createButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
@@ -136,9 +136,9 @@ class TestCasePanelFactory(
         updateErrorLabel()
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
         panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
-        panel.add(previousButtons)
+        panel.add(previousButton)
         panel.add(requestLabel)
-        panel.add(nextButtons)
+        panel.add(nextButton)
         panel.add(errorLabel)
         panel.add(Box.createHorizontalGlue())
         panel.add(copyButton)
@@ -146,7 +146,7 @@ class TestCasePanelFactory(
         panel.add(dislikeButton)
         panel.add(Box.createRigidArea(Dimension(12, 0)))
 
-        previousButtons.addActionListener {
+        previousButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
                 if (currentRequestNumber > 1) currentRequestNumber--
                 switchToAnotherCode()
@@ -154,7 +154,7 @@ class TestCasePanelFactory(
             }
         }
 
-        nextButtons.addActionListener {
+        nextButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
                 if (currentRequestNumber < allRequestsNumber) currentRequestNumber++
                 switchToAnotherCode()
@@ -432,8 +432,8 @@ class TestCasePanelFactory(
     }
 
     private fun enableComponents(isEnabled: Boolean) {
-        nextButtons.isEnabled = isEnabled
-        previousButtons.isEnabled = isEnabled
+        nextButton.isEnabled = isEnabled
+        previousButton.isEnabled = isEnabled
         runTestButton.isEnabled = isEnabled
         resetToLastRunButton.isEnabled = isEnabled
         resetButton.isEnabled = isEnabled
