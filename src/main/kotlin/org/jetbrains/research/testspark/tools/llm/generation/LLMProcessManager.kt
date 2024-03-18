@@ -4,8 +4,8 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.generation.network.LLMResponse
-import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
+import org.jetbrains.research.testspark.core.generation.llm.network.LLMResponse
+import org.jetbrains.research.testspark.core.generation.llm.network.ResponseErrorCode
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report

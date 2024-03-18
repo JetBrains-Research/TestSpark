@@ -1,8 +1,8 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.diagnostic.Logger
-import org.jetbrains.research.testspark.core.generation.network.LLMResponse
-import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
+import org.jetbrains.research.testspark.core.generation.llm.network.LLMResponse
+import org.jetbrains.research.testspark.core.generation.llm.network.ResponseErrorCode
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage

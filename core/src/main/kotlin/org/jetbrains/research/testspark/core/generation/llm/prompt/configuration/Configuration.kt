@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.core.generation.prompt.configuration
+package org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 
 /**
  * Represents the context for generating prompts for generating unit tests.

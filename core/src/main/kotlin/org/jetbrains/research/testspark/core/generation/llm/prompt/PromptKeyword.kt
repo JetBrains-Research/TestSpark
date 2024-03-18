@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.core.generation.prompt
+package org.jetbrains.research.testspark.core.generation.llm.prompt
 
 enum class PromptKeyword(val text: String, val description: String, val mandatory: Boolean) {
     NAME("NAME", "The name of the code under test (Class name, method name, line number)", true),

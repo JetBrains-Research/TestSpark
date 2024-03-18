@@ -1,6 +1,6 @@
-package org.jetbrains.research.testspark.core.generation.prompt
+package org.jetbrains.research.testspark.core.generation.llm.prompt
 
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.ClassRepresentation
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
 
 internal class PromptBuilder(private var prompt: String) {
     private fun isPromptValid(

@@ -1,9 +1,9 @@
-package org.jetbrains.research.testspark.core.generation.prompt
+package org.jetbrains.research.testspark.core.generation.llm.prompt
 
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.ClassRepresentation
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.MethodRepresentation
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptGenerationContext
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptTemplates
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.MethodRepresentation
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptGenerationContext
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptTemplates
 
 class PromptGenerator(
     private val context: PromptGenerationContext,

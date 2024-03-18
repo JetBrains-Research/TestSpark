@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.services
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.generation.network.LLMResponse
+import org.jetbrains.research.testspark.core.generation.llm.network.LLMResponse
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
