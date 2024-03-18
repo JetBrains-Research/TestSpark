@@ -17,6 +17,7 @@ import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import com.intellij.openapi.util.io.FileUtilRt
+import org.jetbrains.research.testspark.display.IJProgressIndicator
 
 
 /**
@@ -61,21 +62,23 @@ class Pipeline(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
-                    if (processStopped(project, indicator)) return
+                    val ijIndicator = IJProgressIndicator(indicator)
 
-                    if (projectBuilder.runBuild(indicator)) {
-                        if (processStopped(project, indicator)) return
+                    if (processStopped(project, ijIndicator)) return
+
+                    if (projectBuilder.runBuild(ijIndicator)) {
+                        if (processStopped(project, ijIndicator)) return
 
                         processManager.runTestGenerator(
-                            indicator,
+                            ijIndicator,
                             codeType,
                             packageName,
                         )
                     }
 
-                    if (processStopped(project, indicator)) return
+                    if (processStopped(project, ijIndicator)) return
 
-                    indicator.stop()
+                    ijIndicator.stop()
                 }
             })
     }

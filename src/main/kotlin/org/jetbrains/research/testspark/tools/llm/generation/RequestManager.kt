@@ -1,9 +1,9 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.progress.ProgressIndicator
 import org.jetbrains.research.testspark.core.generation.network.LLMResponse
 import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
+import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
 
@@ -30,7 +30,7 @@ abstract class RequestManager(var token: String) {
      */
     open fun request(
         prompt: String,
-        indicator: ProgressIndicator,
+        indicator: MyProgressIndicator,
         packageName: String,
         isUserFeedback: Boolean = false,
     ): LLMResponse {
@@ -85,7 +85,7 @@ abstract class RequestManager(var token: String) {
 
     abstract fun send(
         prompt: String,
-        indicator: ProgressIndicator,
+        indicator: MyProgressIndicator,
     ): Pair<SendResult, TestsAssembler>
 
 

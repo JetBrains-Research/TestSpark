@@ -24,6 +24,7 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
@@ -390,13 +391,15 @@ class TestCasePanelFactory(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
-                    if (processStopped(project, indicator)) return
+                    val ijIndicator = IJProgressIndicator(indicator)
+
+                    if (processStopped(project, ijIndicator)) return
 
                     val modifiedTest = project.service<LLMChatService>()
                         .testModificationRequest(
                             initialCodes[currentRequestNumber - 1],
                             requestComboBox.editor.item.toString(),
-                            indicator,
+                            ijIndicator,
                         )
 
                     if (modifiedTest != null) {
@@ -418,9 +421,9 @@ class TestCasePanelFactory(
                         enableComponents(true)
                     }
 
-                    if (processStopped(project, indicator)) return
+                    if (processStopped(project, ijIndicator)) return
 
-                    indicator.stop()
+                    ijIndicator.stop()
                 }
             })
     }
@@ -483,12 +486,12 @@ class TestCasePanelFactory(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
-                    runTest(indicator)
+                    runTest(IJProgressIndicator(indicator))
                 }
             })
     }
 
-    fun addTask(tasks: Queue<(ProgressIndicator) -> Unit>) {
+    fun addTask(tasks: Queue<(MyProgressIndicator) -> Unit>) {
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
 
@@ -500,8 +503,8 @@ class TestCasePanelFactory(
         }
     }
 
-    private fun runTest(indicator: ProgressIndicator) {
-        indicator.text = "Executing ${testCase.testName}"
+    private fun runTest(indicator: MyProgressIndicator) {
+        indicator.setText("Executing ${testCase.testName}")
 
         val newTestCase = project.service<TestStorageProcessingService>()
             .processNewTestCase(

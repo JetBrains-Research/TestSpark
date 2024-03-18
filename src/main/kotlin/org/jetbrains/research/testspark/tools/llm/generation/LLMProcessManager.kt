@@ -2,11 +2,11 @@ package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.generation.network.LLMResponse
 import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
+import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
@@ -60,7 +60,7 @@ class LLMProcessManager(
      * @param packageName The package name of the code being tested.
      */
     override fun runTestGenerator(
-        indicator: ProgressIndicator,
+        indicator: MyProgressIndicator,
         codeType: FragmentToTestData,
         packageName: String,
     ) {
@@ -79,7 +79,7 @@ class LLMProcessManager(
             llmErrorManager.errorProcess(TestSparkBundle.message("emptyBuildPath"), project)
             return
         }
-        indicator.text = TestSparkBundle.message("searchMessage")
+        indicator.setText(TestSparkBundle.message("searchMessage"))
 
         log.info("Generated tests suite received")
 
@@ -209,7 +209,8 @@ class LLMProcessManager(
                 }
 
             // Compile the test file
-            indicator.text = TestSparkBundle.message("compilationTestsChecking")
+            indicator.setText(TestSparkBundle.message("compilationTestsChecking"))
+
             val separateCompilationResult = project.service<TestStorageProcessingService>().compileTestCases(generatedTestCasesPaths, buildPath, testCases)
             val commonCompilationResult = project.service<TestStorageProcessingService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 

@@ -1,20 +1,20 @@
 package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
+import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
-import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.IJRequestManager
+import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 
 class GrazieRequestManager(project: Project) : IJRequestManager(project) {
     private val llmErrorManager = LLMErrorManager()
 
     override fun send(
         prompt: String,
-        indicator: ProgressIndicator,
+        indicator: MyProgressIndicator,
     ): Pair<SendResult, TestsAssembler> {
         var testsAssembler: TestsAssembler = JUnitTestsAssembler(project, indicator)
         var sendResult = SendResult.OK

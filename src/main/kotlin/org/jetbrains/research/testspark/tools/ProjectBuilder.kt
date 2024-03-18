@@ -6,12 +6,12 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.task.ProjectTaskManager
 import com.intellij.util.concurrency.Semaphore
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
@@ -34,14 +34,15 @@ class ProjectBuilder(private val project: Project) {
      * @param indicator The progress indicator to show the build progress.
      * @return True if the build is successful, false otherwise.
      */
-    fun runBuild(indicator: ProgressIndicator): Boolean {
+    fun runBuild(indicator: MyProgressIndicator): Boolean {
         val handle = CountDownLatch(1)
         log.info("Starting build!")
         var isSuccessful = true
 
         try {
-            indicator.isIndeterminate = true
-            indicator.text = TestSparkBundle.message("buildMessage")
+            indicator.setIndeterminate(true)
+            indicator.setText(TestSparkBundle.message("buildMessage"))
+
             if (settingsState.buildCommand.isEmpty()) {
                 // User did not put own command line
                 val promise = ProjectTaskManager.getInstance(project).buildAllModules()
@@ -88,7 +89,7 @@ class ProjectBuilder(private val project: Project) {
                     isSuccessful = false
                 }
 
-                if (indicator.isCanceled) {
+                if (indicator.isCanceled()) {
                     return false
                 }
 

@@ -1,16 +1,15 @@
 package org.jetbrains.research.testspark.tools.llm.generation.openai
 
 import com.google.gson.GsonBuilder
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.IJRequestManager
-import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import java.net.HttpURLConnection
 
@@ -28,7 +27,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
 
     override fun send(
         prompt: String,
-        indicator: ProgressIndicator,
+        indicator: MyProgressIndicator,
     ): Pair<SendResult, TestsAssembler> {
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(SettingsArguments.getModel(), chatHistory)

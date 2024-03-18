@@ -1,10 +1,10 @@
 package org.jetbrains.research.testspark.services
 
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.generation.network.LLMResponse
+import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
@@ -28,7 +28,7 @@ class LLMChatService(private val project: Project) {
      * After receiving the response, it tries to parse the tests
      *
      * @param messageToPrompt: A string that represents the prompt to LLM
-     * @param indicator: A ProgressIndicator object that represents the indication of the test generation progress.
+     * @param indicator: A progress indicator object that represents the indication of the test generation progress.
      * @param packageName: A string that represents the package name where the tests will be generated.
      * @param project: A Project object that represents the current project in which the tests are to be generated.
      *
@@ -39,7 +39,7 @@ class LLMChatService(private val project: Project) {
      */
     fun testGenerationRequest(
         messageToPrompt: String,
-        indicator: ProgressIndicator,
+        indicator: MyProgressIndicator,
         packageName: String,
     ): LLMResponse {
         return requestManager.request(messageToPrompt, indicator, packageName)
@@ -51,7 +51,7 @@ class LLMChatService(private val project: Project) {
      *
      * @param testcase: The test that is requested to be modified
      * @param task: A string representing the requested task for test modification
-     * @param indicator: A ProgressIndicator object that represents the indication of the test generation progress.
+     * @param indicator: A progress indicator object that represents the indication of the test generation progress.
      * @param project: A Project object that represents the current project in which the tests are to be generated.
      *
      * @return A Pair object containing a String and a TestSuiteGeneratedByLLM object.
@@ -62,7 +62,7 @@ class LLMChatService(private val project: Project) {
     fun testModificationRequest(
         testcase: String,
         task: String,
-        indicator: ProgressIndicator,
+        indicator: MyProgressIndicator,
     ): TestSuiteGeneratedByLLM? {
         // Update Token information
         if (!updateToken()) {

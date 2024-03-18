@@ -2,10 +2,10 @@ package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
+import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.services.ErrorService
@@ -131,9 +131,9 @@ fun getBuildPath(project: Project): String {
  *
  * @return true if the process has been stopped, false otherwise
  */
-fun processStopped(project: Project, indicator: ProgressIndicator): Boolean {
+fun processStopped(project: Project, indicator: MyProgressIndicator): Boolean {
     if (project.service<ErrorService>().isErrorOccurred()) return true
-    if (indicator.isCanceled) {
+    if (indicator.isCanceled()) {
         project.service<ErrorService>().errorOccurred()
         indicator.stop()
         return true
