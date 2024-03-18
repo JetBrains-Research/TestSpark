@@ -129,15 +129,6 @@ class SettingsLLMComponent {
             }
         }
 
-    var defaultLLMRequests: String
-        get() = Json.encodeToString(
-            ListSerializer(String.serializer()),
-            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }.map { (it.getComponent(0) as JTextField).text },
-        )
-        set(value) {
-            fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), value))
-        }
-
     var llmSetupCheckBoxSelected: Boolean
         get() = llmSetupCheckBox.isSelected
         set(newStatus) {
