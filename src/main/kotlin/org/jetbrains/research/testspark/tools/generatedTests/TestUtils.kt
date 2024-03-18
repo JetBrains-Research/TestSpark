@@ -11,20 +11,17 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
+import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.TestCase
-import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.TestGenerationData
+import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.getBuildPath
 import java.io.File
-import java.util.ArrayList
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
-
-
 
 
 class TestUtils(val project:Project){
@@ -60,7 +57,7 @@ class TestUtils(val project:Project){
         // Save the generated test suite to the file
         val testFile = File("$generatedTestPath$testFileName")
         testFile.createNewFile()
-        org.jetbrains.research.testspark.tools.log.info("Save test in file " + testFile.absolutePath)
+        log.info("Save test in file " + testFile.absolutePath)
         testFile.writeText(code)
 
         return "$generatedTestPath$testFileName"
@@ -112,7 +109,8 @@ class TestUtils(val project:Project){
         testCaseName: String,
         projectBuildPath: String,
         generatedTestPackage: String,
-        resultPath: String
+        resultPath: String,
+        projectContext: ProjectContext
     ): String {
         // find the proper javac
         val javaRunner = File(javaHomeDirectory.path).walk()
@@ -124,7 +122,7 @@ class TestUtils(val project:Project){
         // JaCoCo libs
         val jacocoAgentDir = getLibrary("jacocoagent.jar")
         val jacocoCLIDir = getLibrary("jacococli.jar")
-        val sourceRoots = ModuleRootManager.getInstance(project.service<ProjectContextService>().cutModule!!).getSourceRoots(false)
+        val sourceRoots = ModuleRootManager.getInstance(projectContext.cutModule!!).getSourceRoots(false)
 
         // unique name
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
@@ -136,7 +134,7 @@ class TestUtils(val project:Project){
         val testExecutionError = CommandLineRunner.run(
             arrayListOf(
                 javaRunner.absolutePath,
-                "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${project.service<ProjectContextService>().classFQN}",
+                "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${projectContext.classFQN}",
                 "-cp",
                 "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
@@ -157,7 +155,7 @@ class TestUtils(val project:Project){
 
         // for classpath containing cut
         command.add("--classfiles")
-        command.add(CompilerModuleExtension.getInstance(project.service<ProjectContextService>().cutModule!!)?.compilerOutputPath!!.path)
+        command.add(CompilerModuleExtension.getInstance(projectContext.cutModule!!)?.compilerOutputPath!!.path)
 
         // for each source folder
         sourceRoots.forEach { root ->
@@ -190,6 +188,7 @@ class TestUtils(val project:Project){
                            testCode: String,
                            packageLine: String,
                            resultPath: String,
+                           projectContext: ProjectContext
                            ): TestCase {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
@@ -211,7 +210,7 @@ class TestUtils(val project:Project){
         if (!compilationResult.first) {
             project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, compilationResult.second)
         } else {
-            val dataFileName = "${project.service<ProjectContextService>().resultPath!!}/jacoco-${fileName.split(".")[0]}"
+            val dataFileName = "${resultPath}/jacoco-${fileName.split(".")[0]}"
 
             val testExecutionError = createXmlFromJacoco(
                 fileName.split(".")[0],
@@ -219,7 +218,8 @@ class TestUtils(val project:Project){
                 testName,
                 buildPath,
                 project.service<TestGenerationData>().packageLine,
-                resultPath
+                resultPath,
+                projectContext
             )
 
             if (!File("$dataFileName.xml").exists()) {
@@ -229,22 +229,23 @@ class TestUtils(val project:Project){
                     testId,
                     testName,
                     testCode,
-                    getExceptionData(testExecutionError).second,
+                    getExceptionData(testExecutionError, projectContext).second,
                     "$dataFileName.xml",
+                    projectContext
                 )
 
-                if (getExceptionData(testExecutionError).first) {
+                if (getExceptionData(testExecutionError, projectContext).first) {
                     project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, testExecutionError)
                 } else {
                     project.service<TestsExecutionResultService>().addPassedTest(testId, testCode)
                 }
 
-                DataFilesUtil.cleanFolder(project.service<ProjectContextService>().resultPath!!)
+                DataFilesUtil.cleanFolder(resultPath)
 
                 return testCase
             }
         }
-        DataFilesUtil.cleanFolder(project.service<ProjectContextService>().resultPath!!)
+        DataFilesUtil.cleanFolder(resultPath)
 
         return TestCase(testId, testName, testCode, setOf(), setOf(), setOf())
     }
@@ -255,7 +256,7 @@ class TestUtils(val project:Project){
      * @param testExecutionError error output (including the thrown stack trace) during the test execution.
      * @return a set of lines that are covered in CUT during the exception happening.
      */
-    private fun getExceptionData(testExecutionError: String): Pair<Boolean, Set<Int>> {
+    private fun getExceptionData(testExecutionError: String, projectContext: ProjectContext): Pair<Boolean, Set<Int>> {
         if (testExecutionError.isBlank()) {
             return Pair(false, emptySet())
         }
@@ -267,7 +268,7 @@ class TestUtils(val project:Project){
         frames.removeFirst()
 
         frames.forEach { frame ->
-            if (frame.contains(project.service<ProjectContextService>().classFQN!!)) {
+            if (frame.contains(projectContext.classFQN!!)) {
                 val coveredLineNumber = frame.split(":")[1].replace(")", "").toIntOrNull()
                 if (coveredLineNumber != null) {
                     result.add(coveredLineNumber)
@@ -298,6 +299,7 @@ class TestUtils(val project:Project){
         testCaseCode: String,
         linesCoveredDuringTheException: Set<Int>,
         xmlFileName: String,
+        projectContext: ProjectContext
     ): TestCase {
         val setOfLines = mutableSetOf<Int>()
         var isCorrectSourceFile: Boolean
@@ -312,7 +314,7 @@ class TestUtils(val project:Project){
                         children("counter") {}
                     }
                     children("sourcefile") {
-                        isCorrectSourceFile = this.attributes.getValue("name") == project.service<ProjectContextService>().fileUrl!!.split(File.separatorChar).last()
+                        isCorrectSourceFile = this.attributes.getValue("name") == projectContext.fileUrl!!.split(File.separatorChar).last()
                         children("line") {
                             if (isCorrectSourceFile && this.attributes.getValue("mi") == "0") {
                                 setOfLines.add(this.attributes.getValue("nr").toInt())
@@ -383,7 +385,8 @@ class TestUtils(val project:Project){
     fun compileTestCases(generatedTestCasesPaths: List<String>,
                          buildPath: String,
                          testCases: MutableList<TestCaseGeneratedByLLM>,
-                         generatedTestData: TestGenerationData): Boolean {
+                         generatedTestData: TestGenerationData
+    ): Boolean {
         var result = false
         for (index in generatedTestCasesPaths.indices) {
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first

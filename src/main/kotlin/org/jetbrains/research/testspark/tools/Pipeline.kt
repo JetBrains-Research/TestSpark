@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.tools
 
 //import org.jetbrains.research.testspark.services.ProjectContextService
+import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -13,9 +14,11 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.getSurroundingClass
-import org.jetbrains.research.testspark.services.TestGenerationData
+import org.jetbrains.research.testspark.services.ReportLockingService
+import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.tools.generatedTests.getResultPath
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
@@ -73,6 +76,8 @@ class Pipeline(
 //        project.service<ClearService>().clear(project)
         val projectBuilder = ProjectBuilder(project)
 
+        var result: UIContext? = null
+
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
@@ -83,7 +88,7 @@ class Pipeline(
                     if (projectBuilder.runBuild(ijIndicator)) {
                         if (processStopped(project, ijIndicator)) return
 
-                        processManager.runTestGenerator(
+                        result = processManager.runTestGenerator(
                             ijIndicator,
                             codeType,
                             packageName,
@@ -95,6 +100,11 @@ class Pipeline(
                     if (processStopped(project, ijIndicator)) return
 
                     ijIndicator.stop()
+                }
+
+                override fun onFinished() {
+                    super.onFinished()
+                    project.service<ReportLockingService>().receiveReport(result)
                 }
             })
     }

@@ -13,6 +13,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
+import org.jetbrains.research.testspark.data.TestGenerationData
 import java.io.File
 
 @Service(Service.Level.PROJECT)

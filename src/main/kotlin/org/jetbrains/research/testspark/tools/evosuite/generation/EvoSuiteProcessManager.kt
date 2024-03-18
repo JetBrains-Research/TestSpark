@@ -18,9 +18,10 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.TestGenerationData
+import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
@@ -74,9 +75,9 @@ class EvoSuiteProcessManager(
         packageName: String,
         projectContext: ProjectContext,
         generatedTestData: TestGenerationData
-    ) {
+    ): UIContext? {
         try {
-            if (processStopped(project, indicator)) return
+            if (processStopped(project, indicator)) return null
 
             val regex = Regex("version \"(.*?)\"")
             val version = regex.find(CommandLineRunner.run(arrayListOf(settingsState.javaPath, "-version")))
@@ -88,7 +89,7 @@ class EvoSuiteProcessManager(
 
             if (version == null || version > 11) {
                 evoSuiteErrorManager.errorProcess(TestSparkBundle.message("incorrectJavaVersion"), project)
-                return
+                return null
             }
 
             val projectClassPath = projectContext.projectClassPath!!
@@ -186,10 +187,10 @@ class EvoSuiteProcessManager(
 
             handler.startNotify()
 
-            if (processStopped(project, indicator)) return
+            if (processStopped(project, indicator)) return null
 
             // evosuite errors check
-            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return
+            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return null
 
             val gson = Gson()
             val reader = JsonReader(FileReader(resultName))
@@ -208,5 +209,7 @@ class EvoSuiteProcessManager(
             evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()
         }
+
+        return UIContext(projectContext,generatedTestData)
     }
 }

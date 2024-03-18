@@ -14,9 +14,10 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.TestGenerationData
+import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.tools.generatedTests.TestUtils
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
@@ -65,10 +66,10 @@ class LLMProcessManager(
         packageName: String,
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData
-    ) {
+    ): UIContext? {
         log.info("LLM test generation begins")
 
-        if (processStopped(project, indicator)) return
+        if (processStopped(project, indicator)) return null
 
         // update build path
         var buildPath = projectContext.projectClassPath!!
@@ -79,7 +80,7 @@ class LLMProcessManager(
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
             llmErrorManager.errorProcess(TestSparkBundle.message("emptyBuildPath"), project)
-            return
+            return null
         }
         indicator.setText(TestSparkBundle.message("searchMessage"))
 
@@ -104,7 +105,7 @@ class LLMProcessManager(
 
             // Process stopped checking
             if (processStopped(project, indicator)) {
-                return
+                return null
             }
 
             // Ending loop checking
@@ -131,7 +132,7 @@ class LLMProcessManager(
                         continue
                     } else {
                         llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPromptRequest"), project)
-                        return
+                        return null
                     }
                 }
                 ResponseErrorCode.EMPTY_LLM_RESPONSE -> {
@@ -157,7 +158,7 @@ class LLMProcessManager(
 
             // Process stopped checking
             if (processStopped(project, indicator)) {
-                return
+                return null
             }
 
             // Save the generated TestSuite into a temp file
@@ -230,10 +231,10 @@ class LLMProcessManager(
             }
         }
 
-        if (processStopped(project, indicator)) return
+        if (processStopped(project, indicator)) return null
 
         // Error during the collecting
-        if (project.service<ErrorService>().isErrorOccurred()) return
+        if (project.service<ErrorService>().isErrorOccurred()) return null
 
         log.info("Result is ready")
 
@@ -249,6 +250,8 @@ class LLMProcessManager(
             projectContext.fileUrl!!,
             generatedTestsData
             )
+
+        return UIContext(projectContext,generatedTestsData,requestManager)
     }
 
     private fun isLastIteration(requestsCount: Int) = requestsCount > maxRequests

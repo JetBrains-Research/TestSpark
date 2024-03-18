@@ -27,9 +27,9 @@ import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
-import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
@@ -38,6 +38,7 @@ import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.generatedTests.TestUtils
 import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.tools.llm.test.TestSuitePresenter
+import org.jetbrains.research.testspark.tools.llm.testModificationRequest
 import org.jetbrains.research.testspark.tools.processStopped
 import java.awt.Dimension
 import java.awt.Toolkit
@@ -61,6 +62,7 @@ class TestCasePanelFactory(
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
+    val uiContext: UIContext?
 ) {
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!
@@ -401,11 +403,12 @@ class TestCasePanelFactory(
 
                     if (processStopped(project, ijIndicator)) return
 
-                    val modifiedTest = project.service<LLMChatService>()
-                        .testModificationRequest(
+                    val modifiedTest = testModificationRequest(
                             initialCodes[currentRequestNumber - 1],
                             requestComboBox.editor.item.toString(),
                             ijIndicator,
+                            uiContext!!.requestManager!!,
+                            project
                         )
 
                     if (modifiedTest != null) {
@@ -445,7 +448,7 @@ class TestCasePanelFactory(
     }
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
-        val testSuitePresenter = TestSuitePresenter(project, generatedTestsData)
+        val testSuitePresenter = TestSuitePresenter(project, uiContext!!.testGenerationOutput)
 
         WriteCommandAction.runWriteCommandAction(project) {
             project.service<ErrorService>().clear()
@@ -519,6 +522,9 @@ class TestCasePanelFactory(
                 testCase.id,
                 testCase.testName,
                 testCase.testCode,
+                uiContext!!.testGenerationOutput.packageLine,
+                uiContext.testGenerationOutput.resultPath,
+                uiContext.projectContext
             )
 
         testCase.coveredLines = newTestCase.coveredLines

@@ -1,16 +1,9 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import com.intellij.util.concurrency.AppExecutorUtil
-import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.RunnerService
-import org.jetbrains.research.testspark.services.TestGenerationData
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.template.Tool
@@ -35,7 +28,6 @@ class Manager {
             if (project.service<RunnerService>().isGeneratorRunning()) return
 
             EvoSuite().generateTestsForClass(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            display(project, 1)
         }
 
         /**
@@ -51,7 +43,6 @@ class Manager {
             if (project.service<RunnerService>().isGeneratorRunning()) return
 
             Llm().generateTestsForClass(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            display(project, 1)
         }
 
         /**
@@ -67,7 +58,6 @@ class Manager {
             if (project.service<RunnerService>().isGeneratorRunning()) return
 
             EvoSuite().generateTestsForMethod(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            display(project, 1)
         }
 
         /**
@@ -82,7 +72,6 @@ class Manager {
             if (project.service<RunnerService>().isGeneratorRunning()) return
 
             Llm().generateTestsForMethod(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            display(project, 1)
         }
 
         /**
@@ -98,7 +87,6 @@ class Manager {
             if (project.service<RunnerService>().isGeneratorRunning()) return
 
             EvoSuite().generateTestsForLine(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            display(project, 1)
         }
 
         /**
@@ -114,7 +102,6 @@ class Manager {
             if (project.service<RunnerService>().isGeneratorRunning()) return
 
             Llm().generateTestsForLine(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            display(project, 1)
         }
 
         /**
@@ -124,8 +111,8 @@ class Manager {
          * @param project The project to be displayed.
          * @param numberOfUsedTool The number of used tools in the project.
          */
-        private fun display(project: Project, numberOfUsedTool: Int) =
-            AppExecutorUtil.getAppScheduledExecutorService().execute(Display(project, numberOfUsedTool))
+//        private fun display(project: Project, result: UIContext?, numberOfUsedTool: Int) =
+//            AppExecutorUtil.getAppScheduledExecutorService().execute(Display(project, result, numberOfUsedTool))
     }
 }
 
@@ -136,49 +123,49 @@ class Manager {
  * @property project The project in which the display is shown.
  * @property numberOfUsedTool The number of tools used for the test generation.
  */
-private class Display(private val project: Project, private val numberOfUsedTool: Int) : Runnable {
-    private val log = Logger.getInstance(this::class.java)
-
-    override fun run() {
-        // waiting time after each iteration
-        val sleepDurationMillis: Long = 1000
-
-        // waiting for the generation result
-        while (true) {
-            // checks if all generator are finished their work
-            if (project.service<TestGenerationData>().testGenerationResultList.size != numberOfUsedTool) {
-                // there is some error during the process running
-                if (project.service<ErrorService>().isErrorOccurred()) break
-                log.info("Found ${project.service<TestGenerationData>().testGenerationResultList.size} number of results")
-                log.info("Waiting for other generation results")
-                Thread.sleep(sleepDurationMillis)
-                continue
-            }
-
-            log.info("Found all $numberOfUsedTool generation results")
-
-            ApplicationManager.getApplication().invokeLater {
-                project.service<ReportLockingService>().receiveReport(getMergeResult(numberOfUsedTool))
-            }
-
-            break
-        }
-
-        project.service<RunnerService>().clear()
-    }
-
-    /**
-     * Retrieves the merged result of a test generation process.
-     *
-     * @param numberOfUsedTool The number of tools used for the test generation.
-     * @return The merged report containing the results of the test generation process.
-     */
-    private fun getMergeResult(numberOfUsedTool: Int): Report {
-        log.info("Merging $numberOfUsedTool generation results")
-
-        if (numberOfUsedTool == 1) {
-            return project.service<TestGenerationData>().testGenerationResultList[0]!!
-        }
-        TODO("implement merge")
-    }
-}
+//private class Display(private val project: Project, result: UIContext?, private val numberOfUsedTool: Int) : Runnable {
+//    private val log = Logger.getInstance(this::class.java)
+//
+//    override fun run() {
+//        // waiting time after each iteration
+//        val sleepDurationMillis: Long = 1000
+//
+//        // waiting for the generation result
+//        while (true) {
+//            // checks if all generator are finished their work
+//            if (project.service<TestGenerationData>().testGenerationResultList.size != numberOfUsedTool) {
+//                // there is some error during the process running
+//                if (project.service<ErrorService>().isErrorOccurred()) break
+//                log.info("Found ${project.service<TestGenerationData>().testGenerationResultList.size} number of results")
+//                log.info("Waiting for other generation results")
+//                Thread.sleep(sleepDurationMillis)
+//                continue
+//            }
+//
+//            log.info("Found all $numberOfUsedTool generation results")
+//
+//            ApplicationManager.getApplication().invokeLater {
+//                project.service<ReportLockingService>().receiveReport(getMergeResult(numberOfUsedTool))
+//            }
+//
+//            break
+//        }
+//
+//        project.service<RunnerService>().clear()
+//    }
+//
+//    /**
+//     * Retrieves the merged result of a test generation process.
+//     *
+//     * @param numberOfUsedTool The number of tools used for the test generation.
+//     * @return The merged report containing the results of the test generation process.
+//     */
+//    private fun getMergeResult(numberOfUsedTool: Int, generationData: TestGenerationData): Report {
+//        log.info("Merging $numberOfUsedTool generation results")
+//
+//        if (numberOfUsedTool == 1) {
+//            return generationData.testGenerationResultList[0]!!
+//        }
+//        TODO("implement merge")
+//    }
+//}
