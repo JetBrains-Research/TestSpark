@@ -118,6 +118,7 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests
         settingsState.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
         settingsState.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
+        settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests
     }
 
     /**

@@ -122,6 +122,11 @@ class TestSamplePanelFactory(
 
     fun enabledComponents(isEnabled: Boolean) {
         resetButton.isEnabled = false
+        for (index in testNames.indices) {
+            if (testNames[index] == testSamplesSelector.selectedItem && isEnabled) {
+                resetButton.isEnabled = initialTestCodes[index] != currentTestCodes[index]
+            }
+        }
         removeButton.isEnabled = isEnabled
         testSamplesSelector.isEnabled = isEnabled
         languageTextField.isEnabled = isEnabled

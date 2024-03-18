@@ -73,6 +73,9 @@ internal class PromptBuilder(private var prompt: String) {
 
         if (isPromptValid(PromptKeyword.METHODS, prompt)) {
             var fullText = ""
+            if (interestingClasses.isNotEmpty()) {
+                fullText += "Here are some information about other methods and classes used by the class under test. Only use them for creating objects, not your own ideas.\n"
+            }
             for (interestingClass in interestingClasses) {
                 if (interestingClass.qualifiedName!!.startsWith("java")) {
                     continue

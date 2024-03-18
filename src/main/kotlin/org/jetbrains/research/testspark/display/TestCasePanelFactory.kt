@@ -30,11 +30,11 @@ import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.ReportLockingService
+import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.test.TestSuitePresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
@@ -62,7 +62,8 @@ class TestCasePanelFactory(
     editor: Editor,
     private val checkbox: JCheckBox,
 ) {
-    private val settingsState: SettingsApplicationState = SettingsArguments.settingsState!!
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
 
     private val panel = JPanel()
     private val previousButtons =
@@ -243,9 +244,14 @@ class TestCasePanelFactory(
         requestPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         requestPanel.add(requestJLabel)
         requestPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
-        requestPanel.add(requestComboBox)
-        requestPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
-        requestPanel.add(sendButton)
+
+        // temporary panel to avoid IDEA's bug
+        val requestComboBoxAndSendButtonPanel = JPanel()
+        requestComboBoxAndSendButtonPanel.layout = BoxLayout(requestComboBoxAndSendButtonPanel, BoxLayout.X_AXIS)
+        requestComboBoxAndSendButtonPanel.add(requestComboBox)
+        requestComboBoxAndSendButtonPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
+        requestComboBoxAndSendButtonPanel.add(sendButton)
+        requestPanel.add(requestComboBoxAndSendButtonPanel)
         requestPanel.add(Box.createRigidArea(Dimension(15, 0)))
 
         val buttonsPanel = JPanel()
@@ -461,6 +467,7 @@ class TestCasePanelFactory(
 
             requestComboBox.selectedItem = requestComboBox.getItemAt(0)
             sendButton.isEnabled = true
+
             loadingLabel.isVisible = false
             enableComponents(true)
 
