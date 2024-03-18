@@ -25,26 +25,28 @@ class LLMTestSampleService {
 
         projectFileIndex.iterateContent { file ->
             if (file.fileType === javaFileType) {
-                val psiJavaFile = (PsiManager.getInstance(project).findFile(file) as PsiJavaFile)
-                val psiClass = psiJavaFile.classes[
-                    psiJavaFile.classes.stream().map { it.name }.toArray()
-                        .indexOf(psiJavaFile.name.removeSuffix(".java")),
-                ]
-                var imports = psiJavaFile.importList?.allImportStatements?.map { it.text }?.toList()
-                    ?.joinToString("\n") ?: ""
-                if (psiClass.qualifiedName != null && psiClass.qualifiedName!!.contains(".")) {
-                    imports += "\nimport ${psiClass.qualifiedName?.substringBeforeLast(".") + ".*"};"
-                }
-                psiClass.allMethods.forEach { method ->
-                    val annotations = method.modifierList.annotations
-                    annotations.forEach { annotation ->
-                        if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
-                            val code: String = createTestSampleClass(imports, method.text)
-                            testNames.add(createMethodName(psiClass, method))
-                            initialTestCodes.add(code)
+                try {
+                    val psiJavaFile = (PsiManager.getInstance(project).findFile(file) as PsiJavaFile)
+                    val psiClass = psiJavaFile.classes[
+                        psiJavaFile.classes.stream().map { it.name }.toArray()
+                            .indexOf(psiJavaFile.name.removeSuffix(".java")),
+                    ]
+                    var imports = psiJavaFile.importList?.allImportStatements?.map { it.text }?.toList()
+                        ?.joinToString("\n") ?: ""
+                    if (psiClass.qualifiedName != null && psiClass.qualifiedName!!.contains(".")) {
+                        imports += "\nimport ${psiClass.qualifiedName?.substringBeforeLast(".") + ".*"};"
+                    }
+                    psiClass.allMethods.forEach { method ->
+                        val annotations = method.modifierList.annotations
+                        annotations.forEach { annotation ->
+                            if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
+                                val code: String = createTestSampleClass(imports, method.text)
+                                testNames.add(createMethodName(psiClass, method))
+                                initialTestCodes.add(code)
+                            }
                         }
                     }
-                }
+                } catch (_: Exception) {}
             }
             true
         }
