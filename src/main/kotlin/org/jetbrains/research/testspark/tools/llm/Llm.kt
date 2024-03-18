@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools.llm
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
@@ -11,7 +10,6 @@ import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.helpers.getSurroundingClass
 import org.jetbrains.research.testspark.helpers.getSurroundingLine
 import org.jetbrains.research.testspark.helpers.getSurroundingMethod
-import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
@@ -72,7 +70,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode The code of the test samples.
      */
     override fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
-        if (!project.service<LLMChatService>().isCorrectToken()) {
+        if (!isCorrectToken(project)) {
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
@@ -89,7 +87,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode the code of the test samples to use for test generation
      */
     override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
-        if (!project.service<LLMChatService>().isCorrectToken()) {
+        if (!isCorrectToken(project)) {
             return
         }
         val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caretOffset)!!
@@ -107,7 +105,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode The code for the test samples.
      */
     override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
-        if (!project.service<LLMChatService>().isCorrectToken()) {
+        if (!isCorrectToken(project)) {
             return
         }
         val selectedLine: Int = getSurroundingLine(psiFile, caretOffset)?.plus(1)!!

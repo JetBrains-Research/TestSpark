@@ -27,7 +27,7 @@ class ReportLockingService(private val project: Project) {
     fun receiveReport(report: Report) {
         this.report = report
 
-        project.service<TestCaseDisplayService>().updateEditorForFileUrl(project.service<TestGenerationDataService>().fileUrl)
+        project.service<TestCaseDisplayService>().updateEditorForFileUrl(project.service<TestGenerationData>().fileUrl)
 
         if (project.service<EditorService>().editor != null) {
             project.service<TestCaseDisplayService>().displayTestCases()

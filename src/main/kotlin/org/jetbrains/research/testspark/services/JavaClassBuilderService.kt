@@ -8,14 +8,12 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.Service
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import java.io.File
-import java.util.Locale
 
 @Service(Service.Level.PROJECT)
 class JavaClassBuilderService(private val project: Project) {
@@ -33,6 +31,7 @@ class JavaClassBuilderService(private val project: Project) {
         packageString: String,
         runWith: String,
         otherInfo: String,
+        testGenerationData: TestGenerationData
     ): String {
         var testFullText = printUpperPart(className, imports, packageString, runWith, otherInfo)
 
@@ -44,7 +43,7 @@ class JavaClassBuilderService(private val project: Project) {
 
         testFullText.replace("\r\n", "\n")
 
-        return formatJavaCode(Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"))
+        return formatJavaCode(Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"), testGenerationData)
     }
 
     /**
@@ -86,23 +85,6 @@ class JavaClassBuilderService(private val project: Project) {
         }
 
         return testText
-    }
-
-    /**
-     * Returns the generated class name for a given test case.
-     *
-     * @param testCaseName The test case name.
-     * @return The generated class name as a string.
-     */
-    fun getClassWithTestCaseName(testCaseName: String): String {
-        val className = testCaseName.replaceFirstChar {
-            if (it.isLowerCase()) {
-                it.titlecase(Locale.getDefault())
-            } else {
-                it.toString()
-            }
-        }
-        return "Generated$className"
     }
 
     /**
@@ -193,10 +175,10 @@ class JavaClassBuilderService(private val project: Project) {
      * @param code The Java code to be formatted.
      * @return The formatted Java code.
      */
-    fun formatJavaCode(code: String): String {
+    fun formatJavaCode(code: String, generatedTestData: TestGenerationData): String {
         var result = ""
         WriteCommandAction.runWriteCommandAction(project) {
-            val fileName = project.service<ProjectContextService>().resultPath!! + File.separatorChar + "Formatted.java"
+            val fileName = generatedTestData.resultPath + File.separatorChar + "Formatted.java"
             // create a temporary PsiFile
             val psiFile: PsiFile = PsiFileFactory.getInstance(project)
                 .createFileFromText(

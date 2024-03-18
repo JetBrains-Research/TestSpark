@@ -9,8 +9,8 @@ class ProjectContextService {
     // The class path of the project.
     var projectClassPath: String? = null
 
-    // The path to save the generated test results.
-    var resultPath: String? = null
+    // The path to save the generated test results (shouldnt it be in TestGenerationData?).
+    var resultPath: String? = null // should be removed
 
     // The base directory of the project.
     var baseDir: String? = null
@@ -24,4 +24,5 @@ class ProjectContextService {
 
     // The module to cut.
     var cutModule: Module? = null
+
 }

@@ -26,7 +26,7 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.TestGenerationDataService
+import org.jetbrains.research.testspark.services.TestGenerationData
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
@@ -139,7 +139,7 @@ class PromptManager(
     fun reducePromptSize(): Boolean {
         // reducing depth of polymorphism
         if (SettingsArguments.maxPolyDepth(project) > 1) {
-            project.service<TestGenerationDataService>().polyDepthReducing++
+            project.service<TestGenerationData>().polyDepthReducing++
             log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
             showPromptReductionWarning()
             return true
@@ -147,7 +147,7 @@ class PromptManager(
 
         // reducing depth of input params
         if (SettingsArguments.maxInputParamsDepth(project) > 1) {
-            project.service<TestGenerationDataService>().inputParamsDepthReducing++
+            project.service<TestGenerationData>().inputParamsDepthReducing++
             log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
             showPromptReductionWarning()
             return true

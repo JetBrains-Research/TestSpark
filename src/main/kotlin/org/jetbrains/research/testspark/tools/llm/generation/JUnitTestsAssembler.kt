@@ -13,7 +13,7 @@ import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.TestGenerationDataService
+import org.jetbrains.research.testspark.services.TestGenerationData
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
@@ -102,16 +102,16 @@ class JUnitTestsAssembler(
 
         // save RunWith
         if (testSuite?.runWith?.isNotBlank() == true) {
-            project.service<TestGenerationDataService>().runWith = testSuite.runWith
-            project.service<TestGenerationDataService>().importsCode.add(junitVersion.runWithAnnotationMeta.import)
+            project.service<TestGenerationData>().runWith = testSuite.runWith
+            project.service<TestGenerationData>().importsCode.add(junitVersion.runWithAnnotationMeta.import)
         }
         else {
-            project.service<TestGenerationDataService>().runWith = ""
-            project.service<TestGenerationDataService>().importsCode.remove(junitVersion.runWithAnnotationMeta.import)
+            project.service<TestGenerationData>().runWith = ""
+            project.service<TestGenerationData>().importsCode.remove(junitVersion.runWithAnnotationMeta.import)
         }
 
         // save annotations and pre-set methods
-        project.service<TestGenerationDataService>().otherInfo = testSuite?.otherInfo ?: ""
+        project.service<TestGenerationData>().otherInfo = testSuite?.otherInfo ?: ""
 
         // logging generated test cases if any
         testSuite?.testCases?.forEach { testCase -> log.info("Generated test case: $testCase") }

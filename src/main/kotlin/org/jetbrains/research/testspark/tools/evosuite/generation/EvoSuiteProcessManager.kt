@@ -16,10 +16,11 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.TestGenerationData
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
@@ -71,6 +72,8 @@ class EvoSuiteProcessManager(
         indicator: CustomProgressIndicator,
         codeType: FragmentToTestData,
         packageName: String,
+        projectContext: ProjectContext,
+        generatedTestData: TestGenerationData
     ) {
         try {
             if (processStopped(project, indicator)) return
@@ -88,12 +91,12 @@ class EvoSuiteProcessManager(
                 return
             }
 
-            val projectClassPath = project.service<ProjectContextService>().projectClassPath!!
-            val classFQN = project.service<ProjectContextService>().classFQN!!
-            val baseDir = project.service<ProjectContextService>().baseDir!!
-            val resultName = "${project.service<ProjectContextService>().resultPath}${sep}EvoSuiteResult"
+            val projectClassPath = projectContext.projectClassPath!!
+            val classFQN = projectContext.classFQN!!
+            val baseDir = generatedTestData.baseDir!!
+            val resultName = "${generatedTestData.resultPath}${sep}EvoSuiteResult"
 
-            Path(project.service<ProjectContextService>().resultPath!!).createDirectories()
+            Path(generatedTestData.resultPath!!).createDirectories()
 
             // get command
             val command = when (codeType.type!!) {
@@ -198,6 +201,8 @@ class EvoSuiteProcessManager(
                 Report(testGenerationResult),
                 getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
                 getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
+                projectContext.fileUrl!!,
+                generatedTestData
             )
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)

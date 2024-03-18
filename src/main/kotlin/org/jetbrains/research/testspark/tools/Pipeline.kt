@@ -1,23 +1,25 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.components.service
+//import org.jetbrains.research.testspark.services.ProjectContextService
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.helpers.getSurroundingClass
-import org.jetbrains.research.testspark.services.ClearService
-import org.jetbrains.research.testspark.services.ProjectContextService
-import org.jetbrains.research.testspark.services.TestStorageProcessingService
-import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import com.intellij.openapi.util.io.FileUtilRt
+import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.display.IJProgressIndicator
+import org.jetbrains.research.testspark.helpers.getSurroundingClass
+import org.jetbrains.research.testspark.services.TestGenerationData
+import org.jetbrains.research.testspark.tools.generatedTests.getResultPath
+import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
+import java.io.File
+import java.util.*
 
 
 /**
@@ -36,27 +38,39 @@ class Pipeline(
     fileUrl: String?,
     private val packageName: String,
 ) {
+    val projectContext: ProjectContext
+    val generatedTestsData = TestGenerationData()
+
     init {
-        project.service<ProjectContextService>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
-        project.service<ProjectContextService>().resultPath = project.service<TestStorageProcessingService>().resultPath
-        project.service<ProjectContextService>().baseDir = "${project.service<TestStorageProcessingService>().testResultDirectory}${project.service<TestStorageProcessingService>().testResultName}-validation"
-        project.service<ProjectContextService>().fileUrl = fileUrl
+        val cutPsiClass = getSurroundingClass(psiFile, caretOffset)!!
 
-        project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(psiFile, caretOffset)
-        project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
+        // get generated test path
+        val sep = File.separatorChar
+        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
+        val id = UUID.randomUUID().toString()
+        val testResultName = "test_gen_result_$id"
 
-        project.service<ProjectContextService>().classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!
+        projectContext = ProjectContext(
+            projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path,
+            fileUrl = fileUrl,
+            cutPsiClass = cutPsiClass,
+            classFQN = cutPsiClass.qualifiedName!!,
+            cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!,
+        )
+
+        generatedTestsData.resultPath = getResultPath(id, testResultDirectory)
+        generatedTestsData.baseDir = "${testResultDirectory}${testResultName}-validation"
+        generatedTestsData.testResultName = testResultName
 
         DataFilesUtil.makeTmp(FileUtilRt.getTempDirectory())
-        DataFilesUtil.makeDir(project.service<ProjectContextService>().baseDir!!)
+        DataFilesUtil.makeDir(generatedTestsData.baseDir!!)
     }
 
     /**
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-        project.service<ClearService>().clear(project)
-
+//        project.service<ClearService>().clear(project)
         val projectBuilder = ProjectBuilder(project)
 
         ProgressManager.getInstance()
@@ -73,6 +87,8 @@ class Pipeline(
                             ijIndicator,
                             codeType,
                             packageName,
+                            projectContext,
+                            generatedTestsData
                         )
                     }
 

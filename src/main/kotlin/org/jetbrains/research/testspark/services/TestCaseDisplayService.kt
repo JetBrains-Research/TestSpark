@@ -35,7 +35,7 @@ import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.io.File
-import java.util.Locale
+import java.util.*
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
@@ -368,8 +368,8 @@ class TestCaseDisplayService(private val project: Project) {
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
 
-                if (project.service<TestGenerationDataService>().runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<TestGenerationDataService>().runWith})")
+                if (project.service<TestGenerationData>().runWith.isNotEmpty()) {
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<TestGenerationData>().runWith})")
                 }
 
                 psiJavaFile!!.add(psiClass!!)
@@ -455,23 +455,23 @@ class TestCaseDisplayService(private val project: Project) {
         // insert other info to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             selectedClass.rBrace!!.textRange.startOffset,
-            project.service<TestGenerationDataService>().otherInfo + "\n",
+            project.service<TestGenerationData>().otherInfo + "\n",
         )
 
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            project.service<TestGenerationDataService>().importsCode.joinToString("\n") + "\n\n",
+            project.service<TestGenerationData>().importsCode.joinToString("\n") + "\n\n",
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
             .insertString(
                 0,
-                if (project.service<TestGenerationDataService>().packageLine.isEmpty()) {
+                if (project.service<TestGenerationData>().packageLine.isEmpty()) {
                     ""
                 } else {
-                    "package ${project.service<TestGenerationDataService>().packageLine};\n\n"
+                    "package ${project.service<TestGenerationData>().packageLine};\n\n"
                 },
             )
     }

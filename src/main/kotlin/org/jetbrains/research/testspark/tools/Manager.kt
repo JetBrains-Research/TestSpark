@@ -10,7 +10,7 @@ import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.RunnerService
-import org.jetbrains.research.testspark.services.TestGenerationDataService
+import org.jetbrains.research.testspark.services.TestGenerationData
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.template.Tool
@@ -146,10 +146,10 @@ private class Display(private val project: Project, private val numberOfUsedTool
         // waiting for the generation result
         while (true) {
             // checks if all generator are finished their work
-            if (project.service<TestGenerationDataService>().testGenerationResultList.size != numberOfUsedTool) {
+            if (project.service<TestGenerationData>().testGenerationResultList.size != numberOfUsedTool) {
                 // there is some error during the process running
                 if (project.service<ErrorService>().isErrorOccurred()) break
-                log.info("Found ${project.service<TestGenerationDataService>().testGenerationResultList.size} number of results")
+                log.info("Found ${project.service<TestGenerationData>().testGenerationResultList.size} number of results")
                 log.info("Waiting for other generation results")
                 Thread.sleep(sleepDurationMillis)
                 continue
@@ -177,7 +177,7 @@ private class Display(private val project: Project, private val numberOfUsedTool
         log.info("Merging $numberOfUsedTool generation results")
 
         if (numberOfUsedTool == 1) {
-            return project.service<TestGenerationDataService>().testGenerationResultList[0]!!
+            return project.service<TestGenerationData>().testGenerationResultList[0]!!
         }
         TODO("implement merge")
     }

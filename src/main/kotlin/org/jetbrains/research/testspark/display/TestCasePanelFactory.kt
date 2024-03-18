@@ -25,6 +25,7 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
@@ -32,17 +33,17 @@ import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.generatedTests.TestUtils
+import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.tools.llm.test.TestSuitePresenter
-import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
-import java.util.Queue
+import java.util.*
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
@@ -54,7 +55,6 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import kotlin.collections.HashMap
 
 class TestCasePanelFactory(
     private val project: Project,
@@ -91,7 +91,7 @@ class TestCasePanelFactory(
         editor.project,
         testCase.testCode,
         TestCaseDocumentCreator(
-            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+            getClassWithTestCaseName(testCase.testName),
         ),
         false,
     )
@@ -410,7 +410,7 @@ class TestCasePanelFactory(
 
                     if (modifiedTest != null) {
                         modifiedTest.setTestFileName(
-                            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+                            getClassWithTestCaseName(testCase.testName),
                         )
                         addTest(modifiedTest)
                     } else {
@@ -445,7 +445,7 @@ class TestCasePanelFactory(
     }
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
-        val testSuitePresenter = TestSuitePresenter(project)
+        val testSuitePresenter = TestSuitePresenter(project, generatedTestsData)
 
         WriteCommandAction.runWriteCommandAction(project) {
             project.service<ErrorService>().clear()
@@ -513,7 +513,7 @@ class TestCasePanelFactory(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
-        val newTestCase = project.service<TestStorageProcessingService>()
+        val newTestCase = TestUtils(project)
             .processNewTestCase(
                 "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
                 testCase.id,
