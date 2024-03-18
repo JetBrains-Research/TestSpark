@@ -109,6 +109,9 @@ dependencies {
     implementation(project(":core"))
     "hasGrazieAccessCompileOnly"(project(":core"))
 
+    // https://central.sonatype.com/artifact/io.github.oshai/kotlin-logging-jvm/overview
+    implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
+
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
     implementation("junit:junit:4.13")
