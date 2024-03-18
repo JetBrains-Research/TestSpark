@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.core.generation
+package org.jetbrains.research.testspark.core.utils
 
 val importPattern =
     Regex(

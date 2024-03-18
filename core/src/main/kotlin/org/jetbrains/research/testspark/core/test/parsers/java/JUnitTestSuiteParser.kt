@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.core.test.parsers.java
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.generation.importPattern
+import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestLine

@@ -13,8 +13,8 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.generation.importPattern
-import org.jetbrains.research.testspark.core.generation.packagePattern
+import org.jetbrains.research.testspark.core.utils.importPattern
+import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptGenerator
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.MethodRepresentation
