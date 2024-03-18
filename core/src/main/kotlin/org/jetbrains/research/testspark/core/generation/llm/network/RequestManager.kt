@@ -1,11 +1,9 @@
-package org.jetbrains.research.testspark.tools.llm.generation
+package org.jetbrains.research.testspark.core.generation.llm.network
 
-import com.intellij.openapi.diagnostic.Logger
-import org.jetbrains.research.testspark.core.generation.llm.network.LLMResponse
-import org.jetbrains.research.testspark.core.generation.llm.network.ResponseErrorCode
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
-import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
 
 
 abstract class RequestManager(var token: String) {
@@ -17,7 +15,7 @@ abstract class RequestManager(var token: String) {
 
     val chatHistory = mutableListOf<ChatMessage>()
 
-    protected val log: Logger = Logger.getInstance(this.javaClass)
+    protected val log = KotlinLogging.logger {}
 
     /**
      * Sends a request to LLM with the given prompt and returns the generated TestSuite.
@@ -38,7 +36,7 @@ abstract class RequestManager(var token: String) {
         chatHistory.add(ChatMessage("user", prompt))
 
         // Send Request to LLM
-        log.info("Sending Request...")
+        log.info { "Sending Request..." }
 
         val (sendResult, testsAssembler) = send(prompt, indicator)
 
@@ -64,7 +62,7 @@ abstract class RequestManager(var token: String) {
         // save the full response in the chat history
         val response = testsAssembler.getContent()
 
-        log.info("The full response: \n $response")
+        log.info { "The full response: \n $response" }
         chatHistory.add(ChatMessage("assistant", response))
 
         // check if response is empty
@@ -95,7 +93,7 @@ abstract class RequestManager(var token: String) {
     ): LLMResponse {
         val response = testsAssembler.getContent()
 
-        log.info("The full response: \n $response")
+        log.info { "The full response: \n $response" }
 
         // check if response is empty
         if (response.isEmpty() || response.isBlank()) {

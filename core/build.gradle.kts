@@ -16,6 +16,8 @@ repositories {
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     compileOnly(kotlin("stdlib"))
+
+    implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
 }
 
 tasks.test {

@@ -77,7 +77,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
                 }
             }
         } catch (e: HttpStatusException) {
-            log.info("Error in sending request: ${e.message}")
+            log.info { "Error in sending request: ${e.message}" }
         }
 
         return Pair(sendResult, testsAssembler)
