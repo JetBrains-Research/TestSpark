@@ -156,7 +156,6 @@ class TestsAssembler(
 
                 // Get unexpected exceptions
                 if (!rawTest.contains("public void")) {
-                    println("WARNING: The raw Test does not contain public void:\n $rawTest")
                     return@ca
                 }
                 val interestingPartOfSignature =
@@ -195,8 +194,6 @@ class TestsAssembler(
                     // it is the last test. So we should remove another closing bracket
                     if (tempList.isNotEmpty()) {
                         tempList.removeLast()
-                    } else {
-                        println("WARNING: the final test does not have to brackets:\n $testBody")
                     }
                 }
 
