@@ -11,15 +11,15 @@ import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestMana
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
 @Service(Service.Level.PROJECT)
-class LLMChatService {
+class LLMChatService(private val project: Project) {
 
-    private var requestManager = StandardRequestManagerFactory().getRequestManager()
+    private var requestManager = StandardRequestManagerFactory().getRequestManager(project)
 
     /**
      * Re-initiates the requestManager. All the chat history will be removed.
      */
     fun newSession() {
-        requestManager = StandardRequestManagerFactory().getRequestManager()
+        requestManager = StandardRequestManagerFactory().getRequestManager(project)
     }
 
     /**
@@ -41,9 +41,8 @@ class LLMChatService {
         messageToPrompt: String,
         indicator: ProgressIndicator,
         packageName: String,
-        project: Project,
     ): LLMResponse {
-        return requestManager.request(messageToPrompt, indicator, packageName, project)
+        return requestManager.request(messageToPrompt, indicator, packageName)
     }
 
     /**
@@ -64,10 +63,9 @@ class LLMChatService {
         testcase: String,
         task: String,
         indicator: ProgressIndicator,
-        project: Project,
     ): TestSuiteGeneratedByLLM? {
         // Update Token information
-        if (!updateToken(project)) {
+        if (!updateToken()) {
             return null
         }
         val prompt = "For this test:\n ```\n $testcase\n ```\nPerform the following task: $task"
@@ -86,7 +84,6 @@ class LLMChatService {
             prompt,
             indicator,
             packageName,
-            project,
             isUserFeedback = true,
         )
 
@@ -96,23 +93,19 @@ class LLMChatService {
     /**
      * Updates token  based on the last entries of settings and check if the token is valid
      *
-     * @param project The project for error processing.
-     *
      * @return True if the token is set, false otherwise.
      */
-    private fun updateToken(project: Project): Boolean {
+    private fun updateToken(): Boolean {
         requestManager.token = SettingsArguments.getToken()
-        return isCorrectToken(project)
+        return isCorrectToken()
     }
 
     /**
      * Checks if the token is set.
      *
-     * @param project The project for error processing.
-     *
      * @return True if the token is set, false otherwise.
      */
-    fun isCorrectToken(project: Project): Boolean {
+    fun isCorrectToken(): Boolean {
         if (!SettingsArguments.isTokenSet()) {
             LLMErrorManager().errorProcess(TestSparkBundle.message("missingToken"), project)
             return false

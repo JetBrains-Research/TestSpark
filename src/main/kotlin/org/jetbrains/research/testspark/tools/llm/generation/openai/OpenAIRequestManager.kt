@@ -9,6 +9,7 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.llm.generation.IJRequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import java.net.HttpURLConnection
@@ -16,7 +17,7 @@ import java.net.HttpURLConnection
 /**
  * This class represents a manager for making requests to the LLM (Large Language Model).
  */
-class OpenAIRequestManager : RequestManager(token = SettingsArguments.getToken()) {
+class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
     private val url = "https://api.openai.com/v1/chat/completions"
 
     private val httpRequest = HttpRequests.post(url, "application/json").tuner {
@@ -28,7 +29,6 @@ class OpenAIRequestManager : RequestManager(token = SettingsArguments.getToken()
     override fun send(
         prompt: String,
         indicator: ProgressIndicator,
-        project: Project,
     ): Pair<SendResult, TestsAssembler> {
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(SettingsArguments.getModel(), chatHistory)

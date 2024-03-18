@@ -397,7 +397,6 @@ class TestCasePanelFactory(
                             initialCodes[currentRequestNumber - 1],
                             requestComboBox.editor.item.toString(),
                             indicator,
-                            project,
                         )
 
                     if (modifiedTest != null) {

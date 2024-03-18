@@ -118,7 +118,7 @@ class LLMProcessManager(
             }
 
             val response: LLMResponse =
-                project.service<LLMChatService>().testGenerationRequest(messageToPrompt, indicator, packageName, project)
+                project.service<LLMChatService>().testGenerationRequest(messageToPrompt, indicator, packageName)
 
             when(response.errorCode) {
                 ResponseErrorCode.OK -> {

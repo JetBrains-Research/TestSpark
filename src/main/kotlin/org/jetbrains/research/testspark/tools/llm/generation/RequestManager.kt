@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.generation.network.LLMResponse
 import org.jetbrains.research.testspark.core.generation.network.ResponseErrorCode
 import org.jetbrains.research.testspark.core.test.TestsAssembler
@@ -26,7 +25,6 @@ abstract class RequestManager(var token: String) {
      * @param prompt the prompt to send to LLM
      * @param indicator the progress indicator to show progress during the request
      * @param packageName the name of the package for the generated TestSuite
-     * @param project the project associated with the request
      * @param isUserFeedback indicates if this request is a test generation request or a user feedback
      * @return the generated TestSuite, or null and prompt message
      */
@@ -34,7 +32,6 @@ abstract class RequestManager(var token: String) {
         prompt: String,
         indicator: ProgressIndicator,
         packageName: String,
-        project: Project,
         isUserFeedback: Boolean = false,
     ): LLMResponse {
         // save the prompt in chat history
@@ -43,7 +40,7 @@ abstract class RequestManager(var token: String) {
         // Send Request to LLM
         log.info("Sending Request...")
 
-        val (sendResult, testsAssembler) = send(prompt, indicator, project)
+        val (sendResult, testsAssembler) = send(prompt, indicator)
 
         if (sendResult == SendResult.PROMPT_TOO_LONG) {
             return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, null)
@@ -85,11 +82,12 @@ abstract class RequestManager(var token: String) {
         }
     }
 
+
     abstract fun send(
         prompt: String,
         indicator: ProgressIndicator,
-        project: Project,
     ): Pair<SendResult, TestsAssembler>
+
 
     open fun processUserFeedbackResponse(
         testsAssembler: TestsAssembler,
