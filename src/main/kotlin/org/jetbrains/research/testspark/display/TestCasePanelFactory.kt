@@ -24,7 +24,7 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
@@ -491,7 +491,7 @@ class TestCasePanelFactory(
             })
     }
 
-    fun addTask(tasks: Queue<(MyProgressIndicator) -> Unit>) {
+    fun addTask(tasks: Queue<(CustomProgressIndicator) -> Unit>) {
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
 
@@ -503,7 +503,7 @@ class TestCasePanelFactory(
         }
     }
 
-    private fun runTest(indicator: MyProgressIndicator) {
+    private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
         val newTestCase = project.service<TestStorageProcessingService>()

@@ -11,7 +11,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.task.ProjectTaskManager
 import com.intellij.util.concurrency.Semaphore
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
@@ -34,7 +34,7 @@ class ProjectBuilder(private val project: Project) {
      * @param indicator The progress indicator to show the build progress.
      * @return True if the build is successful, false otherwise.
      */
-    fun runBuild(indicator: MyProgressIndicator): Boolean {
+    fun runBuild(indicator: CustomProgressIndicator): Boolean {
         val handle = CountDownLatch(1)
         log.info("Starting build!")
         var isSuccessful = true

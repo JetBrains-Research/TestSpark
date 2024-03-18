@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
@@ -27,7 +27,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
 
     override fun send(
         prompt: String,
-        indicator: MyProgressIndicator,
+        indicator: CustomProgressIndicator,
     ): Pair<SendResult, TestsAssembler> {
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(SettingsArguments.getModel(), chatHistory)

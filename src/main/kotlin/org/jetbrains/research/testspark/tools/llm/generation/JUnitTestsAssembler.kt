@@ -8,7 +8,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
@@ -29,7 +29,7 @@ import org.jetbrains.research.testspark.tools.processStopped
  */
 class JUnitTestsAssembler(
     val project: Project,
-    val indicator: MyProgressIndicator,
+    val indicator: CustomProgressIndicator,
 ) : TestsAssembler() {
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!

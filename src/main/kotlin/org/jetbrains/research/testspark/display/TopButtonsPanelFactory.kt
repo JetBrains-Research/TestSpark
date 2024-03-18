@@ -7,7 +7,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Dimension
 import java.util.LinkedList
@@ -151,7 +151,7 @@ class TopButtonsPanelFactory(private val project: Project) {
         runAllButton.isEnabled = false
 
         // add each test generation task to queue
-        val tasks: Queue<(MyProgressIndicator) -> Unit> = LinkedList()
+        val tasks: Queue<(CustomProgressIndicator) -> Unit> = LinkedList()
 
         for (testCasePanelFactory in testCasePanelFactories) {
             testCasePanelFactory.addTask(tasks)
@@ -160,7 +160,7 @@ class TopButtonsPanelFactory(private val project: Project) {
         executeTasks(tasks)
     }
 
-    private fun executeTasks(tasks: Queue<(MyProgressIndicator) -> Unit>) {
+    private fun executeTasks(tasks: Queue<(CustomProgressIndicator) -> Unit>) {
         val nextTask = tasks.poll()
 
         nextTask?.let { task ->

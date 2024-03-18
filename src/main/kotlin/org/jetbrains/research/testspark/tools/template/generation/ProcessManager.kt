@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.tools.template.generation
 
-import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.FragmentToTestData
 
 /**
@@ -15,7 +15,7 @@ interface ProcessManager {
      * @param packageName The package name of the code fragment.
      */
     fun runTestGenerator(
-        indicator: MyProgressIndicator,
+        indicator: CustomProgressIndicator,
         codeType: FragmentToTestData,
         packageName: String,
     )

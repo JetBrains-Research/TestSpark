@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.core.progress
 
-interface MyProgressIndicator {
+interface CustomProgressIndicator {
     fun setText(text: String)
     fun getText(): String
     fun setIndeterminate(value: Boolean)

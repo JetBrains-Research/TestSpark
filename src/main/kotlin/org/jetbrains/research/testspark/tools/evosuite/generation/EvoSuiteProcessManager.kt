@@ -12,7 +12,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.progress.MyProgressIndicator
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -68,7 +68,7 @@ class EvoSuiteProcessManager(
      * @param indicator the progress indicator
      */
     override fun runTestGenerator(
-        indicator: MyProgressIndicator,
+        indicator: CustomProgressIndicator,
         codeType: FragmentToTestData,
         packageName: String,
     ) {
