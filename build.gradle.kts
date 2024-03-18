@@ -107,7 +107,8 @@ dependencies {
     implementation(files("lib/JUnitRunner.jar"))
 
     implementation(project(":core"))
-    "hasGrazieAccessCompileOnly"(project(":core"))
+    if (spaceCredentialsProvided())
+        "hasGrazieAccessCompileOnly"(project(":core"))
 
     // https://central.sonatype.com/artifact/io.github.oshai/kotlin-logging-jvm/overview
     implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
