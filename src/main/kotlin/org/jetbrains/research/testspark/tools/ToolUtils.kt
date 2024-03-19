@@ -9,9 +9,9 @@ import com.intellij.openapi.roots.ModuleRootManager
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
 import java.io.File
@@ -84,7 +84,7 @@ fun saveData(
         )
     }
 
-    project.service<TestGenerationData>().testGenerationResultList.add(report)
+    generatedTestData.testGenerationResultList.add(report)
 }
 
 /**

@@ -5,5 +5,5 @@ import org.jetbrains.research.testspark.core.generation.llm.network.RequestManag
 data class UIContext(
     val projectContext: ProjectContext,
     val testGenerationOutput: TestGenerationData,
-    val requestManager: RequestManager? = null
+    var requestManager: RequestManager? = null
 )

@@ -1,12 +1,12 @@
 package org.jetbrains.research.testspark.core.test.parsers.java
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.utils.importPattern
-import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestLine
 import org.jetbrains.research.testspark.core.test.data.TestLineType
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
+import org.jetbrains.research.testspark.core.utils.importPattern
 
 
 class JUnitTestSuiteParser(
@@ -100,7 +100,7 @@ private class JUnitTestCaseParser {
         }
 
         // Get unexpected exceptions
-        if (!rawTest.contains("public void")) {
+        if (!rawTest.contains("void")) {
             return TestCaseParseResult(
                 testCase = null,
                 errorMessage = "The raw Test does not contain public void:\n $rawTest",

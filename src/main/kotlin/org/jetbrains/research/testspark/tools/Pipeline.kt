@@ -14,11 +14,16 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
+import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.getSurroundingClass
+import org.jetbrains.research.testspark.services.CoverageVisualisationService
+import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.ReportLockingService
-import org.jetbrains.research.testspark.data.TestGenerationData
+import org.jetbrains.research.testspark.services.RunnerService
+import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.generatedTests.getResultPath
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
@@ -73,7 +78,7 @@ class Pipeline(
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-//        project.service<ClearService>().clear(project)
+        clear(project)
         val projectBuilder = ProjectBuilder(project)
 
         var result: UIContext? = null
@@ -104,8 +109,20 @@ class Pipeline(
 
                 override fun onFinished() {
                     super.onFinished()
-                    project.service<ReportLockingService>().receiveReport(result)
+                    project.service<RunnerService>().clear()
+                    result?.let {
+                        project.service<ReportLockingService>().receiveReport(it)
+                    }
+
+
                 }
             })
+    }
+
+    fun clear(project: Project) { // should be removed totally!
+        project.service<TestCaseDisplayService>().clear()
+        project.service<ErrorService>().clear()
+        project.service<CoverageVisualisationService>().clear()
+        project.service<TestsExecutionResultService>().clear()
     }
 }

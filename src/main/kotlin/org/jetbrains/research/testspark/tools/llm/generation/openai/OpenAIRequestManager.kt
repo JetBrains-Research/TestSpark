@@ -28,12 +28,11 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
     override fun send(
         prompt: String,
         indicator: CustomProgressIndicator,
-    ): Pair<SendResult, TestsAssembler> {
+        testsAssembler: TestsAssembler
+    ): SendResult {
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(SettingsArguments.getModel(), chatHistory)
 
-        // Prepare the test assembler
-        val testsAssembler = JUnitTestsAssembler(project, indicator)
         var sendResult = SendResult.OK
 
         try {
@@ -42,7 +41,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
 
                 // check response
                 when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
-                    HttpURLConnection.HTTP_OK -> testsAssembler.consume(it)
+                    HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consume(it)
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         llmErrorManager.errorProcess(
                             TestSparkBundle.message("serverProblems"),
@@ -80,6 +79,6 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
             log.info { "Error in sending request: ${e.message}" }
         }
 
-        return Pair(sendResult, testsAssembler)
+        return sendResult
     }
 }

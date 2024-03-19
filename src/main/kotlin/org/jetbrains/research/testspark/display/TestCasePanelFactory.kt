@@ -408,7 +408,8 @@ class TestCasePanelFactory(
                             requestComboBox.editor.item.toString(),
                             ijIndicator,
                             uiContext!!.requestManager!!,
-                            project
+                            project,
+                            uiContext.testGenerationOutput
                         )
 
                     if (modifiedTest != null) {

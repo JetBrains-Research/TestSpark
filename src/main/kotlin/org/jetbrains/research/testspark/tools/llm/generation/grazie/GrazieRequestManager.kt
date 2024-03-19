@@ -7,7 +7,6 @@ import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.IJRequestManager
-import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 
 class GrazieRequestManager(project: Project) : IJRequestManager(project) {
     private val llmErrorManager = LLMErrorManager()
@@ -15,16 +14,15 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
     override fun send(
         prompt: String,
         indicator: CustomProgressIndicator,
-    ): Pair<SendResult, TestsAssembler> {
-        var testsAssembler: TestsAssembler = JUnitTestsAssembler(project, indicator)
+        testsAssembler: TestsAssembler
+    ): SendResult {
         var sendResult = SendResult.OK
 
         try {
             val className = "org.jetbrains.research.grazie.Request"
             val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
 
-            val requestResult = request.request(token, getMessages(), SettingsArguments.getModel(), JUnitTestsAssembler(project, indicator))
-            val requestError = requestResult.first
+            val requestError = request.request(token, getMessages(), SettingsArguments.getModel(), testsAssembler)
 
             if (requestError.isNotEmpty()) {
                 with(requestError) {
@@ -51,15 +49,16 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
                         }
                     }
                 }
-            } else {
-                testsAssembler = requestResult.second
             }
+//            else {
+//                testsAssembler = requestResult.second
+//            }
         }
         catch (e: ClassNotFoundException) {
             llmErrorManager.errorProcess(TestSparkBundle.message("grazieError"), project)
         }
 
-        return Pair(sendResult, testsAssembler)
+        return sendResult
     }
 
     private fun getMessages(): List<Pair<String, String>> {

@@ -13,9 +13,9 @@ import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -217,7 +217,7 @@ class TestUtils(val project:Project){
                 dataFileName,
                 testName,
                 buildPath,
-                project.service<TestGenerationData>().packageLine,
+                packageLine,
                 resultPath,
                 projectContext
             )

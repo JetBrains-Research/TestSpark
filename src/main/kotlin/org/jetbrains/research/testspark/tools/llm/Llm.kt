@@ -35,7 +35,7 @@ class Llm(override val name: String = "LLM") : Tool {
     private fun getLLMProcessManager(project: Project, psiFile: PsiFile, caretOffset: Int, codeType: FragmentToTestData, testSamplesCode: String): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClass>()
         // check if cut has any none java super class
-        val maxPolymorphismDepth = SettingsArguments.maxPolyDepth(project)
+        val maxPolymorphismDepth = SettingsArguments.maxPolyDepth(0)
 
         val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caretOffset)!!
 

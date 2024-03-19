@@ -14,10 +14,10 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.tools.generatedTests.TestUtils
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
@@ -92,7 +92,7 @@ class LLMProcessManager(
 
         var requestsCount = 0
         var warningMessage = ""
-        var messageToPrompt = promptManager.generatePrompt(codeType, testSamplesCode)
+        var messageToPrompt = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
         var generatedTestSuite: TestSuiteGeneratedByLLM? = null
 
         // Initiate a new RequestManager
@@ -120,14 +120,14 @@ class LLMProcessManager(
             }
 
             val response: LLMResponse =
-                requestManager.request(messageToPrompt, indicator, packageName)
+                requestManager.request(messageToPrompt, indicator, packageName, JUnitTestsAssembler(project, indicator, generatedTestsData))
             when(response.errorCode) {
                 ResponseErrorCode.OK -> {
                     log.info("Test suite generated successfully: ${response.testSuite!!}")
                 }
                 ResponseErrorCode.PROMPT_TOO_LONG -> {
-                    if (promptManager.reducePromptSize()) {
-                        messageToPrompt = promptManager.generatePrompt(codeType, testSamplesCode)
+                    if (promptManager.reducePromptSize(generatedTestsData)) {
+                        messageToPrompt = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
                         requestsCount--
                         continue
                     } else {

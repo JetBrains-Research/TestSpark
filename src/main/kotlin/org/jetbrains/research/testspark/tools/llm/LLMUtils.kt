@@ -5,7 +5,9 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import java.util.*
 
 /**
@@ -58,7 +60,8 @@ fun testModificationRequest(
     task: String,
     indicator: CustomProgressIndicator,
     requestManager: RequestManager,
-    project: Project
+    project: Project,
+    testGenerationOutput: TestGenerationData
 ): TestSuiteGeneratedByLLM? {
     // Update Token information
     if (!updateToken(requestManager, project)) {
@@ -80,6 +83,7 @@ fun testModificationRequest(
         prompt,
         indicator,
         packageName,
+        JUnitTestsAssembler(project, indicator, testGenerationOutput),
         isUserFeedback = true,
     )
 

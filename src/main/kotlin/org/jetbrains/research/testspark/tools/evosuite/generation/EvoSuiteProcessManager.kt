@@ -18,16 +18,17 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
@@ -210,6 +211,6 @@ class EvoSuiteProcessManager(
             e.printStackTrace()
         }
 
-        return UIContext(projectContext,generatedTestData)
+        return UIContext(projectContext,generatedTestData, StandardRequestManagerFactory().getRequestManager(project))
     }
 }
