@@ -224,20 +224,24 @@ class SettingsLLMComponent {
         val mandatoryKeywords = keywords.filter { it.mandatory }
         val optionalKeywords = keywords.filter { !it.mandatory }
 
-        panel.add(JLabel("Mandatory:"))
+        val mandatoryPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+        mandatoryPanel.add(JLabel("Mandatory:"))
+        panel.add(mandatoryPanel)
         mandatoryKeywords.forEach {
-            panel.add(createButtonPanel(it))
+            panel.add(createButtonPanel(it, panel))
         }
 
-        panel.add(JLabel("Optional:"))
+        val optionalPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+        optionalPanel.add(JLabel("Optional:"))
+        panel.add(optionalPanel)
         optionalKeywords.forEach {
-            panel.add(createButtonPanel(it))
+            panel.add(createButtonPanel(it, panel))
         }
     }
 
-    private fun createButtonPanel(keyword: PromptKeyword): JPanel {
+    private fun createButtonPanel(keyword: PromptKeyword, panel: JPanel): JPanel {
         val buttonPanel = JPanel(FlowLayout(FlowLayout.LEFT))
-        val editorTextField = panel!!.getComponent(1) as EditorTextField
+        val editorTextField = panel.getComponent(1) as EditorTextField
         val button = JButton("\$${keyword.text}")
         button.setForeground(JBColor.ORANGE)
         button.font = Font("Monochrome", Font.BOLD, 12)
