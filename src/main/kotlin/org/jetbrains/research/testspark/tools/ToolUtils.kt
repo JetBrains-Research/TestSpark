@@ -1,14 +1,15 @@
 package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
+import org.jetbrains.research.testspark.core.data.Report
+import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
-import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
@@ -16,7 +17,6 @@ import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
 import java.io.File
 
-private val log = Logger.getInstance("TestSparkToolUtils")
 /**
  * Retrieves the imports code from a given test suite code.
  *
@@ -144,4 +144,21 @@ fun processStopped(project: Project, indicator: CustomProgressIndicator): Boolea
     return false
 }
 
+
+fun getResultPath(id: String, testResultDirectory: String): String {
+    val testResultName = "test_gen_result_$id"
+
+    return "$testResultDirectory$testResultName"
+}
+
+
+fun transferToIJTestCases(report: Report){
+    val result: MutableMap<Int, TestCase> = mutableMapOf()
+    report.testCaseList.keys.forEach{index ->
+        val testcase = report.testCaseList[index]
+        val ijTestCase = IJTestCase(testcase!!.id, testcase.testName, testcase.testCode, testcase.coveredLines)
+        result[index] = ijTestCase
+    }
+    report.testCaseList = HashMap(result)
+}
 

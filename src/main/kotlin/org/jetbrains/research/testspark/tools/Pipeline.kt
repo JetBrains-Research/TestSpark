@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools
 
-//import org.jetbrains.research.testspark.services.ProjectContextService
 import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -24,7 +23,6 @@ import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.RunnerService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.tools.generatedTests.getResultPath
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
 import java.util.*

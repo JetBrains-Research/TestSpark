@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.data
 
+import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 
 data class TestGenerationData(

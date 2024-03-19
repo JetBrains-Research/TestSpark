@@ -5,20 +5,20 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.network.LLMResponse
 import org.jetbrains.research.testspark.core.generation.llm.network.ResponseErrorCode
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.tools.generatedTests.TestUtils
+import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
@@ -29,6 +29,7 @@ import org.jetbrains.research.testspark.tools.llm.test.TestSuitePresenter
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
+import org.jetbrains.research.testspark.tools.transferToIJTestCases
 import java.io.File
 
 /**
@@ -51,7 +52,7 @@ class LLMProcessManager(
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
-    private val testUtils = TestUtils(project)
+    private val testProcessor = TestProcessor(project)
 
     /**
      * Runs the test generator process.
@@ -88,7 +89,7 @@ class LLMProcessManager(
 
         var generatedTestsArePassing = false
 
-        val report = Report()
+        var report = IJReport()
 
         var requestsCount = 0
         var warningMessage = ""
@@ -175,7 +176,7 @@ class LLMProcessManager(
                     val testCaseRepresentation = testSuitePresenter
                         .toStringSingleTestCaseWithoutExpectedException(generatedTestSuite, testCaseIndex)
 
-                    val saveFilepath = testUtils.saveGeneratedTest(
+                    val saveFilepath = testProcessor.saveGeneratedTest(
                         generatedTestSuite.packageString,
                         testCaseRepresentation,
                         generatedTestsData.resultPath,
@@ -186,7 +187,7 @@ class LLMProcessManager(
                 }
             }
 
-            val generatedTestPath: String = testUtils.saveGeneratedTest(
+            val generatedTestPath: String = testProcessor.saveGeneratedTest(
                 generatedTestSuite.packageString,
                 testSuitePresenter.toStringWithoutExpectedException(generatedTestSuite),
                 generatedTestsData.resultPath,
@@ -212,8 +213,8 @@ class LLMProcessManager(
             // Compile the test file
             indicator.setText(TestSparkBundle.message("compilationTestsChecking"))
 
-            val separateCompilationResult = testUtils.compileTestCases(generatedTestCasesPaths, buildPath, testCases, generatedTestsData)
-            val commonCompilationResult = testUtils.compileCode(File(generatedTestPath).absolutePath, buildPath)
+            val separateCompilationResult = testProcessor.compileTestCases(generatedTestCasesPaths, buildPath, testCases, generatedTestsData)
+            val commonCompilationResult = testProcessor.compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!separateCompilationResult && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n${testSuitePresenter.toString(generatedTestSuite)}")
@@ -227,7 +228,7 @@ class LLMProcessManager(
             generatedTestsArePassing = true
 
             for (index in testCases.indices) {
-                report.testCaseList[index] = TestCase(index, testCases[index].name, testCases[index].toString(), setOf(), setOf(), setOf())
+                report.testCaseList[index] = TestCase(index, testCases[index].name, testCases[index].toString(), setOf())
             }
         }
 
@@ -241,7 +242,7 @@ class LLMProcessManager(
         val testSuitePresenter = TestSuitePresenter(project,generatedTestsData)
         val testSuiteRepresentation =
             if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null
-
+        transferToIJTestCases(report)
         saveData(
             project,
             report,

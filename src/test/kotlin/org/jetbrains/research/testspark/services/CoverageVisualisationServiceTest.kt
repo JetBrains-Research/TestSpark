@@ -12,7 +12,7 @@ import org.evosuite.result.MutationInfo
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.shaded.org.mockito.Mockito
 import org.evosuite.utils.CompactReport
-import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.core.data.Report
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance

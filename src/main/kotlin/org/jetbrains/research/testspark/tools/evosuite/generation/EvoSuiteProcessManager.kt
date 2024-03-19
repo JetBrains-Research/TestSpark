@@ -15,9 +15,9 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.Report
 import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.SettingsApplicationService
@@ -200,7 +200,7 @@ class EvoSuiteProcessManager(
 
             saveData(
                 project,
-                Report(testGenerationResult),
+                IJReport(testGenerationResult),
                 getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
                 getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
                 projectContext.fileUrl!!,

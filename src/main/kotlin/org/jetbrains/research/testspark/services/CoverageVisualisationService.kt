@@ -13,8 +13,10 @@ import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.coverage.CoverageRenderer
-import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.IJReport
+import org.jetbrains.research.testspark.data.IJTestCase
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -122,7 +124,7 @@ class CoverageVisualisationService(private val project: Project) {
             val mapMutantsToTests = HashMap<String, MutableList<String>>()
 
             testReport.testCaseList.values.forEach { compactTestCase ->
-                val mutantsCovered = compactTestCase.coveredMutants
+                val mutantsCovered = (compactTestCase as IJTestCase).coveredMutants
                 val testName = compactTestCase.testName
                 mutantsCovered.forEach {
                     val testCasesCoveringMutant = mapMutantsToTests.getOrPut(it.replacement) { ArrayList() }
@@ -131,11 +133,11 @@ class CoverageVisualisationService(private val project: Project) {
             }
 
             val mutationCovered =
-                testReport.testCaseList.filter { x -> x.value.id in selectedTests }.map { x -> x.value.coveredMutants }
+                testReport.testCaseList.filter { x -> x.value.id in selectedTests }.map { x -> (x.value as IJTestCase).coveredMutants }
                     .flatten().groupBy { x -> x.lineNo }
             val mutationNotCovered =
-                testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.value.id !in selectedTests }
-                    .map { x -> x.value.coveredMutants }.flatten().groupBy { x -> x.lineNo }
+                (testReport as IJReport).allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.value.id !in selectedTests }
+                    .map { x -> (x.value as IJTestCase).coveredMutants }.flatten().groupBy { x -> x.lineNo }
 
             for (i in linesToCover) {
                 val line = i - 1
@@ -180,7 +182,7 @@ class CoverageVisualisationService(private val project: Project) {
         }
 
         // Call branch coverage
-        val coveredBranches = testReport.allCoveredBranches.size
+        val coveredBranches = (testReport as IJReport).allCoveredBranches.size
         val allBranches = testReport.allUncoveredBranches.size + coveredBranches
         var relativeBranch = 100
         if (allBranches != 0) {
