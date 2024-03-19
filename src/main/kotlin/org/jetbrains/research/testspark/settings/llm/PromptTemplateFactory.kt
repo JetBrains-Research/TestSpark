@@ -2,9 +2,6 @@ package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.EditorTextField
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
@@ -14,6 +11,8 @@ import java.awt.FlowLayout
 import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
+import kotlin.math.max
+import org.jetbrains.research.testspark.data.JsonEncoding
 
 class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     private val settingsState: SettingsApplicationState
@@ -26,6 +25,7 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     private val requestNumber = "%d / %d"
     private val requestLabel = JLabel(requestNumber)
     private val nextButton = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
+    private val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTemplate"))
     private val addButton = JButton(TestSparkLabelsBundle.defaultValue("addPromptTemplate"), TestSparkIcons.add)
     private var currentTemplateNumber = 1
     private var allTemplateNumber = 1
@@ -46,18 +46,23 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
             editorTextField.document.setText(templates[currentTemplateNumber - 1])
         }
 
-        updateRequestLabel()
+        update()
 
         addListeners()
     }
 
     fun getEditorTextField() = editorTextField
 
+    fun templatesUpdate() {
+        templates[currentTemplateNumber - 1] = editorTextField.document.text
+    }
+
     fun getButtonsPanel(): JPanel {
         val panel = JPanel(FlowLayout(FlowLayout.LEFT))
         panel.add(previousButton)
         panel.add(requestLabel)
         panel.add(nextButton)
+        panel.add(removeButton)
         panel.add(addButton)
         return panel
     }
@@ -66,32 +71,14 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
 
     fun setCurrentTemplateNumber(currentTemplateNumber: Int) {
         this.currentTemplateNumber = currentTemplateNumber
+        update()
     }
 
-    fun getCommonPrompt(): String {
-        var jsonString = Json.encodeToString(
-            ListSerializer(String.serializer()),
-            templates,
-        )
-        val replacements = mapOf(
-            "\\n" to "\n",
-            "\\t" to "\t",
-            "\\r" to "\r",
-            "\\\\" to "\\",
-            "\\\"" to "\"",
-            "\\'" to "\'",
-            "\\b" to "\b",
-            "\\f" to "\u000c",
-        )
-        replacements.forEach { (key, value) ->
-            jsonString = jsonString.replace(key, value)
-        }
-        return jsonString
-    }
+    fun getCommonPrompt(): String = JsonEncoding.encode(templates)
 
     fun setCommonPrompt(value: String) {
         templates.clear()
-        templates = Json.decodeFromString(ListSerializer(String.serializer()), value) as MutableList<String>
+        templates = JsonEncoding.decode(value)
         allTemplateNumber = templates.size
         currentTemplateNumber = when (promptEditorType) {
             PromptEditorType.CLASS -> settingsState.currentClassTemplateNumber
@@ -103,18 +90,12 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     private fun addListeners() {
         previousButton.addActionListener {
             if (currentTemplateNumber > 1) currentTemplateNumber--
-            ApplicationManager.getApplication().runWriteAction {
-                editorTextField.document.setText(templates[currentTemplateNumber - 1])
-            }
-            updateRequestLabel()
+            update()
         }
 
         nextButton.addActionListener {
             if (currentTemplateNumber < allTemplateNumber) currentTemplateNumber++
-            ApplicationManager.getApplication().runWriteAction {
-                editorTextField.document.setText(templates[currentTemplateNumber - 1])
-            }
-            updateRequestLabel()
+            update()
         }
 
         addButton.addActionListener {
@@ -124,7 +105,14 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
                 templates.add("")
                 editorTextField.document.setText("")
             }
-            updateRequestLabel()
+            update()
+        }
+
+        removeButton.addActionListener {
+            templates.removeAt(currentTemplateNumber - 1)
+            currentTemplateNumber = max(1, currentTemplateNumber - 1)
+            allTemplateNumber--
+            update()
         }
     }
 
@@ -132,11 +120,15 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
      * Updates the label displaying the request number information.
      * Uses the requestNumber template to format the label text.
      */
-    private fun updateRequestLabel() {
+    private fun update() {
         requestLabel.text = String.format(
             requestNumber,
             currentTemplateNumber,
             allTemplateNumber,
         )
+        ApplicationManager.getApplication().runWriteAction {
+            editorTextField.document.setText(templates[currentTemplateNumber - 1])
+        }
+        removeButton.isEnabled = allTemplateNumber != 1
     }
 }

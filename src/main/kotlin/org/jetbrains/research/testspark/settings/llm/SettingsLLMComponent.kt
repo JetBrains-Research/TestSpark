@@ -10,9 +10,6 @@ import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
@@ -34,6 +31,7 @@ import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.data.JsonEncoding
 
 class SettingsLLMComponent {
     private val settingsState: SettingsApplicationState
@@ -129,13 +127,10 @@ class SettingsLLMComponent {
         set(value) = promptLineTemplateFactory.setCurrentTemplateNumber(value)
 
     var defaultLLMRequests: String
-        get() = Json.encodeToString(
-            ListSerializer(String.serializer()),
-            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }
-                .map { (it.getComponent(0) as JTextField).text },
-        )
+        get() = JsonEncoding.encode(defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }
+            .map { (it.getComponent(0) as JTextField).text } as MutableList<String>)
         set(value) {
-            fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), value))
+            fillDefaultLLMRequestsPanel(JsonEncoding.decode(value))
         }
 
     var llmSetupCheckBoxSelected: Boolean
@@ -155,12 +150,7 @@ class SettingsLLMComponent {
         stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         stylizePanel()
 
-        fillDefaultLLMRequestsPanel(
-            Json.decodeFromString(
-                ListSerializer(String.serializer()),
-                settingsState.defaultLLMRequests,
-            ),
-        )
+        fillDefaultLLMRequestsPanel(JsonEncoding.decode(settingsState.defaultLLMRequests))
 
         fillAddDefaultLLMRequestsButtonPanel()
 
@@ -337,6 +327,11 @@ class SettingsLLMComponent {
             getEditorTextField(it).document.addDocumentListener(
                 object : com.intellij.openapi.editor.event.DocumentListener {
                     override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
+                        when (it) {
+                            PromptEditorType.CLASS -> promptClassTemplateFactory.templatesUpdate()
+                            PromptEditorType.METHOD -> promptMethodTemplateFactory.templatesUpdate()
+                            PromptEditorType.LINE -> promptLineTemplateFactory.templatesUpdate()
+                        }
                         updateHighlighting(event.document.text, it)
                     }
                 },

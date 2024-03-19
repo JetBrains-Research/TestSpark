@@ -12,6 +12,9 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.generation.importPattern
 import org.jetbrains.research.testspark.core.generation.packagePattern
@@ -23,6 +26,7 @@ import org.jetbrains.research.testspark.core.generation.prompt.configuration.Pro
 import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptTemplates
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
@@ -69,9 +73,9 @@ class PromptManager(
                 )
 
                 val promptTemplates = PromptTemplates(
-                    classPrompt = settingsState.classPrompt,
-                    methodPrompt = settingsState.methodPrompt,
-                    linePrompt = settingsState.linePrompt,
+                    classPrompt = JsonEncoding.decode(settingsState.classPrompt)[settingsState.currentClassTemplateNumber - 1],
+                    methodPrompt = JsonEncoding.decode(settingsState.methodPrompt)[settingsState.currentMethodTemplateNumber - 1],
+                    linePrompt = JsonEncoding.decode(settingsState.linePrompt)[settingsState.currentLineTemplateNumber - 1],
                 )
 
                 val promptGenerator = PromptGenerator(context, promptTemplates)

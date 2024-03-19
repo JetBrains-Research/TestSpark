@@ -6,6 +6,7 @@ import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
+import org.jetbrains.research.testspark.data.JsonEncoding
 
 /**
  * This class allows to configure some LLM-related settings via the Large Language Model page in the Settings dialog,
@@ -79,19 +80,18 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
-        // class prompt
+
         modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
-        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.classPrompt)
-        // method prompt
         modified = modified or (settingsComponent!!.methodPrompt != settingsState.methodPrompt)
-        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.methodPrompt)
-        // line prompt
         modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
-        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.linePrompt)
 
         modified = modified or (settingsComponent!!.currentClassTemplateNumber != settingsState.currentClassTemplateNumber)
         modified = modified or (settingsComponent!!.currentMethodTemplateNumber != settingsState.currentMethodTemplateNumber)
         modified = modified or (settingsComponent!!.currentLineTemplateNumber != settingsState.currentLineTemplateNumber)
+
+        modified = modified and service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.classPrompt)[settingsComponent!!.currentClassTemplateNumber - 1])
+        modified = modified and service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.methodPrompt)[settingsComponent!!.currentMethodTemplateNumber - 1])
+        modified = modified and service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.linePrompt)[settingsComponent!!.currentLineTemplateNumber - 1])
 
         modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
         modified = modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != settingsState.provideTestSamplesCheckBoxSelected)

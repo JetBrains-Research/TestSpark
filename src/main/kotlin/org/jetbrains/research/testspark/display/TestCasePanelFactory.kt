@@ -53,6 +53,7 @@ import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 import kotlin.collections.HashMap
+import org.jetbrains.research.testspark.data.JsonEncoding
 
 class TestCasePanelFactory(
     private val project: Project,
@@ -114,7 +115,7 @@ class TestCasePanelFactory(
     private val runTestButton = createRunTestButton()
 
     private val requestJLabel = JLabel(TestSparkLabelsBundle.defaultValue("requestJLabel"))
-    private val requestComboBox = ComboBox(arrayOf("") + Json.decodeFromString(ListSerializer(String.serializer()), settingsState.defaultLLMRequests))
+    private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(settingsState.defaultLLMRequests))
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
