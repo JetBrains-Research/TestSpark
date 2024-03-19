@@ -13,6 +13,7 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.core.generation.importPattern
 import org.jetbrains.research.testspark.core.generation.packagePattern
 import org.jetbrains.research.testspark.core.generation.prompt.PromptGenerator
@@ -105,7 +106,7 @@ class PromptManager(
                     }
                 }
             },
-        )
+        ) + TestSparkToolTipsBundle.defaultValue("commonPromptPart")
         log.info("Prompt is:\n$prompt")
         return prompt
     }

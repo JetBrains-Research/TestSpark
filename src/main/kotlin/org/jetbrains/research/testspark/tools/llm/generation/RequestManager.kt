@@ -84,7 +84,7 @@ abstract class RequestManager {
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
 
         if (testSuiteGeneratedByLLM == null) {
-            LLMErrorManager().warningProcess(TestSparkBundle.message("emptyResponse") + "LLM response: $response", project)
+            LLMErrorManager().warningProcess(TestSparkBundle.message("emptyResponse") + " LLM response: $response", project)
             return Pair("The provided code is not parsable. Please give the correct code", null)
         }
 
