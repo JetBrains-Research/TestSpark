@@ -24,9 +24,9 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
@@ -62,7 +62,7 @@ class TestCasePanelFactory(
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
-    val uiContext: UIContext?
+    val uiContext: UIContext?,
 ) {
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!
@@ -404,13 +404,13 @@ class TestCasePanelFactory(
                     if (processStopped(project, ijIndicator)) return
 
                     val modifiedTest = testModificationRequest(
-                            initialCodes[currentRequestNumber - 1],
-                            requestComboBox.editor.item.toString(),
-                            ijIndicator,
-                            uiContext!!.requestManager!!,
-                            project,
-                            uiContext.testGenerationOutput
-                        )
+                        initialCodes[currentRequestNumber - 1],
+                        requestComboBox.editor.item.toString(),
+                        ijIndicator,
+                        uiContext!!.requestManager!!,
+                        project,
+                        uiContext.testGenerationOutput,
+                    )
 
                     if (modifiedTest != null) {
                         modifiedTest.setTestFileName(
@@ -525,7 +525,7 @@ class TestCasePanelFactory(
                 testCase.testCode,
                 uiContext!!.testGenerationOutput.packageLine,
                 uiContext.testGenerationOutput.resultPath,
-                uiContext.projectContext
+                uiContext.projectContext,
             )
 
         testCase.coveredLines = newTestCase.coveredLines

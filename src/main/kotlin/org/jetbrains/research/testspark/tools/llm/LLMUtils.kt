@@ -15,14 +15,13 @@ import java.util.*
  *
  * @return True if the token is set, false otherwise.
  */
-fun isCorrectToken(project:Project): Boolean {
+fun isCorrectToken(project: Project): Boolean {
     if (!SettingsArguments.isTokenSet()) {
         LLMErrorManager().errorProcess(TestSparkBundle.message("missingToken"), project)
         return false
     }
     return true
 }
-
 
 /**
  * Returns the generated class name for a given test case.
@@ -61,7 +60,7 @@ fun testModificationRequest(
     indicator: CustomProgressIndicator,
     requestManager: RequestManager,
     project: Project,
-    testGenerationOutput: TestGenerationData
+    testGenerationOutput: TestGenerationData,
 ): TestSuiteGeneratedByLLM? {
     // Update Token information
     if (!updateToken(requestManager, project)) {

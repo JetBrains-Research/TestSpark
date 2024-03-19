@@ -8,7 +8,6 @@ import org.jetbrains.research.testspark.core.data.Report
 
 class IJReport : Report {
 
-
     var allCoveredBranches: Set<BranchInfo> = setOf()
     var allUncoveredBranches: Set<BranchInfo> = setOf()
     var allCoveredMutation: Set<MutationInfo> = setOf()
@@ -18,7 +17,6 @@ class IJReport : Report {
      * Default constructor for Report
      */
     constructor()
-
 
     /**
      * Transformation CompactReport to Report

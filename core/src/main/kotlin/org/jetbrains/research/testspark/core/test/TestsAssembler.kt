@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.core.test
 
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
-
 abstract class TestsAssembler {
     private var rawText = ""
 

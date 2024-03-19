@@ -27,7 +27,6 @@ import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
 import java.util.*
 
-
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
  *
@@ -65,7 +64,7 @@ class Pipeline(
         )
 
         generatedTestsData.resultPath = getResultPath(id, testResultDirectory)
-        generatedTestsData.baseDir = "${testResultDirectory}${testResultName}-validation"
+        generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
         generatedTestsData.testResultName = testResultName
 
         DataFilesUtil.makeTmp(FileUtilRt.getTempDirectory())
@@ -96,7 +95,7 @@ class Pipeline(
                             codeType,
                             packageName,
                             projectContext,
-                            generatedTestsData
+                            generatedTestsData,
                         )
                     }
 
@@ -111,8 +110,6 @@ class Pipeline(
                     result?.let {
                         project.service<ReportLockingService>().receiveReport(it)
                     }
-
-
                 }
             })
     }

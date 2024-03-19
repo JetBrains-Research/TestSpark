@@ -7,8 +7,6 @@ data class ProjectContext(
     // The class path of the project.
     var projectClassPath: String? = null,
 
-
-
     // The URL of the file being tested.
     var fileUrl: String? = null,
 
@@ -18,5 +16,4 @@ data class ProjectContext(
 
     // The module to cut.
     var cutModule: Module? = null,
-) {
-}
+)

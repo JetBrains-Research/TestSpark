@@ -9,9 +9,8 @@ class IJTestCase(
     id: Int,
     testName: String,
     testCode: String,
-    coveredLines: Set<Int>
+    coveredLines: Set<Int>,
 ) : TestCase(id, testName, testCode, coveredLines) {
-
 
     var coveredBranches: Set<BranchInfo> = setOf()
     var coveredMutants: Set<MutationInfo> = setOf()
@@ -47,6 +46,4 @@ class IJTestCase(
         this.coveredBranches = coveredBranches
         this.coveredMutants = coveredMutants
     }
-
-
 }

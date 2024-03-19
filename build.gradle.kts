@@ -52,7 +52,6 @@ repositories {
     }
 }
 
-
 if (spaceCredentialsProvided()) {
     // Add the new source set
     val hasGrazieAccess = sourceSets.create("hasGrazieAccess")
@@ -107,8 +106,9 @@ dependencies {
     implementation(files("lib/JUnitRunner.jar"))
 
     implementation(project(":core"))
-    if (spaceCredentialsProvided())
+    if (spaceCredentialsProvided()) {
         "hasGrazieAccessCompileOnly"(project(":core"))
+    }
 
     // https://central.sonatype.com/artifact/io.github.oshai/kotlin-logging-jvm/overview
     implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")

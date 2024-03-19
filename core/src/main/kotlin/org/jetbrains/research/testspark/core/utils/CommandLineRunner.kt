@@ -3,7 +3,6 @@ package org.jetbrains.research.testspark.core.utils
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-
 class CommandLineRunner {
     companion object {
         /**
@@ -42,5 +41,4 @@ class CommandLineRunner {
             return errorMessage
         }
     }
-
 }

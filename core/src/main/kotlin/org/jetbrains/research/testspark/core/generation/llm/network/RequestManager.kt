@@ -5,7 +5,6 @@ import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 
-
 abstract class RequestManager(var token: String) {
     enum class SendResult {
         OK,
@@ -75,19 +74,16 @@ abstract class RequestManager(var token: String) {
 
         return if (testSuiteGeneratedByLLM == null) {
             LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
-        }
-        else {
+        } else {
             LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM.reformat())
         }
     }
 
-
     abstract fun send(
         prompt: String,
         indicator: CustomProgressIndicator,
-        testsAssembler: TestsAssembler
+        testsAssembler: TestsAssembler,
     ): SendResult
-
 
     open fun processUserFeedbackResponse(
         testsAssembler: TestsAssembler,
@@ -106,8 +102,7 @@ abstract class RequestManager(var token: String) {
 
         return if (testSuiteGeneratedByLLM == null) {
             LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
-        }
-        else {
+        } else {
             LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM)
         }
     }

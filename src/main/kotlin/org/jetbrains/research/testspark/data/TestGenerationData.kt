@@ -10,8 +10,8 @@ data class TestGenerationData(
     // test file name?
     var resultName: String = "",
     var fileUrl: String = "",
-    var resultPath: String= "",
-    var testResultName: String="",
+    var resultPath: String = "",
+    var testResultName: String = "",
     // The base directory of the project.
     var baseDir: String? = null,
 
@@ -28,7 +28,7 @@ data class TestGenerationData(
     // list of correct test cases during the incorrect compilation
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf(),
 
-    ) {
+) {
 
     /**
      * Cleaning all old data before new test generation.

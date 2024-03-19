@@ -103,6 +103,5 @@ class Manager {
 
             Llm().generateTestsForLine(project, psiFile, caretOffset, fileUrl, testSamplesCode)
         }
-
     }
 }

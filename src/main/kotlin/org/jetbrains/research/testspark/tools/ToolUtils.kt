@@ -63,7 +63,7 @@ fun saveData(
     packageLine: String,
     importsCode: MutableSet<String>,
     fileUrl: String,
-    generatedTestData: TestGenerationData
+    generatedTestData: TestGenerationData,
 ) {
     generatedTestData.fileUrl = fileUrl
     generatedTestData.packageLine = packageLine
@@ -80,7 +80,7 @@ fun saveData(
             generatedTestData.packageLine,
             generatedTestData.runWith,
             generatedTestData.otherInfo,
-            generatedTestData
+            generatedTestData,
         )
     }
 
@@ -144,21 +144,18 @@ fun processStopped(project: Project, indicator: CustomProgressIndicator): Boolea
     return false
 }
 
-
 fun getResultPath(id: String, testResultDirectory: String): String {
     val testResultName = "test_gen_result_$id"
 
     return "$testResultDirectory$testResultName"
 }
 
-
-fun transferToIJTestCases(report: Report){
+fun transferToIJTestCases(report: Report) {
     val result: MutableMap<Int, TestCase> = mutableMapOf()
-    report.testCaseList.keys.forEach{index ->
+    report.testCaseList.keys.forEach { index ->
         val testcase = report.testCaseList[index]
         val ijTestCase = IJTestCase(testcase!!.id, testcase.testName, testcase.testCode, testcase.coveredLines)
         result[index] = ijTestCase
     }
     report.testCaseList = HashMap(result)
 }
-

@@ -23,11 +23,8 @@ import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
-class TestProcessor(val project: Project){
+class TestProcessor(val project: Project) {
     private val sep = File.separatorChar
-
-
-
 
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
@@ -61,7 +58,6 @@ class TestProcessor(val project: Project){
 
         return "$generatedTestPath$testFileName"
     }
-
 
     /**
      * Retrieves the absolute path of the specified library.
@@ -109,7 +105,7 @@ class TestProcessor(val project: Project){
         projectBuildPath: String,
         generatedTestPackage: String,
         resultPath: String,
-        projectContext: ProjectContext
+        projectContext: ProjectContext,
     ): String {
         // find the proper javac
         val javaRunner = File(javaHomeDirectory.path).walk()
@@ -181,13 +177,14 @@ class TestProcessor(val project: Project){
      * @param testCode new code of test
      * @param testName the name of the test
      */
-    fun processNewTestCase(fileName: String,
-                           testId: Int,
-                           testName: String,
-                           testCode: String,
-                           packageLine: String,
-                           resultPath: String,
-                           projectContext: ProjectContext
+    fun processNewTestCase(
+        fileName: String,
+        testId: Int,
+        testName: String,
+        testCode: String,
+        packageLine: String,
+        resultPath: String,
+        projectContext: ProjectContext,
     ): TestCase {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
@@ -209,7 +206,7 @@ class TestProcessor(val project: Project){
         if (!compilationResult.first) {
             project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, compilationResult.second)
         } else {
-            val dataFileName = "${resultPath}/jacoco-${fileName.split(".")[0]}"
+            val dataFileName = "$resultPath/jacoco-${fileName.split(".")[0]}"
 
             val testExecutionError = createXmlFromJacoco(
                 fileName.split(".")[0],
@@ -218,7 +215,7 @@ class TestProcessor(val project: Project){
                 buildPath,
                 packageLine,
                 resultPath,
-                projectContext
+                projectContext,
             )
 
             if (!File("$dataFileName.xml").exists()) {
@@ -230,7 +227,7 @@ class TestProcessor(val project: Project){
                     testCode,
                     getExceptionData(testExecutionError, projectContext).second,
                     "$dataFileName.xml",
-                    projectContext
+                    projectContext,
                 )
 
                 if (getExceptionData(testExecutionError, projectContext).first) {
@@ -283,8 +280,6 @@ class TestProcessor(val project: Project){
         )
     }
 
-
-
     /**
      * Saves data of a given test case to a report.
      *
@@ -298,7 +293,7 @@ class TestProcessor(val project: Project){
         testCaseCode: String,
         linesCoveredDuringTheException: Set<Int>,
         xmlFileName: String,
-        projectContext: ProjectContext
+        projectContext: ProjectContext,
     ): TestCase {
         val setOfLines = mutableSetOf<Int>()
         var isCorrectSourceFile: Boolean
@@ -334,9 +329,6 @@ class TestProcessor(val project: Project){
 
         return TestCase(testCaseId, testCaseName, testCaseCode, setOfLines)
     }
-
-
-
 
     /**
      * Compiles the code at the specified path using the provided project build path.
@@ -381,10 +373,11 @@ class TestProcessor(val project: Project){
      * @return A Pair containing a boolean indicating whether the compilation was successful
      *         and a String containing any error message encountered during compilation.
      */
-    fun compileTestCases(generatedTestCasesPaths: List<String>,
-                         buildPath: String,
-                         testCases: MutableList<TestCaseGeneratedByLLM>,
-                         generatedTestData: TestGenerationData
+    fun compileTestCases(
+        generatedTestCasesPaths: List<String>,
+        buildPath: String,
+        testCases: MutableList<TestCaseGeneratedByLLM>,
+        generatedTestData: TestGenerationData,
     ): Boolean {
         var result = false
         for (index in generatedTestCasesPaths.indices) {
@@ -396,5 +389,4 @@ class TestProcessor(val project: Project){
         }
         return result
     }
-
 }

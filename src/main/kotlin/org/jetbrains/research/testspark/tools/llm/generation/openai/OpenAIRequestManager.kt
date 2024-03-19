@@ -28,7 +28,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
     override fun send(
         prompt: String,
         indicator: CustomProgressIndicator,
-        testsAssembler: TestsAssembler
+        testsAssembler: TestsAssembler,
     ): SendResult {
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(SettingsArguments.getModel(), chatHistory)

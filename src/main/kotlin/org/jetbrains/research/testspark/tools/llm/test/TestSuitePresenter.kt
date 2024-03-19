@@ -3,14 +3,13 @@ package org.jetbrains.research.testspark.tools.llm.test
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.data.TestGenerationData
+import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
-
 
 class TestSuitePresenter(
     private val project: Project,
-    val generatedTestsData: TestGenerationData
+    val generatedTestsData: TestGenerationData,
 ) {
     /**
      * Returns a string representation of this object.
@@ -43,11 +42,10 @@ class TestSuitePresenter(
                 packageString,
                 runWith,
                 otherInfo,
-                generatedTestsData
+                generatedTestsData,
             )
         }
     }
-
 
     /**
      * Returns the full text of the test suite (excluding the expected exception).
@@ -55,7 +53,9 @@ class TestSuitePresenter(
      * @return the full text of the test suite (excluding the expected exception) as a string.
      */
     fun toStringSingleTestCaseWithoutExpectedException(
-        testSuite: TestSuiteGeneratedByLLM, testCaseIndex: Int): String =
+        testSuite: TestSuiteGeneratedByLLM,
+        testCaseIndex: Int,
+    ): String =
         testSuite.run {
             project.service<JavaClassBuilderService>().generateCode(
                 getClassWithTestCaseName(testCases[testCaseIndex].name),
@@ -64,7 +64,7 @@ class TestSuitePresenter(
                 packageString,
                 runWith,
                 otherInfo,
-                generatedTestsData
+                generatedTestsData,
             )
         }
 
@@ -87,7 +87,7 @@ class TestSuitePresenter(
                 packageString,
                 runWith,
                 otherInfo,
-                generatedTestsData
+                generatedTestsData,
             )
         }
     }

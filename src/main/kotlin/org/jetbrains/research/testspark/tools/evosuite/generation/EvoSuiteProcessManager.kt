@@ -15,8 +15,8 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
-import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.data.UIContext
@@ -75,7 +75,7 @@ class EvoSuiteProcessManager(
         codeType: FragmentToTestData,
         packageName: String,
         projectContext: ProjectContext,
-        generatedTestData: TestGenerationData
+        generatedTestData: TestGenerationData,
     ): UIContext? {
         try {
             if (processStopped(project, indicator)) return null
@@ -204,13 +204,13 @@ class EvoSuiteProcessManager(
                 getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
                 getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
                 projectContext.fileUrl!!,
-                generatedTestData
+                generatedTestData,
             )
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()
         }
 
-        return UIContext(projectContext,generatedTestData, StandardRequestManagerFactory().getRequestManager(project))
+        return UIContext(projectContext, generatedTestData, StandardRequestManagerFactory().getRequestManager(project))
     }
 }

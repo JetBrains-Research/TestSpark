@@ -32,7 +32,7 @@ class JavaClassBuilderService(private val project: Project) {
         packageString: String,
         runWith: String,
         otherInfo: String,
-        testGenerationData: TestGenerationData
+        testGenerationData: TestGenerationData,
     ): String {
         var testFullText = printUpperPart(className, imports, packageString, runWith, otherInfo)
 

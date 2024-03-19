@@ -444,7 +444,7 @@ class TestCaseDisplayService(private val project: Project) {
                     project.service<JavaClassBuilderService>().formatJavaCode(
                         it.replace("\r\n", "\n")
                             .replace("verifyException(", "// verifyException("),
-                        uiContext!!.testGenerationOutput
+                        uiContext!!.testGenerationOutput,
                     ),
                 )
                 // Fix Windows line separators

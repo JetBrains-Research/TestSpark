@@ -29,7 +29,7 @@ import org.jetbrains.research.testspark.tools.processStopped
 class JUnitTestsAssembler(
     val project: Project,
     val indicator: CustomProgressIndicator,
-    val generationData: TestGenerationData
+    val generationData: TestGenerationData,
 ) : TestsAssembler() {
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!
@@ -104,8 +104,7 @@ class JUnitTestsAssembler(
         if (testSuite?.runWith?.isNotBlank() == true) {
             generationData.runWith = testSuite.runWith
             generationData.importsCode.add(junitVersion.runWithAnnotationMeta.import)
-        }
-        else {
+        } else {
             generationData.runWith = ""
             generationData.importsCode.remove(junitVersion.runWithAnnotationMeta.import)
         }

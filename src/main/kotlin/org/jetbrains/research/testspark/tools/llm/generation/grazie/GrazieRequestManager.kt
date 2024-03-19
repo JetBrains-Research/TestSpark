@@ -14,7 +14,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
     override fun send(
         prompt: String,
         indicator: CustomProgressIndicator,
-        testsAssembler: TestsAssembler
+        testsAssembler: TestsAssembler,
     ): SendResult {
         var sendResult = SendResult.OK
 
@@ -53,8 +53,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
 //            else {
 //                testsAssembler = requestResult.second
 //            }
-        }
-        catch (e: ClassNotFoundException) {
+        } catch (e: ClassNotFoundException) {
             llmErrorManager.errorProcess(TestSparkBundle.message("grazieError"), project)
         }
 

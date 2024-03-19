@@ -66,7 +66,7 @@ class LLMProcessManager(
         codeType: FragmentToTestData,
         packageName: String,
         projectContext: ProjectContext,
-        generatedTestsData: TestGenerationData
+        generatedTestsData: TestGenerationData,
     ): UIContext? {
         log.info("LLM test generation begins")
 
@@ -122,7 +122,7 @@ class LLMProcessManager(
 
             val response: LLMResponse =
                 requestManager.request(messageToPrompt, indicator, packageName, JUnitTestsAssembler(project, indicator, generatedTestsData))
-            when(response.errorCode) {
+            when (response.errorCode) {
                 ResponseErrorCode.OK -> {
                     log.info("Test suite generated successfully: ${response.testSuite!!}")
                 }
@@ -168,8 +168,7 @@ class LLMProcessManager(
 
             if (isLastIteration(requestsCount)) {
                 generatedTestSuite.updateTestCases(generatedTestsData.compilableTestCases.toMutableList())
-            }
-            else {
+            } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
                     val testFileName = "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
 
@@ -180,7 +179,7 @@ class LLMProcessManager(
                         generatedTestSuite.packageString,
                         testCaseRepresentation,
                         generatedTestsData.resultPath,
-                        testFileName
+                        testFileName,
                     )
 
                     generatedTestCasesPaths.add(saveFilepath)
@@ -239,7 +238,7 @@ class LLMProcessManager(
 
         log.info("Result is ready")
 
-        val testSuitePresenter = TestSuitePresenter(project,generatedTestsData)
+        val testSuitePresenter = TestSuitePresenter(project, generatedTestsData)
         val testSuiteRepresentation =
             if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null
         transferToIJTestCases(report)
@@ -247,12 +246,12 @@ class LLMProcessManager(
             project,
             report,
             getPackageFromTestSuiteCode(testSuiteRepresentation/*generatedTestSuite.toString()*/),
-            getImportsCodeFromTestSuiteCode(testSuiteRepresentation/*generatedTestSuite.toString()*/, projectContext.classFQN!!,),
+            getImportsCodeFromTestSuiteCode(testSuiteRepresentation/*generatedTestSuite.toString()*/, projectContext.classFQN!!),
             projectContext.fileUrl!!,
-            generatedTestsData
-            )
+            generatedTestsData,
+        )
 
-        return UIContext(projectContext,generatedTestsData,requestManager)
+        return UIContext(projectContext, generatedTestsData, requestManager)
     }
 
     private fun isLastIteration(requestsCount: Int) = requestsCount > maxRequests

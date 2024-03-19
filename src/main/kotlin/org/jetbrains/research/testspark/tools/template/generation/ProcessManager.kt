@@ -3,8 +3,8 @@ package org.jetbrains.research.testspark.tools.template.generation
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.TestGenerationData
+import org.jetbrains.research.testspark.data.UIContext
 
 /**
  * An interface representing a process manager.
@@ -22,6 +22,6 @@ interface ProcessManager {
         codeType: FragmentToTestData,
         packageName: String,
         projectContext: ProjectContext,
-        generatedTestData: TestGenerationData
+        generatedTestData: TestGenerationData,
     ): UIContext?
 }

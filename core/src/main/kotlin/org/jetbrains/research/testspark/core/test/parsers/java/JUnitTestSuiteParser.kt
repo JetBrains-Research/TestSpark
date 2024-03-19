@@ -8,7 +8,6 @@ import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.core.utils.importPattern
 
-
 class JUnitTestSuiteParser(
     private val packageName: String,
     private val junitVersion: JUnitVersion,
@@ -122,7 +121,7 @@ private class JUnitTestCaseParser {
             .trim()
 
         // Get test body and remove opening bracket
-        var testBody = rawTest.split("{").toMutableList().apply {removeFirst() }
+        var testBody = rawTest.split("{").toMutableList().apply { removeFirst() }
             .joinToString("{").trim()
 
         // remove closing bracket

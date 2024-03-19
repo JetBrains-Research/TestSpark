@@ -199,7 +199,7 @@ class PromptManager(
      * @param classesToTest The list of classes to test for interesting PsiClasses.
      * @return The set of interesting PsiClasses found during the search.
      */
-    private fun getInterestingPsiClasses(classesToTest: MutableList<PsiClass>,  polyDepthReducing: Int): MutableSet<PsiClass> {
+    private fun getInterestingPsiClasses(classesToTest: MutableList<PsiClass>, polyDepthReducing: Int): MutableSet<PsiClass> {
         val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
 
         var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
