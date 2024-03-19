@@ -38,6 +38,9 @@ data class SettingsApplicationState(
     var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
     var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
     var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
+    var currentClassTemplateNumber: Int = DefaultSettingsApplicationState.currentClassTemplateNumber,
+    var currentMethodTemplateNumber: Int = DefaultSettingsApplicationState.currentMethodTemplateNumber,
+    var currentLineTemplateNumber: Int = DefaultSettingsApplicationState.currentLineTemplateNumber,
     var defaultLLMRequests: String = DefaultSettingsApplicationState.defaultLLMRequests,
     var junitVersion: JUnitVersion = DefaultSettingsApplicationState.junitVersion,
     var provideTestSamplesCheckBoxSelected: Boolean = DefaultSettingsApplicationState.provideTestSamplesCheckBoxSelected,
@@ -79,6 +82,9 @@ data class SettingsApplicationState(
         val classPrompt: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
         val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
         val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
+        val currentClassTemplateNumber: Int = TestSparkDefaultsBundle.defaultValue("currentClassTemplateNumber").toInt()
+        val currentMethodTemplateNumber: Int = TestSparkDefaultsBundle.defaultValue("currentMethodTemplateNumber").toInt()
+        val currentLineTemplateNumber: Int = TestSparkDefaultsBundle.defaultValue("currentLineTemplateNumber").toInt()
         val defaultLLMRequests: String = TestSparkDefaultsBundle.defaultValue("defaultLLMRequests")
         val junitVersion: JUnitVersion = JUnitVersion.JUnit4
         val provideTestSamplesCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()

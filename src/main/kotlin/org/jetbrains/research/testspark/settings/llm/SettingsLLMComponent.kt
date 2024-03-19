@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.ide.ui.UINumericRange
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.ComboBox
@@ -11,7 +10,6 @@ import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
-import java.awt.Dimension
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -30,15 +28,12 @@ import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
 import java.awt.Font
 import javax.swing.BorderFactory
-import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
-import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
-import org.jdesktop.swingx.JXButton
 
 class SettingsLLMComponent {
     private val settingsState: SettingsApplicationState
@@ -62,6 +57,11 @@ class SettingsLLMComponent {
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
+
+    private val promptClassTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(PromptEditorType.CLASS)
+    private val promptMethodTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(PromptEditorType.METHOD)
+    private val promptLineTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(PromptEditorType.LINE)
+
     private var promptEditorTabbedPane = createTabbedPane()
 
     // Maximum number of LLM requests
@@ -73,7 +73,8 @@ class SettingsLLMComponent {
     // Maximum polymorphism depth
     private var maxPolyDepthField = JBIntSpinner(UINumericRange(settingsState.maxPolyDepth, 1, 5))
 
-    private val provideTestSamplesCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("provideTestSamplesCheckBox"), true)
+    private val provideTestSamplesCheckBox: JCheckBox =
+        JCheckBox(TestSparkLabelsBundle.defaultValue("provideTestSamplesCheckBox"), true)
 
     private val llmSetupCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("llmSetupCheckBox"), true)
 
@@ -104,39 +105,34 @@ class SettingsLLMComponent {
         }
 
     var classPrompt: String
-        get() = getEditorTextField(PromptEditorType.CLASS).document.text
-        set(value) {
-            ApplicationManager.getApplication().runWriteAction {
-                val editorTextField =
-                    getEditorTextField(PromptEditorType.CLASS)
-                editorTextField.document.setText(value)
-            }
-        }
+        get() = promptClassTemplateFactory.getCommonPrompt()
+        set(value) = promptClassTemplateFactory.setCommonPrompt(value)
 
     var methodPrompt: String
-        get() = getEditorTextField(PromptEditorType.METHOD).document.text
-        set(value) {
-            ApplicationManager.getApplication().runWriteAction {
-                val editorTextField =
-                    getEditorTextField(PromptEditorType.METHOD)
-                editorTextField.document.setText(value)
-            }
-        }
+        get() = promptMethodTemplateFactory.getCommonPrompt()
+        set(value) = promptMethodTemplateFactory.setCommonPrompt(value)
 
     var linePrompt: String
-        get() = getEditorTextField(PromptEditorType.LINE).document.text
-        set(value) {
-            ApplicationManager.getApplication().runWriteAction {
-                val editorTextField =
-                    getEditorTextField(PromptEditorType.LINE)
-                editorTextField.document.setText(value)
-            }
-        }
+        get() = promptLineTemplateFactory.getCommonPrompt()
+        set(value) = promptLineTemplateFactory.setCommonPrompt(value)
+
+    var currentClassTemplateNumber: Int
+        get() = promptClassTemplateFactory.getCurrentTemplateNumber()
+        set(value) = promptClassTemplateFactory.setCurrentTemplateNumber(value)
+
+    var currentMethodTemplateNumber: Int
+        get() = promptMethodTemplateFactory.getCurrentTemplateNumber()
+        set(value) = promptMethodTemplateFactory.setCurrentTemplateNumber(value)
+
+    var currentLineTemplateNumber: Int
+        get() = promptLineTemplateFactory.getCurrentTemplateNumber()
+        set(value) = promptLineTemplateFactory.setCurrentTemplateNumber(value)
 
     var defaultLLMRequests: String
         get() = Json.encodeToString(
             ListSerializer(String.serializer()),
-            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }.map { (it.getComponent(0) as JTextField).text },
+            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }
+                .map { (it.getComponent(0) as JTextField).text },
         )
         set(value) {
             fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), value))
@@ -159,12 +155,21 @@ class SettingsLLMComponent {
         stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         stylizePanel()
 
-        fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), settingsState.defaultLLMRequests))
+        fillDefaultLLMRequestsPanel(
+            Json.decodeFromString(
+                ListSerializer(String.serializer()),
+                settingsState.defaultLLMRequests,
+            ),
+        )
 
         fillAddDefaultLLMRequestsButtonPanel()
 
         // Adds the panel components
         createSettingsPanel()
+
+        PromptEditorType.values().forEach {
+            updateHighlighting(getEditorTextField(it).text, it)
+        }
 
         // Adds listeners
         addListeners()
@@ -197,17 +202,23 @@ class SettingsLLMComponent {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
 
-        val previousButton = createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
-        var requestNumber: String = "%d / %d"
-        var requestLabel: JLabel = JLabel(requestNumber)
-        val nextButton = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
-        panel.add(getButtonsPanel(previousButton, requestLabel, nextButton))
-
-        // Add editor text field (the prompt editor) to the panel
-        val editorTextField = EditorTextField()
-        editorTextField.setOneLineMode(false)
-        panel.add(editorTextField)
+        // Prompt
+        panel.add(
+            when (promptEditorType) {
+                PromptEditorType.CLASS -> promptClassTemplateFactory.getButtonsPanel()
+                PromptEditorType.METHOD -> promptMethodTemplateFactory.getButtonsPanel()
+                PromptEditorType.LINE -> promptLineTemplateFactory.getButtonsPanel()
+            },
+        )
+        panel.add(
+            when (promptEditorType) {
+                PromptEditorType.CLASS -> promptClassTemplateFactory.getEditorTextField()
+                PromptEditorType.METHOD -> promptMethodTemplateFactory.getEditorTextField()
+                PromptEditorType.LINE -> promptLineTemplateFactory.getEditorTextField()
+            },
+        )
         panel.add(JSeparator())
+
         // add buttons for inserting keywords to the prompt editor
         addPromptButtons(panel)
         // add the panel as a new tab
@@ -392,15 +403,6 @@ class SettingsLLMComponent {
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)
             .panel
-    }
-
-    private fun getButtonsPanel(previousButton: JButton, requestLabel: JLabel, nextButton: JButton): JPanel {
-        val buttonsPanel = JPanel()
-        buttonsPanel.layout = BoxLayout(buttonsPanel, BoxLayout.X_AXIS)
-        buttonsPanel.add(previousButton)
-        buttonsPanel.add(requestLabel)
-        buttonsPanel.add(nextButton)
-        return buttonsPanel
     }
 
     private fun getEditorTextField(editorType: PromptEditorType): EditorTextField {

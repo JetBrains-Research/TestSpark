@@ -48,6 +48,9 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.classPrompt = settingsState.classPrompt
         settingsComponent!!.methodPrompt = settingsState.methodPrompt
         settingsComponent!!.linePrompt = settingsState.linePrompt
+        settingsComponent!!.currentClassTemplateNumber = settingsState.currentClassTemplateNumber
+        settingsComponent!!.currentMethodTemplateNumber = settingsState.currentMethodTemplateNumber
+        settingsComponent!!.currentLineTemplateNumber = settingsState.currentLineTemplateNumber
         settingsComponent!!.llmSetupCheckBoxSelected = settingsState.llmSetupCheckBoxSelected
         settingsComponent!!.provideTestSamplesCheckBoxSelected = settingsState.provideTestSamplesCheckBoxSelected
         settingsComponent!!.defaultLLMRequests = settingsState.defaultLLMRequests
@@ -86,6 +89,10 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
         modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.linePrompt)
 
+        modified = modified or (settingsComponent!!.currentClassTemplateNumber != settingsState.currentClassTemplateNumber)
+        modified = modified or (settingsComponent!!.currentMethodTemplateNumber != settingsState.currentMethodTemplateNumber)
+        modified = modified or (settingsComponent!!.currentLineTemplateNumber != settingsState.currentLineTemplateNumber)
+
         modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
         modified = modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != settingsState.provideTestSamplesCheckBoxSelected)
 
@@ -115,6 +122,9 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.classPrompt = settingsComponent!!.classPrompt
         settingsState.methodPrompt = settingsComponent!!.methodPrompt
         settingsState.linePrompt = settingsComponent!!.linePrompt
+        settingsState.currentClassTemplateNumber = settingsComponent!!.currentClassTemplateNumber
+        settingsState.currentMethodTemplateNumber = settingsComponent!!.currentMethodTemplateNumber
+        settingsState.currentLineTemplateNumber = settingsComponent!!.currentLineTemplateNumber
         settingsState.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
         settingsState.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
         settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests
