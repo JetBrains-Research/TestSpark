@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.settings.llm
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.EditorTextField
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.services.SettingsApplicationService
@@ -12,7 +13,6 @@ import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import kotlin.math.max
-import org.jetbrains.research.testspark.data.JsonEncoding
 
 class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     private val settingsState: SettingsApplicationState

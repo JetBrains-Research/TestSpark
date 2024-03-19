@@ -13,6 +13,7 @@ import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
@@ -31,7 +32,6 @@ import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
-import org.jetbrains.research.testspark.data.JsonEncoding
 
 class SettingsLLMComponent {
     private val settingsState: SettingsApplicationState
@@ -127,8 +127,10 @@ class SettingsLLMComponent {
         set(value) = promptLineTemplateFactory.setCurrentTemplateNumber(value)
 
     var defaultLLMRequests: String
-        get() = JsonEncoding.encode(defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }
-            .map { (it.getComponent(0) as JTextField).text } as MutableList<String>)
+        get() = JsonEncoding.encode(
+            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }
+                .map { (it.getComponent(0) as JTextField).text } as MutableList<String>,
+        )
         set(value) {
             fillDefaultLLMRequestsPanel(JsonEncoding.decode(value))
         }
