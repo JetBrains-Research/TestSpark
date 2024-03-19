@@ -29,9 +29,11 @@ import javax.swing.BorderFactory
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
+import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.core.generation.prompt.PromptKeyword
 
 class SettingsLLMComponent {
     private val settingsState: SettingsApplicationState
@@ -219,33 +221,45 @@ class SettingsLLMComponent {
 
     private fun addPromptButtons(panel: JPanel) {
         val keywords = service<PromptParserService>().getKeywords()
-        val editorTextField = panel.getComponent(1) as EditorTextField
-        keywords.forEach {
-            val btnPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+        val mandatoryKeywords = keywords.filter { it.mandatory }
+        val optionalKeywords = keywords.filter { !it.mandatory }
 
-            val button = JButton("\$${it.text}")
-            button.setForeground(JBColor.ORANGE)
-            button.font = Font("Monochrome", Font.BOLD, 12)
+        panel.add(JLabel("Mandatory:"))
+        mandatoryKeywords.forEach {
+            panel.add(createButtonPanel(it))
+        }
 
-            // add actionListener for button
-            button.addActionListener { _ ->
-                val editor = editorTextField.editor
+        panel.add(JLabel("Optional:"))
+        optionalKeywords.forEach {
+            panel.add(createButtonPanel(it))
+        }
+    }
 
-                editor?.let { e ->
-                    val offset = e.caretModel.offset
-                    val document = editorTextField.document
-                    WriteCommandAction.runWriteCommandAction(e.project) {
-                        document.insertString(offset, "\$${it.text}")
-                    }
+    private fun createButtonPanel(keyword: PromptKeyword): JPanel {
+        val buttonPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+        val editorTextField = panel!!.getComponent(1) as EditorTextField
+        val button = JButton("\$${keyword.text}")
+        button.setForeground(JBColor.ORANGE)
+        button.font = Font("Monochrome", Font.BOLD, 12)
+
+        // add actionListener for button
+        button.addActionListener { _ ->
+            val editor = editorTextField.editor
+
+            editor?.let { e ->
+                val offset = e.caretModel.offset
+                val document = editorTextField.document
+                WriteCommandAction.runWriteCommandAction(e.project) {
+                    document.insertString(offset, "\$${keyword.text}")
                 }
             }
-
-            // add button and it's description to buttons panel
-            btnPanel.add(button)
-            btnPanel.add(JBLabel("${it.description} - ${if (it.mandatory) "mandatory" else "optional"}"))
-
-            panel.add(btnPanel)
         }
+
+        // add button and it's description to buttons panel
+        buttonPanel.add(button)
+        buttonPanel.add(JBLabel(keyword.description))
+
+        return buttonPanel
     }
 
     /**
