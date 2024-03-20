@@ -44,6 +44,10 @@ class JavaClassBuilderService(private val project: Project) {
 
         testFullText.replace("\r\n", "\n")
 
+        /**
+         * for better readability and make the tests shorter, we reduce the number of line breaks:
+         *  when we have three or more sequential \n, reduce it to two.
+         */
         return formatJavaCode(Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"), testGenerationData)
     }
 
