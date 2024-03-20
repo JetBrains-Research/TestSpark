@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.generation.importPattern
+import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -117,17 +118,15 @@ class TestsAssembler(
                     .map { it.groupValues[0] }
                     .toSet()
 
-            val junitVersion = settingsState.junitVersion
-
             // save RunWith
-            val runWith = junitVersion.runWithAnnotationMeta.extract(rawText)
+            val runWith = getJUnitVersion().runWithAnnotationMeta.extract(rawText)
             if (runWith != null) {
                 testSuite.runWith = runWith
                 project.service<TestGenerationDataService>().runWith = runWith
-                project.service<TestGenerationDataService>().importsCode.add(junitVersion.runWithAnnotationMeta.import)
+                project.service<TestGenerationDataService>().importsCode.add(getJUnitVersion().runWithAnnotationMeta.import)
             } else {
                 project.service<TestGenerationDataService>().runWith = ""
-                project.service<TestGenerationDataService>().importsCode.remove(junitVersion.runWithAnnotationMeta.import)
+                project.service<TestGenerationDataService>().importsCode.remove(getJUnitVersion().runWithAnnotationMeta.import)
             }
 
             val testSet: MutableList<String> = rawText.split("@Test").toMutableList()
@@ -223,5 +222,13 @@ class TestsAssembler(
         } catch (e: Exception) {
             return null
         }
+    }
+
+    private fun getJUnitVersion(): JUnitVersion {
+        var junitVersion = JUnitVersion.JUnit4
+        for (version in JUnitVersion.values()) {
+            if (version.name == settingsState.junitVersion) { junitVersion = version }
+        }
+        return junitVersion
     }
 }

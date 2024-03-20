@@ -17,6 +17,7 @@ import kotlinx.serialization.json.Json
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
@@ -55,6 +56,11 @@ class SettingsLLMComponent {
     private var commonDefaultLLMRequestsPanel = JPanel()
     private val defaultLLMRequestPanels = mutableListOf<JPanel>()
     private val addDefaultLLMRequestsButtonPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+
+    // JUnit versions
+    private var junitVersionSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("junitVersion"))
+    private val junitVersionPriorityCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("junitVersionPriorityCheckBox"), true)
+    private var junitVersionSelector = ComboBox(JUnitVersion.values().map { it.showName }.toTypedArray())
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
@@ -97,6 +103,18 @@ class SettingsLLMComponent {
         get() = maxPolyDepthField.number
         set(value) {
             maxPolyDepthField.number = value
+        }
+
+    var junitVersionPriorityCheckBoxSelected: Boolean
+        get() = junitVersionPriorityCheckBox.isSelected
+        set(newStatus) {
+            junitVersionPriorityCheckBox.isSelected = newStatus
+        }
+
+    var junitVersion: String
+        get() = junitVersionSelector.item
+        set(value) {
+            junitVersionSelector.item = value
         }
 
     var classPrompt: String
@@ -158,6 +176,8 @@ class SettingsLLMComponent {
         fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), settingsState.defaultLLMRequests))
 
         fillAddDefaultLLMRequestsButtonPanel()
+
+        fillJunitComponents()
 
         // Adds the panel components
         createSettingsPanel()
@@ -249,6 +269,11 @@ class SettingsLLMComponent {
         }
 
         addDefaultLLMRequestsButtonPanel.add(addDefaultLLMRequestsButton)
+    }
+
+    private fun fillJunitComponents() {
+        junitVersionSelector.item = settingsState.junitVersion
+        junitVersionPriorityCheckBox.isSelected = settingsState.junitVersionPriorityCheckBoxSelected
     }
 
     /**
@@ -377,6 +402,9 @@ class SettingsLLMComponent {
             .addComponent(defaultLLMRequestsSeparator, 15)
             .addComponent(commonDefaultLLMRequestsPanel, 15)
             .addComponent(addDefaultLLMRequestsButtonPanel, 15)
+            .addComponent(junitVersionSeparator, 15)
+            .addComponent(junitVersionPriorityCheckBox, 15)
+            .addComponent(junitVersionSelector, 15)
             .addComponent(promptSeparator, 15)
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)

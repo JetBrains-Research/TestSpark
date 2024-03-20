@@ -176,6 +176,6 @@ class LLMSetupPanelFactory(private val e: AnActionEvent) : PanelFactory {
                 settingsState.grazieModel = llmPlatforms[index].model
             }
         }
-        settingsState.junitVersion = junitSelector.selectedItem!! as JUnitVersion
+        settingsState.junitVersion = (junitSelector.selectedItem!! as JUnitVersion).showName
     }
 }

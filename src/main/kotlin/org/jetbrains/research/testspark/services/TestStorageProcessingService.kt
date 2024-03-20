@@ -11,6 +11,7 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.data.DataFilesUtil
+import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.data.TestCase
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -46,9 +47,8 @@ class TestStorageProcessingService(private val project: Project) {
      */
     private fun getPath(buildPath: String): String {
         // create the path for the command
-        val junitVersion = settingsState.junitVersion
         val separator = DataFilesUtil.classpathSeparator
-        val junitPath = junitVersion.libJar.joinToString(separator.toString()) { getLibrary(it) }
+        val junitPath = getJUnitVersion().libJar.joinToString(separator.toString()) { getLibrary(it) }
         val mockitoPath = getLibrary("mockito-core-5.0.0.jar")
         val hamcrestPath = getLibrary("hamcrest-core-1.3.jar")
         val byteBuddy = getLibrary("byte-buddy-1.14.6.jar")
@@ -181,7 +181,7 @@ class TestStorageProcessingService(private val project: Project) {
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
         name += "$className#$testCaseName"
 
-        val junitVersion = settingsState.junitVersion.version
+        val junitVersion = getJUnitVersion().version
 
         // run the test method with jacoco agent
         val testExecutionError = project.service<RunCommandLineService>().runCommandLine(
@@ -374,5 +374,13 @@ class TestStorageProcessingService(private val project: Project) {
         DataFilesUtil.cleanFolder(project.service<ProjectContextService>().resultPath!!)
 
         return TestCase(testId, testName, testCode, setOf(), setOf(), setOf())
+    }
+
+    private fun getJUnitVersion(): JUnitVersion {
+        var junitVersion = JUnitVersion.JUnit4
+        for (version in JUnitVersion.values()) {
+            if (version.name == settingsState.junitVersion) { junitVersion = version }
+        }
+        return junitVersion
     }
 }

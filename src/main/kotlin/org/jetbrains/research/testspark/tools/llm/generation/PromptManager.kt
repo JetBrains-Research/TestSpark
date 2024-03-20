@@ -64,7 +64,7 @@ class PromptManager(
                     polymorphismRelations = polymorphismRelations,
                     promptConfiguration = PromptConfiguration(
                         desiredLanguage = "Java",
-                        desiredTestingPlatform = settingsState.junitVersion.showName,
+                        desiredTestingPlatform = settingsState.junitVersion,
                         desiredMockingFramework = "Mockito 5",
                     ),
                 )
