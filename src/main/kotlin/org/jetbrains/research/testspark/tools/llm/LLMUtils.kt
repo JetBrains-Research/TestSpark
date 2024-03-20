@@ -2,10 +2,10 @@ package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import java.util.Locale

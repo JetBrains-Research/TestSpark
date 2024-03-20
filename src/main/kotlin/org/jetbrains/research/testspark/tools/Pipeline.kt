@@ -10,10 +10,10 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.getSurroundingClass

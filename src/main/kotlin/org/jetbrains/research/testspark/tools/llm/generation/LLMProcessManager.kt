@@ -1,23 +1,28 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
+import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.core.data.TestCase
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.network.LLMResponse
 import org.jetbrains.research.testspark.core.generation.llm.network.ResponseErrorCode
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
@@ -53,6 +58,10 @@ class LLMProcessManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
     private val testProcessor = TestProcessor(project)
+    private val sep = File.separatorChar
+
+    private val settingsState: SettingsApplicationState
+        get() = SettingsApplicationService.getInstance().state!!
 
     /**
      * Runs the test generator process.
@@ -95,6 +104,11 @@ class LLMProcessManager(
         var warningMessage = ""
         var messageToPrompt = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
         var generatedTestSuite: TestSuiteGeneratedByLLM? = null
+
+        // ToDO: needs to be passed to LLMWithFeedback class (in core) in the future
+        val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
+        val libraryPath = "\"${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}\""
+        val junitVersion = settingsState.junitVersion
 
         // Initiate a new RequestManager
         val requestManager = StandardRequestManagerFactory().getRequestManager(project)
@@ -211,9 +225,9 @@ class LLMProcessManager(
 
             // Compile the test file
             indicator.setText(TestSparkBundle.message("compilationTestsChecking"))
-
-            val separateCompilationResult = testProcessor.compileTestCases(generatedTestCasesPaths, buildPath, testCases, generatedTestsData)
-            val commonCompilationResult = testProcessor.compileCode(File(generatedTestPath).absolutePath, buildPath)
+            val testCompiler = TestCompiler(javaHomePath, libraryPath, junitVersion)
+            val separateCompilationResult = testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases, generatedTestsData)
+            val commonCompilationResult = testCompiler.compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!separateCompilationResult && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n${testSuitePresenter.toString(generatedTestSuite)}")

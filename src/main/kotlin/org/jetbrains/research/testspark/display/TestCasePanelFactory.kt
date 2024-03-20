@@ -44,7 +44,7 @@ import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
-import java.util.Queue
+import java.util.*
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
@@ -453,7 +453,7 @@ class TestCasePanelFactory(
 
         WriteCommandAction.runWriteCommandAction(project) {
             project.service<ErrorService>().clear()
-            val code = testSuitePresenter.toString(testSuite) /*testSuite.toString()*/
+            val code = testSuitePresenter.toString(testSuite)
             testCase.testName =
                 project.service<JavaClassBuilderService>()
                     .getTestMethodNameFromClassWithTestCase(testCase.testName, code)

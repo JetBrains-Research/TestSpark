@@ -177,11 +177,12 @@ class CoverageVisualisationService(private val project: Project) {
     }
 
     private fun getUncoveredMutants(testReport: Report, selectedTests: HashSet<Int>): Map<Int, List<MutationInfo>> {
-        if (testReport is IJReport)
+        if (testReport is IJReport) {
             return testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.value.id !in selectedTests }
                 .map { x -> (x.value as IJTestCase).coveredMutants }.flatten().groupBy { x -> x.lineNo }
-        else
+        } else {
             throw IllegalStateException("the report provided to IDEA's UI should ba an instance of IJReport")
+        }
     }
 
     private fun getCoveredMutants(testReport: Report, selectedTests: HashSet<Int>): Map<Int, List<MutationInfo>> {
