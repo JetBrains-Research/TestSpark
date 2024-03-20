@@ -7,7 +7,6 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
-import org.jetbrains.research.testspark.data.JUnitVersion
 import java.awt.Font
 import javax.swing.JButton
 import javax.swing.JLabel
@@ -40,7 +39,7 @@ class EvoSuitePanelFactory : PanelFactory {
      *
      * @return the middle panel as a JPanel.
      */
-    override fun getMiddlePanel(junit: JUnitVersion?): JPanel {
+    override fun getMiddlePanel(): JPanel {
         javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
         javaPathTextField.text = settingsState.javaPath
 
