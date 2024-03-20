@@ -245,8 +245,8 @@ class LLMProcessManager(
         saveData(
             project,
             report,
-            getPackageFromTestSuiteCode(testSuiteRepresentation/*generatedTestSuite.toString()*/),
-            getImportsCodeFromTestSuiteCode(testSuiteRepresentation/*generatedTestSuite.toString()*/, projectContext.classFQN!!),
+            getPackageFromTestSuiteCode(testSuiteRepresentation),
+            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
             projectContext.fileUrl!!,
             generatedTestsData,
         )

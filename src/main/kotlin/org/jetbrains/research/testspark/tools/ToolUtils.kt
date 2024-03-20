@@ -152,10 +152,10 @@ fun getResultPath(id: String, testResultDirectory: String): String {
 
 fun transferToIJTestCases(report: Report) {
     val result: MutableMap<Int, TestCase> = mutableMapOf()
-    report.testCaseList.keys.forEach { index ->
-        val testcase = report.testCaseList[index]
+    report.testCaseList.keys.forEach { key ->
+        val testcase = report.testCaseList[key]
         val ijTestCase = IJTestCase(testcase!!.id, testcase.testName, testcase.testCode, testcase.coveredLines)
-        result[index] = ijTestCase
+        result[key] = ijTestCase
     }
     report.testCaseList = HashMap(result)
 }
