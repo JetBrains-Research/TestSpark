@@ -24,8 +24,7 @@ import org.jetbrains.research.testspark.services.RunnerService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import java.io.File
-import java.util.UUID
+import java.util.*
 
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
@@ -50,7 +49,6 @@ class Pipeline(
         val cutPsiClass = getSurroundingClass(psiFile, caretOffset)!!
 
         // get generated test path
-        val sep = File.separatorChar
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
         val id = UUID.randomUUID().toString()
         val testResultName = "test_gen_result_$id"

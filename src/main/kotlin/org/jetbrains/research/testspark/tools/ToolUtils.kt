@@ -17,6 +17,8 @@ import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
 import java.io.File
 
+val sep = File.separatorChar
+
 /**
  * Retrieves the imports code from a given test suite code.
  *

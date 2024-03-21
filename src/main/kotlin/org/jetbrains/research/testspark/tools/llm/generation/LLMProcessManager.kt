@@ -33,6 +33,7 @@ import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.tools.llm.test.TestSuitePresenter
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
+import org.jetbrains.research.testspark.tools.sep
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import org.jetbrains.research.testspark.tools.transferToIJTestCases
 import java.io.File
@@ -58,7 +59,6 @@ class LLMProcessManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = SettingsArguments.maxLLMRequest()
     private val testProcessor = TestProcessor(project)
-    private val sep = File.separatorChar
 
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!

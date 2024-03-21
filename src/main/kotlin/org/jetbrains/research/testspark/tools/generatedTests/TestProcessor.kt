@@ -18,12 +18,12 @@ import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.getBuildPath
+import org.jetbrains.research.testspark.tools.sep
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
 class TestProcessor(val project: Project) {
-    private val sep = File.separatorChar
 
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
