@@ -5,7 +5,7 @@ package org.jetbrains.research.testspark.core.data
  */
 open class Report {
     // Fields were created based on the fields in org.evosuite.utils.CompactReport for easier transformation
-    var UUT: String = ""
+    var UUT: String = "" // Unit Under Test
     var allCoveredLines: Set<Int> = setOf()
     var allUncoveredLines: Set<Int> = setOf()
     var testCaseList: HashMap<Int, TestCase> = hashMapOf()

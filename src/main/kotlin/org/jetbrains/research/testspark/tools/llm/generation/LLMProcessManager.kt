@@ -261,7 +261,7 @@ class LLMProcessManager(
             report,
             getPackageFromTestSuiteCode(testSuiteRepresentation),
             getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
-            projectContext.fileUrl!!,
+            projectContext.fileUrlAsString!!,
             generatedTestsData,
         )
 

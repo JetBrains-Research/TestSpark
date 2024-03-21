@@ -202,7 +202,7 @@ class EvoSuiteProcessManager(
                 IJReport(testGenerationResult),
                 getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
                 getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
-                projectContext.fileUrl!!,
+                projectContext.fileUrlAsString!!,
                 generatedTestData,
             )
         } catch (e: Exception) {
