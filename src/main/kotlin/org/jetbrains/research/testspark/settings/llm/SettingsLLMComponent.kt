@@ -404,7 +404,12 @@ class SettingsLLMComponent {
             .addComponent(addDefaultLLMRequestsButtonPanel, 15)
             .addComponent(junitVersionSeparator, 15)
             .addComponent(junitVersionPriorityCheckBox, 15)
-            .addComponent(junitVersionSelector, 15)
+            .addLabeledComponent(
+                JBLabel(TestSparkLabelsBundle.defaultValue("preferredJUnitVersion")),
+                junitVersionSelector,
+                10,
+                false,
+            )
             .addComponent(promptSeparator, 15)
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)

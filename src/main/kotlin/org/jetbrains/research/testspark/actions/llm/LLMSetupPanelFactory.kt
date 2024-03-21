@@ -1,10 +1,6 @@
 package org.jetbrains.research.testspark.actions.llm
 
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.roots.LibraryOrderEntry
-import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
@@ -22,14 +18,14 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-class LLMSetupPanelFactory(private val e: AnActionEvent) : PanelFactory {
+class LLMSetupPanelFactory(e: AnActionEvent) : PanelFactory {
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
     private var platformSelector = ComboBox(arrayOf(settingsState.openAIName))
     private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
     private val okLlmButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
-    private val junitSelector = JUnitCombobox()
+    private val junitSelector = JUnitCombobox(e)
 
     private val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
 
@@ -69,8 +65,6 @@ class LLMSetupPanelFactory(private val e: AnActionEvent) : PanelFactory {
     override fun getMiddlePanel(): JPanel {
         stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
 
-        junitSelector.detected = findJUnitDependency()
-
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
             .addLabeledComponent(
@@ -98,26 +92,6 @@ class LLMSetupPanelFactory(private val e: AnActionEvent) : PanelFactory {
                 false,
             )
             .panel
-    }
-
-    private fun findJUnitDependency(): JUnitVersion? {
-        val project = e.project!!
-        val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)?.firstOrNull() ?: return null
-
-        val index = ProjectRootManager.getInstance(project).fileIndex
-        val module = index.getModuleForFile(virtualFile) ?: return null
-
-        for (orderEntry in ModuleRootManager.getInstance(module).orderEntries) {
-            if (orderEntry is LibraryOrderEntry) {
-                val libraryName = orderEntry.library?.name ?: continue
-                for (junit in JUnitVersion.values()) {
-                    if (libraryName.contains(junit.groupId)) {
-                        return junit
-                    }
-                }
-            }
-        }
-        return null
     }
 
     /**
