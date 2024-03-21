@@ -22,17 +22,21 @@ import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.JsonEncoding
-import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.core.data.TestCase
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
-import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
+import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
+import org.jetbrains.research.testspark.tools.llm.test.TestSuitePresenter
+import org.jetbrains.research.testspark.tools.llm.testModificationRequest
 import org.jetbrains.research.testspark.tools.processStopped
 import java.awt.Dimension
 import java.awt.Toolkit
@@ -50,13 +54,13 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import kotlin.collections.HashMap
 
 class TestCasePanelFactory(
     private val project: Project,
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
+    val uiContext: UIContext?,
 ) {
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!
@@ -87,7 +91,7 @@ class TestCasePanelFactory(
         editor.project,
         testCase.testCode,
         TestCaseDocumentCreator(
-            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+            getClassWithTestCaseName(testCase.testName),
         ),
         false,
     )
@@ -393,19 +397,22 @@ class TestCasePanelFactory(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
-                    if (processStopped(project, indicator)) return
+                    val ijIndicator = IJProgressIndicator(indicator)
 
-                    val modifiedTest = project.service<LLMChatService>()
-                        .testModificationRequest(
-                            initialCodes[currentRequestNumber - 1],
-                            requestComboBox.editor.item.toString(),
-                            indicator,
-                            project,
-                        )
+                    if (processStopped(project, ijIndicator)) return
+
+                    val modifiedTest = testModificationRequest(
+                        initialCodes[currentRequestNumber - 1],
+                        requestComboBox.editor.item.toString(),
+                        ijIndicator,
+                        uiContext!!.requestManager!!,
+                        project,
+                        uiContext.testGenerationOutput,
+                    )
 
                     if (modifiedTest != null) {
                         modifiedTest.setTestFileName(
-                            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+                            getClassWithTestCaseName(testCase.testName),
                         )
                         addTest(modifiedTest)
                     } else {
@@ -422,9 +429,9 @@ class TestCasePanelFactory(
                         enableComponents(true)
                     }
 
-                    if (processStopped(project, indicator)) return
+                    if (processStopped(project, ijIndicator)) return
 
-                    indicator.stop()
+                    ijIndicator.stop()
                 }
             })
     }
@@ -440,9 +447,11 @@ class TestCasePanelFactory(
     }
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
+        val testSuitePresenter = TestSuitePresenter(project, uiContext!!.testGenerationOutput)
+
         WriteCommandAction.runWriteCommandAction(project) {
             project.service<ErrorService>().clear()
-            val code = testSuite.toString()
+            val code = testSuitePresenter.toString(testSuite)
             testCase.testName =
                 project.service<JavaClassBuilderService>()
                     .getTestMethodNameFromClassWithTestCase(testCase.testName, code)
@@ -486,12 +495,12 @@ class TestCasePanelFactory(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
-                    runTest(indicator)
+                    runTest(IJProgressIndicator(indicator))
                 }
             })
     }
 
-    fun addTask(tasks: Queue<(ProgressIndicator) -> Unit>) {
+    fun addTask(tasks: Queue<(CustomProgressIndicator) -> Unit>) {
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
 
@@ -503,15 +512,18 @@ class TestCasePanelFactory(
         }
     }
 
-    private fun runTest(indicator: ProgressIndicator) {
-        indicator.text = "Executing ${testCase.testName}"
+    private fun runTest(indicator: CustomProgressIndicator) {
+        indicator.setText("Executing ${testCase.testName}")
 
-        val newTestCase = project.service<TestStorageProcessingService>()
+        val newTestCase = TestProcessor(project)
             .processNewTestCase(
                 "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
                 testCase.id,
                 testCase.testName,
                 testCase.testCode,
+                uiContext!!.testGenerationOutput.packageLine,
+                uiContext.testGenerationOutput.resultPath,
+                uiContext.projectContext,
             )
 
         testCase.coveredLines = newTestCase.coveredLines
