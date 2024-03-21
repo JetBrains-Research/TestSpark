@@ -29,6 +29,7 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import java.awt.BorderLayout
@@ -80,6 +81,8 @@ class TestCaseDisplayService(private val project: Project) {
      * Variable to keep reference to the coverage visualisation content
      */
     private var content: Content? = null
+
+    var uiContext: UIContext? = null
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -133,7 +136,7 @@ class TestCaseDisplayService(private val project: Project) {
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox)
+            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext)
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
@@ -368,8 +371,8 @@ class TestCaseDisplayService(private val project: Project) {
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
 
-                if (project.service<TestGenerationDataService>().runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<TestGenerationDataService>().runWith})")
+                if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${uiContext!!.testGenerationOutput.runWith})")
                 }
 
                 psiJavaFile!!.add(psiClass!!)
@@ -441,6 +444,7 @@ class TestCaseDisplayService(private val project: Project) {
                     project.service<JavaClassBuilderService>().formatJavaCode(
                         it.replace("\r\n", "\n")
                             .replace("verifyException(", "// verifyException("),
+                        uiContext!!.testGenerationOutput,
                     ),
                 )
                 // Fix Windows line separators
@@ -455,23 +459,23 @@ class TestCaseDisplayService(private val project: Project) {
         // insert other info to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             selectedClass.rBrace!!.textRange.startOffset,
-            project.service<TestGenerationDataService>().otherInfo + "\n",
+            uiContext!!.testGenerationOutput.otherInfo + "\n",
         )
 
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            project.service<TestGenerationDataService>().importsCode.joinToString("\n") + "\n\n",
+            uiContext!!.testGenerationOutput.importsCode.joinToString("\n") + "\n\n",
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
             .insertString(
                 0,
-                if (project.service<TestGenerationDataService>().packageLine.isEmpty()) {
+                if (uiContext!!.testGenerationOutput.packageLine.isEmpty()) {
                     ""
                 } else {
-                    "package ${project.service<TestGenerationDataService>().packageLine};\n\n"
+                    "package ${uiContext!!.testGenerationOutput.packageLine};\n\n"
                 },
             )
     }

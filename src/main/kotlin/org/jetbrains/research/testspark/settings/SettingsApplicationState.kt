@@ -1,8 +1,8 @@
 package org.jetbrains.research.testspark.settings
 
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
-import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.core.data.JUnitVersion
+import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 
 /**
  * This class is the actual data class that stores the values of the EvoSuite Settings entries.

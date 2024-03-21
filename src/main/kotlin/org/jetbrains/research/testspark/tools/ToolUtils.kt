@@ -5,16 +5,19 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
+import org.jetbrains.research.testspark.core.data.Report
+import org.jetbrains.research.testspark.core.data.TestCase
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
-import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
-import org.jetbrains.research.testspark.services.ProjectContextService
-import org.jetbrains.research.testspark.services.TestGenerationDataService
-import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
 import java.io.File
+
+val sep = File.separatorChar
 
 /**
  * Retrieves the imports code from a given test suite code.
@@ -61,27 +64,29 @@ fun saveData(
     report: Report,
     packageLine: String,
     importsCode: MutableSet<String>,
+    fileUrl: String,
+    generatedTestData: TestGenerationData,
 ) {
-    project.service<TestGenerationDataService>().resultName = project.service<TestStorageProcessingService>().testResultName
-    project.service<TestGenerationDataService>().fileUrl = project.service<ProjectContextService>().fileUrl!!
-    project.service<TestGenerationDataService>().packageLine = packageLine
-    project.service<TestGenerationDataService>().importsCode.addAll(importsCode)
+    generatedTestData.fileUrl = fileUrl
+    generatedTestData.packageLine = packageLine
+    generatedTestData.importsCode.addAll(importsCode)
 
     project.service<TestsExecutionResultService>().initExecutionResult(report.testCaseList.values.map { it.id })
 
     for (testCase in report.testCaseList.values) {
         val code = testCase.testCode
         testCase.testCode = project.service<JavaClassBuilderService>().generateCode(
-            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+            getClassWithTestCaseName(testCase.testName),
             code,
-            project.service<TestGenerationDataService>().importsCode,
-            project.service<TestGenerationDataService>().packageLine,
-            project.service<TestGenerationDataService>().runWith,
-            project.service<TestGenerationDataService>().otherInfo,
+            generatedTestData.importsCode,
+            generatedTestData.packageLine,
+            generatedTestData.runWith,
+            generatedTestData.otherInfo,
+            generatedTestData,
         )
     }
 
-    project.service<TestGenerationDataService>().testGenerationResultList.add(report)
+    generatedTestData.testGenerationResultList.add(report)
 }
 
 /**
@@ -139,4 +144,20 @@ fun processStopped(project: Project, indicator: CustomProgressIndicator): Boolea
         return true
     }
     return false
+}
+
+fun getResultPath(id: String, testResultDirectory: String): String {
+    val testResultName = "test_gen_result_$id"
+
+    return "$testResultDirectory$testResultName"
+}
+
+fun transferToIJTestCases(report: Report) {
+    val result: MutableMap<Int, TestCase> = mutableMapOf()
+    report.testCaseList.keys.forEach { key ->
+        val testcase = report.testCaseList[key]
+        val ijTestCase = IJTestCase(testcase!!.id, testcase.testName, testcase.testCode, testcase.coveredLines)
+        result[key] = ijTestCase
+    }
+    report.testCaseList = HashMap(result)
 }

@@ -7,7 +7,7 @@ class DataFilesUtil {
     companion object {
         fun makeTmp(tempDir: String) {
             val sep = File.separatorChar
-            val testResultDirectory = "${tempDir}${sep}testSparkResults${sep}"
+            val testResultDirectory = "${tempDir}${sep}testSparkResults$sep"
 
             val tmpDir = File(testResultDirectory)
 

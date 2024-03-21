@@ -2,8 +2,6 @@ package org.jetbrains.research.testspark.core.generation.llm.network
 
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
-
-
 enum class ResponseErrorCode {
     OK,
     PROMPT_TOO_LONG,
@@ -18,8 +16,7 @@ data class LLMResponse(
     init {
         if (errorCode == ResponseErrorCode.OK && testSuite == null) {
             throw IllegalArgumentException("Test suite must be provided when ErrorCode is OK, got null")
-        }
-        else if (errorCode != ResponseErrorCode.OK && testSuite != null) {
+        } else if (errorCode != ResponseErrorCode.OK && testSuite != null) {
             throw IllegalArgumentException("Test suite must not be provided when ErrorCode is not OK, got $testSuite")
         }
     }

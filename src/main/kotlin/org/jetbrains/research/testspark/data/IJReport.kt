@@ -4,20 +4,19 @@ import org.evosuite.result.BranchInfo
 import org.evosuite.result.MutationInfo
 import org.evosuite.utils.CompactReport
 import org.evosuite.utils.CompactTestCase
+import org.jetbrains.research.testspark.core.data.Report
 
-/**
- * Storage of generated tests. Implemented on the basis of org.evosuite.utils.CompactReport structure.
- */
-class Report {
-    // Fields were created based on the fields in org.evosuite.utils.CompactReport for easier transformation
-    var UUT: String = ""
-    var allCoveredLines: Set<Int> = setOf()
-    var allUncoveredLines: Set<Int> = setOf()
+class IJReport : Report {
+
     var allCoveredBranches: Set<BranchInfo> = setOf()
     var allUncoveredBranches: Set<BranchInfo> = setOf()
     var allCoveredMutation: Set<MutationInfo> = setOf()
     var allUncoveredMutation: Set<MutationInfo> = setOf()
-    var testCaseList: HashMap<Int, TestCase> = hashMapOf()
+
+    /**
+     * Default constructor for Report
+     */
+    constructor()
 
     /**
      * Transformation CompactReport to Report
@@ -33,20 +32,7 @@ class Report {
         allCoveredMutation = compactReport.allCoveredMutation
         allUncoveredMutation = compactReport.allUncoveredMutation
         for ((index, compactTestCase: CompactTestCase) in compactReport.testCaseList.values.withIndex()) {
-            testCaseList[index] = TestCase(index, compactTestCase)
+            testCaseList[index] = IJTestCase(index, compactTestCase)
         }
-    }
-
-    /**
-     * Default constructor for Report
-     */
-    constructor()
-
-    /**
-     * AllCoveredLines update
-     */
-    fun normalized(): Report {
-        allCoveredLines = testCaseList.values.map { it.coveredLines }.flatten().toSet()
-        return this
     }
 }

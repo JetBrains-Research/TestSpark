@@ -2,11 +2,15 @@ package org.jetbrains.research.testspark.tools.llm.test
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
 
-
-class TestSuitePresenter(private val project: Project) {
+class TestSuitePresenter(
+    private val project: Project,
+    val generatedTestsData: TestGenerationData,
+) {
     /**
      * Returns a string representation of this object.
      *
@@ -38,10 +42,10 @@ class TestSuitePresenter(private val project: Project) {
                 packageString,
                 runWith,
                 otherInfo,
+                generatedTestsData,
             )
         }
     }
-
 
     /**
      * Returns the full text of the test suite (excluding the expected exception).
@@ -49,15 +53,18 @@ class TestSuitePresenter(private val project: Project) {
      * @return the full text of the test suite (excluding the expected exception) as a string.
      */
     fun toStringSingleTestCaseWithoutExpectedException(
-        testSuite: TestSuiteGeneratedByLLM, testCaseIndex: Int): String =
+        testSuite: TestSuiteGeneratedByLLM,
+        testCaseIndex: Int,
+    ): String =
         testSuite.run {
             project.service<JavaClassBuilderService>().generateCode(
-                project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCases[testCaseIndex].name),
+                getClassWithTestCaseName(testCases[testCaseIndex].name),
                 testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
                 imports,
                 packageString,
                 runWith,
                 otherInfo,
+                generatedTestsData,
             )
         }
 
@@ -80,6 +87,7 @@ class TestSuitePresenter(private val project: Project) {
                 packageString,
                 runWith,
                 otherInfo,
+                generatedTestsData,
             )
         }
     }

@@ -1,13 +1,12 @@
 package org.jetbrains.research.testspark.core.test.parsers.java
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.utils.importPattern
-import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestLine
 import org.jetbrains.research.testspark.core.test.data.TestLineType
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-
+import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
+import org.jetbrains.research.testspark.core.utils.importPattern
 
 class JUnitTestSuiteParser(
     private val packageName: String,
@@ -100,14 +99,18 @@ private class JUnitTestCaseParser {
         }
 
         // Get unexpected exceptions
-        if (!rawTest.contains("public void")) {
+        /* Each test case should follow [public] void <testcase name> {...}
+            Tests do not return anything so it is safe to consider that void always appears before test case name
+         */
+        val voidString = "void"
+        if (!rawTest.contains(voidString)) {
             return TestCaseParseResult(
                 testCase = null,
-                errorMessage = "The raw Test does not contain public void:\n $rawTest",
+                errorMessage = "The raw Test does not contain $voidString:\n $rawTest",
                 errorOccurred = true,
             )
         }
-        val interestingPartOfSignature = rawTest.split("public void")[1]
+        val interestingPartOfSignature = rawTest.split(voidString)[1]
             .split("{")[0]
             .split("()")[1]
             .trim()
@@ -117,12 +120,12 @@ private class JUnitTestCaseParser {
         }
 
         // Get test name
-        val testName: String = rawTest.split("public void ")[1]
+        val testName: String = rawTest.split(voidString)[1]
             .split("()")[0]
             .trim()
 
         // Get test body and remove opening bracket
-        var testBody = rawTest.split("{").toMutableList().apply {removeFirst() }
+        var testBody = rawTest.split("{").toMutableList().apply { removeFirst() }
             .joinToString("{").trim()
 
         // remove closing bracket

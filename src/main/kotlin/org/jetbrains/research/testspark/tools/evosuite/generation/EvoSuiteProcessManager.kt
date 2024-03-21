@@ -12,12 +12,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.services.ProjectContextService
+import org.jetbrains.research.testspark.data.IJReport
+import org.jetbrains.research.testspark.data.ProjectContext
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -26,10 +28,11 @@ import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManage
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
+import org.jetbrains.research.testspark.tools.sep
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import java.io.File
 import java.io.FileReader
 import java.nio.charset.Charset
 import java.util.regex.Pattern
@@ -54,7 +57,6 @@ class EvoSuiteProcessManager(
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
     private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
 
-    private val sep = File.separatorChar
     private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
     private var evoSuitePath = "$pluginsPath${sep}TestSpark${sep}lib${sep}evosuite-$evosuiteVersion.jar"
 
@@ -71,9 +73,11 @@ class EvoSuiteProcessManager(
         indicator: CustomProgressIndicator,
         codeType: FragmentToTestData,
         packageName: String,
-    ) {
+        projectContext: ProjectContext,
+        generatedTestData: TestGenerationData,
+    ): UIContext? {
         try {
-            if (processStopped(project, indicator)) return
+            if (processStopped(project, indicator)) return null
 
             val regex = Regex("version \"(.*?)\"")
             val version = regex.find(CommandLineRunner.run(arrayListOf(settingsState.javaPath, "-version")))
@@ -85,15 +89,15 @@ class EvoSuiteProcessManager(
 
             if (version == null || version > 11) {
                 evoSuiteErrorManager.errorProcess(TestSparkBundle.message("incorrectJavaVersion"), project)
-                return
+                return null
             }
 
-            val projectClassPath = project.service<ProjectContextService>().projectClassPath!!
-            val classFQN = project.service<ProjectContextService>().classFQN!!
-            val baseDir = project.service<ProjectContextService>().baseDir!!
-            val resultName = "${project.service<ProjectContextService>().resultPath}${sep}EvoSuiteResult"
+            val projectClassPath = projectContext.projectClassPath!!
+            val classFQN = projectContext.classFQN!!
+            val baseDir = generatedTestData.baseDir!!
+            val resultName = "${generatedTestData.resultPath}${sep}EvoSuiteResult"
 
-            Path(project.service<ProjectContextService>().resultPath!!).createDirectories()
+            Path(generatedTestData.resultPath).createDirectories()
 
             // get command
             val command = when (codeType.type!!) {
@@ -183,10 +187,10 @@ class EvoSuiteProcessManager(
 
             handler.startNotify()
 
-            if (processStopped(project, indicator)) return
+            if (processStopped(project, indicator)) return null
 
             // evosuite errors check
-            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return
+            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return null
 
             val gson = Gson()
             val reader = JsonReader(FileReader(resultName))
@@ -195,13 +199,17 @@ class EvoSuiteProcessManager(
 
             saveData(
                 project,
-                Report(testGenerationResult),
+                IJReport(testGenerationResult),
                 getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
                 getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
+                projectContext.fileUrlAsString!!,
+                generatedTestData,
             )
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()
         }
+
+        return UIContext(projectContext, generatedTestData, StandardRequestManagerFactory().getRequestManager(project))
     }
 }

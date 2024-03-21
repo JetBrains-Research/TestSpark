@@ -13,7 +13,7 @@ class Request : GrazieRequest {
         messages: List<Pair<String, String>>,
         profile: String,
         testsAssembler: TestsAssembler,
-    ): Pair<String, TestsAssembler> {
+    ): String {
         val generation = TestGeneration(token)
         var errorMessage = ""
         runBlocking {
@@ -23,6 +23,6 @@ class Request : GrazieRequest {
                 testsAssembler.consume(it)
             }
         }
-        return Pair(errorMessage, testsAssembler)
+        return errorMessage
     }
 }

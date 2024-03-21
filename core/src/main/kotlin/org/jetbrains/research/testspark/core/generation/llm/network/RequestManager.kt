@@ -5,7 +5,6 @@ import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 
-
 abstract class RequestManager(var token: String) {
     enum class SendResult {
         OK,
@@ -30,6 +29,7 @@ abstract class RequestManager(var token: String) {
         prompt: String,
         indicator: CustomProgressIndicator,
         packageName: String,
+        testsAssembler: TestsAssembler,
         isUserFeedback: Boolean = false,
     ): LLMResponse {
         // save the prompt in chat history
@@ -38,7 +38,7 @@ abstract class RequestManager(var token: String) {
         // Send Request to LLM
         log.info { "Sending Request..." }
 
-        val (sendResult, testsAssembler) = send(prompt, indicator)
+        val sendResult = send(prompt, indicator, testsAssembler)
 
         if (sendResult == SendResult.PROMPT_TOO_LONG) {
             return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, null)
@@ -74,18 +74,16 @@ abstract class RequestManager(var token: String) {
 
         return if (testSuiteGeneratedByLLM == null) {
             LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
-        }
-        else {
+        } else {
             LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM.reformat())
         }
     }
 
-
     abstract fun send(
         prompt: String,
         indicator: CustomProgressIndicator,
-    ): Pair<SendResult, TestsAssembler>
-
+        testsAssembler: TestsAssembler,
+    ): SendResult
 
     open fun processUserFeedbackResponse(
         testsAssembler: TestsAssembler,
@@ -104,8 +102,7 @@ abstract class RequestManager(var token: String) {
 
         return if (testSuiteGeneratedByLLM == null) {
             LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
-        }
-        else {
+        } else {
             LLMResponse(ResponseErrorCode.OK, testSuiteGeneratedByLLM)
         }
     }

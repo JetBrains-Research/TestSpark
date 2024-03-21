@@ -2,21 +2,20 @@ package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.google.gson.Gson
 import com.google.gson.JsonParser
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
-import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
+import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
-import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.processStopped
 
 /**
@@ -30,6 +29,7 @@ import org.jetbrains.research.testspark.tools.processStopped
 class JUnitTestsAssembler(
     val project: Project,
     val indicator: CustomProgressIndicator,
+    val generationData: TestGenerationData,
 ) : TestsAssembler() {
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!
@@ -102,16 +102,15 @@ class JUnitTestsAssembler(
 
         // save RunWith
         if (testSuite?.runWith?.isNotBlank() == true) {
-            project.service<TestGenerationDataService>().runWith = testSuite.runWith
-            project.service<TestGenerationDataService>().importsCode.add(junitVersion.runWithAnnotationMeta.import)
-        }
-        else {
-            project.service<TestGenerationDataService>().runWith = ""
-            project.service<TestGenerationDataService>().importsCode.remove(junitVersion.runWithAnnotationMeta.import)
+            generationData.runWith = testSuite.runWith
+            generationData.importsCode.add(junitVersion.runWithAnnotationMeta.import)
+        } else {
+            generationData.runWith = ""
+            generationData.importsCode.remove(junitVersion.runWithAnnotationMeta.import)
         }
 
         // save annotations and pre-set methods
-        project.service<TestGenerationDataService>().otherInfo = testSuite?.otherInfo ?: ""
+        generationData.otherInfo = testSuite?.otherInfo ?: ""
 
         // logging generated test cases if any
         testSuite?.testCases?.forEach { testCase -> log.info("Generated test case: $testCase") }
