@@ -21,10 +21,10 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
