@@ -12,13 +12,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
@@ -31,8 +31,8 @@ import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
+import org.jetbrains.research.testspark.tools.sep
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import java.io.File
 import java.io.FileReader
 import java.nio.charset.Charset
 import java.util.regex.Pattern
@@ -57,7 +57,6 @@ class EvoSuiteProcessManager(
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
     private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
 
-    private val sep = File.separatorChar
     private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
     private var evoSuitePath = "$pluginsPath${sep}TestSpark${sep}lib${sep}evosuite-$evosuiteVersion.jar"
 
@@ -98,7 +97,7 @@ class EvoSuiteProcessManager(
             val baseDir = generatedTestData.baseDir!!
             val resultName = "${generatedTestData.resultPath}${sep}EvoSuiteResult"
 
-            Path(generatedTestData.resultPath!!).createDirectories()
+            Path(generatedTestData.resultPath).createDirectories()
 
             // get command
             val command = when (codeType.type!!) {

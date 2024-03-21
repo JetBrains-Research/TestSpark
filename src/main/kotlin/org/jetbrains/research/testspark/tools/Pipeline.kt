@@ -10,10 +10,10 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.getSurroundingClass
@@ -24,8 +24,7 @@ import org.jetbrains.research.testspark.services.RunnerService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import java.io.File
-import java.util.*
+import java.util.UUID
 
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
@@ -50,7 +49,6 @@ class Pipeline(
         val cutPsiClass = getSurroundingClass(psiFile, caretOffset)!!
 
         // get generated test path
-        val sep = File.separatorChar
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
         val id = UUID.randomUUID().toString()
         val testResultName = "test_gen_result_$id"

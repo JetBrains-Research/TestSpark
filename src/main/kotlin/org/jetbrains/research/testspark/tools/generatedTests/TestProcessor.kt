@@ -9,22 +9,21 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.data.TestCase
-import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.getBuildPath
+import org.jetbrains.research.testspark.tools.sep
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
 class TestProcessor(val project: Project) {
-    private val sep = File.separatorChar
 
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
@@ -32,6 +31,11 @@ class TestProcessor(val project: Project) {
 
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!
+
+    private val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
+    private val libraryPath = "\"${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}\""
+    private val junitVersion = settingsState.junitVersion
+    private val testCompiler = TestCompiler(javaHomePath, libraryPath, junitVersion)
 
     /**
      * Save the generated tests to a specified directory.
@@ -57,35 +61,6 @@ class TestProcessor(val project: Project) {
         testFile.writeText(code)
 
         return "$generatedTestPath$testFileName"
-    }
-
-    /**
-     * Retrieves the absolute path of the specified library.
-     *
-     * @param libraryName the name of the library
-     * @return the absolute path of the library
-     */
-    private fun getLibrary(libraryName: String): String {
-        val pluginsPath = PathManager.getPluginsPath()
-        return "\"$pluginsPath${sep}TestSpark${sep}lib${sep}$libraryName\""
-    }
-
-    /**
-     * Generates the path for the command by concatenating the necessary paths.
-     *
-     * @param buildPath The path of the build file.
-     * @return The generated path as a string.
-     */
-    private fun getPath(buildPath: String): String {
-        // create the path for the command
-        val junitVersion = settingsState.junitVersion
-        val separator = DataFilesUtil.classpathSeparator
-        val junitPath = junitVersion.libJar.joinToString(separator.toString()) { getLibrary(it) }
-        val mockitoPath = getLibrary("mockito-core-5.0.0.jar")
-        val hamcrestPath = getLibrary("hamcrest-core-1.3.jar")
-        val byteBuddy = getLibrary("byte-buddy-1.14.6.jar")
-        val byteBuddyAgent = getLibrary("byte-buddy-agent-1.14.6.jar")
-        return "$junitPath${separator}$hamcrestPath${separator}$mockitoPath${separator}$byteBuddy${separator}$byteBuddyAgent${separator}$buildPath"
     }
 
     /**
@@ -115,8 +90,8 @@ class TestProcessor(val project: Project) {
             }
             .first()
         // JaCoCo libs
-        val jacocoAgentDir = getLibrary("jacocoagent.jar")
-        val jacocoCLIDir = getLibrary("jacococli.jar")
+        val jacocoAgentDir = testCompiler.getLibrary("jacocoagent.jar")
+        val jacocoCLIDir = testCompiler.getLibrary("jacococli.jar")
         val sourceRoots = ModuleRootManager.getInstance(projectContext.cutModule!!).getSourceRoots(false)
 
         // unique name
@@ -131,7 +106,7 @@ class TestProcessor(val project: Project) {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${projectContext.classFQN}",
                 "-cp",
-                "${getPath(projectBuildPath)}${getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
+                "${testCompiler.getPath(projectBuildPath)}${testCompiler.getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
                 "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
             ),
@@ -202,7 +177,7 @@ class TestProcessor(val project: Project) {
         )
 
         // compilation checking
-        val compilationResult = compileCode(generatedTestPath, buildPath)
+        val compilationResult = testCompiler.compileCode(generatedTestPath, buildPath)
         if (!compilationResult.first) {
             project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, compilationResult.second)
         } else {
@@ -328,65 +303,5 @@ class TestProcessor(val project: Project) {
         setOfLines.addAll(linesCoveredDuringTheException)
 
         return TestCase(testCaseId, testCaseName, testCaseCode, setOfLines)
-    }
-
-    /**
-     * Compiles the code at the specified path using the provided project build path.
-     *
-     * @param path The path of the code file to compile.
-     * @param projectBuildPath The project build path to use during compilation.
-     * @return A pair containing a boolean value indicating whether the compilation was successful (true) or not (false),
-     *         and a string message describing any error encountered during compilation.
-     */
-    fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
-        // find the proper javac
-        val javaCompile = File(javaHomeDirectory.path).walk()
-            .filter {
-                val isCompilerName = if (DataFilesUtil.isWindows()) it.name.equals("javac.exe") else it.name.equals("javac")
-                isCompilerName && it.isFile
-            }
-            .first()
-
-        // compile file
-        val errorMsg = CommandLineRunner.run(
-            arrayListOf(
-                javaCompile.absolutePath,
-                "-cp",
-                getPath(projectBuildPath),
-                path,
-            ),
-        )
-
-        log.info("Error message: $errorMsg")
-
-        // create .class file path
-        val classFilePath = path.replace(".java", ".class")
-
-        // check is .class file exists
-        return Pair(File(classFilePath).exists(), errorMsg)
-    }
-
-    /**
-     * Compiles the generated test file using the proper javac and returns a Pair
-     * indicating whether the compilation was successful and any error message encountered during compilation.
-     *
-     * @return A Pair containing a boolean indicating whether the compilation was successful
-     *         and a String containing any error message encountered during compilation.
-     */
-    fun compileTestCases(
-        generatedTestCasesPaths: List<String>,
-        buildPath: String,
-        testCases: MutableList<TestCaseGeneratedByLLM>,
-        generatedTestData: TestGenerationData,
-    ): Boolean {
-        var result = false
-        for (index in generatedTestCasesPaths.indices) {
-            val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
-            result = result || compilable
-            if (compilable) {
-                generatedTestData.compilableTestCases.add(testCases[index])
-            }
-        }
-        return result
     }
 }

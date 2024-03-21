@@ -453,7 +453,7 @@ class TestCasePanelFactory(
 
         WriteCommandAction.runWriteCommandAction(project) {
             project.service<ErrorService>().clear()
-            val code = testSuitePresenter.toString(testSuite) /*testSuite.toString()*/
+            val code = testSuitePresenter.toString(testSuite)
             testCase.testName =
                 project.service<JavaClassBuilderService>()
                     .getTestMethodNameFromClassWithTestCase(testCase.testName, code)

@@ -2,8 +2,8 @@ package org.jetbrains.research.testspark.tools.llm.test
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
 

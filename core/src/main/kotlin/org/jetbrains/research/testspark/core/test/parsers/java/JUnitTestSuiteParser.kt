@@ -101,7 +101,7 @@ private class JUnitTestCaseParser {
         // Get unexpected exceptions
         /* Each test case should follow [public] void <testcase name> {...}
             Tests do not return anything so it is safe to consider that void always appears before test case name
-        */
+         */
         val voidString = "void"
         if (!rawTest.contains(voidString)) {
             return TestCaseParseResult(

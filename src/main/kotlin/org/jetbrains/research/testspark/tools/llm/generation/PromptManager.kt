@@ -13,6 +13,7 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptGenerator
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.MethodRepresentation
@@ -23,7 +24,6 @@ import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.TestGenerationData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
