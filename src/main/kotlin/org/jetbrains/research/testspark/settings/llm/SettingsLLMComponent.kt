@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.data.JUnitVersion
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
@@ -60,7 +60,7 @@ class SettingsLLMComponent {
     // JUnit versions
     private var junitVersionSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("junitVersion"))
     private val junitVersionPriorityCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("junitVersionPriorityCheckBox"), true)
-    private var junitVersionSelector = ComboBox(JUnitVersion.values().map { it.showName }.toTypedArray())
+    private var junitVersionSelector = ComboBox(JUnitVersion.entries.map { it.showName }.toTypedArray())
 
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
@@ -147,15 +147,6 @@ class SettingsLLMComponent {
             }
         }
 
-    var defaultLLMRequests: String
-        get() = Json.encodeToString(
-            ListSerializer(String.serializer()),
-            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }.map { (it.getComponent(0) as JTextField).text },
-        )
-        set(value) {
-            fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), value))
-        }
-
     var llmSetupCheckBoxSelected: Boolean
         get() = llmSetupCheckBox.isSelected
         set(newStatus) {
@@ -166,6 +157,15 @@ class SettingsLLMComponent {
         get() = provideTestSamplesCheckBox.isSelected
         set(newStatus) {
             provideTestSamplesCheckBox.isSelected = newStatus
+        }
+
+    var defaultLLMRequests: String
+        get() = Json.encodeToString(
+            ListSerializer(String.serializer()),
+            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }.map { (it.getComponent(0) as JTextField).text },
+        )
+        set(value) {
+            fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), value))
         }
 
     init {
@@ -336,7 +336,7 @@ class SettingsLLMComponent {
     }
 
     private fun addHighlighterListeners() {
-        PromptEditorType.values().forEach {
+        PromptEditorType.entries.forEach {
             getEditorTextField(it).document.addDocumentListener(
                 object : com.intellij.openapi.editor.event.DocumentListener {
                     override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {

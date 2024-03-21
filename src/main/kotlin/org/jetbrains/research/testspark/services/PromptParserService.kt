@@ -7,7 +7,7 @@ import com.intellij.openapi.editor.markup.MarkupModel
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
-import org.jetbrains.research.testspark.core.generation.prompt.PromptKeyword
+import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptKeyword
 import java.awt.Font
 
 @Service
