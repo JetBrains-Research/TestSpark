@@ -226,13 +226,13 @@ class LLMProcessManager(
             // Compile the test file
             indicator.setText(TestSparkBundle.message("compilationTestsChecking"))
             val testCompiler = TestCompiler(javaHomePath, libraryPath, junitVersion)
-            val separateCompilationResult = testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases, generatedTestsData)
-            val commonCompilationResult = testCompiler.compileCode(File(generatedTestPath).absolutePath, buildPath)
+            val allTestCasesCompilable = testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases, generatedTestsData)
+            val testSuiteCompilationResult = testCompiler.compileCode(File(generatedTestPath).absolutePath, buildPath)
 
-            if (!separateCompilationResult && !isLastIteration(requestsCount)) {
+            if (!allTestCasesCompilable && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n${testSuitePresenter.toString(generatedTestSuite)}")
                 warningMessage = TestSparkBundle.message("compilationError")
-                messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${commonCompilationResult.second}\n Fix this issue in the provided tests." + TestSparkToolTipsBundle.defaultValue("commonPromptPart")
+                messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${testSuiteCompilationResult.second}\n Fix this issue in the provided tests." + TestSparkToolTipsBundle.defaultValue("commonPromptPart")
                 continue
             }
 

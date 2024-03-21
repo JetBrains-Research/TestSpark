@@ -17,11 +17,10 @@ class TestCompiler(
     private val log = KotlinLogging.logger { this::class.java }
 
     /**
-     * Compiles the generated test file using the proper javac and returns a Pair
-     * indicating whether the compilation was successful and any error message encountered during compilation.
+     * Compiles the generated files with test cases using the proper javac.
      *
-     * @return A Pair containing a boolean indicating whether the compilation was successful
-     *         and a String containing any error message encountered during compilation.
+     * @return true if all the provided test cases are successfully compiled,
+     *         otherwise returns false.
      */
     fun compileTestCases(
         generatedTestCasesPaths: List<String>,
@@ -29,15 +28,15 @@ class TestCompiler(
         testCases: MutableList<TestCaseGeneratedByLLM>,
         generatedTestData: TestGenerationData,
     ): Boolean {
-        var result = false
+        var allTestCasesCompilable = true
         for (index in generatedTestCasesPaths.indices) {
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
-            result = result || compilable
+            allTestCasesCompilable = allTestCasesCompilable && compilable
             if (compilable) {
                 generatedTestData.compilableTestCases.add(testCases[index])
             }
         }
-        return result
+        return allTestCasesCompilable
     }
 
     /**
