@@ -22,6 +22,7 @@ class SettingsEvoSuiteComponent {
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
     private var configurationIdTextField = JTextField()
     private var seedTextField = JTextField()
+    private var evosuitePortField = JTextField()
 
     private val evosuiteSetupCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("evosuiteSetupCheckBox"), true)
 
@@ -69,6 +70,7 @@ class SettingsEvoSuiteComponent {
             // Important settings like algorithm selection, seed selection
             .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("defaultSearch")), algorithmSelector, 10, false)
             .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("seed")), seedTextField, 10, false)
+            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("port")), evosuitePortField, 10, false)
             .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("configId")), configurationIdTextField, 5, false)
             .addComponent(evosuiteSetupCheckBox, 10)
             // Checkboxes settings
@@ -100,6 +102,7 @@ class SettingsEvoSuiteComponent {
 
         // Tooltips
         seedTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("seed")
+        evosuitePortField.toolTipText = TestSparkToolTipsBundle.defaultValue("port")
         configurationIdTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("configId")
         clientOnThreadCheckBox.toolTipText = TestSparkToolTipsBundle.defaultValue("debug")
         junitCheckCheckBox.toolTipText = TestSparkToolTipsBundle.defaultValue("junit")
@@ -147,6 +150,12 @@ class SettingsEvoSuiteComponent {
         get() = seedTextField.text
         set(newText) {
             seedTextField.text = newText
+        }
+
+    var evosuitePort: String
+        get() = evosuitePortField.text
+        set(newPort) {
+            evosuitePortField.text = newPort
         }
 
     var algorithm: ContentDigestAlgorithm

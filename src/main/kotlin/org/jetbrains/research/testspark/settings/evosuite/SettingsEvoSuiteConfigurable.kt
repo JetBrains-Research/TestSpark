@@ -36,6 +36,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
         settingsComponent!!.sandbox = settingsState.sandbox
         settingsComponent!!.assertions = settingsState.assertions
         settingsComponent!!.seed = settingsState.seed
+        settingsComponent!!.evosuitePort = settingsState.evosuitePort
         settingsComponent!!.algorithm = settingsState.algorithm
         settingsComponent!!.evosuiteSetupCheckBoxSelected = settingsState.evosuiteSetupCheckBoxSelected
         settingsComponent!!.configurationId = settingsState.configurationId
@@ -62,6 +63,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
         modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
         modified = modified or (settingsComponent!!.seed != settingsState.seed)
+        modified = modified or (settingsComponent!!.evosuitePort != settingsState.evosuitePort)
         modified = modified or (settingsComponent!!.algorithm != settingsState.algorithm)
         modified = modified or (settingsComponent!!.evosuiteSetupCheckBoxSelected != settingsState.evosuiteSetupCheckBoxSelected)
         modified = modified or (settingsComponent!!.configurationId != settingsState.configurationId)
@@ -110,6 +112,16 @@ class SettingsEvoSuiteConfigurable : Configurable {
             return
         }
         settingsState.seed = settingsComponent!!.seed
+
+        val evosuitePort = settingsComponent!!.evosuitePort.toIntOrNull()
+        if (evosuitePort == null || evosuitePort < 1024 || evosuitePort > 65535) {
+            Messages.showErrorDialog(
+                "Evosuite port should be a valye between 1024 to 65535. Therefore, it will not be saved. However, the rest of the parameters have been successfully saved. ",
+                "Incorrect Port Provided",
+            )
+            return
+        }
+        settingsState.evosuitePort = settingsComponent!!.evosuitePort
     }
 
     /**
