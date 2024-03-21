@@ -25,7 +25,7 @@ import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
-import java.util.UUID
+import java.util.*
 
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
@@ -57,7 +57,7 @@ class Pipeline(
 
         projectContext = ProjectContext(
             projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path,
-            fileUrl = fileUrl,
+            fileUrlAsString = fileUrl,
             cutPsiClass = cutPsiClass,
             classFQN = cutPsiClass.qualifiedName!!,
             cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!,

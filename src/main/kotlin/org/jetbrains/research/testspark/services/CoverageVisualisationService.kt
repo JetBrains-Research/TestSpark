@@ -181,7 +181,7 @@ class CoverageVisualisationService(private val project: Project) {
             return testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.value.id !in selectedTests }
                 .map { x -> (x.value as IJTestCase).coveredMutants }.flatten().groupBy { x -> x.lineNo }
         else
-            throw IllegalStateException("the report provided to IDEA's UI should ba an instance of IJReport")
+            throw IllegalStateException("The report provided to IDEA's UI should be an instance of IJReport")
     }
 
     private fun getCoveredMutants(testReport: Report, selectedTests: HashSet<Int>): Map<Int, List<MutationInfo>> {

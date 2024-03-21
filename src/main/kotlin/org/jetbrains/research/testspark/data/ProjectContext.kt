@@ -8,10 +8,12 @@ data class ProjectContext(
     var projectClassPath: String? = null,
 
     // The URL of the file being tested.
-    var fileUrl: String? = null,
+    var fileUrlAsString: String? = null,
 
+    // The PsiClass of the class under test
     var cutPsiClass: PsiClass? = null,
 
+    // The full qualified name of the class under test
     var classFQN: String? = null,
 
     // The module to cut.
