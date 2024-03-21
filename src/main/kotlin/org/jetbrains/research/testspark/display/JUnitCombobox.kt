@@ -18,7 +18,7 @@ class JUnitCombobox(val e: AnActionEvent) : ComboBox<JUnitVersion>(JUnitVersion.
         get() = SettingsApplicationService.getInstance().state!!
 
     init {
-        val detected: MutableList<JUnitVersion> = findJUnitDependency()
+        val detected = findJUnitDependency()
 
         if (settingsState.junitVersionPriorityCheckBoxSelected && detected.size == 1) {
             this.selectedItem = detected[0]
@@ -50,7 +50,7 @@ class JUnitCombobox(val e: AnActionEvent) : ComboBox<JUnitVersion>(JUnitVersion.
         }
     }
 
-    private fun findJUnitDependency(): MutableList<JUnitVersion> {
+    private fun findJUnitDependency(): List<JUnitVersion> {
         val detected: MutableList<JUnitVersion> = mutableListOf()
         val project = e.project!!
         val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)?.firstOrNull() ?: return detected

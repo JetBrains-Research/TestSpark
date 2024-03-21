@@ -376,11 +376,5 @@ class TestStorageProcessingService(private val project: Project) {
         return TestCase(testId, testName, testCode, setOf(), setOf(), setOf())
     }
 
-    private fun getJUnitVersion(): JUnitVersion {
-        var junitVersion = JUnitVersion.JUnit4
-        for (version in JUnitVersion.values()) {
-            if (version.name == settingsState.junitVersion) { junitVersion = version }
-        }
-        return junitVersion
-    }
+    fun getJUnitVersion(): JUnitVersion = JUnitVersion.values().lastOrNull { it.name == settingsState.junitVersion } ?: JUnitVersion.JUnit4
 }
