@@ -72,7 +72,7 @@ class LLMWithFeedback(
         while (!generatedTestsArePassing) {
             requestsCount++
 
-            log.info { "New iterations of requests" }
+            log.info { "Iteration #$requestsCount of feedback cycle" }
 
             // Process stopped checking
             if (indicator.isCanceled()) {
@@ -86,6 +86,9 @@ class LLMWithFeedback(
             }
 
             // TODO: check some warning here
+
+            // clearing test assembler's collected text on the previous attempts
+            testsAssembler.clear()
             val response: LLMResponse = requestManager.request(
                         prompt = nextPromptMessage,
                         indicator = indicator,
