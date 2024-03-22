@@ -120,14 +120,13 @@ class LLMWithFeedbackCycle(
                 }
                 ResponseErrorCode.EMPTY_LLM_RESPONSE -> {
                     nextPromptMessage =
-                            // TODO: "... same constraints?"
                             "You have provided an empty answer! Please, answer my previous question with the same formats"
                     continue
                 }
                 ResponseErrorCode.TEST_SUITE_PARSING_FAILURE -> {
                     onWarningCallback?.invoke(WarningType.TEST_SUITE_PARSING_FAILED)
                     log.info { "Cannot parse a test suite from the LLM response. LLM response: '$response'" }
-                    // llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse") + "LLM response: $response", project)
+
                     nextPromptMessage = "The provided code is not parsable. Please, generate the correct code"
                     continue
                 }
@@ -138,7 +137,7 @@ class LLMWithFeedbackCycle(
             // Empty response checking
             if (generatedTestSuite.testCases.isEmpty()) {
                 onWarningCallback?.invoke(WarningType.NO_TEST_CASES_GENERATED)
-                // warningMessage = TestSparkBundle.message("emptyResponse")
+
                 nextPromptMessage =
                     "You have provided an empty answer! Please answer my previous question with the same formats."
                 continue
@@ -210,10 +209,8 @@ class LLMWithFeedbackCycle(
 
             if (!testCasesCompilationResult.allTestCasesCompilable && !isLastIteration(requestsCount)) {
                 log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite)}" }
-                // log.info { "Incorrect result: \n${testSuitePresenter.toString(generatedTestSuite)}" }
 
                 onWarningCallback?.invoke(WarningType.COMPILATION_ERROR_OCCURRED)
-                // warningMessage = TestSparkBundle.message("compilationError")
 
                 nextPromptMessage = "I cannot compile the tests that you provided. The error is:\n${testSuiteCompilationResult.second}\n Fix this issue in the provided tests.\nGenerate public classes and public methods. Response only a code with tests between ```, do not provide any other text."
                 continue
