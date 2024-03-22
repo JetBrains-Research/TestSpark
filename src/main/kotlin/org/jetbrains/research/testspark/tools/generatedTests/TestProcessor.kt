@@ -10,6 +10,7 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.test.TestCompiler
+import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -23,7 +24,7 @@ import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
-class TestProcessor(val project: Project) {
+class TestProcessor(val project: Project) : TestsPersistentStorage {
 
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
 
@@ -37,16 +38,7 @@ class TestProcessor(val project: Project) {
     private val junitVersion = settingsState.junitVersion
     private val testCompiler = TestCompiler(javaHomePath, libraryPath, junitVersion)
 
-    /**
-     * Save the generated tests to a specified directory.
-     *
-     * @param packageString The package string where the generated tests will be saved.
-     * @param code The generated test code.
-     * @param resultPath The result path where the generated tests will be saved.
-     * @param testFileName The name of the test file.
-     * @return The path where the generated tests are saved.
-     */
-    fun saveGeneratedTest(packageString: String, code: String, resultPath: String, testFileName: String): String {
+    override fun saveGeneratedTest(packageString: String, code: String, resultPath: String, testFileName: String): String {
         // Generate the final path for the generated tests
         var generatedTestPath = "$resultPath${File.separatorChar}"
         packageString.split(".").forEach { directory ->
