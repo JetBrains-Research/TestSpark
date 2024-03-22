@@ -25,6 +25,13 @@ abstract class TestsAssembler {
     }
 
     /**
+     * Clears the raw text content stored in the TestsAssembler object.
+     */
+    fun clear() {
+        rawText = ""
+    }
+
+    /**
      * Extracts test cases from raw text and generates a TestSuite using the given package name.
      *
      * @param packageName The package name to be set in the generated TestSuite.
