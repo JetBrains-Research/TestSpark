@@ -155,9 +155,16 @@ class LLMProcessManager(
             requestsCountThreshold = maxRequests,
         )
 
-        // TODO: add ability to show warnings on some events in feedback cycle (similar to what is done inside the while-loop)
-        //       llmFeedbackCycle.onWarning(warnType -> { show(warnType) })
-        val feedbackResponse = llmFeedbackCycle.run()
+        val feedbackResponse = llmFeedbackCycle.run { warning ->
+            when(warning) {
+                LLMWithFeedback.WarningType.TEST_SUITE_PARSING_FAILED ->
+                    llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse"), project)
+                LLMWithFeedback.WarningType.NO_TEST_CASES_GENERATED ->
+                    llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse"), project)
+                LLMWithFeedback.WarningType.COMPILATION_ERROR_OCCURRED ->
+                    llmErrorManager.warningProcess(TestSparkBundle.message("compilationError"), project)
+            }
+        }
 
         log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
 

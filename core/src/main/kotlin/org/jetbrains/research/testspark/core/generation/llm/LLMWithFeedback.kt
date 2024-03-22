@@ -40,7 +40,6 @@ data class FeedbackResponse(
     }
 }
 
-
 class LLMWithFeedback(
     private val report: Report,
     private val initialPromptMessage: String,
@@ -57,9 +56,15 @@ class LLMWithFeedback(
     private val indicator: CustomProgressIndicator,
     private val requestsCountThreshold: Int,
 ) {
+    enum class WarningType {
+        TEST_SUITE_PARSING_FAILED,
+        NO_TEST_CASES_GENERATED,
+        COMPILATION_ERROR_OCCURRED,
+    }
+
     private val log = KotlinLogging.logger { this::class.java }
 
-    fun run(): FeedbackResponse {
+    fun run(onWarningCallback: ((WarningType) -> Unit)? = null): FeedbackResponse {
         var requestsCount = 0
         var generatedTestsArePassing = false
         var nextPromptMessage = initialPromptMessage
@@ -85,8 +90,6 @@ class LLMWithFeedback(
                 break
             }
 
-            // TODO: check some warning here
-
             // clearing test assembler's collected text on the previous attempts
             testsAssembler.clear()
             val response: LLMResponse = requestManager.request(
@@ -105,7 +108,7 @@ class LLMWithFeedback(
                     if (promptSizeReductionStrategy.isReductionPossible()) {
                         nextPromptMessage = promptSizeReductionStrategy.reduceSizeAndGeneratePrompt()
                         /**
-                         * current attempt does not count as a failure since it was rejected due to the prompt size exceeding the threshold
+                         * Current attempt does not count as a failure since it was rejected due to the prompt size exceeding the threshold
                          */
                         requestsCount--
                         continue
@@ -122,7 +125,8 @@ class LLMWithFeedback(
                     continue
                 }
                 ResponseErrorCode.TEST_SUITE_PARSING_FAILURE -> {
-                    // TODO: need to show a warning on the UI
+                    onWarningCallback?.invoke(WarningType.TEST_SUITE_PARSING_FAILED)
+                    log.info { "Cannot parse a test suite from the LLM response. LLM response: '$response'" }
                     // llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse") + "LLM response: $response", project)
                     nextPromptMessage = "The provided code is not parsable. Please, generate the correct code"
                     continue
@@ -133,6 +137,7 @@ class LLMWithFeedback(
 
             // Empty response checking
             if (generatedTestSuite.testCases.isEmpty()) {
+                onWarningCallback?.invoke(WarningType.NO_TEST_CASES_GENERATED)
                 // warningMessage = TestSparkBundle.message("emptyResponse")
                 nextPromptMessage =
                     "You have provided an empty answer! Please answer my previous question with the same formats."
@@ -147,7 +152,6 @@ class LLMWithFeedback(
 
             // Save the generated TestSuite into a temp file
             val generatedTestCasesPaths: MutableList<String> = mutableListOf()
-            // val testSuitePresenter = TestSuitePresenter(project, generatedTestsData)
 
             if (isLastIteration(requestsCount)) {
                 generatedTestSuite.updateTestCases(compilableTestCases.toMutableList())
@@ -157,7 +161,6 @@ class LLMWithFeedback(
                     val testCaseFilename = "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
 
                     val testCaseRepresentation = testsPresenter.representTestCase(generatedTestSuite, testCaseIndex)
-                        // .toStringSingleTestCaseWithoutExpectedException(generatedTestSuite, testCaseIndex)
 
                     val saveFilepath = testStorage.saveGeneratedTest(
                         generatedTestSuite.packageString,
@@ -173,7 +176,6 @@ class LLMWithFeedback(
             val generatedTestSuitePath: String = testStorage.saveGeneratedTest(
                 generatedTestSuite.packageString,
                 testsPresenter.representTestSuite(generatedTestSuite),
-                // testSuitePresenter.toStringWithoutExpectedException(generatedTestSuite),
                 resultPath,
                 testSuiteFilename,
             )
@@ -207,10 +209,12 @@ class LLMWithFeedback(
             compilableTestCases.addAll(testCasesCompilationResult.compilableTestCases)
 
             if (!testCasesCompilationResult.allTestCasesCompilable && !isLastIteration(requestsCount)) {
-                // log.info { "Incorrect result: \n${testSuitePresenter.toString(generatedTestSuite)}" }
                 log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite)}" }
+                // log.info { "Incorrect result: \n${testSuitePresenter.toString(generatedTestSuite)}" }
 
+                onWarningCallback?.invoke(WarningType.COMPILATION_ERROR_OCCURRED)
                 // warningMessage = TestSparkBundle.message("compilationError")
+
                 nextPromptMessage = "I cannot compile the tests that you provided. The error is:\n${testSuiteCompilationResult.second}\n Fix this issue in the provided tests.\nGenerate public classes and public methods. Response only a code with tests between ```, do not provide any other text."
                 continue
             }
