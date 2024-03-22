@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.tools
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -40,7 +41,11 @@ class Pipeline(
         project.service<ProjectContextService>().fileUrl = fileUrl
 
         project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(psiFile, caretOffset)
-        project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
+
+        ApplicationManager.getApplication().runWriteAction {
+            project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project)
+                .getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
+        }
 
         project.service<ProjectContextService>().classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!
 
