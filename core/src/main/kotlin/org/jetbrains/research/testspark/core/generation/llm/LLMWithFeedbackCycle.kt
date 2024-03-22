@@ -44,10 +44,13 @@ class LLMWithFeedbackCycle(
     private val report: Report,
     private val initialPromptMessage: String,
     private val promptSizeReductionStrategy: PromptSizeReductionStrategy,
-    private val testSuiteFilename: String, // TODO: write a comment of what this is
+    // filename in which the test suite is saved in result path
+    private val testSuiteFilename: String,
     private val packageName: String,
-    private val resultPath: String, // TODO: write a comment of what this is
-    private val buildPath: String, // TODO: write a comment of what this is
+    // temp path where all the generated tests and their jacoco report are saved
+    private val resultPath: String,
+    // all the directories where the compiled code of the project under test is saved. This path will be used as a classpath to run each test case
+    private val buildPath: String,
     private val requestManager: RequestManager,
     private val testsAssembler: TestsAssembler,
     private val testCompiler: TestCompiler,
