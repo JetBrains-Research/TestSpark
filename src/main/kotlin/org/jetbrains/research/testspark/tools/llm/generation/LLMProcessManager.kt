@@ -6,19 +6,13 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
-import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedback
-import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
-import org.jetbrains.research.testspark.core.generation.llm.network.LLMResponse
-import org.jetbrains.research.testspark.core.generation.llm.network.ResponseErrorCode
+import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.TestsPresenter
-import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.IJReport
@@ -40,7 +34,6 @@ import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.sep
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import org.jetbrains.research.testspark.tools.transferToIJTestCases
-import java.io.File
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -138,7 +131,7 @@ class LLMProcessManager(
         }
 
         // Asking LLM to generate a test suite. Here we have a feedback cycle for LLM in case of wrong responses
-        val llmFeedbackCycle = LLMWithFeedback(
+        val llmFeedbackCycle = LLMWithFeedbackCycle(
             report = report,
             initialPromptMessage = initialPromptMessage,
             promptSizeReductionStrategy = promptSizeReductionStrategy,
@@ -157,11 +150,11 @@ class LLMProcessManager(
 
         val feedbackResponse = llmFeedbackCycle.run { warning ->
             when(warning) {
-                LLMWithFeedback.WarningType.TEST_SUITE_PARSING_FAILED ->
+                LLMWithFeedbackCycle.WarningType.TEST_SUITE_PARSING_FAILED ->
                     llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse"), project)
-                LLMWithFeedback.WarningType.NO_TEST_CASES_GENERATED ->
+                LLMWithFeedbackCycle.WarningType.NO_TEST_CASES_GENERATED ->
                     llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse"), project)
-                LLMWithFeedback.WarningType.COMPILATION_ERROR_OCCURRED ->
+                LLMWithFeedbackCycle.WarningType.COMPILATION_ERROR_OCCURRED ->
                     llmErrorManager.warningProcess(TestSparkBundle.message("compilationError"), project)
             }
         }

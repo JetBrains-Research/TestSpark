@@ -40,7 +40,7 @@ data class FeedbackResponse(
     }
 }
 
-class LLMWithFeedback(
+class LLMWithFeedbackCycle(
     private val report: Report,
     private val initialPromptMessage: String,
     private val promptSizeReductionStrategy: PromptSizeReductionStrategy,
