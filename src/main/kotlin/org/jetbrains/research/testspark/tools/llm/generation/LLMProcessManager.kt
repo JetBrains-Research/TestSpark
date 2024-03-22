@@ -9,6 +9,7 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.generation.llm.network.LLMResponse
 import org.jetbrains.research.testspark.core.generation.llm.network.ResponseErrorCode
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -29,8 +30,7 @@ import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
-import org.jetbrains.research.testspark.tools.llm.test.TestSuitePresenter
+import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.sep
@@ -178,7 +178,7 @@ class LLMProcessManager(
 
             // Save the generated TestSuite into a temp file
             val generatedTestCasesPaths: MutableList<String> = mutableListOf()
-            val testSuitePresenter = TestSuitePresenter(project, generatedTestsData)
+            val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData)
 
             if (isLastIteration(requestsCount)) {
                 generatedTestSuite.updateTestCases(generatedTestsData.compilableTestCases.toMutableList())
@@ -226,10 +226,12 @@ class LLMProcessManager(
             // Compile the test file
             indicator.setText(TestSparkBundle.message("compilationTestsChecking"))
             val testCompiler = TestCompiler(javaHomePath, libraryPath, junitVersion)
-            val allTestCasesCompilable = testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases, generatedTestsData)
+            val testCasesCompilationResult = testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases)
             val testSuiteCompilationResult = testCompiler.compileCode(File(generatedTestPath).absolutePath, buildPath)
 
-            if (!allTestCasesCompilable && !isLastIteration(requestsCount)) {
+            generatedTestsData.compilableTestCases.addAll(testCasesCompilationResult.compilableTestCases)
+
+            if (!testCasesCompilationResult.allTestCasesCompilable && !isLastIteration(requestsCount)) {
                 log.info("Incorrect result: \n${testSuitePresenter.toString(generatedTestSuite)}")
                 warningMessage = TestSparkBundle.message("compilationError")
                 messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${testSuiteCompilationResult.second}\n Fix this issue in the provided tests." + TestSparkToolTipsBundle.defaultValue("commonPromptPart")
@@ -252,7 +254,7 @@ class LLMProcessManager(
 
         log.info("Result is ready")
 
-        val testSuitePresenter = TestSuitePresenter(project, generatedTestsData)
+        val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData)
         val testSuiteRepresentation =
             if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null
         transferToIJTestCases(report)

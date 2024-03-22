@@ -8,12 +8,18 @@ import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import java.io.File
 
+
+data class TestCasesCompilationResult(
+    val allTestCasesCompilable: Boolean,
+    val compilableTestCases: MutableSet<TestCaseGeneratedByLLM>,
+)
+
+
 class TestCompiler(
     val javaHomeDirectoryPath: String,
     val libPath: String,
     val junitVersion: JUnitVersion,
 ) {
-
     private val log = KotlinLogging.logger { this::class.java }
 
     /**
@@ -26,17 +32,21 @@ class TestCompiler(
         generatedTestCasesPaths: List<String>,
         buildPath: String,
         testCases: MutableList<TestCaseGeneratedByLLM>,
-        generatedTestData: TestGenerationData,
-    ): Boolean {
+        // generatedTestData: TestGenerationData,
+    ): TestCasesCompilationResult {
         var allTestCasesCompilable = true
+        val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
+
         for (index in generatedTestCasesPaths.indices) {
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
             allTestCasesCompilable = allTestCasesCompilable && compilable
             if (compilable) {
-                generatedTestData.compilableTestCases.add(testCases[index])
+                // generatedTestData.compilableTestCases.add(testCases[index])
+                compilableTestCases.add(testCases[index])
             }
         }
-        return allTestCasesCompilable
+
+        return TestCasesCompilationResult(allTestCasesCompilable, compilableTestCases)
     }
 
     /**
@@ -66,7 +76,7 @@ class TestCompiler(
             ),
         )
 
-        log.info("Error message: $errorMsg")
+        log.info { "Error message: '$errorMsg'" }
 
         // create .class file path
         val classFilePath = path.replace(".java", ".class")

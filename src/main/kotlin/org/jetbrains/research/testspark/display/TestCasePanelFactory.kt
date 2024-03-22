@@ -25,6 +25,7 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.core.data.TestCase
+import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
@@ -36,8 +37,7 @@ import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
-import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
-import org.jetbrains.research.testspark.tools.llm.test.TestSuitePresenter
+import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.llm.testModificationRequest
 import org.jetbrains.research.testspark.tools.processStopped
 import java.awt.Dimension
@@ -449,7 +449,7 @@ class TestCasePanelFactory(
     }
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
-        val testSuitePresenter = TestSuitePresenter(project, uiContext!!.testGenerationOutput)
+        val testSuitePresenter = JUnitTestSuitePresenter(project, uiContext!!.testGenerationOutput)
 
         WriteCommandAction.runWriteCommandAction(project) {
             project.service<ErrorService>().clear()
