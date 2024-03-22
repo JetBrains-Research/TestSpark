@@ -9,7 +9,6 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
-import java.util.Locale
 
 /**
  * Checks if the token is set.
@@ -53,7 +52,7 @@ fun testModificationRequest(
         task,
         indicator,
         requestManager,
-        testsAssembler = JUnitTestsAssembler(project, indicator, testGenerationOutput)
+        testsAssembler = JUnitTestsAssembler(project, indicator, testGenerationOutput),
     )
     return testSuite
 }

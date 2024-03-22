@@ -25,7 +25,6 @@ fun getClassWithTestCaseName(testCaseName: String): String {
     return "Generated$className"
 }
 
-
 /**
  * Sends a test modification request according to user's feedback.
  * After receiving the response, it tries to parse the generated test cases.

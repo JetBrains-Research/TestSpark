@@ -2,18 +2,15 @@ package org.jetbrains.research.testspark.core.test
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import java.io.File
 
-
 data class TestCasesCompilationResult(
     val allTestCasesCompilable: Boolean,
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM>,
 )
-
 
 class TestCompiler(
     val javaHomeDirectoryPath: String,

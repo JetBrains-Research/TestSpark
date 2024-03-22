@@ -9,8 +9,8 @@ import org.jetbrains.research.testspark.core.generation.llm.network.ResponseErro
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestCompiler
-import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsAssembler
+import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
@@ -32,10 +32,10 @@ data class FeedbackResponse(
     init {
         if (executionResult == FeedbackCycleExecutionResult.OK && generatedTestSuite == null) {
             throw IllegalArgumentException("Test suite must be provided when FeedbackCycleExecutionResult is OK, got null")
-        }
-        else if (executionResult != FeedbackCycleExecutionResult.OK && generatedTestSuite != null) {
+        } else if (executionResult != FeedbackCycleExecutionResult.OK && generatedTestSuite != null) {
             throw IllegalArgumentException(
-                "Test suite must not be provided when FeedbackCycleExecutionResult is not OK, got $generatedTestSuite")
+                "Test suite must not be provided when FeedbackCycleExecutionResult is not OK, got $generatedTestSuite",
+            )
         }
     }
 }
@@ -93,16 +93,16 @@ class LLMWithFeedbackCycle(
             // clearing test assembler's collected text on the previous attempts
             testsAssembler.clear()
             val response: LLMResponse = requestManager.request(
-                        prompt = nextPromptMessage,
-                        indicator = indicator,
-                        packageName = packageName,
-                        testsAssembler = testsAssembler,
-                        isUserFeedback = false,
-                    )
+                prompt = nextPromptMessage,
+                indicator = indicator,
+                packageName = packageName,
+                testsAssembler = testsAssembler,
+                isUserFeedback = false,
+            )
 
             when (response.errorCode) {
                 ResponseErrorCode.OK -> {
-                    log.info{ "Test suite generated successfully: ${response.testSuite!!}" }
+                    log.info { "Test suite generated successfully: ${response.testSuite!!}" }
                 }
                 ResponseErrorCode.PROMPT_TOO_LONG -> {
                     if (promptSizeReductionStrategy.isReductionPossible()) {
@@ -112,15 +112,14 @@ class LLMWithFeedbackCycle(
                          */
                         requestsCount--
                         continue
-                    }
-                    else {
+                    } else {
                         executionResult = FeedbackCycleExecutionResult.PROVIDED_PROMPT_TOO_LONG
                         break
                     }
                 }
                 ResponseErrorCode.EMPTY_LLM_RESPONSE -> {
                     nextPromptMessage =
-                            "You have provided an empty answer! Please, answer my previous question with the same formats"
+                        "You have provided an empty answer! Please, answer my previous question with the same formats"
                     continue
                 }
                 ResponseErrorCode.TEST_SUITE_PARSING_FAILURE -> {
@@ -154,8 +153,7 @@ class LLMWithFeedbackCycle(
 
             if (isLastIteration(requestsCount)) {
                 generatedTestSuite.updateTestCases(compilableTestCases.toMutableList())
-            }
-            else {
+            } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
                     val testCaseFilename = "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
 
@@ -192,11 +190,11 @@ class LLMWithFeedbackCycle(
 
             // Get test cases
             val testCases: MutableList<TestCaseGeneratedByLLM> =
-                    if (!isLastIteration(requestsCount)) {
-                        generatedTestSuite.testCases
-                    } else {
-                        compilableTestCases.toMutableList()
-                    }
+                if (!isLastIteration(requestsCount)) {
+                    generatedTestSuite.testCases
+                } else {
+                    compilableTestCases.toMutableList()
+                }
 
             // Compile the test file
             indicator.setText("Compilation tests checking")

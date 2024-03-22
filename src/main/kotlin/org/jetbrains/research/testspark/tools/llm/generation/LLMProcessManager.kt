@@ -149,7 +149,7 @@ class LLMProcessManager(
         )
 
         val feedbackResponse = llmFeedbackCycle.run { warning ->
-            when(warning) {
+            when (warning) {
                 LLMWithFeedbackCycle.WarningType.TEST_SUITE_PARSING_FAILED ->
                     llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse"), project)
                 LLMWithFeedbackCycle.WarningType.NO_TEST_CASES_GENERATED ->
@@ -317,7 +317,7 @@ class LLMProcessManager(
                 report.testCaseList[index] = TestCase(index, testCases[index].name, testCases[index].toString(), setOf())
             }
         }
-        */
+         */
 
         if (processStopped(project, indicator)) return null
 
