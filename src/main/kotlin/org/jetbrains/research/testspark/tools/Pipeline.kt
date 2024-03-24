@@ -59,10 +59,10 @@ class Pipeline(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
-                    if (processStopped(project, indicator)) return
+                    if (isProcessStopped(project, indicator)) return
 
                     if (projectBuilder.runBuild(indicator)) {
-                        if (processStopped(project, indicator)) return
+                        if (isProcessStopped(project, indicator)) return
 
                         processManager.runTestGenerator(
                             indicator,
@@ -71,7 +71,7 @@ class Pipeline(
                         )
                     }
 
-                    if (processStopped(project, indicator)) return
+                    if (isProcessStopped(project, indicator)) return
 
                     indicator.stop()
                 }

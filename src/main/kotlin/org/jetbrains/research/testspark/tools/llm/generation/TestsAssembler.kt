@@ -12,12 +12,12 @@ import org.jetbrains.research.testspark.core.generation.importPattern
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestLine
 import org.jetbrains.research.testspark.tools.llm.test.TestLineType
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.tools.processStopped
 
 /**
  * Assembler class for generating and organizing test cases.
@@ -59,7 +59,7 @@ class TestsAssembler(
      */
     fun receiveResponse(httpRequest: HttpRequests.Request) {
         while (true) {
-            if (processStopped(project, indicator)) return
+            if (isProcessStopped(project, indicator)) return
 
             Thread.sleep(50L)
             var text = httpRequest.reader.readLine()

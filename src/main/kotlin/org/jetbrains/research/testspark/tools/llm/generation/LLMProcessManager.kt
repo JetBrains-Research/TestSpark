@@ -19,11 +19,11 @@ import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
@@ -64,7 +64,7 @@ class LLMProcessManager(
     ) {
         log.info("LLM test generation begins")
 
-        if (processStopped(project, indicator)) return
+        if (isProcessStopped(project, indicator)) return
 
         // update build path
         var buildPath = project.service<ProjectContextService>().projectClassPath!!
@@ -100,7 +100,7 @@ class LLMProcessManager(
             log.info("New iterations of requests")
 
             // Process stopped checking
-            if (processStopped(project, indicator)) return
+            if (isProcessStopped(project, indicator)) return
 
             // Ending loop checking
             if (isLastIteration(requestsCount) && project.service<TestGenerationDataService>().compilableTestCases.isEmpty()) {
@@ -126,7 +126,7 @@ class LLMProcessManager(
             generatedTestSuite = requestResult.second
 
             // Process stopped checking
-            if (processStopped(project, indicator)) return
+            if (isProcessStopped(project, indicator)) return
 
             // Bad response checking
             if (generatedTestSuite == null) {
@@ -203,7 +203,7 @@ class LLMProcessManager(
             }
         }
 
-        if (processStopped(project, indicator)) return
+        if (isProcessStopped(project, indicator)) return
 
         // Error during the collecting
         if (project.service<ErrorService>().isErrorOccurred()) return

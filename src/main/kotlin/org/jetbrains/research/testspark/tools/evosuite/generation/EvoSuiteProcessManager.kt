@@ -26,7 +26,7 @@ import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManage
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.processStopped
+import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
@@ -73,7 +73,7 @@ class EvoSuiteProcessManager(
         packageName: String,
     ) {
         try {
-            if (processStopped(project, indicator)) return
+            if (isProcessStopped(project, indicator)) return
 
             val regex = Regex("version \"(.*?)\"")
             val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(settingsState.javaPath, "-version")))
@@ -138,7 +138,7 @@ class EvoSuiteProcessManager(
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (processStopped(project, indicator)) {
+                    if (isProcessStopped(project, indicator)) {
                         handler.destroyProcess()
                         return
                     }
@@ -182,7 +182,7 @@ class EvoSuiteProcessManager(
 
             handler.startNotify()
 
-            if (processStopped(project, indicator)) return
+            if (isProcessStopped(project, indicator)) return
 
             // evosuite errors check
             if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return

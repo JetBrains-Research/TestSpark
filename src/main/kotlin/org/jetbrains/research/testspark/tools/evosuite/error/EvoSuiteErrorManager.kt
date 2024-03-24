@@ -8,7 +8,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.tools.processStopped
+import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.template.error.ErrorManager
 import java.util.Locale
 
@@ -73,7 +73,7 @@ class EvoSuiteErrorManager : ErrorManager {
         evoSuiteProcessTimeout: Long,
         indicator: ProgressIndicator,
     ): Boolean {
-        if (processStopped(project, indicator)) return false
+        if (isProcessStopped(project, indicator)) return false
 
         // exceeded timeout error
         if (!handler.waitFor(evoSuiteProcessTimeout)) {
