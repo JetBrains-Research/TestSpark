@@ -63,7 +63,6 @@ class TestCasePanelFactory(
     private val settingsState: SettingsApplicationState
         get() = project.getService(SettingsApplicationService::class.java).state
 
-
     private val panel = JPanel()
     private val previousButtons =
         createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))

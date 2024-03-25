@@ -18,7 +18,7 @@ class SettingsArguments(private val project: Project) {
      *
      * @return The maximum LLM request value.
      */
-    fun maxLLMRequest(): Int = settingsState!!.maxLLMRequest
+    fun maxLLMRequest(): Int = settingsState.maxLLMRequest
 
     /**
      * Returns the maximum depth for input parameters.
@@ -27,7 +27,7 @@ class SettingsArguments(private val project: Project) {
      * @return The maximum depth for input parameters.
      */
     fun maxInputParamsDepth(project: Project): Int =
-        settingsState!!.maxInputParamsDepth - project.service<TestGenerationDataService>().inputParamsDepthReducing
+        settingsState.maxInputParamsDepth - project.service<TestGenerationDataService>().inputParamsDepthReducing
 
     /**
      * Returns the maximum depth of polymorphism.
@@ -35,7 +35,7 @@ class SettingsArguments(private val project: Project) {
      * @return The maximum depth of polymorphism.
      */
     fun maxPolyDepth(project: Project): Int =
-        settingsState!!.maxPolyDepth - project.service<TestGenerationDataService>().polyDepthReducing
+        settingsState.maxPolyDepth - project.service<TestGenerationDataService>().polyDepthReducing
 
     /**
      * Checks if the token is set for the user in the settings.
@@ -49,7 +49,7 @@ class SettingsArguments(private val project: Project) {
      *
      * @return selected LLM platform
      */
-    fun currentLLMPlatformName(): String = settingsState!!.currentLLMPlatformName
+    fun currentLLMPlatformName(): String = settingsState.currentLLMPlatformName
 
     /**
      * Retrieves the token for the current user.
@@ -57,8 +57,8 @@ class SettingsArguments(private val project: Project) {
      * @return The token as a string.
      */
     fun getToken(): String = when (currentLLMPlatformName()) {
-        settingsState!!.openAIName -> settingsState!!.openAIToken
-        settingsState!!.grazieName -> settingsState!!.grazieToken
+        settingsState.openAIName -> settingsState.openAIToken
+        settingsState.grazieName -> settingsState.grazieToken
         else -> ""
     }
 
@@ -68,9 +68,8 @@ class SettingsArguments(private val project: Project) {
      * @return The token as a string.
      */
     fun getModel(): String = when (currentLLMPlatformName()) {
-        settingsState!!.openAIName -> settingsState!!.openAIModel
-        settingsState!!.grazieName -> settingsState!!.grazieModel
+        settingsState.openAIName -> settingsState.openAIModel
+        settingsState.grazieName -> settingsState.grazieModel
         else -> ""
     }
-
 }

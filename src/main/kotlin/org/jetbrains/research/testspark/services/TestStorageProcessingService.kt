@@ -38,7 +38,6 @@ class TestStorageProcessingService(private val project: Project) {
     private val settingsState: SettingsApplicationState
         get() = project.getService(SettingsApplicationService::class.java).state
 
-
     /**
      * Generates the path for the command by concatenating the necessary paths.
      *

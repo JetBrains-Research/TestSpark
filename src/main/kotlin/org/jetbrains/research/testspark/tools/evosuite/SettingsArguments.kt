@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools.evosuite
 
-
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.services.SettingsApplicationService
