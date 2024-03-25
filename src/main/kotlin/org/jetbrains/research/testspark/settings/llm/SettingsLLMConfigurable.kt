@@ -46,6 +46,8 @@ class SettingsLLMConfigurable(private val project: Project) : Configurable {
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
+        settingsComponent!!.junitVersion = settingsState.junitVersion
+        settingsComponent!!.junitVersionPriorityCheckBoxSelected = settingsState.junitVersionPriorityCheckBoxSelected
         settingsComponent!!.classPrompt = settingsState.classPrompt
         settingsComponent!!.methodPrompt = settingsState.methodPrompt
         settingsComponent!!.linePrompt = settingsState.linePrompt
@@ -77,6 +79,11 @@ class SettingsLLMConfigurable(private val project: Project) : Configurable {
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
+
+        // junit version
+        modified = modified or (settingsComponent!!.junitVersion != settingsState.junitVersion)
+        modified = modified or (settingsComponent!!.junitVersionPriorityCheckBoxSelected != settingsState.junitVersionPriorityCheckBoxSelected)
+
         // class prompt
         modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
         modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.classPrompt)
@@ -113,6 +120,8 @@ class SettingsLLMConfigurable(private val project: Project) : Configurable {
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
         settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth
+        settingsState.junitVersion = settingsComponent!!.junitVersion
+        settingsState.junitVersionPriorityCheckBoxSelected = settingsComponent!!.junitVersionPriorityCheckBoxSelected
         settingsState.classPrompt = settingsComponent!!.classPrompt
         settingsState.methodPrompt = settingsComponent!!.methodPrompt
         settingsState.linePrompt = settingsComponent!!.linePrompt

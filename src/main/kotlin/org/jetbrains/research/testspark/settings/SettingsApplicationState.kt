@@ -42,6 +42,7 @@ data class SettingsApplicationState(
     var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
     var defaultLLMRequests: String = DefaultSettingsApplicationState.defaultLLMRequests,
     @OptionTag(converter = JUnitVersionConverter::class) var junitVersion: JUnitVersion = DefaultSettingsApplicationState.junitVersion,
+    var junitVersionPriorityCheckBoxSelected: Boolean = DefaultSettingsApplicationState.junitVersionPriorityCheckBoxSelected,
     var provideTestSamplesCheckBoxSelected: Boolean = DefaultSettingsApplicationState.provideTestSamplesCheckBoxSelected,
     var llmSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.llmSetupCheckBoxSelected,
     var evosuiteSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.evosuiteSetupCheckBoxSelected,
@@ -82,7 +83,8 @@ data class SettingsApplicationState(
         val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
         val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
         val defaultLLMRequests: String = TestSparkDefaultsBundle.defaultValue("defaultLLMRequests")
-        val junitVersion: JUnitVersion = JUnitVersion.JUnit4
+        val junitVersion: JUnitVersion = JUnitVersion.JUnit5
+        val junitVersionPriorityCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("junitVersionPriority").toBoolean()
         val provideTestSamplesCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
         val llmSetupCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
         val evosuiteSetupCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()

@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.actions.llm
 
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
@@ -20,7 +21,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-class LLMSetupPanelFactory(private val project: Project) : PanelFactory {
+class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : PanelFactory {
     private val settingsState: SettingsApplicationState
         get() = project.getService(SettingsApplicationService::class.java).state
 
@@ -30,7 +31,7 @@ class LLMSetupPanelFactory(private val project: Project) : PanelFactory {
     private var platformSelector = ComboBox(arrayOf(settingsState.openAIName))
     private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
     private val okLlmButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
-    private val junitSelector = JUnitCombobox()
+    private val junitSelector = JUnitCombobox(e)
 
     private val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
 
@@ -67,10 +68,8 @@ class LLMSetupPanelFactory(private val project: Project) : PanelFactory {
      * and a user token field. These components are stylized using the `stylizeMainComponents` method.
      * The UI labels for the platform, token, and model components are retrieved using the
      * `TestSpark*/
-    override fun getMiddlePanel(junit: JUnitVersion?): JPanel {
+    override fun getMiddlePanel(): JPanel {
         stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
-
-        junitSelector.detected = junit
 
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)

@@ -76,11 +76,9 @@ class SettingsArguments(
      * Finalizes the parameter construction by applying the user runtime settings
      */
     fun build(isLineCoverage: Boolean = false): MutableList<String> {
-        if (settingsState != null) {
-            val params = settingsState!!.serializeChangesFromDefault()
-            command.addAll(params)
-            command.add(createCriterionString(settingsState!!, isLineCoverage))
-        }
+        val params = settingsState.serializeChangesFromDefault()
+        command.addAll(params)
+        command.add(createCriterionString(settingsState, isLineCoverage))
         return command
     }
 
