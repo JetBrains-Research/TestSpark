@@ -11,10 +11,13 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
+import org.evosuite.result.MutationInfo
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.coverage.CoverageRenderer
-import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.IJReport
+import org.jetbrains.research.testspark.data.IJTestCase
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -122,20 +125,23 @@ class CoverageVisualisationService(private val project: Project) {
             val mapMutantsToTests = HashMap<String, MutableList<String>>()
 
             testReport.testCaseList.values.forEach { compactTestCase ->
-                val mutantsCovered = compactTestCase.coveredMutants
-                val testName = compactTestCase.testName
-                mutantsCovered.forEach {
-                    val testCasesCoveringMutant = mapMutantsToTests.getOrPut(it.replacement) { ArrayList() }
-                    testCasesCoveringMutant.add(testName)
+                // Since we are in the IntelliJ plugin's visualizer, all test cases should be an instance of IJTestCase
+                if (compactTestCase is IJTestCase) {
+                    val mutantsCovered = compactTestCase.coveredMutants
+                    val testName = compactTestCase.testName
+                    mutantsCovered.forEach {
+                        val testCasesCoveringMutant = mapMutantsToTests.getOrPut(it.replacement) { ArrayList() }
+                        testCasesCoveringMutant.add(testName)
+                    }
+                } else {
+                    throw IllegalStateException("all test cases passed to the plugin visualizer in IDEA should be an instance of IJTestCase")
                 }
             }
 
-            val mutationCovered =
-                testReport.testCaseList.filter { x -> x.value.id in selectedTests }.map { x -> x.value.coveredMutants }
-                    .flatten().groupBy { x -> x.lineNo }
-            val mutationNotCovered =
-                testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.value.id !in selectedTests }
-                    .map { x -> x.value.coveredMutants }.flatten().groupBy { x -> x.lineNo }
+            // get a list of mutants covered by each test
+            val mutationCovered = getCoveredMutants(testReport, selectedTests)
+            // get uncovered mutants for each test case
+            val mutationNotCovered = getUncoveredMutants(testReport, selectedTests)
 
             for (i in linesToCover) {
                 val line = i - 1
@@ -146,9 +152,9 @@ class CoverageVisualisationService(private val project: Project) {
                     textAttribute,
                 )
 
-                val testsCoveringLine =
-                    testReport.testCaseList.filter { x -> i in x.value.coveredLines && x.value.id in selectedTests }
-                        .map { x -> x.value.testName }
+                // get tests that are covering the current line
+                val testsCoveringLine = getCoveringLines(testReport, selectedTests, i)
+                // get the list of killed and survived mutants in the current line
                 val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
                 val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 
@@ -163,6 +169,25 @@ class CoverageVisualisationService(private val project: Project) {
                 )
             }
         }
+    }
+
+    private fun getCoveringLines(testReport: Report, selectedTests: HashSet<Int>, lineNumber: Int): List<String> {
+        return testReport.testCaseList.filter { x -> lineNumber in x.value.coveredLines && x.value.id in selectedTests }
+            .map { x -> x.value.testName }
+    }
+
+    private fun getUncoveredMutants(testReport: Report, selectedTests: HashSet<Int>): Map<Int, List<MutationInfo>> {
+        if (testReport is IJReport) {
+            return testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.value.id !in selectedTests }
+                .map { x -> (x.value as IJTestCase).coveredMutants }.flatten().groupBy { x -> x.lineNo }
+        } else {
+            throw IllegalStateException("The report provided to IDEA's UI should be an instance of IJReport")
+        }
+    }
+
+    private fun getCoveredMutants(testReport: Report, selectedTests: HashSet<Int>): Map<Int, List<MutationInfo>> {
+        return testReport.testCaseList.filter { x -> x.value.id in selectedTests }.map { x -> (x.value as IJTestCase).coveredMutants }
+            .flatten().groupBy { x -> x.lineNo }
     }
 
     /**
@@ -180,7 +205,7 @@ class CoverageVisualisationService(private val project: Project) {
         }
 
         // Call branch coverage
-        val coveredBranches = testReport.allCoveredBranches.size
+        val coveredBranches = (testReport as IJReport).allCoveredBranches.size
         val allBranches = testReport.allUncoveredBranches.size + coveredBranches
         var relativeBranch = 100
         if (allBranches != 0) {
