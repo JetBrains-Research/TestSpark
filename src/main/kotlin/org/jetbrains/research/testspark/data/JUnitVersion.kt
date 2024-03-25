@@ -1,5 +1,14 @@
 package org.jetbrains.research.testspark.data
 
+import com.intellij.util.xmlb.Converter
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import org.jetbrains.annotations.NonNls
+
+
+@Serializable
 enum class JUnitVersion(
     val groupId: String,
     val version: Int,
@@ -25,4 +34,14 @@ enum class JUnitVersion(
         setOf("junit-4.13.jar"),
         RunWithAnnotationMeta("RunWith", "import org.junit.runner.RunWith;"),
     ),
+}
+
+class JUnitVersionConverter : Converter<JUnitVersion>() {
+    override fun fromString(value: String): JUnitVersion {
+        return Json.decodeFromString(value)
+    }
+
+    override fun toString(value: JUnitVersion): String {
+        return Json.encodeToString(value)
+    }
 }

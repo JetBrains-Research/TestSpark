@@ -15,7 +15,7 @@ import java.net.HttpURLConnection
 /**
  * This class represents a manager for making requests to the LLM (Large Language Model).
  */
-class OpenAIRequestManager : RequestManager() {
+class OpenAIRequestManager(private val project: Project) : RequestManager(project) {
     private val url = "https://api.openai.com/v1/chat/completions"
 
     private val httpRequest = HttpRequests.post(url, "application/json").tuner {
@@ -29,7 +29,7 @@ class OpenAIRequestManager : RequestManager() {
         llmErrorManager: LLMErrorManager,
     ): Pair<SendResult, TestsAssembler> {
         // Prepare the chat
-        val llmRequestBody = OpenAIRequestBody(SettingsArguments.getModel(), chatHistory)
+        val llmRequestBody = OpenAIRequestBody(SettingsArguments(project).getModel(), chatHistory)
 
         // Prepare the test assembler
         val testsAssembler = TestsAssembler(project, indicator)

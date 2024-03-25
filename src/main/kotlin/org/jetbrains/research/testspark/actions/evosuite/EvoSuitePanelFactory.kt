@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.actions.evosuite
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
@@ -8,13 +9,14 @@ import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.data.JUnitVersion
+import org.jetbrains.research.testspark.services.SettingsApplicationService
 import java.awt.Font
 import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-class EvoSuitePanelFactory : PanelFactory {
+class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
     private var javaPathTextField = JTextField(30)
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
     private val backEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
@@ -41,11 +43,12 @@ class EvoSuitePanelFactory : PanelFactory {
      * @return the middle panel as a JPanel.
      */
     override fun getMiddlePanel(junit: JUnitVersion?): JPanel {
+        val settingsApplicationState = project.getService(SettingsApplicationService::class.java).state
         javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
-        javaPathTextField.text = settingsState.javaPath
+        javaPathTextField.text = settingsApplicationState.javaPath
 
         algorithmSelector.setMinimumAndPreferredWidth(300)
-        algorithmSelector.selectedItem = settingsState.algorithm
+        algorithmSelector.selectedItem = settingsApplicationState.algorithm
 
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
@@ -101,7 +104,8 @@ class EvoSuitePanelFactory : PanelFactory {
      * Updates the state of the settings.
      */
     override fun applyUpdates() {
-        settingsState.javaPath = javaPathTextField.text
-        settingsState.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm
+        val settingsApplicationState = project.getService(SettingsApplicationService::class.java).state
+        settingsApplicationState.javaPath = javaPathTextField.text
+        settingsApplicationState.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm
     }
 }

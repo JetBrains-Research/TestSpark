@@ -97,9 +97,9 @@ class TestSparkAction : AnAction() {
 
         private val cardLayout = CardLayout()
 
-        private val llmSetupPanelFactory = LLMSetupPanelFactory()
+        private val llmSetupPanelFactory = LLMSetupPanelFactory(project)
         private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project)
-        private val evoSuitePanelFactory = EvoSuitePanelFactory()
+        private val evoSuitePanelFactory = EvoSuitePanelFactory(project)
 
         init {
             if (!visibilityController.isVisible) {
@@ -256,9 +256,10 @@ class TestSparkAction : AnAction() {
             }
 
             nextButton.addActionListener {
-                if (llmButton.isSelected && !SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected && !SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
+                val settingsApplicationState = project.getService(SettingsApplicationService::class.java).state
+                if (llmButton.isSelected && !settingsApplicationState.llmSetupCheckBoxSelected && !settingsApplicationState.provideTestSamplesCheckBoxSelected) {
                     startLLMGeneration()
-                } else if (llmButton.isSelected && !SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected) {
+                } else if (llmButton.isSelected && !settingsApplicationState.llmSetupCheckBoxSelected) {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     cardLayout.next(panel)
@@ -267,7 +268,7 @@ class TestSparkAction : AnAction() {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     pack()
-                } else if (evoSuiteButton.isSelected && !SettingsApplicationService.getInstance().state!!.evosuiteSetupCheckBoxSelected) {
+                } else if (evoSuiteButton.isSelected && !settingsApplicationState.evosuiteSetupCheckBoxSelected) {
                     startEvoSuiteGeneration()
                 } else {
                     cardLayout.next(panel)
@@ -287,8 +288,9 @@ class TestSparkAction : AnAction() {
             }
 
             llmSetupPanelFactory.getFinishedButton().addActionListener {
+                val settingsApplicationState = project.getService(SettingsApplicationService::class.java).state
                 llmSetupPanelFactory.applyUpdates()
-                if (SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
+                if (settingsApplicationState.provideTestSamplesCheckBoxSelected) {
                     cardLayout.next(panel)
                 } else {
                     startLLMGeneration()
@@ -300,7 +302,8 @@ class TestSparkAction : AnAction() {
             }
 
             llmSampleSelectorFactory.getBackButton().addActionListener {
-                if (SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected) {
+                val settingsApplicationState = project.getService(SettingsApplicationService::class.java).state
+                if (settingsApplicationState.llmSetupCheckBoxSelected) {
                     cardLayout.previous(panel)
                 } else {
                     cardLayout.previous(panel)
@@ -366,8 +369,9 @@ class TestSparkAction : AnAction() {
             }
             nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
 
-            if ((llmButton.isSelected && !SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected && !SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) ||
-                (evoSuiteButton.isSelected && !SettingsApplicationService.getInstance().state!!.evosuiteSetupCheckBoxSelected)
+            val settingsApplicationState = project.getService(SettingsApplicationService::class.java).state
+            if ((llmButton.isSelected && !settingsApplicationState.llmSetupCheckBoxSelected && !settingsApplicationState.provideTestSamplesCheckBoxSelected) ||
+                (evoSuiteButton.isSelected && !settingsApplicationState.evosuiteSetupCheckBoxSelected)
             ) {
                 nextButton.text = TestSparkLabelsBundle.defaultValue("ok")
             } else {

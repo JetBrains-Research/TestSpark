@@ -9,9 +9,9 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 
-abstract class RequestManager {
+abstract class RequestManager(project: Project) {
     enum class SendResult { OK, TOOLONG, OTHER }
-    open var token: String = SettingsArguments.getToken()
+    open var token: String = SettingsArguments(project).getToken()
     open val chatHistory = mutableListOf<ChatMessage>()
 
     open val log: Logger = Logger.getInstance(this.javaClass)

@@ -49,7 +49,7 @@ class EvoSuiteProcessManager(
     private val log = Logger.getInstance(this::class.java)
 
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
     private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
@@ -97,12 +97,12 @@ class EvoSuiteProcessManager(
 
             // get command
             val command = when (codeType.type!!) {
-                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).build()
+                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, project).build()
                 CodeType.METHOD -> {
-                    SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forMethod(codeType.objectDescription).build()
+                    SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, project).forMethod(codeType.objectDescription).build()
                 }
 
-                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
+                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, project).forLine(codeType.objectIndex).build(true)
             }
 
             if (settingsState.seed.isNotBlank()) command.add("-seed=${settingsState.seed}")

@@ -1,8 +1,13 @@
 package org.jetbrains.research.testspark.settings
 
+import com.intellij.util.xmlb.annotations.OptionTag
+import com.intellij.util.xmlb.annotations.Tag
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.data.JUnitVersion
+import org.jetbrains.research.testspark.data.JUnitVersionConverter
 
 /**
  * This class is the actual data class that stores the values of the EvoSuite Settings entries.
@@ -39,7 +44,7 @@ data class SettingsApplicationState(
     var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
     var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
     var defaultLLMRequests: String = DefaultSettingsApplicationState.defaultLLMRequests,
-    var junitVersion: JUnitVersion = DefaultSettingsApplicationState.junitVersion,
+    @OptionTag(converter = JUnitVersionConverter::class) var junitVersion: JUnitVersion = DefaultSettingsApplicationState.junitVersion,
     var provideTestSamplesCheckBoxSelected: Boolean = DefaultSettingsApplicationState.provideTestSamplesCheckBoxSelected,
     var llmSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.llmSetupCheckBoxSelected,
     var evosuiteSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.evosuiteSetupCheckBoxSelected,

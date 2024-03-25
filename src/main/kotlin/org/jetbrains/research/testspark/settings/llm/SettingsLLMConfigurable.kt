@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -11,9 +12,9 @@ import javax.swing.JComponent
  * This class allows to configure some LLM-related settings via the Large Language Model page in the Settings dialog,
  *   observes the changes and manages the UI and state.
  */
-class SettingsLLMConfigurable : Configurable {
+class SettingsLLMConfigurable(private val project: Project) : Configurable {
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     private var settingsComponent: SettingsLLMComponent? = null
 
@@ -23,7 +24,7 @@ class SettingsLLMConfigurable : Configurable {
      * @return the panel used for displaying settings
      */
     override fun createComponent(): JComponent? {
-        settingsComponent = SettingsLLMComponent()
+        settingsComponent = SettingsLLMComponent(project)
         return settingsComponent!!.panel
     }
 

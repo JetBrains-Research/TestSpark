@@ -98,6 +98,7 @@ class DescriptionTab(private val project: Project) {
         llmSettingsButton.isOpaque = false
         llmSettingsButton.isContentAreaFilled = false
         llmSettingsButton.addActionListener {
+
             ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsLLMConfigurable::class.java)
         }
 

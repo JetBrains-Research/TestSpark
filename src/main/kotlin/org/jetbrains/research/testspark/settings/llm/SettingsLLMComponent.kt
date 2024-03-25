@@ -4,6 +4,7 @@ import com.intellij.ide.ui.UINumericRange
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
@@ -36,9 +37,9 @@ import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
 
-class SettingsLLMComponent {
+class SettingsLLMComponent(private val project: Project) {
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     var panel: JPanel? = null
 

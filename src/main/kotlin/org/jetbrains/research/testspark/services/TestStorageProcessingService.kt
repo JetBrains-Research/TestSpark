@@ -36,7 +36,8 @@ class TestStorageProcessingService(private val project: Project) {
     private val log = Logger.getInstance(this::class.java)
 
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
+
 
     /**
      * Generates the path for the command by concatenating the necessary paths.

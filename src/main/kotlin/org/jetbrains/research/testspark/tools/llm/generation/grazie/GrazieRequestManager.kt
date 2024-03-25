@@ -8,7 +8,7 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
 
-class GrazieRequestManager : RequestManager() {
+class GrazieRequestManager(private val project: Project) : RequestManager(project) {
     override fun send(
         prompt: String,
         indicator: ProgressIndicator,
@@ -22,7 +22,7 @@ class GrazieRequestManager : RequestManager() {
             val className = "org.jetbrains.research.grazie.Request"
             val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
 
-            val requestResult = request.request(token, getMessages(), SettingsArguments.getModel(), TestsAssembler(project, indicator))
+            val requestResult = request.request(token, getMessages(), SettingsArguments(project).getModel(), TestsAssembler(project, indicator))
             val requestError = requestResult.first
 
             if (requestError.isNotEmpty()) {

@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.tools.evosuite
 
+
+import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -20,12 +22,13 @@ class SettingsArguments(
     private val serializeResultPath: String,
     private val classFQN: String,
     baseDir: String,
+    private val project: Project,
 ) {
-    private val settingsState: SettingsApplicationState?
-        get() = SettingsApplicationService.getInstance().state
+    private val settingsState: SettingsApplicationState
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     private var command: MutableList<String> = mutableListOf(
-        algorithmsToGenerateMap[settingsState!!.algorithm]!!,
+        algorithmsToGenerateMap[settingsState.algorithm]!!,
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
         "-base_dir", """"$baseDir"""",

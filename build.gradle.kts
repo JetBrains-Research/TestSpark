@@ -21,6 +21,7 @@ plugins {
     id("java")
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "1.9.0"
+    kotlin("plugin.serialization") version "1.9.0"
     // Gradle IntelliJ Plugin
     id("org.jetbrains.intellij") version "1.15.0"
     // Gradle Changelog Plugin
@@ -153,7 +154,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test
     implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     if (spaceCredentialsProvided()) {
         // Dependencies for hasGrazieAccess variant

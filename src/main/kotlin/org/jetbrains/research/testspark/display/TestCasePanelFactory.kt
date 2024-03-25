@@ -61,7 +61,8 @@ class TestCasePanelFactory(
     private val checkbox: JCheckBox,
 ) {
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
+
 
     private val panel = JPanel()
     private val previousButtons =

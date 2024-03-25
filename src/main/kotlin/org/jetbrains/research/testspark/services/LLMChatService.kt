@@ -10,15 +10,15 @@ import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestMana
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 
 @Service(Service.Level.PROJECT)
-class LLMChatService {
+class LLMChatService(private val project: Project) {
 
-    private var requestManager = StandardRequestManagerFactory().getRequestManager()
+    private var requestManager = StandardRequestManagerFactory(project).getRequestManager()
 
     /**
      * Re-initiates the requestManager. All the chat history will be removed.
      */
     fun newSession() {
-        requestManager = StandardRequestManagerFactory().getRequestManager()
+        requestManager = StandardRequestManagerFactory(project).getRequestManager()
     }
 
     /**
@@ -103,7 +103,7 @@ class LLMChatService {
      * @return True if the token is set, false otherwise.
      */
     private fun updateToken(project: Project): Boolean {
-        requestManager.token = SettingsArguments.getToken()
+        requestManager.token = SettingsArguments(project).getToken()
         return isCorrectToken(project)
     }
 
@@ -115,7 +115,7 @@ class LLMChatService {
      * @return True if the token is set, false otherwise.
      */
     fun isCorrectToken(project: Project): Boolean {
-        if (!SettingsArguments.isTokenSet()) {
+        if (!SettingsArguments(project).isTokenSet()) {
             LLMErrorManager().errorProcess(TestSparkBundle.message("missingToken"), project)
             return false
         }

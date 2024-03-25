@@ -7,8 +7,8 @@ import javax.swing.JButton
 import javax.swing.JPanel
 
 interface PanelFactory {
-    val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+//    val settingsState: SettingsApplicationState
+//        get() = SettingsApplicationService.getInstance().state!!
 
     fun getTitlePanel(): JPanel
 

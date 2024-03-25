@@ -44,7 +44,7 @@ class PromptManager(
     private val classesToTest: MutableList<PsiClass>,
 ) {
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
@@ -138,17 +138,17 @@ class PromptManager(
 
     fun reducePromptSize(): Boolean {
         // reducing depth of polymorphism
-        if (SettingsArguments.maxPolyDepth(project) > 1) {
+        if (SettingsArguments(project).maxPolyDepth(project) > 1) {
             project.service<TestGenerationDataService>().polyDepthReducing++
-            log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
+            log.info("polymorphism depth is: ${SettingsArguments(project).maxPolyDepth(project)}")
             showPromptReductionWarning()
             return true
         }
 
         // reducing depth of input params
-        if (SettingsArguments.maxInputParamsDepth(project) > 1) {
+        if (SettingsArguments(project).maxInputParamsDepth(project) > 1) {
             project.service<TestGenerationDataService>().inputParamsDepthReducing++
-            log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
+            log.info("input params depth is: ${SettingsArguments(project).maxPolyDepth(project)}")
             showPromptReductionWarning()
             return true
         }
@@ -159,8 +159,8 @@ class PromptManager(
     private fun showPromptReductionWarning() {
         llmErrorManager.warningProcess(
             TestSparkBundle.message("promptReduction") + "\n" +
-                "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
-                "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
+                "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(project)}.\n" +
+                "Maximum depth for input parameters is ${SettingsArguments(project).maxInputParamsDepth(project)}.",
             project,
         )
     }
@@ -205,7 +205,7 @@ class PromptManager(
 
         var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
 
-        repeat(SettingsArguments.maxInputParamsDepth(project)) {
+        repeat(SettingsArguments(project).maxInputParamsDepth(project)) {
             val tempListOfClasses = mutableSetOf<PsiClass>()
 
             currentLevelClasses.forEach { classIt ->
