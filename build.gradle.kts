@@ -57,6 +57,7 @@ if (spaceCredentialsProvided()) {
     val hasGrazieAccess = sourceSets.create("hasGrazieAccess")
     // add output of main source set to new source set class path
     hasGrazieAccess.compileClasspath += sourceSets.main.get().output
+
     // register feature variant
     java.registerFeature(hasGrazieAccess.name) {
         usingSourceSet(hasGrazieAccess)
