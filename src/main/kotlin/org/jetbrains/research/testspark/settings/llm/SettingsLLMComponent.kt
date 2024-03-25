@@ -18,6 +18,7 @@ import kotlinx.serialization.json.Json
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
@@ -36,7 +37,6 @@ import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
-import org.jetbrains.research.testspark.core.data.JUnitVersion
 
 class SettingsLLMComponent(private val project: Project) {
     private val settingsState: SettingsApplicationState
