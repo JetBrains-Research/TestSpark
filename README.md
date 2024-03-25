@@ -76,23 +76,9 @@ If you are running the plugin for the first time, checkout the [Settings](#setti
 - [Settings](#settings)
 - [Telemetry](#telemetry-opt-in)
 
-### Generating Tests for Classes
-To generate a test for a class, right-click (with mouse) anywhere within the class you want to test or right-click the class name itself (note that when using multiple cursors only the last one will count). Under the "TestSpark" option, select the test generator and "class [...]" option. After setting up the selected test generator, test generation will start.
+### Generating Tests
 
-![Test generation for classes](readme-images/gifs/testClass.gif#gh-light-mode-only)
-![Test generation for classes dark](readme-images/gifs/testClass_dark.gif#gh-dark-mode-only)
-
-### Generating Tests for Methods
-To generate a test for a method, right-click (with mouse) anywhere within the method you want to test or right-click the method name itself (note that when using multiple cursors only the last one will count). Under the "TestSpark" option, select the test generator and "method [...]" option. After setting up the selected test generator, test generation will start.
-
-![Test generation for methods](readme-images/gifs/testMethod.gif#gh-light-mode-only)
-![Test generation for methods dark](readme-images/gifs/testMethod_dark.gif#gh-dark-mode-only)
-
-### Generating Tests for Lines
-To generate a test for a method, right-click (with mouse) anywhere within the line you want. Note that the line has to contain a statement (e.g. you will not have the option on lines with only method declarations). Under the "TestSpark" option, select the test generator and "line [...]" option. After setting up the selected test generator, test generation will start.
-
-![Test generation for methods](readme-images/gifs/testLine.gif#gh-light-mode-only)
-![Test generation for methods dark](readme-images/gifs/testLine_dark.gif#gh-dark-mode-only)
+[//]: # (TODO add details description about the TestSpark window)
 
 ### Working with Test Cases
 After receiving the results, the user can interact with the test cases in various ways. They can view the result (whether it's passed or failed), also select, delete, modify, reset, like/dislike, fix by LLM and execute the tests to update the results.\
@@ -257,10 +243,32 @@ In addition to the token, users are recommended to configure settings for the LL
 ![LLM Parameters](readme-images/pngs/LLMParameters.png#gh-light-mode-only)
 ![LLM Parameters dark](readme-images/pngs/LLMParameters_dark.png#gh-dark-mode-only)
 
+[//]: # (TODO llmSetupCheckBox)
+
+![LLM Setup Page](readme-images/pngs/LLMSetupPage.png#gh-light-mode-only)
+![LLM Setup Page dark](readme-images/pngs/LLMSetupPage_dark.png#gh-dark-mode-only)
+
+[//]: # (TODO supporting default structures for requests to LLM in test cases)
+
+![LLM Default Requests](readme-images/pngs/LLMDefaultRequests.png#gh-light-mode-only)
+![LLM Default Requests dark](readme-images/pngs/LLMDefaultRequests_dark.png#gh-dark-mode-only)
+
+[//]: # (TODO JUnit version)
+
+![LLM JUnit version](readme-images/pngs/LLMJUnitVersion.png#gh-light-mode-only)
+![LLM JUnit version dark](readme-images/pngs/LLMJUnitVersion_dark.png#gh-dark-mode-only)
+
+[//]: # (TODO JUnit version)
+
+![LLM JUnit version](readme-images/pngs/LLMJUnitVersion.png#gh-light-mode-only)
+![LLM JUnit version dark](readme-images/pngs/LLMJUnitVersion_dark.png#gh-dark-mode-only)
+
 Users have the opportunity to adjust the prompt that is sent to the LLM platform.
 
-![LLM Parameters](readme-images/pngs/LLMPrompt.png#gh-light-mode-only)
-![LLM Parameters dark](readme-images/pngs/LLMPrompt_dark.png#gh-dark-mode-only)
+[//]: # (TODO improve the description. Add information about the templates)
+
+![LLM Prompt](readme-images/pngs/LLMPrompt.png#gh-light-mode-only)
+![LLM Prompt dark](readme-images/pngs/LLMPrompt_dark.png#gh-dark-mode-only)
 
 <span style="color:crimson; font-size:150%; font-weight:bold">:exclamation: Pro tip: don't forget to hit the "save" button at the bottom. :exclamation:</span>
 
