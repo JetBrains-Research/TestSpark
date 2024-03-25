@@ -115,6 +115,7 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.classPrompt = settingsComponent!!.classPrompt
         settingsState.methodPrompt = settingsComponent!!.methodPrompt
         settingsState.linePrompt = settingsComponent!!.linePrompt
+        settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests
         settingsState.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
         settingsState.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
         settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests

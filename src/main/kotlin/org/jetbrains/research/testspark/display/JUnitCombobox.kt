@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.display
 
 import com.intellij.openapi.ui.ComboBox
-import org.jetbrains.research.testspark.data.JUnitVersion
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JList

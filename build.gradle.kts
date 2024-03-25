@@ -57,6 +57,7 @@ if (spaceCredentialsProvided()) {
     val hasGrazieAccess = sourceSets.create("hasGrazieAccess")
     // add output of main source set to new source set class path
     hasGrazieAccess.compileClasspath += sourceSets.main.get().output
+
     // register feature variant
     java.registerFeature(hasGrazieAccess.name) {
         usingSourceSet(hasGrazieAccess)
@@ -105,6 +106,12 @@ dependencies {
     implementation(files("lib/JUnitRunner.jar"))
 
     implementation(project(":core"))
+    if (spaceCredentialsProvided()) {
+        "hasGrazieAccessCompileOnly"(project(":core"))
+    }
+
+    // https://central.sonatype.com/artifact/io.github.oshai/kotlin-logging-jvm/overview
+    implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
 
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
