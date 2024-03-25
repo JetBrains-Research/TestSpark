@@ -18,7 +18,6 @@ import kotlinx.serialization.json.Json
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
@@ -37,6 +36,7 @@ import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.JTextField
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 
 class SettingsLLMComponent(private val project: Project) {
     private val settingsState: SettingsApplicationState
@@ -148,15 +148,6 @@ class SettingsLLMComponent(private val project: Project) {
             }
         }
 
-    var defaultLLMRequests: String
-        get() = Json.encodeToString(
-            ListSerializer(String.serializer()),
-            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }.map { (it.getComponent(0) as JTextField).text },
-        )
-        set(value) {
-            fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), value))
-        }
-
     var llmSetupCheckBoxSelected: Boolean
         get() = llmSetupCheckBox.isSelected
         set(newStatus) {
@@ -167,6 +158,15 @@ class SettingsLLMComponent(private val project: Project) {
         get() = provideTestSamplesCheckBox.isSelected
         set(newStatus) {
             provideTestSamplesCheckBox.isSelected = newStatus
+        }
+
+    var defaultLLMRequests: String
+        get() = Json.encodeToString(
+            ListSerializer(String.serializer()),
+            defaultLLMRequestPanels.filter { (it.getComponent(0) as JTextField).text.isNotBlank() }.map { (it.getComponent(0) as JTextField).text },
+        )
+        set(value) {
+            fillDefaultLLMRequestsPanel(Json.decodeFromString(ListSerializer(String.serializer()), value))
         }
 
     init {

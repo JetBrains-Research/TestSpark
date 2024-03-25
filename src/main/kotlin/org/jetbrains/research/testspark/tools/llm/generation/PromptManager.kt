@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
@@ -14,19 +13,19 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.core.generation.importPattern
-import org.jetbrains.research.testspark.core.generation.packagePattern
-import org.jetbrains.research.testspark.core.generation.prompt.PromptGenerator
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.ClassRepresentation
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.MethodRepresentation
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptConfiguration
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptGenerationContext
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptTemplates
+import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptGenerator
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.MethodRepresentation
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptConfiguration
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptGenerationContext
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptTemplates
+import org.jetbrains.research.testspark.core.utils.importPattern
+import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
@@ -49,10 +48,10 @@ class PromptManager(
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
-    fun generatePrompt(codeType: FragmentToTestData, testSamplesCode: String): String {
+    fun generatePrompt(codeType: FragmentToTestData, testSamplesCode: String, polyDepthReducing: Int): String {
         val prompt = ApplicationManager.getApplication().runReadAction(
             Computable {
-                val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
+                val interestingPsiClasses = getInterestingPsiClasses(classesToTest, polyDepthReducing)
 
                 val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation)
                 val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cut)
@@ -136,31 +135,36 @@ class PromptManager(
         return key to value // mapOf(key to value).entries.first()
     }
 
-    fun reducePromptSize(): Boolean {
+    fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
+        return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
+            (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+    }
+
+    fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
         // reducing depth of polymorphism
-        if (SettingsArguments(project).maxPolyDepth(project) > 1) {
-            project.service<TestGenerationDataService>().polyDepthReducing++
-            log.info("polymorphism depth is: ${SettingsArguments(project).maxPolyDepth(project)}")
-            showPromptReductionWarning()
+        if (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) {
+            testGenerationData.polyDepthReducing++
+            log.info("polymorphism depth is: ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}")
+            showPromptReductionWarning(testGenerationData)
             return true
         }
 
         // reducing depth of input params
-        if (SettingsArguments(project).maxInputParamsDepth(project) > 1) {
-            project.service<TestGenerationDataService>().inputParamsDepthReducing++
-            log.info("input params depth is: ${SettingsArguments(project).maxPolyDepth(project)}")
-            showPromptReductionWarning()
+        if (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1) {
+            testGenerationData.inputParamsDepthReducing++
+            log.info("input params depth is: ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}")
+            showPromptReductionWarning(testGenerationData)
             return true
         }
 
         return false
     }
 
-    private fun showPromptReductionWarning() {
+    private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
             TestSparkBundle.message("promptReduction") + "\n" +
-                "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(project)}.\n" +
-                "Maximum depth for input parameters is ${SettingsArguments(project).maxInputParamsDepth(project)}.",
+                "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                "Maximum depth for input parameters is ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
             project,
         )
     }
@@ -200,12 +204,12 @@ class PromptManager(
      * @param classesToTest The list of classes to test for interesting PsiClasses.
      * @return The set of interesting PsiClasses found during the search.
      */
-    private fun getInterestingPsiClasses(classesToTest: MutableList<PsiClass>): MutableSet<PsiClass> {
+    private fun getInterestingPsiClasses(classesToTest: MutableList<PsiClass>, polyDepthReducing: Int): MutableSet<PsiClass> {
         val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
 
         var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
 
-        repeat(SettingsArguments(project).maxInputParamsDepth(project)) {
+        repeat(SettingsArguments(project).maxInputParamsDepth(polyDepthReducing)) {
             val tempListOfClasses = mutableSetOf<PsiClass>()
 
             currentLevelClasses.forEach { classIt ->

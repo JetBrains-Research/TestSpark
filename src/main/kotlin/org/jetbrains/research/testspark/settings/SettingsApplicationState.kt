@@ -2,8 +2,8 @@ package org.jetbrains.research.testspark.settings
 
 import com.intellij.util.xmlb.annotations.OptionTag
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
-import org.jetbrains.research.testspark.data.JUnitVersion
 import org.jetbrains.research.testspark.data.JUnitVersionConverter
 
 /**

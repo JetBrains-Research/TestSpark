@@ -21,7 +21,6 @@ plugins {
     id("java")
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "1.9.0"
-    kotlin("plugin.serialization") version "1.9.0"
     // Gradle IntelliJ Plugin
     id("org.jetbrains.intellij") version "1.15.0"
     // Gradle Changelog Plugin
@@ -106,6 +105,12 @@ dependencies {
     implementation(files("lib/JUnitRunner.jar"))
 
     implementation(project(":core"))
+    if (spaceCredentialsProvided()) {
+        "hasGrazieAccessCompileOnly"(project(":core"))
+    }
+
+    // https://central.sonatype.com/artifact/io.github.oshai/kotlin-logging-jvm/overview
+    implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
 
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
