@@ -28,9 +28,8 @@ import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManage
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
-import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.isProcessStopped
+import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.sep
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
@@ -39,7 +38,6 @@ import java.nio.charset.Charset
 import java.util.regex.Pattern
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
-import org.jetbrains.research.testspark.tools.isProcessStopped
 
 /**
  * This class manages the execution of EvoSuite, a test generation tool.

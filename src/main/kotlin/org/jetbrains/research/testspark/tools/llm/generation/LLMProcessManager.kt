@@ -159,8 +159,8 @@ class LLMProcessManager(
             }
         }
 
-            // Process stopped checking
-            if (isProcessStopped(project, indicator)) return null
+        // Process stopped checking
+        if (isProcessStopped(project, indicator)) return null
         log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
 
         when (feedbackResponse.executionResult) {

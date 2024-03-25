@@ -37,11 +37,9 @@ import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
+import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.llm.testModificationRequest
-import org.jetbrains.research.testspark.tools.processStopped
-import org.jetbrains.research.testspark.tools.isProcessStopped
-import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
