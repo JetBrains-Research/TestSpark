@@ -55,14 +55,14 @@ class Pipeline(
         val testResultName = "test_gen_result_$id"
 
         ApplicationManager.getApplication().runWriteAction {
-        projectContext = ProjectContext(
-            projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path,
-            fileUrlAsString = fileUrl,
-            cutPsiClass = cutPsiClass,
-            classFQN = cutPsiClass.qualifiedName!!,
-            cutModule = ProjectFileIndex.getInstance(project)
-                .getModuleForFile(cutPsiClass.containingFile.virtualFile)!!,
-        )
+            projectContext = ProjectContext(
+                projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path,
+                fileUrlAsString = fileUrl,
+                cutPsiClass = cutPsiClass,
+                classFQN = cutPsiClass.qualifiedName!!,
+                cutModule = ProjectFileIndex.getInstance(project)
+                    .getModuleForFile(cutPsiClass.containingFile.virtualFile)!!,
+            )
         }
 
         generatedTestsData.resultPath = getResultPath(id, testResultDirectory)
