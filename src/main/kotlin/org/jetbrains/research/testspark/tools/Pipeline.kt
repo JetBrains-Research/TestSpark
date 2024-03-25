@@ -7,15 +7,24 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.data.DataFilesUtil
+import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.ProjectContext
+import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.getSurroundingClass
-import org.jetbrains.research.testspark.services.ClearService
-import org.jetbrains.research.testspark.services.ProjectContextService
-import org.jetbrains.research.testspark.services.TestStorageProcessingService
+import org.jetbrains.research.testspark.services.CoverageVisualisationService
+import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.services.ReportLockingService
+import org.jetbrains.research.testspark.services.RunnerService
+import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
+import java.util.UUID
 
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
@@ -33,48 +42,80 @@ class Pipeline(
     fileUrl: String?,
     private val packageName: String,
 ) {
+    val projectContext: ProjectContext
+    val generatedTestsData = TestGenerationData()
+
     init {
-        project.service<ProjectContextService>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
-        project.service<ProjectContextService>().resultPath = project.service<TestStorageProcessingService>().resultPath
-        project.service<ProjectContextService>().baseDir = "${project.service<TestStorageProcessingService>().testResultDirectory}${project.service<TestStorageProcessingService>().testResultName}-validation"
-        project.service<ProjectContextService>().fileUrl = fileUrl
+        val cutPsiClass = getSurroundingClass(psiFile, caretOffset)!!
 
-        project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(psiFile, caretOffset)
-        project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
+        // get generated test path
+        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
+        val id = UUID.randomUUID().toString()
+        val testResultName = "test_gen_result_$id"
 
-        project.service<ProjectContextService>().classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!
+        projectContext = ProjectContext(
+            projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path,
+            fileUrlAsString = fileUrl,
+            cutPsiClass = cutPsiClass,
+            classFQN = cutPsiClass.qualifiedName!!,
+            cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!,
+        )
 
-        DataFilesUtil.makeTmp()
-        DataFilesUtil.makeDir(project.service<ProjectContextService>().baseDir!!)
+        generatedTestsData.resultPath = getResultPath(id, testResultDirectory)
+        generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
+        generatedTestsData.testResultName = testResultName
+
+        DataFilesUtil.makeTmp(FileUtilRt.getTempDirectory())
+        DataFilesUtil.makeDir(generatedTestsData.baseDir!!)
     }
 
     /**
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-        project.service<ClearService>().clear(project)
-
+        clear(project)
         val projectBuilder = ProjectBuilder(project)
+
+        var result: UIContext? = null
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
-                    if (processStopped(project, indicator)) return
+                    val ijIndicator = IJProgressIndicator(indicator)
 
-                    if (projectBuilder.runBuild(indicator)) {
-                        if (processStopped(project, indicator)) return
+                    if (processStopped(project, ijIndicator)) return
 
-                        processManager.runTestGenerator(
-                            indicator,
+                    if (projectBuilder.runBuild(ijIndicator)) {
+                        if (processStopped(project, ijIndicator)) return
+
+                        result = processManager.runTestGenerator(
+                            ijIndicator,
                             codeType,
                             packageName,
+                            projectContext,
+                            generatedTestsData,
                         )
                     }
 
-                    if (processStopped(project, indicator)) return
+                    if (processStopped(project, ijIndicator)) return
 
-                    indicator.stop()
+                    ijIndicator.stop()
+                }
+
+                override fun onFinished() {
+                    super.onFinished()
+                    project.service<RunnerService>().clear()
+                    result?.let {
+                        project.service<ReportLockingService>().receiveReport(it)
+                    }
                 }
             })
+    }
+
+    fun clear(project: Project) { // should be removed totally!
+        project.service<TestCaseDisplayService>().clear()
+        project.service<ErrorService>().clear()
+        project.service<CoverageVisualisationService>().clear()
+        project.service<TestsExecutionResultService>().clear()
     }
 }
