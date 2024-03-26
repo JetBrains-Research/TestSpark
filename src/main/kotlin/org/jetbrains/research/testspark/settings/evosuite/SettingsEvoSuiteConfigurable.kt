@@ -114,7 +114,7 @@ class SettingsEvoSuiteConfigurable : Configurable {
         settingsState.seed = settingsComponent!!.seed
 
         val evosuitePort = settingsComponent!!.evosuitePort.toIntOrNull()
-        if (evosuitePort == null || evosuitePort < 1024 || evosuitePort > 65535) {
+        if (evosuitePort != null && (evosuitePort < 1024 || evosuitePort > 65535)) {
             Messages.showErrorDialog(
                 "Evosuite port should be a valye between 1024 to 65535. Therefore, it will not be saved. However, the rest of the parameters have been successfully saved. ",
                 "Incorrect Port Provided",
