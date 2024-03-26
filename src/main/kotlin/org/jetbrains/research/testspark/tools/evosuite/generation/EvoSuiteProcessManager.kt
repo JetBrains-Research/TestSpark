@@ -28,8 +28,8 @@ import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManage
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
-import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.sep
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
@@ -77,7 +77,7 @@ class EvoSuiteProcessManager(
         generatedTestData: TestGenerationData,
     ): UIContext? {
         try {
-            if (processStopped(project, indicator)) return null
+            if (isProcessStopped(project, indicator)) return null
 
             val regex = Regex("version \"(.*?)\"")
             val version = regex.find(CommandLineRunner.run(arrayListOf(settingsState.javaPath, "-version")))
@@ -111,6 +111,7 @@ class EvoSuiteProcessManager(
 
             if (settingsState.seed.isNotBlank()) command.add("-seed=${settingsState.seed}")
             if (settingsState.configurationId.isNotBlank()) command.add("-Dconfiguration_id=${settingsState.configurationId}")
+            if (settingsState.evosuitePort.isNotBlank()) command.add("-Dprocess_communication_port=${settingsState.evosuitePort}")
 
             // update build path
             var buildPath = projectClassPath
@@ -143,7 +144,7 @@ class EvoSuiteProcessManager(
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (processStopped(project, indicator)) {
+                    if (isProcessStopped(project, indicator)) {
                         handler.destroyProcess()
                         return
                     }
@@ -187,7 +188,7 @@ class EvoSuiteProcessManager(
 
             handler.startNotify()
 
-            if (processStopped(project, indicator)) return null
+            if (isProcessStopped(project, indicator)) return null
 
             // evosuite errors check
             if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return null

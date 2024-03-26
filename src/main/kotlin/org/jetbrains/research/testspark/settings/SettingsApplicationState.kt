@@ -46,6 +46,7 @@ data class SettingsApplicationState(
     var provideTestSamplesCheckBoxSelected: Boolean = DefaultSettingsApplicationState.provideTestSamplesCheckBoxSelected,
     var llmSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.llmSetupCheckBoxSelected,
     var evosuiteSetupCheckBoxSelected: Boolean = DefaultSettingsApplicationState.evosuiteSetupCheckBoxSelected,
+    var evosuitePort: String = DefaultSettingsApplicationState.evosuitePort,
 ) {
 
     /**
@@ -88,6 +89,7 @@ data class SettingsApplicationState(
         val provideTestSamplesCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
         val llmSetupCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
         val evosuiteSetupCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
+        val evosuitePort: String = TestSparkDefaultsBundle.defaultValue("evosuitePort")
     }
 
     // TODO remove from here

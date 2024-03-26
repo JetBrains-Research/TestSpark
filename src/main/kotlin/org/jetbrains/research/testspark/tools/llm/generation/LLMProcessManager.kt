@@ -26,10 +26,10 @@ import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
-import org.jetbrains.research.testspark.tools.processStopped
 import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.sep
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
@@ -76,7 +76,7 @@ class LLMProcessManager(
     ): UIContext? {
         log.info("LLM test generation begins")
 
-        if (processStopped(project, indicator)) return null
+        if (isProcessStopped(project, indicator)) return null
 
         // update build path
         var buildPath = projectContext.projectClassPath!!
@@ -159,6 +159,8 @@ class LLMProcessManager(
             }
         }
 
+        // Process stopped checking
+        if (isProcessStopped(project, indicator)) return null
         log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
 
         when (feedbackResponse.executionResult) {
@@ -183,7 +185,7 @@ class LLMProcessManager(
             }
         }
 
-        if (processStopped(project, indicator)) return null
+        if (isProcessStopped(project, indicator)) return null
 
         // Error during the collecting
         if (project.service<ErrorService>().isErrorOccurred()) return null

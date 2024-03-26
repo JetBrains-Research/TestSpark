@@ -37,9 +37,9 @@ import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
+import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.llm.testModificationRequest
-import org.jetbrains.research.testspark.tools.processStopped
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
@@ -400,8 +400,10 @@ class TestCasePanelFactory(
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
-
-                    if (processStopped(project, ijIndicator)) return
+                    if (isProcessStopped(project, ijIndicator)) {
+                        finishProcess()
+                        return
+                    }
 
                     val modifiedTest = testModificationRequest(
                         initialCodes[currentRequestNumber - 1],
@@ -417,25 +419,23 @@ class TestCasePanelFactory(
                             getClassWithTestCaseName(testCase.testName),
                         )
                         addTest(modifiedTest)
-                    } else {
-                        NotificationGroupManager.getInstance()
-                            .getNotificationGroup("LLM Execution Error")
-                            .createNotification(
-                                TestSparkBundle.message("llmWarningTitle"),
-                                TestSparkBundle.message("noRequestFromLLM"),
-                                NotificationType.WARNING,
-                            )
-                            .notify(project)
-
-                        loadingLabel.isVisible = false
-                        enableComponents(true)
                     }
 
-                    if (processStopped(project, ijIndicator)) return
+                    if (isProcessStopped(project, ijIndicator)) {
+                        finishProcess()
+                        return
+                    }
 
+                    finishProcess()
                     ijIndicator.stop()
                 }
             })
+    }
+
+    private fun finishProcess() {
+        project.service<ErrorService>().clear()
+        loadingLabel.isVisible = false
+        enableComponents(true)
     }
 
     private fun enableComponents(isEnabled: Boolean) {
@@ -471,9 +471,6 @@ class TestCasePanelFactory(
 
             requestComboBox.selectedItem = requestComboBox.getItemAt(0)
             sendButton.isEnabled = true
-
-            loadingLabel.isVisible = false
-            enableComponents(true)
 
             switchToAnotherCode()
         }
@@ -534,12 +531,12 @@ class TestCasePanelFactory(
 
         lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
-        loadingLabel.isVisible = false
-        enableComponents(true)
-
         SwingUtilities.invokeLater {
             updateUI()
         }
+
+        finishProcess()
+        indicator.stop()
     }
 
     /**
