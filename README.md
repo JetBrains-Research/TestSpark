@@ -16,7 +16,6 @@
 - [Licence](#licence)
 
 ## Description
-
 <!-- Plugin description -->
 TestSpark is a plugin for generating unit tests. TestSpark natively integrates different AI-based test generation tools and techniques in the IDE.
 
@@ -53,7 +52,6 @@ If you are running the plugin for the first time, checkout the [Settings](#setti
 <!-- Plugin description end -->
 
 ## Installation
-
 - Using IDE built-in plugin system:
 
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "TestSpark"</kbd> >
@@ -67,9 +65,7 @@ If you are running the plugin for the first time, checkout the [Settings](#setti
 
 ## Usage
 <!-- How to use the plugin? What are the limitations? Are there any shortcuts? -->
-- [Generating Tests for Classes](#generating-tests-for-classes)
-- [Generating Tests for Methods](#generating-tests-for-methods)
-- [Generating Tests for Lines](#generating-tests-for-lines)
+- [Generating Tests](#generating-tests)
 - [Working with Test Cases](#working-with-test-cases)
 - [Coverage](#coverage)
 - [Integrating tests into the project](#integrating-tests-into-the-project)
@@ -77,7 +73,6 @@ If you are running the plugin for the first time, checkout the [Settings](#setti
 - [Telemetry](#telemetry-opt-in)
 
 ### Generating Tests
-
 [//]: # (TODO add details description about the TestSpark window)
 
 ### Working with Test Cases
@@ -85,76 +80,76 @@ After receiving the results, the user can interact with the test cases in variou
 Hitting the "Apply to test suite" button will add the selected tests to a test class of your choice.\
 Additionally, the top row of the tool window has buttons for selecting all tests, deselecting all tests, running all tests and removing them. The user also has an overview of how many tests they currently have selected and passed.
 
-![Quick buttons](readme-images/pngs/quickButtons.png#gh-light-mode-only)
-![Quick buttons dark](readme-images/pngs/quickButtons_dark.png#gh-dark-mode-only)
+![Quick buttons](readme-images/pngs/QuickButtons.png#gh-light-mode-only)
+![Quick buttons dark](readme-images/pngs/QuickButtons_dark.png#gh-dark-mode-only)
 
 #### Select Test
 Users can select test cases.
 
-![Select test case](readme-images/gifs/selectTestCase.gif#gh-light-mode-only)
-![Select test case dark](readme-images/gifs/selectTestCase_dark.gif#gh-dark-mode-only)
+![Select test case](readme-images/gifs/SelectTestCase.gif#gh-light-mode-only)
+![Select test case dark](readme-images/gifs/SelectTestCase_dark.gif#gh-dark-mode-only)
 
 #### Remove Test
 Users can remove test cases.
 
-![Remove test case](readme-images/gifs/deleteTestCase.gif#gh-light-mode-only)
-![Remove test case dark](readme-images/gifs/deleteTestCase_dark.gif#gh-dark-mode-only)
+![Remove test case](readme-images/gifs/DeleteTestCase.gif#gh-light-mode-only)
+![Remove test case dark](readme-images/gifs/DeleteTestCase_dark.gif#gh-dark-mode-only)
 
 #### Modify Test
 Users can modify the code of test cases.
 
-![Modify test case](readme-images/gifs/modifyTestCase.gif#gh-light-mode-only)
-![Modify test case dark](readme-images/gifs/modifyTestCase_dark.gif#gh-dark-mode-only)
+![Modify test case](readme-images/gifs/ModifyTestCase.gif#gh-light-mode-only)
+![Modify test case dark](readme-images/gifs/ModifyTestCase_dark.gif#gh-dark-mode-only)
 
 #### Reset Test
 Users can reset the code to its original.
 
-![Reset test case](readme-images/gifs/resetTestCase.gif#gh-light-mode-only)
-![Reset test case dark](readme-images/gifs/resetTestCase_dark.gif#gh-dark-mode-only)
+![Reset test case](readme-images/gifs/ResetTestCase.gif#gh-light-mode-only)
+![Reset test case dark](readme-images/gifs/ResetTestCase_dark.gif#gh-dark-mode-only)
 
 #### Reset to Last Run
 Users can reset the code to the last run.
 
-![Reset to last run](readme-images/gifs/resetToLastRunTestCase.gif#gh-light-mode-only)
-![Reset to last run dark](readme-images/gifs/resetToLastRunTestCase_dark.gif#gh-dark-mode-only)
+![Reset to last run](readme-images/gifs/ResetToLastRunTestCase.gif#gh-light-mode-only)
+![Reset to last run dark](readme-images/gifs/ResetToLastRunTestCase_dark.gif#gh-dark-mode-only)
 
 #### Run Test
 Users can run the test to update the execution result.\
 Effortlessly identify passed and failed test cases with green and red color highlights for instant result comprehension is available. In case of failure, it is possible to find out the current error.
 
-![Run test](readme-images/gifs/runTestCase.gif#gh-light-mode-only)
-![Run test dark](readme-images/gifs/runTestCase_dark.gif#gh-dark-mode-only)
+![Run test](readme-images/gifs/RunTestCase.gif#gh-light-mode-only)
+![Run test dark](readme-images/gifs/RunTestCase_dark.gif#gh-dark-mode-only)
 
 #### Copy Test
 Users can copy the test.
 
-![Copy test](readme-images/gifs/copyTestCase.gif#gh-light-mode-only)
-![Copy test dark](readme-images/gifs/copyTestCase_dark.gif#gh-dark-mode-only)
+![Copy test](readme-images/gifs/CopyTestCase.gif#gh-light-mode-only)
+![Copy test dark](readme-images/gifs/CopyTestCase_dark.gif#gh-dark-mode-only)
 
 #### Like/Dislike Test
 Users can like/dislike the test for future analysis and improvement of the generation process.
 
-![Like test](readme-images/gifs/likeTestCase.gif#gh-light-mode-only)
-![Like test dark](readme-images/gifs/likeTestCase_dark.gif#gh-dark-mode-only)
+![Like test](readme-images/gifs/LikeTestCase.gif#gh-light-mode-only)
+![Like test dark](readme-images/gifs/LikeTestCase_dark.gif#gh-dark-mode-only)
 
 #### Send a Request to LLM
 Users can send a request to LLM with modification which users prefer for the test case.
 
-![Send a request to LLM](readme-images/gifs/send.gif#gh-light-mode-only)
-![Send a request to LLM dark](readme-images/gifs/send_dark.gif#gh-dark-mode-only)
+![Send a request to LLM](readme-images/gifs/Send.gif#gh-light-mode-only)
+![Send a request to LLM dark](readme-images/gifs/Send_dark.gif#gh-dark-mode-only)
 
 ### Coverage
 #### Coverage Table
 Once a test suite is generated, basic statistics about it can be seen in the tool window, `coverage` tab. The statistics include line coverage, branch coverage, weak mutation coverage. The table adjusts dynamically - it only calculates the statistics for the selected tests in the test suite.
 
-![Progress bar](readme-images/pngs/coverageTable.png#gh-light-mode-only)
-![Progress bar dark](readme-images/pngs/coverageTable_dark.png#gh-dark-mode-only)
+![Progress bar](readme-images/pngs/CoverageTable.png#gh-light-mode-only)
+![Progress bar dark](readme-images/pngs/CoverageTable_dark.png#gh-dark-mode-only)
 
 #### Coverage Visualisation
 Once test are generated, the lines which are covered by the tests will be highlighted (default color: green). The gutter next to the lines will have a green rectangle as well. If the rectangle is clicked, a popup will show the names of the tests which cover the selected line. If any of the test names are clicked, the corresponding test in the toolwindow will be highlighted with the same accent color. The effect lasts 10 seconds. Coverage visualisation adjusts dynamically - it only shows results for the tests that are selected in the TestSpark tab.
 
-![Test Highlight](readme-images/gifs/testHighlight.gif#gh-light-mode-only)
-![Test Highlight dark](readme-images/gifs/testHighlight_dark.gif#gh-dark-mode-only)
+![Test Highlight](readme-images/gifs/TestHighlight.gif#gh-light-mode-only)
+![Test Highlight dark](readme-images/gifs/TestHighlight_dark.gif#gh-dark-mode-only)
 
 For reference, without visualisation the window would look like this:
 
@@ -162,26 +157,26 @@ For reference, without visualisation the window would look like this:
 ![No Test Highlight dark](readme-images/pngs/NoCoverageVisualisation_dark.png#gh-dark-mode-only)
 
 #### Killed Mutants Visualisation
-For mutation visualisation to work, you must have [coverage visualisation](#coverage-visualisation-1) enabled. You must also have the criterion `Mutation coverage` turned on. The setting is available in the <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> > <kbd>EvoSuite</kbd> tab.
+For mutation visualisation to work, you must have [coverage visualisation](#coverage-visualisation) enabled. You must also have the criterion `Mutation coverage` turned on. The setting is available in the <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> > <kbd>EvoSuite</kbd> tab.
 
-![Turn on Mutation](readme-images/pngs/turnOnMutation.png#gh-light-mode-only)
-![Turn on Mutation dark](readme-images/pngs/turnOnMutation_dark.png#gh-dark-mode-only)
+![Turn on Mutation](readme-images/pngs/TurnOnMutation.png#gh-light-mode-only)
+![Turn on Mutation dark](readme-images/pngs/TurnOnMutation_dark.png#gh-dark-mode-only)
 
-Once tests are generated, the same gutter from [`Coverage Visualisation`](#coverage-visualisation-1) can be used to show which mutants are covered by the current test suite and which ones are not. For mutants covered, the mutant can be clicked. Clicking the mutant will highlight all the tests that kill the mutant. Mutation visualisation adjusts dynamically - it only shows results for the tests that are selected in the TestSpark tab.
+Once tests are generated, the same gutter from [`Coverage Visualisation`](#coverage-visualisation) can be used to show which mutants are covered by the current test suite and which ones are not. For mutants covered, the mutant can be clicked. Clicking the mutant will highlight all the tests that kill the mutant. Mutation visualisation adjusts dynamically - it only shows results for the tests that are selected in the TestSpark tab.
 
-![Mutation Coverage](readme-images/gifs/mutationHighlight.gif#gh-light-mode-only)
-![Mutation Coverage dark](readme-images/gifs/mutationHighlight_dark.gif#gh-dark-mode-only)
+![Mutation Coverage](readme-images/gifs/MutationHighlight.gif#gh-light-mode-only)
+![Mutation Coverage dark](readme-images/gifs/MutationHighlight_dark.gif#gh-dark-mode-only)
 
 ### Integrating Tests into the Project
 The tests can be added to an existing file:
 
-![Tests adding to an exiting file](readme-images/gifs/addingToAnExistingFile.gif#gh-light-mode-only)
-![Tests adding to an exiting file dark](readme-images/gifs/addingToAnExistingFile_dark.gif#gh-dark-mode-only)
+![Tests adding to an exiting file](readme-images/gifs/AddingToAnExistingFile.gif#gh-light-mode-only)
+![Tests adding to an exiting file dark](readme-images/gifs/AddingToAnExistingFile_dark.gif#gh-dark-mode-only)
 
 Or to a new file:
 
-![Tests adding to a new file](readme-images/gifs/addingToANewFile.gif#gh-light-mode-only)
-![Tests adding to a new file_dark](readme-images/gifs/addingToANewFile_dark.gif#gh-dark-mode-only)
+![Tests adding to a new file](readme-images/gifs/AddingToANewFile.gif#gh-light-mode-only)
+![Tests adding to a new file_dark](readme-images/gifs/AddingToANewFile_dark.gif#gh-dark-mode-only)
 
 ### Settings
 <!-- How can users configure the plugin to match their needs? -->
@@ -248,15 +243,15 @@ In addition to the token, users are recommended to configure settings for the LL
 ![LLM Setup Page](readme-images/pngs/LLMSetupPage.png#gh-light-mode-only)
 ![LLM Setup Page dark](readme-images/pngs/LLMSetupPage_dark.png#gh-dark-mode-only)
 
+[//]: # (TODO provideTestSamplesCheckBox)
+
+![LLM Test Samples Page](readme-images/pngs/[LLMTestSamplesPage.png#gh-light-mode-only)
+![[LLM Test Samples Page dark](readme-images/pngs/[LLMTestSamplesPage_dark.png#gh-dark-mode-only)
+
 [//]: # (TODO supporting default structures for requests to LLM in test cases)
 
 ![LLM Default Requests](readme-images/pngs/LLMDefaultRequests.png#gh-light-mode-only)
 ![LLM Default Requests dark](readme-images/pngs/LLMDefaultRequests_dark.png#gh-dark-mode-only)
-
-[//]: # (TODO JUnit version)
-
-![LLM JUnit version](readme-images/pngs/LLMJUnitVersion.png#gh-light-mode-only)
-![LLM JUnit version dark](readme-images/pngs/LLMJUnitVersion_dark.png#gh-dark-mode-only)
 
 [//]: # (TODO JUnit version)
 
@@ -276,15 +271,13 @@ Users have the opportunity to adjust the prompt that is sent to the LLM platform
 One of the biggest future plans of our client is to leverage the data that is gathered by TestSpark’s telemetry. This will help them with future research, including the development of an interactive way of using EvoSuite. The general idea behind this feature is to learn from the stored user corrections in order to improve test generation.\
 To opt into telemetry, go to <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> and tick the `Enable telemetry` checkbox. If you want, change the directory where telemetry is stored.
 
-![Telemetry](readme-images/pngs/telemetry.png#gh-light-mode-only)
-![Telemetry dark](readme-images/pngs/telemetry_dark.png#gh-dark-mode-only)
-
+![Telemetry](readme-images/pngs/Telemetry.png#gh-light-mode-only)
+![Telemetry dark](readme-images/pngs/Telemetry_dark.png#gh-dark-mode-only)
 
 ## TestSpark for JetBrains employees
 JetBrains employees have the ability to send queries to OpenAI models through the [Grazie platform](https://try.ai.intellij.net/chat).
 
 ### Using Grazie platform
-
 #### Pass Space username and token as properties
 
 1) To include test generation using Grazie in the build process, you need to pass Space username and token as properties:\
@@ -305,7 +298,6 @@ spacePassword=<TOKEN>
 ...
 ```
 
-
 ### LLM Settings with Grazie
 LLM Settings with Grazie platform option:
 
@@ -315,6 +307,7 @@ LLM Settings with Grazie platform option:
 ## Contribution
 <!-- How to contribute to the plugin -->
 The plugin is Open-Source and  publicly hosted on github. Anyone can look into the code and suggest changes. You can find the plugin page [here](https://github.com/JetBrains-Research/TestSpark).
+
 ## Licence
 <!-- Which licence does the plugin have -->
 
