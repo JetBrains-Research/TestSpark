@@ -43,7 +43,7 @@ class Pipeline(
     fileUrl: String?,
     private val packageName: String,
 ) {
-    lateinit var projectContext: ProjectContext
+    val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
 
     init {
@@ -55,14 +55,11 @@ class Pipeline(
         val testResultName = "test_gen_result_$id"
 
         ApplicationManager.getApplication().runWriteAction {
-            projectContext = ProjectContext(
-                projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path,
-                fileUrlAsString = fileUrl,
-                cutPsiClass = cutPsiClass,
-                classFQN = cutPsiClass.qualifiedName!!,
-                cutModule = ProjectFileIndex.getInstance(project)
-                    .getModuleForFile(cutPsiClass.containingFile.virtualFile)!!,
-            )
+            projectContext.projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
+            projectContext.fileUrlAsString = fileUrl
+            projectContext.cutPsiClass = cutPsiClass
+            projectContext.classFQN = cutPsiClass.qualifiedName!!
+            projectContext.cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
         }
 
         generatedTestsData.resultPath = getResultPath(id, testResultDirectory)
