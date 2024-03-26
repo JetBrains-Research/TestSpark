@@ -84,10 +84,10 @@ class Pipeline(
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
 
-                    if (processStopped(project, ijIndicator)) return
+                    if (isProcessStopped(project, ijIndicator)) return
 
                     if (projectBuilder.runBuild(ijIndicator)) {
-                        if (processStopped(project, ijIndicator)) return
+                        if (isProcessStopped(project, ijIndicator)) return
 
                         result = processManager.runTestGenerator(
                             ijIndicator,
@@ -98,7 +98,7 @@ class Pipeline(
                         )
                     }
 
-                    if (processStopped(project, ijIndicator)) return
+                    if (isProcessStopped(project, ijIndicator)) return
 
                     ijIndicator.stop()
                 }
