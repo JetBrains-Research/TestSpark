@@ -111,6 +111,7 @@ class EvoSuiteProcessManager(
 
             if (settingsState.seed.isNotBlank()) command.add("-seed=${settingsState.seed}")
             if (settingsState.configurationId.isNotBlank()) command.add("-Dconfiguration_id=${settingsState.configurationId}")
+            if (settingsState.evosuitePort.isNotBlank()) command.add("-Dprocess_communication_port=${settingsState.evosuitePort}")
 
             // update build path
             var buildPath = projectClassPath
