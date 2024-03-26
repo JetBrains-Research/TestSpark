@@ -53,13 +53,13 @@ class PromptManager(
             Computable {
                 val interestingPsiClasses = getInterestingPsiClasses(classesToTest, polyDepthReducing)
 
-                val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation)
+                val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList().filterNotNull()
                 val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cut)
-                    .map(this::createClassRepresentation).toMap()
+                    .map(this::createClassRepresentation).toMap().filter { it.key != null }
 
                 val context = PromptGenerationContext(
-                    cut = createClassRepresentation(cut),
-                    classesToTest = classesToTest.map(this::createClassRepresentation),
+                    cut = createClassRepresentation(cut)!!,
+                    classesToTest = classesToTest.map(this::createClassRepresentation).toList().filterNotNull(),
                     polymorphismRelations = polymorphismRelations,
                     promptConfiguration = PromptConfiguration(
                         desiredLanguage = "Java",
@@ -82,8 +82,8 @@ class PromptManager(
                     }
                     CodeType.METHOD -> {
                         val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
-                        val method = createMethodRepresentation(psiMethod)
-                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
+                        val method = createMethodRepresentation(psiMethod)!!
+                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation).toList().filterNotNull()
 
                         promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, testSamplesCode)
                     }
@@ -97,8 +97,8 @@ class PromptManager(
                         val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
 
                         val lineUnderTest = document.getText(TextRange.create(lineStartOffset, lineEndOffset))
-                        val method = createMethodRepresentation(psiMethod)
-                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
+                        val method = createMethodRepresentation(psiMethod)!!
+                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation).toList().filterNotNull()
 
                         promptGenerator.generatePromptForLine(lineUnderTest, method, interestingClassesFromMethod, testSamplesCode)
                     }
@@ -109,7 +109,8 @@ class PromptManager(
         return prompt
     }
 
-    private fun createMethodRepresentation(psiMethod: PsiMethod): MethodRepresentation {
+    private fun createMethodRepresentation(psiMethod: PsiMethod): MethodRepresentation? {
+        psiMethod.text ?: return null
         return MethodRepresentation(
             signature = psiMethod.getSignatureString(),
             name = psiMethod.name,
@@ -118,17 +119,18 @@ class PromptManager(
         )
     }
 
-    private fun createClassRepresentation(psiClass: PsiClass): ClassRepresentation {
+    private fun createClassRepresentation(psiClass: PsiClass): ClassRepresentation? {
+        psiClass.qualifiedName ?: return null
         return ClassRepresentation(
-            psiClass.qualifiedName!!,
+            psiClass.qualifiedName,
             getClassFullText(psiClass),
-            psiClass.allMethods.map(this::createMethodRepresentation),
+            psiClass.allMethods.map(this::createMethodRepresentation).toList().filterNotNull(),
         )
     }
 
     private fun createClassRepresentation(
         entry: Map.Entry<PsiClass, MutableList<PsiClass>>,
-    ): Pair<ClassRepresentation, List<ClassRepresentation>> {
+    ): Pair<ClassRepresentation?, List<ClassRepresentation?>> {
         val key = createClassRepresentation(entry.key)
         val value = entry.value.map(this::createClassRepresentation)
 
