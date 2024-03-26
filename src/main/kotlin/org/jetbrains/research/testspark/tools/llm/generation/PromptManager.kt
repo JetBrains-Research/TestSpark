@@ -135,6 +135,11 @@ class PromptManager(
         return key to value // mapOf(key to value).entries.first()
     }
 
+    fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
+        return (SettingsArguments.maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
+            (SettingsArguments.maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+    }
+
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
         // reducing depth of polymorphism
         if (SettingsArguments.maxPolyDepth(testGenerationData.polyDepthReducing) > 1) {

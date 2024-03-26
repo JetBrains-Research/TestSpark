@@ -2,42 +2,48 @@ package org.jetbrains.research.testspark.core.test
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import java.io.File
+
+data class TestCasesCompilationResult(
+    val allTestCasesCompilable: Boolean,
+    val compilableTestCases: MutableSet<TestCaseGeneratedByLLM>,
+)
 
 class TestCompiler(
     val javaHomeDirectoryPath: String,
     val libPath: String,
     val junitVersion: JUnitVersion,
 ) {
-
     private val log = KotlinLogging.logger { this::class.java }
 
     /**
-     * Compiles the generated test file using the proper javac and returns a Pair
-     * indicating whether the compilation was successful and any error message encountered during compilation.
+     * Compiles the generated files with test cases using the proper javac.
      *
-     * @return A Pair containing a boolean indicating whether the compilation was successful
-     *         and a String containing any error message encountered during compilation.
+     * @return true if all the provided test cases are successfully compiled,
+     *         otherwise returns false.
      */
     fun compileTestCases(
         generatedTestCasesPaths: List<String>,
         buildPath: String,
         testCases: MutableList<TestCaseGeneratedByLLM>,
-        generatedTestData: TestGenerationData,
-    ): Boolean {
-        var result = false
+        // generatedTestData: TestGenerationData,
+    ): TestCasesCompilationResult {
+        var allTestCasesCompilable = true
+        val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
+
         for (index in generatedTestCasesPaths.indices) {
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
-            result = result || compilable
+            allTestCasesCompilable = allTestCasesCompilable && compilable
             if (compilable) {
-                generatedTestData.compilableTestCases.add(testCases[index])
+                // generatedTestData.compilableTestCases.add(testCases[index])
+                compilableTestCases.add(testCases[index])
             }
         }
-        return result
+
+        return TestCasesCompilationResult(allTestCasesCompilable, compilableTestCases)
     }
 
     /**
@@ -67,7 +73,7 @@ class TestCompiler(
             ),
         )
 
-        log.info("Error message: $errorMsg")
+        log.info { "Error message: '$errorMsg'" }
 
         // create .class file path
         val classFilePath = path.replace(".java", ".class")

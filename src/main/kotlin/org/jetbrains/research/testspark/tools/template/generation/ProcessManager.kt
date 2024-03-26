@@ -22,6 +22,6 @@ interface ProcessManager {
         codeType: FragmentToTestData,
         packageName: String,
         projectContext: ProjectContext,
-        generatedTestData: TestGenerationData,
+        generatedTestsData: TestGenerationData,
     ): UIContext?
 }

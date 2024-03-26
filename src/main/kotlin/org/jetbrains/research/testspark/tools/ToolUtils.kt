@@ -8,13 +8,13 @@ import com.intellij.openapi.roots.ModuleRootManager
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.tools.llm.getClassWithTestCaseName
 import java.io.File
 
 val sep = File.separatorChar
