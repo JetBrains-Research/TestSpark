@@ -15,8 +15,8 @@ import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
-import org.jetbrains.research.testspark.tools.processStopped
 
 /**
  * Assembler class for generating and organizing test cases.
@@ -58,7 +58,7 @@ class JUnitTestsAssembler(
      */
     fun consume(httpRequest: HttpRequests.Request) {
         while (true) {
-            if (processStopped(project, indicator)) return
+            if (isProcessStopped(project, indicator)) return
 
             Thread.sleep(50L)
             var text = httpRequest.reader.readLine()
