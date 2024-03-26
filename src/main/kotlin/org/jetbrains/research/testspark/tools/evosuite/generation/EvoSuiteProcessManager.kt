@@ -101,12 +101,12 @@ class EvoSuiteProcessManager(
 
             // get command
             val command = when (codeType.type!!) {
-                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, project).build()
+                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, settingsState).build()
                 CodeType.METHOD -> {
-                    SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, project).forMethod(codeType.objectDescription).build()
+                    SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, settingsState).forMethod(codeType.objectDescription).build()
                 }
 
-                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, project).forLine(codeType.objectIndex).build(true)
+                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, settingsState).forLine(codeType.objectIndex).build(true)
             }
 
             if (settingsState.seed.isNotBlank()) command.add("-seed=${settingsState.seed}")

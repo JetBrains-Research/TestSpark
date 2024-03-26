@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.settings
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
@@ -45,7 +46,7 @@ class SettingsPluginConfigurableTest {
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
 
-        settingsEvoConfigurable = SettingsEvoSuiteConfigurable()
+        settingsEvoConfigurable = SettingsEvoSuiteConfigurable(fixture.project)
         settingsEvoConfigurable.createComponent()
         settingsEvoConfigurable.reset()
 
@@ -54,7 +55,7 @@ class SettingsPluginConfigurableTest {
         settingsComponent = settingsConfigurable.settingsComponent!!
         settingsState = fixture.project.service<SettingsProjectService>().state
 
-        settingsApplicationState = SettingsApplicationService.getInstance().state!!
+        settingsApplicationState = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
     }
 
     @AfterEach
