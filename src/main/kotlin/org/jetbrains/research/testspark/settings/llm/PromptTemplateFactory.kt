@@ -14,6 +14,9 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import kotlin.math.max
 
+/**
+ * Creating the part of LLM settings that is responsible for prompt templates is organized
+ */
 class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     private val settingsState: SettingsApplicationState
         get() = SettingsApplicationService.getInstance().state!!
