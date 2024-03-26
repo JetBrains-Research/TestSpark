@@ -49,6 +49,13 @@ class Llm(override val name: String = "LLM") : Tool {
         )
     }
 
+    /**
+     * Fills the classesToTest variable with the data about the classes to test
+     *
+     * @param classesToTest The list of classes to test
+     * @param psiFile The PSI file.
+     * @param caretOffset The caret offset in the file.
+     */
     private fun collectClassesToTest(classesToTest: MutableList<PsiClass>, psiFile: PsiFile, caretOffset: Int) {
         // check if cut has any none java super class
         val maxPolymorphismDepth = SettingsArguments.maxPolyDepth(0)
