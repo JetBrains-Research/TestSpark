@@ -10,7 +10,7 @@ package org.jetbrains.research.testspark.core.generation.llm.prompt.configuratio
 data class PromptGenerationContext(
     val cut: ClassRepresentation,
     val classesToTest: List<ClassRepresentation>,
-    val polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
+    val polymorphismRelations: Map<ClassRepresentation?, List<ClassRepresentation?>>,
     val promptConfiguration: PromptConfiguration,
 )
 

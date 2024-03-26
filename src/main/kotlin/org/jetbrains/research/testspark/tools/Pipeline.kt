@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.tools
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -42,7 +43,7 @@ class Pipeline(
     fileUrl: String?,
     private val packageName: String,
 ) {
-    val projectContext: ProjectContext
+    val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
 
     init {
@@ -53,13 +54,13 @@ class Pipeline(
         val id = UUID.randomUUID().toString()
         val testResultName = "test_gen_result_$id"
 
-        projectContext = ProjectContext(
-            projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path,
-            fileUrlAsString = fileUrl,
-            cutPsiClass = cutPsiClass,
-            classFQN = cutPsiClass.qualifiedName!!,
-            cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!,
-        )
+        ApplicationManager.getApplication().runWriteAction {
+            projectContext.projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
+            projectContext.fileUrlAsString = fileUrl
+            projectContext.cutPsiClass = cutPsiClass
+            projectContext.classFQN = cutPsiClass.qualifiedName!!
+            projectContext.cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
+        }
 
         generatedTestsData.resultPath = getResultPath(id, testResultDirectory)
         generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
@@ -83,10 +84,10 @@ class Pipeline(
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
 
-                    if (processStopped(project, ijIndicator)) return
+                    if (isProcessStopped(project, ijIndicator)) return
 
                     if (projectBuilder.runBuild(ijIndicator)) {
-                        if (processStopped(project, ijIndicator)) return
+                        if (isProcessStopped(project, ijIndicator)) return
 
                         result = processManager.runTestGenerator(
                             ijIndicator,
@@ -97,7 +98,7 @@ class Pipeline(
                         )
                     }
 
-                    if (processStopped(project, ijIndicator)) return
+                    if (isProcessStopped(project, ijIndicator)) return
 
                     ijIndicator.stop()
                 }
