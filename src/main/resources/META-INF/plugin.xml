@@ -146,12 +146,12 @@
                 instance="org.jetbrains.research.testspark.settings.SettingsPluginConfigurable"
                 id="TestSparkSettings"
                 displayName="TestSpark"/>
-        <applicationConfigurable
+        <projectConfigurable
                 parentId="TestSparkSettings"
                 instance="org.jetbrains.research.testspark.settings.llm.SettingsLLMConfigurable"
                 id="TestSparkSettings.llm"
                 displayName="Large Language Models"/>
-        <applicationConfigurable
+        <projectConfigurable
                 parentId="TestSparkSettings"
                 instance="org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable"
                 id="TestSparkSettings.evosuite"

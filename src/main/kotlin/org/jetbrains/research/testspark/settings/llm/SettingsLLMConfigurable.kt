@@ -2,6 +2,10 @@ package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -11,9 +15,9 @@ import javax.swing.JComponent
  * This class allows to configure some LLM-related settings via the Large Language Model page in the Settings dialog,
  *   observes the changes and manages the UI and state.
  */
-class SettingsLLMConfigurable : Configurable {
+class SettingsLLMConfigurable(private val project: Project) : Configurable {
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     private var settingsComponent: SettingsLLMComponent? = null
 
@@ -23,7 +27,7 @@ class SettingsLLMConfigurable : Configurable {
      * @return the panel used for displaying settings
      */
     override fun createComponent(): JComponent? {
-        settingsComponent = SettingsLLMComponent()
+        settingsComponent = SettingsLLMComponent(project)
         return settingsComponent!!.panel
     }
 
@@ -45,9 +49,17 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
-        settingsComponent!!.classPrompt = settingsState.classPrompt
-        settingsComponent!!.methodPrompt = settingsState.methodPrompt
-        settingsComponent!!.linePrompt = settingsState.linePrompt
+        settingsComponent!!.classPrompts = settingsState.classPrompts
+        settingsComponent!!.methodPrompts = settingsState.methodPrompts
+        settingsComponent!!.linePrompts = settingsState.linePrompts
+        settingsComponent!!.classPromptNames = settingsState.classPromptNames
+        settingsComponent!!.methodPromptNames = settingsState.methodPromptNames
+        settingsComponent!!.linePromptNames = settingsState.linePromptNames
+        settingsComponent!!.classCurrentDefaultPromptIndex = settingsState.classCurrentDefaultPromptIndex
+        settingsComponent!!.methodCurrentDefaultPromptIndex = settingsState.methodCurrentDefaultPromptIndex
+        settingsComponent!!.lineCurrentDefaultPromptIndex = settingsState.lineCurrentDefaultPromptIndex
+        settingsComponent!!.junitVersion = settingsState.junitVersion
+        settingsComponent!!.junitVersionPriorityCheckBoxSelected = settingsState.junitVersionPriorityCheckBoxSelected
         settingsComponent!!.llmSetupCheckBoxSelected = settingsState.llmSetupCheckBoxSelected
         settingsComponent!!.provideTestSamplesCheckBoxSelected = settingsState.provideTestSamplesCheckBoxSelected
         settingsComponent!!.defaultLLMRequests = settingsState.defaultLLMRequests
@@ -76,18 +88,29 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.maxLLMRequest != settingsState.maxLLMRequest)
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
-        // class prompt
-        modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
-        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.classPrompt)
-        // method prompt
-        modified = modified or (settingsComponent!!.methodPrompt != settingsState.methodPrompt)
-        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.methodPrompt)
-        // line prompt
-        modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
-        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.linePrompt)
+
+        modified = modified or (settingsComponent!!.classPrompts != settingsState.classPrompts)
+        modified = modified or (settingsComponent!!.methodPrompts != settingsState.methodPrompts)
+        modified = modified or (settingsComponent!!.linePrompts != settingsState.linePrompts)
+
+        modified = modified or (settingsComponent!!.classPromptNames != settingsState.classPromptNames)
+        modified = modified or (settingsComponent!!.methodPromptNames != settingsState.methodPromptNames)
+        modified = modified or (settingsComponent!!.linePromptNames != settingsState.linePromptNames)
+
+        modified =
+            modified or (settingsComponent!!.classCurrentDefaultPromptIndex != settingsState.classCurrentDefaultPromptIndex)
+        modified =
+            modified or (settingsComponent!!.methodCurrentDefaultPromptIndex != settingsState.methodCurrentDefaultPromptIndex)
+        modified =
+            modified or (settingsComponent!!.lineCurrentDefaultPromptIndex != settingsState.lineCurrentDefaultPromptIndex)
+
+        // junit version
+        modified = modified or (settingsComponent!!.junitVersion != settingsState.junitVersion)
+        modified = modified or (settingsComponent!!.junitVersionPriorityCheckBoxSelected != settingsState.junitVersionPriorityCheckBoxSelected)
 
         modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
-        modified = modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != settingsState.provideTestSamplesCheckBoxSelected)
+        modified =
+            modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != settingsState.provideTestSamplesCheckBoxSelected)
 
         modified = modified or (settingsComponent!!.defaultLLMRequests != settingsState.defaultLLMRequests)
 
@@ -98,6 +121,16 @@ class SettingsLLMConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
+        if (!service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.classPrompts)[settingsComponent!!.classCurrentDefaultPromptIndex]) ||
+            !service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.methodPrompts)[settingsComponent!!.methodCurrentDefaultPromptIndex]) ||
+            !service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.linePrompts)[settingsComponent!!.lineCurrentDefaultPromptIndex])
+        ) {
+            Messages.showErrorDialog(
+                TestSparkBundle.message("defaultPromptIsNotValidMessage"),
+                TestSparkBundle.message("defaultPromptIsNotValidTitle"),
+            )
+            return
+        }
         for (index in settingsComponent!!.llmPlatforms.indices) {
             if (settingsComponent!!.llmPlatforms[index].name == settingsState.openAIName) {
                 settingsState.openAIToken = settingsComponent!!.llmPlatforms[index].token
@@ -112,9 +145,17 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
         settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth
-        settingsState.classPrompt = settingsComponent!!.classPrompt
-        settingsState.methodPrompt = settingsComponent!!.methodPrompt
-        settingsState.linePrompt = settingsComponent!!.linePrompt
+        settingsState.classPrompts = settingsComponent!!.classPrompts
+        settingsState.methodPrompts = settingsComponent!!.methodPrompts
+        settingsState.linePrompts = settingsComponent!!.linePrompts
+        settingsState.classPromptNames = settingsComponent!!.classPromptNames
+        settingsState.methodPromptNames = settingsComponent!!.methodPromptNames
+        settingsState.linePromptNames = settingsComponent!!.linePromptNames
+        settingsState.classCurrentDefaultPromptIndex = settingsComponent!!.classCurrentDefaultPromptIndex
+        settingsState.methodCurrentDefaultPromptIndex = settingsComponent!!.methodCurrentDefaultPromptIndex
+        settingsState.lineCurrentDefaultPromptIndex = settingsComponent!!.lineCurrentDefaultPromptIndex
+        settingsState.junitVersion = settingsComponent!!.junitVersion
+        settingsState.junitVersionPriorityCheckBoxSelected = settingsComponent!!.junitVersionPriorityCheckBoxSelected
         settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests
         settingsState.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
         settingsState.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
