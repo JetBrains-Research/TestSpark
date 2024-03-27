@@ -1,6 +1,11 @@
 package org.jetbrains.research.testspark.settings.llm
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.ui.Messages
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.data.JsonEncoding
+import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
@@ -109,6 +114,16 @@ class SettingsLLMConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
+        if (!service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.classPrompts)[settingsComponent!!.classCurrentDefaultPromptIndex]) ||
+            !service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.methodPrompts)[settingsComponent!!.methodCurrentDefaultPromptIndex]) ||
+            !service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.linePrompts)[settingsComponent!!.lineCurrentDefaultPromptIndex])
+        ) {
+            Messages.showErrorDialog(
+                TestSparkBundle.message("defaultPromptIsNotValidMessage"),
+                TestSparkBundle.message("defaultPromptIsNotValidTitle"),
+            )
+            return
+        }
         for (index in settingsComponent!!.llmPlatforms.indices) {
             if (settingsComponent!!.llmPlatforms[index].name == settingsState.openAIName) {
                 settingsState.openAIToken = settingsComponent!!.llmPlatforms[index].token
