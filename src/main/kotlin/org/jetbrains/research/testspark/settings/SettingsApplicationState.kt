@@ -37,9 +37,15 @@ data class SettingsApplicationState(
     var maxLLMRequest: Int = DefaultSettingsApplicationState.maxLLMRequest,
     var maxInputParamsDepth: Int = DefaultSettingsApplicationState.maxInputParamsDepth,
     var maxPolyDepth: Int = DefaultSettingsApplicationState.maxPolyDepth,
-    var classPrompt: String = DefaultSettingsApplicationState.classPrompt,
-    var methodPrompt: String = DefaultSettingsApplicationState.methodPrompt,
-    var linePrompt: String = DefaultSettingsApplicationState.linePrompt,
+    var classPrompts: String = DefaultSettingsApplicationState.classPrompts,
+    var methodPrompts: String = DefaultSettingsApplicationState.methodPrompts,
+    var linePrompts: String = DefaultSettingsApplicationState.linePrompts,
+    var classPromptNames: String = DefaultSettingsApplicationState.classPromptNames,
+    var methodPromptNames: String = DefaultSettingsApplicationState.methodPromptNames,
+    var linePromptNames: String = DefaultSettingsApplicationState.linePromptNames,
+    var classCurrentDefaultPromptIndex: Int = DefaultSettingsApplicationState.classCurrentDefaultPromptIndex,
+    var methodCurrentDefaultPromptIndex: Int = DefaultSettingsApplicationState.methodCurrentDefaultPromptIndex,
+    var lineCurrentDefaultPromptIndex: Int = DefaultSettingsApplicationState.lineCurrentDefaultPromptIndex,
     var defaultLLMRequests: String = DefaultSettingsApplicationState.defaultLLMRequests,
     @OptionTag(converter = JUnitVersionConverter::class) var junitVersion: JUnitVersion = DefaultSettingsApplicationState.junitVersion,
     var junitVersionPriorityCheckBoxSelected: Boolean = DefaultSettingsApplicationState.junitVersionPriorityCheckBoxSelected,
@@ -80,9 +86,15 @@ data class SettingsApplicationState(
         val maxLLMRequest: Int = TestSparkDefaultsBundle.defaultValue("maxLLMRequest").toInt()
         val maxInputParamsDepth: Int = TestSparkDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
         val maxPolyDepth: Int = TestSparkDefaultsBundle.defaultValue("maxPolyDepth").toInt()
-        val classPrompt: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
-        val methodPrompt: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
-        val linePrompt: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
+        val classPrompts: String = TestSparkDefaultsBundle.defaultValue("classPrompt")
+        val methodPrompts: String = TestSparkDefaultsBundle.defaultValue("methodPrompt")
+        val linePrompts: String = TestSparkDefaultsBundle.defaultValue("linePrompt")
+        var classPromptNames = TestSparkDefaultsBundle.defaultValue("classPromptName")
+        var methodPromptNames = TestSparkDefaultsBundle.defaultValue("methodPromptName")
+        var linePromptNames = TestSparkDefaultsBundle.defaultValue("linePromptName")
+        var classCurrentDefaultPromptIndex = TestSparkDefaultsBundle.defaultValue("classCurrentDefaultPromptIndex").toInt()
+        var methodCurrentDefaultPromptIndex = TestSparkDefaultsBundle.defaultValue("methodCurrentDefaultPromptIndex").toInt()
+        var lineCurrentDefaultPromptIndex = TestSparkDefaultsBundle.defaultValue("lineCurrentDefaultPromptIndex").toInt()
         val defaultLLMRequests: String = TestSparkDefaultsBundle.defaultValue("defaultLLMRequests")
         val junitVersion: JUnitVersion = JUnitVersion.JUnit5
         val junitVersionPriorityCheckBoxSelected: Boolean = TestSparkDefaultsBundle.defaultValue("junitVersionPriority").toBoolean()

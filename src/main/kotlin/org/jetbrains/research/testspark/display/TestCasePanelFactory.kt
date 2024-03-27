@@ -19,15 +19,13 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
@@ -68,11 +66,11 @@ class TestCasePanelFactory(
         get() = project.getService(SettingsApplicationService::class.java).state
 
     private val panel = JPanel()
-    private val previousButtons =
+    private val previousButton =
         createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
     private var requestNumber: String = "%d / %d"
     private var requestLabel: JLabel = JLabel(requestNumber)
-    private val nextButtons = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
+    private val nextButton = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
     private val errorLabel = JLabel(TestSparkIcons.showError)
     private val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
     private val likeButton = createButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
@@ -118,7 +116,7 @@ class TestCasePanelFactory(
     private val runTestButton = createRunTestButton()
 
     private val requestJLabel = JLabel(TestSparkLabelsBundle.defaultValue("requestJLabel"))
-    private val requestComboBox = ComboBox(arrayOf("") + Json.decodeFromString(ListSerializer(String.serializer()), settingsState.defaultLLMRequests))
+    private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(settingsState.defaultLLMRequests))
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
@@ -140,9 +138,9 @@ class TestCasePanelFactory(
         updateErrorLabel()
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
         panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
-        panel.add(previousButtons)
+        panel.add(previousButton)
         panel.add(requestLabel)
-        panel.add(nextButtons)
+        panel.add(nextButton)
         panel.add(errorLabel)
         panel.add(Box.createHorizontalGlue())
         panel.add(copyButton)
@@ -150,7 +148,7 @@ class TestCasePanelFactory(
         panel.add(dislikeButton)
         panel.add(Box.createRigidArea(Dimension(12, 0)))
 
-        previousButtons.addActionListener {
+        previousButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
                 if (currentRequestNumber > 1) currentRequestNumber--
                 switchToAnotherCode()
@@ -158,7 +156,7 @@ class TestCasePanelFactory(
             }
         }
 
-        nextButtons.addActionListener {
+        nextButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
                 if (currentRequestNumber < allRequestsNumber) currentRequestNumber++
                 switchToAnotherCode()
@@ -439,8 +437,8 @@ class TestCasePanelFactory(
     }
 
     private fun enableComponents(isEnabled: Boolean) {
-        nextButtons.isEnabled = isEnabled
-        previousButtons.isEnabled = isEnabled
+        nextButton.isEnabled = isEnabled
+        previousButton.isEnabled = isEnabled
         runTestButton.isEnabled = isEnabled
         resetToLastRunButton.isEnabled = isEnabled
         resetButton.isEnabled = isEnabled

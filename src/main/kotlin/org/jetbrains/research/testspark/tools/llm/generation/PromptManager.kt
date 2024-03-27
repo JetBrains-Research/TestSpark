@@ -24,6 +24,7 @@ import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -69,9 +70,9 @@ class PromptManager(
                 )
 
                 val promptTemplates = PromptTemplates(
-                    classPrompt = settingsState.classPrompt,
-                    methodPrompt = settingsState.methodPrompt,
-                    linePrompt = settingsState.linePrompt,
+                    classPrompt = JsonEncoding.decode(settingsState.classPrompts)[settingsState.classCurrentDefaultPromptIndex],
+                    methodPrompt = JsonEncoding.decode(settingsState.methodPrompts)[settingsState.methodCurrentDefaultPromptIndex],
+                    linePrompt = JsonEncoding.decode(settingsState.linePrompts)[settingsState.lineCurrentDefaultPromptIndex],
                 )
 
                 val promptGenerator = PromptGenerator(context, promptTemplates)

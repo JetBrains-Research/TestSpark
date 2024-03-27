@@ -230,7 +230,10 @@ class TestSparkAction : AnAction() {
             }
 
             for (button in codeTypeButtons) {
-                button.addActionListener { updateNextButton() }
+                button.addActionListener {
+                    llmSetupPanelFactory.setPromptEditorType(button.text)
+                    updateNextButton()
+                }
             }
 
             nextButton.addActionListener {
