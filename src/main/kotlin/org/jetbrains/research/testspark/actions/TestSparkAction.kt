@@ -164,7 +164,7 @@ class TestSparkAction : AnAction() {
             for (orderEntry in ModuleRootManager.getInstance(module).orderEntries) {
                 if (orderEntry is LibraryOrderEntry) {
                     val libraryName = orderEntry.library?.name ?: continue
-                    for (junit in JUnitVersion.values()) {
+                    for (junit in JUnitVersion.entries) {
                         if (libraryName.contains(junit.groupId)) {
                             return junit
                         }
@@ -252,7 +252,10 @@ class TestSparkAction : AnAction() {
             }
 
             for (button in codeTypeButtons) {
-                button.addActionListener { updateNextButton() }
+                button.addActionListener {
+                    llmSetupPanelFactory.setPromptEditorType(button.text)
+                    updateNextButton()
+                }
             }
 
             nextButton.addActionListener {

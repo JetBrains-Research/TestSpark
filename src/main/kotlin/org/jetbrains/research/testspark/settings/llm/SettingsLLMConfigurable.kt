@@ -1,8 +1,6 @@
 package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.options.Configurable
-import com.intellij.openapi.ui.Messages
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
