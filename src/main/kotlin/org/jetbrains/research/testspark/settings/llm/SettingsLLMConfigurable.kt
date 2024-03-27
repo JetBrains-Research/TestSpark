@@ -2,10 +2,10 @@ package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.JsonEncoding
-import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -107,16 +107,6 @@ class SettingsLLMConfigurable(private val project: Project) : Configurable {
         // junit version
         modified = modified or (settingsComponent!!.junitVersion != settingsState.junitVersion)
         modified = modified or (settingsComponent!!.junitVersionPriorityCheckBoxSelected != settingsState.junitVersionPriorityCheckBoxSelected)
-
-        // class prompt
-        modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
-        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.classPrompt)
-        // method prompt
-        modified = modified or (settingsComponent!!.methodPrompt != settingsState.methodPrompt)
-        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.methodPrompt)
-        // line prompt
-        modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
-        modified = modified and service<PromptParserService>().isPromptValid(settingsComponent!!.linePrompt)
 
         modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
         modified =

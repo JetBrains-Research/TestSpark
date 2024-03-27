@@ -11,7 +11,6 @@ import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.services.PromptParserService
-import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.FlowLayout
 import javax.swing.BorderFactory
@@ -26,10 +25,10 @@ import kotlin.math.max
 /**
  * Creating the part of LLM settings that is responsible for prompt templates is organized
  */
-class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
-    private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
-
+class PromptTemplateFactory(
+    private val settingsState: SettingsApplicationState,
+    private val promptEditorType: PromptEditorType,
+) {
     private var templates = mutableListOf<String>()
     private var names = mutableListOf<String>()
 

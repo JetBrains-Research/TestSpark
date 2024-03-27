@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.actions.llm
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
@@ -16,9 +16,9 @@ import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
 import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
 import org.jetbrains.research.testspark.helpers.stylizeMainComponents
 import org.jetbrains.research.testspark.services.PromptParserService
-import org.jetbrains.research.testspark.settings.llm.PromptEditorType
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.settings.llm.PromptEditorType
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
 import java.awt.Font

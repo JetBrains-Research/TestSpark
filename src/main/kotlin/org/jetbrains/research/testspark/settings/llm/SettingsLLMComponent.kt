@@ -14,9 +14,9 @@ import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptKeyword
 import org.jetbrains.research.testspark.data.JsonEncoding
-import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
@@ -63,9 +63,9 @@ class SettingsLLMComponent(private val project: Project) {
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("PromptSeparator"))
 
-    private val promptClassTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(PromptEditorType.CLASS)
-    private val promptMethodTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(PromptEditorType.METHOD)
-    private val promptLineTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(PromptEditorType.LINE)
+    private val promptClassTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(settingsState, PromptEditorType.CLASS)
+    private val promptMethodTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(settingsState, PromptEditorType.METHOD)
+    private val promptLineTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(settingsState, PromptEditorType.LINE)
 
     private var promptEditorTabbedPane = createTabbedPane()
 
