@@ -12,12 +12,12 @@ interface RequestManagerFactory {
     fun getRequestManager(project: Project): RequestManager
 }
 
-class StandardRequestManagerFactory : RequestManagerFactory {
+class StandardRequestManagerFactory(private val project: Project) : RequestManagerFactory {
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     override fun getRequestManager(project: Project): RequestManager {
-        return when (val platform = SettingsArguments.currentLLMPlatformName()) {
+        return when (val platform = SettingsArguments(project).currentLLMPlatformName()) {
             settingsState.openAIName -> OpenAIRequestManager(project)
             settingsState.grazieName -> GrazieRequestManager(project)
             else -> throw IllegalStateException("Unknown selected platform: $platform")

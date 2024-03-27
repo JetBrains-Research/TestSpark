@@ -1,20 +1,25 @@
 package org.jetbrains.research.testspark.actions.evosuite
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.Font
 import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-class EvoSuitePanelFactory : PanelFactory {
+class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
+    private val settingsState: SettingsApplicationState
+        get() = project.getService(SettingsApplicationService::class.java).state
+
     private var javaPathTextField = JTextField(30)
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
     private val backEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
@@ -40,7 +45,7 @@ class EvoSuitePanelFactory : PanelFactory {
      *
      * @return the middle panel as a JPanel.
      */
-    override fun getMiddlePanel(junit: JUnitVersion?): JPanel {
+    override fun getMiddlePanel(): JPanel {
         javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
         javaPathTextField.text = settingsState.javaPath
 

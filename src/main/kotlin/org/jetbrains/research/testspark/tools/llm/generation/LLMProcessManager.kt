@@ -51,14 +51,14 @@ class LLMProcessManager(
     private val promptManager: PromptManager,
     private val testSamplesCode: String,
 ) : ProcessManager {
+    private val settingsState: SettingsApplicationState
+        get() = project.getService(SettingsApplicationService::class.java).state
+
     private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
-    private val maxRequests = SettingsArguments.maxLLMRequest()
+    private val maxRequests = SettingsArguments(project).maxLLMRequest()
     private val testProcessor = TestProcessor(project)
-
-    private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
 
     /**
      * Runs the test generator process.
@@ -100,7 +100,7 @@ class LLMProcessManager(
         val junitVersion = settingsState.junitVersion
 
         // initiate a new RequestManager
-        val requestManager = StandardRequestManagerFactory().getRequestManager(project)
+        val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
 
         // adapter for the existing prompt reduction functionality
         val promptSizeReductionStrategy = object : PromptSizeReductionStrategy {

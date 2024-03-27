@@ -24,7 +24,6 @@ import javax.swing.event.HyperlinkEvent
  * This class stores the main panel and the UI of the "Parameters" tool window tab.
  */
 class DescriptionTab(private val project: Project) {
-
     private val panelTitle = JPanel()
     private val iconTitle = JLabel(TestSparkIcons.pluginIcon)
     private val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("quickAccess"))

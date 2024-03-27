@@ -16,7 +16,7 @@ import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
  * @return True if the token is set, false otherwise.
  */
 fun isCorrectToken(project: Project): Boolean {
-    if (!SettingsArguments.isTokenSet()) {
+    if (!SettingsArguments(project).isTokenSet()) {
         LLMErrorManager().errorProcess(TestSparkBundle.message("missingToken"), project)
         return false
     }
@@ -63,6 +63,6 @@ fun testModificationRequest(
  * @return True if the token is set, false otherwise.
  */
 private fun updateToken(requestManager: RequestManager, project: Project): Boolean {
-    requestManager.token = SettingsArguments.getToken()
+    requestManager.token = SettingsArguments(project).getToken()
     return isCorrectToken(project)
 }

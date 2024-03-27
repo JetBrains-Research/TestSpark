@@ -32,7 +32,7 @@ class JUnitTestsAssembler(
     val generationData: TestGenerationData,
 ) : TestsAssembler() {
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     private val log: Logger = Logger.getInstance(this.javaClass)
 

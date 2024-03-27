@@ -38,7 +38,7 @@ class Llm(override val name: String = "LLM") : Tool {
 
         ApplicationManager.getApplication().runReadAction(
             Computable {
-                collectClassesToTest(classesToTest, psiFile, caretOffset)
+                collectClassesToTest(project, classesToTest, psiFile, caretOffset)
             },
         )
 
@@ -56,9 +56,9 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param psiFile The PSI file.
      * @param caretOffset The caret offset in the file.
      */
-    private fun collectClassesToTest(classesToTest: MutableList<PsiClass>, psiFile: PsiFile, caretOffset: Int) {
+    private fun collectClassesToTest(project: Project, classesToTest: MutableList<PsiClass>, psiFile: PsiFile, caretOffset: Int) {
         // check if cut has any none java super class
-        val maxPolymorphismDepth = SettingsArguments.maxPolyDepth(0)
+        val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(0)
 
         val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caretOffset)!!
         var currentPsiClass = cutPsiClass

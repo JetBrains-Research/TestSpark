@@ -63,7 +63,7 @@ class TestCasePanelFactory(
     val uiContext: UIContext?,
 ) {
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     private val panel = JPanel()
     private val previousButton =

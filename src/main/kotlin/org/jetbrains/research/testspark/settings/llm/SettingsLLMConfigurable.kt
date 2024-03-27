@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.data.JsonEncoding
@@ -14,9 +15,9 @@ import javax.swing.JComponent
  * This class allows to configure some LLM-related settings via the Large Language Model page in the Settings dialog,
  *   observes the changes and manages the UI and state.
  */
-class SettingsLLMConfigurable : Configurable {
+class SettingsLLMConfigurable(private val project: Project) : Configurable {
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     private var settingsComponent: SettingsLLMComponent? = null
 
@@ -26,7 +27,7 @@ class SettingsLLMConfigurable : Configurable {
      * @return the panel used for displaying settings
      */
     override fun createComponent(): JComponent? {
-        settingsComponent = SettingsLLMComponent()
+        settingsComponent = SettingsLLMComponent(project)
         return settingsComponent!!.panel
     }
 
@@ -57,6 +58,8 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.classCurrentDefaultPromptIndex = settingsState.classCurrentDefaultPromptIndex
         settingsComponent!!.methodCurrentDefaultPromptIndex = settingsState.methodCurrentDefaultPromptIndex
         settingsComponent!!.lineCurrentDefaultPromptIndex = settingsState.lineCurrentDefaultPromptIndex
+        settingsComponent!!.junitVersion = settingsState.junitVersion
+        settingsComponent!!.junitVersionPriorityCheckBoxSelected = settingsState.junitVersionPriorityCheckBoxSelected
         settingsComponent!!.llmSetupCheckBoxSelected = settingsState.llmSetupCheckBoxSelected
         settingsComponent!!.provideTestSamplesCheckBoxSelected = settingsState.provideTestSamplesCheckBoxSelected
         settingsComponent!!.defaultLLMRequests = settingsState.defaultLLMRequests
@@ -100,6 +103,10 @@ class SettingsLLMConfigurable : Configurable {
             modified or (settingsComponent!!.methodCurrentDefaultPromptIndex != settingsState.methodCurrentDefaultPromptIndex)
         modified =
             modified or (settingsComponent!!.lineCurrentDefaultPromptIndex != settingsState.lineCurrentDefaultPromptIndex)
+
+        // junit version
+        modified = modified or (settingsComponent!!.junitVersion != settingsState.junitVersion)
+        modified = modified or (settingsComponent!!.junitVersionPriorityCheckBoxSelected != settingsState.junitVersionPriorityCheckBoxSelected)
 
         modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
         modified =
@@ -147,6 +154,9 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.classCurrentDefaultPromptIndex = settingsComponent!!.classCurrentDefaultPromptIndex
         settingsState.methodCurrentDefaultPromptIndex = settingsComponent!!.methodCurrentDefaultPromptIndex
         settingsState.lineCurrentDefaultPromptIndex = settingsComponent!!.lineCurrentDefaultPromptIndex
+        settingsState.junitVersion = settingsComponent!!.junitVersion
+        settingsState.junitVersionPriorityCheckBoxSelected = settingsComponent!!.junitVersionPriorityCheckBoxSelected
+        settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests
         settingsState.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
         settingsState.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
         settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests

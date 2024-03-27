@@ -22,7 +22,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
             val className = "org.jetbrains.research.grazie.Request"
             val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
 
-            val requestError = request.request(token, getMessages(), SettingsArguments.getModel(), testsAssembler)
+            val requestError = request.request(token, getMessages(), SettingsArguments(project).getModel(), testsAssembler)
 
             if (requestError.isNotEmpty()) {
                 with(requestError) {

@@ -1,10 +1,10 @@
 package org.jetbrains.research.testspark.services
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 
 /**
@@ -38,10 +38,8 @@ class SettingsApplicationService : PersistentStateComponent<SettingsApplicationS
     /**
      * Returns the service object with a static call.
      */
+
     companion object {
-        @JvmStatic
-        fun getInstance(): PersistentStateComponent<SettingsApplicationState> {
-            return ApplicationManager.getApplication().getService(SettingsApplicationService::class.java)
-        }
+        fun service(project: Project) = project.getService(SettingsApplicationService::class.java).state
     }
 }
