@@ -102,41 +102,41 @@ class SettingsLLMComponent {
             maxPolyDepthField.number = value
         }
 
-    var classPrompt: String
+    var classPrompts: String
         get() = promptClassTemplateFactory.getCommonPrompt()
         set(value) = promptClassTemplateFactory.setCommonPrompt(value)
 
-    var methodPrompt: String
+    var methodPrompts: String
         get() = promptMethodTemplateFactory.getCommonPrompt()
         set(value) = promptMethodTemplateFactory.setCommonPrompt(value)
 
-    var linePrompt: String
+    var linePrompts: String
         get() = promptLineTemplateFactory.getCommonPrompt()
         set(value) = promptLineTemplateFactory.setCommonPrompt(value)
 
-    var classPromptName: String
+    var classPromptNames: String
         get() = promptClassTemplateFactory.getCommonName()
         set(value) = promptClassTemplateFactory.setCommonName(value)
 
-    var methodPromptName: String
+    var methodPromptNames: String
         get() = promptMethodTemplateFactory.getCommonName()
         set(value) = promptMethodTemplateFactory.setCommonName(value)
 
-    var linePromptName: String
+    var linePromptNames: String
         get() = promptLineTemplateFactory.getCommonName()
         set(value) = promptLineTemplateFactory.setCommonName(value)
 
-    var classCurrentDefaultPromptName: String
-        get() = promptClassTemplateFactory.getCurrentDefaultPromptName()
-        set(value) = promptClassTemplateFactory.setCurrentDefaultPromptName(value)
+    var classCurrentDefaultPromptIndex: Int
+        get() = promptClassTemplateFactory.getCurrentDefaultPromptIndex()
+        set(value) = promptClassTemplateFactory.setCurrentDefaultPromptIndex(value)
 
-    var methodCurrentDefaultPromptName: String
-        get() = promptMethodTemplateFactory.getCurrentDefaultPromptName()
-        set(value) = promptMethodTemplateFactory.setCurrentDefaultPromptName(value)
+    var methodCurrentDefaultPromptIndex: Int
+        get() = promptMethodTemplateFactory.getCurrentDefaultPromptIndex()
+        set(value) = promptMethodTemplateFactory.setCurrentDefaultPromptIndex(value)
 
-    var lineCurrentDefaultPromptName: String
-        get() = promptLineTemplateFactory.getCurrentDefaultPromptName()
-        set(value) = promptLineTemplateFactory.setCurrentDefaultPromptName(value)
+    var lineCurrentDefaultPromptIndex: Int
+        get() = promptLineTemplateFactory.getCurrentDefaultPromptIndex()
+        set(value) = promptLineTemplateFactory.setCurrentDefaultPromptIndex(value)
 
     var defaultLLMRequests: String
         get() = JsonEncoding.encode(

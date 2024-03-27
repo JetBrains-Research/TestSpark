@@ -43,15 +43,15 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.maxLLMRequest = settingsState.maxLLMRequest
         settingsComponent!!.maxPolyDepth = settingsState.maxPolyDepth
         settingsComponent!!.maxInputParamsDepth = settingsState.maxInputParamsDepth
-        settingsComponent!!.classPrompt = settingsState.classPrompt
-        settingsComponent!!.methodPrompt = settingsState.methodPrompt
-        settingsComponent!!.linePrompt = settingsState.linePrompt
-        settingsComponent!!.classPromptName = settingsState.classPromptName
-        settingsComponent!!.methodPromptName = settingsState.methodPromptName
-        settingsComponent!!.linePromptName = settingsState.linePromptName
-        settingsComponent!!.classCurrentDefaultPromptName = settingsState.classCurrentDefaultPromptName
-        settingsComponent!!.methodCurrentDefaultPromptName = settingsState.methodCurrentDefaultPromptName
-        settingsComponent!!.lineCurrentDefaultPromptName = settingsState.lineCurrentDefaultPromptName
+        settingsComponent!!.classPrompts = settingsState.classPrompts
+        settingsComponent!!.methodPrompts = settingsState.methodPrompts
+        settingsComponent!!.linePrompts = settingsState.linePrompts
+        settingsComponent!!.classPromptNames = settingsState.classPromptNames
+        settingsComponent!!.methodPromptNames = settingsState.methodPromptNames
+        settingsComponent!!.linePromptNames = settingsState.linePromptNames
+        settingsComponent!!.classCurrentDefaultPromptIndex = settingsState.classCurrentDefaultPromptIndex
+        settingsComponent!!.methodCurrentDefaultPromptIndex = settingsState.methodCurrentDefaultPromptIndex
+        settingsComponent!!.lineCurrentDefaultPromptIndex = settingsState.lineCurrentDefaultPromptIndex
         settingsComponent!!.llmSetupCheckBoxSelected = settingsState.llmSetupCheckBoxSelected
         settingsComponent!!.provideTestSamplesCheckBoxSelected = settingsState.provideTestSamplesCheckBoxSelected
         settingsComponent!!.defaultLLMRequests = settingsState.defaultLLMRequests
@@ -81,20 +81,20 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.maxPolyDepth != settingsState.maxPolyDepth)
         modified = modified or (settingsComponent!!.maxInputParamsDepth != settingsState.maxInputParamsDepth)
 
-        modified = modified or (settingsComponent!!.classPrompt != settingsState.classPrompt)
-        modified = modified or (settingsComponent!!.methodPrompt != settingsState.methodPrompt)
-        modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
+        modified = modified or (settingsComponent!!.classPrompts != settingsState.classPrompts)
+        modified = modified or (settingsComponent!!.methodPrompts != settingsState.methodPrompts)
+        modified = modified or (settingsComponent!!.linePrompts != settingsState.linePrompts)
 
-        modified = modified or (settingsComponent!!.classPromptName != settingsState.classPromptName)
-        modified = modified or (settingsComponent!!.methodPromptName != settingsState.methodPromptName)
-        modified = modified or (settingsComponent!!.linePromptName != settingsState.linePromptName)
+        modified = modified or (settingsComponent!!.classPromptNames != settingsState.classPromptNames)
+        modified = modified or (settingsComponent!!.methodPromptNames != settingsState.methodPromptNames)
+        modified = modified or (settingsComponent!!.linePromptNames != settingsState.linePromptNames)
 
         modified =
-            modified or (settingsComponent!!.classCurrentDefaultPromptName != settingsState.classCurrentDefaultPromptName)
+            modified or (settingsComponent!!.classCurrentDefaultPromptIndex != settingsState.classCurrentDefaultPromptIndex)
         modified =
-            modified or (settingsComponent!!.methodCurrentDefaultPromptName != settingsState.methodCurrentDefaultPromptName)
+            modified or (settingsComponent!!.methodCurrentDefaultPromptIndex != settingsState.methodCurrentDefaultPromptIndex)
         modified =
-            modified or (settingsComponent!!.lineCurrentDefaultPromptName != settingsState.lineCurrentDefaultPromptName)
+            modified or (settingsComponent!!.lineCurrentDefaultPromptIndex != settingsState.lineCurrentDefaultPromptIndex)
 
         modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
         modified =
@@ -123,15 +123,15 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.maxLLMRequest = settingsComponent!!.maxLLMRequest
         settingsState.maxPolyDepth = settingsComponent!!.maxPolyDepth
         settingsState.maxInputParamsDepth = settingsComponent!!.maxInputParamsDepth
-        settingsState.classPrompt = settingsComponent!!.classPrompt
-        settingsState.methodPrompt = settingsComponent!!.methodPrompt
-        settingsState.linePrompt = settingsComponent!!.linePrompt
-        settingsState.classPromptName = settingsComponent!!.classPromptName
-        settingsState.methodPromptName = settingsComponent!!.methodPromptName
-        settingsState.linePromptName = settingsComponent!!.linePromptName
-        settingsState.classCurrentDefaultPromptName = settingsComponent!!.classCurrentDefaultPromptName
-        settingsState.methodCurrentDefaultPromptName = settingsComponent!!.methodCurrentDefaultPromptName
-        settingsState.lineCurrentDefaultPromptName = settingsComponent!!.lineCurrentDefaultPromptName
+        settingsState.classPrompts = settingsComponent!!.classPrompts
+        settingsState.methodPrompts = settingsComponent!!.methodPrompts
+        settingsState.linePrompts = settingsComponent!!.linePrompts
+        settingsState.classPromptNames = settingsComponent!!.classPromptNames
+        settingsState.methodPromptNames = settingsComponent!!.methodPromptNames
+        settingsState.linePromptNames = settingsComponent!!.linePromptNames
+        settingsState.classCurrentDefaultPromptIndex = settingsComponent!!.classCurrentDefaultPromptIndex
+        settingsState.methodCurrentDefaultPromptIndex = settingsComponent!!.methodCurrentDefaultPromptIndex
+        settingsState.lineCurrentDefaultPromptIndex = settingsComponent!!.lineCurrentDefaultPromptIndex
         settingsState.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
         settingsState.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
         settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests

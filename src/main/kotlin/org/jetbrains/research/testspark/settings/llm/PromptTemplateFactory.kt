@@ -33,7 +33,7 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     private var templates = mutableListOf<String>()
     private var names = mutableListOf<String>()
 
-    private var currentDefaultName = ""
+    private var currentDefaultIndex = 0
 
     private var currentTemplateNumber = 0
 
@@ -84,11 +84,11 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
         return panel
     }
 
-    fun getCurrentDefaultPromptName() = currentDefaultName
+    fun getCurrentDefaultPromptIndex() = currentDefaultIndex
 
-    fun setCurrentDefaultPromptName(value: String) {
-        currentDefaultName = value
-        currentTemplateNumber = names.indexOf(currentDefaultName)
+    fun setCurrentDefaultPromptIndex(value: Int) {
+        currentDefaultIndex = value
+        currentTemplateNumber = currentDefaultIndex
         update()
     }
 
@@ -102,9 +102,6 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     fun getCommonName(): String {
         for (i in names.indices) {
             if (names[i].isBlank()) {
-                if (currentDefaultName == names[i]) {
-                    currentDefaultName = getDefaultPromptTemplateName(i + 1)
-                }
                 names[i] = getDefaultPromptTemplateName(i + 1)
             }
         }
@@ -119,21 +116,21 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     private fun setSettingsStateParameters() {
         templates.clear()
         templates = when (promptEditorType) {
-            PromptEditorType.CLASS -> JsonEncoding.decode(settingsState.classPrompt)
-            PromptEditorType.METHOD -> JsonEncoding.decode(settingsState.methodPrompt)
-            PromptEditorType.LINE -> JsonEncoding.decode(settingsState.linePrompt)
+            PromptEditorType.CLASS -> JsonEncoding.decode(settingsState.classPrompts)
+            PromptEditorType.METHOD -> JsonEncoding.decode(settingsState.methodPrompts)
+            PromptEditorType.LINE -> JsonEncoding.decode(settingsState.linePrompts)
         }
         names = when (promptEditorType) {
-            PromptEditorType.CLASS -> JsonEncoding.decode(settingsState.classPromptName)
-            PromptEditorType.METHOD -> JsonEncoding.decode(settingsState.methodPromptName)
-            PromptEditorType.LINE -> JsonEncoding.decode(settingsState.linePromptName)
+            PromptEditorType.CLASS -> JsonEncoding.decode(settingsState.classPromptNames)
+            PromptEditorType.METHOD -> JsonEncoding.decode(settingsState.methodPromptNames)
+            PromptEditorType.LINE -> JsonEncoding.decode(settingsState.linePromptNames)
         }
-        currentDefaultName = when (promptEditorType) {
-            PromptEditorType.CLASS -> settingsState.classCurrentDefaultPromptName
-            PromptEditorType.METHOD -> settingsState.methodCurrentDefaultPromptName
-            PromptEditorType.LINE -> settingsState.lineCurrentDefaultPromptName
+        currentDefaultIndex = when (promptEditorType) {
+            PromptEditorType.CLASS -> settingsState.classCurrentDefaultPromptIndex
+            PromptEditorType.METHOD -> settingsState.methodCurrentDefaultPromptIndex
+            PromptEditorType.LINE -> settingsState.lineCurrentDefaultPromptIndex
         }
-        currentTemplateNumber = names.indexOf(currentDefaultName)
+        currentTemplateNumber = currentDefaultIndex
     }
 
     private fun setEditorTextField() {
@@ -155,9 +152,6 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
                     } else {
                         promptTemplateName.border = defaultPromptTemplateNameBorder
                     }
-                    if (currentDefaultName == names[currentTemplateNumber]) {
-                        currentDefaultName = promptTemplateName.text
-                    }
                     names[currentTemplateNumber] = promptTemplateName.text
                 }
 
@@ -176,17 +170,18 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
         )
 
         setAsDefaultButton.addActionListener {
-            currentDefaultName = names[currentTemplateNumber]
+            currentDefaultIndex = currentTemplateNumber
             updateSetAsDefaultButton()
         }
 
         removeButton.addActionListener {
-            if (currentDefaultName == names[currentTemplateNumber]) {
+            if (currentDefaultIndex == currentTemplateNumber) {
                 Messages.showErrorDialog(
                     TestSparkBundle.message("removeTemplateMessage"),
                     TestSparkBundle.message("removeTemplateTitle"),
                 )
             } else {
+                if (currentTemplateNumber < currentDefaultIndex) currentDefaultIndex--
                 templates.removeAt(currentTemplateNumber)
                 names.removeAt(currentTemplateNumber)
                 currentTemplateNumber = max(0, currentTemplateNumber - 1)
@@ -227,7 +222,7 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     }
 
     private fun updateSetAsDefaultButton() {
-        setAsDefaultButton.isEnabled = (currentDefaultName != names[currentTemplateNumber])
+        setAsDefaultButton.isEnabled = (currentDefaultIndex != currentTemplateNumber)
 
         if (!service<PromptParserService>().isPromptValid(editorTextField.document.text)) {
             setAsDefaultButton.border = redBorder

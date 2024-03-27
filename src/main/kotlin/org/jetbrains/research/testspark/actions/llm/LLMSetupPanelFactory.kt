@@ -37,9 +37,9 @@ class LLMSetupPanelFactory : PanelFactory {
 
     private var promptEditorType: PromptEditorType = PromptEditorType.CLASS
     private val promptTemplateNames = ComboBox(arrayOf(""))
-    private var prompts: String = settingsState.classPrompt
-    private var promptNames: String = settingsState.classPromptName
-    private var currentDefaultPromptName: String = settingsState.classCurrentDefaultPromptName
+    private var prompts: String = settingsState.classPrompts
+    private var promptNames: String = settingsState.classPromptNames
+    private var currentDefaultPromptIndex: Int = settingsState.classCurrentDefaultPromptIndex
     private var showCodeJLabel: JLabel = JLabel(TestSparkIcons.showCode)
 
     init {
@@ -122,19 +122,19 @@ class LLMSetupPanelFactory : PanelFactory {
     private fun updatePromptSelectionPanel() {
         when (promptEditorType) {
             PromptEditorType.CLASS -> {
-                prompts = settingsState.classPrompt
-                promptNames = settingsState.classPromptName
-                currentDefaultPromptName = settingsState.classCurrentDefaultPromptName
+                prompts = settingsState.classPrompts
+                promptNames = settingsState.classPromptNames
+                currentDefaultPromptIndex = settingsState.classCurrentDefaultPromptIndex
             }
             PromptEditorType.METHOD -> {
-                prompts = settingsState.methodPrompt
-                promptNames = settingsState.methodPromptName
-                currentDefaultPromptName = settingsState.methodCurrentDefaultPromptName
+                prompts = settingsState.methodPrompts
+                promptNames = settingsState.methodPromptNames
+                currentDefaultPromptIndex = settingsState.methodCurrentDefaultPromptIndex
             }
             PromptEditorType.LINE -> {
-                prompts = settingsState.linePrompt
-                promptNames = settingsState.linePromptName
-                currentDefaultPromptName = settingsState.lineCurrentDefaultPromptName
+                prompts = settingsState.linePrompts
+                promptNames = settingsState.linePromptNames
+                currentDefaultPromptIndex = settingsState.lineCurrentDefaultPromptIndex
             }
         }
 
@@ -148,7 +148,7 @@ class LLMSetupPanelFactory : PanelFactory {
         }
 
         promptTemplateNames.model = DefaultComboBoxModel(normalizedNames)
-        promptTemplateNames.selectedItem = currentDefaultPromptName
+        promptTemplateNames.selectedItem = names[currentDefaultPromptIndex]
     }
 
     private fun getPromptSelectionPanel(): JPanel {
@@ -233,9 +233,9 @@ class LLMSetupPanelFactory : PanelFactory {
         settingsState.junitVersion = junitSelector.selectedItem!! as JUnitVersion
 
         when (promptEditorType) {
-            PromptEditorType.CLASS -> settingsState.classCurrentDefaultPromptName = promptTemplateNames.selectedItem!!.toString()
-            PromptEditorType.METHOD -> settingsState.methodCurrentDefaultPromptName = promptTemplateNames.selectedItem!!.toString()
-            PromptEditorType.LINE -> settingsState.lineCurrentDefaultPromptName = promptTemplateNames.selectedItem!!.toString()
+            PromptEditorType.CLASS -> settingsState.classCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
+            PromptEditorType.METHOD -> settingsState.methodCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
+            PromptEditorType.LINE -> settingsState.lineCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
         }
     }
 }
