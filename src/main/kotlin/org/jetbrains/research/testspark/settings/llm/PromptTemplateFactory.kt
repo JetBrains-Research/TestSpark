@@ -39,7 +39,8 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
 
     private val promptTemplateName = JTextField()
     private val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTemplate"))
-    private val setAsDefaultButton = JButton(TestSparkLabelsBundle.defaultValue("setAsDefault"), TestSparkIcons.setDefault)
+    private val setAsDefaultButton =
+        JButton(TestSparkLabelsBundle.defaultValue("setAsDefault"), TestSparkIcons.setDefault)
 
     private val editorTextField = EditorTextField()
 
@@ -47,7 +48,8 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     private val defaultPromptTemplateNameBorder = promptTemplateName.border
     private val redBorder = BorderFactory.createLineBorder(JBColor.RED)
 
-    private val previousButton = createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
+    private val previousButton =
+        createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
     private val nextButton = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
     private val addButton = JButton(TestSparkLabelsBundle.defaultValue("addPromptTemplate"), TestSparkIcons.add)
 
@@ -97,7 +99,14 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
         templates = JsonEncoding.decode(value)
     }
 
-    fun getCommonName(): String = JsonEncoding.encode(names)
+    fun getCommonName(): String {
+        for (i in names.indices) {
+            if (names[i].isBlank()) {
+                names[i] = getDefaultPromptTemplateName(i + 1)
+            }
+        }
+        return JsonEncoding.encode(names)
+    }
 
     fun setCommonName(value: String) {
         names.clear()
@@ -131,7 +140,8 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
         }
     }
 
-    private fun getDefaultPromptTemplateName() = TestSparkLabelsBundle.defaultValue("defaultPromptTemplateName") + (currentTemplateNumber + 1).toString()
+    private fun getDefaultPromptTemplateName(number: Int) =
+        TestSparkLabelsBundle.defaultValue("defaultPromptTemplateName") + number.toString()
 
     private fun addListeners() {
         promptTemplateName.document.addDocumentListener(
@@ -201,7 +211,7 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
         addButton.addActionListener {
             currentTemplateNumber = templates.size
             templates.add("")
-            names.add(getDefaultPromptTemplateName())
+            names.add(getDefaultPromptTemplateName(currentTemplateNumber + 1))
             update()
         }
     }
@@ -240,7 +250,7 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
         }
         removeButton.isEnabled = templates.size != 1
 
-        promptTemplateName.text = getDefaultPromptTemplateName()
+        promptTemplateName.text = getDefaultPromptTemplateName(currentTemplateNumber + 1)
 
         updateSetAsDefaultButton()
         updateEditorTextField()

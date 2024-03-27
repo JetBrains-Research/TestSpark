@@ -1,6 +1,8 @@
 package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.ui.Messages
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
@@ -89,12 +91,16 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.methodPromptName != settingsState.methodPromptName)
         modified = modified or (settingsComponent!!.linePromptName != settingsState.linePromptName)
 
-        modified = modified or (settingsComponent!!.classCurrentDefaultPromptName != settingsState.classCurrentDefaultPromptName)
-        modified = modified or (settingsComponent!!.methodCurrentDefaultPromptName != settingsState.methodCurrentDefaultPromptName)
-        modified = modified or (settingsComponent!!.lineCurrentDefaultPromptName != settingsState.lineCurrentDefaultPromptName)
+        modified =
+            modified or (settingsComponent!!.classCurrentDefaultPromptName != settingsState.classCurrentDefaultPromptName)
+        modified =
+            modified or (settingsComponent!!.methodCurrentDefaultPromptName != settingsState.methodCurrentDefaultPromptName)
+        modified =
+            modified or (settingsComponent!!.lineCurrentDefaultPromptName != settingsState.lineCurrentDefaultPromptName)
 
         modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
-        modified = modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != settingsState.provideTestSamplesCheckBoxSelected)
+        modified =
+            modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != settingsState.provideTestSamplesCheckBoxSelected)
 
         modified = modified or (settingsComponent!!.defaultLLMRequests != settingsState.defaultLLMRequests)
 
