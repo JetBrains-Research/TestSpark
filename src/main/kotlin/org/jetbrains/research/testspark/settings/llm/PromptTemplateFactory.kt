@@ -102,6 +102,9 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
     fun getCommonName(): String {
         for (i in names.indices) {
             if (names[i].isBlank()) {
+                if (currentDefaultName == names[i]) {
+                    currentDefaultName = getDefaultPromptTemplateName(i + 1)
+                }
                 names[i] = getDefaultPromptTemplateName(i + 1)
             }
         }
@@ -151,6 +154,9 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
                         promptTemplateName.border = redBorder
                     } else {
                         promptTemplateName.border = defaultPromptTemplateNameBorder
+                    }
+                    if (currentDefaultName == names[currentTemplateNumber]) {
+                        currentDefaultName = promptTemplateName.text
                     }
                     names[currentTemplateNumber] = promptTemplateName.text
                 }
@@ -250,7 +256,7 @@ class PromptTemplateFactory(private val promptEditorType: PromptEditorType) {
         }
         removeButton.isEnabled = templates.size != 1
 
-        promptTemplateName.text = getDefaultPromptTemplateName(currentTemplateNumber + 1)
+        promptTemplateName.text = names[currentTemplateNumber]
 
         updateSetAsDefaultButton()
         updateEditorTextField()
