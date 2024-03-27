@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.settings.evosuite
 
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.ui.Messages
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
@@ -106,22 +107,22 @@ class SettingsEvoSuiteConfigurable : Configurable {
         val seed = settingsComponent!!.seed.toLongOrNull()
         if (settingsComponent!!.seed != "" && seed == null) {
             Messages.showErrorDialog(
-                "Seed parameter is not of numeric type. Therefore, it will not be saved. However, the rest of the parameters have been successfully saved.",
-                "Incorrect Numeric Type For Seed",
+                TestSparkBundle.message("seedParameterMessage"),
+                TestSparkBundle.message("seedParameterTitle"),
             )
-            return
+        } else {
+            settingsState.seed = settingsComponent!!.seed
         }
-        settingsState.seed = settingsComponent!!.seed
 
         val evosuitePort = settingsComponent!!.evosuitePort.toIntOrNull()
         if (evosuitePort != null && (evosuitePort < 1024 || evosuitePort > 65535)) {
             Messages.showErrorDialog(
-                "Evosuite port should be a valye between 1024 to 65535. Therefore, it will not be saved. However, the rest of the parameters have been successfully saved. ",
-                "Incorrect Port Provided",
+                TestSparkBundle.message("evosuitePortMessage"),
+                TestSparkBundle.message("evosuitePortTitle"),
             )
-            return
+        } else {
+            settingsState.evosuitePort = settingsComponent!!.evosuitePort
         }
-        settingsState.evosuitePort = settingsComponent!!.evosuitePort
     }
 
     /**
