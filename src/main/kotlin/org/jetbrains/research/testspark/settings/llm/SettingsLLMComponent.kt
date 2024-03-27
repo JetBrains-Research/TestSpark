@@ -26,13 +26,11 @@ import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
 import java.awt.Font
-import javax.swing.BorderFactory
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JPanel
-import javax.swing.JSeparator
 import javax.swing.JTextField
 
 class SettingsLLMComponent {
@@ -116,17 +114,29 @@ class SettingsLLMComponent {
         get() = promptLineTemplateFactory.getCommonPrompt()
         set(value) = promptLineTemplateFactory.setCommonPrompt(value)
 
-    var currentClassTemplateNumber: Int
-        get() = promptClassTemplateFactory.getCurrentTemplateNumber()
-        set(value) = promptClassTemplateFactory.setCurrentTemplateNumber(value)
+    var classPromptName: String
+        get() = promptClassTemplateFactory.getCommonName()
+        set(value) = promptClassTemplateFactory.setCommonName(value)
 
-    var currentMethodTemplateNumber: Int
-        get() = promptMethodTemplateFactory.getCurrentTemplateNumber()
-        set(value) = promptMethodTemplateFactory.setCurrentTemplateNumber(value)
+    var methodPromptName: String
+        get() = promptMethodTemplateFactory.getCommonName()
+        set(value) = promptMethodTemplateFactory.setCommonName(value)
 
-    var currentLineTemplateNumber: Int
-        get() = promptLineTemplateFactory.getCurrentTemplateNumber()
-        set(value) = promptLineTemplateFactory.setCurrentTemplateNumber(value)
+    var linePromptName: String
+        get() = promptLineTemplateFactory.getCommonName()
+        set(value) = promptLineTemplateFactory.setCommonName(value)
+
+    var classCurrentDefaultPromptName: String
+        get() = promptClassTemplateFactory.getCurrentDefaultPromptName()
+        set(value) = promptClassTemplateFactory.setCurrentDefaultPromptName(value)
+
+    var methodCurrentDefaultPromptName: String
+        get() = promptMethodTemplateFactory.getCurrentDefaultPromptName()
+        set(value) = promptMethodTemplateFactory.setCurrentDefaultPromptName(value)
+
+    var lineCurrentDefaultPromptName: String
+        get() = promptLineTemplateFactory.getCurrentDefaultPromptName()
+        set(value) = promptLineTemplateFactory.setCurrentDefaultPromptName(value)
 
     var defaultLLMRequests: String
         get() = JsonEncoding.encode(
@@ -161,23 +171,8 @@ class SettingsLLMComponent {
         // Adds the panel components
         createSettingsPanel()
 
-        PromptEditorType.values().forEach {
-            updateHighlighting(getEditorTextField(it).text, it)
-        }
-
         // Adds listeners
         addListeners()
-    }
-
-    fun updateHighlighting(prompt: String, editorType: PromptEditorType) {
-        val editorTextField = getEditorTextField(editorType)
-        service<PromptParserService>().highlighter(editorTextField, prompt)
-        if (!service<PromptParserService>().isPromptValid(prompt)) {
-            val border = BorderFactory.createLineBorder(JBColor.RED)
-            editorTextField.border = border
-        } else {
-            editorTextField.border = null
-        }
     }
 
     private fun createTabbedPane(): JBTabbedPane {
@@ -197,21 +192,15 @@ class SettingsLLMComponent {
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
 
         // Prompt
-        panel.add(
-            when (promptEditorType) {
-                PromptEditorType.CLASS -> promptClassTemplateFactory.getButtonsPanel()
-                PromptEditorType.METHOD -> promptMethodTemplateFactory.getButtonsPanel()
-                PromptEditorType.LINE -> promptLineTemplateFactory.getButtonsPanel()
-            },
-        )
-        panel.add(
-            when (promptEditorType) {
-                PromptEditorType.CLASS -> promptClassTemplateFactory.getEditorTextField()
-                PromptEditorType.METHOD -> promptMethodTemplateFactory.getEditorTextField()
-                PromptEditorType.LINE -> promptLineTemplateFactory.getEditorTextField()
-            },
-        )
-        panel.add(JSeparator())
+        val promptTemplateFactory: PromptTemplateFactory = when (promptEditorType) {
+            PromptEditorType.CLASS -> promptClassTemplateFactory
+            PromptEditorType.METHOD -> promptMethodTemplateFactory
+            PromptEditorType.LINE -> promptLineTemplateFactory
+        }
+
+        panel.add(promptTemplateFactory.getUpperButtonsPanel())
+        panel.add(promptTemplateFactory.getEditorTextField())
+        panel.add(promptTemplateFactory.getLowerButtonsPanel())
 
         // add buttons for inserting keywords to the prompt editor
         addPromptButtons(panel)
@@ -338,25 +327,6 @@ class SettingsLLMComponent {
             llmPlatforms,
             settingsState,
         )
-
-        addHighlighterListeners()
-    }
-
-    private fun addHighlighterListeners() {
-        PromptEditorType.values().forEach {
-            getEditorTextField(it).document.addDocumentListener(
-                object : com.intellij.openapi.editor.event.DocumentListener {
-                    override fun documentChanged(event: com.intellij.openapi.editor.event.DocumentEvent) {
-                        when (it) {
-                            PromptEditorType.CLASS -> promptClassTemplateFactory.templatesUpdate()
-                            PromptEditorType.METHOD -> promptMethodTemplateFactory.templatesUpdate()
-                            PromptEditorType.LINE -> promptLineTemplateFactory.templatesUpdate()
-                        }
-                        updateHighlighting(event.document.text, it)
-                    }
-                },
-            )
-        }
     }
 
     private fun stylizePanel() {
@@ -418,10 +388,6 @@ class SettingsLLMComponent {
             .addComponent(promptEditorTabbedPane, 15)
             .addComponentFillVertically(JPanel(), 0)
             .panel
-    }
-
-    private fun getEditorTextField(editorType: PromptEditorType): EditorTextField {
-        return (promptEditorTabbedPane.getComponentAt(editorType.index) as JPanel).getComponent(1) as EditorTextField
     }
 
     fun updateTokenAndModel() {

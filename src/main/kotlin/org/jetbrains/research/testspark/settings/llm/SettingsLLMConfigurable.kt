@@ -1,9 +1,6 @@
 package org.jetbrains.research.testspark.settings.llm
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
-import org.jetbrains.research.testspark.data.JsonEncoding
-import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
@@ -49,9 +46,12 @@ class SettingsLLMConfigurable : Configurable {
         settingsComponent!!.classPrompt = settingsState.classPrompt
         settingsComponent!!.methodPrompt = settingsState.methodPrompt
         settingsComponent!!.linePrompt = settingsState.linePrompt
-        settingsComponent!!.currentClassTemplateNumber = settingsState.currentClassTemplateNumber
-        settingsComponent!!.currentMethodTemplateNumber = settingsState.currentMethodTemplateNumber
-        settingsComponent!!.currentLineTemplateNumber = settingsState.currentLineTemplateNumber
+        settingsComponent!!.classPromptName = settingsState.classPromptName
+        settingsComponent!!.methodPromptName = settingsState.methodPromptName
+        settingsComponent!!.linePromptName = settingsState.linePromptName
+        settingsComponent!!.classCurrentDefaultPromptName = settingsState.classCurrentDefaultPromptName
+        settingsComponent!!.methodCurrentDefaultPromptName = settingsState.methodCurrentDefaultPromptName
+        settingsComponent!!.lineCurrentDefaultPromptName = settingsState.lineCurrentDefaultPromptName
         settingsComponent!!.llmSetupCheckBoxSelected = settingsState.llmSetupCheckBoxSelected
         settingsComponent!!.provideTestSamplesCheckBoxSelected = settingsState.provideTestSamplesCheckBoxSelected
         settingsComponent!!.defaultLLMRequests = settingsState.defaultLLMRequests
@@ -85,13 +85,13 @@ class SettingsLLMConfigurable : Configurable {
         modified = modified or (settingsComponent!!.methodPrompt != settingsState.methodPrompt)
         modified = modified or (settingsComponent!!.linePrompt != settingsState.linePrompt)
 
-        modified = modified or (settingsComponent!!.currentClassTemplateNumber != settingsState.currentClassTemplateNumber)
-        modified = modified or (settingsComponent!!.currentMethodTemplateNumber != settingsState.currentMethodTemplateNumber)
-        modified = modified or (settingsComponent!!.currentLineTemplateNumber != settingsState.currentLineTemplateNumber)
+        modified = modified or (settingsComponent!!.classPromptName != settingsState.classPromptName)
+        modified = modified or (settingsComponent!!.methodPromptName != settingsState.methodPromptName)
+        modified = modified or (settingsComponent!!.linePromptName != settingsState.linePromptName)
 
-        modified = modified and service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.classPrompt)[settingsComponent!!.currentClassTemplateNumber - 1])
-        modified = modified and service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.methodPrompt)[settingsComponent!!.currentMethodTemplateNumber - 1])
-        modified = modified and service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.linePrompt)[settingsComponent!!.currentLineTemplateNumber - 1])
+        modified = modified or (settingsComponent!!.classCurrentDefaultPromptName != settingsState.classCurrentDefaultPromptName)
+        modified = modified or (settingsComponent!!.methodCurrentDefaultPromptName != settingsState.methodCurrentDefaultPromptName)
+        modified = modified or (settingsComponent!!.lineCurrentDefaultPromptName != settingsState.lineCurrentDefaultPromptName)
 
         modified = modified or (settingsComponent!!.llmSetupCheckBoxSelected != settingsState.llmSetupCheckBoxSelected)
         modified = modified or (settingsComponent!!.provideTestSamplesCheckBoxSelected != settingsState.provideTestSamplesCheckBoxSelected)
@@ -122,9 +122,12 @@ class SettingsLLMConfigurable : Configurable {
         settingsState.classPrompt = settingsComponent!!.classPrompt
         settingsState.methodPrompt = settingsComponent!!.methodPrompt
         settingsState.linePrompt = settingsComponent!!.linePrompt
-        settingsState.currentClassTemplateNumber = settingsComponent!!.currentClassTemplateNumber
-        settingsState.currentMethodTemplateNumber = settingsComponent!!.currentMethodTemplateNumber
-        settingsState.currentLineTemplateNumber = settingsComponent!!.currentLineTemplateNumber
+        settingsState.classPromptName = settingsComponent!!.classPromptName
+        settingsState.methodPromptName = settingsComponent!!.methodPromptName
+        settingsState.linePromptName = settingsComponent!!.linePromptName
+        settingsState.classCurrentDefaultPromptName = settingsComponent!!.classCurrentDefaultPromptName
+        settingsState.methodCurrentDefaultPromptName = settingsComponent!!.methodCurrentDefaultPromptName
+        settingsState.lineCurrentDefaultPromptName = settingsComponent!!.lineCurrentDefaultPromptName
         settingsState.llmSetupCheckBoxSelected = settingsComponent!!.llmSetupCheckBoxSelected
         settingsState.provideTestSamplesCheckBoxSelected = settingsComponent!!.provideTestSamplesCheckBoxSelected
         settingsState.defaultLLMRequests = settingsComponent!!.defaultLLMRequests

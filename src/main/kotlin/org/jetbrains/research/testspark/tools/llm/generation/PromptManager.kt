@@ -70,9 +70,9 @@ class PromptManager(
                 )
 
                 val promptTemplates = PromptTemplates(
-                    classPrompt = JsonEncoding.decode(settingsState.classPrompt)[settingsState.currentClassTemplateNumber - 1],
-                    methodPrompt = JsonEncoding.decode(settingsState.methodPrompt)[settingsState.currentMethodTemplateNumber - 1],
-                    linePrompt = JsonEncoding.decode(settingsState.linePrompt)[settingsState.currentLineTemplateNumber - 1],
+                    classPrompt = JsonEncoding.decode(settingsState.classPrompt)[JsonEncoding.decode(settingsState.classPromptName).indexOf(settingsState.classCurrentDefaultPromptName)],
+                    methodPrompt = JsonEncoding.decode(settingsState.methodPrompt)[JsonEncoding.decode(settingsState.methodPromptName).indexOf(settingsState.methodCurrentDefaultPromptName)],
+                    linePrompt = JsonEncoding.decode(settingsState.linePrompt)[JsonEncoding.decode(settingsState.linePromptName).indexOf(settingsState.lineCurrentDefaultPromptName)],
                 )
 
                 val promptGenerator = PromptGenerator(context, promptTemplates)
