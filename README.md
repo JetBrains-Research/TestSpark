@@ -195,14 +195,13 @@ Users can like/dislike the test for future analysis and improvement of the gener
 ![Like test dark](readme-images/gifs/LikeTestCase_dark.gif#gh-dark-mode-only)
 
 #### Send a Request to LLM
-Users can send a request to LLM with modification which users prefer for the test case.\
-
-[//]: # (TODO)
+Users can send a request to LLM with modification which users prefer for the test case.
+Users can choose a default query, the list of which is set up in the `Settings`.
 
 ![Send a template request to LLM](readme-images/gifs/SendTemplateRequest.gif#gh-light-mode-only)
 ![Send a template request to LLM dark](readme-images/gifs/SendTemplateRequest_dark.gif#gh-dark-mode-only)
 
-[//]: # (TODO)
+Users can also manually punch in a new request.
 
 ![Send a request to LLM](readme-images/gifs/SendRequest.gif#gh-light-mode-only)
 ![Send a request to LLM dark](readme-images/gifs/SendRequest_dark.gif#gh-dark-mode-only)
@@ -306,19 +305,20 @@ Additionally, they can also disable the display of the `LLM Samples Page`.
 ![LLM test samples page](readme-images/pngs/llm-settings/LLMTestSamplesPage_dark.png#gh-light-mode-only)
 ![[LLM test samples page dark](readme-images/pngs/llm-settings/LLMTestSamplesPage_dark.png#gh-dark-mode-only)
 
-[//]: # (TODO supporting default structures for requests to LLM in test cases)
+Users can customize the list of default requests to the LLM in test cases.
 
 ![LLM default requests](readme-images/pngs/llm-settings/LLMDefaultRequests.png#gh-light-mode-only)
 ![LLM default requests dark](readme-images/pngs/llm-settings/LLMDefaultRequests_dark.png#gh-dark-mode-only)
 
-[//]: # (TODO JUnit version)
+The plugin uses JUnit to generate tests. It is possible to select the JUnit version and prioritize the versions used by the current project.
 
 ![LLM JUnit version](readme-images/pngs/llm-settings/LLMJUnitVersion.png#gh-light-mode-only)
 ![LLM JUnit version dark](readme-images/pngs/llm-settings/LLMJUnitVersion_dark.png#gh-dark-mode-only)
 
 Users have the opportunity to adjust the prompt that is sent to the LLM platform.
 
-[//]: # (TODO improve the description. Add information about the templates)
+To create a request to the LLM, it is necessary to provide a prompt which contains information about the details of the generation. The most necessary data are located in the mandatory section, without them the prompt is not valid.\
+Users can modify, create new templates, delete and use different variants in practice.
 
 ![LLM prompt](readme-images/pngs/llm-settings/LLMPrompt.png#gh-light-mode-only)
 ![LLM prompt dark](readme-images/pngs/llm-settings/LLMPrompt_dark.png#gh-dark-mode-only)
