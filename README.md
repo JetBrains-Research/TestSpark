@@ -220,17 +220,6 @@ Once test are generated, the lines which are covered by the tests will be highli
 ![Test highlight](readme-images/gifs/TestHighlight.gif#gh-light-mode-only)
 ![Test highlight dark](readme-images/gifs/TestHighlight_dark.gif#gh-dark-mode-only)
 
-#### Killed Mutants Visualisation
-For mutation visualisation to work, you must have [coverage visualisation](#coverage-visualisation) enabled. You must also have the criterion `Mutation coverage` turned on. The setting is available in the <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> > <kbd>EvoSuite</kbd> tab.
-
-![Turn on mutation](readme-images/pngs/evosuite-settings/TurnOnMutation.png#gh-light-mode-only)
-![Turn on mutation dark](readme-images/pngs/evosuite-settings/TurnOnMutation_dark.png#gh-dark-mode-only)
-
-Once tests are generated, the same gutter from [`Coverage Visualisation`](#coverage-visualisation) can be used to show which mutants are covered by the current test suite and which ones are not. For mutants covered, the mutant can be clicked. Clicking the mutant will highlight all the tests that kill the mutant. Mutation visualisation adjusts dynamically - it only shows results for the tests that are selected in the TestSpark tab.
-
-![Mutation coverage](readme-images/gifs/MutationHighlight.gif#gh-light-mode-only)
-![Mutation coverage dark](readme-images/gifs/MutationHighlight_dark.gif#gh-dark-mode-only)
-
 ### Integrating Tests into the Project
 The tests can be added to an existing file:
 
