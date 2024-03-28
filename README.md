@@ -73,7 +73,73 @@ If you are running the plugin for the first time, checkout the [Settings](#setti
 - [Telemetry](#telemetry-opt-in)
 
 ### Generating Tests
-[//]: # (TODO add details description about the TestSpark window)
+To initiate the generation process, right-click on the part of the code for which tests need to be generated and select `TestSpark`.
+
+![TestSpark option](readme-images/pngs/TestSparkOption.png#gh-light-mode-only)
+![TestSpark option dark](readme-images/pngs/TestSparkOption_dark.png#gh-dark-mode-only)
+
+#### Main Page
+After that, a window will open where users need to configure generation settings.
+
+![Main page](readme-images/pngs/MainPage.png#gh-light-mode-only)
+![Main page dark](readme-images/pngs/MainPage_dark.png#gh-dark-mode-only)
+
+Firstly users need to select the test generator (LLM-based test generator or `EvoSuite`, which is a Local search-based test generator).
+
+![Test generator](readme-images/pngs/TestGenerator.png#gh-light-mode-only)
+![Test generator dark](readme-images/pngs/TestGenerator_dark.png#gh-dark-mode-only)
+
+Also, in this window, it is necessary to select the part of the code for which tests need to be generated. The selection consists of no more than three items -- `class/interface`, `method/constructor` (if applicable), `line` (if applicable).
+
+![Part of the code](readme-images/pngs/PartOfTheCode.png#gh-light-mode-only)
+![Part of the code dark](readme-images/pngs/PartOfTheCode_dark.png#gh-dark-mode-only)
+
+After clicking the `Next` button, the plugin provides the opportunity to configure the basic parameters of the selected generator. Advanced parameter settings can be done in Settings. All settings, both in `Settings` and in this window, are saved, so you can [disable the ability](#llm-settings) to configure generators before each generation process to perform this process more quickly.
+
+#### LLM Setup Page
+In the case of LLM, two additional pages are provided for basic settings.\
+In the first page, users configure `LLM Platform`, `LLM Token`, `LLM Model`, `LLM JUnit version`, and `Prompt Selection`. More detailed descriptions of each item can be found in `Settings`.
+
+![LLM setup page](readme-images/pngs/LLMSetupPage.png#gh-light-mode-only)
+![LLM setup page dark](readme-images/pngs/LLMSetupPage_dark.png#gh-dark-mode-only)
+
+#### LLM Samples Page
+After that, in the next page, you can provide some test samples for LLM.
+
+![LLM samples page](readme-images/pngs/LLMSamplesPage.png#gh-light-mode-only)
+![LLM samples page dark](readme-images/pngs/LLMSamplesPage_dark.png#gh-dark-mode-only)
+
+Tests can be entered manually.
+
+![Manually samples](readme-images/pngs/ManuallySamples.png#gh-light-mode-only)
+![Manually samples](readme-images/pngs/ManuallySamples_dark.png#gh-dark-mode-only)
+
+Also, tests can be chosen tests from the current project.
+
+![Chosen samples](readme-images/pngs/ChosenSamples.png#gh-light-mode-only)
+![Chosen samples dark](readme-images/pngs/ChosenSamples_dark.png#gh-dark-mode-only)
+
+Test Cases can be modified, reset to their initial state, and deleted.
+
+![Interaction with samples](readme-images/pngs/InteractionWithSamples.png#gh-light-mode-only)
+![Interaction with samples dark](readme-images/pngs/InteractionWithSamples_dark.png#gh-dark-mode-only)
+
+#### EvoSuite Setup Page
+For `EvoSuite`, you need to enter the local path to Java 11 and select the generation algorithm, after which the generation process will start.
+
+![EvoSuite page](readme-images/pngs/EvoSuitePage.png#gh-light-mode-only)
+![EvoSuite page dark](readme-images/pngs/EvoSuitePage_dark.png#gh-dark-mode-only)
+
+#### Generation Process
+After configuring the test generators, click the `OK` button, after which the generation process will start, and a list of generated test cases will appear on the right side of the IDE.
+
+![Generated tests](readme-images/pngs/GeneratedTests.png#gh-light-mode-only)
+![Generated tests dark](readme-images/pngs/GeneratedTests_dark.png#gh-dark-mode-only)
+
+During the test generation, users can observe the current state of the generation process.
+
+![Generation state](readme-images/pngs/GenerationState.png#gh-light-mode-only)
+![Generation state dark](readme-images/pngs/GenerationState_dark.png#gh-dark-mode-only)
 
 ### Working with Test Cases
 After receiving the results, the user can interact with the test cases in various ways. They can view the result (whether it's passed or failed), also select, delete, modify, reset, like/dislike, fix by LLM and execute the tests to update the results.\
@@ -148,24 +214,24 @@ Once a test suite is generated, basic statistics about it can be seen in the too
 #### Coverage Visualisation
 Once test are generated, the lines which are covered by the tests will be highlighted (default color: green). The gutter next to the lines will have a green rectangle as well. If the rectangle is clicked, a popup will show the names of the tests which cover the selected line. If any of the test names are clicked, the corresponding test in the toolwindow will be highlighted with the same accent color. The effect lasts 10 seconds. Coverage visualisation adjusts dynamically - it only shows results for the tests that are selected in the TestSpark tab.
 
-![Test Highlight](readme-images/gifs/TestHighlight.gif#gh-light-mode-only)
-![Test Highlight dark](readme-images/gifs/TestHighlight_dark.gif#gh-dark-mode-only)
+![Test highlight](readme-images/gifs/TestHighlight.gif#gh-light-mode-only)
+![Test highlight dark](readme-images/gifs/TestHighlight_dark.gif#gh-dark-mode-only)
 
 For reference, without visualisation the window would look like this:
 
-![No Test Highlight](readme-images/pngs/NoCoverageVisualisation.png#gh-light-mode-only)
-![No Test Highlight dark](readme-images/pngs/NoCoverageVisualisation_dark.png#gh-dark-mode-only)
+![No test highlight](readme-images/pngs/NoCoverageVisualisation.png#gh-light-mode-only)
+![No test highlight dark](readme-images/pngs/NoCoverageVisualisation_dark.png#gh-dark-mode-only)
 
 #### Killed Mutants Visualisation
 For mutation visualisation to work, you must have [coverage visualisation](#coverage-visualisation) enabled. You must also have the criterion `Mutation coverage` turned on. The setting is available in the <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> > <kbd>EvoSuite</kbd> tab.
 
-![Turn on Mutation](readme-images/pngs/TurnOnMutation.png#gh-light-mode-only)
-![Turn on Mutation dark](readme-images/pngs/TurnOnMutation_dark.png#gh-dark-mode-only)
+![Turn on mutation](readme-images/pngs/evosuite-settings/TurnOnMutation.png#gh-light-mode-only)
+![Turn on mutation dark](readme-images/pngs/evosuite-settings/TurnOnMutation_dark.png#gh-dark-mode-only)
 
 Once tests are generated, the same gutter from [`Coverage Visualisation`](#coverage-visualisation) can be used to show which mutants are covered by the current test suite and which ones are not. For mutants covered, the mutant can be clicked. Clicking the mutant will highlight all the tests that kill the mutant. Mutation visualisation adjusts dynamically - it only shows results for the tests that are selected in the TestSpark tab.
 
-![Mutation Coverage](readme-images/gifs/MutationHighlight.gif#gh-light-mode-only)
-![Mutation Coverage dark](readme-images/gifs/MutationHighlight_dark.gif#gh-dark-mode-only)
+![Mutation coverage](readme-images/gifs/MutationHighlight.gif#gh-light-mode-only)
+![Mutation coverage dark](readme-images/gifs/MutationHighlight_dark.gif#gh-dark-mode-only)
 
 ### Integrating Tests into the Project
 The tests can be added to an existing file:
@@ -182,20 +248,20 @@ Or to a new file:
 <!-- How can users configure the plugin to match their needs? -->
 The plugin is configured mainly through the Settings menu. The plugin settings can be found under <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd>. Here, the user is able to select options for the plugin:
 
-![Plugin Settings](readme-images/pngs/PluginSettings.png#gh-light-mode-only)
-![Plugin Settings dark](readme-images/pngs/PluginSettings_dark.png#gh-dark-mode-only)
+![Plugin settings](readme-images/pngs/PluginSettings.png#gh-light-mode-only)
+![Plugin settings dark](readme-images/pngs/PluginSettings_dark.png#gh-dark-mode-only)
 
 #### First time configuration
 Before running the plugin for the first time, we highly recommend going to the `Environment settings` section of TestSpark settings. The settings include compilation path (path to compiled code) and compilation command. Both commands have defaults. However, we recommend especially that you check compilation command. For this command the user requires maven, gradle or any other builder program which can be accessed via command. Leaving this field with a faulty value may cause unintended behaviour.
 
-![Setup](readme-images/pngs/Setup.png#gh-light-mode-only)
-![Setup dark](readme-images/pngs/Setup_dark.png#gh-dark-mode-only)
+![Setup](readme-images/pngs/common-settings/Setup.png#gh-light-mode-only)
+![Setup dark](readme-images/pngs/common-settings/Setup_dark.png#gh-dark-mode-only)
 
 #### Accessibility Features
 The plugin supports changing the color for [coverage visualisation](#coverage-visualisation-1) and [killed mutants visualisation](#killed-mutants-visualisation-1) (one setting for both). To change the color, go to <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> and use the color picker under `Accessibility settings`:
 
-![Color Picker](readme-images/pngs/common-settings/ColorPicker.png#gh-light-mode-only)
-![Color Picker dark](readme-images/pngs/common-settings/ColorPicker_dark.png#gh-dark-mode-only)
+![Color picker](readme-images/pngs/common-settings/ColorPicker.png#gh-light-mode-only)
+![Color picker dark](readme-images/pngs/common-settings/ColorPicker_dark.png#gh-dark-mode-only)
 
 The plugin has been designed with translation in mind. The vast majority of the plugins labels, tooltips, messages, etc. is stored in <kbd>.property</kbd> files. For more information on translation, refer to the contributing readme.
 
@@ -204,54 +270,59 @@ The plugin has been designed with translation in mind. The vast majority of the 
 The settings submenu <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> > <kbd>EvoSuite</kbd> allows the user to tweak EvoSuite parameters to their liking.\
 At the moment EvoSuite can be executed only with Java 11, so if the user has a more modern version by default, it is necessary to download Java 11 and set the path to the java file.
 
-![Java Setup](readme-images/pngs/JavaSetup.png#gh-light-mode-only)
-![Java Setup dark](readme-images/pngs/JavaSetup_dark.png#gh-dark-mode-only)
+![Java setup](readme-images/pngs/JavaSetup.png#gh-light-mode-only)
+![Java setup dark](readme-images/pngs/JavaSetup_dark.png#gh-dark-mode-only)
 
-EvoSuite has hundreds of parameters, not all can be packed in a settings menu. However, the most commonly used and rational settings were added here:
+To accelerate the test generation process, users can disable the display of the `EvoSuite Setup Page`.
 
-![EvoSuite Settings](readme-images/pngs/EvoSuiteSettings.png#gh-light-mode-only)
-![EvoSuite Settings dark](readme-images/pngs/EvoSuiteSettings_dark.png#gh-dark-mode-only)
+![EvoSuite setup page](readme-images/pngs/EvoSuiteSetupPage.png#gh-light-mode-only)
+![EvoSuite setup page dark](readme-images/pngs/EvoSuiteSetupPage_dark.png#gh-dark-mode-only)
+
+`EvoSuite` has hundreds of parameters, not all can be packed in a settings menu. However, the most commonly used and rational settings were added here:
+
+![EvoSuite settings](readme-images/pngs/EvoSuiteSettings.png#gh-light-mode-only)
+![EvoSuite settings dark](readme-images/pngs/EvoSuiteSettings_dark.png#gh-dark-mode-only)
 
 #### LLM Settings
 The settings submenu <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> > <kbd>LLM</kbd> allows the user to tweak LLM parameters to their liking.
 
-![LLM Settings](readme-images/pngs/LLMSettings.png#gh-light-mode-only)
-![LLM Settings dark](readme-images/pngs/LLMSettings_dark.png#gh-dark-mode-only)
+![LLM settings](readme-images/pngs/LLMSettings.png#gh-light-mode-only)
+![LLM settings dark](readme-images/pngs/LLMSettings_dark.png#gh-dark-mode-only)
 
 Selecting a platform to interact with the LLM. By default, only OpenAI is available, but for JetBrains employees there is an option to interact via Graize. More details in the [TestSpark for JetBrains employees](#testspark-for-jetbrains-employees) section.
 
-![LLM Platform](readme-images/pngs/LLMPlatform.png#gh-light-mode-only)
-![LLM Platform dark](readme-images/pngs/LLMPlatform_dark.png#gh-dark-mode-only)
+![LLM platform](readme-images/pngs/LLMPlatform.png#gh-light-mode-only)
+![LLM platform dark](readme-images/pngs/LLMPlatform_dark.png#gh-dark-mode-only)
 
 Users have to set their own token for LLM, the plugin does not provide a default option.
 
-![LLM Token](readme-images/pngs/LLMToken.png#gh-light-mode-only)
-![LLM Token dark](readme-images/pngs/LLMToken_dark.png#gh-dark-mode-only)
+![LLM token](readme-images/pngs/LLMToken.png#gh-light-mode-only)
+![LLM token dark](readme-images/pngs/LLMToken_dark.png#gh-dark-mode-only)
 
 Once the correct token is entered, it will be possible to select an LLM model for test generation.
 
-![LLM Model](readme-images/pngs/LLMModel.png#gh-light-mode-only)
-![LLM Model dark](readme-images/pngs/LLMModel_dark.png#gh-dark-mode-only)
+![LLM model](readme-images/pngs/LLMModel.png#gh-light-mode-only)
+![LLM model dark](readme-images/pngs/LLMModel_dark.png#gh-dark-mode-only)
 
 In addition to the token, users are recommended to configure settings for the LLM process.
 
-![LLM Parameters](readme-images/pngs/LLMParameters.png#gh-light-mode-only)
-![LLM Parameters dark](readme-images/pngs/LLMParameters_dark.png#gh-dark-mode-only)
+![LLM parameters](readme-images/pngs/LLMParameters.png#gh-light-mode-only)
+![LLM parameters dark](readme-images/pngs/LLMParameters_dark.png#gh-dark-mode-only)
 
-[//]: # (TODO llmSetupCheckBox)
+To expedite the test generation process, users can disable the display of the `LLM Setup Page`.
 
-![LLM Setup Page](readme-images/pngs/LLMSetupPage.png#gh-light-mode-only)
-![LLM Setup Page dark](readme-images/pngs/LLMSetupPage_dark.png#gh-dark-mode-only)
+![LLM setup page](readme-images/pngs/LLMSetupPage.png#gh-light-mode-only)
+![LLM setup page dark](readme-images/pngs/LLMSetupPage_dark.png#gh-dark-mode-only)
 
-[//]: # (TODO provideTestSamplesCheckBox)
+Additionally, they can also disable the display of the `LLM Samples Page`.
 
-![LLM Test Samples Page](readme-images/pngs/[LLMTestSamplesPage.png#gh-light-mode-only)
-![[LLM Test Samples Page dark](readme-images/pngs/[LLMTestSamplesPage_dark.png#gh-dark-mode-only)
+![LLM test samples page](readme-images/pngs/[LLMTestSamplesPage.png#gh-light-mode-only)
+![[LLM test samples page dark](readme-images/pngs/[LLMTestSamplesPage_dark.png#gh-dark-mode-only)
 
 [//]: # (TODO supporting default structures for requests to LLM in test cases)
 
-![LLM Default Requests](readme-images/pngs/LLMDefaultRequests.png#gh-light-mode-only)
-![LLM Default Requests dark](readme-images/pngs/LLMDefaultRequests_dark.png#gh-dark-mode-only)
+![LLM default requests](readme-images/pngs/LLMDefaultRequests.png#gh-light-mode-only)
+![LLM default requests dark](readme-images/pngs/LLMDefaultRequests_dark.png#gh-dark-mode-only)
 
 [//]: # (TODO JUnit version)
 
@@ -262,8 +333,8 @@ Users have the opportunity to adjust the prompt that is sent to the LLM platform
 
 [//]: # (TODO improve the description. Add information about the templates)
 
-![LLM Prompt](readme-images/pngs/LLMPrompt.png#gh-light-mode-only)
-![LLM Prompt dark](readme-images/pngs/LLMPrompt_dark.png#gh-dark-mode-only)
+![LLM prompt](readme-images/pngs/LLMPrompt.png#gh-light-mode-only)
+![LLM prompt dark](readme-images/pngs/LLMPrompt_dark.png#gh-dark-mode-only)
 
 <span style="color:crimson; font-size:150%; font-weight:bold">:exclamation: Pro tip: don't forget to hit the "save" button at the bottom. :exclamation:</span>
 
@@ -271,8 +342,8 @@ Users have the opportunity to adjust the prompt that is sent to the LLM platform
 One of the biggest future plans of our client is to leverage the data that is gathered by TestSpark’s telemetry. This will help them with future research, including the development of an interactive way of using EvoSuite. The general idea behind this feature is to learn from the stored user corrections in order to improve test generation.\
 To opt into telemetry, go to <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd> and tick the `Enable telemetry` checkbox. If you want, change the directory where telemetry is stored.
 
-![Telemetry](readme-images/pngs/Telemetry.png#gh-light-mode-only)
-![Telemetry dark](readme-images/pngs/Telemetry_dark.png#gh-dark-mode-only)
+![Telemetry](readme-images/pngs/common-settings/Telemetry.png#gh-light-mode-only)
+![Telemetry dark](readme-images/pngs/common-settings/Telemetry_dark.png#gh-dark-mode-only)
 
 ## TestSpark for JetBrains employees
 JetBrains employees have the ability to send queries to OpenAI models through the [Grazie platform](https://try.ai.intellij.net/chat).
@@ -301,8 +372,8 @@ spacePassword=<TOKEN>
 ### LLM Settings with Grazie
 LLM Settings with Grazie platform option:
 
-![LLM Grazie Settings](readme-images/pngs/LLMGrazieSettings.png#gh-light-mode-only)
-![LLM Grazie Settings dark](readme-images/pngs/LLMGrazieSettings_dark.png#gh-dark-mode-only)
+![LLM grazie settings](readme-images/pngs/LLMGrazieSettings.png#gh-light-mode-only)
+![LLM grazie settings dark](readme-images/pngs/LLMGrazieSettings_dark.png#gh-dark-mode-only)
 
 ## Contribution
 <!-- How to contribute to the plugin -->
