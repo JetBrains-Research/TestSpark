@@ -68,7 +68,7 @@ class TestCompiler(
             arrayListOf(
                 javaCompile.absolutePath,
                 "-cp",
-                getPath(projectBuildPath),
+                "\"${getPath(projectBuildPath)}\"",
                 path,
             ),
         )
@@ -106,6 +106,6 @@ class TestCompiler(
      * @return the absolute path of the library
      */
     fun getLibrary(libraryName: String): String {
-        return "\"$libPath$libraryName\""
+        return "${libPath.removeSurrounding("\"")}$libraryName"
     }
 }
