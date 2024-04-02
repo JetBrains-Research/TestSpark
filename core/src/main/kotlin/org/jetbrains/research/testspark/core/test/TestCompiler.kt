@@ -106,6 +106,6 @@ class TestCompiler(
      * @return the absolute path of the library
      */
     fun getLibrary(libraryName: String): String {
-        return "${libPath.removeSurrounding("\"").replace(" ", "\" ")}$libraryName"
+        return "${libPath.removeSurrounding("\"")}$libraryName"
     }
 }
