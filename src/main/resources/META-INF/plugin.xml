@@ -20,7 +20,7 @@
     <ul>
         <li>Supports Java (any version).</li>
         <li>Generates unit tests for capturing failures.</li>
-        <li>Generate tests for Java classes, methods, and single lines.</li>
+        <li>Generate tests (JUnit4 and 5) for Java classes, methods, and single lines.</li>
     </ul>
 
     <h4>Local search-based test generation</h4>
