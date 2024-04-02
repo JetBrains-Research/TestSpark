@@ -364,7 +364,8 @@ LLM Settings with Grazie platform option:
 
 ## Contribution
 <!-- How to contribute to the plugin -->
-The plugin is Open-Source and  publicly hosted on github. Anyone can look into the code and suggest changes. You can find the plugin page [here](https://github.com/JetBrains-Research/TestSpark).
+The plugin is Open-Source and  publicly hosted on github. Anyone can look into the code and suggest changes. You can find the plugin page [here](https://github.com/JetBrains-Research/TestSpark).\
+In addition, learn more about the structure of the plugin [here](https://github.com/JetBrains-Research/TestSpark/blob/development/CONTRIBUTING.md).
 
 ## Licence
 <!-- Which licence does the plugin have -->
