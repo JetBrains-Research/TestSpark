@@ -82,8 +82,8 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
             }
             .first()
         // JaCoCo libs
-        val jacocoAgentDir = testCompiler.getLibrary("jacocoagent.jar")
-        val jacocoCLIDir = testCompiler.getLibrary("jacococli.jar")
+        val jacocoAgentDir = "\"${testCompiler.getLibrary("jacocoagent.jar")}\""
+        val jacocoCLIDir = "\"${testCompiler.getLibrary("jacococli.jar")}\""
         val sourceRoots = ModuleRootManager.getInstance(projectContext.cutModule!!).getSourceRoots(false)
 
         // unique name
@@ -98,7 +98,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${projectContext.classFQN}",
                 "-cp",
-                "${testCompiler.getPath(projectBuildPath)}${testCompiler.getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath",
+                "\"${testCompiler.getPath(projectBuildPath)}${testCompiler.getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath\"",
                 "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
             ),
