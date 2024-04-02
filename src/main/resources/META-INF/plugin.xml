@@ -36,6 +36,17 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.2.0</h4>
+            <ul>
+                <li>An error with saving settings data between plugin runs</li>
+                <li>Major refactoring of the plugin, including separation of common code sections for use in both Intellij plugin and Fleet plugin</li>
+                <li>Prompt structure improving</li>
+                <li>Supporting JUnit5 usage for test generation</li>
+                <li>Supporting tests samples detector for LLM</li>
+                <li>Supporting default structures for requests to LLM in test cases</li>
+                <li>Supporting of different LLM prompt templates</li>
+                <li>Supporting the newer versions of IJ</li>
+            </ul>
         <h4>0.1.9</h4>
             <ul>
                 <li>Model selection for JetBrains AI Assistant platform</li>
