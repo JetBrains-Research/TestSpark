@@ -34,7 +34,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
         get() = project.getService(SettingsApplicationService::class.java).state
 
     private val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
-    private val libraryPath = "${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}"
+    private val libraryPath = "${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib$sep"
     private val junitVersion = settingsState.junitVersion
     private val testCompiler = TestCompiler(javaHomePath, libraryPath, junitVersion)
 

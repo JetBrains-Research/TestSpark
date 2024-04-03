@@ -7,6 +7,7 @@ import java.io.InputStreamReader
 class CommandLineRunner {
     companion object {
         protected val log = KotlinLogging.logger {}
+
         /**
          * Executes a command line process and returns the output as a string.
          *
@@ -25,7 +26,7 @@ class CommandLineRunner {
                     .redirectErrorStream(true)
                     .start()
             } else {
-                log.info{"Running command: ${cmd.joinToString(" ")}"}
+                log.info { "Running command: ${cmd.joinToString(" ")}" }
                 ProcessBuilder()
                     .command("bash", "-c", cmd.joinToString(" "))
                     .redirectErrorStream(true)
