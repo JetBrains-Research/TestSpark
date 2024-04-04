@@ -7,9 +7,6 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.LibraryOrderEntry
-import com.intellij.openapi.roots.ModuleRootManager
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiFile
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
@@ -19,10 +16,10 @@ import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
@@ -82,11 +79,14 @@ class TestSparkAction : AnAction() {
      */
     class TestSparkActionWindow(e: AnActionEvent, private val visibilityController: VisibilityController) :
         JFrame("TestSpark") {
+        private val project: Project = e.project!!
+        private val settingsState: SettingsApplicationState
+            get() = project.getService(SettingsApplicationService::class.java).state
+
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
         private val codeTypes = getCurrentListOfCodeTypes(e)!!
-        private val project: Project = e.project!!
         private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
@@ -97,9 +97,9 @@ class TestSparkAction : AnAction() {
 
         private val cardLayout = CardLayout()
 
-        private val llmSetupPanelFactory = LLMSetupPanelFactory()
+        private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
         private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project)
-        private val evoSuitePanelFactory = EvoSuitePanelFactory()
+        private val evoSuitePanelFactory = EvoSuitePanelFactory(project)
 
         init {
             if (!visibilityController.isVisible) {
@@ -108,15 +108,13 @@ class TestSparkAction : AnAction() {
 
                 val panel = JPanel(cardLayout)
 
-                val junit = findJUnitDependency(e)
-
                 panel.add(getMainPanel(), "1")
-                panel.add(createCardPanel(evoSuitePanelFactory, junit), "2")
-                panel.add(createCardPanel(llmSetupPanelFactory, junit), "3")
+                panel.add(createCardPanel(evoSuitePanelFactory), "2")
+                panel.add(createCardPanel(llmSetupPanelFactory), "3")
 
                 panel.add(
                     JBScrollPane(
-                        createCardPanel(llmSampleSelectorFactory, junit),
+                        createCardPanel(llmSampleSelectorFactory),
                         JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
                     ),
@@ -145,33 +143,13 @@ class TestSparkAction : AnAction() {
             }
         }
 
-        private fun createCardPanel(toolPanelFactory: PanelFactory, junit: JUnitVersion?): JPanel {
+        private fun createCardPanel(toolPanelFactory: PanelFactory): JPanel {
             val cardPanel = JPanel(BorderLayout())
             cardPanel.add(toolPanelFactory.getTitlePanel(), BorderLayout.NORTH)
-            cardPanel.add(toolPanelFactory.getMiddlePanel(junit), BorderLayout.CENTER)
+            cardPanel.add(toolPanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             cardPanel.add(toolPanelFactory.getBottomPanel(), BorderLayout.SOUTH)
 
             return cardPanel
-        }
-
-        private fun findJUnitDependency(e: AnActionEvent): JUnitVersion? {
-            val project = e.project!!
-            val virtualFile = e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)?.firstOrNull() ?: return null
-
-            val index = ProjectRootManager.getInstance(project).fileIndex
-            val module = index.getModuleForFile(virtualFile) ?: return null
-
-            for (orderEntry in ModuleRootManager.getInstance(module).orderEntries) {
-                if (orderEntry is LibraryOrderEntry) {
-                    val libraryName = orderEntry.library?.name ?: continue
-                    for (junit in JUnitVersion.values()) {
-                        if (libraryName.contains(junit.groupId)) {
-                            return junit
-                        }
-                    }
-                }
-            }
-            return null
         }
 
         /**
@@ -252,13 +230,16 @@ class TestSparkAction : AnAction() {
             }
 
             for (button in codeTypeButtons) {
-                button.addActionListener { updateNextButton() }
+                button.addActionListener {
+                    llmSetupPanelFactory.setPromptEditorType(button.text)
+                    updateNextButton()
+                }
             }
 
             nextButton.addActionListener {
-                if (llmButton.isSelected && !SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected && !SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
+                if (llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected && !settingsState.provideTestSamplesCheckBoxSelected) {
                     startLLMGeneration()
-                } else if (llmButton.isSelected && !SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected) {
+                } else if (llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected) {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     cardLayout.next(panel)
@@ -267,7 +248,7 @@ class TestSparkAction : AnAction() {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     pack()
-                } else if (evoSuiteButton.isSelected && !SettingsApplicationService.getInstance().state!!.evosuiteSetupCheckBoxSelected) {
+                } else if (evoSuiteButton.isSelected && !settingsState.evosuiteSetupCheckBoxSelected) {
                     startEvoSuiteGeneration()
                 } else {
                     cardLayout.next(panel)
@@ -288,7 +269,7 @@ class TestSparkAction : AnAction() {
 
             llmSetupPanelFactory.getFinishedButton().addActionListener {
                 llmSetupPanelFactory.applyUpdates()
-                if (SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) {
+                if (settingsState.provideTestSamplesCheckBoxSelected) {
                     cardLayout.next(panel)
                 } else {
                     startLLMGeneration()
@@ -300,7 +281,7 @@ class TestSparkAction : AnAction() {
             }
 
             llmSampleSelectorFactory.getBackButton().addActionListener {
-                if (SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected) {
+                if (settingsState.llmSetupCheckBoxSelected) {
                     cardLayout.previous(panel)
                 } else {
                     cardLayout.previous(panel)
@@ -366,8 +347,8 @@ class TestSparkAction : AnAction() {
             }
             nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
 
-            if ((llmButton.isSelected && !SettingsApplicationService.getInstance().state!!.llmSetupCheckBoxSelected && !SettingsApplicationService.getInstance().state!!.provideTestSamplesCheckBoxSelected) ||
-                (evoSuiteButton.isSelected && !SettingsApplicationService.getInstance().state!!.evosuiteSetupCheckBoxSelected)
+            if ((llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected && !settingsState.provideTestSamplesCheckBoxSelected) ||
+                (evoSuiteButton.isSelected && !settingsState.evosuiteSetupCheckBoxSelected)
             ) {
                 nextButton.text = TestSparkLabelsBundle.defaultValue("ok")
             } else {
