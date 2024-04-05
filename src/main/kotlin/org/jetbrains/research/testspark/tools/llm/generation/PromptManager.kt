@@ -22,7 +22,7 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptTemplates
 import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
-import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.core.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
