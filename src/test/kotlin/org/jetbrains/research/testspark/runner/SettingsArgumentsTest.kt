@@ -42,7 +42,7 @@ class SettingsArgumentsTest {
 
     @Test
     fun testCommandForClass() {
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir")
+        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir", settingsState)
         val command = mutableListOf(
             "-generateMOSuite",
             "-serializeResult",
@@ -76,6 +76,7 @@ class SettingsArgumentsTest {
             "serializepath",
             "lang.java.Dung",
             "basedir",
+            settingsState,
         ).forMethod("dungMethod(IDLjava/lang/Thread;)Ljava/lang/Object;")
         val command = mutableListOf(
             "-generateMOSuite",
@@ -106,7 +107,7 @@ class SettingsArgumentsTest {
     @Test
     fun testCommandForLine() {
         val settings =
-            SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir").forLine(419)
+            SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir", settingsState).forLine(419)
         val command = mutableListOf(
             "-generateMOSuite",
             "-serializeResult",
@@ -144,7 +145,7 @@ class SettingsArgumentsTest {
         settingsState.criterionMethod = false
         settingsState.criterionOutput = false
 
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir")
+        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir", settingsState)
 
         val criterion = settings.build().last()
 
@@ -160,7 +161,7 @@ class SettingsArgumentsTest {
         settingsState.criterionWeakMutation = false
         settingsState.criterionLine = false
 
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir")
+        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir", settingsState)
 
         val criterion = settings.build().last()
 
@@ -171,7 +172,7 @@ class SettingsArgumentsTest {
 
     @Test
     fun testCriterionStringAll() {
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir")
+        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir", settingsState)
 
         val criterion = settings.build().last()
 

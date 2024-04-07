@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.core.test
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -72,7 +71,7 @@ open class TestCompiler(
             arrayListOf(
                 javaCompile.absolutePath,
                 "-cp",
-                getPath(projectBuildPath),
+                "\"${getPath(projectBuildPath)}\"",
                 path,
             ),
         )
@@ -113,14 +112,13 @@ open class TestCompiler(
         return path
     }
 
-    /**
-     * Retrieves the absolute path of the specified library.
-     *
-     * @param libraryName the name of the library
-     * @return the absolute path of the library
-     */
+//    /**
+//     * Retrieves the absolute path of the specified library.
+//     *
+//     * @param libraryName the name of the library
+//     * @return the absolute path of the library
+//     */
     /*fun getLibrary(libraryName: String): String {
-        // TODO: if libPath does not have a slash '/' at the end then error
-        return "\"$libPath$libraryName\""
+        return "${libPath.removeSurrounding("\"")}$libraryName"
     }*/
 }

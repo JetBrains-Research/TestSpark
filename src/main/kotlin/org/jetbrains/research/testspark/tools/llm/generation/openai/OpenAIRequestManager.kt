@@ -31,7 +31,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
         testsAssembler: TestsAssembler,
     ): SendResult {
         // Prepare the chat
-        val llmRequestBody = OpenAIRequestBody(SettingsArguments.getModel(), chatHistory)
+        val llmRequestBody = OpenAIRequestBody(SettingsArguments(project).getModel(), chatHistory)
 
         var sendResult = SendResult.OK
 

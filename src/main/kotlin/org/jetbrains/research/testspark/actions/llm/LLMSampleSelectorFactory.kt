@@ -5,7 +5,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.services.LLMTestSampleService
 import java.awt.Font
 import javax.swing.ButtonGroup
@@ -121,7 +120,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
      *
      * @return the middle panel as a JPanel
      */
-    override fun getMiddlePanel(junit: JUnitVersion?): JPanel {
+    override fun getMiddlePanel(): JPanel {
         for (button in selectionTypeButtons) {
             selectionTypeButtonGroup.add(button)
             radioButtonsPanel.add(button)

@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.settings
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
@@ -22,10 +21,11 @@ import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SettingsEvoSuiteConfigurableTest {
-    private val settingsConfigurable = SettingsEvoSuiteConfigurable()
     private lateinit var settingsComponent: SettingsEvoSuiteComponent
     private lateinit var settingsState: SettingsApplicationState
     private lateinit var fixture: CodeInsightTestFixture
+
+    private lateinit var settingsConfigurable: SettingsEvoSuiteConfigurable
 
     @BeforeEach
     fun setUp() {
@@ -36,10 +36,11 @@ class SettingsEvoSuiteConfigurableTest {
             .createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
+        settingsConfigurable = SettingsEvoSuiteConfigurable(fixture.project)
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
         settingsComponent = settingsConfigurable.settingsComponent!!
-        settingsState = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
+        settingsState = fixture.project.getService(SettingsApplicationService::class.java).state
     }
 
     @AfterEach

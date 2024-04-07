@@ -32,7 +32,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
     private val log = Logger.getInstance(this::class.java)
 
     private val settingsState: SettingsApplicationState
-        get() = SettingsApplicationService.getInstance().state!!
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     // private val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
     // private val libraryPath = "\"${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}\""
@@ -103,10 +103,10 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
             }
             .first()
         // JaCoCo libs
-        // val jacocoAgentDir = testCompiler.getLibrary("jacocoagent.jar")
-        // val jacocoCLIDir = testCompiler.getLibrary("jacococli.jar")
-        val jacocoAgentLibraryPath = LibraryPathsProvider.getJacocoAgentLibraryPath()
-        val jacocoCLILibraryPath = LibraryPathsProvider.getJacocoCliLibraryPath()
+        // val jacocoAgentDir = "\"${testCompiler.getLibrary("jacocoagent.jar")}\""
+        // val jacocoCLIDir = "\"${testCompiler.getLibrary("jacococli.jar")}\""
+        val jacocoAgentLibraryPath = "\"${LibraryPathsProvider.getJacocoAgentLibraryPath()}\""
+        val jacocoCLILibraryPath = "\"${LibraryPathsProvider.getJacocoCliLibraryPath()}\""
 
         val sourceRoots = ModuleRootManager.getInstance(projectContext.cutModule!!).getSourceRoots(false)
 
@@ -123,7 +123,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
                 javaRunner.absolutePath,
                 "-javaagent:${/*jacocoAgentDir*/jacocoAgentLibraryPath}=destfile=$dataFileName.exec,append=false,includes=${projectContext.classFQN}",
                 "-cp",
-                "${testCompiler.getPath(projectBuildPath)}${/*testCompiler.getLibrary("JUnitRunner.jar")*/junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath",
+                "\"${testCompiler.getPath(projectBuildPath)}${/*testCompiler.getLibrary("JUnitRunner.jar")*/junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
                 "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
             ),
