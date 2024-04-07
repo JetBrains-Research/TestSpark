@@ -22,18 +22,12 @@ import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.*
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
-import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
-import org.jetbrains.research.testspark.tools.processStopped
-import org.jetbrains.research.testspark.tools.saveData
-import org.jetbrains.research.testspark.tools.sep
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import org.jetbrains.research.testspark.tools.transferToIJTestCases
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -95,9 +89,15 @@ class LLMProcessManager(
 
         val initialPromptMessage = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
-        val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
-        val libraryPath = "\"${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}\""
-        val junitVersion = settingsState.junitVersion
+        val testCompiler = run {
+            val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
+            // val libraryPath = "\"${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}\""
+            // val junitVersion = settingsState.junitVersion
+            val libraryPaths = LibraryPathsProvider.getTestCompilationLibraryPaths()
+            val junitLibraryPaths = LibraryPathsProvider.getJUnitLibraryPaths(settingsState.junitVersion)
+
+            TestCompiler(javaHomePath, libraryPaths, junitLibraryPaths)
+        }
 
         // initiate a new RequestManager
         val requestManager = StandardRequestManagerFactory().getRequestManager(project)
@@ -141,7 +141,7 @@ class LLMProcessManager(
             buildPath = buildPath,
             requestManager = requestManager,
             testsAssembler = JUnitTestsAssembler(project, indicator, generatedTestsData),
-            testCompiler = TestCompiler(javaHomePath, libraryPath, junitVersion),
+            testCompiler = testCompiler,
             testStorage = testProcessor,
             testsPresenter = testsPresenter,
             indicator = indicator,

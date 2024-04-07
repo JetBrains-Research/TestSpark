@@ -12,10 +12,16 @@ data class TestCasesCompilationResult(
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM>,
 )
 
-class TestCompiler(
+/**
+ * TestCompiler is a class that is responsible for compiling generated test cases using the proper javac.
+ * It provides methods for compiling test cases and code files.
+ */
+open class TestCompiler(
     val javaHomeDirectoryPath: String,
-    val libPath: String,
-    val junitVersion: JUnitVersion,
+    val libPaths: List<String>,
+    val junitLibPaths: List<String>,
+    // val libPath: String,
+    // val junitVersion: JUnitVersion,
 ) {
     private val log = KotlinLogging.logger { this::class.java }
 
@@ -29,7 +35,6 @@ class TestCompiler(
         generatedTestCasesPaths: List<String>,
         buildPath: String,
         testCases: MutableList<TestCaseGeneratedByLLM>,
-        // generatedTestData: TestGenerationData,
     ): TestCasesCompilationResult {
         var allTestCasesCompilable = true
         val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
@@ -38,7 +43,6 @@ class TestCompiler(
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
             allTestCasesCompilable = allTestCasesCompilable && compilable
             if (compilable) {
-                // generatedTestData.compilableTestCases.add(testCases[index])
                 compilableTestCases.add(testCases[index])
             }
         }
@@ -91,12 +95,22 @@ class TestCompiler(
     fun getPath(buildPath: String): String {
         // create the path for the command
         val separator = DataFilesUtil.classpathSeparator
+        val dependencyLibPath = libPaths.joinToString(separator.toString())
+        val junitPath = junitLibPaths.joinToString(separator.toString())
+
+        /*
         val junitPath = junitVersion.libJar.joinToString(separator.toString()) { getLibrary(it) }
         val mockitoPath = getLibrary("mockito-core-5.0.0.jar")
         val hamcrestPath = getLibrary("hamcrest-core-1.3.jar")
         val byteBuddy = getLibrary("byte-buddy-1.14.6.jar")
         val byteBuddyAgent = getLibrary("byte-buddy-agent-1.14.6.jar")
-        return "$junitPath${separator}$hamcrestPath${separator}$mockitoPath${separator}$byteBuddy${separator}$byteBuddyAgent${separator}$buildPath"
+        */
+
+        // val path = "$junitPath${separator}$hamcrestPath${separator}$mockitoPath${separator}$byteBuddy${separator}$byteBuddyAgent${separator}$buildPath"
+        val path = "$junitPath${separator}$dependencyLibPath${separator}$buildPath"
+        println("[TestCompiler]: the path is: $path")
+
+        return path
     }
 
     /**
@@ -105,7 +119,8 @@ class TestCompiler(
      * @param libraryName the name of the library
      * @return the absolute path of the library
      */
-    fun getLibrary(libraryName: String): String {
+    /*fun getLibrary(libraryName: String): String {
+        // TODO: if libPath does not have a slash '/' at the end then error
         return "\"$libPath$libraryName\""
-    }
+    }*/
 }
