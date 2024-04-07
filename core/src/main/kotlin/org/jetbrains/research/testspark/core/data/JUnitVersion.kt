@@ -1,8 +1,6 @@
 package org.jetbrains.research.testspark.core.data
 
-import kotlinx.serialization.Serializable
 
-@Serializable
 enum class JUnitVersion(
     val groupId: String,
     val version: Int,
