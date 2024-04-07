@@ -5,7 +5,6 @@ import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.data.dependencies.JavaTestCompilationDependencies
 import java.io.File
 
-
 /**
  * The class encapsulates logic for creation of library paths:
  * 1. Paths related to JUnit
@@ -15,7 +14,7 @@ import java.io.File
 class LibraryPathsProvider {
     companion object {
         private val sep = File.separatorChar
-        private val libPrefix = "${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}"
+        private val libPrefix = "${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib$sep"
 
         fun getTestCompilationLibraryPaths() = JavaTestCompilationDependencies.getJarDescriptors().map { descriptor ->
             "$libPrefix${sep}${descriptor.name}"

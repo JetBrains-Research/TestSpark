@@ -65,7 +65,7 @@ open class TestCompiler(
             .firstOrNull()
 
         if (javaCompile == null) {
-            val msg = "Cannot find java compiler 'javac' at '${javaHomeDirectoryPath}'"
+            val msg = "Cannot find java compiler 'javac' at '$javaHomeDirectoryPath'"
             log.error { msg }
             throw RuntimeException(msg)
         }

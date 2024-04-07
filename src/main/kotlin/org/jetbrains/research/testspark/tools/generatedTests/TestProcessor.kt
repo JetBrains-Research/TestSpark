@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.tools.generatedTests
 
 import com.gitlab.mvysny.konsumexml.konsumeXml
-import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -9,7 +8,6 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.data.TestCase
-import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -21,7 +19,6 @@ import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.LibraryPathsProvider
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.sep
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -81,8 +78,6 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
             }
             .first()
         // JaCoCo libs
-        // val jacocoAgentDir = "\"${testCompiler.getLibrary("jacocoagent.jar")}\""
-        // val jacocoCLIDir = "\"${testCompiler.getLibrary("jacococli.jar")}\""
         val jacocoAgentLibraryPath = "\"${LibraryPathsProvider.getJacocoAgentLibraryPath()}\""
         val jacocoCLILibraryPath = "\"${LibraryPathsProvider.getJacocoCliLibraryPath()}\""
 
@@ -99,9 +94,9 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
         val testExecutionError = CommandLineRunner.run(
             arrayListOf(
                 javaRunner.absolutePath,
-                "-javaagent:${/*jacocoAgentDir*/jacocoAgentLibraryPath}=destfile=$dataFileName.exec,append=false,includes=${projectContext.classFQN}",
+                "-javaagent:$jacocoAgentLibraryPath=destfile=$dataFileName.exec,append=false,includes=${projectContext.classFQN}",
                 "-cp",
-                "\"${testCompiler.getPath(projectBuildPath)}${/*testCompiler.getLibrary("JUnitRunner.jar")*/junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
+                "\"${testCompiler.getPath(projectBuildPath)}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
                 "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
             ),

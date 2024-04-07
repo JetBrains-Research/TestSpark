@@ -3,14 +3,12 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -21,12 +19,18 @@ import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.*
+import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
+import org.jetbrains.research.testspark.tools.getBuildPath
+import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
+import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
+import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
+import org.jetbrains.research.testspark.tools.transferToIJTestCases
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -193,7 +197,7 @@ class LLMProcessManager(
         saveData(
             project,
             report,
-            getPackageFromTestSuiteCode(testSuiteRepresentation),
+            getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation),
             getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
             projectContext.fileUrlAsString!!,
             generatedTestsData,

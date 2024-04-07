@@ -5,7 +5,6 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.TestCompiler
 
-
 class TestCompilerFactory {
     companion object {
         fun createJavacTestCompiler(project: Project, junitVersion: JUnitVersion): TestCompiler {

@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.core.test.data.dependencies
 
 import org.jetbrains.research.testspark.core.data.JarLibraryDescriptor
 
-
 /**
  * The class represents a list of dependencies required for java test compilation.
  * The libraries listed are used during test suite/test case compilation.

@@ -16,7 +16,6 @@ import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import java.io.File
 
-
 enum class FeedbackCycleExecutionResult {
     OK,
     NO_COMPILABLE_TEST_CASES_GENERATED,
