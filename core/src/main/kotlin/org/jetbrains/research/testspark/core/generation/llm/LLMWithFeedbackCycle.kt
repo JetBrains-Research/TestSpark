@@ -16,6 +16,7 @@ import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import java.io.File
 
+
 enum class FeedbackCycleExecutionResult {
     OK,
     NO_COMPILABLE_TEST_CASES_GENERATED,
@@ -106,6 +107,14 @@ class LLMWithFeedbackCycle(
             when (response.errorCode) {
                 ResponseErrorCode.OK -> {
                     log.info { "Test suite generated successfully: ${response.testSuite!!}" }
+                    // check that there are some test cases generated
+                    if (response.testSuite!!.testCases.isEmpty()) {
+                        onWarningCallback?.invoke(WarningType.NO_TEST_CASES_GENERATED)
+
+                        nextPromptMessage =
+                            "You have provided an empty answer! Please answer my previous question with the same formats."
+                        continue
+                    }
                 }
                 ResponseErrorCode.PROMPT_TOO_LONG -> {
                     if (promptSizeReductionStrategy.isReductionPossible()) {
@@ -134,16 +143,7 @@ class LLMWithFeedbackCycle(
                 }
             }
 
-            generatedTestSuite = response.testSuite!!
-
-            // Empty response checking
-            if (generatedTestSuite.testCases.isEmpty()) {
-                onWarningCallback?.invoke(WarningType.NO_TEST_CASES_GENERATED)
-
-                nextPromptMessage =
-                    "You have provided an empty answer! Please answer my previous question with the same formats."
-                continue
-            }
+            generatedTestSuite = response.testSuite
 
             // Process stopped checking
             if (indicator.isCanceled()) {
@@ -180,7 +180,7 @@ class LLMWithFeedbackCycle(
                 testSuiteFilename,
             )
 
-            // Correct files creating checking
+            // check that the file creation was successful
             var allFilesCreated = true
             for (path in generatedTestCasesPaths) {
                 allFilesCreated = allFilesCreated && File(path).exists()
@@ -209,7 +209,7 @@ class LLMWithFeedbackCycle(
             compilableTestCases.addAll(testCasesCompilationResult.compilableTestCases)
 
             if (!testCasesCompilationResult.allTestCasesCompilable && !isLastIteration(requestsCount)) {
-                log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite)}" }
+                log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite!!)}" }
 
                 onWarningCallback?.invoke(WarningType.COMPILATION_ERROR_OCCURRED)
 
@@ -225,6 +225,11 @@ class LLMWithFeedbackCycle(
             for (index in testCases.indices) {
                 report.testCaseList[index] = TestCase(index, testCases[index].name, testCases[index].toString(), setOf())
             }
+        }
+
+        // test suite must not be provided upon failed execution
+        if (executionResult != FeedbackCycleExecutionResult.OK) {
+            generatedTestSuite = null
         }
 
         return FeedbackResponse(
