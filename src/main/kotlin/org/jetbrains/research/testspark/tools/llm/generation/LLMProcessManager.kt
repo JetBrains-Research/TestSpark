@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
-import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -89,15 +88,7 @@ class LLMProcessManager(
 
         val initialPromptMessage = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
-        val testCompiler = run {
-            val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
-            // val libraryPath = "\"${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}\""
-            // val junitVersion = settingsState.junitVersion
-            val libraryPaths = LibraryPathsProvider.getTestCompilationLibraryPaths()
-            val junitLibraryPaths = LibraryPathsProvider.getJUnitLibraryPaths(settingsState.junitVersion)
-
-            TestCompiler(javaHomePath, libraryPaths, junitLibraryPaths)
-        }
+        val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, settingsState.junitVersion)
 
         // initiate a new RequestManager
         val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)

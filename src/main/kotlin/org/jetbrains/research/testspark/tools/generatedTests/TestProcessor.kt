@@ -19,6 +19,7 @@ import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.LibraryPathsProvider
+import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.sep
 import java.io.File
@@ -34,30 +35,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
     private val settingsState: SettingsApplicationState
         get() = project.getService(SettingsApplicationService::class.java).state
 
-    // private val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
-    // private val libraryPath = "\"${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}\""
-    // private val junitVersion = settingsState.junitVersion
-    // private val testCompiler = TestCompiler(javaHomePath, libraryPath, junitVersion)
-
-    private val testCompiler = run {
-        val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
-        val libraryPaths = LibraryPathsProvider.getTestCompilationLibraryPaths()
-        val junitLibraryPaths = LibraryPathsProvider.getJUnitLibraryPaths(settingsState.junitVersion)
-
-        /*
-        val libPrefix = "${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}"
-        val libraryPaths = listOf(
-            "$libPrefix${sep}mockito-core-5.0.0.jar",
-            "$libPrefix${sep}hamcrest-core-1.3.jar",
-            "$libPrefix${sep}byte-buddy-1.14.6.jar",
-            "$libPrefix${sep}byte-buddy-agent-1.14.6.jar",
-        )
-
-        val junitLibraryPaths = settingsState.junitVersion.libJar.map { "$libPrefix${sep}$it" }
-        */
-
-        TestCompiler(javaHomePath, libraryPaths, junitLibraryPaths)
-    }
+    private val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, settingsState.junitVersion)
 
     override fun saveGeneratedTest(packageString: String, code: String, resultPath: String, testFileName: String): String {
         // Generate the final path for the generated tests
