@@ -16,11 +16,9 @@ data class TestCasesCompilationResult(
  * It provides methods for compiling test cases and code files.
  */
 open class TestCompiler(
-    val javaHomeDirectoryPath: String,
-    val libPaths: List<String>,
-    val junitLibPaths: List<String>,
-    // val libPath: String,
-    // val junitVersion: JUnitVersion,
+    private val javaHomeDirectoryPath: String,
+    private val libPaths: List<String>,
+    private val junitLibPaths: List<String>,
 ) {
     private val log = KotlinLogging.logger { this::class.java }
 
@@ -64,7 +62,15 @@ open class TestCompiler(
                 val isCompilerName = if (DataFilesUtil.isWindows()) it.name.equals("javac.exe") else it.name.equals("javac")
                 isCompilerName && it.isFile
             }
-            .first()
+            .firstOrNull()
+
+        if (javaCompile == null) {
+            val msg = "Cannot find java compiler 'javac' at '${javaHomeDirectoryPath}'"
+            log.error { msg }
+            throw RuntimeException(msg)
+        }
+
+        println("javac found at '${javaCompile.absolutePath}'")
 
         // compile file
         val errorMsg = CommandLineRunner.run(
@@ -97,28 +103,9 @@ open class TestCompiler(
         val dependencyLibPath = libPaths.joinToString(separator.toString())
         val junitPath = junitLibPaths.joinToString(separator.toString())
 
-        /*
-        val junitPath = junitVersion.libJar.joinToString(separator.toString()) { getLibrary(it) }
-        val mockitoPath = getLibrary("mockito-core-5.0.0.jar")
-        val hamcrestPath = getLibrary("hamcrest-core-1.3.jar")
-        val byteBuddy = getLibrary("byte-buddy-1.14.6.jar")
-        val byteBuddyAgent = getLibrary("byte-buddy-agent-1.14.6.jar")
-        */
-
-        // val path = "$junitPath${separator}$hamcrestPath${separator}$mockitoPath${separator}$byteBuddy${separator}$byteBuddyAgent${separator}$buildPath"
         val path = "$junitPath${separator}$dependencyLibPath${separator}$buildPath"
         println("[TestCompiler]: the path is: $path")
 
         return path
     }
-
-//    /**
-//     * Retrieves the absolute path of the specified library.
-//     *
-//     * @param libraryName the name of the library
-//     * @return the absolute path of the library
-//     */
-    /*fun getLibrary(libraryName: String): String {
-        return "${libPath.removeSurrounding("\"")}$libraryName"
-    }*/
 }
