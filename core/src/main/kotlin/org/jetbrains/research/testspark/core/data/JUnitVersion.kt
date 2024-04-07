@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.core.data
 
-
 enum class JUnitVersion(
     val groupId: String,
     val version: Int,
