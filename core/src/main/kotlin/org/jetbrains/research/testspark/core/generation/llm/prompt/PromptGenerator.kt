@@ -19,7 +19,7 @@ class PromptGenerator(
     fun generatePromptForClass(interestingClasses: List<ClassRepresentation>, testSamplesCode: String): String {
         val prompt = PromptBuilder(promptTemplates.classPrompt)
             .insertLanguage(context.promptConfiguration.desiredLanguage)
-            .insertName(context.cut.qualifiedName!!)
+            .insertName(context.cut.qualifiedName)
             .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
             .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
             .insertCodeUnderTest(context.cut.fullText, context.classesToTest)
