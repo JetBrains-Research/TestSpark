@@ -52,15 +52,16 @@ class PromptManager(
     fun generatePrompt(codeType: FragmentToTestData, testSamplesCode: String, polyDepthReducing: Int): String {
         val prompt = ApplicationManager.getApplication().runReadAction(
             Computable {
-                val interestingPsiClasses = getInterestingPsiClasses(classesToTest, polyDepthReducing)
+                val interestingPsiClasses = getInterestingPsiClassesWithQualifiedNames(classesToTest, polyDepthReducing)
 
-                val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList().filterNotNull()
-                val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cut)
-                    .map(this::createClassRepresentation).toMap().filter { it.key != null }
+                val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
+                val polymorphismRelations = getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses, cut)
+                    .map(this::createClassRepresentation)
+                    .toMap()
 
                 val context = PromptGenerationContext(
-                    cut = createClassRepresentation(cut)!!,
-                    classesToTest = classesToTest.map(this::createClassRepresentation).toList().filterNotNull(),
+                    cut = createClassRepresentation(cut),
+                    classesToTest = classesToTest.map(this::createClassRepresentation).toList(),
                     polymorphismRelations = polymorphismRelations,
                     promptConfiguration = PromptConfiguration(
                         desiredLanguage = "Java",
@@ -84,7 +85,8 @@ class PromptManager(
                     CodeType.METHOD -> {
                         val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
                         val method = createMethodRepresentation(psiMethod)!!
-                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation).toList().filterNotNull()
+                        val interestingClassesFromMethod =
+                            getInterestingPsiClassesWithQualifiedNames(psiMethod).map(this::createClassRepresentation).toList()
 
                         promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, testSamplesCode)
                     }
@@ -99,7 +101,8 @@ class PromptManager(
 
                         val lineUnderTest = document.getText(TextRange.create(lineStartOffset, lineEndOffset))
                         val method = createMethodRepresentation(psiMethod)!!
-                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation).toList().filterNotNull()
+                        val interestingClassesFromMethod =
+                            getInterestingPsiClassesWithQualifiedNames(psiMethod).map(this::createClassRepresentation).toList()
 
                         promptGenerator.generatePromptForLine(lineUnderTest, method, interestingClassesFromMethod, testSamplesCode)
                     }
@@ -120,10 +123,9 @@ class PromptManager(
         )
     }
 
-    private fun createClassRepresentation(psiClass: PsiClass): ClassRepresentation? {
-        psiClass.qualifiedName ?: return null
+    private fun createClassRepresentation(psiClass: PsiClass): ClassRepresentation {
         return ClassRepresentation(
-            psiClass.qualifiedName,
+            psiClass.qualifiedName!!,
             getClassFullText(psiClass),
             psiClass.allMethods.map(this::createMethodRepresentation).toList().filterNotNull(),
         )
@@ -131,7 +133,7 @@ class PromptManager(
 
     private fun createClassRepresentation(
         entry: Map.Entry<PsiClass, MutableList<PsiClass>>,
-    ): Pair<ClassRepresentation?, List<ClassRepresentation?>> {
+    ): Pair<ClassRepresentation, List<ClassRepresentation>> {
         val key = createClassRepresentation(entry.key)
         val value = entry.value.map(this::createClassRepresentation)
 
@@ -183,7 +185,7 @@ class PromptManager(
      * @param psiMethod the PsiMethod for which to find interesting PsiClasses
      * @return a mutable set of interesting PsiClasses
      */
-    private fun getInterestingPsiClasses(psiMethod: PsiMethod): MutableSet<PsiClass> {
+    private fun getInterestingPsiClassesWithQualifiedNames(psiMethod: PsiMethod): MutableSet<PsiClass> {
         val interestingMethods = mutableSetOf(psiMethod)
         for (currentPsiMethod in cut.allMethods) {
             if (currentPsiMethod.isConstructor) interestingMethods.add(currentPsiMethod)
@@ -198,7 +200,10 @@ class PromptManager(
                 }
             }
         }
+
         return interestingPsiClasses
+            .filter { it.qualifiedName != null }
+            .toMutableSet()
     }
 
     /**
@@ -207,7 +212,7 @@ class PromptManager(
      * @param classesToTest The list of classes to test for interesting PsiClasses.
      * @return The set of interesting PsiClasses found during the search.
      */
-    private fun getInterestingPsiClasses(classesToTest: MutableList<PsiClass>, polyDepthReducing: Int): MutableSet<PsiClass> {
+    private fun getInterestingPsiClassesWithQualifiedNames(classesToTest: MutableList<PsiClass>, polyDepthReducing: Int): MutableSet<PsiClass> {
         val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
 
         var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
@@ -232,7 +237,10 @@ class PromptManager(
             interestingPsiClasses.addAll(tempListOfClasses)
         }
 
+        /** filtering out classes that do not have a qualified name as it's required further **/
         return interestingPsiClasses
+            .filter { it.qualifiedName != null }
+            .toMutableSet()
     }
 
     /**
@@ -243,7 +251,7 @@ class PromptManager(
      * @param cutPsiClass The cut PsiClass to determine polymorphism relations against.
      * @return A mutable map where the key represents an interesting PsiClass and the value is a list of its detected subclasses.
      */
-    private fun getPolymorphismRelations(
+    private fun getPolymorphismRelationsWithQualifiedNames(
         project: Project,
         interestingPsiClasses: MutableSet<PsiClass>,
         cutPsiClass: PsiClass,
@@ -270,6 +278,9 @@ class PromptManager(
         }
 
         return polymorphismRelations
+            /** filtering out the entries where the qualified name of any class is null **/
+            .filter { entry -> (entry.key.qualifiedName == null) || (entry.value.any { it.qualifiedName == null }) }
+            .toMutableMap()
     }
 
     /**

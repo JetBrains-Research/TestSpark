@@ -1,17 +1,14 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
-import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -22,6 +19,7 @@ import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
@@ -31,7 +29,6 @@ import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.saveData
-import org.jetbrains.research.testspark.tools.sep
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import org.jetbrains.research.testspark.tools.transferToIJTestCases
 
@@ -95,9 +92,7 @@ class LLMProcessManager(
 
         val initialPromptMessage = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
-        val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
-        val libraryPath = "\"${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib${sep}\""
-        val junitVersion = settingsState.junitVersion
+        val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, settingsState.junitVersion)
 
         // initiate a new RequestManager
         val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
@@ -141,7 +136,7 @@ class LLMProcessManager(
             buildPath = buildPath,
             requestManager = requestManager,
             testsAssembler = JUnitTestsAssembler(project, indicator, generatedTestsData),
-            testCompiler = TestCompiler(javaHomePath, libraryPath, junitVersion),
+            testCompiler = testCompiler,
             testStorage = testProcessor,
             testsPresenter = testsPresenter,
             indicator = indicator,
@@ -202,7 +197,7 @@ class LLMProcessManager(
         saveData(
             project,
             report,
-            getPackageFromTestSuiteCode(testSuiteRepresentation),
+            getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation),
             getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
             projectContext.fileUrlAsString!!,
             generatedTestsData,

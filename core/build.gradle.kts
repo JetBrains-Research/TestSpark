@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.serialization") version "1.9.0"
     `maven-publish`
 }
 
@@ -19,8 +18,6 @@ dependencies {
     compileOnly(kotlin("stdlib"))
 
     implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }
 
 tasks.test {
@@ -35,7 +32,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = group as String
             artifactId = "testspark-core"
-            version = "1.0.0"
+            version = "2.0.4"
             from(components["java"])
         }
     }
