@@ -57,6 +57,7 @@ if (spaceCredentialsProvided()) {
     val hasGrazieAccess = sourceSets.create("hasGrazieAccess")
     // add output of main source set to new source set class path
     hasGrazieAccess.compileClasspath += sourceSets.main.get().output
+
     // register feature variant
     java.registerFeature(hasGrazieAccess.name) {
         usingSourceSet(hasGrazieAccess)
@@ -104,9 +105,23 @@ dependencies {
     implementation(files("lib/byte-buddy-agent-1.14.6.jar"))
     implementation(files("lib/JUnitRunner.jar"))
 
+    implementation(project(":core"))
+    if (spaceCredentialsProvided()) {
+        "hasGrazieAccessCompileOnly"(project(":core"))
+    }
+
+    // https://central.sonatype.com/artifact/io.github.oshai/kotlin-logging-jvm/overview
+    implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
+
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
     implementation("junit:junit:4.13")
+
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+    implementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    implementation("org.junit.platform:junit-platform-launcher:1.10.0")
+    implementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+
     // https://mvnrepository.com/artifact/org.jacoco/org.jacoco.core
     implementation("org.jacoco:org.jacoco.core:0.8.8")
     // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-core
@@ -145,6 +160,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test
     implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
     if (spaceCredentialsProvided()) {
         // Dependencies for hasGrazieAccess variant
         "hasGrazieAccessImplementation"(kotlin("stdlib"))
@@ -182,6 +199,7 @@ tasks {
     compileKotlin {
         dependsOn("updateEvosuite")
         dependsOn("copyJUnitRunnerLib")
+        dependsOn(":core:compileKotlin")
     }
     // Set the JVM compatibility versions
     properties("javaVersion").let {
@@ -264,7 +282,6 @@ tasks {
 }
 
 abstract class CopyJUnitRunnerLib : DefaultTask() {
-
     @TaskAction
     fun execute() {
         val libName = "JUnitRunner.jar"
@@ -315,12 +332,13 @@ abstract class UpdateEvoSuite : DefaultTask() {
         logger.info("Specified evosuite jar not found, downloading release $jarName")
         val downloadUrl =
             "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$version/release.zip"
-        val stream = try {
-            URL(downloadUrl).openStream()
-        } catch (e: Exception) {
-            logger.error("Error fetching latest evosuite custom release - $e")
-            return
-        }
+        val stream =
+            try {
+                URL(downloadUrl).openStream()
+            } catch (e: Exception) {
+                logger.error("Error fetching latest evosuite custom release - $e")
+                return
+            }
 
         ZipInputStream(stream).use { zipInputStream ->
             while (zipInputStream.nextEntry != null) {

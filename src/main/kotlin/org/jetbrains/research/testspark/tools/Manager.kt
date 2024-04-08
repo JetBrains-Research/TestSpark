@@ -1,15 +1,9 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.Logger
-import com.intellij.util.concurrency.AppExecutorUtil
-import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.ReportLockingService
+import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.services.RunnerService
-import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.template.Tool
@@ -24,135 +18,90 @@ class Manager {
         /**
          * Generates tests for a class using EvoSuite.
          *
-         * @param e The AnActionEvent object representing the action event.
+         * @param project The project in which the class resides.
+         * @param psiFile The PSI file representing the class.
+         * @param caretOffset The offset of the caret position.
+         * @param fileUrl The URL of the file containing the class.
+         * @param testSamplesCode The code for the test samples.
          */
-        fun generateTestsForClassByEvoSuite(e: AnActionEvent) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForClassByEvoSuite(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForClass(e)
-            display(e, 1)
+            EvoSuite().generateTestsForClass(project, psiFile, caretOffset, fileUrl, testSamplesCode)
         }
 
         /**
-         * Generates tests for a class using Llm tool.
+         * Generates tests for a class using the Learning With Limited Memory (LLM) algorithm.
          *
-         * @param e the AnActionEvent representing the action event.
+         * @param project The project in which the class exists.
+         * @param psiFile The PSI file containing the class.
+         * @param caretOffset The offset of the caret in the editor.
+         * @param fileUrl The URL of the file containing the class.
+         * @param testSamplesCode The code containing the test samples.
          */
-        fun generateTestsForClassByLlm(e: AnActionEvent) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForClassByLlm(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForClass(e)
-            display(e, 1)
+            Llm().generateTestsForClass(project, psiFile, caretOffset, fileUrl, testSamplesCode)
         }
 
         /**
-         * Generates tests for a specific method using EvoSuite.
+         * Generates test cases for a given method using EvoSuite
          *
-         * @param e The AnActionEvent object representing the user action.
+         * @param project The project where the method is located
+         * @param psiFile The PSI file that contains the method
+         * @param caretOffset The caret offset within the PSI file where the method is located
+         * @param fileUrl The URL of the file where the method is located (optional)
+         * @param testSamplesCode The code for the test samples (optional)
          */
-        fun generateTestsForMethodByEvoSuite(e: AnActionEvent) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForMethodByEvoSuite(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForMethod(e)
-            display(e, 1)
+            EvoSuite().generateTestsForMethod(project, psiFile, caretOffset, fileUrl, testSamplesCode)
         }
 
         /**
-         * Generates tests for a given method based on Llm tool.
+         * Generates tests for a method using Llm.
          *
-         * @param e The AnActionEvent object containing information about the action event.
-         */
-        fun generateTestsForMethodByLlm(e: AnActionEvent) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+         * @param project The project in which the method is located.
+         * @param psiFile The PsiFile where the method is defined.
+         * @param caretOffset The offset of the caret position in the file.
+         * @param fileUrl The URL of the file where the method is defined (optional).
+         * @param*/
+        fun generateTestsForMethodByLlm(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForMethod(e)
-            display(e, 1)
+            Llm().generateTestsForMethod(project, psiFile, caretOffset, fileUrl, testSamplesCode)
         }
 
         /**
-         * Generates tests for a specific line using EvoSuite tool.
+         * Generates tests for a specific line of code using EvoSuite.
          *
-         * @param e AnActionEvent representing the action event.
+         * @param project The project context.
+         * @param psiFile The PSI file.
+         * @param caretOffset The caret offset.
+         * @param fileUrl The URL of the file.
+         * @param testSamplesCode The code for the test samples.
          */
-        fun generateTestsForLineByEvoSuite(e: AnActionEvent) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForLineByEvoSuite(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            EvoSuite().generateTestsForLine(e)
-            display(e, 1)
+            EvoSuite().generateTestsForLine(project, psiFile, caretOffset, fileUrl, testSamplesCode)
         }
 
         /**
-         * Generates tests for a line using Llm tool.
+         * Generates tests for a specific line in a file using the Llm framework.
          *
-         * @param e The AnActionEvent containing the information about the action
+         * @param project The project associated with the file.
+         * @param psiFile The PsiFile representing the file.
+         * @param caretOffset The offset of the caret in the file.
+         * @param fileUrl The URL of the file.
+         * @param testSamplesCode The code for the test samples.
          */
-        fun generateTestsForLineByLlm(e: AnActionEvent) {
-            if (e.project!!.service<RunnerService>().isGeneratorRunning()) return
+        fun generateTestsForLineByLlm(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+            if (project.service<RunnerService>().isGeneratorRunning()) return
 
-            Llm().generateTestsForLine(e)
-            display(e, 1)
+            Llm().generateTestsForLine(project, psiFile, caretOffset, fileUrl, testSamplesCode)
         }
-
-        /**
-         * Displays the given AnActionEvent and the number of used tools.
-         *
-         * @param e The AnActionEvent to be displayed.
-         * @param numberOfUsedTool The number of used tools to be displayed.
-         */
-        private fun display(e: AnActionEvent, numberOfUsedTool: Int) =
-            AppExecutorUtil.getAppScheduledExecutorService().execute(Display(e, numberOfUsedTool))
-    }
-}
-
-/**
- * A private class that displays the test generation result to the user.
- *
- * @param event The action event that triggered the display.
- * @param numberOfUsedTool The number of test generation tools used.
- */
-private class Display(private val event: AnActionEvent, private val numberOfUsedTool: Int) : Runnable {
-    private val log = Logger.getInstance(this::class.java)
-
-    override fun run() {
-        // waiting time after each iteration
-        val sleepDurationMillis: Long = 1000
-
-        // waiting for the generation result
-        while (true) {
-            // checks if all generator are finished their work
-            if (event.project!!.service<TestGenerationDataService>().testGenerationResultList.size != numberOfUsedTool) {
-                // there is some error during the process running
-                if (event.project!!.service<ErrorService>().isErrorOccurred()) break
-                log.info("Found ${event.project!!.service<TestGenerationDataService>().testGenerationResultList.size} number of results")
-                log.info("Waiting for other generation results")
-                Thread.sleep(sleepDurationMillis)
-                continue
-            }
-
-            log.info("Found all $numberOfUsedTool generation results")
-
-            ApplicationManager.getApplication().invokeLater {
-                event.project!!.service<ReportLockingService>().receiveReport(getMergeResult(numberOfUsedTool))
-            }
-
-            break
-        }
-
-        event.project!!.service<RunnerService>().clear()
-    }
-
-    /**
-     * Retrieves the merged result of a test generation process.
-     *
-     * @param numberOfUsedTool The number of tools used for the test generation.
-     * @return The merged report containing the results of the test generation process.
-     */
-    private fun getMergeResult(numberOfUsedTool: Int): Report {
-        log.info("Merging $numberOfUsedTool generation results")
-
-        if (numberOfUsedTool == 1) {
-            return event.project!!.service<TestGenerationDataService>().testGenerationResultList[0]!!
-        }
-        TODO("implement merge")
     }
 }

@@ -1,7 +1,9 @@
 package org.jetbrains.research.testspark.settings.evosuite
 
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import javax.swing.JComponent
@@ -12,7 +14,9 @@ import javax.swing.JComponent
  * It interacts with the SettingsEvoSuiteComponent, TestSparkSettingsService and TestSparkSettingsState.
  * It provides controller functionality for the TestSparkSettingsState.
  */
-class SettingsEvoSuiteConfigurable : Configurable {
+class SettingsEvoSuiteConfigurable(private val project: Project) : Configurable {
+    private val settingsState: SettingsApplicationState
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     var settingsComponent: SettingsEvoSuiteComponent? = null
 
@@ -30,12 +34,13 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         settingsComponent!!.javaPath = settingsState.javaPath
         settingsComponent!!.sandbox = settingsState.sandbox
         settingsComponent!!.assertions = settingsState.assertions
         settingsComponent!!.seed = settingsState.seed
+        settingsComponent!!.evosuitePort = settingsState.evosuitePort
         settingsComponent!!.algorithm = settingsState.algorithm
+        settingsComponent!!.evosuiteSetupCheckBoxSelected = settingsState.evosuiteSetupCheckBoxSelected
         settingsComponent!!.configurationId = settingsState.configurationId
         settingsComponent!!.clientOnThread = settingsState.clientOnThread
         settingsComponent!!.junitCheck = settingsState.junitCheck
@@ -56,12 +61,13 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         var modified: Boolean = settingsComponent!!.sandbox != settingsState.sandbox
         modified = modified or (settingsComponent!!.javaPath != settingsState.javaPath)
         modified = modified or (settingsComponent!!.assertions != settingsState.assertions)
         modified = modified or (settingsComponent!!.seed != settingsState.seed)
+        modified = modified or (settingsComponent!!.evosuitePort != settingsState.evosuitePort)
         modified = modified or (settingsComponent!!.algorithm != settingsState.algorithm)
+        modified = modified or (settingsComponent!!.evosuiteSetupCheckBoxSelected != settingsState.evosuiteSetupCheckBoxSelected)
         modified = modified or (settingsComponent!!.configurationId != settingsState.configurationId)
         modified = modified or (settingsComponent!!.clientOnThread != settingsState.clientOnThread)
         modified = modified or (settingsComponent!!.junitCheck != settingsState.junitCheck)
@@ -81,11 +87,11 @@ class SettingsEvoSuiteConfigurable : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
         settingsState.javaPath = settingsComponent!!.javaPath
         settingsState.sandbox = settingsComponent!!.sandbox
         settingsState.assertions = settingsComponent!!.assertions
         settingsState.algorithm = settingsComponent!!.algorithm
+        settingsState.evosuiteSetupCheckBoxSelected = settingsComponent!!.evosuiteSetupCheckBoxSelected
         settingsState.configurationId = settingsComponent!!.configurationId
         settingsState.clientOnThread = settingsComponent!!.clientOnThread
         settingsState.junitCheck = settingsComponent!!.junitCheck
@@ -102,12 +108,22 @@ class SettingsEvoSuiteConfigurable : Configurable {
         val seed = settingsComponent!!.seed.toLongOrNull()
         if (settingsComponent!!.seed != "" && seed == null) {
             Messages.showErrorDialog(
-                "Seed parameter is not of numeric type. Therefore, it will not be saved. However, the rest of the parameters have been successfully saved.",
-                "Incorrect Numeric Type For Seed",
+                TestSparkBundle.message("seedParameterMessage"),
+                TestSparkBundle.message("seedParameterTitle"),
             )
-            return
+        } else {
+            settingsState.seed = settingsComponent!!.seed
         }
-        settingsState.seed = settingsComponent!!.seed
+
+        val evosuitePort = settingsComponent!!.evosuitePort.toIntOrNull()
+        if (evosuitePort != null && (evosuitePort < 1024 || evosuitePort > 65535)) {
+            Messages.showErrorDialog(
+                TestSparkBundle.message("evosuitePortMessage"),
+                TestSparkBundle.message("evosuitePortTitle"),
+            )
+        } else {
+            settingsState.evosuitePort = settingsComponent!!.evosuitePort
+        }
     }
 
     /**

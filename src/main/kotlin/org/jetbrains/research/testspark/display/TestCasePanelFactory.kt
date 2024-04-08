@@ -14,57 +14,63 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.core.data.TestCase
+import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.data.JsonEncoding
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
-import org.jetbrains.research.testspark.services.LLMChatService
 import org.jetbrains.research.testspark.services.ReportLockingService
+import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.tools.processStopped
+import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
+import org.jetbrains.research.testspark.tools.isProcessStopped
+import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
+import org.jetbrains.research.testspark.tools.llm.testModificationRequest
 import java.awt.Dimension
-import java.awt.Graphics
-import java.awt.Graphics2D
-import java.awt.RenderingHints
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
 import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
-import javax.swing.FocusManager
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
-import javax.swing.JTextField
 import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import kotlin.collections.HashMap
 
 class TestCasePanelFactory(
     private val project: Project,
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
+    val uiContext: UIContext?,
 ) {
+    private val settingsState: SettingsApplicationState
+        get() = project.getService(SettingsApplicationService::class.java).state
+
     private val panel = JPanel()
-    private val previousButtons =
+    private val previousButton =
         createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
     private var requestNumber: String = "%d / %d"
     private var requestLabel: JLabel = JLabel(requestNumber)
-    private val nextButtons = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
+    private val nextButton = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
     private val errorLabel = JLabel(TestSparkIcons.showError)
     private val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
     private val likeButton = createButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
@@ -85,14 +91,14 @@ class TestCasePanelFactory(
         editor.project,
         testCase.testCode,
         TestCaseDocumentCreator(
-            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+            getClassWithTestCaseName(testCase.testName),
         ),
         false,
     )
 
     private val languageTextFieldScrollPane = JBScrollPane(
         languageTextField,
-        ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
+        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
 
@@ -109,7 +115,8 @@ class TestCasePanelFactory(
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
 
-    private val requestField = HintTextField(TestSparkLabelsBundle.defaultValue("requestFieldHint"))
+    private val requestJLabel = JLabel(TestSparkLabelsBundle.defaultValue("requestJLabel"))
+    private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(settingsState.defaultLLMRequests))
 
     private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
@@ -131,9 +138,9 @@ class TestCasePanelFactory(
         updateErrorLabel()
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
         panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
-        panel.add(previousButtons)
+        panel.add(previousButton)
         panel.add(requestLabel)
-        panel.add(nextButtons)
+        panel.add(nextButton)
         panel.add(errorLabel)
         panel.add(Box.createHorizontalGlue())
         panel.add(copyButton)
@@ -141,7 +148,7 @@ class TestCasePanelFactory(
         panel.add(dislikeButton)
         panel.add(Box.createRigidArea(Dimension(12, 0)))
 
-        previousButtons.addActionListener {
+        previousButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
                 if (currentRequestNumber > 1) currentRequestNumber--
                 switchToAnotherCode()
@@ -149,7 +156,7 @@ class TestCasePanelFactory(
             }
         }
 
-        nextButtons.addActionListener {
+        nextButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
                 if (currentRequestNumber < allRequestsNumber) currentRequestNumber++
                 switchToAnotherCode()
@@ -235,9 +242,16 @@ class TestCasePanelFactory(
         val requestPanel = JPanel()
         requestPanel.layout = BoxLayout(requestPanel, BoxLayout.X_AXIS)
         requestPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
-        requestPanel.add(requestField)
+        requestPanel.add(requestJLabel)
         requestPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
-        requestPanel.add(sendButton)
+
+        // temporary panel to avoid IDEA's bug
+        val requestComboBoxAndSendButtonPanel = JPanel()
+        requestComboBoxAndSendButtonPanel.layout = BoxLayout(requestComboBoxAndSendButtonPanel, BoxLayout.X_AXIS)
+        requestComboBoxAndSendButtonPanel.add(requestComboBox)
+        requestComboBoxAndSendButtonPanel.add(Box.createRigidArea(Dimension(dimensionSize, 0)))
+        requestComboBoxAndSendButtonPanel.add(sendButton)
+        requestPanel.add(requestComboBoxAndSendButtonPanel)
         requestPanel.add(Box.createRigidArea(Dimension(15, 0)))
 
         val buttonsPanel = JPanel()
@@ -273,27 +287,9 @@ class TestCasePanelFactory(
         resetToLastRunButton.addActionListener { resetToLastRun() }
         removeButton.addActionListener { remove() }
 
-        sendButton.isEnabled = false
         sendButton.addActionListener { sendRequest() }
 
-        // Add a document listener to listen for changes
-        requestField.document.addDocumentListener(object : DocumentListener, javax.swing.event.DocumentListener {
-            override fun insertUpdate(e: javax.swing.event.DocumentEvent?) {
-                textChanged()
-            }
-
-            override fun removeUpdate(e: javax.swing.event.DocumentEvent?) {
-                textChanged()
-            }
-
-            override fun changedUpdate(e: javax.swing.event.DocumentEvent?) {
-                textChanged()
-            }
-
-            private fun textChanged() {
-                sendButton.isEnabled = requestField.text.isNotBlank()
-            }
-        })
+        requestComboBox.isEditable = true
 
         return panel
     }
@@ -396,51 +392,66 @@ class TestCasePanelFactory(
      */
     private fun sendRequest() {
         loadingLabel.isVisible = true
-        sendButton.isEnabled = false
+        enableComponents(false)
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
-                    if (processStopped(project, indicator)) return
+                    val ijIndicator = IJProgressIndicator(indicator)
+                    if (isProcessStopped(project, ijIndicator)) {
+                        finishProcess()
+                        return
+                    }
 
-                    val modifiedTest = project.service<LLMChatService>()
-                        .testModificationRequest(
-                            initialCodes[currentRequestNumber - 1],
-                            requestField.text,
-                            indicator,
-                            project,
-                        )
+                    val modifiedTest = testModificationRequest(
+                        initialCodes[currentRequestNumber - 1],
+                        requestComboBox.editor.item.toString(),
+                        ijIndicator,
+                        uiContext!!.requestManager!!,
+                        project,
+                        uiContext.testGenerationOutput,
+                    )
 
                     if (modifiedTest != null) {
                         modifiedTest.setTestFileName(
-                            project.service<JavaClassBuilderService>().getClassWithTestCaseName(testCase.testName),
+                            getClassWithTestCaseName(testCase.testName),
                         )
                         addTest(modifiedTest)
-                    } else {
-                        NotificationGroupManager.getInstance()
-                            .getNotificationGroup("LLM Execution Error")
-                            .createNotification(
-                                TestSparkBundle.message("llmWarningTitle"),
-                                TestSparkBundle.message("noRequestFromLLM"),
-                                NotificationType.WARNING,
-                            )
-                            .notify(project)
-
-                        loadingLabel.isVisible = false
-                        sendButton.isEnabled = true
                     }
 
-                    if (processStopped(project, indicator)) return
+                    if (isProcessStopped(project, ijIndicator)) {
+                        finishProcess()
+                        return
+                    }
 
-                    indicator.stop()
+                    finishProcess()
+                    ijIndicator.stop()
                 }
             })
     }
 
+    private fun finishProcess() {
+        project.service<ErrorService>().clear()
+        loadingLabel.isVisible = false
+        enableComponents(true)
+    }
+
+    private fun enableComponents(isEnabled: Boolean) {
+        nextButton.isEnabled = isEnabled
+        previousButton.isEnabled = isEnabled
+        runTestButton.isEnabled = isEnabled
+        resetToLastRunButton.isEnabled = isEnabled
+        resetButton.isEnabled = isEnabled
+        removeButton.isEnabled = isEnabled
+        sendButton.isEnabled = isEnabled
+    }
+
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
+        val testSuitePresenter = JUnitTestSuitePresenter(project, uiContext!!.testGenerationOutput)
+
         WriteCommandAction.runWriteCommandAction(project) {
             project.service<ErrorService>().clear()
-            val code = testSuite.toString()
+            val code = testSuitePresenter.toString(testSuite)
             testCase.testName =
                 project.service<JavaClassBuilderService>()
                     .getTestMethodNameFromClassWithTestCase(testCase.testName, code)
@@ -456,8 +467,8 @@ class TestCasePanelFactory(
             lastRunCodes.add(code)
             currentCodes.add(code)
 
-            requestField.text = ""
-            loadingLabel.isVisible = false
+            requestComboBox.selectedItem = requestComboBox.getItemAt(0)
+            sendButton.isEnabled = true
 
             switchToAnotherCode()
         }
@@ -472,42 +483,44 @@ class TestCasePanelFactory(
      * and updates the UI.
      */
     private fun runTest() {
-
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
 
         loadingLabel.isVisible = true
-        if (!runTestButton.isEnabled) return
+        enableComponents(false)
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
-                    runTest(indicator)
+                    runTest(IJProgressIndicator(indicator))
                 }
             })
     }
 
-    fun addTask(tasks: Queue<(ProgressIndicator) -> Unit>) {
+    fun addTask(tasks: Queue<(CustomProgressIndicator) -> Unit>) {
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
 
         loadingLabel.isVisible = true
-        if (!runTestButton.isEnabled) return
+        enableComponents(false)
 
         tasks.add { indicator ->
             runTest(indicator)
         }
     }
 
-    private fun runTest(indicator: ProgressIndicator) {
-        indicator.text = "Executing ${testCase.testName}"
+    private fun runTest(indicator: CustomProgressIndicator) {
+        indicator.setText("Executing ${testCase.testName}")
 
-        val newTestCase = project.service<TestStorageProcessingService>()
+        val newTestCase = TestProcessor(project)
             .processNewTestCase(
                 "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
                 testCase.id,
                 testCase.testName,
                 testCase.testCode,
+                uiContext!!.testGenerationOutput.packageLine,
+                uiContext.testGenerationOutput.resultPath,
+                uiContext.projectContext,
             )
 
         testCase.coveredLines = newTestCase.coveredLines
@@ -515,10 +528,13 @@ class TestCasePanelFactory(
         testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
         lastRunCodes[currentRequestNumber - 1] = testCase.testCode
-        loadingLabel.isVisible = false
+
         SwingUtilities.invokeLater {
             updateUI()
         }
+
+        finishProcess()
+        indicator.stop()
     }
 
     /**
@@ -590,8 +606,6 @@ class TestCasePanelFactory(
     /**
      * Retrieves the error message for a given test case.
      *
-     * @param testCaseId the id of the test case
-     * @param testCaseCode the code of the test case
      * @return the error message for the test case
      */
     fun getError() = project.service<TestsExecutionResultService>().getError(testCase.id, testCase.testCode)
@@ -599,7 +613,6 @@ class TestCasePanelFactory(
     /**
      * Returns the border for a given test case.
      *
-     * @param testCaseId the id of the test case
      * @return the border for the test case
      */
     private fun getBorder(): Border {
@@ -642,53 +655,6 @@ class TestCasePanelFactory(
     fun isRemoved() = isRemoved
 
     /**
-     * Returns the indexes of lines that are modified between two lists of strings.
-     *
-     * @param source The source list of strings.
-     * @param target The target list of strings.
-     * @return The indexes of modified lines.
-     */
-    private fun getModifiedLines(source: List<String>, target: List<String>): List<Int> {
-        val dp = Array(source.size + 1) { IntArray(target.size + 1) }
-
-        for (i in 1..source.size) {
-            for (j in 1..target.size) {
-                if (source[i - 1] == target[j - 1]) {
-                    dp[i][j] = dp[i - 1][j - 1] + 1
-                } else {
-                    dp[i][j] = maxOf(dp[i - 1][j], dp[i][j - 1])
-                }
-            }
-        }
-
-        var i = source.size
-        var j = target.size
-
-        val modifiedLineIndexes = mutableListOf<Int>()
-
-        while (i > 0 && j > 0) {
-            if (source[i - 1] == target[j - 1]) {
-                i--
-                j--
-            } else if (dp[i][j] == dp[i - 1][j]) {
-                i--
-            } else if (dp[i][j] == dp[i][j - 1]) {
-                modifiedLineIndexes.add(j - 1)
-                j--
-            }
-        }
-
-        while (j > 0) {
-            modifiedLineIndexes.add(j - 1)
-            j--
-        }
-
-        modifiedLineIndexes.reverse()
-
-        return modifiedLineIndexes
-    }
-
-    /**
      * Updates the current test case with the specified test name and test code.
      */
     private fun updateTestCaseInformation() {
@@ -696,24 +662,5 @@ class TestCasePanelFactory(
             project.service<JavaClassBuilderService>()
                 .getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
-    }
-
-    /**
-     * A custom JTextField with a hint text that is displayed when the field is empty and not in focus.
-     */
-    class HintTextField(private val hint: String) : JTextField() {
-        override fun paintComponent(pG: Graphics) {
-            super.paintComponent(pG)
-            if (getText().isEmpty() && FocusManager.getCurrentKeyboardFocusManager().focusOwner !== this) {
-                val g = pG as Graphics2D
-                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-                g.color = disabledTextColor
-                g.drawString(
-                    hint,
-                    getInsets().left + 5,
-                    getInsets().top + (1.3 * pG.getFontMetrics().maxAscent).toInt(),
-                )
-            }
-        }
     }
 }

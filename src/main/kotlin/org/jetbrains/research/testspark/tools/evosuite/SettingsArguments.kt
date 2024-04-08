@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.tools.evosuite
 
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
-import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 
 /**
@@ -20,9 +19,8 @@ class SettingsArguments(
     private val serializeResultPath: String,
     private val classFQN: String,
     baseDir: String,
+    private val settingsState: SettingsApplicationState,
 ) {
-    private val settingsState = SettingsApplicationService.getInstance().state!!
-
     private var command: MutableList<String> = mutableListOf(
         algorithmsToGenerateMap[settingsState.algorithm]!!,
         "-serializeResult",
@@ -73,13 +71,9 @@ class SettingsArguments(
      * Finalizes the parameter construction by applying the user runtime settings
      */
     fun build(isLineCoverage: Boolean = false): MutableList<String> {
-        val settingsState = SettingsApplicationService.getInstance().state
-
-        if (settingsState != null) {
-            val params = settingsState.serializeChangesFromDefault()
-            command.addAll(params)
-            command.add(createCriterionString(settingsState, isLineCoverage))
-        }
+        val params = settingsState.serializeChangesFromDefault()
+        command.addAll(params)
+        command.add(createCriterionString(settingsState, isLineCoverage))
         return command
     }
 

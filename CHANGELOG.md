@@ -4,6 +4,23 @@
 
 ## Unreleased
 
+## 0.2.0
+
+### Fixed
+- An error with saving settings data between plugin runs
+
+### Changed
+- Major refactoring of the plugin, including separation of common code sections for use in both Intellij plugin and Fleet plugin
+- Prompt structure improving
+
+### Added
+- Supporting JUnit5 test generation for LLM-based algorithm
+- Supporting tests samples detector for LLM
+- Supporting default structures for requests to LLM in test cases
+- Supporting of different LLM prompt templates
+- Supporting the newer versions of IntelliJ IDEA
+- EvoSuite's communication port is now changeable in the plugin's settings.
+
 ## 0.1.9
 
 ### Fixed

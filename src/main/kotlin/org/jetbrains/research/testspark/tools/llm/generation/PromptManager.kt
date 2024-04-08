@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
@@ -13,12 +12,21 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptGenerator
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.MethodRepresentation
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptConfiguration
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptGenerationContext
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptTemplates
+import org.jetbrains.research.testspark.core.utils.importPattern
+import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.services.PromptKeyword
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
@@ -35,240 +43,138 @@ class PromptManager(
     private val cut: PsiClass,
     private val classesToTest: MutableList<PsiClass>,
 ) {
-    val settingsState: SettingsApplicationState = SettingsApplicationService.getInstance().state!!
+    private val settingsState: SettingsApplicationState
+        get() = project.getService(SettingsApplicationService::class.java).state
 
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
-    fun generatePrompt(codeType: FragmentToTestData): String {
+    fun generatePrompt(codeType: FragmentToTestData, testSamplesCode: String, polyDepthReducing: Int): String {
         val prompt = ApplicationManager.getApplication().runReadAction(
             Computable {
+                val interestingPsiClasses = getInterestingPsiClasses(classesToTest, polyDepthReducing)
+
+                val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList().filterNotNull()
+                val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cut)
+                    .map(this::createClassRepresentation).toMap().filter { it.key != null }
+
+                val context = PromptGenerationContext(
+                    cut = createClassRepresentation(cut)!!,
+                    classesToTest = classesToTest.map(this::createClassRepresentation).toList().filterNotNull(),
+                    polymorphismRelations = polymorphismRelations,
+                    promptConfiguration = PromptConfiguration(
+                        desiredLanguage = "Java",
+                        desiredTestingPlatform = settingsState.junitVersion.showName,
+                        desiredMockingFramework = "Mockito 5",
+                    ),
+                )
+
+                val promptTemplates = PromptTemplates(
+                    classPrompt = JsonEncoding.decode(settingsState.classPrompts)[settingsState.classCurrentDefaultPromptIndex],
+                    methodPrompt = JsonEncoding.decode(settingsState.methodPrompts)[settingsState.methodCurrentDefaultPromptIndex],
+                    linePrompt = JsonEncoding.decode(settingsState.linePrompts)[settingsState.lineCurrentDefaultPromptIndex],
+                )
+
+                val promptGenerator = PromptGenerator(context, promptTemplates)
+
                 when (codeType.type!!) {
-                    CodeType.CLASS -> generatePromptForClass()
-                    CodeType.METHOD -> generatePromptForMethod(codeType.objectDescription)
-                    CodeType.LINE -> generatePromptForLine(codeType.objectIndex)
+                    CodeType.CLASS -> {
+                        promptGenerator.generatePromptForClass(interestingClasses, testSamplesCode)
+                    }
+                    CodeType.METHOD -> {
+                        val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
+                        val method = createMethodRepresentation(psiMethod)!!
+                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation).toList().filterNotNull()
+
+                        promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, testSamplesCode)
+                    }
+                    CodeType.LINE -> {
+                        val lineNumber = codeType.objectIndex
+                        val psiMethod = getPsiMethod(cut, getMethodDescriptor(cut, lineNumber))!!
+
+                        // get code of line under test
+                        val document = PsiDocumentManager.getInstance(project).getDocument(cut.containingFile)
+                        val lineStartOffset = document!!.getLineStartOffset(lineNumber - 1)
+                        val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
+
+                        val lineUnderTest = document.getText(TextRange.create(lineStartOffset, lineEndOffset))
+                        val method = createMethodRepresentation(psiMethod)!!
+                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation).toList().filterNotNull()
+
+                        promptGenerator.generatePromptForLine(lineUnderTest, method, interestingClassesFromMethod, testSamplesCode)
+                    }
                 }
-            }
-        )
+            },
+        ) + TestSparkToolTipsBundle.defaultValue("commonPromptPart")
         log.info("Prompt is:\n$prompt")
         return prompt
     }
 
-    fun reducePromptSize(): Boolean {
+    private fun createMethodRepresentation(psiMethod: PsiMethod): MethodRepresentation? {
+        psiMethod.text ?: return null
+        return MethodRepresentation(
+            signature = psiMethod.getSignatureString(),
+            name = psiMethod.name,
+            text = psiMethod.text,
+            containingClassQualifiedName = psiMethod.containingClass!!.qualifiedName!!,
+        )
+    }
+
+    private fun createClassRepresentation(psiClass: PsiClass): ClassRepresentation? {
+        psiClass.qualifiedName ?: return null
+        return ClassRepresentation(
+            psiClass.qualifiedName,
+            getClassFullText(psiClass),
+            psiClass.allMethods.map(this::createMethodRepresentation).toList().filterNotNull(),
+        )
+    }
+
+    private fun createClassRepresentation(
+        entry: Map.Entry<PsiClass, MutableList<PsiClass>>,
+    ): Pair<ClassRepresentation?, List<ClassRepresentation?>> {
+        val key = createClassRepresentation(entry.key)
+        val value = entry.value.map(this::createClassRepresentation)
+
+        return key to value // mapOf(key to value).entries.first()
+    }
+
+    fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
+        return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
+            (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+    }
+
+    fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
         // reducing depth of polymorphism
-        if (SettingsArguments.maxPolyDepth(project) > 1) {
-            project.service<TestGenerationDataService>().polyDepthReducing++
-            log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
-            showPromptReductionWarning()
+        if (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) {
+            testGenerationData.polyDepthReducing++
+            log.info("polymorphism depth is: ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}")
+            showPromptReductionWarning(testGenerationData)
             return true
         }
 
         // reducing depth of input params
-        if (SettingsArguments.maxInputParamsDepth(project) > 1) {
-            project.service<TestGenerationDataService>().inputParamsDepthReducing++
-            log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
-            showPromptReductionWarning()
+        if (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1) {
+            testGenerationData.inputParamsDepthReducing++
+            log.info("input params depth is: ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}")
+            showPromptReductionWarning(testGenerationData)
             return true
         }
 
         return false
     }
 
-    private fun showPromptReductionWarning() {
+    private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
             TestSparkBundle.message("promptReduction") + "\n" +
-                "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
-                "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
+                "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                "Maximum depth for input parameters is ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
             project,
         )
-    }
-
-    /**
-     * Generates a prompt for generating unit tests in Java for a given class.
-     *
-     * @return The generated prompt.
-     */
-    private fun generatePromptForClass(): String {
-        var classPrompt = settingsState.classPrompt
-        val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
-
-        classPrompt = insertLanguage(classPrompt)
-        classPrompt = insertName(classPrompt, cut.qualifiedName!!)
-        classPrompt = insertTestingPlatform(classPrompt)
-        classPrompt = insertMockingFramework(classPrompt)
-        classPrompt = insertCodeUnderTest(classPrompt, getClassFullText(cut))
-        classPrompt = insertMethodsSignatures(classPrompt, interestingPsiClasses)
-        classPrompt =
-            insertPolymorphismRelations(classPrompt, getPolymorphismRelations(project, interestingPsiClasses, cut))
-
-        return classPrompt
-    }
-
-    /**
-     * Generates a prompt for a method.
-     *
-     * @param methodDescriptor The descriptor of the method.
-     * @return The generated prompt.
-     */
-    private fun generatePromptForMethod(methodDescriptor: String): String {
-        var methodPrompt = settingsState.methodPrompt
-        val psiMethod = getPsiMethod(cut, methodDescriptor)!!
-
-        methodPrompt = insertLanguage(methodPrompt)
-        methodPrompt = insertName(methodPrompt, "${cut.qualifiedName!!}.${psiMethod.name}")
-        methodPrompt = insertTestingPlatform(methodPrompt)
-        methodPrompt = insertMockingFramework(methodPrompt)
-        methodPrompt = insertCodeUnderTest(methodPrompt, psiMethod.text)
-        methodPrompt = insertMethodsSignatures(methodPrompt, getInterestingPsiClasses(psiMethod))
-        methodPrompt = insertPolymorphismRelations(
-            methodPrompt,
-            getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut),
-        )
-
-        return methodPrompt
-    }
-
-    /**
-     * Generates a prompt for a specific line number in the code.
-     *
-     * @param lineNumber the line number for which to generate the prompt
-     * @return the generated prompt string
-     */
-    private fun generatePromptForLine(lineNumber: Int): String {
-        var linePrompt = settingsState.linePrompt
-        val methodDescriptor = getMethodDescriptor(cut, lineNumber)
-        val psiMethod = getPsiMethod(cut, methodDescriptor)!!
-
-        // get code of line under test
-        val document = PsiDocumentManager.getInstance(project).getDocument(cut.containingFile)
-        val lineStartOffset = document!!.getLineStartOffset(lineNumber - 1)
-        val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
-        val lineUnderTest = document.getText(TextRange.create(lineStartOffset, lineEndOffset))
-
-        linePrompt = insertLanguage(linePrompt)
-        linePrompt = insertName(linePrompt, lineUnderTest.trim())
-        linePrompt = insertTestingPlatform(linePrompt)
-        linePrompt = insertMockingFramework(linePrompt)
-        linePrompt = insertCodeUnderTest(linePrompt, psiMethod.text)
-        linePrompt = insertMethodsSignatures(linePrompt, getInterestingPsiClasses(psiMethod))
-        linePrompt = insertPolymorphismRelations(
-            linePrompt,
-            getPolymorphismRelations(project, getInterestingPsiClasses(classesToTest), cut),
-        )
-
-        return linePrompt
-    }
-
-    private fun isPromptValid(keyword: PromptKeyword, prompt: String): Boolean {
-        val keywordText = keyword.text
-        val isMandatory = keyword.mandatory
-
-        return (prompt.contains(keywordText) || !isMandatory)
-    }
-
-    private fun insertLanguage(classPrompt: String): String {
-        if (isPromptValid(PromptKeyword.LANGUAGE, classPrompt)) {
-            val keyword = "\$${PromptKeyword.LANGUAGE.text}"
-            return classPrompt.replace(keyword, "Java", ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.LANGUAGE.text}")
-        }
-    }
-
-    private fun insertName(classPrompt: String, classDisplayName: String): String {
-        if (isPromptValid(PromptKeyword.NAME, classPrompt)) {
-            val keyword = "\$${PromptKeyword.NAME.text}"
-            return classPrompt.replace(keyword, classDisplayName, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.NAME.text}")
-        }
-    }
-
-    private fun insertTestingPlatform(classPrompt: String): String {
-        if (isPromptValid(PromptKeyword.TESTING_PLATFORM, classPrompt)) {
-            val keyword = "\$${PromptKeyword.TESTING_PLATFORM.text}"
-            return classPrompt.replace(keyword, "JUnit 4", ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.TESTING_PLATFORM.text}")
-        }
-    }
-
-    private fun insertMockingFramework(classPrompt: String): String {
-        if (isPromptValid(PromptKeyword.MOCKING_FRAMEWORK, classPrompt)) {
-            val keyword = "\$${PromptKeyword.MOCKING_FRAMEWORK.text}"
-            return classPrompt.replace(keyword, "Mockito 5", ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.MOCKING_FRAMEWORK.text}")
-        }
-    }
-
-    private fun insertCodeUnderTest(classPrompt: String, classFullText: String): String {
-        if (isPromptValid(PromptKeyword.CODE, classPrompt)) {
-            val keyword = "\$${PromptKeyword.CODE.text}"
-            var fullText = "```\n${classFullText}\n```\n"
-
-            for (i in 2..classesToTest.size) {
-                val subClass = classesToTest[i - 2]
-                val superClass = classesToTest[i - 1]
-
-                fullText += "${subClass.qualifiedName} extends ${superClass.qualifiedName}. " +
-                    "The source code of ${superClass.qualifiedName} is:\n```\n${getClassFullText(superClass)}\n" +
-                    "```\n"
-            }
-            return classPrompt.replace(keyword, fullText, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.CODE.text}")
-        }
-    }
-
-    private fun insertMethodsSignatures(classPrompt: String, interestingPsiClasses: MutableSet<PsiClass>): String {
-        val keyword = "\$${PromptKeyword.METHODS.text}"
-
-        if (isPromptValid(PromptKeyword.METHODS, classPrompt)) {
-            var fullText = ""
-            for (interestingPsiClass: PsiClass in interestingPsiClasses) {
-                if (interestingPsiClass.qualifiedName!!.startsWith("java")) {
-                    continue
-                }
-
-                fullText += "=== methods in ${interestingPsiClass.qualifiedName!!}:\n"
-                for (currentPsiMethod in interestingPsiClass.allMethods) {
-                    // Skip java methods
-                    if (currentPsiMethod.containingClass!!.qualifiedName!!.startsWith("java")) {
-                        continue
-                    }
-                    fullText += " - ${currentPsiMethod.getSignatureString()}\n"
-                }
-            }
-            return classPrompt.replace(keyword, fullText, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.METHODS.text}")
-        }
     }
 
     private fun PsiMethod.getSignatureString(): String {
         val bodyStart = body?.startOffsetInParent ?: this.textLength
         return text.substring(0, bodyStart).replace('\n', ' ').trim()
-    }
-
-    private fun insertPolymorphismRelations(
-        classPrompt: String,
-        polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>>,
-    ): String {
-        val keyword = "\$${PromptKeyword.POLYMORPHISM.text}"
-        if (isPromptValid(PromptKeyword.POLYMORPHISM, classPrompt)) {
-            var fullText = ""
-
-            polymorphismRelations.forEach { entry ->
-                for (currentSubClass in entry.value) {
-                    currentSubClass.qualifiedName ?: continue
-                    fullText += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
-                }
-            }
-            return classPrompt.replace(keyword, fullText, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.POLYMORPHISM.text}")
-        }
     }
 
     /**
@@ -301,12 +207,12 @@ class PromptManager(
      * @param classesToTest The list of classes to test for interesting PsiClasses.
      * @return The set of interesting PsiClasses found during the search.
      */
-    private fun getInterestingPsiClasses(classesToTest: MutableList<PsiClass>): MutableSet<PsiClass> {
+    private fun getInterestingPsiClasses(classesToTest: MutableList<PsiClass>, polyDepthReducing: Int): MutableSet<PsiClass> {
         val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
 
         var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
 
-        repeat(SettingsArguments.maxInputParamsDepth(project)) {
+        repeat(SettingsArguments(project).maxInputParamsDepth(polyDepthReducing)) {
             val tempListOfClasses = mutableSetOf<PsiClass>()
 
             currentLevelClasses.forEach { classIt ->
@@ -373,7 +279,10 @@ class PromptManager(
      * @param methodDescriptor The method descriptor to match against.
      * @return The matching PsiMethod if found, otherwise an empty string.
      */
-    private fun getPsiMethod(psiClass: PsiClass, methodDescriptor: String): PsiMethod? {
+    private fun getPsiMethod(
+        psiClass: PsiClass,
+        methodDescriptor: String,
+    ): PsiMethod? {
         for (currentPsiMethod in psiClass.allMethods) {
             if (generateMethodDescriptor(currentPsiMethod) == methodDescriptor) return currentPsiMethod
         }
@@ -387,7 +296,10 @@ class PromptManager(
      * @param lineNumber the line number within the file where the method is located
      * @return the method descriptor as a String, or an empty string if no method is found
      */
-    private fun getMethodDescriptor(psiClass: PsiClass, lineNumber: Int): String {
+    private fun getMethodDescriptor(
+        psiClass: PsiClass,
+        lineNumber: Int,
+    ): String {
         for (currentPsiMethod in psiClass.allMethods) {
             if (isLineInPsiMethod(currentPsiMethod, lineNumber)) return generateMethodDescriptor(currentPsiMethod)
         }
@@ -401,7 +313,10 @@ class PromptManager(
      * @param lineNumber The line number to check.
      * @return `true` if the line number is within the range of the method, `false` otherwise.
      */
-    private fun isLineInPsiMethod(method: PsiMethod, lineNumber: Int): Boolean {
+    private fun isLineInPsiMethod(
+        method: PsiMethod,
+        lineNumber: Int,
+    ): Boolean {
         val psiFile = method.containingFile ?: return false
         val document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
         val textRange = method.textRange
