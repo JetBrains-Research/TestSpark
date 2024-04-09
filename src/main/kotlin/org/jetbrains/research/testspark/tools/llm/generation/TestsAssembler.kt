@@ -90,6 +90,7 @@ class TestsAssembler(
         if (lastTestCount != generatedTestsCount) {
             indicator?.text = TestSparkBundle.message("generatingTestNumber") + generatedTestsCount
             lastTestCount = generatedTestsCount
+            println("Generate test #$generatedTestsCount")
         }
     }
 
