@@ -10,7 +10,7 @@ package org.jetbrains.research.testspark.core.generation.llm.prompt.configuratio
 data class PromptGenerationContext(
     val cut: ClassRepresentation,
     val classesToTest: List<ClassRepresentation>,
-    val polymorphismRelations: Map<ClassRepresentation?, List<ClassRepresentation?>>,
+    val polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
     val promptConfiguration: PromptConfiguration,
 )
 
@@ -36,7 +36,7 @@ data class PromptConfiguration(
  * @property allMethods - list of methods in the class and all its superclasses, it is an analogy of PsiClass.allMethods property.
  */
 data class ClassRepresentation(
-    val qualifiedName: String?,
+    val qualifiedName: String,
     val fullText: String,
     val allMethods: List<MethodRepresentation>,
 )

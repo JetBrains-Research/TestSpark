@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.tools.generatedTests
 
 import com.gitlab.mvysny.konsumexml.konsumeXml
-import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -9,7 +8,6 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.data.TestCase
-import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -18,8 +16,9 @@ import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.LibraryPathsProvider
+import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.sep
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -33,10 +32,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
     private val settingsState: SettingsApplicationState
         get() = project.getService(SettingsApplicationService::class.java).state
 
-    private val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
-    private val libraryPath = "${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib$sep"
-    private val junitVersion = settingsState.junitVersion
-    private val testCompiler = TestCompiler(javaHomePath, libraryPath, junitVersion)
+    private val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, settingsState.junitVersion)
 
     override fun saveGeneratedTest(packageString: String, code: String, resultPath: String, testFileName: String): String {
         // Generate the final path for the generated tests
@@ -82,8 +78,9 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
             }
             .first()
         // JaCoCo libs
-        val jacocoAgentDir = "\"${testCompiler.getLibrary("jacocoagent.jar")}\""
-        val jacocoCLIDir = "\"${testCompiler.getLibrary("jacococli.jar")}\""
+        val jacocoAgentLibraryPath = "\"${LibraryPathsProvider.getJacocoAgentLibraryPath()}\""
+        val jacocoCLILibraryPath = "\"${LibraryPathsProvider.getJacocoCliLibraryPath()}\""
+
         val sourceRoots = ModuleRootManager.getInstance(projectContext.cutModule!!).getSourceRoots(false)
 
         // unique name
@@ -93,12 +90,13 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
         val junitVersion = settingsState.junitVersion.version
 
         // run the test method with jacoco agent
+        val junitRunnerLibraryPath = LibraryPathsProvider.getJUnitRunnerLibraryPath()
         val testExecutionError = CommandLineRunner.run(
             arrayListOf(
                 javaRunner.absolutePath,
-                "-javaagent:$jacocoAgentDir=destfile=$dataFileName.exec,append=false,includes=${projectContext.classFQN}",
+                "-javaagent:$jacocoAgentLibraryPath=destfile=$dataFileName.exec,append=false,includes=${projectContext.classFQN}",
                 "-cp",
-                "\"${testCompiler.getPath(projectBuildPath)}${testCompiler.getLibrary("JUnitRunner.jar")}${DataFilesUtil.classpathSeparator}$resultPath\"",
+                "\"${testCompiler.getPath(projectBuildPath)}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
                 "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
             ),
@@ -110,7 +108,8 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
         val command = mutableListOf(
             javaRunner.absolutePath,
             "-jar",
-            jacocoCLIDir,
+            // jacocoCLIDir,
+            jacocoCLILibraryPath,
             "report",
             "$dataFileName.exec",
         )

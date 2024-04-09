@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.core.test
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -12,10 +11,14 @@ data class TestCasesCompilationResult(
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM>,
 )
 
-class TestCompiler(
-    val javaHomeDirectoryPath: String,
-    val libPath: String,
-    val junitVersion: JUnitVersion,
+/**
+ * TestCompiler is a class that is responsible for compiling generated test cases using the proper javac.
+ * It provides methods for compiling test cases and code files.
+ */
+open class TestCompiler(
+    private val javaHomeDirectoryPath: String,
+    private val libPaths: List<String>,
+    private val junitLibPaths: List<String>,
 ) {
     private val log = KotlinLogging.logger { this::class.java }
 
@@ -29,7 +32,6 @@ class TestCompiler(
         generatedTestCasesPaths: List<String>,
         buildPath: String,
         testCases: MutableList<TestCaseGeneratedByLLM>,
-        // generatedTestData: TestGenerationData,
     ): TestCasesCompilationResult {
         var allTestCasesCompilable = true
         val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
@@ -38,7 +40,6 @@ class TestCompiler(
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
             allTestCasesCompilable = allTestCasesCompilable && compilable
             if (compilable) {
-                // generatedTestData.compilableTestCases.add(testCases[index])
                 compilableTestCases.add(testCases[index])
             }
         }
@@ -61,7 +62,15 @@ class TestCompiler(
                 val isCompilerName = if (DataFilesUtil.isWindows()) it.name.equals("javac.exe") else it.name.equals("javac")
                 isCompilerName && it.isFile
             }
-            .first()
+            .firstOrNull()
+
+        if (javaCompile == null) {
+            val msg = "Cannot find java compiler 'javac' at '$javaHomeDirectoryPath'"
+            log.error { msg }
+            throw RuntimeException(msg)
+        }
+
+        println("javac found at '${javaCompile.absolutePath}'")
 
         // compile file
         val errorMsg = CommandLineRunner.run(
@@ -91,21 +100,12 @@ class TestCompiler(
     fun getPath(buildPath: String): String {
         // create the path for the command
         val separator = DataFilesUtil.classpathSeparator
-        val junitPath = junitVersion.libJar.joinToString(separator.toString()) { getLibrary(it) }
-        val mockitoPath = getLibrary("mockito-core-5.0.0.jar")
-        val hamcrestPath = getLibrary("hamcrest-core-1.3.jar")
-        val byteBuddy = getLibrary("byte-buddy-1.14.6.jar")
-        val byteBuddyAgent = getLibrary("byte-buddy-agent-1.14.6.jar")
-        return "$junitPath${separator}$hamcrestPath${separator}$mockitoPath${separator}$byteBuddy${separator}$byteBuddyAgent${separator}$buildPath"
-    }
+        val dependencyLibPath = libPaths.joinToString(separator.toString())
+        val junitPath = junitLibPaths.joinToString(separator.toString())
 
-    /**
-     * Retrieves the absolute path of the specified library.
-     *
-     * @param libraryName the name of the library
-     * @return the absolute path of the library
-     */
-    fun getLibrary(libraryName: String): String {
-        return "${libPath.removeSurrounding("\"")}$libraryName"
+        val path = "$junitPath${separator}$dependencyLibPath${separator}$buildPath"
+        println("[TestCompiler]: the path is: $path")
+
+        return path
     }
 }

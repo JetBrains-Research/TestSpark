@@ -33,6 +33,7 @@ abstract class RequestManager(var token: String) {
         isUserFeedback: Boolean = false,
     ): LLMResponse {
         // save the prompt in chat history
+        // TODO: make role to be an enum class
         chatHistory.add(ChatMessage("user", prompt))
 
         // Send Request to LLM
