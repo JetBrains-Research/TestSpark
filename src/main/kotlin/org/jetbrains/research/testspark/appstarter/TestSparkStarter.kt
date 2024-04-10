@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ApplicationStarter
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.PsiClass
@@ -123,6 +124,11 @@ class TestSparkStarter : ApplicationStarter {
 
                     // Run test file
                     runTests(project, output, packageList, classPath)
+
+                    ProjectManager.getInstance().closeAndDispose(project)
+
+                    println("[TestSpark Starter] Exiting the headless mode")
+                    exitProcess(0)
                 }
             }
         }
