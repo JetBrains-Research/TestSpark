@@ -143,7 +143,7 @@ class TestSparkStarter : ApplicationStarter {
                 var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
                 // Test is compiled and it is ready to run jacoco
-                project.service<TestStorageProcessingService>().createXmlFromJacoco(
+                val testExecutionError = project.service<TestStorageProcessingService>().createXmlFromJacoco(
                     it.nameWithoutExtension,
                     "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
                     testcaseName,
@@ -151,17 +151,22 @@ class TestSparkStarter : ApplicationStarter {
                     packageList.joinToString("."),
                     out,
                 )
+
+                saveException(testcaseName, targetDirectory,  testExecutionError)
             }
         }
     }
-//    private fun removeRedundantTestFiles(out: String, packageList: MutableList<String>) {
-//        val targetDirectory= "$out${File.separator}${packageList.joinToString(File.separator)}"
-//        println("Only keep useful test files inside $targetDirectory")
-//        File(targetDirectory).walk().forEach {
-//            if(!it.name.startsWith("GeneratedTest."))
-//                it.delete()
-//        }
-//    }
+
+    private fun saveException(testcaseName: String,
+                              targetDirectory: String,
+                              testExecutionError: String) {
+        if (testExecutionError.isBlank() || !testExecutionError.contains("Exception", ignoreCase = false))
+            return
+        val targetPath = "$targetDirectory/$testcaseName-exception.log"
+
+        // Save the exception
+        File(targetPath).writeText(testExecutionError.replace("\tat ", "\nat "))
+    }
 
 
     private fun detectPsiClass(classes: Array<PsiClass>, classUnderTestName: String): PsiClass? {
