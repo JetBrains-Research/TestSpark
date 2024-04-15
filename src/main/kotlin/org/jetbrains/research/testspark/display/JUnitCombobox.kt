@@ -61,7 +61,7 @@ class JUnitCombobox(val e: AnActionEvent) : ComboBox<JUnitVersion>(JUnitVersion.
         for (orderEntry in ModuleRootManager.getInstance(module).orderEntries) {
             if (orderEntry is LibraryOrderEntry) {
                 val libraryName = orderEntry.library?.name ?: continue
-                for (junit in JUnitVersion.values()) {
+                for (junit in JUnitVersion.entries) {
                     if (libraryName.contains(junit.groupId)) {
                         detected.add(junit)
                     }
