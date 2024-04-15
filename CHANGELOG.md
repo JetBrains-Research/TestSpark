@@ -5,15 +5,19 @@
 ## Unreleased
 
 ## 0.2.1
+
 ### Fixed
 - Several minor bugs related to JUnit5 support and default template.
 
 ## 0.2.0
+
 ### Fixed
 - An error with saving settings data between plugin runs
+
 ### Changed
 - Major refactoring of the plugin, including separation of common code sections for use in both Intellij plugin and Fleet plugin
 - Prompt structure improving
+
 ### Added
 - Supporting JUnit5 test generation for LLM-based algorithm
 - Supporting tests samples detector for LLM
@@ -23,38 +27,34 @@
 - EvoSuite's communication port is now changeable in the plugin's settings.
 
 ## 0.1.9
-### Fixed
-- a bug related to predicting if a prompt is larger than maximum prompt size
-- Test execution tasks will run in background (test execution does not freeze the IDE)
-- minor bug in displaying number of passed tests
-### Changed
-- Better default prompt
-- Better user's request handling
-### Added
-- Model selection for JetBrains AI Assistant platform
 
-## 0.1.9
 ### Fixed
 - a bug related to predicting if a prompt is larger than maximum prompt size
 - Test execution tasks will run in background (test execution does not freeze the IDE)
 - minor bug in displaying number of passed tests
+
 ### Changed
 - Better default prompt
 - Better user's request handling
+
 ### Added
 - Model selection for JetBrains AI Assistant platform
 
 ## 0.1.8
+
 ### Fixed
 - Windows compatibility issue
+
 ### Changed
 - Improve and refactor the test execution process.
 
 ## 0.1.7
+
 ### Fixed
 - Minor bugs in new test generation UI
 
 ## 0.1.6
+
 ### Fixed
 - Minor bugs in general test generation process
 
@@ -67,6 +67,7 @@
 - New UI for requesting a test generation process
 
 ## 0.1.5
+
 ### Fixed
 - Minor bugs in LLM-based test generation process
 
