@@ -36,6 +36,10 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.2.1</h4>
+            <ul>
+                <li>Fix several minor bugs related to JUnit5 support and default template.</li>
+            </ul>
         <h4>0.2.0</h4>
             <ul>
                 <li>Add JUnit5 test generation for LLM-based approach</li>
