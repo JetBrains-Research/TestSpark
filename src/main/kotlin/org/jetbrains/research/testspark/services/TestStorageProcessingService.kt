@@ -13,6 +13,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.openapi.vfs.LocalFileSystem
 import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.data.TestCase
+import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.tools.getBuildPath
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
@@ -84,6 +85,8 @@ class TestStorageProcessingService(private val project: Project) {
                 isCompilerName && it.isFile
             }
             .first()
+
+        ProjectUnderTestFileCreator.log("Found Java compiler: '${javaCompile.absolutePath}'")
 
         // compile file
         val errorMsg = project.service<RunCommandLineService>().runCommandLine(
