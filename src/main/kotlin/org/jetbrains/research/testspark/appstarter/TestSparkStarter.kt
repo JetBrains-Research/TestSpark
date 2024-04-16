@@ -69,6 +69,8 @@ class TestSparkStarter : ApplicationStarter {
         // println("Test generation requested for $projectPath")
         // println("classPath: '$classPath'")
 
+        ProjectUnderTestFileCreator.log("Prompt is located under file '$promptTemplateFile'")
+
         ApplicationManager.getApplication().invokeAndWait {
             val project = ProjectUtil.openOrImport(projectPath, null, true) ?: run {
                 ProjectUnderTestFileCreator.log("Could not find project in '$projectPath'")
