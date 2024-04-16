@@ -2,18 +2,14 @@ package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
-import org.jetbrains.research.testspark.data.DataFilesUtil
+import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
-import java.nio.file.OpenOption
-import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import java.util.*
 import kotlin.io.path.writeText
 
 
@@ -28,7 +24,7 @@ class GrazieRequestManager : RequestManager() {
         var sendResult = SendResult.OK
 
         println("Prompt contains ${prompt.length} characters")
-        val tmpPromptFilepath = getFileInOutputDirectory("sent-prompts.txt")
+        val tmpPromptFilepath = ProjectUnderTestFileCreator.getOrCreateFileInOutputDirectory("sent-prompts.txt")
         tmpPromptFilepath.writeText(prompt, options = arrayOf(StandardOpenOption.APPEND))
         tmpPromptFilepath.writeText(fileContentSeparator, options = arrayOf(StandardOpenOption.APPEND))
 

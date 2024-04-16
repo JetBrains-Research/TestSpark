@@ -5,6 +5,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
@@ -21,22 +22,8 @@ abstract class RequestManager {
 
     open val log: Logger = Logger.getInstance(this.javaClass)
 
-    companion object {
-        var outputDirectory: String = ""
-    }
-
     val fileContentSeparator =
         "\n============================================================================================================\n"
-
-    protected fun getFileInOutputDirectory(filename: String): Path {
-        val filepath = Path.of("$outputDirectory/generated-artifacts/$filename")
-        // Create the parent directories if they don't exist
-        val parentDir = filepath.toFile().parentFile
-        parentDir.mkdirs()
-        // Create the file
-        filepath.toFile().createNewFile()
-        return filepath
-    }
 
     /**
      * Sends a request to LLM with the given prompt and returns the generated TestSuite.
@@ -95,7 +82,7 @@ abstract class RequestManager {
         val response = testsAssembler.rawText
 
         // println("The full LLM response:\n\"$response\"")
-        val llmResponseFile = getFileInOutputDirectory("llm-responses.txt")
+        val llmResponseFile = ProjectUnderTestFileCreator.getOrCreateFileInOutputDirectory("llm-responses.txt")
         llmResponseFile.writeText(response, options = arrayOf(StandardOpenOption.APPEND))
         llmResponseFile.writeText(fileContentSeparator, options = arrayOf(StandardOpenOption.APPEND))
         println("LLM response is saved into the file '$llmResponseFile'")

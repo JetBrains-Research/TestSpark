@@ -14,7 +14,28 @@ import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
 import java.io.File
+import java.nio.file.Path
+
+
+class ProjectUnderTestFileCreator {
+    companion object {
+        var projectUnderTestOutputDirectory: String = ""
+
+        fun getOrCreateFileInOutputDirectory(filename: String): Path {
+            val filepath = Path.of("${projectUnderTestOutputDirectory}/generated-artifacts/$filename")
+            // Create the parent directories if they don't exist
+            val parentDir = filepath.toFile().parentFile
+            parentDir.mkdirs()
+            // Create the file
+            filepath.toFile().createNewFile()
+            return filepath
+        }
+    }
+}
+
+
 
 /**
  * Retrieves the imports code from a given test suite code.

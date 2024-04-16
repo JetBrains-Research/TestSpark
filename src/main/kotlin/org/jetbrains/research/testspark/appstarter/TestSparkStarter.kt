@@ -19,6 +19,7 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
+import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
@@ -106,7 +107,8 @@ class TestSparkStarter : ApplicationStarter {
                      * Set output directory in order to save the produced prompts and LLM responses during test generation.
                      * **The solution of having a public static field is bad but fast.**
                      */
-                    RequestManager.outputDirectory = output
+                    ProjectUnderTestFileCreator.projectUnderTestOutputDirectory = output
+
                     // get target classes
                     val classesToTest = Llm().getClassesUnderTest(project, targetPsiClass)
                     println("Detected CUTs: $classesToTest")
