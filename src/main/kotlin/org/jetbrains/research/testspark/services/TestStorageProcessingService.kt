@@ -112,15 +112,16 @@ class TestStorageProcessingService(private val project: Project) {
      *         and a String containing any error message encountered during compilation.
      */
     fun compileTestCases(generatedTestCasesPaths: List<String>, buildPath: String, testCases: MutableList<TestCaseGeneratedByLLM>): Boolean {
-        var result = false
+        var allTestCasesCompilable = true
+
         for (index in generatedTestCasesPaths.indices) {
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
-            result = result || compilable
+            allTestCasesCompilable = allTestCasesCompilable && compilable
             if (compilable) {
                 project.service<TestGenerationDataService>().compilableTestCases.add(testCases[index])
             }
         }
-        return result
+        return allTestCasesCompilable
     }
 
     /**
