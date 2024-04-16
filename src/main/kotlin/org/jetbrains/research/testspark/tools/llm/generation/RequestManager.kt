@@ -3,11 +3,16 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.openai.ChatMessage
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
+import java.nio.file.Path
+import java.nio.file.StandardOpenOption
+import java.util.*
+import kotlin.io.path.writeText
 
 abstract class RequestManager {
     enum class SendResult { OK, TOOLONG, OTHER }
@@ -15,6 +20,20 @@ abstract class RequestManager {
     open val chatHistory = mutableListOf<ChatMessage>()
 
     open val log: Logger = Logger.getInstance(this.javaClass)
+
+    val uuid = UUID.randomUUID().toString()
+    val fileContentSeparator =
+        "\n============================================================================================================\n"
+
+    protected fun getTempFile(filename: String): Path {
+        val filepath = Path.of("${FileUtilRt.getTempDirectory()}/TestSpark-generated/${this.uuid}/$filename")
+        // Create the parent directories if they don't exist
+        val parentDir = filepath.toFile().parentFile
+        parentDir.mkdirs()
+        // Create the file
+        filepath.toFile().createNewFile()
+        return filepath
+    }
 
     /**
      * Sends a request to LLM with the given prompt and returns the generated TestSuite.
@@ -71,7 +90,13 @@ abstract class RequestManager {
         }
         // save the full response in the chat history
         val response = testsAssembler.rawText
-        println("The full LLM response:\n\"$response\"")
+
+        // println("The full LLM response:\n\"$response\"")
+        val llmResponseFile = getTempFile("llm-response.txt")
+        llmResponseFile.writeText(response, options = arrayOf(StandardOpenOption.APPEND))
+        llmResponseFile.writeText(fileContentSeparator, options = arrayOf(StandardOpenOption.APPEND))
+        println("LLM response is saved into the file '$llmResponseFile'")
+
         log.info("The full LLM response:\n\"$response\"")
         chatHistory.add(ChatMessage("assistant", response))
 
@@ -105,7 +130,7 @@ abstract class RequestManager {
         packageName: String,
     ): Pair<String, TestSuiteGeneratedByLLM?> {
         val response = testsAssembler.rawText
-        log.info("The full response: \n $response")
+        log.info("The full response:\n$response")
 
         val testSuiteGeneratedByLLM = testsAssembler.returnTestSuite(packageName)
 

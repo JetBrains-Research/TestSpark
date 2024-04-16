@@ -16,7 +16,6 @@ import java.nio.file.StandardOpenOption
 import java.util.*
 import kotlin.io.path.writeText
 
-val uuid = UUID.randomUUID().toString()
 
 class GrazieRequestManager : RequestManager() {
     override fun send(
@@ -29,21 +28,11 @@ class GrazieRequestManager : RequestManager() {
         var sendResult = SendResult.OK
 
         println("Prompt contains ${prompt.length} characters")
-        val tmpPromptFilepath = Path.of("${FileUtilRt.getTempDirectory()}/TestSpark-generated-prompt/${uuid}/prompt.txt")
-
-        // Create the parent directories if they don't exist
-        val parentDir = tmpPromptFilepath.toFile().parentFile
-        parentDir.mkdirs()
-
-        // Create the file
-        tmpPromptFilepath.toFile().createNewFile()
+        val tmpPromptFilepath = getTempFile("prompt.txt")
         tmpPromptFilepath.writeText(prompt, options = arrayOf(StandardOpenOption.APPEND))
-        tmpPromptFilepath.writeText(
-            "\n===================================================================================\n",
-            options = arrayOf(StandardOpenOption.APPEND),
-        )
+        tmpPromptFilepath.writeText(fileContentSeparator, options = arrayOf(StandardOpenOption.APPEND))
 
-        println("Prompt is saved into the file at '$tmpPromptFilepath'")
+        println("Prompt is saved into the file '$tmpPromptFilepath'")
         // println("Prompt:\n \"$prompt\"")
 
         try {
