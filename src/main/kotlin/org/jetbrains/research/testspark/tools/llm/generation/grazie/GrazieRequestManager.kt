@@ -38,7 +38,10 @@ class GrazieRequestManager : RequestManager() {
         // Create the file
         tmpPromptFilepath.toFile().createNewFile()
         tmpPromptFilepath.writeText(prompt, options = arrayOf(StandardOpenOption.APPEND))
-        tmpPromptFilepath.writeText("\n===================================================================================\n")
+        tmpPromptFilepath.writeText(
+            "\n===================================================================================\n",
+            options = arrayOf(StandardOpenOption.APPEND),
+        )
 
         println("Prompt is saved into the file at '$tmpPromptFilepath'")
         // println("Prompt:\n \"$prompt\"")
