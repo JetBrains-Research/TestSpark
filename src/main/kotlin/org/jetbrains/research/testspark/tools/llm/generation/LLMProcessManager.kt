@@ -110,7 +110,13 @@ class LLMProcessManager(
 
             // Ending loop checking
             if (isLastIteration(requestsCount) && project.service<TestGenerationDataService>().compilableTestCases.isEmpty()) {
-                ProjectUnderTestFileCreator.log("No compilable test cases on the last feedback cycle iteration")
+                ProjectUnderTestFileCreator.log("No compilable test cases on last feedback cycle iteration")
+
+                if (generatedTestSuite != null) {
+                    ProjectUnderTestFileCreator.log("Remove test cases from test suite")
+                    generatedTestSuite.testCases = mutableListOf()
+                }
+
                 // println("No compilable test cases on the last feedback cycle iteration")
                 llmErrorManager.errorProcess(TestSparkBundle.message("invalidLLMResult"), project)
                 break
@@ -239,14 +245,13 @@ class LLMProcessManager(
             }
         }
 
+        ProjectUnderTestFileCreator.log("Generation has finished: generatedTestsArePassing: $generatedTestsArePassing, iterations used: $requestsCount/$maxRequests\"")
+        // println("Generation has finished: generatedTestsArePassing: $generatedTestsArePassing, iterations used: $requestsCount/$maxRequests")
+
         if (processStopped(project, indicator)) return
 
         // Error during the collecting
         if (project.service<ErrorService>().isErrorOccurred()) return
-
-
-        ProjectUnderTestFileCreator.log("Generation has finished: generatedTestsArePassing: $generatedTestsArePassing, iterations used: $requestsCount/$maxRequests\"")
-        // println("Generation has finished: generatedTestsArePassing: $generatedTestsArePassing, iterations used: $requestsCount/$maxRequests")
 
         saveData(
             project,
