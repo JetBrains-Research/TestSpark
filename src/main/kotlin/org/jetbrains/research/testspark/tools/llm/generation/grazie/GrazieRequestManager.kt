@@ -25,7 +25,15 @@ class GrazieRequestManager : RequestManager() {
 
         println("Prompt contains ${prompt.length} characters")
         val tmpPromptFilepath = Path.of("${FileUtilRt.getTempDirectory()}/TestSpark-generated-prompt/prompt.txt")
+
+        // Create the parent directories if they don't exist
+        val parentDir = tmpPromptFilepath.toFile().parentFile
+        parentDir.mkdirs()
+
+        // Create the file
+        tmpPromptFilepath.toFile().createNewFile()
         tmpPromptFilepath.writeText(prompt)
+
         println("Prompt is saved into the file at '$tmpPromptFilepath'")
         // println("Prompt:\n \"$prompt\"")
 
