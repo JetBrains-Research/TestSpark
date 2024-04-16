@@ -45,7 +45,7 @@ class TestSparkStarter : ApplicationStarter {
         // CUT name (<package-name>.<class-name>)
         val classUnderTestName = args[3]
         // Paths to compilation output of the project under test (seperated by ':')
-        val classPath = "$projectPath/${args[4]}"
+        val classPath = "$projectPath:${args[4]}"
         // Selected mode
         val model = args[5]
         // Token
