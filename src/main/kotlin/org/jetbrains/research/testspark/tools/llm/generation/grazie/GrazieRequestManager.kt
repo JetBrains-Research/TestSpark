@@ -28,7 +28,7 @@ class GrazieRequestManager : RequestManager() {
         var sendResult = SendResult.OK
 
         println("Prompt contains ${prompt.length} characters")
-        val tmpPromptFilepath = getTempFile("prompt.txt")
+        val tmpPromptFilepath = getFileInOutputDirectory("sent-prompts.txt")
         tmpPromptFilepath.writeText(prompt, options = arrayOf(StandardOpenOption.APPEND))
         tmpPromptFilepath.writeText(fileContentSeparator, options = arrayOf(StandardOpenOption.APPEND))
 

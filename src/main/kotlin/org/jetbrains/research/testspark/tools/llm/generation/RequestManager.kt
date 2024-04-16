@@ -21,12 +21,15 @@ abstract class RequestManager {
 
     open val log: Logger = Logger.getInstance(this.javaClass)
 
-    val uuid = UUID.randomUUID().toString()
+    companion object {
+        var outputDirectory: String = ""
+    }
+
     val fileContentSeparator =
         "\n============================================================================================================\n"
 
-    protected fun getTempFile(filename: String): Path {
-        val filepath = Path.of("${FileUtilRt.getTempDirectory()}/TestSpark-generated/${this.uuid}/$filename")
+    protected fun getFileInOutputDirectory(filename: String): Path {
+        val filepath = Path.of("$outputDirectory/generated-artifacts/$filename")
         // Create the parent directories if they don't exist
         val parentDir = filepath.toFile().parentFile
         parentDir.mkdirs()
@@ -92,7 +95,7 @@ abstract class RequestManager {
         val response = testsAssembler.rawText
 
         // println("The full LLM response:\n\"$response\"")
-        val llmResponseFile = getTempFile("llm-response.txt")
+        val llmResponseFile = getFileInOutputDirectory("llm-responses.txt")
         llmResponseFile.writeText(response, options = arrayOf(StandardOpenOption.APPEND))
         llmResponseFile.writeText(fileContentSeparator, options = arrayOf(StandardOpenOption.APPEND))
         println("LLM response is saved into the file '$llmResponseFile'")
