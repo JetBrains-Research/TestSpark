@@ -10,8 +10,13 @@ import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
+import java.nio.file.OpenOption
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
+import java.util.*
 import kotlin.io.path.writeText
+
+val uuid = UUID.randomUUID().toString()
 
 class GrazieRequestManager : RequestManager() {
     override fun send(
@@ -24,7 +29,7 @@ class GrazieRequestManager : RequestManager() {
         var sendResult = SendResult.OK
 
         println("Prompt contains ${prompt.length} characters")
-        val tmpPromptFilepath = Path.of("${FileUtilRt.getTempDirectory()}/TestSpark-generated-prompt/prompt.txt")
+        val tmpPromptFilepath = Path.of("${FileUtilRt.getTempDirectory()}/TestSpark-generated-prompt/${uuid}/prompt.txt")
 
         // Create the parent directories if they don't exist
         val parentDir = tmpPromptFilepath.toFile().parentFile
@@ -32,7 +37,7 @@ class GrazieRequestManager : RequestManager() {
 
         // Create the file
         tmpPromptFilepath.toFile().createNewFile()
-        tmpPromptFilepath.writeText(prompt)
+        tmpPromptFilepath.writeText(prompt, options = arrayOf(StandardOpenOption.APPEND))
 
         println("Prompt is saved into the file at '$tmpPromptFilepath'")
         // println("Prompt:\n \"$prompt\"")
