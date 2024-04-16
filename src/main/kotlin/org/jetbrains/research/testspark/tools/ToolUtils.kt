@@ -47,7 +47,7 @@ class ProjectUnderTestFileCreator {
          */
         fun log(content: String, alsoPrint: Boolean = true) {
             val logFilepath = getOrCreateFileInOutputDirectory("test-generation.log")
-            appendToFile(content, logFilepath)
+            appendToFile(content + "\n", logFilepath)
             if (alsoPrint) {
                 println(content)
             }
