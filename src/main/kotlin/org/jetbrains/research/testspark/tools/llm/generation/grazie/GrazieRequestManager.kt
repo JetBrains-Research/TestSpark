@@ -2,12 +2,16 @@ package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
+import org.jetbrains.research.testspark.data.DataFilesUtil
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
+import java.nio.file.Path
+import kotlin.io.path.writeText
 
 class GrazieRequestManager : RequestManager() {
     override fun send(
@@ -19,7 +23,11 @@ class GrazieRequestManager : RequestManager() {
         var testsAssembler = TestsAssembler(project, indicator)
         var sendResult = SendResult.OK
 
-        println("Prompt: $prompt")
+        println("Prompt contains ${prompt.length} characters")
+        val tmpPromptFilepath = Path.of("${FileUtilRt.getTempDirectory()}/TestSpark-generated-prompt/prompt.txt")
+        tmpPromptFilepath.writeText(prompt)
+        println("Prompt is saved into the file at '$tmpPromptFilepath'")
+        // println("Prompt:\n \"$prompt\"")
 
         try {
             val className = "org.jetbrains.research.grazie.Request"

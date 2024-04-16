@@ -60,16 +60,20 @@ class LLMProcessManager(
         codeType: FragmentToTestData,
         packageName: String,
     ) {
+        println("LLM test generation begins")
         log.info("LLM test generation begins")
 
         if (processStopped(project, indicator)) return
 
         // update build path
         var buildPath = project.service<ProjectContextService>().projectClassPath!!
+        println("buildPath from ProjectContextService: '$buildPath'")
+
         if (settingsProjectState.buildPath.isEmpty()) {
             // User did not set own path
             buildPath = getBuildPath(project)
         }
+        println("Final buildPath: '$buildPath'")
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
             llmErrorManager.errorProcess(TestSparkBundle.message("emptyBuildPath"), project)
@@ -77,6 +81,7 @@ class LLMProcessManager(
         }
         indicator?.text = TestSparkBundle.message("searchMessage")
 
+        // TODO: why is this log here?
         log.info("Generated tests suite received")
 
         var generatedTestsArePassing = false
@@ -91,32 +96,43 @@ class LLMProcessManager(
         // notify LLMChatService to restart the chat process.
         project.service<LLMChatService>().newSession()
 
+        println("Max requests count is $maxRequests")
+
         // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
         while (!generatedTestsArePassing) {
             requestsCount++
 
-            log.info("New iterations of requests")
+            println("Iteration $requestsCount/$maxRequests of feedback cycle")
+            log.info("Iteration $requestsCount/$maxRequests of feedback cycle")
 
             // Process stopped checking
             if (processStopped(project, indicator)) return
 
             // Ending loop checking
             if (isLastIteration(requestsCount) && project.service<TestGenerationDataService>().compilableTestCases.isEmpty()) {
+                println("No compilable test cases on the last feedback cycle iteration")
                 llmErrorManager.errorProcess(TestSparkBundle.message("invalidLLMResult"), project)
                 break
             }
 
             // Send request to LLM
-            if (warningMessage.isNotEmpty()) llmErrorManager.warningProcess(warningMessage, project)
+            if (warningMessage.isNotEmpty()) {
+                llmErrorManager.warningProcess(warningMessage, project)
+            }
+
             val requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
-                project.service<LLMChatService>().testGenerationRequest(messageToPrompt, indicator, packageName, project, llmErrorManager)
+                project.service<LLMChatService>().testGenerationRequest(
+                    messageToPrompt, indicator, packageName, project, llmErrorManager)
 
             if (requestResult.first == TestSparkBundle.message("tooLongPrompt")) {
+                println("The generated prompt is too long: ${messageToPrompt.length} characters")
                 if (promptManager.reducePromptSize()) {
+                    println("Prompt size reduction is possible, reducing prompt...")
                     messageToPrompt = promptManager.generatePrompt(codeType)
                     requestsCount--
                     continue
                 } else {
+                    println("Prompt size reduction is not possible, aborting...")
                     llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPromptRequest"), project)
                     return
                 }
@@ -143,6 +159,8 @@ class LLMProcessManager(
             // Save the generated TestSuite into a temp file
             val generatedTestCasesPaths: MutableList<String> = mutableListOf()
             if (isLastIteration(requestsCount)) {
+                val cnt = project.service<TestGenerationDataService>().compilableTestCases.size
+                println("Update the test suite with $cnt compilable test cases (last iteration)")
                 generatedTestSuite.updateTestCases(project.service<TestGenerationDataService>().compilableTestCases.toMutableList())
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
@@ -166,11 +184,16 @@ class LLMProcessManager(
 
             // Correct files creating checking
             var isFilesExists = true
-            for (path in generatedTestCasesPaths) isFilesExists = isFilesExists && File(path).exists()
+            for (path in generatedTestCasesPaths) {
+                isFilesExists = isFilesExists && File(path).exists()
+            }
             if (!isFilesExists || !File(generatedTestPath).exists()) {
                 llmErrorManager.errorProcess(TestSparkBundle.message("savingTestFileIssue"), project)
                 break
             }
+
+            println("Test suite is saved in: '${generatedTestPath}'")
+            println("Test cases are saved in:\n'${generatedTestCasesPaths}'")
 
             // Get test cases
             val testCases: MutableList<TestCaseGeneratedByLLM> =
@@ -186,12 +209,17 @@ class LLMProcessManager(
             val commonCompilationResult = project.service<TestStorageProcessingService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!separateCompilationResult && !isLastIteration(requestsCount)) {
+                println("Some test cases were not compilable (iteration $requestsCount/$maxRequests)")
+                println("Test suite compilation failed with an error:\n\"${commonCompilationResult.second}\"")
+
                 log.info("Incorrect result: \n$generatedTestSuite")
+
                 warningMessage = TestSparkBundle.message("compilationError")
                 messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${commonCompilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```"
                 continue
             }
 
+            println("${testCases.size} test cases are compilable. Finishing feedback cycle...")
             log.info("Result is compilable")
 
             generatedTestsArePassing = true
@@ -206,6 +234,8 @@ class LLMProcessManager(
         // Error during the collecting
         if (project.service<ErrorService>().isErrorOccurred()) return
 
+
+        println("Result is ready. generatedTestsArePassing: $generatedTestsArePassing, iterations used: $requestsCount/$maxRequests")
         log.info("Result is ready")
 
         saveData(

@@ -133,7 +133,7 @@ fun getBuildPath(project: Project): String {
  */
 fun processStopped(project: Project, indicator: ProgressIndicator?): Boolean {
     if (project.service<ErrorService>().isErrorOccurred()) return true
-    if (indicator!= null && indicator.isCanceled) {
+    if (indicator != null && indicator.isCanceled) {
         project.service<ErrorService>().errorOccurred()
         indicator.stop()
         return true

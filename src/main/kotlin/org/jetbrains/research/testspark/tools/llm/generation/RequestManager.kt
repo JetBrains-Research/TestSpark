@@ -39,7 +39,8 @@ abstract class RequestManager {
         chatHistory.add(ChatMessage("user", prompt))
 
         // Send Request to LLM
-        log.info("Sending Request ...")
+        println("Sending request...")
+        log.info("Sending request...")
         val sendResultPair = send(prompt, indicator, project, llmErrorManager)
         val sendResult = sendResultPair.first
 
@@ -70,7 +71,8 @@ abstract class RequestManager {
         }
         // save the full response in the chat history
         val response = testsAssembler.rawText
-        log.info("The full response: \n $response")
+        println("The full LLM response:\n\"$response\"")
+        log.info("The full LLM response:\n\"$response\"")
         chatHistory.add(ChatMessage("assistant", response))
 
         // check if response is empty

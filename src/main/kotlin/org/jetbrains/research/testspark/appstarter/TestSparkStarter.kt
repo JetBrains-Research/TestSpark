@@ -56,31 +56,32 @@ class TestSparkStarter : ApplicationStarter {
         val output = args[8]
 
         println("Test generation requested for $projectPath")
+        println("classPath: '$classPath'")
 
         ApplicationManager.getApplication().invokeAndWait {
             val project = ProjectUtil.openOrImport(projectPath, null, true) ?: run {
-                println("couldn't find project in $projectPath")
+                println("Could not find project in '$projectPath'")
                 exitProcess(1)
             }
-            println("Detected project: ${project}")
+            println("Detected project: $project")
             // Continue when the project is indexed
             println("Indexing project...")
             project.let {
                 DumbService.getInstance(it).runWhenSmart {
                     // open target file
                     val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath) ?: run {
-                        println("couldn't open file $filePath")
+                        println("couldn't open file '$filePath'")
                         exitProcess(1)
                     }
 
                     // get target PsiClass
                     val psiFile = PsiManager.getInstance(project).findFile(virtualFile) as PsiJavaFile
                     val targetPsiClass = detectPsiClass(psiFile.classes, classUnderTestName) ?: run {
-                        println("couldn't find $classUnderTestName in $filePath")
+                        println("Could not find '$classUnderTestName' in '$filePath'")
                         exitProcess(1)
                     }
 
-                    println("PsiClass ${targetPsiClass.qualifiedName} is detected! Start the test generation process.")
+                    println("PsiClass '${targetPsiClass.qualifiedName}' is detected! Start the test generation process.")
 
                     // update settings
                     project.service<ProjectContextService>().projectClassPath = classPath
@@ -98,11 +99,10 @@ class TestSparkStarter : ApplicationStarter {
                         .getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
                     //        CompilerModuleExtension.getInstance(project.service<ProjectContextService>().cutModule!!)?.compilerOutputPath = psiFile.virtualFile
 
-
                     println("Indexing is done")
+
                     // get target classes
                     val classesToTest = Llm().getClassesUnderTest(project, targetPsiClass)
-
                     println("Detected CUTs: $classesToTest")
 
                     // get package name
@@ -116,14 +116,18 @@ class TestSparkStarter : ApplicationStarter {
                         PromptManager(project, targetPsiClass, classesToTest)
                     )
 
+                    println("Starting test generation with packageName='$packageName'...")
                     llmProcessManager.runTestGenerator(
                         indicator = null,
                         FragmentToTestData(CodeType.CLASS),
                         packageName
                     )
+                    println("Test generation for packageName='$packageName' has finished")
 
                     // Run test file
-                    runTests(project, output, packageList, classPath)
+                    println("Running generated tests and collecting Jacoco coverage...")
+                    runTestsAndCollectJacocoCoverage(project, output, packageList, classPath)
+                    println("Run of the generated tests & coverage collection have finished")
 
                     ProjectManager.getInstance().closeAndDispose(project)
 
@@ -134,12 +138,18 @@ class TestSparkStarter : ApplicationStarter {
         }
     }
 
-    private fun runTests(project: Project, out: String, packageList: MutableList<String>, classPath: String) {
+    private fun runTestsAndCollectJacocoCoverage(
+        project: Project, out: String, packageList: MutableList<String>, classPath: String) {
         val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
-        println("Run tests in $targetDirectory")
+        println("Run tests in '$targetDirectory")
+
         File(targetDirectory).walk().forEach {
+            println("Considering file '${it.name}'")
+
             if (it.name.endsWith(".class")) {
-                println("Running test ${it.name}")
+                println("Running test '${it.name}'")
+
+                // TODO: test case may start with un uppercase letter!
                 var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
                 // Test is compiled and it is ready to run jacoco
