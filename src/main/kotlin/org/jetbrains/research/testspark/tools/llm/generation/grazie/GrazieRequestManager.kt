@@ -24,9 +24,11 @@ class GrazieRequestManager : RequestManager() {
         var sendResult = SendResult.OK
 
         println("Prompt contains ${prompt.length} characters")
+
+        // saving generated prompt into the file under project output directory
         val tmpPromptFilepath = ProjectUnderTestFileCreator.getOrCreateFileInOutputDirectory("sent-prompts.txt")
-        tmpPromptFilepath.writeText(prompt, options = arrayOf(StandardOpenOption.APPEND))
-        tmpPromptFilepath.writeText(fileContentSeparator, options = arrayOf(StandardOpenOption.APPEND))
+        ProjectUnderTestFileCreator.appendToFile(prompt, tmpPromptFilepath)
+        ProjectUnderTestFileCreator.appendToFile(fileContentSeparator, tmpPromptFilepath)
 
         println("Prompt is saved into the file '$tmpPromptFilepath'")
         // println("Prompt:\n \"$prompt\"")

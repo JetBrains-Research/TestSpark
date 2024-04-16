@@ -17,20 +17,26 @@ import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
 import java.io.File
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
+import kotlin.io.path.writeText
 
 
 class ProjectUnderTestFileCreator {
     companion object {
-        var projectUnderTestOutputDirectory: String = ""
+        var projectUnderTestOutputDirectory: String? = null
 
         fun getOrCreateFileInOutputDirectory(filename: String): Path {
-            val filepath = Path.of("${projectUnderTestOutputDirectory}/generated-artifacts/$filename")
+            val filepath = Path.of("${projectUnderTestOutputDirectory!!}/generated-artifacts/$filename")
             // Create the parent directories if they don't exist
             val parentDir = filepath.toFile().parentFile
             parentDir.mkdirs()
             // Create the file
             filepath.toFile().createNewFile()
             return filepath
+        }
+
+        fun appendToFile(content: String, filepath: Path) {
+            filepath.writeText(content, options = arrayOf(StandardOpenOption.APPEND))
         }
     }
 }

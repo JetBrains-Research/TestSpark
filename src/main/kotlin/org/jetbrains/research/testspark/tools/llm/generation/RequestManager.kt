@@ -81,10 +81,11 @@ abstract class RequestManager {
         // save the full response in the chat history
         val response = testsAssembler.rawText
 
-        // println("The full LLM response:\n\"$response\"")
+        // saving llm response into the file under project output directory
         val llmResponseFile = ProjectUnderTestFileCreator.getOrCreateFileInOutputDirectory("llm-responses.txt")
-        llmResponseFile.writeText(response, options = arrayOf(StandardOpenOption.APPEND))
-        llmResponseFile.writeText(fileContentSeparator, options = arrayOf(StandardOpenOption.APPEND))
+        ProjectUnderTestFileCreator.appendToFile(response, llmResponseFile)
+        ProjectUnderTestFileCreator.appendToFile(fileContentSeparator, llmResponseFile)
+
         println("LLM response is saved into the file '$llmResponseFile'")
 
         log.info("The full LLM response:\n\"$response\"")
