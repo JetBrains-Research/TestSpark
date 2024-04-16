@@ -57,33 +57,49 @@ class TestSparkStarter : ApplicationStarter {
         // Output directory
         val output = args[8]
 
-        println("Test generation requested for $projectPath")
-        println("classPath: '$classPath'")
+
+        /**
+         * Set output directory in order to save the produced prompts and LLM responses during test generation.
+         * **The solution of having a public static field is bad but fast.**
+         */
+        ProjectUnderTestFileCreator.projectUnderTestOutputDirectory = output
+
+        ProjectUnderTestFileCreator.log("Test generation requested for $projectPath")
+        ProjectUnderTestFileCreator.log("classPath: '$classPath'")
+        // println("Test generation requested for $projectPath")
+        // println("classPath: '$classPath'")
 
         ApplicationManager.getApplication().invokeAndWait {
             val project = ProjectUtil.openOrImport(projectPath, null, true) ?: run {
-                println("Could not find project in '$projectPath'")
+                ProjectUnderTestFileCreator.log("Could not find project in '$projectPath'")
+                // println("Could not find project in '$projectPath'")
                 exitProcess(1)
             }
-            println("Detected project: $project")
+            ProjectUnderTestFileCreator.log("Detected project: $project")
+            // println("Detected project: $project")
             // Continue when the project is indexed
-            println("Indexing project...")
+            ProjectUnderTestFileCreator.log("Indexing project...")
+            // println("Indexing project...")
             project.let {
                 DumbService.getInstance(it).runWhenSmart {
                     // open target file
                     val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath) ?: run {
-                        println("couldn't open file '$filePath'")
+                        ProjectUnderTestFileCreator.log("Could not open file '$filePath'")
+                        // println("couldn't open file '$filePath'")
                         exitProcess(1)
                     }
 
                     // get target PsiClass
                     val psiFile = PsiManager.getInstance(project).findFile(virtualFile) as PsiJavaFile
                     val targetPsiClass = detectPsiClass(psiFile.classes, classUnderTestName) ?: run {
-                        println("Could not find '$classUnderTestName' in '$filePath'")
+                        ProjectUnderTestFileCreator.log("Could not find '$classUnderTestName' in '$filePath'")
+                        // println("Could not find '$classUnderTestName' in '$filePath'")
                         exitProcess(1)
                     }
 
-                    println("PsiClass '${targetPsiClass.qualifiedName}' is detected! Start the test generation process.")
+                    ProjectUnderTestFileCreator.log(
+                        "PsiClass '${targetPsiClass.qualifiedName}' is detected! Start the test generation process.")
+                    // println("PsiClass '${targetPsiClass.qualifiedName}' is detected! Start the test generation process.")
 
                     // update settings
                     project.service<ProjectContextService>().projectClassPath = classPath
@@ -101,17 +117,13 @@ class TestSparkStarter : ApplicationStarter {
                         .getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
                     //        CompilerModuleExtension.getInstance(project.service<ProjectContextService>().cutModule!!)?.compilerOutputPath = psiFile.virtualFile
 
-                    println("Indexing is done")
-
-                    /**
-                     * Set output directory in order to save the produced prompts and LLM responses during test generation.
-                     * **The solution of having a public static field is bad but fast.**
-                     */
-                    ProjectUnderTestFileCreator.projectUnderTestOutputDirectory = output
+                    ProjectUnderTestFileCreator.log("Indexing is done")
+                    // println("Indexing is done")
 
                     // get target classes
                     val classesToTest = Llm().getClassesUnderTest(project, targetPsiClass)
-                    println("Detected CUTs: $classesToTest")
+                    ProjectUnderTestFileCreator.log("Detected CUTs: classesToTest=$classesToTest")
+                    // println("Detected CUTs: classesToTest=$classesToTest")
 
                     // get package name
                     val packageList = targetPsiClass.qualifiedName.toString().split(".").toMutableList()
@@ -124,22 +136,27 @@ class TestSparkStarter : ApplicationStarter {
                         PromptManager(project, targetPsiClass, classesToTest)
                     )
 
-                    println("Starting test generation with packageName='$packageName'...")
+                    ProjectUnderTestFileCreator.log("Starting test generation with packageName='$packageName'")
+                    // println("Starting test generation with packageName='$packageName'")
                     llmProcessManager.runTestGenerator(
                         indicator = null,
                         FragmentToTestData(CodeType.CLASS),
                         packageName
                     )
-                    println("Test generation for packageName='$packageName' has finished")
+                    ProjectUnderTestFileCreator.log("Test generation for packageName='$packageName' has finished")
+                    // println("Test generation for packageName='$packageName' has finished")
 
                     // Run test file
-                    println("Running generated tests and collecting Jacoco coverage...")
+                    ProjectUnderTestFileCreator.log("Running generated tests and collecting Jacoco coverage...")
+                    // println("Running generated tests and collecting Jacoco coverage...")
                     runTestsAndCollectJacocoCoverage(project, output, packageList, classPath)
-                    println("Run of the generated tests & coverage collection have finished")
+                    ProjectUnderTestFileCreator.log("Run of the generated tests & coverage collection have finished")
+                    // println("Run of the generated tests & coverage collection have finished")
 
                     ProjectManager.getInstance().closeAndDispose(project)
 
-                    println("[TestSpark Starter] Exiting the headless mode")
+                    ProjectUnderTestFileCreator.log("[TestSpark Starter] Exiting the headless mode")
+                    // println("[TestSpark Starter] Exiting the headless mode")
                     exitProcess(0)
                 }
             }
@@ -149,17 +166,21 @@ class TestSparkStarter : ApplicationStarter {
     private fun runTestsAndCollectJacocoCoverage(
         project: Project, out: String, packageList: MutableList<String>, classPath: String) {
         val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
-        println("Run tests in '$targetDirectory")
+        ProjectUnderTestFileCreator.log("Collecting coverage for tests in '$targetDirectory")
+        // println("Run tests in '$targetDirectory")
 
         File(targetDirectory).walk().forEach {
-            println("Considering file '${it.name}'")
+            ProjectUnderTestFileCreator.log("Considering file '${it.name}'")
+            // println("Considering file '${it.name}'")
 
             if (it.name.endsWith(".class")) {
-                println("Running test '${it.name}'")
+                ProjectUnderTestFileCreator.log("Collecting coverage for test '${it.name}'")
+                // println("Running test '${it.name}'")
 
                 // TODO: test case may start with un uppercase letter!
                 var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
+
                 // Test is compiled and it is ready to run jacoco
                 val testExecutionError = project.service<TestStorageProcessingService>().createXmlFromJacoco(
                     it.nameWithoutExtension,

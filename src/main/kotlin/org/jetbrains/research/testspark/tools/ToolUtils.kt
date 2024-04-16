@@ -38,6 +38,20 @@ class ProjectUnderTestFileCreator {
         fun appendToFile(content: String, filepath: Path) {
             filepath.writeText(content, options = arrayOf(StandardOpenOption.APPEND))
         }
+
+        /**
+         * Appends the given content to a log file into the directory of the project under test.
+         *
+         * @param content the content to be appended to the log file
+         * @param alsoPrint if true then the content will be printed in the console as well
+         */
+        fun log(content: String, alsoPrint: Boolean = true) {
+            val logFilepath = getOrCreateFileInOutputDirectory("test-generation.log")
+            appendToFile(content, logFilepath)
+            if (alsoPrint) {
+                println(content)
+            }
+        }
     }
 }
 

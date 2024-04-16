@@ -15,15 +15,11 @@ import org.jetbrains.research.testspark.services.ProjectContextService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.services.TestStorageProcessingService
-import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
+import org.jetbrains.research.testspark.tools.*
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.tools.processStopped
-import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
 
@@ -60,29 +56,29 @@ class LLMProcessManager(
         codeType: FragmentToTestData,
         packageName: String,
     ) {
-        println("LLM test generation begins")
+        ProjectUnderTestFileCreator.log("LLM test generation begins")
+        // println("LLM test generation begins")
         log.info("LLM test generation begins")
 
         if (processStopped(project, indicator)) return
 
         // update build path
         var buildPath = project.service<ProjectContextService>().projectClassPath!!
-        println("buildPath from ProjectContextService: '$buildPath'")
+        ProjectUnderTestFileCreator.log("buildPath from ProjectContextService: '$buildPath'")
+        // println("buildPath from ProjectContextService: '$buildPath'")
 
         if (settingsProjectState.buildPath.isEmpty()) {
             // User did not set own path
             buildPath = getBuildPath(project)
         }
-        println("Final buildPath: '$buildPath'")
+        ProjectUnderTestFileCreator.log("Final buildPath: '$buildPath'")
+        // println("Final buildPath: '$buildPath'")
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
             llmErrorManager.errorProcess(TestSparkBundle.message("emptyBuildPath"), project)
             return
         }
         indicator?.text = TestSparkBundle.message("searchMessage")
-
-        // TODO: why is this log here?
-        log.info("Generated tests suite received")
 
         var generatedTestsArePassing = false
 
@@ -96,21 +92,26 @@ class LLMProcessManager(
         // notify LLMChatService to restart the chat process.
         project.service<LLMChatService>().newSession()
 
-        println("Max requests count is $maxRequests")
+        ProjectUnderTestFileCreator.log("Max requests count is $maxRequests")
+        // println("Max requests count is $maxRequests")
 
         // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
         while (!generatedTestsArePassing) {
             requestsCount++
 
-            println("================== Feedback Cycle Iteration $requestsCount/$maxRequests ==================")
-            log.info("Iteration $requestsCount/$maxRequests of feedback cycle")
+            ProjectUnderTestFileCreator.log(
+                "============================== Feedback Cycle Iteration $requestsCount/$maxRequests ==============================")
+            // println("============================== Feedback Cycle Iteration $requestsCount/$maxRequests ==============================")
+            log.info(
+                "============================== Feedback Cycle Iteration $requestsCount/$maxRequests ==============================")
 
             // Process stopped checking
             if (processStopped(project, indicator)) return
 
             // Ending loop checking
             if (isLastIteration(requestsCount) && project.service<TestGenerationDataService>().compilableTestCases.isEmpty()) {
-                println("No compilable test cases on the last feedback cycle iteration")
+                ProjectUnderTestFileCreator.log("No compilable test cases on the last feedback cycle iteration")
+                // println("No compilable test cases on the last feedback cycle iteration")
                 llmErrorManager.errorProcess(TestSparkBundle.message("invalidLLMResult"), project)
                 break
             }
@@ -125,14 +126,17 @@ class LLMProcessManager(
                     messageToPrompt, indicator, packageName, project, llmErrorManager)
 
             if (requestResult.first == TestSparkBundle.message("tooLongPrompt")) {
-                println("The generated prompt is too long: ${messageToPrompt.length} characters")
+                ProjectUnderTestFileCreator.log("The generated prompt is too long: ${messageToPrompt.length} characters")
+                // println("The generated prompt is too long: ${messageToPrompt.length} characters")
                 if (promptManager.reducePromptSize()) {
-                    println("Prompt size reduction is possible, reducing prompt...")
+                    ProjectUnderTestFileCreator.log("Prompt size reduction is possible, reducing prompt...")
+                    // println("Prompt size reduction is possible, reducing prompt...")
                     messageToPrompt = promptManager.generatePrompt(codeType)
                     requestsCount--
                     continue
                 } else {
-                    println("Prompt size reduction is not possible, aborting...")
+                    ProjectUnderTestFileCreator.log("Prompt size reduction is not possible, aborting...")
+                    // println("Prompt size reduction is not possible, aborting...")
                     llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPromptRequest"), project)
                     return
                 }
@@ -160,7 +164,8 @@ class LLMProcessManager(
             val generatedTestCasesPaths: MutableList<String> = mutableListOf()
             if (isLastIteration(requestsCount)) {
                 val cnt = project.service<TestGenerationDataService>().compilableTestCases.size
-                println("Update the test suite with $cnt compilable test cases (last iteration)")
+                ProjectUnderTestFileCreator.log("Update the test suite with $cnt compilable test cases (last iteration)")
+                // println("Update the test suite with $cnt compilable test cases (last iteration)")
                 generatedTestSuite.updateTestCases(project.service<TestGenerationDataService>().compilableTestCases.toMutableList())
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
@@ -192,8 +197,10 @@ class LLMProcessManager(
                 break
             }
 
-            println("Test suite is saved in: '${generatedTestPath}'")
-            println("Test cases are saved in:\n'${generatedTestCasesPaths}'")
+            ProjectUnderTestFileCreator.log("Test suite is saved in: '${generatedTestPath}'")
+            ProjectUnderTestFileCreator.log("Test cases are saved in:\n'${generatedTestCasesPaths}'")
+            // println("Test suite is saved in: '${generatedTestPath}'")
+            // println("Test cases are saved in:\n'${generatedTestCasesPaths}'")
 
             // Get test cases
             val testCases: MutableList<TestCaseGeneratedByLLM> =
@@ -209,8 +216,10 @@ class LLMProcessManager(
             val commonCompilationResult = project.service<TestStorageProcessingService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
             if (!separateCompilationResult && !isLastIteration(requestsCount)) {
-                println("Some test cases were not compilable (iteration $requestsCount/$maxRequests)")
-                println("Test suite compilation failed with an error:\n\"${commonCompilationResult.second}\"")
+                ProjectUnderTestFileCreator.log("Some test cases were not compilable (iteration $requestsCount/$maxRequests)")
+                ProjectUnderTestFileCreator.log("Test suite compilation failed with an error:\n\"${commonCompilationResult.second}\"")
+                // println("Some test cases were not compilable (iteration $requestsCount/$maxRequests)")
+                // println("Test suite compilation failed with an error:\n\"${commonCompilationResult.second}\"")
 
                 log.info("Incorrect result: \n$generatedTestSuite")
 
@@ -219,7 +228,8 @@ class LLMProcessManager(
                 continue
             }
 
-            println("${testCases.size} test cases are compilable. Finishing feedback cycle...")
+            ProjectUnderTestFileCreator.log("${testCases.size} test cases are compilable. Finishing feedback cycle...")
+            // println("${testCases.size} test cases are compilable. Finishing feedback cycle...")
             log.info("Result is compilable")
 
             generatedTestsArePassing = true
@@ -235,8 +245,8 @@ class LLMProcessManager(
         if (project.service<ErrorService>().isErrorOccurred()) return
 
 
-        println("Result is ready. generatedTestsArePassing: $generatedTestsArePassing, iterations used: $requestsCount/$maxRequests")
-        log.info("Result is ready")
+        ProjectUnderTestFileCreator.log("Generation has finished: generatedTestsArePassing: $generatedTestsArePassing, iterations used: $requestsCount/$maxRequests\"")
+        // println("Generation has finished: generatedTestsArePassing: $generatedTestsArePassing, iterations used: $requestsCount/$maxRequests")
 
         saveData(
             project,

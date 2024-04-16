@@ -48,8 +48,9 @@ abstract class RequestManager {
         chatHistory.add(ChatMessage("user", prompt))
 
         // Send Request to LLM
+        ProjectUnderTestFileCreator.log("Sending request...")
         println("Sending request...")
-        log.info("Sending request...")
+
         val sendResultPair = send(prompt, indicator, project, llmErrorManager)
         val sendResult = sendResultPair.first
 
@@ -86,7 +87,8 @@ abstract class RequestManager {
         ProjectUnderTestFileCreator.appendToFile(response, llmResponseFile)
         ProjectUnderTestFileCreator.appendToFile(fileContentSeparator, llmResponseFile)
 
-        println("LLM response is saved into the file '$llmResponseFile'")
+        ProjectUnderTestFileCreator.log("LLM response is saved into the file '$llmResponseFile'")
+        // println("LLM response is saved into the file '$llmResponseFile'")
 
         log.info("The full LLM response:\n\"$response\"")
         chatHistory.add(ChatMessage("assistant", response))

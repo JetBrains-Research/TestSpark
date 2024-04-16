@@ -23,14 +23,16 @@ class GrazieRequestManager : RequestManager() {
         var testsAssembler = TestsAssembler(project, indicator)
         var sendResult = SendResult.OK
 
-        println("Prompt contains ${prompt.length} characters")
+        ProjectUnderTestFileCreator.log("Prompt contains ${prompt.length} characters")
+        // println("Prompt contains ${prompt.length} characters")
 
         // saving generated prompt into the file under project output directory
         val tmpPromptFilepath = ProjectUnderTestFileCreator.getOrCreateFileInOutputDirectory("sent-prompts.txt")
         ProjectUnderTestFileCreator.appendToFile(prompt, tmpPromptFilepath)
         ProjectUnderTestFileCreator.appendToFile(fileContentSeparator, tmpPromptFilepath)
 
-        println("Prompt is saved into the file '$tmpPromptFilepath'")
+        ProjectUnderTestFileCreator.log("Prompt is saved into the file '$tmpPromptFilepath'")
+        // println("Prompt is saved into the file '$tmpPromptFilepath'")
         // println("Prompt:\n \"$prompt\"")
 
         try {
