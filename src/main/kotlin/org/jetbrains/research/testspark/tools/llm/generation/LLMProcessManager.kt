@@ -102,7 +102,7 @@ class LLMProcessManager(
         while (!generatedTestsArePassing) {
             requestsCount++
 
-            println("Iteration $requestsCount/$maxRequests of feedback cycle")
+            println("================== Feedback Cycle Iteration $requestsCount/$maxRequests ==================")
             log.info("Iteration $requestsCount/$maxRequests of feedback cycle")
 
             // Process stopped checking
