@@ -6,11 +6,20 @@ if uname -s | grep -iq cygwin; then
 fi
 echo $DIR
 
-echo "Provided arguments are $@"
+echo "Provided arguments: $@"
 
 if [ $# -ne "10" ]; then
-  echo "$# arguments provided"
-  echo "need 10 arguments with the following order: 1- project under test root path 2- CUT-File-directory, 3-CUT qualified name, 4-Classpaths containing the compiled project, 5-Model name, 6-Grazie toke 7-.txt file containing prompt template 8- output directory 9-Space username 10-Space password"
+  echo "$# arguments provided, expected 10 arguments in the following order:
+      1) Path to the root directory of the project under test (ProjectPath)
+      2) Path to the target file (.java file) (it MUST be relative to the ProjectPath)
+      3) CUT qualified name (<package-name>.<class-name>)
+      4) Classpaths containing the compiled project (seperated by ':')
+      5) Model name (e.g., GPT-4)
+      6) Grazie token
+      7) txt-file containing prompt template
+      8) Output directory
+      9) Space username
+      10) Space password"
   exit 1
 fi
 
