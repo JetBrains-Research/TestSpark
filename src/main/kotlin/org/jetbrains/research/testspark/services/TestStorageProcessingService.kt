@@ -32,7 +32,6 @@ class TestStorageProcessingService(private val project: Project) {
 
     var resultPath = "$testResultDirectory$testResultName"
 
-
     // If projectSdk is not set, it means that we are in headless mode, and we can use the JDk used for running TestSpark
     private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk?.homeDirectory
         ?: LocalFileSystem.getInstance().findFileByPath(System.getProperty("java.home"))!!
@@ -165,7 +164,7 @@ class TestStorageProcessingService(private val project: Project) {
         testCaseName: String,
         projectBuildPath: String,
         generatedTestPackage: String,
-        providedResultPath: String? = null
+        providedResultPath: String? = null,
     ): String {
         // find the proper javac
         val javaRunner = File(javaHomeDirectory.path).walk()
@@ -214,9 +213,9 @@ class TestStorageProcessingService(private val project: Project) {
 
         // for classpath containing cut
         command.add("--classfiles")
-        if(providedResultPath == null)
+        if (providedResultPath == null) {
             command.add(CompilerModuleExtension.getInstance(project.service<ProjectContextService>().cutModule!!)?.compilerOutputPath!!.path)
-        else
+        } else
             command.add(projectBuildPath)
 
         // for each source folder

@@ -370,7 +370,7 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
     into(libDestDir)
 }
 
-tasks.create<RunIdeTask>("headless"){
+tasks.create<RunIdeTask>("headless") {
     val root: String? by project
     val file: String? by project
     val cut: String? by project
@@ -387,7 +387,7 @@ tasks.create<RunIdeTask>("headless"){
         "-Djava.awt.headless=true",
         "--add-exports",
         "java.base/jdk.internal.vm=ALL-UNNAMED",
-        "-Didea.system.path"
+        "-Didea.system.path",
     )
 }
 

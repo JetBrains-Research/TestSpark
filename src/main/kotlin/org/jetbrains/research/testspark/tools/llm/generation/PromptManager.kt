@@ -240,7 +240,7 @@ class PromptManager(
         interestingPsiClasses: MutableSet<PsiClass>,
         cutPsiClass: PsiClass,
     ): MutableMap<PsiClass, MutableList<PsiClass>> {
-        println("isDumb: "+DumbService.isDumb(project).toString())
+        println("isDumb: " + DumbService.isDumb(project).toString())
         val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
 
         val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
@@ -248,17 +248,17 @@ class PromptManager(
 
 //        ApplicationManager.getApplication().runReadAction {
 //            val projectFileIndex = ProjectRootManager.getInstance(project).fileIndex
-////            projectFileIndex.iterateContent { virtualFile ->
-////                val psiFile = PsiManager.getInstance(project).findFile(virtualFile)
-////                true
-////            }
+// //            projectFileIndex.iterateContent { virtualFile ->
+// //                val psiFile = PsiManager.getInstance(project).findFile(virtualFile)
+// //                true
+// //            }
 //        }
         interestingPsiClasses.forEach { currentInterestingClass ->
             var detectedSubClasses: Collection<PsiClass>? = null
 //            while(true){
-                val scope = GlobalSearchScope.projectScope(project)
-                val query = ClassInheritorsSearch.search(currentInterestingClass, false)
-                detectedSubClasses= query.findAll()
+            val scope = GlobalSearchScope.projectScope(project)
+            val query = ClassInheritorsSearch.search(currentInterestingClass, false)
+            detectedSubClasses = query.findAll()
             PsiShortNamesCache.getInstance(project).getClassesByName(currentInterestingClass.name!!, GlobalSearchScope.projectScope(project))
 //                if (detectedSubClasses.size >0)
 //                    break

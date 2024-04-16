@@ -26,7 +26,6 @@ import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import java.io.File
 import kotlin.system.exitProcess
 
-
 class TestSparkStarter : ApplicationStarter {
     @Deprecated("Specify it as `id` for extension definition in a plugin descriptor")
     override val commandName: String = "testspark"
@@ -37,7 +36,6 @@ class TestSparkStarter : ApplicationStarter {
     @Suppress("TooGenericExceptionCaught")
     @OptIn(ExperimentalSerializationApi::class)
     override fun main(args: List<String>) {
-
         // Project path
         val projectPath = args[1]
         // Path to the target file (.java file)
@@ -45,7 +43,7 @@ class TestSparkStarter : ApplicationStarter {
         // CUT name (<package-name>.<class-name>)
         val classUnderTestName = args[3]
         // Paths to compilation output of the project under test (seperated by ':')
-        val classPath = "$projectPath/${args[4]}"
+        val classPath = "$projectPath:${args[4]}"
         // Selected mode
         val model = args[5]
         // Token
@@ -62,7 +60,7 @@ class TestSparkStarter : ApplicationStarter {
                 println("couldn't find project in $projectPath")
                 exitProcess(1)
             }
-            println("Detected project: ${project}")
+            println("Detected project: $project")
             // Continue when the project is indexed
             println("Indexing project...")
             project.let {
@@ -98,7 +96,6 @@ class TestSparkStarter : ApplicationStarter {
                         .getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
                     //        CompilerModuleExtension.getInstance(project.service<ProjectContextService>().cutModule!!)?.compilerOutputPath = psiFile.virtualFile
 
-
                     println("Indexing is done")
                     // get target classes
                     val classesToTest = Llm().getClassesUnderTest(project, targetPsiClass)
@@ -113,13 +110,13 @@ class TestSparkStarter : ApplicationStarter {
 
                     val llmProcessManager = LLMProcessManager(
                         project,
-                        PromptManager(project, targetPsiClass, classesToTest)
+                        PromptManager(project, targetPsiClass, classesToTest),
                     )
 
                     llmProcessManager.runTestGenerator(
                         indicator = null,
                         FragmentToTestData(CodeType.CLASS),
-                        packageName
+                        packageName,
                     )
 
                     // Run test file
@@ -152,22 +149,24 @@ class TestSparkStarter : ApplicationStarter {
                     out,
                 )
 
-                saveException(testcaseName, targetDirectory,  testExecutionError)
+                saveException(testcaseName, targetDirectory, testExecutionError)
             }
         }
     }
 
-    private fun saveException(testcaseName: String,
-                              targetDirectory: String,
-                              testExecutionError: String) {
-        if (testExecutionError.isBlank() || !testExecutionError.contains("Exception", ignoreCase = false))
+    private fun saveException(
+        testcaseName: String,
+        targetDirectory: String,
+        testExecutionError: String,
+    ) {
+        if (testExecutionError.isBlank() || !testExecutionError.contains("Exception", ignoreCase = false)) {
             return
+        }
         val targetPath = "$targetDirectory/$testcaseName-exception.log"
 
         // Save the exception
         File(targetPath).writeText(testExecutionError.replace("\tat ", "\nat "))
     }
-
 
     private fun detectPsiClass(classes: Array<PsiClass>, classUnderTestName: String): PsiClass? {
         for (psiClass in classes) {
