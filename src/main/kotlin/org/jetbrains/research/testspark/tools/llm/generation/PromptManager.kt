@@ -191,7 +191,7 @@ class PromptManager(
             }
         }
         return interestingPsiClasses
-            .filter { it.qualifiedName != null }
+            .filter { (it.qualifiedName != null) && (it.text != null) }
             .toMutableSet()
     }
 
@@ -227,7 +227,7 @@ class PromptManager(
         }
 
         return interestingPsiClasses
-            .filter { it.qualifiedName != null }
+            .filter { (it.qualifiedName != null) && (it.text != null) }
             .toMutableSet()
     }
 
@@ -280,8 +280,6 @@ class PromptManager(
         }
 
         return polymorphismRelations
-            .filter { entry -> (entry.key.qualifiedName == null) || (entry.value.any { it.qualifiedName == null }) }
-            .toMutableMap()
     }
 
     /**
