@@ -283,6 +283,8 @@ class PromptManager(
         }
 
         return polymorphismRelations
+            .filter { entry -> (entry.key.qualifiedName != null) && (entry.value.all { it.qualifiedName != null }) }
+            .toMutableMap()
     }
 
     /**
