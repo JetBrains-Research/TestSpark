@@ -221,6 +221,9 @@ class LLMProcessManager(
             val separateCompilationResult = project.service<TestStorageProcessingService>().compileTestCases(generatedTestCasesPaths, buildPath, testCases)
             val commonCompilationResult = project.service<TestStorageProcessingService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
 
+            ProjectUnderTestFileCreator.log(
+                "Separate compilation of test cases: $separateCompilationResult, compilation of test suite: ${commonCompilationResult.first}")
+
             if (!separateCompilationResult && !isLastIteration(requestsCount)) {
                 ProjectUnderTestFileCreator.log("Some test cases were not compilable (iteration $requestsCount/$maxRequests)")
                 ProjectUnderTestFileCreator.log("Test suite compilation failed with an error:\n\"${commonCompilationResult.second}\"")
