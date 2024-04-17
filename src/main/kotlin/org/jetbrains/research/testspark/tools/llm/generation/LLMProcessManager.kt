@@ -103,6 +103,11 @@ class LLMProcessManager(
             // Ending loop checking
             if (isLastIteration(requestsCount) && project.service<TestGenerationDataService>().compilableTestCases.isEmpty()) {
                 llmErrorManager.errorProcess(TestSparkBundle.message("invalidLLMResult"), project)
+                if (generatedTestSuite != null) {
+                    // Cleaning up the test cases in the test suite since all of them are not compilable
+                    // Cleanup is required to preserve an invariant of the test suite containing only compilable test cases
+                    generatedTestSuite.testCases = mutableListOf()
+                }
                 break
             }
 
