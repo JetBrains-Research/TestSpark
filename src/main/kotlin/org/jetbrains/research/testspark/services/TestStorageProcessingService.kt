@@ -89,22 +89,36 @@ class TestStorageProcessingService(private val project: Project) {
         ProjectUnderTestFileCreator.log("Found Java compiler: '${javaCompile.absolutePath}'")
 
         // compile file
-        val errorMsg = project.service<RunCommandLineService>().runCommandLine(
-            arrayListOf(
-                javaCompile.absolutePath,
-                "-cp",
-                getPath(projectBuildPath),
-                path,
-            ),
+        val command = arrayListOf(
+            javaCompile.absolutePath,
+            "-cp",
+            getPath(projectBuildPath),
+            path,
         )
+        ProjectUnderTestFileCreator.log("Run compilation command: $command")
 
+        val errorMsg = project.service<RunCommandLineService>().runCommandLine(command)
+
+        if (errorMsg.isBlank()) {
+            ProjectUnderTestFileCreator.log("No compilation error occurred: '$errorMsg'")
+        }
+        else {
+            ProjectUnderTestFileCreator.log("Compilation error occurred: '$errorMsg'")
+        }
         log.info("Error message: $errorMsg")
 
         // create .class file path
         val classFilePath = path.replace(".java", ".class")
 
         // check is .class file exists
-        return Pair(File(classFilePath).exists(), errorMsg)
+        val compiledFileExists = File(classFilePath).exists()
+        if (compiledFileExists) {
+            ProjectUnderTestFileCreator.log("Compiled class found at '$classFilePath'")
+        }
+        else {
+            ProjectUnderTestFileCreator.log("Compiled class not found at '$classFilePath'")
+        }
+        return Pair(compiledFileExists, errorMsg)
     }
 
     /**
