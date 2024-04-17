@@ -166,6 +166,9 @@ class PromptManager(
 
     private fun PsiMethod.getSignatureString(): String {
         val bodyStart = body?.startOffsetInParent ?: this.textLength
+        if (text == null) {
+            return ""
+        }
         return text.substring(0, bodyStart).replace('\n', ' ').trim()
     }
 
