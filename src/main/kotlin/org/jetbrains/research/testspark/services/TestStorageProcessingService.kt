@@ -131,13 +131,39 @@ class TestStorageProcessingService(private val project: Project) {
     fun compileTestCases(generatedTestCasesPaths: List<String>, buildPath: String, testCases: MutableList<TestCaseGeneratedByLLM>): Boolean {
         var allTestCasesCompilable = true
 
+        val compilableTestCases = project.service<TestGenerationDataService>().compilableTestCases
+
         for (index in generatedTestCasesPaths.indices) {
             val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
             allTestCasesCompilable = allTestCasesCompilable && compilable
             if (compilable) {
-                project.service<TestGenerationDataService>().compilableTestCases.add(testCases[index])
+                /**
+                 * If the test case with the same name already present, then delete the old test case
+                 * and replace it with the new one.
+                 *
+                 * Example of why it is needed:
+                 * E.g., LLM on the i-th feedback cycle iteration produces a single compilable test case named 'convertTest'
+                 * and all the rest are non-compilable, then this compilable test case will be added to 'compilableTestCases';
+                 * on the next (i+1) LLM may produce a set of test cases that also has a compilable test case named 'convertTest',
+                 * thus the resulting test suite will have 2 test cases named 'convertTest', thus it will not compile anymore
+                 * with the function definition error, although the present test cases in the test suite may be compilable.
+                 */
+                // remove an old test case duplicate that was generated on the previous compilation attempts
+                compilableTestCases.removeIf {
+                    val isDuplicateTestCase = (it.name == testCases[index].name)
+                    if (isDuplicateTestCase) {
+                        ProjectUnderTestFileCreator.log(
+                            "Found an old duplicate of test case named '${testCases[index].name}': removing it in favour of a new test case with the same name")
+                    }
+                    isDuplicateTestCase
+                }
+                compilableTestCases.add(testCases[index])
             }
         }
+
+        ProjectUnderTestFileCreator.log(
+            "Compilable test cases: [\n${compilableTestCases.joinToString(separator = "\n") { "\t\t$it," }}\n\t]")
+
         return allTestCasesCompilable
     }
 
