@@ -227,7 +227,7 @@ class PromptManager(
         }
 
         return interestingPsiClasses
-            .filter { (it.qualifiedName != null) && (it.text != null) }
+            .filter { (it.qualifiedName != null) && (it.allMethods.all { method -> (method.text != null) }) }
             .toMutableSet()
     }
 
