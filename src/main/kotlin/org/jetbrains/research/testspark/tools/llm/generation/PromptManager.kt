@@ -122,7 +122,7 @@ class PromptManager(
         return ClassRepresentation(
             psiClass.qualifiedName!!,
             getClassFullText(psiClass),
-            psiClass.allMethods.map(this::createMethodRepresentation),
+            psiClass.allMethods.filter { it.text != null }.map(this::createMethodRepresentation),
         )
     }
 
