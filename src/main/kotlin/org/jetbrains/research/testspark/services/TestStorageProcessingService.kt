@@ -162,7 +162,7 @@ class TestStorageProcessingService(private val project: Project) {
         }
 
         ProjectUnderTestFileCreator.log(
-            "Compilable test cases: [\n${compilableTestCases.joinToString(separator = "\n") { "\t\t$it," }}\n\t]")
+            "Compilable test cases: [\n${compilableTestCases.joinToString(separator = "\n") { "\t\t${it.name}," }}\n\t]")
 
         return allTestCasesCompilable
     }
