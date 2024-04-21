@@ -49,7 +49,6 @@ abstract class RequestManager {
 
         // Send Request to LLM
         ProjectUnderTestFileCreator.log("Sending request...")
-        println("Sending request...")
 
         val sendResultPair = send(prompt, indicator, project, llmErrorManager)
         val sendResult = sendResultPair.first

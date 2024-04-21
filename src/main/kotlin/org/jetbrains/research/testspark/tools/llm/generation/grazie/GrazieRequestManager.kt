@@ -76,6 +76,7 @@ class GrazieRequestManager : RequestManager() {
                 testsAssembler = requestResult.second
             }
         } catch (e: ClassNotFoundException) {
+            ProjectUnderTestFileCreator.log("Grazie test generation feature is not available in this build.")
             llmErrorManager.errorProcess(TestSparkBundle.message("grazieError"), project)
         }
 
