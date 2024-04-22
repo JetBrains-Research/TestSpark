@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.custom
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys

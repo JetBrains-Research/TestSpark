@@ -27,6 +27,10 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.common.IconButtonCreator
+import org.jetbrains.research.testspark.display.common.ModifiedLinesGetter
+import org.jetbrains.research.testspark.display.common.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.ReportLockingService
@@ -67,14 +71,14 @@ class TestCasePanelFactory(
 
     private val panel = JPanel()
     private val previousButton =
-        createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
+        IconButtonCreator.getButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
     private var requestNumber: String = "%d / %d"
     private var requestLabel: JLabel = JLabel(requestNumber)
-    private val nextButton = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
+    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
     private val errorLabel = JLabel(TestSparkIcons.showError)
-    private val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
-    private val likeButton = createButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
-    private val dislikeButton = createButton(TestSparkIcons.dislike, TestSparkLabelsBundle.defaultValue("dislikeTip"))
+    private val copyButton = IconButtonCreator.getButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
+    private val likeButton = IconButtonCreator.getButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
+    private val dislikeButton = IconButtonCreator.getButton(TestSparkIcons.dislike, TestSparkLabelsBundle.defaultValue("dislikeTip"))
 
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
@@ -103,14 +107,14 @@ class TestCasePanelFactory(
     )
 
     // Create "Remove" button to remove the test from cache
-    private val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTip"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTip"))
 
     // Create "Reset" button to reset the changes in the source code of the test
-    private val resetButton = createButton(TestSparkIcons.reset, TestSparkLabelsBundle.defaultValue("resetTip"))
+    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, TestSparkLabelsBundle.defaultValue("resetTip"))
 
     // Create "Reset" button to reset the changes to last run in the source code of the test
     private val resetToLastRunButton =
-        createButton(TestSparkIcons.resetToLastRun, TestSparkLabelsBundle.defaultValue("resetToLastRunTip"))
+        IconButtonCreator.getButton(TestSparkIcons.resetToLastRun, TestSparkLabelsBundle.defaultValue("resetToLastRunTip"))
 
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
@@ -118,7 +122,7 @@ class TestCasePanelFactory(
     private val requestJLabel = JLabel(TestSparkLabelsBundle.defaultValue("requestJLabel"))
     private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(settingsState.defaultLLMRequests))
 
-    private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
+    private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
 
     private val loadingLabel: JLabel = JLabel(TestSparkIcons.loading)
 
@@ -356,7 +360,7 @@ class TestCasePanelFactory(
 
         updateBorder()
 
-        val modifiedLineIndexes = getModifiedLines(
+        val modifiedLineIndexes = ModifiedLinesGetter.getLines(
             lastRunCode.split("\n"),
             testCase.testCode.split("\n"),
         )

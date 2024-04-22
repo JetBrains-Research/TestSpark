@@ -9,7 +9,7 @@ import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.createButton
+import org.jetbrains.research.testspark.display.common.IconButtonCreator
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.FlowLayout
@@ -29,6 +29,7 @@ class PromptTemplateFactory(
     private val settingsState: SettingsApplicationState,
     private val promptEditorType: PromptEditorType,
 ) {
+    // init components
     private var templates = mutableListOf<String>()
     private var names = mutableListOf<String>()
 
@@ -37,7 +38,7 @@ class PromptTemplateFactory(
     private var currentTemplateNumber = 0
 
     private val promptTemplateName = JTextField()
-    private val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTemplate"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTemplate"))
     private val setAsDefaultButton =
         JButton(TestSparkLabelsBundle.defaultValue("setAsDefault"), TestSparkIcons.setDefault)
 
@@ -48,8 +49,8 @@ class PromptTemplateFactory(
     private val redBorder = BorderFactory.createLineBorder(JBColor.RED)
 
     private val previousButton =
-        createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
-    private val nextButton = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
+        IconButtonCreator.getButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
+    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
     private val addButton = JButton(TestSparkLabelsBundle.defaultValue("addPromptTemplate"), TestSparkIcons.add)
 
     init {

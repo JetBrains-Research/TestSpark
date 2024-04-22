@@ -18,7 +18,7 @@ import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptKeyword
 import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.createButton
+import org.jetbrains.research.testspark.display.common.IconButtonCreator
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
@@ -326,7 +326,7 @@ class SettingsLLMComponent(private val project: Project) {
         textField.columns = 30
         defaultLLMRequestPanel.add(textField)
 
-        val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeRequest"))
+        val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeRequest"))
         defaultLLMRequestPanel.add(removeButton)
 
         commonDefaultLLMRequestsPanel.add(defaultLLMRequestPanel)

@@ -10,8 +10,8 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.data.JsonEncoding
-import org.jetbrains.research.testspark.display.JUnitCombobox
 import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.display.custom.JUnitCombobox
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService

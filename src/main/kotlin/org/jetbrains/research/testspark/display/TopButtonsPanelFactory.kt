@@ -8,6 +8,8 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.display.common.IconButtonCreator
+import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Dimension
 import java.util.LinkedList
@@ -23,11 +25,11 @@ import javax.swing.JPanel
 class TopButtonsPanelFactory(private val project: Project) {
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
-        createButton(TestSparkIcons.selectAll, TestSparkLabelsBundle.defaultValue("selectAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.selectAll, TestSparkLabelsBundle.defaultValue("selectAllTip"))
     private var unselectAllButton: JButton =
-        createButton(TestSparkIcons.unselectAll, TestSparkLabelsBundle.defaultValue("unselectAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.unselectAll, TestSparkLabelsBundle.defaultValue("unselectAllTip"))
     private var removeAllButton: JButton =
-        createButton(TestSparkIcons.removeAll, TestSparkLabelsBundle.defaultValue("removeAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.removeAll, TestSparkLabelsBundle.defaultValue("removeAllTip"))
 
     private var testsSelectedText: String = "${TestSparkLabelsBundle.defaultValue("testsSelected")}: %d/%d"
     private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)

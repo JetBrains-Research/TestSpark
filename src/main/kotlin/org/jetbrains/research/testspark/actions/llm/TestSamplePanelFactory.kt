@@ -10,10 +10,10 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.createButton
-import org.jetbrains.research.testspark.display.getModifiedLines
+import org.jetbrains.research.testspark.display.common.IconButtonCreator
+import org.jetbrains.research.testspark.display.common.ModifiedLinesGetter
+import org.jetbrains.research.testspark.display.common.TestCaseDocumentCreator
 import javax.swing.BoxLayout
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
@@ -41,8 +41,8 @@ class TestSamplePanelFactory(
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
     private var testSamplesSelector = ComboBox(arrayOf(""))
-    private val resetButton = createButton(TestSparkIcons.reset, TestSparkLabelsBundle.defaultValue("resetTip"))
-    private val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTip"))
+    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, TestSparkLabelsBundle.defaultValue("resetTip"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTip"))
 
     init {
         addListeners()
@@ -62,7 +62,7 @@ class TestSamplePanelFactory(
                     if (testNames[index] == testSamplesSelector.selectedItem) {
                         currentTestCodes[index] = languageTextField.text
 
-                        val modifiedLineIndexes = getModifiedLines(
+                        val modifiedLineIndexes = ModifiedLinesGetter.getLines(
                             initialTestCodes[index].split("\n"),
                             currentTestCodes[index].split("\n"),
                         )
