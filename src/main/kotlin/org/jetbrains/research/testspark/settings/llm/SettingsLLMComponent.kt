@@ -19,9 +19,7 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptKeyword
 import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
-import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
-import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
-import org.jetbrains.research.testspark.helpers.stylizeMainComponents
+import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -83,7 +81,7 @@ class SettingsLLMComponent(private val project: Project) {
 
     private val llmSetupCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("llmSetupCheckBox"), true)
 
-    val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
+    val llmPlatforms: List<LLMPlatform> = LLMHelper.getLLLMPlatforms()
 
     var currentLLMPlatformName: String
         get() = platformSelector.item
@@ -180,7 +178,7 @@ class SettingsLLMComponent(private val project: Project) {
 
     init {
         // Adds additional style (width, tooltips)
-        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
+        LLMHelper.stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         stylizePanel()
 
         fillDefaultLLMRequestsPanel(JsonEncoding.decode(settingsState.defaultLLMRequests))
@@ -346,7 +344,7 @@ class SettingsLLMComponent(private val project: Project) {
      * These listeners will update the model selector based on the text entered the user token field.
      */
     private fun addListeners() {
-        addLLMPanelListeners(
+        LLMHelper.addLLMPanelListeners(
             platformSelector,
             modelSelector,
             llmUserTokenField,

@@ -20,16 +20,12 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
     private val settingsState: SettingsApplicationState
         get() = project.getService(SettingsApplicationService::class.java).state
 
+    // init components
     private var javaPathTextField = JTextField(30)
-    private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
+    private var algorithmSelector = ComboBox(ContentDigestAlgorithm.entries.toTypedArray())
     private val backEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
     private val okEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
 
-    /**
-     * Returns the title panel for the component.
-     *
-     * @return the title panel as a JPanel instance.
-     */
     override fun getTitlePanel(): JPanel {
         val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("evosuiteSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
@@ -40,11 +36,6 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
         return titlePanel
     }
 
-    /**
-     * Returns the middle panel.
-     *
-     * @return the middle panel as a JPanel.
-     */
     override fun getMiddlePanel(): JPanel {
         javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
         javaPathTextField.text = settingsState.javaPath
@@ -69,11 +60,6 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
             .panel
     }
 
-    /**
-     * Returns the bottom panel for the current view.
-     *
-     * @return The bottom panel for the current view.
-     */
     override fun getBottomPanel(): JPanel {
         val bottomButtons = JPanel()
 
@@ -88,23 +74,10 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
         return bottomButtons
     }
 
-    /**
-     * Retrieves the back button.
-     *
-     * @return The back button.
-     */
     override fun getBackButton() = backEvoSuiteButton
 
-    /**
-     * Retrieves the reference to the "OK" button.
-     *
-     * @return The reference to the "OK" button.
-     */
     override fun getFinishedButton() = okEvoSuiteButton
 
-    /**
-     * Updates the state of the settings.
-     */
     override fun applyUpdates() {
         settingsState.javaPath = javaPathTextField.text
         settingsState.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm

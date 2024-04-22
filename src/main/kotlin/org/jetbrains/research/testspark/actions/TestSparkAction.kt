@@ -17,7 +17,7 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.TestSparkBundle
 import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
+import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.Manager
@@ -69,7 +69,7 @@ class TestSparkAction : AnAction() {
      * @param e the AnActionEvent object representing the event
      */
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = getCurrentListOfCodeTypes(e) != null
+        e.presentation.isEnabled = PsiHelper.getCurrentListOfCodeTypes(e) != null
     }
 
     /**
@@ -86,17 +86,19 @@ class TestSparkAction : AnAction() {
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
-        private val codeTypes = getCurrentListOfCodeTypes(e)!!
+
+        private val codeTypes = PsiHelper.getCurrentListOfCodeTypes(e)!!
+
         private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
+
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
         private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
 
         private val cardLayout = CardLayout()
-
         private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
         private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project)
         private val evoSuitePanelFactory = EvoSuitePanelFactory(project)
