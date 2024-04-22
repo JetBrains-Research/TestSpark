@@ -50,7 +50,7 @@ class Pipeline(
         val cutPsiClass = PsiHelper.getSurroundingClass(psiFile, caretOffset)!!
 
         // get generated test path
-        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
+        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults$ToolUtils.sep"
         val id = UUID.randomUUID().toString()
         val testResultName = "test_gen_result_$id"
 
@@ -62,7 +62,7 @@ class Pipeline(
             projectContext.cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
         }
 
-        generatedTestsData.resultPath = getResultPath(id, testResultDirectory)
+        generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
         generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
         generatedTestsData.testResultName = testResultName
 
@@ -84,10 +84,10 @@ class Pipeline(
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
 
-                    if (isProcessStopped(project, ijIndicator)) return
+                    if (ToolUtils.isProcessStopped(project, ijIndicator)) return
 
                     if (projectBuilder.runBuild(ijIndicator)) {
-                        if (isProcessStopped(project, ijIndicator)) return
+                        if (ToolUtils.isProcessStopped(project, ijIndicator)) return
 
                         result = processManager.runTestGenerator(
                             ijIndicator,
@@ -98,7 +98,7 @@ class Pipeline(
                         )
                     }
 
-                    if (isProcessStopped(project, ijIndicator)) return
+                    if (ToolUtils.isProcessStopped(project, ijIndicator)) return
 
                     ijIndicator.stop()
                 }

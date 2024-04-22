@@ -38,8 +38,8 @@ import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
-import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.llm.testModificationRequest
 import java.awt.Dimension
@@ -402,7 +402,7 @@ class TestCasePanelFactory(
             .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
-                    if (isProcessStopped(project, ijIndicator)) {
+                    if (ToolUtils.isProcessStopped(project, ijIndicator)) {
                         finishProcess()
                         return
                     }
@@ -423,7 +423,7 @@ class TestCasePanelFactory(
                         addTest(modifiedTest)
                     }
 
-                    if (isProcessStopped(project, ijIndicator)) {
+                    if (ToolUtils.isProcessStopped(project, ijIndicator)) {
                         finishProcess()
                         return
                     }

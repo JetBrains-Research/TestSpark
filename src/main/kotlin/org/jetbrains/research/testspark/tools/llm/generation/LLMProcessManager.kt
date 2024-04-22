@@ -20,17 +20,12 @@ import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
-import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
-import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import org.jetbrains.research.testspark.tools.transferToIJTestCases
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -73,13 +68,13 @@ class LLMProcessManager(
     ): UIContext? {
         log.info("LLM test generation begins")
 
-        if (isProcessStopped(project, indicator)) return null
+        if (ToolUtils.isProcessStopped(project, indicator)) return null
 
         // update build path
         var buildPath = projectContext.projectClassPath!!
         if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
             // User did not set own path
-            buildPath = getBuildPath(project)
+            buildPath = ToolUtils.getBuildPath(project)
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
@@ -155,7 +150,7 @@ class LLMProcessManager(
         }
 
         // Process stopped checking
-        if (isProcessStopped(project, indicator)) return null
+        if (ToolUtils.isProcessStopped(project, indicator)) return null
         log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
 
         when (feedbackResponse.executionResult) {
@@ -180,7 +175,7 @@ class LLMProcessManager(
             }
         }
 
-        if (isProcessStopped(project, indicator)) return null
+        if (ToolUtils.isProcessStopped(project, indicator)) return null
 
         // Error during the collecting
         if (project.service<ErrorService>().isErrorOccurred()) return null
@@ -192,13 +187,13 @@ class LLMProcessManager(
         val testSuiteRepresentation =
             if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null
 
-        transferToIJTestCases(report)
+        ToolUtils.transferToIJTestCases(report)
 
-        saveData(
+        ToolUtils.saveData(
             project,
             report,
-            getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation),
-            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
+            ToolUtils.getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation),
+            ToolUtils.getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
             projectContext.fileUrlAsString!!,
             generatedTestsData,
         )
