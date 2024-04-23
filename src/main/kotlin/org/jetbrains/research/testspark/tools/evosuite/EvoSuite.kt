@@ -9,7 +9,7 @@ import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.PsiHelper
-import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.evosuite.generation.EvoSuiteProcessManager
 import org.jetbrains.research.testspark.tools.template.Tool
@@ -32,7 +32,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      */
     private fun getEvoSuiteProcessManager(project: Project): EvoSuiteProcessManager {
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-        val settingsProjectState = project.service<SettingsProjectService>().state
+        val settingsProjectState = project.service<PluginSettingsService>().state
         val buildPath = "$projectClassPath${File.separatorChar}${settingsProjectState.buildPath}"
         return EvoSuiteProcessManager(project, buildPath)
     }
@@ -94,7 +94,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
     private fun createPipeline(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?): Pipeline {
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
-        val settingsProjectState = project.service<SettingsProjectService>().state
+        val settingsProjectState = project.service<PluginSettingsService>().state
         val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
 
         return Pipeline(project, psiFile, caretOffset, fileUrl, packageName)

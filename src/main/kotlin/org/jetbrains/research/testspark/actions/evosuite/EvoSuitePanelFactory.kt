@@ -5,11 +5,11 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.bundles.LabelsBundle
+import org.jetbrains.research.testspark.bundles.SettingsBundle
+import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import java.awt.Font
 import javax.swing.JButton
 import javax.swing.JLabel
@@ -17,17 +17,17 @@ import javax.swing.JPanel
 import javax.swing.JTextField
 
 class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val evoSuiteSettingsState: EvoSuiteSettingsState
+        get() = project.getService(EvoSuiteSettingsService::class.java).state
 
     // init components
     private var javaPathTextField = JTextField(30)
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.entries.toTypedArray())
-    private val backEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
-    private val okEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
+    private val backEvoSuiteButton = JButton(LabelsBundle.defaultValue("back"))
+    private val okEvoSuiteButton = JButton(LabelsBundle.defaultValue("ok"))
 
     override fun getTitlePanel(): JPanel {
-        val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("evosuiteSetup"))
+        val textTitle = JLabel(LabelsBundle.defaultValue("evosuiteSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()
@@ -37,22 +37,22 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
     }
 
     override fun getMiddlePanel(): JPanel {
-        javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
-        javaPathTextField.text = settingsState.javaPath
+        javaPathTextField.toolTipText = SettingsBundle.defaultValue("javaPath")
+        javaPathTextField.text = evoSuiteSettingsState.javaPath
 
         algorithmSelector.setMinimumAndPreferredWidth(300)
-        algorithmSelector.selectedItem = settingsState.algorithm
+        algorithmSelector.selectedItem = evoSuiteSettingsState.algorithm
 
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("javaPath")),
+                JBLabel(LabelsBundle.defaultValue("javaPath")),
                 javaPathTextField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("defaultSearch")),
+                JBLabel(LabelsBundle.defaultValue("defaultSearch")),
                 algorithmSelector,
                 10,
                 false,
@@ -79,7 +79,7 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
     override fun getFinishedButton() = okEvoSuiteButton
 
     override fun applyUpdates() {
-        settingsState.javaPath = javaPathTextField.text
-        settingsState.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm
+        evoSuiteSettingsState.javaPath = javaPathTextField.text
+        evoSuiteSettingsState.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm
     }
 }

@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
@@ -16,9 +16,9 @@ import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
@@ -43,8 +43,8 @@ class LLMProcessManager(
     private val promptManager: PromptManager,
     private val testSamplesCode: String,
 ) : ProcessManager {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
     private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
@@ -72,22 +72,22 @@ class LLMProcessManager(
 
         // update build path
         var buildPath = projectContext.projectClassPath!!
-        if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
+        if (project.service<PluginSettingsService>().state.buildPath.isEmpty()) {
             // User did not set own path
             buildPath = ToolUtils.getBuildPath(project)
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
-            llmErrorManager.errorProcess(TestSparkBundle.message("emptyBuildPath"), project)
+            llmErrorManager.errorProcess(MessagesBundle.message("emptyBuildPath"), project)
             return null
         }
-        indicator.setText(TestSparkBundle.message("searchMessage"))
+        indicator.setText(MessagesBundle.message("searchMessage"))
 
         val report = IJReport()
 
         val initialPromptMessage = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
-        val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, settingsState.junitVersion)
+        val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion)
 
         // initiate a new RequestManager
         val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
@@ -141,11 +141,11 @@ class LLMProcessManager(
         val feedbackResponse = llmFeedbackCycle.run { warning ->
             when (warning) {
                 LLMWithFeedbackCycle.WarningType.TEST_SUITE_PARSING_FAILED ->
-                    llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse"), project)
+                    llmErrorManager.warningProcess(MessagesBundle.message("emptyResponse"), project)
                 LLMWithFeedbackCycle.WarningType.NO_TEST_CASES_GENERATED ->
-                    llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse"), project)
+                    llmErrorManager.warningProcess(MessagesBundle.message("emptyResponse"), project)
                 LLMWithFeedbackCycle.WarningType.COMPILATION_ERROR_OCCURRED ->
-                    llmErrorManager.warningProcess(TestSparkBundle.message("compilationError"), project)
+                    llmErrorManager.warningProcess(MessagesBundle.message("compilationError"), project)
             }
         }
 
@@ -160,18 +160,18 @@ class LLMProcessManager(
                 generatedTestsData.compilableTestCases.addAll(feedbackResponse.compilableTestCases)
             }
             FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED -> {
-                llmErrorManager.errorProcess(TestSparkBundle.message("invalidLLMResult"), project)
+                llmErrorManager.errorProcess(MessagesBundle.message("invalidLLMResult"), project)
             }
             FeedbackCycleExecutionResult.CANCELED -> {
                 log.info("Process stopped")
                 return null
             }
             FeedbackCycleExecutionResult.PROVIDED_PROMPT_TOO_LONG -> {
-                llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPromptRequest"), project)
+                llmErrorManager.errorProcess(MessagesBundle.message("tooLongPromptRequest"), project)
                 return null
             }
             FeedbackCycleExecutionResult.SAVING_TEST_FILES_ISSUE -> {
-                llmErrorManager.errorProcess(TestSparkBundle.message("savingTestFileIssue"), project)
+                llmErrorManager.errorProcess(MessagesBundle.message("savingTestFileIssue"), project)
             }
         }
 

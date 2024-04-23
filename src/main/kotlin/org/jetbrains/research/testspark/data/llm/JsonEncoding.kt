@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.data
+package org.jetbrains.research.testspark.data.llm
 
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer

@@ -12,12 +12,12 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import org.evosuite.result.MutationInfo
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.LabelsBundle
+import org.jetbrains.research.testspark.bundles.SettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
-import org.jetbrains.research.testspark.coverage.CoverageRenderer
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
+import org.jetbrains.research.testspark.helpers.CoverageHelper
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -101,15 +101,15 @@ class CoverageVisualisationService(private val project: Project) {
             HighlightedData(linesToCover, selectedTests, testReport, project.service<EditorService>().editor!!)
         clear()
 
-        val settingsProjectState = project.service<SettingsProjectService>().state
+        val settingsProjectState = project.service<PluginSettingsService>().state
 
         if (settingsProjectState.showCoverageCheckboxSelected) {
             val color = JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                SettingsBundle.defaultValue("colorName"),
                 Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue),
             )
             val colorForLines = JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                SettingsBundle.defaultValue("colorName"),
                 Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
@@ -158,7 +158,7 @@ class CoverageVisualisationService(private val project: Project) {
                 val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
                 val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 
-                hl.lineMarkerRenderer = CoverageRenderer(
+                hl.lineMarkerRenderer = CoverageHelper(
                     color,
                     line,
                     testsCoveringLine,
@@ -245,7 +245,7 @@ class CoverageVisualisationService(private val project: Project) {
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
             visualisationService.mainPanel,
-            TestSparkLabelsBundle.defaultValue("coverageVisualisation"),
+            LabelsBundle.defaultValue("coverageVisualisation"),
             true,
         )
         contentManager!!.addContent(content!!)

@@ -4,8 +4,8 @@ import com.google.gson.JsonParser
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.bundles.SettingsBundle
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
@@ -46,7 +46,7 @@ class LLMHelper {
             modelSelector: ComboBox<String>,
             llmUserTokenField: JTextField,
             llmPlatforms: List<LLMPlatform>,
-            settingsState: SettingsApplicationState,
+            settingsState: LLMSettingsState,
         ) {
             ApplicationManager.getApplication().executeOnPooledThread {
                 var modules = arrayOf("")
@@ -86,7 +86,7 @@ class LLMHelper {
             platformSelector: ComboBox<String>,
             llmUserTokenField: JTextField,
             llmPlatforms: List<LLMPlatform>,
-            settingsState: SettingsApplicationState,
+            settingsState: LLMSettingsState,
         ) {
             for (index in llmPlatforms.indices) {
                 if (llmPlatforms[index].name == settingsState.openAIName &&
@@ -117,7 +117,7 @@ class LLMHelper {
             modelSelector: ComboBox<String>,
             llmUserTokenField: JTextField,
             llmPlatforms: List<LLMPlatform>,
-            settingsState: SettingsApplicationState,
+            settingsState: LLMSettingsState,
         ) {
             llmUserTokenField.document.addDocumentListener(object : DocumentListener {
                 override fun insertUpdate(e: DocumentEvent?) {
@@ -168,7 +168,7 @@ class LLMHelper {
             modelSelector: ComboBox<String>,
             llmUserTokenField: JTextField,
             llmPlatforms: List<LLMPlatform>,
-            settingsState: SettingsApplicationState,
+            settingsState: LLMSettingsState,
         ) {
             // Check if the Grazie platform access is available in the current build
             if (isGrazieClassLoaded()) {
@@ -178,10 +178,10 @@ class LLMHelper {
                 platformSelector.isEnabled = false
             }
 
-            llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
+            llmUserTokenField.toolTipText = SettingsBundle.defaultValue("llmToken")
             updateLlmUserTokenField(platformSelector, llmUserTokenField, llmPlatforms, settingsState)
 
-            modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
+            modelSelector.toolTipText = SettingsBundle.defaultValue("model")
             updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         }
 

@@ -27,8 +27,8 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.LabelsBundle
+import org.jetbrains.research.testspark.bundles.SettingsBundle
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
@@ -53,7 +53,7 @@ class TestCaseDisplayService(private val project: Project) {
 
     private val topButtonsPanelFactory = TopButtonsPanelFactory(project)
 
-    private var applyButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("applyButton"))
+    private var applyButton: JButton = JButton(LabelsBundle.defaultValue("applyButton"))
 
     private var allTestCasePanel: JPanel = JPanel()
 
@@ -181,10 +181,10 @@ class TestCaseDisplayService(private val project: Project) {
         scrollToPanel(myPanel)
 
         val editor = getEditor(name) ?: return
-        val settingsProjectState = project.service<SettingsProjectService>().state
+        val settingsProjectState = project.service<PluginSettingsService>().state
         val highlightColor =
             JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                SettingsBundle.defaultValue("colorName"),
                 Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
@@ -332,8 +332,8 @@ class TestCaseDisplayService(private val project: Project) {
                 val jOptionPane =
                     JOptionPane.showInputDialog(
                         null,
-                        TestSparkLabelsBundle.defaultValue("optionPaneMessage"),
-                        TestSparkLabelsBundle.defaultValue("optionPaneTitle"),
+                        LabelsBundle.defaultValue("optionPaneMessage"),
+                        LabelsBundle.defaultValue("optionPaneTitle"),
                         JOptionPane.PLAIN_MESSAGE,
                         null,
                         null,
@@ -352,13 +352,13 @@ class TestCaseDisplayService(private val project: Project) {
 
                 // Check the correctness of a class name
                 if (!Regex("[A-Z][a-zA-Z0-9]*(.java)?").matches(className)) {
-                    showErrorWindow(TestSparkLabelsBundle.defaultValue("incorrectFileNameMessage"))
+                    showErrorWindow(LabelsBundle.defaultValue("incorrectFileNameMessage"))
                     continue
                 }
 
                 // Check the existence of a file with this name
                 if (File(filePath).exists()) {
-                    showErrorWindow(TestSparkLabelsBundle.defaultValue("fileAlreadyExistsMessage"))
+                    showErrorWindow(LabelsBundle.defaultValue("fileAlreadyExistsMessage"))
                     continue
                 }
                 break
@@ -406,7 +406,7 @@ class TestCaseDisplayService(private val project: Project) {
         JOptionPane.showMessageDialog(
             null,
             message,
-            TestSparkLabelsBundle.defaultValue("errorWindowTitle"),
+            LabelsBundle.defaultValue("errorWindowTitle"),
             JOptionPane.ERROR_MESSAGE,
         )
     }
@@ -512,7 +512,7 @@ class TestCaseDisplayService(private val project: Project) {
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
             mainPanel,
-            TestSparkLabelsBundle.defaultValue("generatedTests"),
+            LabelsBundle.defaultValue("generatedTests"),
             true,
         )
         contentManager!!.addContent(content!!)

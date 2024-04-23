@@ -1,8 +1,7 @@
-package org.jetbrains.research.testspark.coverage
+package org.jetbrains.research.testspark.helpers
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.hint.HintManagerImpl
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
@@ -16,8 +15,9 @@ import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
@@ -35,7 +35,7 @@ import java.awt.event.MouseEvent
  * @param mapMutantsToTests map of mutant operation -> List of names of tests which cover mutant
  * @param project the current project
  */
-class CoverageRenderer(
+class CoverageHelper(
     private val color: Color,
     private val lineNumber: Int,
     private val tests: List<String>,
@@ -45,6 +45,8 @@ class CoverageRenderer(
     private val project: Project,
 ) :
     ActiveGutterRenderer, LineMarkerRendererEx {
+    private val evoSuiteSettingsState: EvoSuiteSettingsState
+        get() = project.getService(EvoSuiteSettingsService::class.java).state
 
     /**
      * Perform the action - show toolTip on mouse click.
@@ -66,8 +68,7 @@ class CoverageRenderer(
             )
         }
 
-        val state = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
-        if (coveredMutation.isNotEmpty() && state.criterionWeakMutation) {
+        if (coveredMutation.isNotEmpty() && evoSuiteSettingsState.criterionWeakMutation) {
             prePanel.addComponent(JBLabel(" Killed mutants:"), 10)
             for (mutantName in coveredMutation) {
                 prePanel.addComponent(
@@ -78,7 +79,7 @@ class CoverageRenderer(
             }
         }
 
-        if (notCoveredMutation.isNotEmpty() && state.criterionWeakMutation) {
+        if (notCoveredMutation.isNotEmpty() && evoSuiteSettingsState.criterionWeakMutation) {
             prePanel.addComponent(JBLabel(" Survived mutants:"), 10)
             for (mutantName in notCoveredMutation) {
                 prePanel.addComponent(

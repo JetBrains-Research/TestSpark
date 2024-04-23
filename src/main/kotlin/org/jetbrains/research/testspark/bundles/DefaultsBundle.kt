@@ -5,9 +5,9 @@ import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.PropertyKey
 
 /**
- * Loads the default values from `defaults/TestSpark.properties` file in the `resources` directory.
+ * Loads the default values from `defaults/Messages.properties` file in the `resources` directory.
  */
-object TestSparkDefaultsBundle : DynamicBundle(BundlePaths.DEFAULTS) {
+object DefaultsBundle : DynamicBundle(BundlePaths.DEFAULTS) {
 
     /**
      * Gets the requested default value.

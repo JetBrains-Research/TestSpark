@@ -19,25 +19,25 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.LabelsBundle
+import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.common.IconButtonCreator
 import org.jetbrains.research.testspark.display.common.ModifiedLinesGetter
 import org.jetbrains.research.testspark.display.common.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.ReportLockingService
-import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
@@ -66,19 +66,19 @@ class TestCasePanelFactory(
     private val checkbox: JCheckBox,
     val uiContext: UIContext?,
 ) {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
     private val panel = JPanel()
     private val previousButton =
-        IconButtonCreator.getButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
+        IconButtonCreator.getButton(TestSparkIcons.previous, LabelsBundle.defaultValue("previousRequest"))
     private var requestNumber: String = "%d / %d"
     private var requestLabel: JLabel = JLabel(requestNumber)
-    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
+    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, LabelsBundle.defaultValue("nextRequest"))
     private val errorLabel = JLabel(TestSparkIcons.showError)
-    private val copyButton = IconButtonCreator.getButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
-    private val likeButton = IconButtonCreator.getButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
-    private val dislikeButton = IconButtonCreator.getButton(TestSparkIcons.dislike, TestSparkLabelsBundle.defaultValue("dislikeTip"))
+    private val copyButton = IconButtonCreator.getButton(TestSparkIcons.copy, LabelsBundle.defaultValue("copyTip"))
+    private val likeButton = IconButtonCreator.getButton(TestSparkIcons.like, LabelsBundle.defaultValue("likeTip"))
+    private val dislikeButton = IconButtonCreator.getButton(TestSparkIcons.dislike, LabelsBundle.defaultValue("dislikeTip"))
 
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
@@ -107,22 +107,22 @@ class TestCasePanelFactory(
     )
 
     // Create "Remove" button to remove the test from cache
-    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTip"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, LabelsBundle.defaultValue("removeTip"))
 
     // Create "Reset" button to reset the changes in the source code of the test
-    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, TestSparkLabelsBundle.defaultValue("resetTip"))
+    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, LabelsBundle.defaultValue("resetTip"))
 
     // Create "Reset" button to reset the changes to last run in the source code of the test
     private val resetToLastRunButton =
-        IconButtonCreator.getButton(TestSparkIcons.resetToLastRun, TestSparkLabelsBundle.defaultValue("resetToLastRunTip"))
+        IconButtonCreator.getButton(TestSparkIcons.resetToLastRun, LabelsBundle.defaultValue("resetToLastRunTip"))
 
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
 
-    private val requestJLabel = JLabel(TestSparkLabelsBundle.defaultValue("requestJLabel"))
-    private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(settingsState.defaultLLMRequests))
+    private val requestJLabel = JLabel(LabelsBundle.defaultValue("requestJLabel"))
+    private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(llmSettingsState.defaultLLMRequests))
 
-    private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
+    private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, LabelsBundle.defaultValue("send"))
 
     private val loadingLabel: JLabel = JLabel(TestSparkIcons.loading)
 
@@ -200,7 +200,7 @@ class TestCasePanelFactory(
                 .getNotificationGroup("Test case copied")
                 .createNotification(
                     "",
-                    TestSparkBundle.message("testCaseCopied"),
+                    MessagesBundle.message("testCaseCopied"),
                     NotificationType.INFORMATION,
                 )
                 .notify(project)
@@ -279,8 +279,8 @@ class TestCasePanelFactory(
         runTestButton.addActionListener {
             val choice = JOptionPane.showConfirmDialog(
                 null,
-                TestSparkBundle.message("runCautionMessage"),
-                TestSparkBundle.message("confirmationTitle"),
+                MessagesBundle.message("runCautionMessage"),
+                MessagesBundle.message("confirmationTitle"),
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.WARNING_MESSAGE,
             )
@@ -399,7 +399,7 @@ class TestCasePanelFactory(
         enableComponents(false)
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
+            .run(object : Task.Backgroundable(project, MessagesBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
                     if (ToolUtils.isProcessStopped(project, ijIndicator)) {
@@ -494,7 +494,7 @@ class TestCasePanelFactory(
         enableComponents(false)
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
+            .run(object : Task.Backgroundable(project, MessagesBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     runTest(IJProgressIndicator(indicator))
                 }
@@ -634,7 +634,7 @@ class TestCasePanelFactory(
      * @return the created button
      */
     private fun createRunTestButton(): JButton {
-        val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("run"), TestSparkIcons.runTest)
+        val runTestButton = JButton(LabelsBundle.defaultValue("run"), TestSparkIcons.runTest)
         runTestButton.isOpaque = false
         runTestButton.isContentAreaFilled = false
         runTestButton.isBorderPainted = true

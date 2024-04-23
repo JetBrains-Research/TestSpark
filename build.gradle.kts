@@ -9,8 +9,6 @@ import java.util.zip.ZipInputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
-val thunderdomeVersion = "1.0.5"
-
 val spaceUsername =
     System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
 val spacePassword =
@@ -96,7 +94,7 @@ if (spaceCredentialsProvided()) {
 }
 
 dependencies {
-    implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
+    implementation(files("lib/evosuite-${properties("evosuiteVersion")}.jar"))
     implementation(files("lib/standalone-runtime.jar"))
     implementation(files("lib/jacocoagent.jar"))
     implementation(files("lib/jacococli.jar"))
@@ -115,7 +113,7 @@ dependencies {
 
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
-    implementation("junit:junit:4.13")
+    implementation("junit:junit:4.13.2")
 
     // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
     implementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
@@ -313,7 +311,7 @@ abstract class CopyJUnitRunnerLib : DefaultTask() {
  */
 abstract class UpdateEvoSuite : DefaultTask() {
     @Input
-    var version: String = ""
+    var evoSuiteVersion: String = ""
 
     @TaskAction
     fun execute() {
@@ -322,7 +320,7 @@ abstract class UpdateEvoSuite : DefaultTask() {
             libDir.mkdirs()
         }
 
-        val jarName = "evosuite-$version.jar"
+        val jarName = "evosuite-$evoSuiteVersion.jar"
 
         if (libDir.listFiles()?.any { it.name.matches(Regex(jarName)) } == true) {
             logger.info("Specified evosuite jar found, skipping update")
@@ -331,7 +329,7 @@ abstract class UpdateEvoSuite : DefaultTask() {
 
         logger.info("Specified evosuite jar not found, downloading release $jarName")
         val downloadUrl =
-            "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$version/release.zip"
+            "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$evoSuiteVersion/release.zip"
         val stream =
             try {
                 URL(downloadUrl).openStream()
@@ -359,7 +357,7 @@ abstract class UpdateEvoSuite : DefaultTask() {
 }
 
 tasks.register<UpdateEvoSuite>("updateEvosuite") {
-    version = thunderdomeVersion
+    evoSuiteVersion = properties("evosuiteVersion")
 }
 
 tasks.register<Copy>("copyJUnitRunnerLib") {

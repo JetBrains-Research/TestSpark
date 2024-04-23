@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -44,7 +44,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
                     HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consume(it)
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         llmErrorManager.errorProcess(
-                            TestSparkBundle.message("serverProblems"),
+                            MessagesBundle.message("serverProblems"),
                             project,
                         )
                         sendResult = SendResult.OTHER
@@ -52,7 +52,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
 
                     HttpURLConnection.HTTP_BAD_REQUEST -> {
                         llmErrorManager.warningProcess(
-                            TestSparkBundle.message("tooLongPrompt"),
+                            MessagesBundle.message("tooLongPrompt"),
                             project,
                         )
                         sendResult = SendResult.PROMPT_TOO_LONG
@@ -60,7 +60,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
 
                     HttpURLConnection.HTTP_UNAUTHORIZED -> {
                         llmErrorManager.errorProcess(
-                            TestSparkBundle.message("wrongToken"),
+                            MessagesBundle.message("wrongToken"),
                             project,
                         )
                         sendResult = SendResult.OTHER

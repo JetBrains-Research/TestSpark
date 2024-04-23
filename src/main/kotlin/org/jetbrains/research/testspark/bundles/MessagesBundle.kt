@@ -5,9 +5,9 @@ import org.jetbrains.annotations.Nls
 import org.jetbrains.annotations.PropertyKey
 
 /**
- * Loads the EvoSuite messages from `messages/TestSpark.properties` file in the `resources` directory.
+ * Loads the EvoSuite messages from `messages/Messages.properties` file in the `resources` directory.
  */
-object TestSparkBundle : DynamicBundle(BundlePaths.MESSAGES) {
+object MessagesBundle : DynamicBundle(BundlePaths.MESSAGES) {
 
     /**
      * Gets the requested message.

@@ -4,7 +4,7 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.tools.template.error.ErrorManager
 
@@ -26,7 +26,7 @@ class LLMErrorManager : ErrorManager {
      * @param code The error code associated with the request.
      * @return The error message for the request.
      */
-    fun createRequestErrorMessage(code: Int): String = TestSparkBundle.message("requestError") + " " + code.toString()
+    fun createRequestErrorMessage(code: Int): String = MessagesBundle.message("requestError") + " " + code.toString()
 
     /**
      * Processes an error message and displays a notification if an error has occurred.
@@ -39,7 +39,7 @@ class LLMErrorManager : ErrorManager {
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("LLM Execution Error")
                 .createNotification(
-                    TestSparkBundle.message("llmErrorTitle"),
+                    MessagesBundle.message("llmErrorTitle"),
                     message,
                     NotificationType.ERROR,
                 )
@@ -57,7 +57,7 @@ class LLMErrorManager : ErrorManager {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("LLM Execution Error")
             .createNotification(
-                TestSparkBundle.message("llmWarningTitle"),
+                MessagesBundle.message("llmWarningTitle"),
                 message,
                 NotificationType.WARNING,
             )

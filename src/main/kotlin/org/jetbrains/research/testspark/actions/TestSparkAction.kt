@@ -14,12 +14,14 @@ import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
 import org.jetbrains.research.testspark.actions.template.PanelFactory
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.LabelsBundle
+import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.PsiHelper
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
@@ -80,8 +82,10 @@ class TestSparkAction : AnAction() {
     class TestSparkActionWindow(e: AnActionEvent, private val visibilityController: VisibilityController) :
         JFrame("TestSpark") {
         private val project: Project = e.project!!
-        private val settingsState: SettingsApplicationState
-            get() = project.getService(SettingsApplicationService::class.java).state
+        private val llmSettingsState: LLMSettingsState
+            get() = project.getService(LLMSettingsService::class.java).state
+        private val evoSuiteSettingsState: EvoSuiteSettingsState
+            get() = project.getService(EvoSuiteSettingsService::class.java).state
 
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
@@ -96,7 +100,7 @@ class TestSparkAction : AnAction() {
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
-        private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
+        private val nextButton = JButton(LabelsBundle.defaultValue("next"))
 
         private val cardLayout = CardLayout()
         private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
@@ -137,8 +141,8 @@ class TestSparkAction : AnAction() {
                 NotificationGroupManager.getInstance()
                     .getNotificationGroup("Generation Error")
                     .createNotification(
-                        TestSparkBundle.message("generationWindowWarningTitle"),
-                        TestSparkBundle.message("generationWindowWarningMessage"),
+                        MessagesBundle.message("generationWindowWarningTitle"),
+                        MessagesBundle.message("generationWindowWarningMessage"),
                         NotificationType.WARNING,
                     )
                     .notify(e.project)
@@ -239,9 +243,9 @@ class TestSparkAction : AnAction() {
             }
 
             nextButton.addActionListener {
-                if (llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected && !settingsState.provideTestSamplesCheckBoxSelected) {
+                if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) {
                     startLLMGeneration()
-                } else if (llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected) {
+                } else if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected) {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     cardLayout.next(panel)
@@ -250,7 +254,7 @@ class TestSparkAction : AnAction() {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     pack()
-                } else if (evoSuiteButton.isSelected && !settingsState.evosuiteSetupCheckBoxSelected) {
+                } else if (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected) {
                     startEvoSuiteGeneration()
                 } else {
                     cardLayout.next(panel)
@@ -271,7 +275,7 @@ class TestSparkAction : AnAction() {
 
             llmSetupPanelFactory.getFinishedButton().addActionListener {
                 llmSetupPanelFactory.applyUpdates()
-                if (settingsState.provideTestSamplesCheckBoxSelected) {
+                if (llmSettingsState.provideTestSamplesCheckBoxSelected) {
                     cardLayout.next(panel)
                 } else {
                     startLLMGeneration()
@@ -283,7 +287,7 @@ class TestSparkAction : AnAction() {
             }
 
             llmSampleSelectorFactory.getBackButton().addActionListener {
-                if (settingsState.llmSetupCheckBoxSelected) {
+                if (llmSettingsState.llmSetupCheckBoxSelected) {
                     cardLayout.previous(panel)
                 } else {
                     cardLayout.previous(panel)
@@ -349,12 +353,12 @@ class TestSparkAction : AnAction() {
             }
             nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
 
-            if ((llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected && !settingsState.provideTestSamplesCheckBoxSelected) ||
-                (evoSuiteButton.isSelected && !settingsState.evosuiteSetupCheckBoxSelected)
+            if ((llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) ||
+                (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected)
             ) {
-                nextButton.text = TestSparkLabelsBundle.defaultValue("ok")
+                nextButton.text = LabelsBundle.defaultValue("ok")
             } else {
-                nextButton.text = TestSparkLabelsBundle.defaultValue("next")
+                nextButton.text = LabelsBundle.defaultValue("next")
             }
         }
     }

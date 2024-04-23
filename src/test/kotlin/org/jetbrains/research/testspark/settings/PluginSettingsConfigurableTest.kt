@@ -8,10 +8,14 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteComponent
-import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.common.PluginSettingsComponent
+import org.jetbrains.research.testspark.settings.common.PluginSettingsConfigurable
+import org.jetbrains.research.testspark.settings.common.PluginSettingsState
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsComponent
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
@@ -23,14 +27,14 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SettingsPluginConfigurableTest {
-    private lateinit var settingsConfigurable: SettingsPluginConfigurable
-    private lateinit var settingsEvoConfigurable: SettingsEvoSuiteConfigurable
-    private lateinit var settingsComponent: SettingsPluginComponent
-    private lateinit var settingsEvoComponent: SettingsEvoSuiteComponent
-    private lateinit var settingsState: SettingsProjectState
+class PluginSettingsConfigurableTest {
+    private lateinit var settingsConfigurable: PluginSettingsConfigurable
+    private lateinit var settingsEvoConfigurable: EvoSuiteSettingsConfigurable
+    private lateinit var settingsComponent: PluginSettingsComponent
+    private lateinit var settingsEvoComponent: EvoSuiteSettingsComponent
+    private lateinit var settingsState: PluginSettingsState
     private lateinit var fixture: CodeInsightTestFixture
-    private lateinit var settingsApplicationState: SettingsApplicationState
+    private lateinit var settingsApplicationState: LLMSettingsState
 
     @BeforeEach
     fun setUp() {
@@ -41,21 +45,21 @@ class SettingsPluginConfigurableTest {
             .createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
-        settingsConfigurable = SettingsPluginConfigurable(fixture.project)
+        settingsConfigurable = PluginSettingsConfigurable(fixture.project)
 
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
 
-        settingsEvoConfigurable = SettingsEvoSuiteConfigurable(fixture.project)
+        settingsEvoConfigurable = EvoSuiteSettingsConfigurable(fixture.project)
         settingsEvoConfigurable.createComponent()
         settingsEvoConfigurable.reset()
 
         settingsEvoComponent = settingsEvoConfigurable.settingsComponent!!
 
         settingsComponent = settingsConfigurable.settingsComponent!!
-        settingsState = fixture.project.service<SettingsProjectService>().state
+        settingsState = fixture.project.service<PluginSettingsService>().state
 
-        settingsApplicationState = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
+        settingsApplicationState = ApplicationManager.getApplication().getService(LLMSettingsService::class.java).state
     }
 
     @AfterEach

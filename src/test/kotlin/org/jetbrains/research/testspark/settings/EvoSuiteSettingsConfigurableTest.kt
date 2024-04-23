@@ -7,9 +7,10 @@ import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteComponent
-import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsComponent
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,12 +21,12 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SettingsEvoSuiteConfigurableTest {
-    private lateinit var settingsComponent: SettingsEvoSuiteComponent
-    private lateinit var settingsState: SettingsApplicationState
+class EvoSuiteSettingsConfigurableTest {
+    private lateinit var settingsComponent: EvoSuiteSettingsComponent
+    private lateinit var settingsState: LLMSettingsState
     private lateinit var fixture: CodeInsightTestFixture
 
-    private lateinit var settingsConfigurable: SettingsEvoSuiteConfigurable
+    private lateinit var settingsConfigurable: EvoSuiteSettingsConfigurable
 
     @BeforeEach
     fun setUp() {
@@ -36,11 +37,11 @@ class SettingsEvoSuiteConfigurableTest {
             .createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
-        settingsConfigurable = SettingsEvoSuiteConfigurable(fixture.project)
+        settingsConfigurable = EvoSuiteSettingsConfigurable(fixture.project)
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
         settingsComponent = settingsConfigurable.settingsComponent!!
-        settingsState = fixture.project.getService(SettingsApplicationService::class.java).state
+        settingsState = fixture.project.getService(LLMSettingsService::class.java).state
     }
 
     @AfterEach

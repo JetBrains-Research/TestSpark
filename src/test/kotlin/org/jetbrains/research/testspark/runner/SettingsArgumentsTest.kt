@@ -7,8 +7,8 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class SettingsArgumentsTest {
-    private lateinit var settingsState: SettingsApplicationState
+    private lateinit var settingsState: LLMSettingsState
 
     private lateinit var fixture: CodeInsightTestFixture
 
@@ -29,8 +29,8 @@ class SettingsArgumentsTest {
         fixture = JavaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
-        val settingsService = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java)
-        settingsService.loadState(SettingsApplicationState())
+        val settingsService = ApplicationManager.getApplication().getService(LLMSettingsService::class.java)
+        settingsService.loadState(LLMSettingsState())
 
         settingsState = settingsService.state
     }

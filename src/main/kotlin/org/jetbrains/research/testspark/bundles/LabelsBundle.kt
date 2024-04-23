@@ -7,7 +7,7 @@ import org.jetbrains.annotations.PropertyKey
 /**
  * Loads the label texts from `defaults/Labels.properties` file in the `recourses` directory.
  */
-object TestSparkLabelsBundle : DynamicBundle(BundlePaths.LABELS) {
+object LabelsBundle : DynamicBundle(BundlePaths.LABELS) {
 
     /**
      * Gets the requested default value.

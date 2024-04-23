@@ -5,13 +5,13 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.Messages
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.data.JsonEncoding
+import org.jetbrains.research.testspark.bundles.LabelsBundle
+import org.jetbrains.research.testspark.bundles.MessagesBundle
+import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.data.llm.PromptEditorType
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.common.IconButtonCreator
 import org.jetbrains.research.testspark.services.PromptParserService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.FlowLayout
 import javax.swing.BorderFactory
 import javax.swing.JButton
@@ -26,7 +26,7 @@ import kotlin.math.max
  * Creating the part of LLM settings that is responsible for prompt templates is organized
  */
 class PromptTemplateFactory(
-    private val settingsState: SettingsApplicationState,
+    private val llmSettingsState: LLMSettingsState,
     private val promptEditorType: PromptEditorType,
 ) {
     // init components
@@ -38,9 +38,9 @@ class PromptTemplateFactory(
     private var currentTemplateNumber = 0
 
     private val promptTemplateName = JTextField()
-    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTemplate"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, LabelsBundle.defaultValue("removeTemplate"))
     private val setAsDefaultButton =
-        JButton(TestSparkLabelsBundle.defaultValue("setAsDefault"), TestSparkIcons.setDefault)
+        JButton(LabelsBundle.defaultValue("setAsDefault"), TestSparkIcons.setDefault)
 
     private val editorTextField = EditorTextField()
 
@@ -49,9 +49,9 @@ class PromptTemplateFactory(
     private val redBorder = BorderFactory.createLineBorder(JBColor.RED)
 
     private val previousButton =
-        IconButtonCreator.getButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
-    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
-    private val addButton = JButton(TestSparkLabelsBundle.defaultValue("addPromptTemplate"), TestSparkIcons.add)
+        IconButtonCreator.getButton(TestSparkIcons.previous, LabelsBundle.defaultValue("previousRequest"))
+    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, LabelsBundle.defaultValue("nextRequest"))
+    private val addButton = JButton(LabelsBundle.defaultValue("addPromptTemplate"), TestSparkIcons.add)
 
     init {
         setSettingsStateParameters()
@@ -65,7 +65,7 @@ class PromptTemplateFactory(
 
     fun getUpperButtonsPanel(): JPanel {
         val panel = JPanel(FlowLayout(FlowLayout.LEFT))
-        panel.add(JLabel(TestSparkLabelsBundle.defaultValue("promptTemplateName")))
+        panel.add(JLabel(LabelsBundle.defaultValue("promptTemplateName")))
         panel.add(promptTemplateName)
         panel.add(setAsDefaultButton)
         panel.add(removeButton)
@@ -116,19 +116,19 @@ class PromptTemplateFactory(
     private fun setSettingsStateParameters() {
         templates.clear()
         templates = when (promptEditorType) {
-            PromptEditorType.CLASS -> JsonEncoding.decode(settingsState.classPrompts)
-            PromptEditorType.METHOD -> JsonEncoding.decode(settingsState.methodPrompts)
-            PromptEditorType.LINE -> JsonEncoding.decode(settingsState.linePrompts)
+            PromptEditorType.CLASS -> JsonEncoding.decode(llmSettingsState.classPrompts)
+            PromptEditorType.METHOD -> JsonEncoding.decode(llmSettingsState.methodPrompts)
+            PromptEditorType.LINE -> JsonEncoding.decode(llmSettingsState.linePrompts)
         }
         names = when (promptEditorType) {
-            PromptEditorType.CLASS -> JsonEncoding.decode(settingsState.classPromptNames)
-            PromptEditorType.METHOD -> JsonEncoding.decode(settingsState.methodPromptNames)
-            PromptEditorType.LINE -> JsonEncoding.decode(settingsState.linePromptNames)
+            PromptEditorType.CLASS -> JsonEncoding.decode(llmSettingsState.classPromptNames)
+            PromptEditorType.METHOD -> JsonEncoding.decode(llmSettingsState.methodPromptNames)
+            PromptEditorType.LINE -> JsonEncoding.decode(llmSettingsState.linePromptNames)
         }
         currentDefaultIndex = when (promptEditorType) {
-            PromptEditorType.CLASS -> settingsState.classCurrentDefaultPromptIndex
-            PromptEditorType.METHOD -> settingsState.methodCurrentDefaultPromptIndex
-            PromptEditorType.LINE -> settingsState.lineCurrentDefaultPromptIndex
+            PromptEditorType.CLASS -> llmSettingsState.classCurrentDefaultPromptIndex
+            PromptEditorType.METHOD -> llmSettingsState.methodCurrentDefaultPromptIndex
+            PromptEditorType.LINE -> llmSettingsState.lineCurrentDefaultPromptIndex
         }
         currentTemplateNumber = currentDefaultIndex
     }
@@ -141,7 +141,7 @@ class PromptTemplateFactory(
     }
 
     private fun getDefaultPromptTemplateName(number: Int) =
-        TestSparkLabelsBundle.defaultValue("defaultPromptTemplateName") + number.toString()
+        LabelsBundle.defaultValue("defaultPromptTemplateName") + number.toString()
 
     private fun addListeners() {
         promptTemplateName.document.addDocumentListener(
@@ -177,8 +177,8 @@ class PromptTemplateFactory(
         removeButton.addActionListener {
             if (currentDefaultIndex == currentTemplateNumber) {
                 Messages.showErrorDialog(
-                    TestSparkBundle.message("removeTemplateMessage"),
-                    TestSparkBundle.message("removeTemplateTitle"),
+                    MessagesBundle.message("removeTemplateMessage"),
+                    MessagesBundle.message("removeTemplateTitle"),
                 )
             } else {
                 if (currentTemplateNumber < currentDefaultIndex) currentDefaultIndex--

@@ -5,8 +5,8 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.LabelsBundle
+import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.display.common.IconButtonCreator
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
@@ -25,16 +25,16 @@ import javax.swing.JPanel
 class TopButtonsPanelFactory(private val project: Project) {
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
-        IconButtonCreator.getButton(TestSparkIcons.selectAll, TestSparkLabelsBundle.defaultValue("selectAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.selectAll, LabelsBundle.defaultValue("selectAllTip"))
     private var unselectAllButton: JButton =
-        IconButtonCreator.getButton(TestSparkIcons.unselectAll, TestSparkLabelsBundle.defaultValue("unselectAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.unselectAll, LabelsBundle.defaultValue("unselectAllTip"))
     private var removeAllButton: JButton =
-        IconButtonCreator.getButton(TestSparkIcons.removeAll, TestSparkLabelsBundle.defaultValue("removeAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.removeAll, LabelsBundle.defaultValue("removeAllTip"))
 
-    private var testsSelectedText: String = "${TestSparkLabelsBundle.defaultValue("testsSelected")}: %d/%d"
+    private var testsSelectedText: String = "${LabelsBundle.defaultValue("testsSelected")}: %d/%d"
     private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
-    private val testsPassedText: String = "${TestSparkLabelsBundle.defaultValue("testsPassed")}: %d/%d"
+    private val testsPassedText: String = "${LabelsBundle.defaultValue("testsPassed")}: %d/%d"
     private var testsPassedLabel: JLabel = JLabel(testsPassedText)
 
     private val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
@@ -121,8 +121,8 @@ class TopButtonsPanelFactory(private val project: Project) {
         // Ask the user for the confirmation
         val choice = JOptionPane.showConfirmDialog(
             null,
-            TestSparkBundle.message("removeAllMessage"),
-            TestSparkBundle.message("confirmationTitle"),
+            MessagesBundle.message("removeAllMessage"),
+            MessagesBundle.message("confirmationTitle"),
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE,
         )
@@ -142,8 +142,8 @@ class TopButtonsPanelFactory(private val project: Project) {
     private fun runAllTestCases() {
         val choice = JOptionPane.showConfirmDialog(
             null,
-            TestSparkBundle.message("runCautionMessage"),
-            TestSparkBundle.message("confirmationTitle"),
+            MessagesBundle.message("runCautionMessage"),
+            MessagesBundle.message("confirmationTitle"),
             JOptionPane.OK_CANCEL_OPTION,
             JOptionPane.WARNING_MESSAGE,
         )
@@ -185,7 +185,7 @@ class TopButtonsPanelFactory(private val project: Project) {
      * @return a JButton for running all tests
      */
     private fun createRunAllTestButton(): JButton {
-        val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("runAll"), TestSparkIcons.runTest)
+        val runTestButton = JButton(LabelsBundle.defaultValue("runAll"), TestSparkIcons.runTest)
         runTestButton.isOpaque = false
         runTestButton.isContentAreaFilled = false
         runTestButton.isBorderPainted = true

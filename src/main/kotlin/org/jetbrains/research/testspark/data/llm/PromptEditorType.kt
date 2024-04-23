@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.settings.llm
+package org.jetbrains.research.testspark.data.llm
 
 enum class PromptEditorType(val text: String, val index: Int) {
     CLASS("Class", 0),

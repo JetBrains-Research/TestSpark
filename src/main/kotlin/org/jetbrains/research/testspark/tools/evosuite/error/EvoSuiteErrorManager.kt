@@ -5,7 +5,7 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.tools.ToolUtils
@@ -35,7 +35,7 @@ class EvoSuiteErrorManager : ErrorManager {
      * @return The common error message with the provided message.
      */
     private fun getCommonErrorMessage(message: String) =
-        TestSparkBundle.message("evosuiteErrorCommon") + " " + message
+        MessagesBundle.message("evosuiteErrorCommon") + " " + message
 
     /**
      * Returns the exceeded timeout message with the specified EvoSuite process timeout.
@@ -44,7 +44,7 @@ class EvoSuiteErrorManager : ErrorManager {
      * @return The exceeded timeout message.
      */
     private fun getExceededTimeoutMessage(evoSuiteProcessTimeout: Long) =
-        TestSparkBundle.message("exceededTimeoutMessage") + " " + evoSuiteProcessTimeout + " ms"
+        MessagesBundle.message("exceededTimeoutMessage") + " " + evoSuiteProcessTimeout + " ms"
 
     /**
      * Retrieves the error message from the EvoSuite output or the non-zero exit code message if available.
@@ -56,7 +56,7 @@ class EvoSuiteErrorManager : ErrorManager {
     private fun getEvoSuiteNonZeroExitCodeMessage(evosuiteOutput: String) =
         "Error: (.*)\n".toRegex().find(evosuiteOutput)?.groupValues?.get(1)
             ?: "Exception: (.*)\n".toRegex().find(evosuiteOutput)?.groupValues?.get(1)
-            ?: TestSparkBundle.message("nonZeroCodeMessage")
+            ?: MessagesBundle.message("nonZeroCodeMessage")
 
     /**
      * Checks if the process is correct by analyzing the output and exit code of the process.
@@ -91,15 +91,15 @@ class EvoSuiteErrorManager : ErrorManager {
         }
 
         // unknown class error
-        if (output.contains(TestSparkBundle.message("unknownClassError"))) {
-            errorProcess(TestSparkBundle.message("unknownClassMessage"), project)
+        if (output.contains(MessagesBundle.message("unknownClassError"))) {
+            errorProcess(MessagesBundle.message("unknownClassMessage"), project)
             return false
         }
 
         // error while initializing target class
-        if (output.contains(TestSparkBundle.message("errorWhileInitializingTargetClass"))) {
+        if (output.contains(MessagesBundle.message("errorWhileInitializingTargetClass"))) {
             errorProcess(
-                TestSparkBundle.message("errorWhileInitializingTargetClass").lowercase(Locale.getDefault()),
+                MessagesBundle.message("errorWhileInitializingTargetClass").lowercase(Locale.getDefault()),
                 project,
             )
             return false
@@ -118,7 +118,7 @@ class EvoSuiteErrorManager : ErrorManager {
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("EvoSuite Execution Error")
                 .createNotification(
-                    TestSparkBundle.message("evosuiteErrorTitle"),
+                    MessagesBundle.message("evosuiteErrorTitle"),
                     getCommonErrorMessage(message),
                     NotificationType.ERROR,
                 )
@@ -135,7 +135,7 @@ class EvoSuiteErrorManager : ErrorManager {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("EvoSuite Execution Error")
             .createNotification(
-                TestSparkBundle.message("evosuiteErrorTitle"),
+                MessagesBundle.message("evosuiteErrorTitle"),
                 getCommonErrorMessage(message),
                 NotificationType.WARNING,
             )

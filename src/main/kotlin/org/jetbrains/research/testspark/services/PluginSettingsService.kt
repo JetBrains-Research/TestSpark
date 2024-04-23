@@ -1,26 +1,20 @@
 package org.jetbrains.research.testspark.services
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.settings.SettingsProjectState
-import java.io.File
+import org.jetbrains.research.testspark.settings.common.PluginSettingsState
 
 /**
  * This class is responsible for storing the project-level settings persistently. It uses SettingsProjectState class for that.
  */
 @Service(Service.Level.PROJECT)
-@State(name = "SettingsProjectState", storages = [Storage("TestSparkPluginSettings.xml")])
-class SettingsProjectService(project: Project) : PersistentStateComponent<SettingsProjectState> {
+@State(name = "SettingsProjectState", storages = [Storage("ProjectSettings.xml")])
+class PluginSettingsService : PersistentStateComponent<PluginSettingsState> {
 
-    private var settingsProjectState: SettingsProjectState = SettingsProjectState()
-
-    init {
-        settingsProjectState.telemetryPath += File.separator.plus(project.name)
-    }
+    private var settingsProjectState: PluginSettingsState = PluginSettingsState()
 
     /**
      * Gets the currently persisted state of the open project.
@@ -28,7 +22,7 @@ class SettingsProjectService(project: Project) : PersistentStateComponent<Settin
      * If the values from getState are different from the default values obtained by calling
      *  the default constructor, the state is persisted (serialised and stored).
      */
-    override fun getState(): SettingsProjectState {
+    override fun getState(): PluginSettingsState {
         return settingsProjectState
     }
 
@@ -37,19 +31,11 @@ class SettingsProjectService(project: Project) : PersistentStateComponent<Settin
      * This method is called after the application-level settings component has been created
      *   and if the XML file with the state is changes externally.
      */
-    override fun loadState(state: SettingsProjectState) {
+    override fun loadState(state: PluginSettingsState) {
         settingsProjectState = state
     }
 
     companion object {
-
-        /**
-         * Returns the service object with a static call.
-         *
-         * @return the service that manages the state
-         */
-        fun getInstance(): PersistentStateComponent<SettingsProjectState> {
-            return ApplicationManager.getApplication().getService(SettingsProjectService::class.java)
-        }
+        fun service(project: Project) = project.getService(PluginSettingsService::class.java).state
     }
 }

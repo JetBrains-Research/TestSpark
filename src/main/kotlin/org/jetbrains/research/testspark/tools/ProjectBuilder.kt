@@ -10,23 +10,26 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.task.ProjectTaskManager
 import com.intellij.util.concurrency.Semaphore
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.common.PluginSettingsState
 import java.util.concurrent.CountDownLatch
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
  */
 class ProjectBuilder(private val project: Project) {
+    private val pluginSettingsState: PluginSettingsState
+        get() = project.getService(PluginSettingsService::class.java).state
+
     private val log = Logger.getInstance(this::class.java)
 
     private val builderTimeout: Long = 12000000 // TODO: Source from config
 
     private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    private val settingsState = project.service<SettingsProjectService>().state
 
     /**
      * Runs the build process.
@@ -41,9 +44,9 @@ class ProjectBuilder(private val project: Project) {
 
         try {
             indicator.setIndeterminate(true)
-            indicator.setText(TestSparkBundle.message("buildMessage"))
+            indicator.setText(MessagesBundle.message("buildMessage"))
 
-            if (settingsState.buildCommand.isEmpty()) {
+            if (pluginSettingsState.buildCommand.isEmpty()) {
                 // User did not put own command line
                 val promise = ProjectTaskManager.getInstance(project).buildAllModules()
                 val finished = Semaphore()
@@ -74,7 +77,7 @@ class ProjectBuilder(private val project: Project) {
                     cmd.add("-c")
                 }
 
-                cmd.add(settingsState.buildCommand)
+                cmd.add(pluginSettingsState.buildCommand)
 
                 val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
                 log.info("Starting build process with arguments: $cmdString")
@@ -113,8 +116,8 @@ class ProjectBuilder(private val project: Project) {
     private fun errorProcess() {
         if (project.service<ErrorService>().errorOccurred()) {
             NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-                TestSparkBundle.message("buildErrorTitle"),
-                TestSparkBundle.message("commonBuildErrorMessage"),
+                MessagesBundle.message("buildErrorTitle"),
+                MessagesBundle.message("commonBuildErrorMessage"),
                 NotificationType.ERROR,
             ).notify(project)
         }
