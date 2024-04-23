@@ -113,7 +113,7 @@ dependencies {
 
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
-    implementation("junit:junit:4.13.2")
+    implementation("junit:junit:4.13")
 
     // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
     implementation("org.junit.jupiter:junit-jupiter-api:5.10.0")

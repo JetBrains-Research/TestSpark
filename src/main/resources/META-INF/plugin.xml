@@ -156,22 +156,24 @@
                 serviceImplementation="org.jetbrains.research.testspark.services.LLMSettingsService"/>
         <applicationService
                 serviceImplementation="org.jetbrains.research.testspark.services.PluginSettingsService"/>
+        <applicationService
+                serviceImplementation="org.jetbrains.research.testspark.services.EvoSuiteSettingsService"/>
 
         <!-- Configurables -->
         <projectConfigurable
                 parentId="tools"
                 instance="org.jetbrains.research.testspark.settings.common.PluginSettingsConfigurable"
-                id="TestSparkSettings"
+                id="PluginSettings"
                 displayName="TestSpark"/>
         <projectConfigurable
                 parentId="TestSparkSettings"
                 instance="org.jetbrains.research.testspark.settings.llm.LLMSettingsConfigurable"
-                id="TestSparkSettings.llm"
+                id="LLMSettings"
                 displayName="Large Language Models"/>
         <projectConfigurable
                 parentId="TestSparkSettings"
                 instance="org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable"
-                id="TestSparkSettings.evosuite"
+                id="EvoSuiteSettings"
                 displayName="EvoSuite"/>
 
         <!-- Notifications -->
