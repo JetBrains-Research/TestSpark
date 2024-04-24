@@ -11,6 +11,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
+import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteDefaultsBundle
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
@@ -50,8 +51,8 @@ class EvoSuiteProcessManager(
     private val evoSuiteSettingsState: EvoSuiteSettingsState
         get() = project.getService(EvoSuiteSettingsService::class.java).state
 
-    private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
-    private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
+    private val evoSuiteProcessTimeout: Long = 12000000
+    private val evosuiteVersion = EvoSuiteDefaultsBundle.defaultValue("evosuiteVersion")
 
     private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
     private var evoSuitePath = "$pluginsPath${ToolUtils.sep}TestSpark${ToolUtils.sep}lib${ToolUtils.sep}evosuite-$evosuiteVersion.jar"

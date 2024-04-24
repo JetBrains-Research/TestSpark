@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.task.ProjectTaskManager
 import com.intellij.util.concurrency.Semaphore
+import org.jetbrains.research.testspark.bundles.plugin.PluginDefaultsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -27,7 +28,7 @@ class ProjectBuilder(private val project: Project) {
 
     private val log = Logger.getInstance(this::class.java)
 
-    private val builderTimeout: Long = 12000000 // TODO: Source from config
+    private val builderTimeout: Long = 12000000
 
     private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
