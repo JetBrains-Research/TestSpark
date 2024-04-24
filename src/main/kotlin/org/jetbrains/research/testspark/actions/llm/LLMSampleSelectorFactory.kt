@@ -4,7 +4,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
-import org.jetbrains.research.testspark.bundles.LabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.services.LLMTestSampleService
 import java.awt.Font
 import javax.swing.ButtonGroup
@@ -16,8 +16,8 @@ import javax.swing.JRadioButton
 class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     // init components
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
-        JRadioButton(LabelsBundle.defaultValue("provideTestSample")),
-        JRadioButton(LabelsBundle.defaultValue("noTestSample")),
+        JRadioButton(PluginLabelsBundle.defaultValue("provideTestSample")),
+        JRadioButton(PluginLabelsBundle.defaultValue("noTestSample")),
     )
     private val selectionTypeButtonGroup = ButtonGroup()
     private val radioButtonsPanel = JPanel()
@@ -31,10 +31,10 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     private var testSamplesCode: String = ""
 
     private val addButtonPanel = JPanel()
-    private val addButton = JButton(LabelsBundle.defaultValue("addTestSample"))
+    private val addButton = JButton(PluginLabelsBundle.defaultValue("addTestSample"))
 
-    private val nextButton = JButton(LabelsBundle.defaultValue("ok"))
-    private val backLlmButton = JButton(LabelsBundle.defaultValue("back"))
+    private val nextButton = JButton(PluginLabelsBundle.defaultValue("ok"))
+    private val backLlmButton = JButton(PluginLabelsBundle.defaultValue("back"))
 
     private var formBuilder = FormBuilder.createFormBuilder()
         .setFormLeftIndent(10)
@@ -50,7 +50,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     }
 
     override fun getTitlePanel(): JPanel {
-        val textTitle = JLabel(LabelsBundle.defaultValue("llmSampleSelectorFactory"))
+        val textTitle = JLabel(PluginLabelsBundle.defaultValue("llmSampleSelectorFactory"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()

@@ -7,10 +7,10 @@ import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsComponent
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable
-import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,7 +23,7 @@ import java.util.stream.Stream
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EvoSuiteSettingsConfigurableTest {
     private lateinit var settingsComponent: EvoSuiteSettingsComponent
-    private lateinit var settingsState: LLMSettingsState
+    private lateinit var settingsState: EvoSuiteSettingsState
     private lateinit var fixture: CodeInsightTestFixture
 
     private lateinit var settingsConfigurable: EvoSuiteSettingsConfigurable
@@ -41,7 +41,7 @@ class EvoSuiteSettingsConfigurableTest {
         settingsConfigurable.createComponent()
         settingsConfigurable.reset()
         settingsComponent = settingsConfigurable.settingsComponent!!
-        settingsState = fixture.project.getService(LLMSettingsService::class.java).state
+        settingsState = fixture.project.getService(EvoSuiteSettingsService::class.java).state
     }
 
     @AfterEach

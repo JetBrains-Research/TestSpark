@@ -10,12 +10,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.task.ProjectTaskManager
 import com.intellij.util.concurrency.Semaphore
-import org.jetbrains.research.testspark.bundles.MessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.settings.common.PluginSettingsState
+import org.jetbrains.research.testspark.settings.plugin.PluginSettingsState
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -44,7 +44,7 @@ class ProjectBuilder(private val project: Project) {
 
         try {
             indicator.setIndeterminate(true)
-            indicator.setText(MessagesBundle.message("buildMessage"))
+            indicator.setText(PluginMessagesBundle.message("buildMessage"))
 
             if (pluginSettingsState.buildCommand.isEmpty()) {
                 // User did not put own command line
@@ -116,8 +116,8 @@ class ProjectBuilder(private val project: Project) {
     private fun errorProcess() {
         if (project.service<ErrorService>().errorOccurred()) {
             NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-                MessagesBundle.message("buildErrorTitle"),
-                MessagesBundle.message("commonBuildErrorMessage"),
+                PluginMessagesBundle.message("buildErrorTitle"),
+                PluginMessagesBundle.message("commonBuildErrorMessage"),
                 NotificationType.ERROR,
             ).notify(project)
         }

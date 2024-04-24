@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.settings.common
+package org.jetbrains.research.testspark.settings.plugin
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project

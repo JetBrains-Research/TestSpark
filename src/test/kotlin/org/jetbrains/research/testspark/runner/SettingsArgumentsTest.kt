@@ -7,9 +7,8 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
-import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
-import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -30,8 +29,8 @@ class SettingsArgumentsTest {
         fixture = JavaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
-        val settingsService = ApplicationManager.getApplication().getService(LLMSettingsService::class.java)
-        settingsService.loadState(LLMSettingsState())
+        val settingsService = ApplicationManager.getApplication().getService(EvoSuiteSettingsService::class.java)
+        settingsService.loadState(EvoSuiteSettingsState())
 
         settingsState = settingsService.state
     }

@@ -5,12 +5,12 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.Messages
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
-import org.jetbrains.research.testspark.bundles.LabelsBundle
-import org.jetbrains.research.testspark.bundles.MessagesBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.data.llm.PromptEditorType
-import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.IconButtonCreator
+import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.services.PromptParserService
 import java.awt.FlowLayout
 import javax.swing.BorderFactory
@@ -38,9 +38,9 @@ class PromptTemplateFactory(
     private var currentTemplateNumber = 0
 
     private val promptTemplateName = JTextField()
-    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, LabelsBundle.defaultValue("removeTemplate"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.defaultValue("removeTemplate"))
     private val setAsDefaultButton =
-        JButton(LabelsBundle.defaultValue("setAsDefault"), TestSparkIcons.setDefault)
+        JButton(PluginLabelsBundle.defaultValue("setAsDefault"), TestSparkIcons.setDefault)
 
     private val editorTextField = EditorTextField()
 
@@ -49,9 +49,9 @@ class PromptTemplateFactory(
     private val redBorder = BorderFactory.createLineBorder(JBColor.RED)
 
     private val previousButton =
-        IconButtonCreator.getButton(TestSparkIcons.previous, LabelsBundle.defaultValue("previousRequest"))
-    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, LabelsBundle.defaultValue("nextRequest"))
-    private val addButton = JButton(LabelsBundle.defaultValue("addPromptTemplate"), TestSparkIcons.add)
+        IconButtonCreator.getButton(TestSparkIcons.previous, PluginLabelsBundle.defaultValue("previousRequest"))
+    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, PluginLabelsBundle.defaultValue("nextRequest"))
+    private val addButton = JButton(PluginLabelsBundle.defaultValue("addPromptTemplate"), TestSparkIcons.add)
 
     init {
         setSettingsStateParameters()
@@ -65,7 +65,7 @@ class PromptTemplateFactory(
 
     fun getUpperButtonsPanel(): JPanel {
         val panel = JPanel(FlowLayout(FlowLayout.LEFT))
-        panel.add(JLabel(LabelsBundle.defaultValue("promptTemplateName")))
+        panel.add(JLabel(PluginLabelsBundle.defaultValue("promptTemplateName")))
         panel.add(promptTemplateName)
         panel.add(setAsDefaultButton)
         panel.add(removeButton)
@@ -141,7 +141,7 @@ class PromptTemplateFactory(
     }
 
     private fun getDefaultPromptTemplateName(number: Int) =
-        LabelsBundle.defaultValue("defaultPromptTemplateName") + number.toString()
+        PluginLabelsBundle.defaultValue("defaultPromptTemplateName") + number.toString()
 
     private fun addListeners() {
         promptTemplateName.document.addDocumentListener(
@@ -177,8 +177,8 @@ class PromptTemplateFactory(
         removeButton.addActionListener {
             if (currentDefaultIndex == currentTemplateNumber) {
                 Messages.showErrorDialog(
-                    MessagesBundle.message("removeTemplateMessage"),
-                    MessagesBundle.message("removeTemplateTitle"),
+                    LLMMessagesBundle.message("removeTemplateMessage"),
+                    LLMMessagesBundle.message("removeTemplateTitle"),
                 )
             } else {
                 if (currentTemplateNumber < currentDefaultIndex) currentDefaultIndex--

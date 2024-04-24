@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.settings.evosuite
 
-import org.jetbrains.research.testspark.bundles.DefaultsBundle
+import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteDefaultsBundle
 import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
 
 /**
@@ -32,25 +32,24 @@ data class EvoSuiteSettingsState(
      * Default values of SettingsEvoSuiteState.
      */
     object DefaultEvoSuiteSettingsState {
-        var javaPath: String = DefaultsBundle.defaultValue("javaPath")
-        val sandbox: Boolean = DefaultsBundle.defaultValue("sandbox").toBoolean()
-        val assertions: Boolean = DefaultsBundle.defaultValue("assertions").toBoolean()
-        val seed: String = DefaultsBundle.defaultValue("seed")
-        val junitCheck: Boolean = DefaultsBundle.defaultValue("junitCheck").toBoolean()
-        val minimize: Boolean = DefaultsBundle.defaultValue("minimize").toBoolean()
+        var javaPath: String = EvoSuiteDefaultsBundle.defaultValue("javaPath")
+        val sandbox: Boolean = EvoSuiteDefaultsBundle.defaultValue("sandbox").toBoolean()
+        val assertions: Boolean = EvoSuiteDefaultsBundle.defaultValue("assertions").toBoolean()
+        val seed: String = EvoSuiteDefaultsBundle.defaultValue("seed")
+        val junitCheck: Boolean = EvoSuiteDefaultsBundle.defaultValue("junitCheck").toBoolean()
+        val minimize: Boolean = EvoSuiteDefaultsBundle.defaultValue("minimize").toBoolean()
         val algorithm: ContentDigestAlgorithm = ContentDigestAlgorithm.DYNAMOSA
-        val configurationId: String = DefaultsBundle.defaultValue("configurationId")
-        val clientOnThread: Boolean = DefaultsBundle.defaultValue("clientOnThread").toBoolean()
-        val criterionLine: Boolean = DefaultsBundle.defaultValue("criterionLine").toBoolean()
-        val criterionBranch: Boolean = DefaultsBundle.defaultValue("criterionBranch").toBoolean()
-        val criterionException: Boolean = DefaultsBundle.defaultValue("criterionException").toBoolean()
-        val criterionWeakMutation: Boolean = DefaultsBundle.defaultValue("criterionWeakMutation").toBoolean()
-        val criterionOutput: Boolean = DefaultsBundle.defaultValue("criterionOutput").toBoolean()
-        val criterionMethod: Boolean = DefaultsBundle.defaultValue("criterionMethod").toBoolean()
-        val criterionMethodNoException: Boolean = DefaultsBundle.defaultValue("criterionMethodNoException").toBoolean()
-        val criterionCBranch: Boolean = DefaultsBundle.defaultValue("criterionCBranch").toBoolean()
-        val openAIName: String = DefaultsBundle.defaultValue("openAIName")
-        val evosuiteSetupCheckBoxSelected: Boolean = DefaultsBundle.defaultValue("evosuiteSetup").toBoolean()
-        val evosuitePort: String = DefaultsBundle.defaultValue("evosuitePort")
+        val configurationId: String = EvoSuiteDefaultsBundle.defaultValue("configurationId")
+        val clientOnThread: Boolean = EvoSuiteDefaultsBundle.defaultValue("clientOnThread").toBoolean()
+        val criterionLine: Boolean = EvoSuiteDefaultsBundle.defaultValue("criterionLine").toBoolean()
+        val criterionBranch: Boolean = EvoSuiteDefaultsBundle.defaultValue("criterionBranch").toBoolean()
+        val criterionException: Boolean = EvoSuiteDefaultsBundle.defaultValue("criterionException").toBoolean()
+        val criterionWeakMutation: Boolean = EvoSuiteDefaultsBundle.defaultValue("criterionWeakMutation").toBoolean()
+        val criterionOutput: Boolean = EvoSuiteDefaultsBundle.defaultValue("criterionOutput").toBoolean()
+        val criterionMethod: Boolean = EvoSuiteDefaultsBundle.defaultValue("criterionMethod").toBoolean()
+        val criterionMethodNoException: Boolean = EvoSuiteDefaultsBundle.defaultValue("criterionMethodNoException").toBoolean()
+        val criterionCBranch: Boolean = EvoSuiteDefaultsBundle.defaultValue("criterionCBranch").toBoolean()
+        val evosuiteSetupCheckBoxSelected: Boolean = EvoSuiteDefaultsBundle.defaultValue("evosuiteSetup").toBoolean()
+        val evosuitePort: String = EvoSuiteDefaultsBundle.defaultValue("evosuitePort")
     }
 }

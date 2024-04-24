@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.settings.evosuite
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import org.jetbrains.research.testspark.bundles.MessagesBundle
+import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.settings.template.SettingsConfigurable
 import javax.swing.JComponent
@@ -107,8 +107,8 @@ class EvoSuiteSettingsConfigurable(private val project: Project) : SettingsConfi
         val seed = settingsComponent!!.seed.toLongOrNull()
         if (settingsComponent!!.seed != "" && seed == null) {
             Messages.showErrorDialog(
-                MessagesBundle.message("seedParameterMessage"),
-                MessagesBundle.message("seedParameterTitle"),
+                EvoSuiteMessagesBundle.message("seedParameterMessage"),
+                EvoSuiteMessagesBundle.message("seedParameterTitle"),
             )
         } else {
             evoSuiteSettingsState.seed = settingsComponent!!.seed
@@ -117,8 +117,8 @@ class EvoSuiteSettingsConfigurable(private val project: Project) : SettingsConfi
         val evosuitePort = settingsComponent!!.evosuitePort.toIntOrNull()
         if (evosuitePort != null && (evosuitePort < 1024 || evosuitePort > 65535)) {
             Messages.showErrorDialog(
-                MessagesBundle.message("evosuitePortMessage"),
-                MessagesBundle.message("evosuitePortTitle"),
+                EvoSuiteMessagesBundle.message("evosuitePortMessage"),
+                EvoSuiteMessagesBundle.message("evosuitePortTitle"),
             )
         } else {
             evoSuiteSettingsState.evosuitePort = settingsComponent!!.evosuitePort

@@ -14,8 +14,8 @@ import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
 import org.jetbrains.research.testspark.actions.template.PanelFactory
-import org.jetbrains.research.testspark.bundles.LabelsBundle
-import org.jetbrains.research.testspark.bundles.MessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
@@ -100,7 +100,7 @@ class TestSparkAction : AnAction() {
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
-        private val nextButton = JButton(LabelsBundle.defaultValue("next"))
+        private val nextButton = JButton(PluginLabelsBundle.defaultValue("next"))
 
         private val cardLayout = CardLayout()
         private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
@@ -141,8 +141,8 @@ class TestSparkAction : AnAction() {
                 NotificationGroupManager.getInstance()
                     .getNotificationGroup("Generation Error")
                     .createNotification(
-                        MessagesBundle.message("generationWindowWarningTitle"),
-                        MessagesBundle.message("generationWindowWarningMessage"),
+                        PluginMessagesBundle.message("generationWindowWarningTitle"),
+                        PluginMessagesBundle.message("generationWindowWarningMessage"),
                         NotificationType.WARNING,
                     )
                     .notify(e.project)
@@ -356,9 +356,9 @@ class TestSparkAction : AnAction() {
             if ((llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) ||
                 (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected)
             ) {
-                nextButton.text = LabelsBundle.defaultValue("ok")
+                nextButton.text = PluginLabelsBundle.defaultValue("ok")
             } else {
-                nextButton.text = LabelsBundle.defaultValue("next")
+                nextButton.text = PluginLabelsBundle.defaultValue("next")
             }
         }
     }

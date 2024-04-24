@@ -5,7 +5,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.settings.common.PluginSettingsState
+import org.jetbrains.research.testspark.settings.plugin.PluginSettingsState
 
 /**
  * This class is responsible for storing the project-level settings persistently. It uses SettingsProjectState class for that.

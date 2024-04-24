@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.util.xmlb.annotations.OptionTag
-import org.jetbrains.research.testspark.bundles.DefaultsBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.data.JUnitVersionConverter
 
@@ -39,29 +39,29 @@ data class LLMSettingsState(
      * Default values of SettingsLLMState.
      */
     object DefaultLLMSettingsState {
-        val openAIName: String = DefaultsBundle.defaultValue("openAIName")
-        val openAIToken: String = DefaultsBundle.defaultValue("openAIToken")
-        val openAIModel: String = DefaultsBundle.defaultValue("openAIModel")
-        val grazieName: String = DefaultsBundle.defaultValue("grazieName")
-        val grazieToken: String = DefaultsBundle.defaultValue("grazieToken")
-        val grazieModel: String = DefaultsBundle.defaultValue("grazieModel")
-        var currentLLMPlatformName: String = DefaultsBundle.defaultValue("openAIName")
-        val maxLLMRequest: Int = DefaultsBundle.defaultValue("maxLLMRequest").toInt()
-        val maxInputParamsDepth: Int = DefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
-        val maxPolyDepth: Int = DefaultsBundle.defaultValue("maxPolyDepth").toInt()
-        val classPrompts: String = DefaultsBundle.defaultValue("classPrompt")
-        val methodPrompts: String = DefaultsBundle.defaultValue("methodPrompt")
-        val linePrompts: String = DefaultsBundle.defaultValue("linePrompt")
-        var classPromptNames = DefaultsBundle.defaultValue("classPromptName")
-        var methodPromptNames = DefaultsBundle.defaultValue("methodPromptName")
-        var linePromptNames = DefaultsBundle.defaultValue("linePromptName")
-        var classCurrentDefaultPromptIndex = DefaultsBundle.defaultValue("classCurrentDefaultPromptIndex").toInt()
-        var methodCurrentDefaultPromptIndex = DefaultsBundle.defaultValue("methodCurrentDefaultPromptIndex").toInt()
-        var lineCurrentDefaultPromptIndex = DefaultsBundle.defaultValue("lineCurrentDefaultPromptIndex").toInt()
-        val defaultLLMRequests: String = DefaultsBundle.defaultValue("defaultLLMRequests")
+        val openAIName: String = LLMDefaultsBundle.defaultValue("openAIName")
+        val openAIToken: String = LLMDefaultsBundle.defaultValue("openAIToken")
+        val openAIModel: String = LLMDefaultsBundle.defaultValue("openAIModel")
+        val grazieName: String = LLMDefaultsBundle.defaultValue("grazieName")
+        val grazieToken: String = LLMDefaultsBundle.defaultValue("grazieToken")
+        val grazieModel: String = LLMDefaultsBundle.defaultValue("grazieModel")
+        var currentLLMPlatformName: String = LLMDefaultsBundle.defaultValue("openAIName")
+        val maxLLMRequest: Int = LLMDefaultsBundle.defaultValue("maxLLMRequest").toInt()
+        val maxInputParamsDepth: Int = LLMDefaultsBundle.defaultValue("maxInputParamsDepth").toInt()
+        val maxPolyDepth: Int = LLMDefaultsBundle.defaultValue("maxPolyDepth").toInt()
+        val classPrompts: String = LLMDefaultsBundle.defaultValue("classPrompt")
+        val methodPrompts: String = LLMDefaultsBundle.defaultValue("methodPrompt")
+        val linePrompts: String = LLMDefaultsBundle.defaultValue("linePrompt")
+        var classPromptNames = LLMDefaultsBundle.defaultValue("classPromptName")
+        var methodPromptNames = LLMDefaultsBundle.defaultValue("methodPromptName")
+        var linePromptNames = LLMDefaultsBundle.defaultValue("linePromptName")
+        var classCurrentDefaultPromptIndex = LLMDefaultsBundle.defaultValue("classCurrentDefaultPromptIndex").toInt()
+        var methodCurrentDefaultPromptIndex = LLMDefaultsBundle.defaultValue("methodCurrentDefaultPromptIndex").toInt()
+        var lineCurrentDefaultPromptIndex = LLMDefaultsBundle.defaultValue("lineCurrentDefaultPromptIndex").toInt()
+        val defaultLLMRequests: String = LLMDefaultsBundle.defaultValue("defaultLLMRequests")
         val junitVersion: JUnitVersion = JUnitVersion.JUnit5
-        val junitVersionPriorityCheckBoxSelected: Boolean = DefaultsBundle.defaultValue("junitVersionPriority").toBoolean()
-        val provideTestSamplesCheckBoxSelected: Boolean = DefaultsBundle.defaultValue("provideTestSamples").toBoolean()
-        val llmSetupCheckBoxSelected: Boolean = DefaultsBundle.defaultValue("llmSetup").toBoolean()
+        val junitVersionPriorityCheckBoxSelected: Boolean = LLMDefaultsBundle.defaultValue("junitVersionPriority").toBoolean()
+        val provideTestSamplesCheckBoxSelected: Boolean = LLMDefaultsBundle.defaultValue("provideTestSamples").toBoolean()
+        val llmSetupCheckBoxSelected: Boolean = LLMDefaultsBundle.defaultValue("llmSetup").toBoolean()
     }
 }

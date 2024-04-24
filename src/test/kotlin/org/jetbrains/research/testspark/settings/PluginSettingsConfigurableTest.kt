@@ -10,12 +10,12 @@ import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.settings.common.PluginSettingsComponent
-import org.jetbrains.research.testspark.settings.common.PluginSettingsConfigurable
-import org.jetbrains.research.testspark.settings.common.PluginSettingsState
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsComponent
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.settings.plugin.PluginSettingsComponent
+import org.jetbrains.research.testspark.settings.plugin.PluginSettingsConfigurable
+import org.jetbrains.research.testspark.settings.plugin.PluginSettingsState
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order

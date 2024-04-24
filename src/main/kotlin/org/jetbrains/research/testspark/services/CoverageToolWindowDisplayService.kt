@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.services
 import com.intellij.openapi.components.Service
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.table.JBTable
-import org.jetbrains.research.testspark.bundles.LabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import java.awt.Dimension
 import javax.swing.JScrollPane
 import javax.swing.table.AbstractTableModel
@@ -57,10 +57,10 @@ class CoverageToolWindowDisplayService {
             ScrollPaneFactory.createScrollPane(table)
 
         val tableColumnModel = table.columnModel
-        tableColumnModel.getColumn(0).headerValue = LabelsBundle.defaultValue("unitsUndertest")
-        tableColumnModel.getColumn(1).headerValue = LabelsBundle.defaultValue("lineCoverage")
-        tableColumnModel.getColumn(2).headerValue = LabelsBundle.defaultValue("branchCoverage")
-        tableColumnModel.getColumn(3).headerValue = LabelsBundle.defaultValue("weakMutationCoverage")
+        tableColumnModel.getColumn(0).headerValue = PluginLabelsBundle.defaultValue("unitsUndertest")
+        tableColumnModel.getColumn(1).headerValue = PluginLabelsBundle.defaultValue("lineCoverage")
+        tableColumnModel.getColumn(2).headerValue = PluginLabelsBundle.defaultValue("branchCoverage")
+        tableColumnModel.getColumn(3).headerValue = PluginLabelsBundle.defaultValue("weakMutationCoverage")
         table.columnModel = tableColumnModel
 
         table.minimumSize = Dimension(700, 100)

@@ -19,8 +19,8 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
-import org.jetbrains.research.testspark.bundles.LabelsBundle
-import org.jetbrains.research.testspark.bundles.MessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -36,8 +36,8 @@ import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import java.awt.Dimension
 import java.awt.Toolkit
@@ -68,15 +68,15 @@ class TestCasePanelFactory(
 
     private val panel = JPanel()
     private val previousButton =
-        IconButtonCreator.getButton(TestSparkIcons.previous, LabelsBundle.defaultValue("previousRequest"))
+        IconButtonCreator.getButton(TestSparkIcons.previous, PluginLabelsBundle.defaultValue("previousRequest"))
     private var requestNumber: String = "%d / %d"
     private var requestLabel: JLabel = JLabel(requestNumber)
-    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, LabelsBundle.defaultValue("nextRequest"))
+    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, PluginLabelsBundle.defaultValue("nextRequest"))
     private val errorLabel = JLabel(TestSparkIcons.showError)
-    private val copyButton = IconButtonCreator.getButton(TestSparkIcons.copy, LabelsBundle.defaultValue("copyTip"))
-    private val likeButton = IconButtonCreator.getButton(TestSparkIcons.like, LabelsBundle.defaultValue("likeTip"))
+    private val copyButton = IconButtonCreator.getButton(TestSparkIcons.copy, PluginLabelsBundle.defaultValue("copyTip"))
+    private val likeButton = IconButtonCreator.getButton(TestSparkIcons.like, PluginLabelsBundle.defaultValue("likeTip"))
     private val dislikeButton =
-        IconButtonCreator.getButton(TestSparkIcons.dislike, LabelsBundle.defaultValue("dislikeTip"))
+        IconButtonCreator.getButton(TestSparkIcons.dislike, PluginLabelsBundle.defaultValue("dislikeTip"))
 
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
@@ -106,22 +106,22 @@ class TestCasePanelFactory(
 
     // Create "Remove" button to remove the test from cache
     private val removeButton =
-        IconButtonCreator.getButton(TestSparkIcons.remove, LabelsBundle.defaultValue("removeTip"))
+        IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.defaultValue("removeTip"))
 
     // Create "Reset" button to reset the changes in the source code of the test
-    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, LabelsBundle.defaultValue("resetTip"))
+    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.defaultValue("resetTip"))
 
     // Create "Reset" button to reset the changes to last run in the source code of the test
     private val resetToLastRunButton =
-        IconButtonCreator.getButton(TestSparkIcons.resetToLastRun, LabelsBundle.defaultValue("resetToLastRunTip"))
+        IconButtonCreator.getButton(TestSparkIcons.resetToLastRun, PluginLabelsBundle.defaultValue("resetToLastRunTip"))
 
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
 
-    private val requestJLabel = JLabel(LabelsBundle.defaultValue("requestJLabel"))
+    private val requestJLabel = JLabel(PluginLabelsBundle.defaultValue("requestJLabel"))
     private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(llmSettingsState.defaultLLMRequests))
 
-    private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, LabelsBundle.defaultValue("send"))
+    private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, PluginLabelsBundle.defaultValue("send"))
 
     private val loadingLabel: JLabel = JLabel(TestSparkIcons.loading)
 
@@ -199,7 +199,7 @@ class TestCasePanelFactory(
                 .getNotificationGroup("Test case copied")
                 .createNotification(
                     "",
-                    MessagesBundle.message("testCaseCopied"),
+                    PluginMessagesBundle.message("testCaseCopied"),
                     NotificationType.INFORMATION,
                 )
                 .notify(project)
@@ -278,8 +278,8 @@ class TestCasePanelFactory(
         runTestButton.addActionListener {
             val choice = JOptionPane.showConfirmDialog(
                 null,
-                MessagesBundle.message("runCautionMessage"),
-                MessagesBundle.message("confirmationTitle"),
+                PluginMessagesBundle.message("runCautionMessage"),
+                PluginMessagesBundle.message("confirmationTitle"),
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.WARNING_MESSAGE,
             )
@@ -398,7 +398,7 @@ class TestCasePanelFactory(
         enableComponents(false)
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, MessagesBundle.message("sendingFeedback")) {
+            .run(object : Task.Backgroundable(project, PluginMessagesBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
                     if (ToolUtils.isProcessStopped(project, ijIndicator)) {
@@ -493,7 +493,7 @@ class TestCasePanelFactory(
         enableComponents(false)
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, MessagesBundle.message("sendingFeedback")) {
+            .run(object : Task.Backgroundable(project, PluginMessagesBundle.message("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     runTest(IJProgressIndicator(indicator))
                 }
@@ -633,7 +633,7 @@ class TestCasePanelFactory(
      * @return the created button
      */
     private fun createRunTestButton(): JButton {
-        val runTestButton = JButton(LabelsBundle.defaultValue("run"), TestSparkIcons.runTest)
+        val runTestButton = JButton(PluginLabelsBundle.defaultValue("run"), TestSparkIcons.runTest)
         runTestButton.isOpaque = false
         runTestButton.isContentAreaFilled = false
         runTestButton.isBorderPainted = true

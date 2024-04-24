@@ -9,11 +9,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
-import org.jetbrains.research.testspark.bundles.LabelsBundle
-import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.display.IconButtonCreator
 import org.jetbrains.research.testspark.display.ModifiedLinesGetter
 import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.TestSparkIcons
 import javax.swing.BoxLayout
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
@@ -41,8 +41,8 @@ class TestSamplePanelFactory(
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
     private var testSamplesSelector = ComboBox(arrayOf(""))
-    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, LabelsBundle.defaultValue("resetTip"))
-    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, LabelsBundle.defaultValue("removeTip"))
+    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.defaultValue("resetTip"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.defaultValue("removeTip"))
 
     init {
         addListeners()

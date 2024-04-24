@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.MessagesBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -29,7 +29,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
                     when {
                         contains("invalid: 401") -> {
                             llmErrorManager.errorProcess(
-                                MessagesBundle.message("wrongToken"),
+                                LLMMessagesBundle.message("wrongToken"),
                                 project,
                             )
                             sendResult = SendResult.OTHER
@@ -37,7 +37,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
 
                         contains("invalid: 413 Payload Too Large") -> {
                             llmErrorManager.warningProcess(
-                                MessagesBundle.message("tooLongPrompt"),
+                                LLMMessagesBundle.message("tooLongPrompt"),
                                 project,
                             )
                             sendResult = SendResult.PROMPT_TOO_LONG
@@ -51,7 +51,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
                 }
             }
         } catch (e: ClassNotFoundException) {
-            llmErrorManager.errorProcess(MessagesBundle.message("grazieError"), project)
+            llmErrorManager.errorProcess(LLMMessagesBundle.message("grazieError"), project)
         }
 
         return sendResult

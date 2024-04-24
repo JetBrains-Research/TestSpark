@@ -1,6 +1,6 @@
-package org.jetbrains.research.testspark.settings.common
+package org.jetbrains.research.testspark.settings.plugin
 
-import org.jetbrains.research.testspark.bundles.DefaultsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginDefaultsBundle
 
 /**
  * This class is the actual data class that stores the values of the Plugin Settings entries.
@@ -18,11 +18,11 @@ data class PluginSettingsState(
      * Default values of SettingsProjectState.
      */
     object DefaultPluginSettingsState {
-        val showCoverageCheckboxSelected: Boolean = DefaultsBundle.defaultValue("showCoverageCheckboxSelected").toBoolean()
-        val colorRed: Int = DefaultsBundle.defaultValue("colorRed").toInt()
-        val colorGreen: Int = DefaultsBundle.defaultValue("colorGreen").toInt()
-        val colorBlue: Int = DefaultsBundle.defaultValue("colorBlue").toInt()
-        val buildPath: String = DefaultsBundle.defaultValue("buildPath")
-        val buildCommand: String = DefaultsBundle.defaultValue("buildCommand")
+        val showCoverageCheckboxSelected: Boolean = PluginDefaultsBundle.defaultValue("showCoverageCheckboxSelected").toBoolean()
+        val colorRed: Int = PluginDefaultsBundle.defaultValue("colorRed").toInt()
+        val colorGreen: Int = PluginDefaultsBundle.defaultValue("colorGreen").toInt()
+        val colorBlue: Int = PluginDefaultsBundle.defaultValue("colorBlue").toInt()
+        val buildPath: String = PluginDefaultsBundle.defaultValue("buildPath")
+        val buildCommand: String = PluginDefaultsBundle.defaultValue("buildCommand")
     }
 }

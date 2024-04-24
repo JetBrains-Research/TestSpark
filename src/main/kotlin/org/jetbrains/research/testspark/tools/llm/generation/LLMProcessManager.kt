@@ -3,7 +3,8 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.MessagesBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
@@ -20,8 +21,8 @@ import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
-import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
@@ -78,10 +79,10 @@ class LLMProcessManager(
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
-            llmErrorManager.errorProcess(MessagesBundle.message("emptyBuildPath"), project)
+            llmErrorManager.errorProcess(LLMMessagesBundle.message("emptyBuildPath"), project)
             return null
         }
-        indicator.setText(MessagesBundle.message("searchMessage"))
+        indicator.setText(PluginMessagesBundle.message("searchMessage"))
 
         val report = IJReport()
 
@@ -141,11 +142,11 @@ class LLMProcessManager(
         val feedbackResponse = llmFeedbackCycle.run { warning ->
             when (warning) {
                 LLMWithFeedbackCycle.WarningType.TEST_SUITE_PARSING_FAILED ->
-                    llmErrorManager.warningProcess(MessagesBundle.message("emptyResponse"), project)
+                    llmErrorManager.warningProcess(LLMMessagesBundle.message("emptyResponse"), project)
                 LLMWithFeedbackCycle.WarningType.NO_TEST_CASES_GENERATED ->
-                    llmErrorManager.warningProcess(MessagesBundle.message("emptyResponse"), project)
+                    llmErrorManager.warningProcess(LLMMessagesBundle.message("emptyResponse"), project)
                 LLMWithFeedbackCycle.WarningType.COMPILATION_ERROR_OCCURRED ->
-                    llmErrorManager.warningProcess(MessagesBundle.message("compilationError"), project)
+                    llmErrorManager.warningProcess(LLMMessagesBundle.message("compilationError"), project)
             }
         }
 
@@ -160,18 +161,18 @@ class LLMProcessManager(
                 generatedTestsData.compilableTestCases.addAll(feedbackResponse.compilableTestCases)
             }
             FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED -> {
-                llmErrorManager.errorProcess(MessagesBundle.message("invalidLLMResult"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.message("invalidLLMResult"), project)
             }
             FeedbackCycleExecutionResult.CANCELED -> {
                 log.info("Process stopped")
                 return null
             }
             FeedbackCycleExecutionResult.PROVIDED_PROMPT_TOO_LONG -> {
-                llmErrorManager.errorProcess(MessagesBundle.message("tooLongPromptRequest"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.message("tooLongPromptRequest"), project)
                 return null
             }
             FeedbackCycleExecutionResult.SAVING_TEST_FILES_ISSUE -> {
-                llmErrorManager.errorProcess(MessagesBundle.message("savingTestFileIssue"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.message("savingTestFileIssue"), project)
             }
         }
 

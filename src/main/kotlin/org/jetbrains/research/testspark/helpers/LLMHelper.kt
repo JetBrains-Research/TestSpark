@@ -5,8 +5,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
-import org.jetbrains.research.testspark.bundles.MessagesBundle
-import org.jetbrains.research.testspark.bundles.SettingsBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModificationRequest
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
@@ -188,10 +188,10 @@ class LLMHelper {
                 platformSelector.isEnabled = false
             }
 
-            llmUserTokenField.toolTipText = SettingsBundle.defaultValue("llmToken")
+            llmUserTokenField.toolTipText = LLMSettingsBundle.defaultValue("llmToken")
             updateLlmUserTokenField(platformSelector, llmUserTokenField, llmPlatforms, settingsState)
 
-            modelSelector.toolTipText = SettingsBundle.defaultValue("model")
+            modelSelector.toolTipText = LLMSettingsBundle.defaultValue("model")
             updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         }
 
@@ -211,7 +211,7 @@ class LLMHelper {
          */
         fun isCorrectToken(project: Project): Boolean {
             if (!SettingsArguments(project).isTokenSet()) {
-                LLMErrorManager().errorProcess(MessagesBundle.message("missingToken"), project)
+                LLMErrorManager().errorProcess(LLMMessagesBundle.message("missingToken"), project)
                 return false
             }
             return true
@@ -260,7 +260,6 @@ class LLMHelper {
             requestManager.token = SettingsArguments(project).getToken()
             return isCorrectToken(project)
         }
-
 
         /**
          * Retrieves a list of available models from the OpenAI API.

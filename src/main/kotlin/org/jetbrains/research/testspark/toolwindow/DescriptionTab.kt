@@ -4,11 +4,11 @@ import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.bundles.LabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.settings.common.PluginSettingsConfigurable
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsConfigurable
+import org.jetbrains.research.testspark.settings.plugin.PluginSettingsConfigurable
 import java.awt.Desktop
 import java.awt.Font
 import java.net.URI
@@ -26,7 +26,7 @@ import javax.swing.event.HyperlinkEvent
 class DescriptionTab(private val project: Project) {
     private val panelTitle = JPanel()
     private val iconTitle = JLabel(TestSparkIcons.pluginIcon)
-    private val textTitle = JLabel(LabelsBundle.defaultValue("quickAccess"))
+    private val textTitle = JLabel(PluginLabelsBundle.defaultValue("quickAccess"))
 
     private val testSparkDescription = JTextPane().apply {
         isEditable = false
@@ -69,16 +69,16 @@ class DescriptionTab(private val project: Project) {
     }
 
     // Link to LLM settings
-    private val llmSettingsButton = JButton(LabelsBundle.defaultValue("llmSettingsLink"), TestSparkIcons.settings)
+    private val llmSettingsButton = JButton(PluginLabelsBundle.defaultValue("llmSettingsLink"), TestSparkIcons.settings)
 
     // Link to EvoSuite settings
-    private val evoSuiteSettingsButton = JButton(LabelsBundle.defaultValue("evoSuiteSettingsLink"), TestSparkIcons.settings)
+    private val evoSuiteSettingsButton = JButton(PluginLabelsBundle.defaultValue("evoSuiteSettingsLink"), TestSparkIcons.settings)
 
     // Link to open settings
-    private val settingsButton = JButton(LabelsBundle.defaultValue("settingsLink"), TestSparkIcons.settings)
+    private val settingsButton = JButton(PluginLabelsBundle.defaultValue("settingsLink"), TestSparkIcons.settings)
 
     // Link to documentation
-    private val documentationButton = JButton(LabelsBundle.defaultValue("documentationLink"), TestSparkIcons.documentation)
+    private val documentationButton = JButton(PluginLabelsBundle.defaultValue("documentationLink"), TestSparkIcons.documentation)
 
     // Tool Window panel
     private var toolWindowPanel: JPanel = JPanel()

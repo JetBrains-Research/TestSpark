@@ -162,7 +162,7 @@
         <!-- Configurables -->
         <projectConfigurable
                 parentId="tools"
-                instance="org.jetbrains.research.testspark.settings.common.PluginSettingsConfigurable"
+                instance="org.jetbrains.research.testspark.settings.plugin.PluginSettingsConfigurable"
                 id="PluginSettings"
                 displayName="TestSpark"/>
         <projectConfigurable

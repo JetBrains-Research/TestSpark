@@ -12,14 +12,15 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
-import org.jetbrains.research.testspark.bundles.LabelsBundle
-import org.jetbrains.research.testspark.bundles.SettingsBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMLabelsBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptKeyword
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.data.llm.PromptEditorType
-import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.IconButtonCreator
+import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PromptParserService
@@ -49,18 +50,18 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
 
     // Default LLM Requests
     private var defaultLLMRequestsSeparator =
-        JXTitledSeparator(LabelsBundle.defaultValue("defaultLLMRequestsSeparator"))
+        JXTitledSeparator(LLMLabelsBundle.defaultValue("defaultLLMRequestsSeparator"))
     private var commonDefaultLLMRequestsPanel = JPanel()
     private val defaultLLMRequestPanels = mutableListOf<JPanel>()
     private val addDefaultLLMRequestsButtonPanel = JPanel(FlowLayout(FlowLayout.LEFT))
 
     // JUnit versions
-    private var junitVersionSeparator = JXTitledSeparator(LabelsBundle.defaultValue("junitVersion"))
-    private val junitVersionPriorityCheckBox: JCheckBox = JCheckBox(LabelsBundle.defaultValue("junitVersionPriorityCheckBox"), true)
+    private var junitVersionSeparator = JXTitledSeparator(LLMLabelsBundle.defaultValue("junitVersion"))
+    private val junitVersionPriorityCheckBox: JCheckBox = JCheckBox(LLMLabelsBundle.defaultValue("junitVersionPriorityCheckBox"), true)
     private var junitVersionSelector = ComboBox(JUnitVersion.entries.map { it }.toTypedArray())
 
     // Prompt Editor
-    private var promptSeparator = JXTitledSeparator(LabelsBundle.defaultValue("PromptSeparator"))
+    private var promptSeparator = JXTitledSeparator(LLMLabelsBundle.defaultValue("PromptSeparator"))
 
     private val promptClassTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(llmSettingsState, PromptEditorType.CLASS)
     private val promptMethodTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(llmSettingsState, PromptEditorType.METHOD)
@@ -78,9 +79,9 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
     private var maxPolyDepthField = JBIntSpinner(UINumericRange(llmSettingsState.maxPolyDepth, 1, 5))
 
     private val provideTestSamplesCheckBox: JCheckBox =
-        JCheckBox(LabelsBundle.defaultValue("provideTestSamplesCheckBox"), true)
+        JCheckBox(LLMLabelsBundle.defaultValue("provideTestSamplesCheckBox"), true)
 
-    private val llmSetupCheckBox: JCheckBox = JCheckBox(LabelsBundle.defaultValue("llmSetupCheckBox"), true)
+    private val llmSetupCheckBox: JCheckBox = JCheckBox(LLMLabelsBundle.defaultValue("llmSetupCheckBox"), true)
 
     val llmPlatforms: List<LLMPlatform> = LLMHelper.getLLLMPlatforms()
 
@@ -188,48 +189,48 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
         fillAddDefaultLLMRequestsButtonPanel()
         fillJunitComponents()
 
-        maxLLMRequestsField.toolTipText = SettingsBundle.defaultValue("maximumNumberOfRequests")
-        maxInputParamsDepthField.toolTipText = SettingsBundle.defaultValue("parametersDepth")
-        maxPolyDepthField.toolTipText = SettingsBundle.defaultValue("maximumPolyDepth")
-        promptSeparator.toolTipText = SettingsBundle.defaultValue("promptEditor")
-        provideTestSamplesCheckBox.toolTipText = SettingsBundle.defaultValue("provideTestSamples")
+        maxLLMRequestsField.toolTipText = LLMSettingsBundle.defaultValue("maximumNumberOfRequests")
+        maxInputParamsDepthField.toolTipText = LLMSettingsBundle.defaultValue("parametersDepth")
+        maxPolyDepthField.toolTipText = LLMSettingsBundle.defaultValue("maximumPolyDepth")
+        promptSeparator.toolTipText = LLMSettingsBundle.defaultValue("promptEditor")
+        provideTestSamplesCheckBox.toolTipText = LLMSettingsBundle.defaultValue("provideTestSamples")
     }
 
     override fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
-            .addComponent(JXTitledSeparator(LabelsBundle.defaultValue("LLMSettings")))
+            .addComponent(JXTitledSeparator(LLMLabelsBundle.defaultValue("LLMSettings")))
             .addLabeledComponent(
-                JBLabel(LabelsBundle.defaultValue("llmPlatform")),
+                JBLabel(LLMLabelsBundle.defaultValue("llmPlatform")),
                 platformSelector,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(LabelsBundle.defaultValue("llmToken")),
+                JBLabel(LLMLabelsBundle.defaultValue("llmToken")),
                 llmUserTokenField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(LabelsBundle.defaultValue("model")),
+                JBLabel(LLMLabelsBundle.defaultValue("model")),
                 modelSelector,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(LabelsBundle.defaultValue("parametersDepth")),
+                JBLabel(LLMLabelsBundle.defaultValue("parametersDepth")),
                 maxInputParamsDepthField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(LabelsBundle.defaultValue("maximumPolyDepth")),
+                JBLabel(LLMLabelsBundle.defaultValue("maximumPolyDepth")),
                 maxPolyDepthField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(LabelsBundle.defaultValue("maximumNumberOfRequests")),
+                JBLabel(LLMLabelsBundle.defaultValue("maximumNumberOfRequests")),
                 maxLLMRequestsField,
                 10,
                 false,
@@ -242,7 +243,7 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
             .addComponent(junitVersionSeparator, 15)
             .addComponent(junitVersionPriorityCheckBox, 15)
             .addLabeledComponent(
-                JBLabel(LabelsBundle.defaultValue("preferredJUnitVersion")),
+                JBLabel(LLMLabelsBundle.defaultValue("preferredJUnitVersion")),
                 junitVersionSelector,
                 10,
                 false,
@@ -356,7 +357,7 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
      * Fills the addDefaultLLMRequestsButtonPanel with a button for adding default LLM requests.
      */
     private fun fillAddDefaultLLMRequestsButtonPanel() {
-        val addDefaultLLMRequestsButton = JButton(LabelsBundle.defaultValue("addRequest"), TestSparkIcons.add)
+        val addDefaultLLMRequestsButton = JButton(PluginLabelsBundle.defaultValue("addRequest"), TestSparkIcons.add)
 
         addDefaultLLMRequestsButton.isOpaque = false
         addDefaultLLMRequestsButton.isContentAreaFilled = false
@@ -404,7 +405,7 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
         textField.columns = 30
         defaultLLMRequestPanel.add(textField)
 
-        val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, LabelsBundle.defaultValue("removeRequest"))
+        val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.defaultValue("removeRequest"))
         defaultLLMRequestPanel.add(removeButton)
 
         commonDefaultLLMRequestsPanel.add(defaultLLMRequestPanel)
