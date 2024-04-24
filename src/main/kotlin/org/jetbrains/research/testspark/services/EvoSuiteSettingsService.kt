@@ -11,10 +11,10 @@ import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
  * This class is responsible for storing the application-level settings persistently. It uses SettingsApplicationState class for that.
  */
 @Service(Service.Level.PROJECT)
-@State(name = "SettingsEvoSuiteState", storages = [Storage("EvoSuiteSettings.xml")])
+@State(name = "EvoSuiteSettingsState", storages = [Storage("EvoSuiteSettings.xml")])
 class EvoSuiteSettingsService : PersistentStateComponent<EvoSuiteSettingsState> {
 
-    private var settingsEvoSuiteState: EvoSuiteSettingsState = EvoSuiteSettingsState()
+    private var evoSuiteSettingsState: EvoSuiteSettingsState = EvoSuiteSettingsState()
 
     /**
      * Gets the currently persisted state of the application.
@@ -23,7 +23,7 @@ class EvoSuiteSettingsService : PersistentStateComponent<EvoSuiteSettingsState> 
      *  the default constructor, the state is persisted (serialised and stored).
      */
     override fun getState(): EvoSuiteSettingsState {
-        return settingsEvoSuiteState
+        return evoSuiteSettingsState
     }
 
     /**
@@ -32,7 +32,7 @@ class EvoSuiteSettingsService : PersistentStateComponent<EvoSuiteSettingsState> 
      *   and if the XML file with the state is changes externally.
      */
     override fun loadState(state: EvoSuiteSettingsState) {
-        settingsEvoSuiteState = state
+        evoSuiteSettingsState = state
     }
 
     /**

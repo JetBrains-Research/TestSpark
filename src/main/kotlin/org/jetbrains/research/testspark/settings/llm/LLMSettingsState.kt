@@ -9,36 +9,36 @@ import org.jetbrains.research.testspark.data.JUnitVersionConverter
  * This class is the actual data class that stores the values of the LLM Settings entries.
  */
 data class LLMSettingsState(
-    var openAIName: String = DefaultSettingsLLMState.openAIName,
-    var openAIToken: String = DefaultSettingsLLMState.openAIToken,
-    var openAIModel: String = DefaultSettingsLLMState.openAIModel,
-    var grazieName: String = DefaultSettingsLLMState.grazieName,
-    var grazieToken: String = DefaultSettingsLLMState.grazieToken,
-    var grazieModel: String = DefaultSettingsLLMState.grazieModel,
-    var currentLLMPlatformName: String = DefaultSettingsLLMState.currentLLMPlatformName,
-    var maxLLMRequest: Int = DefaultSettingsLLMState.maxLLMRequest,
-    var maxInputParamsDepth: Int = DefaultSettingsLLMState.maxInputParamsDepth,
-    var maxPolyDepth: Int = DefaultSettingsLLMState.maxPolyDepth,
-    var classPrompts: String = DefaultSettingsLLMState.classPrompts,
-    var methodPrompts: String = DefaultSettingsLLMState.methodPrompts,
-    var linePrompts: String = DefaultSettingsLLMState.linePrompts,
-    var classPromptNames: String = DefaultSettingsLLMState.classPromptNames,
-    var methodPromptNames: String = DefaultSettingsLLMState.methodPromptNames,
-    var linePromptNames: String = DefaultSettingsLLMState.linePromptNames,
-    var classCurrentDefaultPromptIndex: Int = DefaultSettingsLLMState.classCurrentDefaultPromptIndex,
-    var methodCurrentDefaultPromptIndex: Int = DefaultSettingsLLMState.methodCurrentDefaultPromptIndex,
-    var lineCurrentDefaultPromptIndex: Int = DefaultSettingsLLMState.lineCurrentDefaultPromptIndex,
-    var defaultLLMRequests: String = DefaultSettingsLLMState.defaultLLMRequests,
-    @OptionTag(converter = JUnitVersionConverter::class) var junitVersion: JUnitVersion = DefaultSettingsLLMState.junitVersion,
-    var junitVersionPriorityCheckBoxSelected: Boolean = DefaultSettingsLLMState.junitVersionPriorityCheckBoxSelected,
-    var provideTestSamplesCheckBoxSelected: Boolean = DefaultSettingsLLMState.provideTestSamplesCheckBoxSelected,
-    var llmSetupCheckBoxSelected: Boolean = DefaultSettingsLLMState.llmSetupCheckBoxSelected,
+    var openAIName: String = DefaultLLMSettingsState.openAIName,
+    var openAIToken: String = DefaultLLMSettingsState.openAIToken,
+    var openAIModel: String = DefaultLLMSettingsState.openAIModel,
+    var grazieName: String = DefaultLLMSettingsState.grazieName,
+    var grazieToken: String = DefaultLLMSettingsState.grazieToken,
+    var grazieModel: String = DefaultLLMSettingsState.grazieModel,
+    var currentLLMPlatformName: String = DefaultLLMSettingsState.currentLLMPlatformName,
+    var maxLLMRequest: Int = DefaultLLMSettingsState.maxLLMRequest,
+    var maxInputParamsDepth: Int = DefaultLLMSettingsState.maxInputParamsDepth,
+    var maxPolyDepth: Int = DefaultLLMSettingsState.maxPolyDepth,
+    var classPrompts: String = DefaultLLMSettingsState.classPrompts,
+    var methodPrompts: String = DefaultLLMSettingsState.methodPrompts,
+    var linePrompts: String = DefaultLLMSettingsState.linePrompts,
+    var classPromptNames: String = DefaultLLMSettingsState.classPromptNames,
+    var methodPromptNames: String = DefaultLLMSettingsState.methodPromptNames,
+    var linePromptNames: String = DefaultLLMSettingsState.linePromptNames,
+    var classCurrentDefaultPromptIndex: Int = DefaultLLMSettingsState.classCurrentDefaultPromptIndex,
+    var methodCurrentDefaultPromptIndex: Int = DefaultLLMSettingsState.methodCurrentDefaultPromptIndex,
+    var lineCurrentDefaultPromptIndex: Int = DefaultLLMSettingsState.lineCurrentDefaultPromptIndex,
+    var defaultLLMRequests: String = DefaultLLMSettingsState.defaultLLMRequests,
+    @OptionTag(converter = JUnitVersionConverter::class) var junitVersion: JUnitVersion = DefaultLLMSettingsState.junitVersion,
+    var junitVersionPriorityCheckBoxSelected: Boolean = DefaultLLMSettingsState.junitVersionPriorityCheckBoxSelected,
+    var provideTestSamplesCheckBoxSelected: Boolean = DefaultLLMSettingsState.provideTestSamplesCheckBoxSelected,
+    var llmSetupCheckBoxSelected: Boolean = DefaultLLMSettingsState.llmSetupCheckBoxSelected,
 ) {
 
     /**
      * Default values of SettingsLLMState.
      */
-    object DefaultSettingsLLMState {
+    object DefaultLLMSettingsState {
         val openAIName: String = DefaultsBundle.defaultValue("openAIName")
         val openAIToken: String = DefaultsBundle.defaultValue("openAIToken")
         val openAIModel: String = DefaultsBundle.defaultValue("openAIModel")

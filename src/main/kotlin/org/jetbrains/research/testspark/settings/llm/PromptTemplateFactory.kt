@@ -10,7 +10,7 @@ import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.data.llm.PromptEditorType
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.common.IconButtonCreator
+import org.jetbrains.research.testspark.display.IconButtonCreator
 import org.jetbrains.research.testspark.services.PromptParserService
 import java.awt.FlowLayout
 import javax.swing.BorderFactory

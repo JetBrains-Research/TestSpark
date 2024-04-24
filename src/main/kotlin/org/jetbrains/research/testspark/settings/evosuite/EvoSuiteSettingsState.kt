@@ -7,31 +7,31 @@ import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
  * This class is the actual data class that stores the values of the EvoSuite Settings entries.
  */
 data class EvoSuiteSettingsState(
-    var javaPath: String = DefaultSettingsEvoSuiteState.javaPath,
-    var sandbox: Boolean = DefaultSettingsEvoSuiteState.sandbox,
-    var assertions: Boolean = DefaultSettingsEvoSuiteState.assertions,
-    var seed: String = DefaultSettingsEvoSuiteState.seed,
-    var algorithm: ContentDigestAlgorithm = DefaultSettingsEvoSuiteState.algorithm,
-    var configurationId: String = DefaultSettingsEvoSuiteState.configurationId,
-    var clientOnThread: Boolean = DefaultSettingsEvoSuiteState.clientOnThread,
-    var junitCheck: Boolean = DefaultSettingsEvoSuiteState.junitCheck,
-    var criterionLine: Boolean = DefaultSettingsEvoSuiteState.criterionLine,
-    var criterionBranch: Boolean = DefaultSettingsEvoSuiteState.criterionBranch,
-    var criterionException: Boolean = DefaultSettingsEvoSuiteState.criterionException,
-    var criterionWeakMutation: Boolean = DefaultSettingsEvoSuiteState.criterionWeakMutation,
-    var criterionOutput: Boolean = DefaultSettingsEvoSuiteState.criterionOutput,
-    var criterionMethod: Boolean = DefaultSettingsEvoSuiteState.criterionMethod,
-    var criterionMethodNoException: Boolean = DefaultSettingsEvoSuiteState.criterionMethodNoException,
-    var criterionCBranch: Boolean = DefaultSettingsEvoSuiteState.criterionCBranch,
-    var minimize: Boolean = DefaultSettingsEvoSuiteState.minimize,
-    var evosuiteSetupCheckBoxSelected: Boolean = DefaultSettingsEvoSuiteState.evosuiteSetupCheckBoxSelected,
-    var evosuitePort: String = DefaultSettingsEvoSuiteState.evosuitePort,
+    var javaPath: String = DefaultEvoSuiteSettingsState.javaPath,
+    var sandbox: Boolean = DefaultEvoSuiteSettingsState.sandbox,
+    var assertions: Boolean = DefaultEvoSuiteSettingsState.assertions,
+    var seed: String = DefaultEvoSuiteSettingsState.seed,
+    var algorithm: ContentDigestAlgorithm = DefaultEvoSuiteSettingsState.algorithm,
+    var configurationId: String = DefaultEvoSuiteSettingsState.configurationId,
+    var clientOnThread: Boolean = DefaultEvoSuiteSettingsState.clientOnThread,
+    var junitCheck: Boolean = DefaultEvoSuiteSettingsState.junitCheck,
+    var criterionLine: Boolean = DefaultEvoSuiteSettingsState.criterionLine,
+    var criterionBranch: Boolean = DefaultEvoSuiteSettingsState.criterionBranch,
+    var criterionException: Boolean = DefaultEvoSuiteSettingsState.criterionException,
+    var criterionWeakMutation: Boolean = DefaultEvoSuiteSettingsState.criterionWeakMutation,
+    var criterionOutput: Boolean = DefaultEvoSuiteSettingsState.criterionOutput,
+    var criterionMethod: Boolean = DefaultEvoSuiteSettingsState.criterionMethod,
+    var criterionMethodNoException: Boolean = DefaultEvoSuiteSettingsState.criterionMethodNoException,
+    var criterionCBranch: Boolean = DefaultEvoSuiteSettingsState.criterionCBranch,
+    var minimize: Boolean = DefaultEvoSuiteSettingsState.minimize,
+    var evosuiteSetupCheckBoxSelected: Boolean = DefaultEvoSuiteSettingsState.evosuiteSetupCheckBoxSelected,
+    var evosuitePort: String = DefaultEvoSuiteSettingsState.evosuitePort,
 ) {
 
     /**
      * Default values of SettingsEvoSuiteState.
      */
-    object DefaultSettingsEvoSuiteState {
+    object DefaultEvoSuiteSettingsState {
         var javaPath: String = DefaultsBundle.defaultValue("javaPath")
         val sandbox: Boolean = DefaultsBundle.defaultValue("sandbox").toBoolean()
         val assertions: Boolean = DefaultsBundle.defaultValue("assertions").toBoolean()

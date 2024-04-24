@@ -1,20 +1,20 @@
 package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PromptParserService
+import org.jetbrains.research.testspark.settings.template.SettingsConfigurable
 import javax.swing.JComponent
 
 /**
  * This class allows to configure some LLM-related settings via the Large Language Model page in the Settings dialog,
  *   observes the changes and manages the UI and state.
  */
-class LLMSettingsConfigurable(private val project: Project) : Configurable {
+class LLMSettingsConfigurable(private val project: Project) : SettingsConfigurable {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 

@@ -2,10 +2,20 @@ package org.jetbrains.research.testspark.helpers
 
 import com.google.gson.JsonParser
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
+import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.bundles.SettingsBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModificationRequest
+import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
@@ -193,6 +203,64 @@ class LLMHelper {
         fun getLLLMPlatforms(): List<LLMPlatform> {
             return listOf(OpenAIPlatform(), GraziePlatform())
         }
+
+        /**
+         * Checks if the token is set.
+         *
+         * @return True if the token is set, false otherwise.
+         */
+        fun isCorrectToken(project: Project): Boolean {
+            if (!SettingsArguments(project).isTokenSet()) {
+                LLMErrorManager().errorProcess(MessagesBundle.message("missingToken"), project)
+                return false
+            }
+            return true
+        }
+
+        /**
+         * Updates the token and sends a test modification request according to user's feedback.
+         * After receiving the response, it tries to parse the generated test cases.
+         *
+         * @param testCase: The test that is requested to be modified
+         * @param task: A string representing the requested task for test modification
+         * @param indicator: A progress indicator object that represents the indication of the test generation progress.
+         * @param project: A Project object that represents the current project in which the tests are to be generated.
+         *
+         * @return instance of TestSuiteGeneratedByLLM if the generated test cases are parsable, otherwise null.
+         */
+        fun testModificationRequest(
+            testCase: String,
+            task: String,
+            indicator: CustomProgressIndicator,
+            requestManager: RequestManager,
+            project: Project,
+            testGenerationOutput: TestGenerationData,
+        ): TestSuiteGeneratedByLLM? {
+            // Update Token information
+            if (!updateToken(requestManager, project)) {
+                return null
+            }
+
+            val testSuite = executeTestCaseModificationRequest(
+                testCase,
+                task,
+                indicator,
+                requestManager,
+                testsAssembler = JUnitTestsAssembler(project, indicator, testGenerationOutput),
+            )
+            return testSuite
+        }
+
+        /**
+         * Updates token based on the last entries of settings and check if the token is valid
+         *
+         * @return True if the token is set, false otherwise.
+         */
+        private fun updateToken(requestManager: RequestManager, project: Project): Boolean {
+            requestManager.token = SettingsArguments(project).getToken()
+            return isCorrectToken(project)
+        }
+
 
         /**
          * Retrieves a list of available models from the OpenAI API.

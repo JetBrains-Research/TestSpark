@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display.common
+package org.jetbrains.research.testspark.display
 
 import java.awt.Dimension
 import javax.swing.Icon

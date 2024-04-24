@@ -11,10 +11,10 @@ import org.jetbrains.research.testspark.settings.common.PluginSettingsState
  * This class is responsible for storing the project-level settings persistently. It uses SettingsProjectState class for that.
  */
 @Service(Service.Level.PROJECT)
-@State(name = "SettingsProjectState", storages = [Storage("ProjectSettings.xml")])
+@State(name = "PluginSettingsState", storages = [Storage("ProjectSettings.xml")])
 class PluginSettingsService : PersistentStateComponent<PluginSettingsState> {
 
-    private var settingsProjectState: PluginSettingsState = PluginSettingsState()
+    private var pluginSettingsState: PluginSettingsState = PluginSettingsState()
 
     /**
      * Gets the currently persisted state of the open project.
@@ -23,7 +23,7 @@ class PluginSettingsService : PersistentStateComponent<PluginSettingsState> {
      *  the default constructor, the state is persisted (serialised and stored).
      */
     override fun getState(): PluginSettingsState {
-        return settingsProjectState
+        return pluginSettingsState
     }
 
     /**
@@ -32,7 +32,7 @@ class PluginSettingsService : PersistentStateComponent<PluginSettingsState> {
      *   and if the XML file with the state is changes externally.
      */
     override fun loadState(state: PluginSettingsState) {
-        settingsProjectState = state
+        pluginSettingsState = state
     }
 
     companion object {

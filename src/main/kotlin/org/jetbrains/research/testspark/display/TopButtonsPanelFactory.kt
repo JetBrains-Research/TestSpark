@@ -8,7 +8,6 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.LabelsBundle
 import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.display.common.IconButtonCreator
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Dimension

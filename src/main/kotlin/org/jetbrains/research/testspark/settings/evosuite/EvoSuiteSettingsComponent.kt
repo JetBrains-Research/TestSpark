@@ -7,6 +7,7 @@ import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.LabelsBundle
 import org.jetbrains.research.testspark.bundles.SettingsBundle
 import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.settings.template.SettingsComponent
 import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JTextField
@@ -14,7 +15,7 @@ import javax.swing.JTextField
 /**
  * This class displays and captures changes to the values of the Settings entries.
  */
-class EvoSuiteSettingsComponent {
+class EvoSuiteSettingsComponent : SettingsComponent {
     var panel: JPanel? = null
 
     // Java path
@@ -46,65 +47,6 @@ class EvoSuiteSettingsComponent {
     private var criterionMethodCheckBox = JCheckBox(LabelsBundle.defaultValue("criterionMethod"))
     private var criterionMethodNoExceptionCheckBox = JCheckBox(LabelsBundle.defaultValue("criterionMethodNoExc"))
     private var criterionCBranchCheckBox = JCheckBox(LabelsBundle.defaultValue("criterionCBranch"))
-
-    init {
-        createSettingsPanel()
-
-        stylizePanel()
-    }
-
-    /**
-     * Create the main panel for EvoSuite settings page
-     */
-    private fun createSettingsPanel() {
-        panel = FormBuilder.createFormBuilder()
-            .addComponent(JXTitledSeparator(LabelsBundle.defaultValue("javaSettings")))
-            .addLabeledComponent(JBLabel(LabelsBundle.defaultValue("javaPath")), javaPathTextField, 10, false)
-            .addComponent(JXTitledSeparator(LabelsBundle.defaultValue("generalSettings")))
-            // EvoSuite "input" options (e.g. text, number)
-            // Important settings like algorithm selection, seed selection
-            .addLabeledComponent(JBLabel(LabelsBundle.defaultValue("defaultSearch")), algorithmSelector, 10, false)
-            .addLabeledComponent(JBLabel(LabelsBundle.defaultValue("seed")), seedTextField, 10, false)
-            .addLabeledComponent(JBLabel(LabelsBundle.defaultValue("port")), evosuitePortField, 10, false)
-            .addLabeledComponent(JBLabel(LabelsBundle.defaultValue("configId")), configurationIdTextField, 5, false)
-            .addComponent(evosuiteSetupCheckBox, 10)
-            // Checkboxes settings
-            .addComponent(sandboxCheckBox, 10)
-            .addComponent(assertionsCheckBox, 10)
-            .addComponent(clientOnThreadCheckBox, 10)
-            .addComponent(minimizeCheckBox, 10)
-            .addComponent(junitCheckCheckBox, 10)
-            // Criterion selection checkboxes
-            .addComponent(criterionSeparator, 15)
-            .addComponent(criterionLineCheckBox, 5)
-            .addComponent(criterionBranchCheckBox, 5)
-            .addComponent(criterionExceptionCheckBox, 5)
-            .addComponent(criterionWeakMutationCheckBox, 5)
-            .addComponent(criterionOutputCheckBox, 5)
-            .addComponent(criterionMethodCheckBox, 5)
-            .addComponent(criterionMethodNoExceptionCheckBox, 5)
-            .addComponent(criterionCBranchCheckBox, 5)
-            .addComponentFillVertically(JPanel(), 0)
-            .panel
-    }
-
-    /**
-     * Add stylistic additions to elements of EvoSuite settings panel (e.g. tooltips)
-     */
-    private fun stylizePanel() {
-        // Dimensions adjustments
-        algorithmSelector.setMinimumAndPreferredWidth(300)
-
-        // Tooltips
-        seedTextField.toolTipText = SettingsBundle.defaultValue("seed")
-        evosuitePortField.toolTipText = SettingsBundle.defaultValue("port")
-        configurationIdTextField.toolTipText = SettingsBundle.defaultValue("configId")
-        clientOnThreadCheckBox.toolTipText = SettingsBundle.defaultValue("debug")
-        junitCheckCheckBox.toolTipText = SettingsBundle.defaultValue("junit")
-        criterionSeparator.toolTipText = SettingsBundle.defaultValue("criterion")
-
-        javaPathTextField.toolTipText = SettingsBundle.defaultValue("javaPath")
-    }
 
     var evosuiteSetupCheckBoxSelected: Boolean
         get() = evosuiteSetupCheckBox.isSelected
@@ -219,4 +161,57 @@ class EvoSuiteSettingsComponent {
         set(newStatus) {
             minimizeCheckBox.isSelected = newStatus
         }
+
+    init {
+        super.initComponent()
+    }
+
+    override fun stylizePanel() {
+        // Dimensions adjustments
+        algorithmSelector.setMinimumAndPreferredWidth(300)
+
+        // Tooltips
+        seedTextField.toolTipText = SettingsBundle.defaultValue("seed")
+        evosuitePortField.toolTipText = SettingsBundle.defaultValue("port")
+        configurationIdTextField.toolTipText = SettingsBundle.defaultValue("configId")
+        clientOnThreadCheckBox.toolTipText = SettingsBundle.defaultValue("debug")
+        junitCheckCheckBox.toolTipText = SettingsBundle.defaultValue("junit")
+        criterionSeparator.toolTipText = SettingsBundle.defaultValue("criterion")
+
+        javaPathTextField.toolTipText = SettingsBundle.defaultValue("javaPath")
+    }
+
+    override fun createSettingsPanel() {
+        panel = FormBuilder.createFormBuilder()
+            .addComponent(JXTitledSeparator(LabelsBundle.defaultValue("javaSettings")))
+            .addLabeledComponent(JBLabel(LabelsBundle.defaultValue("javaPath")), javaPathTextField, 10, false)
+            .addComponent(JXTitledSeparator(LabelsBundle.defaultValue("generalSettings")))
+            // EvoSuite "input" options (e.g. text, number)
+            // Important settings like algorithm selection, seed selection
+            .addLabeledComponent(JBLabel(LabelsBundle.defaultValue("defaultSearch")), algorithmSelector, 10, false)
+            .addLabeledComponent(JBLabel(LabelsBundle.defaultValue("seed")), seedTextField, 10, false)
+            .addLabeledComponent(JBLabel(LabelsBundle.defaultValue("port")), evosuitePortField, 10, false)
+            .addLabeledComponent(JBLabel(LabelsBundle.defaultValue("configId")), configurationIdTextField, 5, false)
+            .addComponent(evosuiteSetupCheckBox, 10)
+            // Checkboxes settings
+            .addComponent(sandboxCheckBox, 10)
+            .addComponent(assertionsCheckBox, 10)
+            .addComponent(clientOnThreadCheckBox, 10)
+            .addComponent(minimizeCheckBox, 10)
+            .addComponent(junitCheckCheckBox, 10)
+            // Criterion selection checkboxes
+            .addComponent(criterionSeparator, 15)
+            .addComponent(criterionLineCheckBox, 5)
+            .addComponent(criterionBranchCheckBox, 5)
+            .addComponent(criterionExceptionCheckBox, 5)
+            .addComponent(criterionWeakMutationCheckBox, 5)
+            .addComponent(criterionOutputCheckBox, 5)
+            .addComponent(criterionMethodCheckBox, 5)
+            .addComponent(criterionMethodNoExceptionCheckBox, 5)
+            .addComponent(criterionCBranchCheckBox, 5)
+            .addComponentFillVertically(JPanel(), 0)
+            .panel
+    }
+
+    override fun addListeners() {}
 }

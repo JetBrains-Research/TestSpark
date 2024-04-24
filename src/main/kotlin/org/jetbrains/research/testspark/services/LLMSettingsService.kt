@@ -11,10 +11,10 @@ import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
  * This class is responsible for storing the application-level settings persistently. It uses SettingsApplicationState class for that.
  */
 @Service(Service.Level.PROJECT)
-@State(name = "SettingsLLMState", storages = [Storage("LLMSettings.xml")])
+@State(name = "LLMSettingsState", storages = [Storage("LLMSettings.xml")])
 class LLMSettingsService : PersistentStateComponent<LLMSettingsState> {
 
-    private var settingsLLMState: LLMSettingsState = LLMSettingsState()
+    private var llmSettingsState: LLMSettingsState = LLMSettingsState()
 
     /**
      * Gets the currently persisted state of the application.
@@ -23,7 +23,7 @@ class LLMSettingsService : PersistentStateComponent<LLMSettingsState> {
      *  the default constructor, the state is persisted (serialised and stored).
      */
     override fun getState(): LLMSettingsState {
-        return settingsLLMState
+        return llmSettingsState
     }
 
     /**
@@ -32,7 +32,7 @@ class LLMSettingsService : PersistentStateComponent<LLMSettingsState> {
      *   and if the XML file with the state is changes externally.
      */
     override fun loadState(state: LLMSettingsState) {
-        settingsLLMState = state
+        llmSettingsState = state
     }
 
     /**

@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.tools.evosuite
 
 import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
-import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState.DefaultSettingsEvoSuiteState
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState.DefaultEvoSuiteSettingsState
 
 /**
  * This class is used for constructing the necessary parameters for running evosuite
@@ -81,17 +81,17 @@ class SettingsArguments(
     private fun serializeChangesFromDefault(): List<String> {
         val params = mutableListOf<String>()
         // Parameters from settings menu
-        if (evoSuiteSettingsState.sandbox != DefaultSettingsEvoSuiteState.sandbox) {
+        if (evoSuiteSettingsState.sandbox != DefaultEvoSuiteSettingsState.sandbox) {
             params.add("-Dsandbox=${evoSuiteSettingsState.sandbox}")
         }
-        if (evoSuiteSettingsState.assertions != DefaultSettingsEvoSuiteState.assertions) {
+        if (evoSuiteSettingsState.assertions != DefaultEvoSuiteSettingsState.assertions) {
             params.add("-Dassertions=${evoSuiteSettingsState.assertions}")
         }
         params.add("-Dalgorithm=${evoSuiteSettingsState.algorithm}")
-        if (evoSuiteSettingsState.junitCheck != DefaultSettingsEvoSuiteState.junitCheck) {
+        if (evoSuiteSettingsState.junitCheck != DefaultEvoSuiteSettingsState.junitCheck) {
             params.add("-Djunit_check=${evoSuiteSettingsState.junitCheck}")
         }
-        if (evoSuiteSettingsState.minimize != DefaultSettingsEvoSuiteState.minimize) {
+        if (evoSuiteSettingsState.minimize != DefaultEvoSuiteSettingsState.minimize) {
             params.add("-Dminimize=${evoSuiteSettingsState.minimize}")
         }
         return params

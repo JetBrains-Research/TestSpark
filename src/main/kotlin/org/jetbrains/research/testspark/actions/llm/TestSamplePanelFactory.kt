@@ -11,9 +11,9 @@ import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import org.jetbrains.research.testspark.bundles.LabelsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.common.IconButtonCreator
-import org.jetbrains.research.testspark.display.common.ModifiedLinesGetter
-import org.jetbrains.research.testspark.display.common.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.IconButtonCreator
+import org.jetbrains.research.testspark.display.ModifiedLinesGetter
+import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
 import javax.swing.BoxLayout
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton

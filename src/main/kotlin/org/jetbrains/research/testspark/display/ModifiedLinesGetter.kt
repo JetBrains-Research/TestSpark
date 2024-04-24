@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display.common
+package org.jetbrains.research.testspark.display
 
 object ModifiedLinesGetter {
     /**

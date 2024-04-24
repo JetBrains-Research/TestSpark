@@ -1,10 +1,10 @@
 package org.jetbrains.research.testspark.settings.common
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.template.SettingsConfigurable
 import javax.swing.JComponent
 
 /**
@@ -12,7 +12,7 @@ import javax.swing.JComponent
  * It interacts with the SettingsPluginComponent, TestSparkSettingsService and TestSparkSettingsState.
  * It provides controller functionality for the TestSparkSettingsState.
  */
-class PluginSettingsConfigurable(val project: Project) : Configurable {
+class PluginSettingsConfigurable(val project: Project) : SettingsConfigurable {
 
     var settingsComponent: PluginSettingsComponent? = null
 

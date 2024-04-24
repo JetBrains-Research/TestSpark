@@ -1,10 +1,10 @@
 package org.jetbrains.research.testspark.settings.evosuite
 
-import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.research.testspark.bundles.MessagesBundle
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
+import org.jetbrains.research.testspark.settings.template.SettingsConfigurable
 import javax.swing.JComponent
 
 /**
@@ -13,7 +13,7 @@ import javax.swing.JComponent
  * It interacts with the SettingsEvoSuiteComponent, TestSparkSettingsService and TestSparkSettingsState.
  * It provides controller functionality for the TestSparkSettingsState.
  */
-class EvoSuiteSettingsConfigurable(private val project: Project) : Configurable {
+class EvoSuiteSettingsConfigurable(private val project: Project) : SettingsConfigurable {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
         get() = project.getService(EvoSuiteSettingsService::class.java).state
 

@@ -27,10 +27,8 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.display.common.IconButtonCreator
-import org.jetbrains.research.testspark.display.common.ModifiedLinesGetter
-import org.jetbrains.research.testspark.display.common.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMSettingsService
@@ -39,9 +37,8 @@ import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.ToolUtils
-import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
+import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
-import org.jetbrains.research.testspark.tools.llm.testModificationRequest
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
@@ -78,7 +75,8 @@ class TestCasePanelFactory(
     private val errorLabel = JLabel(TestSparkIcons.showError)
     private val copyButton = IconButtonCreator.getButton(TestSparkIcons.copy, LabelsBundle.defaultValue("copyTip"))
     private val likeButton = IconButtonCreator.getButton(TestSparkIcons.like, LabelsBundle.defaultValue("likeTip"))
-    private val dislikeButton = IconButtonCreator.getButton(TestSparkIcons.dislike, LabelsBundle.defaultValue("dislikeTip"))
+    private val dislikeButton =
+        IconButtonCreator.getButton(TestSparkIcons.dislike, LabelsBundle.defaultValue("dislikeTip"))
 
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
@@ -107,7 +105,8 @@ class TestCasePanelFactory(
     )
 
     // Create "Remove" button to remove the test from cache
-    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, LabelsBundle.defaultValue("removeTip"))
+    private val removeButton =
+        IconButtonCreator.getButton(TestSparkIcons.remove, LabelsBundle.defaultValue("removeTip"))
 
     // Create "Reset" button to reset the changes in the source code of the test
     private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, LabelsBundle.defaultValue("resetTip"))
@@ -407,7 +406,7 @@ class TestCasePanelFactory(
                         return
                     }
 
-                    val modifiedTest = testModificationRequest(
+                    val modifiedTest = LLMHelper.testModificationRequest(
                         initialCodes[currentRequestNumber - 1],
                         requestComboBox.editor.item.toString(),
                         ijIndicator,
