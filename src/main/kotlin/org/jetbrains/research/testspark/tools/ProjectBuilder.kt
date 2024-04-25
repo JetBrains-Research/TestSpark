@@ -10,7 +10,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.task.ProjectTaskManager
 import com.intellij.util.concurrency.Semaphore
-import org.jetbrains.research.testspark.bundles.plugin.PluginDefaultsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
