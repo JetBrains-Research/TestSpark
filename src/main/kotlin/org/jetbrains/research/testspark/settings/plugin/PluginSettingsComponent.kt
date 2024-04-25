@@ -27,10 +27,10 @@ class PluginSettingsComponent : SettingsComponent {
     private var buildCommandTextField = JTextField()
 
     // Show coverage options
-    private val showCoverageCheckbox: JCheckBox = JCheckBox(PluginLabelsBundle.defaultValue("showCoverage"))
+    private val showCoverageCheckbox: JCheckBox = JCheckBox(PluginLabelsBundle.get("showCoverage"))
 
     // Accessibility options
-    private val accessibilitySeparator = JXTitledSeparator(PluginLabelsBundle.defaultValue("accessibility"))
+    private val accessibilitySeparator = JXTitledSeparator(PluginLabelsBundle.get("accessibility"))
     private var colorPicker = JColorChooser()
 
     var showCoverageCheckboxSelected: Boolean
@@ -55,7 +55,7 @@ class PluginSettingsComponent : SettingsComponent {
         get() = colorPicker.color.red
         set(newStatus) {
             colorPicker.color = JBColor(
-                PluginSettingsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(newStatus, colorPicker.color.green, colorPicker.color.blue),
             )
         }
@@ -64,7 +64,7 @@ class PluginSettingsComponent : SettingsComponent {
         get() = colorPicker.color.green
         set(newStatus) {
             colorPicker.color = JBColor(
-                PluginSettingsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(colorPicker.color.red, newStatus, colorPicker.color.blue),
             )
         }
@@ -72,7 +72,7 @@ class PluginSettingsComponent : SettingsComponent {
         get() = colorPicker.color.blue
         set(newStatus) {
             colorPicker.color = JBColor(
-                PluginSettingsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(colorPicker.color.red, colorPicker.color.green, newStatus),
             )
         }
@@ -83,13 +83,13 @@ class PluginSettingsComponent : SettingsComponent {
 
     override fun stylizePanel() {
         // Add description to telemetry path show coverage checkbox
-        showCoverageCheckbox.toolTipText = PluginSettingsBundle.defaultValue("showCoverage")
+        showCoverageCheckbox.toolTipText = PluginSettingsBundle.get("showCoverage")
 
         // Add description to build Path
-        buildPathTextField.toolTipText = PluginSettingsBundle.defaultValue("buildPath")
+        buildPathTextField.toolTipText = PluginSettingsBundle.get("buildPath")
 
         // Add description to build Command
-        buildCommandTextField.toolTipText = PluginSettingsBundle.defaultValue("buildCommand")
+        buildCommandTextField.toolTipText = PluginSettingsBundle.get("buildCommand")
 
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
@@ -108,25 +108,25 @@ class PluginSettingsComponent : SettingsComponent {
 
     override fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
-            .addComponent(JXTitledSeparator(PluginLabelsBundle.defaultValue("showCoverageDescription")), 15)
+            .addComponent(JXTitledSeparator(PluginLabelsBundle.get("showCoverageDescription")), 15)
             .addComponent(showCoverageCheckbox, 10)
-            .addComponent(JXTitledSeparator(PluginLabelsBundle.defaultValue("environmentSettings")), 15)
+            .addComponent(JXTitledSeparator(PluginLabelsBundle.get("environmentSettings")), 15)
             // Add buildPath option
             .addLabeledComponent(
-                JBLabel(PluginLabelsBundle.defaultValue("buildPath")),
+                JBLabel(PluginLabelsBundle.get("buildPath")),
                 buildPathTextField,
                 10,
                 false,
             )
             // Add buildPath option
             .addLabeledComponent(
-                JBLabel(PluginLabelsBundle.defaultValue("buildCommand")),
+                JBLabel(PluginLabelsBundle.get("buildCommand")),
                 buildCommandTextField,
                 10,
                 false,
             )
             .addComponent(accessibilitySeparator, 15)
-            .addComponent(JBLabel(PluginLabelsBundle.defaultValue("colorPicker")), 15)
+            .addComponent(JBLabel(PluginLabelsBundle.get("colorPicker")), 15)
             .addComponent(colorPicker, 10)
             .addComponentFillVertically(JPanel(), 0)
             .panel

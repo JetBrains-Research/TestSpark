@@ -108,7 +108,7 @@ class PromptManager(
                     }
                 }
             },
-        ) + LLMSettingsBundle.defaultValue("commonPromptPart")
+        ) + LLMSettingsBundle.get("commonPromptPart")
         log.info("Prompt is:\n$prompt")
         return prompt
     }
@@ -167,7 +167,7 @@ class PromptManager(
 
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
-            LLMMessagesBundle.message("promptReduction") + "\n" +
+            LLMMessagesBundle.get("promptReduction") + "\n" +
                 "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
                 "Maximum depth for input parameters is ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
             project,

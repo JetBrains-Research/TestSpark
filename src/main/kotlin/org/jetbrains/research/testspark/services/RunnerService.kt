@@ -29,8 +29,8 @@ class RunnerService(private val project: Project) {
         val notification = NotificationGroupManager.getInstance()
             .getNotificationGroup("Execution Error")
             .createNotification(
-                PluginMessagesBundle.message("alreadyRunningNotificationTitle"),
-                PluginMessagesBundle.message("alreadyRunningTextNotificationText"),
+                PluginMessagesBundle.get("alreadyRunningNotificationTitle"),
+                PluginMessagesBundle.get("alreadyRunningTextNotificationText"),
                 NotificationType.WARNING,
             )
 

@@ -13,6 +13,6 @@ object PluginMessagesBundle : DynamicBundle(PluginBundlePaths.messages) {
      * Gets the requested message.
      */
     @Nls
-    fun message(@PropertyKey(resourceBundle = PluginBundlePaths.messages) key: String, vararg params: Any): String =
+    fun get(@PropertyKey(resourceBundle = PluginBundlePaths.messages) key: String, vararg params: Any): String =
         getMessage(key, *params)
 }

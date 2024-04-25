@@ -44,7 +44,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
                     HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consume(it)
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         llmErrorManager.errorProcess(
-                            LLMMessagesBundle.message("serverProblems"),
+                            LLMMessagesBundle.get("serverProblems"),
                             project,
                         )
                         sendResult = SendResult.OTHER
@@ -52,7 +52,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
 
                     HttpURLConnection.HTTP_BAD_REQUEST -> {
                         llmErrorManager.warningProcess(
-                            LLMMessagesBundle.message("tooLongPrompt"),
+                            LLMMessagesBundle.get("tooLongPrompt"),
                             project,
                         )
                         sendResult = SendResult.PROMPT_TOO_LONG
@@ -60,7 +60,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
 
                     HttpURLConnection.HTTP_UNAUTHORIZED -> {
                         llmErrorManager.errorProcess(
-                            LLMMessagesBundle.message("wrongToken"),
+                            LLMMessagesBundle.get("wrongToken"),
                             project,
                         )
                         sendResult = SendResult.OTHER

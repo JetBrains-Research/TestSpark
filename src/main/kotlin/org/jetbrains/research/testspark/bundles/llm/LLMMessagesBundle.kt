@@ -13,6 +13,6 @@ object LLMMessagesBundle : DynamicBundle(LLMBundlePaths.messages) {
      * Gets the requested message.
      */
     @Nls
-    fun message(@PropertyKey(resourceBundle = LLMBundlePaths.messages) key: String, vararg params: Any): String =
+    fun get(@PropertyKey(resourceBundle = LLMBundlePaths.messages) key: String, vararg params: Any): String =
         getMessage(key, *params)
 }

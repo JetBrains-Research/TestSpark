@@ -79,10 +79,10 @@ class LLMProcessManager(
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
-            llmErrorManager.errorProcess(LLMMessagesBundle.message("emptyBuildPath"), project)
+            llmErrorManager.errorProcess(LLMMessagesBundle.get("emptyBuildPath"), project)
             return null
         }
-        indicator.setText(PluginMessagesBundle.message("searchMessage"))
+        indicator.setText(PluginMessagesBundle.get("searchMessage"))
 
         val report = IJReport()
 
@@ -142,11 +142,11 @@ class LLMProcessManager(
         val feedbackResponse = llmFeedbackCycle.run { warning ->
             when (warning) {
                 LLMWithFeedbackCycle.WarningType.TEST_SUITE_PARSING_FAILED ->
-                    llmErrorManager.warningProcess(LLMMessagesBundle.message("emptyResponse"), project)
+                    llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
                 LLMWithFeedbackCycle.WarningType.NO_TEST_CASES_GENERATED ->
-                    llmErrorManager.warningProcess(LLMMessagesBundle.message("emptyResponse"), project)
+                    llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
                 LLMWithFeedbackCycle.WarningType.COMPILATION_ERROR_OCCURRED ->
-                    llmErrorManager.warningProcess(LLMMessagesBundle.message("compilationError"), project)
+                    llmErrorManager.warningProcess(LLMMessagesBundle.get("compilationError"), project)
             }
         }
 
@@ -161,18 +161,18 @@ class LLMProcessManager(
                 generatedTestsData.compilableTestCases.addAll(feedbackResponse.compilableTestCases)
             }
             FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED -> {
-                llmErrorManager.errorProcess(LLMMessagesBundle.message("invalidLLMResult"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project)
             }
             FeedbackCycleExecutionResult.CANCELED -> {
                 log.info("Process stopped")
                 return null
             }
             FeedbackCycleExecutionResult.PROVIDED_PROMPT_TOO_LONG -> {
-                llmErrorManager.errorProcess(LLMMessagesBundle.message("tooLongPromptRequest"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("tooLongPromptRequest"), project)
                 return null
             }
             FeedbackCycleExecutionResult.SAVING_TEST_FILES_ISSUE -> {
-                llmErrorManager.errorProcess(LLMMessagesBundle.message("savingTestFileIssue"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("savingTestFileIssue"), project)
             }
         }
 

@@ -13,5 +13,5 @@ object EvoSuiteSettingsBundle : DynamicBundle(EvoSuiteBundlePaths.settings) {
      * Gets the requested default value.
      */
     @Nls
-    fun defaultValue(@PropertyKey(resourceBundle = EvoSuiteBundlePaths.settings) key: String): String = getMessage(key)
+    fun get(@PropertyKey(resourceBundle = EvoSuiteBundlePaths.settings) key: String): String = getMessage(key)
 }

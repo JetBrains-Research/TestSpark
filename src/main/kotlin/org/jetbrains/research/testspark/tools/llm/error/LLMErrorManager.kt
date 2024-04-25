@@ -27,7 +27,7 @@ class LLMErrorManager : ErrorManager {
      * @param code The error code associated with the request.
      * @return The error message for the request.
      */
-    fun createRequestErrorMessage(code: Int): String = LLMMessagesBundle.message("requestError") + " " + code.toString()
+    fun createRequestErrorMessage(code: Int): String = LLMMessagesBundle.get("requestError") + " " + code.toString()
 
     /**
      * Processes an error message and displays a notification if an error has occurred.
@@ -40,7 +40,7 @@ class LLMErrorManager : ErrorManager {
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("LLM Execution Error")
                 .createNotification(
-                    PluginMessagesBundle.message("llmErrorTitle"),
+                    PluginMessagesBundle.get("llmErrorTitle"),
                     message,
                     NotificationType.ERROR,
                 )
@@ -58,7 +58,7 @@ class LLMErrorManager : ErrorManager {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("LLM Execution Error")
             .createNotification(
-                PluginMessagesBundle.message("llmWarningTitle"),
+                PluginMessagesBundle.get("llmWarningTitle"),
                 message,
                 NotificationType.WARNING,
             )

@@ -41,8 +41,8 @@ class TestSamplePanelFactory(
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
     private var testSamplesSelector = ComboBox(arrayOf(""))
-    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.defaultValue("resetTip"))
-    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.defaultValue("removeTip"))
+    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
 
     init {
         addListeners()

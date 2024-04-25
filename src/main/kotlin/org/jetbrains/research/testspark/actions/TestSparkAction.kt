@@ -100,7 +100,7 @@ class TestSparkAction : AnAction() {
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
-        private val nextButton = JButton(PluginLabelsBundle.defaultValue("next"))
+        private val nextButton = JButton(PluginLabelsBundle.get("next"))
 
         private val cardLayout = CardLayout()
         private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
@@ -141,8 +141,8 @@ class TestSparkAction : AnAction() {
                 NotificationGroupManager.getInstance()
                     .getNotificationGroup("Generation Error")
                     .createNotification(
-                        PluginMessagesBundle.message("generationWindowWarningTitle"),
-                        PluginMessagesBundle.message("generationWindowWarningMessage"),
+                        PluginMessagesBundle.get("generationWindowWarningTitle"),
+                        PluginMessagesBundle.get("generationWindowWarningMessage"),
                         NotificationType.WARNING,
                     )
                     .notify(e.project)
@@ -356,9 +356,9 @@ class TestSparkAction : AnAction() {
             if ((llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) ||
                 (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected)
             ) {
-                nextButton.text = PluginLabelsBundle.defaultValue("ok")
+                nextButton.text = PluginLabelsBundle.get("ok")
             } else {
-                nextButton.text = PluginLabelsBundle.defaultValue("next")
+                nextButton.text = PluginLabelsBundle.get("next")
             }
         }
     }

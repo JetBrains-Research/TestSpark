@@ -44,7 +44,7 @@ class ProjectBuilder(private val project: Project) {
 
         try {
             indicator.setIndeterminate(true)
-            indicator.setText(PluginMessagesBundle.message("buildMessage"))
+            indicator.setText(PluginMessagesBundle.get("buildMessage"))
 
             if (pluginSettingsState.buildCommand.isEmpty()) {
                 // User did not put own command line
@@ -116,8 +116,8 @@ class ProjectBuilder(private val project: Project) {
     private fun errorProcess() {
         if (project.service<ErrorService>().errorOccurred()) {
             NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-                PluginMessagesBundle.message("buildErrorTitle"),
-                PluginMessagesBundle.message("commonBuildErrorMessage"),
+                PluginMessagesBundle.get("buildErrorTitle"),
+                PluginMessagesBundle.get("commonBuildErrorMessage"),
                 NotificationType.ERROR,
             ).notify(project)
         }

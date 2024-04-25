@@ -24,16 +24,16 @@ import javax.swing.JPanel
 class TopButtonsPanelFactory(private val project: Project) {
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
-        IconButtonCreator.getButton(TestSparkIcons.selectAll, PluginLabelsBundle.defaultValue("selectAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.selectAll, PluginLabelsBundle.get("selectAllTip"))
     private var unselectAllButton: JButton =
-        IconButtonCreator.getButton(TestSparkIcons.unselectAll, PluginLabelsBundle.defaultValue("unselectAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.unselectAll, PluginLabelsBundle.get("unselectAllTip"))
     private var removeAllButton: JButton =
-        IconButtonCreator.getButton(TestSparkIcons.removeAll, PluginLabelsBundle.defaultValue("removeAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.removeAll, PluginLabelsBundle.get("removeAllTip"))
 
-    private var testsSelectedText: String = "${PluginLabelsBundle.defaultValue("testsSelected")}: %d/%d"
+    private var testsSelectedText: String = "${PluginLabelsBundle.get("testsSelected")}: %d/%d"
     private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)
 
-    private val testsPassedText: String = "${PluginLabelsBundle.defaultValue("testsPassed")}: %d/%d"
+    private val testsPassedText: String = "${PluginLabelsBundle.get("testsPassed")}: %d/%d"
     private var testsPassedLabel: JLabel = JLabel(testsPassedText)
 
     private val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
@@ -120,8 +120,8 @@ class TopButtonsPanelFactory(private val project: Project) {
         // Ask the user for the confirmation
         val choice = JOptionPane.showConfirmDialog(
             null,
-            PluginMessagesBundle.message("removeAllMessage"),
-            PluginMessagesBundle.message("confirmationTitle"),
+            PluginMessagesBundle.get("removeAllMessage"),
+            PluginMessagesBundle.get("confirmationTitle"),
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE,
         )
@@ -141,8 +141,8 @@ class TopButtonsPanelFactory(private val project: Project) {
     private fun runAllTestCases() {
         val choice = JOptionPane.showConfirmDialog(
             null,
-            PluginMessagesBundle.message("runCautionMessage"),
-            PluginMessagesBundle.message("confirmationTitle"),
+            PluginMessagesBundle.get("runCautionMessage"),
+            PluginMessagesBundle.get("confirmationTitle"),
             JOptionPane.OK_CANCEL_OPTION,
             JOptionPane.WARNING_MESSAGE,
         )
@@ -184,7 +184,7 @@ class TopButtonsPanelFactory(private val project: Project) {
      * @return a JButton for running all tests
      */
     private fun createRunAllTestButton(): JButton {
-        val runTestButton = JButton(PluginLabelsBundle.defaultValue("runAll"), TestSparkIcons.runTest)
+        val runTestButton = JButton(PluginLabelsBundle.get("runAll"), TestSparkIcons.runTest)
         runTestButton.isOpaque = false
         runTestButton.isContentAreaFilled = false
         runTestButton.isBorderPainted = true

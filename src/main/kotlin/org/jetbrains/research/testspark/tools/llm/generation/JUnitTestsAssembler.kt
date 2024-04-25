@@ -89,7 +89,7 @@ class JUnitTestsAssembler(
         val generatedTestsCount = super.getContent().split("@Test").size - 1
 
         if (lastTestCount != generatedTestsCount) {
-            indicator.setText(PluginMessagesBundle.message("generatingTestNumber") + generatedTestsCount)
+            indicator.setText(PluginMessagesBundle.get("generatingTestNumber") + generatedTestsCount)
             lastTestCount = generatedTestsCount
         }
     }

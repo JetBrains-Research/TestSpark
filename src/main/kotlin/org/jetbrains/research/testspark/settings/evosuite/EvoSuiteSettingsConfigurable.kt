@@ -107,8 +107,8 @@ class EvoSuiteSettingsConfigurable(private val project: Project) : SettingsConfi
         val seed = settingsComponent!!.seed.toLongOrNull()
         if (settingsComponent!!.seed != "" && seed == null) {
             Messages.showErrorDialog(
-                EvoSuiteMessagesBundle.message("seedParameterMessage"),
-                EvoSuiteMessagesBundle.message("seedParameterTitle"),
+                EvoSuiteMessagesBundle.get("seedParameterMessage"),
+                EvoSuiteMessagesBundle.get("seedParameterTitle"),
             )
         } else {
             evoSuiteSettingsState.seed = settingsComponent!!.seed
@@ -117,8 +117,8 @@ class EvoSuiteSettingsConfigurable(private val project: Project) : SettingsConfi
         val evosuitePort = settingsComponent!!.evosuitePort.toIntOrNull()
         if (evosuitePort != null && (evosuitePort < 1024 || evosuitePort > 65535)) {
             Messages.showErrorDialog(
-                EvoSuiteMessagesBundle.message("evosuitePortMessage"),
-                EvoSuiteMessagesBundle.message("evosuitePortTitle"),
+                EvoSuiteMessagesBundle.get("evosuitePortMessage"),
+                EvoSuiteMessagesBundle.get("evosuitePortTitle"),
             )
         } else {
             evoSuiteSettingsState.evosuitePort = settingsComponent!!.evosuitePort

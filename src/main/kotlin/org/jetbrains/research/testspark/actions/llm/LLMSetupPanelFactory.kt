@@ -36,8 +36,8 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
     private var platformSelector = ComboBox(arrayOf(llmSettingsState.openAIName))
-    private val backLlmButton = JButton(PluginLabelsBundle.defaultValue("back"))
-    private val okLlmButton = JButton(PluginLabelsBundle.defaultValue("next"))
+    private val backLlmButton = JButton(PluginLabelsBundle.get("back"))
+    private val okLlmButton = JButton(PluginLabelsBundle.get("next"))
     private val junitSelector = JUnitCombobox(e)
 
     private val llmPlatforms: List<LLMPlatform> = LLMHelper.getLLLMPlatforms()
@@ -62,7 +62,7 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
     }
 
     override fun getTitlePanel(): JPanel {
-        val textTitle = JLabel(PluginLabelsBundle.defaultValue("llmSetup"))
+        val textTitle = JLabel(PluginLabelsBundle.get("llmSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()
@@ -79,31 +79,31 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
             .addLabeledComponent(
-                JBLabel(LLMLabelsBundle.defaultValue("llmPlatform")),
+                JBLabel(LLMLabelsBundle.get("llmPlatform")),
                 platformSelector,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(LLMLabelsBundle.defaultValue("llmToken")),
+                JBLabel(LLMLabelsBundle.get("llmToken")),
                 llmUserTokenField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(LLMLabelsBundle.defaultValue("model")),
+                JBLabel(LLMLabelsBundle.get("model")),
                 modelSelector,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(LLMLabelsBundle.defaultValue("junitVersion")),
+                JBLabel(LLMLabelsBundle.get("junitVersion")),
                 junitSelector,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(LLMLabelsBundle.defaultValue("selectPrompt")),
+                JBLabel(LLMLabelsBundle.get("selectPrompt")),
                 getPromptSelectionPanel(),
                 10,
                 false,
@@ -121,7 +121,7 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
         okLlmButton.isOpaque = false
         okLlmButton.isContentAreaFilled = false
         if (!llmSettingsState.provideTestSamplesCheckBoxSelected) {
-            okLlmButton.text = PluginLabelsBundle.defaultValue("ok")
+            okLlmButton.text = PluginLabelsBundle.get("ok")
         }
         bottomPanel.add(okLlmButton)
 

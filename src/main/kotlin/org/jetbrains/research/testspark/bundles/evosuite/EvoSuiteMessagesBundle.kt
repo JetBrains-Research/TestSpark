@@ -13,6 +13,6 @@ object EvoSuiteMessagesBundle : DynamicBundle(EvoSuiteBundlePaths.messages) {
      * Gets the requested message.
      */
     @Nls
-    fun message(@PropertyKey(resourceBundle = EvoSuiteBundlePaths.messages) key: String, vararg params: Any): String =
+    fun get(@PropertyKey(resourceBundle = EvoSuiteBundlePaths.messages) key: String, vararg params: Any): String =
         getMessage(key, *params)
 }

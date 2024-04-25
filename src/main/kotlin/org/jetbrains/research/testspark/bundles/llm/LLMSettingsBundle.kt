@@ -13,5 +13,5 @@ object LLMSettingsBundle : DynamicBundle(LLMBundlePaths.settings) {
      * Gets the requested default value.
      */
     @Nls
-    fun defaultValue(@PropertyKey(resourceBundle = LLMBundlePaths.settings) key: String): String = getMessage(key)
+    fun get(@PropertyKey(resourceBundle = LLMBundlePaths.settings) key: String): String = getMessage(key)
 }

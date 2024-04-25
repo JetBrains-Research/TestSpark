@@ -57,10 +57,10 @@ class CoverageToolWindowDisplayService {
             ScrollPaneFactory.createScrollPane(table)
 
         val tableColumnModel = table.columnModel
-        tableColumnModel.getColumn(0).headerValue = PluginLabelsBundle.defaultValue("unitsUndertest")
-        tableColumnModel.getColumn(1).headerValue = PluginLabelsBundle.defaultValue("lineCoverage")
-        tableColumnModel.getColumn(2).headerValue = PluginLabelsBundle.defaultValue("branchCoverage")
-        tableColumnModel.getColumn(3).headerValue = PluginLabelsBundle.defaultValue("weakMutationCoverage")
+        tableColumnModel.getColumn(0).headerValue = PluginLabelsBundle.get("unitsUndertest")
+        tableColumnModel.getColumn(1).headerValue = PluginLabelsBundle.get("lineCoverage")
+        tableColumnModel.getColumn(2).headerValue = PluginLabelsBundle.get("branchCoverage")
+        tableColumnModel.getColumn(3).headerValue = PluginLabelsBundle.get("weakMutationCoverage")
         table.columnModel = tableColumnModel
 
         table.minimumSize = Dimension(700, 100)

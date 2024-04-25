@@ -26,7 +26,7 @@ import javax.swing.event.HyperlinkEvent
 class DescriptionTab(private val project: Project) {
     private val panelTitle = JPanel()
     private val iconTitle = JLabel(TestSparkIcons.pluginIcon)
-    private val textTitle = JLabel(PluginLabelsBundle.defaultValue("quickAccess"))
+    private val textTitle = JLabel(PluginLabelsBundle.get("quickAccess"))
 
     private val testSparkDescription = JTextPane().apply {
         isEditable = false
@@ -69,16 +69,16 @@ class DescriptionTab(private val project: Project) {
     }
 
     // Link to LLM settings
-    private val llmSettingsButton = JButton(PluginLabelsBundle.defaultValue("llmSettingsLink"), TestSparkIcons.settings)
+    private val llmSettingsButton = JButton(PluginLabelsBundle.get("llmSettingsLink"), TestSparkIcons.settings)
 
     // Link to EvoSuite settings
-    private val evoSuiteSettingsButton = JButton(PluginLabelsBundle.defaultValue("evoSuiteSettingsLink"), TestSparkIcons.settings)
+    private val evoSuiteSettingsButton = JButton(PluginLabelsBundle.get("evoSuiteSettingsLink"), TestSparkIcons.settings)
 
     // Link to open settings
-    private val settingsButton = JButton(PluginLabelsBundle.defaultValue("settingsLink"), TestSparkIcons.settings)
+    private val settingsButton = JButton(PluginLabelsBundle.get("settingsLink"), TestSparkIcons.settings)
 
     // Link to documentation
-    private val documentationButton = JButton(PluginLabelsBundle.defaultValue("documentationLink"), TestSparkIcons.documentation)
+    private val documentationButton = JButton(PluginLabelsBundle.get("documentationLink"), TestSparkIcons.documentation)
 
     // Tool Window panel
     private var toolWindowPanel: JPanel = JPanel()

@@ -16,8 +16,8 @@ import javax.swing.JRadioButton
 class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     // init components
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
-        JRadioButton(PluginLabelsBundle.defaultValue("provideTestSample")),
-        JRadioButton(PluginLabelsBundle.defaultValue("noTestSample")),
+        JRadioButton(PluginLabelsBundle.get("provideTestSample")),
+        JRadioButton(PluginLabelsBundle.get("noTestSample")),
     )
     private val selectionTypeButtonGroup = ButtonGroup()
     private val radioButtonsPanel = JPanel()
@@ -31,10 +31,10 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     private var testSamplesCode: String = ""
 
     private val addButtonPanel = JPanel()
-    private val addButton = JButton(PluginLabelsBundle.defaultValue("addTestSample"))
+    private val addButton = JButton(PluginLabelsBundle.get("addTestSample"))
 
-    private val nextButton = JButton(PluginLabelsBundle.defaultValue("ok"))
-    private val backLlmButton = JButton(PluginLabelsBundle.defaultValue("back"))
+    private val nextButton = JButton(PluginLabelsBundle.get("ok"))
+    private val backLlmButton = JButton(PluginLabelsBundle.get("back"))
 
     private var formBuilder = FormBuilder.createFormBuilder()
         .setFormLeftIndent(10)
@@ -50,7 +50,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     }
 
     override fun getTitlePanel(): JPanel {
-        val textTitle = JLabel(PluginLabelsBundle.defaultValue("llmSampleSelectorFactory"))
+        val textTitle = JLabel(PluginLabelsBundle.get("llmSampleSelectorFactory"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()

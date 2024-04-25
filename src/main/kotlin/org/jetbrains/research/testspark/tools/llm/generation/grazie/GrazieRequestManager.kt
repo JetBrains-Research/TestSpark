@@ -29,7 +29,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
                     when {
                         contains("invalid: 401") -> {
                             llmErrorManager.errorProcess(
-                                LLMMessagesBundle.message("wrongToken"),
+                                LLMMessagesBundle.get("wrongToken"),
                                 project,
                             )
                             sendResult = SendResult.OTHER
@@ -37,7 +37,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
 
                         contains("invalid: 413 Payload Too Large") -> {
                             llmErrorManager.warningProcess(
-                                LLMMessagesBundle.message("tooLongPrompt"),
+                                LLMMessagesBundle.get("tooLongPrompt"),
                                 project,
                             )
                             sendResult = SendResult.PROMPT_TOO_LONG
@@ -51,7 +51,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
                 }
             }
         } catch (e: ClassNotFoundException) {
-            llmErrorManager.errorProcess(LLMMessagesBundle.message("grazieError"), project)
+            llmErrorManager.errorProcess(LLMMessagesBundle.get("grazieError"), project)
         }
 
         return sendResult

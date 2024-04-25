@@ -105,11 +105,11 @@ class CoverageVisualisationService(private val project: Project) {
 
         if (settingsProjectState.showCoverageCheckboxSelected) {
             val color = JBColor(
-                PluginSettingsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue),
             )
             val colorForLines = JBColor(
-                PluginSettingsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
@@ -245,7 +245,7 @@ class CoverageVisualisationService(private val project: Project) {
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
             visualisationService.mainPanel,
-            PluginLabelsBundle.defaultValue("coverageVisualisation"),
+            PluginLabelsBundle.get("coverageVisualisation"),
             true,
         )
         contentManager!!.addContent(content!!)

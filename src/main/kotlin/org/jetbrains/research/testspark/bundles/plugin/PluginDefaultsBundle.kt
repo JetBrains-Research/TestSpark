@@ -13,5 +13,5 @@ object PluginDefaultsBundle : DynamicBundle(PluginBundlePaths.defaults) {
      * Gets the requested default value.
      */
     @Nls
-    fun defaultValue(@PropertyKey(resourceBundle = PluginBundlePaths.defaults) key: String): String = getMessage(key)
+    fun get(@PropertyKey(resourceBundle = PluginBundlePaths.defaults) key: String): String = getMessage(key)
 }

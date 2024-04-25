@@ -18,11 +18,11 @@ data class PluginSettingsState(
      * Default values of SettingsProjectState.
      */
     object DefaultPluginSettingsState {
-        val showCoverageCheckboxSelected: Boolean = PluginDefaultsBundle.defaultValue("showCoverageCheckboxSelected").toBoolean()
-        val colorRed: Int = PluginDefaultsBundle.defaultValue("colorRed").toInt()
-        val colorGreen: Int = PluginDefaultsBundle.defaultValue("colorGreen").toInt()
-        val colorBlue: Int = PluginDefaultsBundle.defaultValue("colorBlue").toInt()
-        val buildPath: String = PluginDefaultsBundle.defaultValue("buildPath")
-        val buildCommand: String = PluginDefaultsBundle.defaultValue("buildCommand")
+        val showCoverageCheckboxSelected: Boolean = PluginDefaultsBundle.get("showCoverageCheckboxSelected").toBoolean()
+        val colorRed: Int = PluginDefaultsBundle.get("colorRed").toInt()
+        val colorGreen: Int = PluginDefaultsBundle.get("colorGreen").toInt()
+        val colorBlue: Int = PluginDefaultsBundle.get("colorBlue").toInt()
+        val buildPath: String = PluginDefaultsBundle.get("buildPath")
+        val buildCommand: String = PluginDefaultsBundle.get("buildCommand")
     }
 }

@@ -24,11 +24,11 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
     // init components
     private var javaPathTextField = JTextField(30)
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.entries.toTypedArray())
-    private val backEvoSuiteButton = JButton(PluginLabelsBundle.defaultValue("back"))
-    private val okEvoSuiteButton = JButton(PluginLabelsBundle.defaultValue("ok"))
+    private val backEvoSuiteButton = JButton(PluginLabelsBundle.get("back"))
+    private val okEvoSuiteButton = JButton(PluginLabelsBundle.get("ok"))
 
     override fun getTitlePanel(): JPanel {
-        val textTitle = JLabel(PluginLabelsBundle.defaultValue("evosuiteSetup"))
+        val textTitle = JLabel(PluginLabelsBundle.get("evosuiteSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()
@@ -38,7 +38,7 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
     }
 
     override fun getMiddlePanel(): JPanel {
-        javaPathTextField.toolTipText = EvoSuiteSettingsBundle.defaultValue("javaPath")
+        javaPathTextField.toolTipText = EvoSuiteSettingsBundle.get("javaPath")
         javaPathTextField.text = evoSuiteSettingsState.javaPath
 
         algorithmSelector.setMinimumAndPreferredWidth(300)
@@ -47,13 +47,13 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
             .addLabeledComponent(
-                JBLabel(EvoSuiteLabelsBundle.defaultValue("javaPath")),
+                JBLabel(EvoSuiteLabelsBundle.get("javaPath")),
                 javaPathTextField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(EvoSuiteLabelsBundle.defaultValue("defaultSearch")),
+                JBLabel(EvoSuiteLabelsBundle.get("defaultSearch")),
                 algorithmSelector,
                 10,
                 false,

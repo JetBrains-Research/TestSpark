@@ -188,10 +188,10 @@ class LLMHelper {
                 platformSelector.isEnabled = false
             }
 
-            llmUserTokenField.toolTipText = LLMSettingsBundle.defaultValue("llmToken")
+            llmUserTokenField.toolTipText = LLMSettingsBundle.get("llmToken")
             updateLlmUserTokenField(platformSelector, llmUserTokenField, llmPlatforms, settingsState)
 
-            modelSelector.toolTipText = LLMSettingsBundle.defaultValue("model")
+            modelSelector.toolTipText = LLMSettingsBundle.get("model")
             updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
         }
 
@@ -211,7 +211,7 @@ class LLMHelper {
          */
         fun isCorrectToken(project: Project): Boolean {
             if (!SettingsArguments(project).isTokenSet()) {
-                LLMErrorManager().errorProcess(LLMMessagesBundle.message("missingToken"), project)
+                LLMErrorManager().errorProcess(LLMMessagesBundle.get("missingToken"), project)
                 return false
             }
             return true

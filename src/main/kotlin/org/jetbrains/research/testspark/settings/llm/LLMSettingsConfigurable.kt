@@ -125,8 +125,8 @@ class LLMSettingsConfigurable(private val project: Project) : SettingsConfigurab
             !service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.linePrompts)[settingsComponent!!.lineCurrentDefaultPromptIndex])
         ) {
             Messages.showErrorDialog(
-                LLMMessagesBundle.message("defaultPromptIsNotValidMessage"),
-                LLMMessagesBundle.message("defaultPromptIsNotValidTitle"),
+                LLMMessagesBundle.get("defaultPromptIsNotValidMessage"),
+                LLMMessagesBundle.get("defaultPromptIsNotValidTitle"),
             )
             return
         }

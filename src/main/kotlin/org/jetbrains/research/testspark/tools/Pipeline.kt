@@ -80,7 +80,7 @@ class Pipeline(
         var result: UIContext? = null
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, PluginMessagesBundle.message("testGenerationMessage")) {
+            .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
 

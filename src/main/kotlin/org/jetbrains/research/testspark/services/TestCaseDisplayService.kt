@@ -53,7 +53,7 @@ class TestCaseDisplayService(private val project: Project) {
 
     private val topButtonsPanelFactory = TopButtonsPanelFactory(project)
 
-    private var applyButton: JButton = JButton(PluginLabelsBundle.defaultValue("applyButton"))
+    private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
     private var allTestCasePanel: JPanel = JPanel()
 
@@ -184,7 +184,7 @@ class TestCaseDisplayService(private val project: Project) {
         val settingsProjectState = project.service<PluginSettingsService>().state
         val highlightColor =
             JBColor(
-                PluginSettingsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
@@ -332,8 +332,8 @@ class TestCaseDisplayService(private val project: Project) {
                 val jOptionPane =
                     JOptionPane.showInputDialog(
                         null,
-                        PluginLabelsBundle.defaultValue("optionPaneMessage"),
-                        PluginLabelsBundle.defaultValue("optionPaneTitle"),
+                        PluginLabelsBundle.get("optionPaneMessage"),
+                        PluginLabelsBundle.get("optionPaneTitle"),
                         JOptionPane.PLAIN_MESSAGE,
                         null,
                         null,
@@ -352,13 +352,13 @@ class TestCaseDisplayService(private val project: Project) {
 
                 // Check the correctness of a class name
                 if (!Regex("[A-Z][a-zA-Z0-9]*(.java)?").matches(className)) {
-                    showErrorWindow(PluginLabelsBundle.defaultValue("incorrectFileNameMessage"))
+                    showErrorWindow(PluginLabelsBundle.get("incorrectFileNameMessage"))
                     continue
                 }
 
                 // Check the existence of a file with this name
                 if (File(filePath).exists()) {
-                    showErrorWindow(PluginLabelsBundle.defaultValue("fileAlreadyExistsMessage"))
+                    showErrorWindow(PluginLabelsBundle.get("fileAlreadyExistsMessage"))
                     continue
                 }
                 break
@@ -406,7 +406,7 @@ class TestCaseDisplayService(private val project: Project) {
         JOptionPane.showMessageDialog(
             null,
             message,
-            PluginLabelsBundle.defaultValue("errorWindowTitle"),
+            PluginLabelsBundle.get("errorWindowTitle"),
             JOptionPane.ERROR_MESSAGE,
         )
     }
@@ -512,7 +512,7 @@ class TestCaseDisplayService(private val project: Project) {
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
             mainPanel,
-            PluginLabelsBundle.defaultValue("generatedTests"),
+            PluginLabelsBundle.get("generatedTests"),
             true,
         )
         contentManager!!.addContent(content!!)

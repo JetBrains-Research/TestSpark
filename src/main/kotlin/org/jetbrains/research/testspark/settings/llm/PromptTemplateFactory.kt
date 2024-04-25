@@ -38,9 +38,9 @@ class PromptTemplateFactory(
     private var currentTemplateNumber = 0
 
     private val promptTemplateName = JTextField()
-    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.defaultValue("removeTemplate"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTemplate"))
     private val setAsDefaultButton =
-        JButton(PluginLabelsBundle.defaultValue("setAsDefault"), TestSparkIcons.setDefault)
+        JButton(PluginLabelsBundle.get("setAsDefault"), TestSparkIcons.setDefault)
 
     private val editorTextField = EditorTextField()
 
@@ -49,9 +49,9 @@ class PromptTemplateFactory(
     private val redBorder = BorderFactory.createLineBorder(JBColor.RED)
 
     private val previousButton =
-        IconButtonCreator.getButton(TestSparkIcons.previous, PluginLabelsBundle.defaultValue("previousRequest"))
-    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, PluginLabelsBundle.defaultValue("nextRequest"))
-    private val addButton = JButton(PluginLabelsBundle.defaultValue("addPromptTemplate"), TestSparkIcons.add)
+        IconButtonCreator.getButton(TestSparkIcons.previous, PluginLabelsBundle.get("previousRequest"))
+    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, PluginLabelsBundle.get("nextRequest"))
+    private val addButton = JButton(PluginLabelsBundle.get("addPromptTemplate"), TestSparkIcons.add)
 
     init {
         setSettingsStateParameters()
@@ -65,7 +65,7 @@ class PromptTemplateFactory(
 
     fun getUpperButtonsPanel(): JPanel {
         val panel = JPanel(FlowLayout(FlowLayout.LEFT))
-        panel.add(JLabel(PluginLabelsBundle.defaultValue("promptTemplateName")))
+        panel.add(JLabel(PluginLabelsBundle.get("promptTemplateName")))
         panel.add(promptTemplateName)
         panel.add(setAsDefaultButton)
         panel.add(removeButton)
@@ -141,7 +141,7 @@ class PromptTemplateFactory(
     }
 
     private fun getDefaultPromptTemplateName(number: Int) =
-        PluginLabelsBundle.defaultValue("defaultPromptTemplateName") + number.toString()
+        PluginLabelsBundle.get("defaultPromptTemplateName") + number.toString()
 
     private fun addListeners() {
         promptTemplateName.document.addDocumentListener(
@@ -177,8 +177,8 @@ class PromptTemplateFactory(
         removeButton.addActionListener {
             if (currentDefaultIndex == currentTemplateNumber) {
                 Messages.showErrorDialog(
-                    LLMMessagesBundle.message("removeTemplateMessage"),
-                    LLMMessagesBundle.message("removeTemplateTitle"),
+                    LLMMessagesBundle.get("removeTemplateMessage"),
+                    LLMMessagesBundle.get("removeTemplateTitle"),
                 )
             } else {
                 if (currentTemplateNumber < currentDefaultIndex) currentDefaultIndex--

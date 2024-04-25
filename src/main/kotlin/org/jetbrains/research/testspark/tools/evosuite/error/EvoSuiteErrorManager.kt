@@ -36,7 +36,7 @@ class EvoSuiteErrorManager : ErrorManager {
      * @return The common error message with the provided message.
      */
     private fun getCommonErrorMessage(message: String) =
-        EvoSuiteMessagesBundle.message("evosuiteErrorCommon") + " " + message
+        EvoSuiteMessagesBundle.get("evosuiteErrorCommon") + " " + message
 
     /**
      * Returns the exceeded timeout message with the specified EvoSuite process timeout.
@@ -45,7 +45,7 @@ class EvoSuiteErrorManager : ErrorManager {
      * @return The exceeded timeout message.
      */
     private fun getExceededTimeoutMessage(evoSuiteProcessTimeout: Long) =
-        EvoSuiteMessagesBundle.message("exceededTimeoutMessage") + " " + evoSuiteProcessTimeout + " ms"
+        EvoSuiteMessagesBundle.get("exceededTimeoutMessage") + " " + evoSuiteProcessTimeout + " ms"
 
     /**
      * Retrieves the error message from the EvoSuite output or the non-zero exit code message if available.
@@ -57,7 +57,7 @@ class EvoSuiteErrorManager : ErrorManager {
     private fun getEvoSuiteNonZeroExitCodeMessage(evosuiteOutput: String) =
         "Error: (.*)\n".toRegex().find(evosuiteOutput)?.groupValues?.get(1)
             ?: "Exception: (.*)\n".toRegex().find(evosuiteOutput)?.groupValues?.get(1)
-            ?: EvoSuiteMessagesBundle.message("nonZeroCodeMessage")
+            ?: EvoSuiteMessagesBundle.get("nonZeroCodeMessage")
 
     /**
      * Checks if the process is correct by analyzing the output and exit code of the process.
@@ -92,15 +92,15 @@ class EvoSuiteErrorManager : ErrorManager {
         }
 
         // unknown class error
-        if (output.contains(EvoSuiteMessagesBundle.message("unknownClassError"))) {
-            errorProcess(EvoSuiteMessagesBundle.message("unknownClassMessage"), project)
+        if (output.contains(EvoSuiteMessagesBundle.get("unknownClassError"))) {
+            errorProcess(EvoSuiteMessagesBundle.get("unknownClassMessage"), project)
             return false
         }
 
         // error while initializing target class
-        if (output.contains(EvoSuiteMessagesBundle.message("errorWhileInitializingTargetClass"))) {
+        if (output.contains(EvoSuiteMessagesBundle.get("errorWhileInitializingTargetClass"))) {
             errorProcess(
-                EvoSuiteMessagesBundle.message("errorWhileInitializingTargetClass").lowercase(Locale.getDefault()),
+                EvoSuiteMessagesBundle.get("errorWhileInitializingTargetClass").lowercase(Locale.getDefault()),
                 project,
             )
             return false
@@ -119,7 +119,7 @@ class EvoSuiteErrorManager : ErrorManager {
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("EvoSuite Execution Error")
                 .createNotification(
-                    PluginMessagesBundle.message("evosuiteErrorTitle"),
+                    PluginMessagesBundle.get("evosuiteErrorTitle"),
                     getCommonErrorMessage(message),
                     NotificationType.ERROR,
                 )
@@ -136,7 +136,7 @@ class EvoSuiteErrorManager : ErrorManager {
         NotificationGroupManager.getInstance()
             .getNotificationGroup("EvoSuite Execution Error")
             .createNotification(
-                PluginMessagesBundle.message("evosuiteErrorTitle"),
+                PluginMessagesBundle.get("evosuiteErrorTitle"),
                 getCommonErrorMessage(message),
                 NotificationType.WARNING,
             )
