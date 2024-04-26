@@ -1,6 +1,5 @@
-package org.jetbrains.research.testspark.services
+package org.jetbrains.research.testspark.helpers
 
-import com.intellij.openapi.components.Service
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.table.JBTable
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
@@ -9,10 +8,9 @@ import javax.swing.JScrollPane
 import javax.swing.table.AbstractTableModel
 
 /**
- * Class to display EvoSuite coverage in the tool window.
+ * Class to display coverage in the tool window.
  */
-@Service(Service.Level.PROJECT)
-class CoverageToolWindowDisplayService {
+class CoverageToolWindowDisplayHelper {
     var mainPanel: JScrollPane? = null
     var data: ArrayList<String> = arrayListOf("", "", "", "")
 
@@ -47,6 +45,7 @@ class CoverageToolWindowDisplayService {
             return data[rowIndex * 4 + columnIndex]
         }
     }
+
     private var table = JBTable(tableModel)
 
     /**

@@ -18,6 +18,7 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.helpers.CoverageHelper
+import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
 import java.awt.Color
 import kotlin.math.roundToInt
 
@@ -35,6 +36,8 @@ class CoverageVisualisationService(private val project: Project) {
     private val textAttribute = TextAttributes()
 
     private var currentHighlightedData: HighlightedData? = null
+
+    private val coverageToolWindowDisplayHelper = CoverageToolWindowDisplayHelper()
 
     /**
      * Represents highlighted data in the editor.
@@ -221,19 +224,16 @@ class CoverageVisualisationService(private val project: Project) {
         }
 
         // Change the values in the table
-        val coverageToolWindowDisplayService = project.service<CoverageToolWindowDisplayService>()
-        coverageToolWindowDisplayService.data[0] = testReport.UUT
-        coverageToolWindowDisplayService.data[1] = "$relativeLines% ($coveredLines/$allLines)"
-        coverageToolWindowDisplayService.data[2] = "$relativeBranch% ($coveredBranches/$allBranches)"
-        coverageToolWindowDisplayService.data[3] = "$relativeMutations% ($coveredMutations/$allMutations)"
+        coverageToolWindowDisplayHelper.data[0] = testReport.UUT
+        coverageToolWindowDisplayHelper.data[1] = "$relativeLines% ($coveredLines/$allLines)"
+        coverageToolWindowDisplayHelper.data[2] = "$relativeBranch% ($coveredBranches/$allBranches)"
+        coverageToolWindowDisplayHelper.data[3] = "$relativeMutations% ($coveredMutations/$allMutations)"
     }
 
     /**
      * Creates a new toolWindow tab for the coverage visualisation.
      */
     private fun createToolWindowTab() {
-        val visualisationService = project.service<CoverageToolWindowDisplayService>()
-
         // Remove coverage visualisation from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
         contentManager = toolWindowManager!!.contentManager
@@ -244,7 +244,7 @@ class CoverageVisualisationService(private val project: Project) {
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
-            visualisationService.mainPanel,
+            coverageToolWindowDisplayHelper.mainPanel,
             PluginLabelsBundle.get("coverageVisualisation"),
             true,
         )
