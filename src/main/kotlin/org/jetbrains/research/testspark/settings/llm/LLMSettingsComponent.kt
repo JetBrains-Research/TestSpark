@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.ide.ui.UINumericRange
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.EditorTextField
@@ -22,8 +21,8 @@ import org.jetbrains.research.testspark.data.llm.PromptEditorType
 import org.jetbrains.research.testspark.display.IconButtonCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.LLMHelper
+import org.jetbrains.research.testspark.helpers.PromptParserHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.settings.template.SettingsComponent
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
@@ -307,7 +306,7 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
     }
 
     private fun addPromptButtons(panel: JPanel) {
-        val keywords = service<PromptParserService>().getKeywords()
+        val keywords = PromptParserHelper.getKeywords()
         val mandatoryKeywords = keywords.filter { it.mandatory }
         val optionalKeywords = keywords.filter { !it.mandatory }
 
