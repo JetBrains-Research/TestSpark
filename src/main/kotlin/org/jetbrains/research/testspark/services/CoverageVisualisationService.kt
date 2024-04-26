@@ -20,6 +20,7 @@ import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.helpers.CoverageHelper
 import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
 import java.awt.Color
+import javax.swing.JScrollPane
 import kotlin.math.roundToInt
 
 /**
@@ -37,7 +38,7 @@ class CoverageVisualisationService(private val project: Project) {
 
     private var currentHighlightedData: HighlightedData? = null
 
-    private val coverageToolWindowDisplayHelper = CoverageToolWindowDisplayHelper()
+    private var mainScrollPane: JScrollPane? = null
 
     /**
      * Represents highlighted data in the editor.
@@ -189,7 +190,8 @@ class CoverageVisualisationService(private val project: Project) {
     }
 
     private fun getCoveredMutants(testReport: Report, selectedTests: HashSet<Int>): Map<Int, List<MutationInfo>> {
-        return testReport.testCaseList.filter { x -> x.value.id in selectedTests }.map { x -> (x.value as IJTestCase).coveredMutants }
+        return testReport.testCaseList.filter { x -> x.value.id in selectedTests }
+            .map { x -> (x.value as IJTestCase).coveredMutants }
             .flatten().groupBy { x -> x.lineNo }
     }
 
@@ -224,10 +226,14 @@ class CoverageVisualisationService(private val project: Project) {
         }
 
         // Change the values in the table
-        coverageToolWindowDisplayHelper.data[0] = testReport.UUT
-        coverageToolWindowDisplayHelper.data[1] = "$relativeLines% ($coveredLines/$allLines)"
-        coverageToolWindowDisplayHelper.data[2] = "$relativeBranch% ($coveredBranches/$allBranches)"
-        coverageToolWindowDisplayHelper.data[3] = "$relativeMutations% ($coveredMutations/$allMutations)"
+        mainScrollPane = CoverageToolWindowDisplayHelper.getPanel(
+            arrayListOf(
+                testReport.UUT,
+                "$relativeLines% ($coveredLines/$allLines)",
+                "$relativeBranch% ($coveredBranches/$allBranches)",
+                "$relativeMutations% ($coveredMutations/$allMutations)",
+            ),
+        )
     }
 
     /**
@@ -244,7 +250,7 @@ class CoverageVisualisationService(private val project: Project) {
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
-            coverageToolWindowDisplayHelper.mainPanel,
+            mainScrollPane,
             PluginLabelsBundle.get("coverageVisualisation"),
             true,
         )
