@@ -10,6 +10,7 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiFile
+import org.jetbrains.research.testspark.actions.controllers.RunnerController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -21,7 +22,6 @@ import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.ReportLockingService
-import org.jetbrains.research.testspark.services.RunnerService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
@@ -42,6 +42,7 @@ class Pipeline(
     caretOffset: Int,
     fileUrl: String?,
     private val packageName: String,
+    private val runnerController: RunnerController,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
@@ -105,7 +106,7 @@ class Pipeline(
 
                 override fun onFinished() {
                     super.onFinished()
-                    project.service<RunnerService>().clear()
+                    runnerController.finished()
                     result?.let {
                         project.service<ReportLockingService>().receiveReport(it)
                     }
@@ -113,7 +114,7 @@ class Pipeline(
             })
     }
 
-    fun clear(project: Project) { // should be removed totally!
+    private fun clear(project: Project) { // should be removed totally!
         project.service<TestCaseDisplayService>().clear()
         project.service<ErrorService>().clear()
         project.service<CoverageVisualisationService>().clear()
