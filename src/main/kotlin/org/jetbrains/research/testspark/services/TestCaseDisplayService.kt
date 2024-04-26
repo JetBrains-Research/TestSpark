@@ -32,6 +32,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
+import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -438,17 +439,17 @@ class TestCaseDisplayService(private val project: Project) {
 
         // insert tests to a code
         testCaseComponents.reversed().forEach {
-            val testMethodCode = project
-                .service<JavaClassBuilderService>()
-                .getTestMethodCodeFromClassWithTestCase(
-                    project.service<JavaClassBuilderService>().formatJavaCode(
+            val testMethodCode =
+                JavaClassBuilderHelper.getTestMethodCodeFromClassWithTestCase(
+                    JavaClassBuilderHelper.formatJavaCode(
+                        project,
                         it.replace("\r\n", "\n")
                             .replace("verifyException(", "// verifyException("),
                         uiContext!!.testGenerationOutput,
                     ),
                 )
-                // Fix Windows line separators
-                .replace("\r\n", "\n")
+                    // Fix Windows line separators
+                    .replace("\r\n", "\n")
 
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
