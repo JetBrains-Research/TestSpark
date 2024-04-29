@@ -55,9 +55,9 @@ object LLMTestSampleHelper {
         var normalizedImports = imports
         if (normalizedImports.isNotBlank()) normalizedImports += "\n\n"
         return normalizedImports +
-                "public class TestSample {\n" +
-                "   $methodCode\n" +
-                "}"
+            "public class TestSample {\n" +
+            "   $methodCode\n" +
+            "}"
     }
 
     private fun createMethodName(psiClass: PsiClass, method: PsiMethod): String =
