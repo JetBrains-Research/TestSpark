@@ -28,6 +28,7 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
 import org.jetbrains.research.testspark.services.TestGenerationDataService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 
@@ -53,9 +54,25 @@ class PromptManager(
             Computable {
                 val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
 
+                ProjectUnderTestFileCreator.log("interestingPsiClasses: [\n${
+                        interestingPsiClasses.joinToString("\n") { "\t${it.qualifiedName}" }
+                    }\n]")
+
                 val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation)
+
+                ProjectUnderTestFileCreator.log("interestingClasses: [\n${
+                    interestingClasses.joinToString("\n") { "\t${it.qualifiedName}" }
+                }\n]")
+
                 val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cut)
                     .map(this::createClassRepresentation).toMap()
+
+                for (entry in polymorphismRelations.entries) {
+                    val baseClass = entry.key
+                    val subclasses = entry.value
+                    val subclassesStr = subclasses.joinToString("\n") { "$\t${it.qualifiedName}" }
+                    ProjectUnderTestFileCreator.log("${baseClass.qualifiedName}: [\n${subclassesStr}\n]")
+                }
 
                 val context = PromptGenerationContext(
                     cut = createClassRepresentation(cut),
