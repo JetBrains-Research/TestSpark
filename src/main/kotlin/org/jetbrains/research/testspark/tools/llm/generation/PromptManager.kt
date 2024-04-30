@@ -224,6 +224,7 @@ class PromptManager(
      * @return The set of interesting PsiClasses found during the search.
      */
     private fun getInterestingPsiClasses(classesToTest: MutableList<PsiClass>): MutableSet<PsiClass> {
+        ProjectUnderTestFileCreator.log("Select interesting classes:")
         val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
 
         var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
@@ -232,8 +233,14 @@ class PromptManager(
             val tempListOfClasses = mutableSetOf<PsiClass>()
 
             currentLevelClasses.forEach { classIt ->
+                ProjectUnderTestFileCreator.log("\tCurrent class: $classIt, methods:")
+
                 classIt.methods.forEach { methodIt ->
+                    ProjectUnderTestFileCreator.log("\t\tMethod: ${methodIt.getSignatureString()}")
+
                     methodIt.parameterList.parameters.forEach { paramIt ->
+                        ProjectUnderTestFileCreator.log("\t\t\tParameter: $paramIt")
+
                         PsiTypesUtil.getPsiClass(paramIt.type)?.let {
                             if (!interestingPsiClasses.contains(it) && it.qualifiedName != null &&
                                 !it.qualifiedName!!.startsWith("java.")
