@@ -54,6 +54,7 @@ abstract class RequestManager {
         val sendResult = sendResultPair.first
 
         if (sendResult == SendResult.TOOLONG) {
+            ProjectUnderTestFileCreator.log("The chat history is too long")
             return Pair(TestSparkBundle.message("tooLongPrompt"), null)
         }
 

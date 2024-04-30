@@ -122,7 +122,9 @@ class PromptManager(
         return ClassRepresentation(
             psiClass.qualifiedName!!,
             getClassFullText(psiClass),
-            psiClass.allMethods.filter { it.text != null }.map(this::createMethodRepresentation),
+            psiClass.allMethods
+                /*.filter { it.text != null }*/
+                .map(this::createMethodRepresentation),
         )
     }
 
@@ -194,8 +196,8 @@ class PromptManager(
             }
         }
         return interestingPsiClasses
-            .filter { (it.qualifiedName != null) && (it.text != null) }
-            .toMutableSet()
+//            .filter { (it.qualifiedName != null) && (it.text != null) }
+//            .toMutableSet()
     }
 
     /**
@@ -230,8 +232,8 @@ class PromptManager(
         }
 
         return interestingPsiClasses
-            .filter { (it.qualifiedName != null) && (it.allMethods.all { method -> (method.text != null) }) }
-            .toMutableSet()
+//            .filter { (it.qualifiedName != null) && (it.allMethods.all { method -> (method.text != null) }) }
+//            .toMutableSet()
     }
 
     /**
@@ -265,7 +267,7 @@ class PromptManager(
 //            while(true){
                 val scope = GlobalSearchScope.projectScope(project)
                 val query = ClassInheritorsSearch.search(currentInterestingClass, false)
-                detectedSubClasses= query.findAll()
+                detectedSubClasses = query.findAll()
             PsiShortNamesCache.getInstance(project).getClassesByName(currentInterestingClass.name!!, GlobalSearchScope.projectScope(project))
 //                if (detectedSubClasses.size >0)
 //                    break
@@ -283,8 +285,8 @@ class PromptManager(
         }
 
         return polymorphismRelations
-            .filter { entry -> (entry.key.qualifiedName != null) && (entry.value.all { it.qualifiedName != null }) }
-            .toMutableMap()
+//            .filter { entry -> (entry.key.qualifiedName != null) && (entry.value.all { it.qualifiedName != null }) }
+//            .toMutableMap()
     }
 
     /**
