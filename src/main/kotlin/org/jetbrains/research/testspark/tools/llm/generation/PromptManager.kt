@@ -242,9 +242,12 @@ class PromptManager(
                         ProjectUnderTestFileCreator.log("\t\t\tParameter: $paramIt")
 
                         PsiTypesUtil.getPsiClass(paramIt.type)?.let {
+                            ProjectUnderTestFileCreator.log("\t\t\tConsidering: $it")
                             if (!interestingPsiClasses.contains(it) && it.qualifiedName != null &&
                                 !it.qualifiedName!!.startsWith("java.")
                             ) {
+                                ProjectUnderTestFileCreator.log("$it added into set of interesting psi classes: [${interestingPsiClasses.joinToString(", ") { cls -> cls.qualifiedName.toString() }}]")
+
                                 tempListOfClasses.add(it)
                             }
                         }
