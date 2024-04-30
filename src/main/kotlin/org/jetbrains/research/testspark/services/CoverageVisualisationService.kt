@@ -12,8 +12,8 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import org.evosuite.result.MutationInfo
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.coverage.CoverageRenderer
 import org.jetbrains.research.testspark.data.IJReport
@@ -105,11 +105,11 @@ class CoverageVisualisationService(private val project: Project) {
 
         if (settingsProjectState.showCoverageCheckboxSelected) {
             val color = JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue),
             )
             val colorForLines = JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
@@ -245,7 +245,7 @@ class CoverageVisualisationService(private val project: Project) {
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
             visualisationService.mainPanel,
-            TestSparkLabelsBundle.defaultValue("coverageVisualisation"),
+            PluginLabelsBundle.get("coverageVisualisation"),
             true,
         )
         contentManager!!.addContent(content!!)

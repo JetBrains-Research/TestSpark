@@ -4,7 +4,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
@@ -126,8 +126,8 @@ class SettingsLLMConfigurable(private val project: Project) : Configurable {
             !service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.linePrompts)[settingsComponent!!.lineCurrentDefaultPromptIndex])
         ) {
             Messages.showErrorDialog(
-                TestSparkBundle.message("defaultPromptIsNotValidMessage"),
-                TestSparkBundle.message("defaultPromptIsNotValidTitle"),
+                LLMMessagesBundle.get("defaultPromptIsNotValidMessage"),
+                LLMMessagesBundle.get("defaultPromptIsNotValidTitle"),
             )
             return
         }

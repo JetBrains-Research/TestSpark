@@ -11,8 +11,8 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptGenerator
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
@@ -108,7 +108,7 @@ class PromptManager(
                     }
                 }
             },
-        ) + TestSparkToolTipsBundle.defaultValue("commonPromptPart")
+        ) + LLMSettingsBundle.get("commonPromptPart")
         log.info("Prompt is:\n$prompt")
         return prompt
     }
@@ -167,7 +167,7 @@ class PromptManager(
 
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
-            TestSparkBundle.message("promptReduction") + "\n" +
+            LLMMessagesBundle.get("promptReduction") + "\n" +
                 "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
                 "Maximum depth for input parameters is ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
             project,

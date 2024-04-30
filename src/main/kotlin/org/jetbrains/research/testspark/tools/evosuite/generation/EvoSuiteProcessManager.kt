@@ -11,7 +11,8 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
@@ -88,7 +89,7 @@ class EvoSuiteProcessManager(
                 ?.toInt()
 
             if (version == null || version > 11) {
-                evoSuiteErrorManager.errorProcess(TestSparkBundle.message("incorrectJavaVersion"), project)
+                evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("incorrectJavaVersion"), project)
                 return null
             }
 
@@ -134,7 +135,7 @@ class EvoSuiteProcessManager(
             log.info("Starting EvoSuite with arguments: $cmdString")
 
 //            indicator.isIndeterminate = false
-            indicator.setText(TestSparkBundle.message("searchMessage"))
+            indicator.setText(PluginMessagesBundle.get("searchMessage"))
 
             val evoSuiteProcess = GeneralCommandLine(cmd)
             evoSuiteProcess.charset = Charset.forName("UTF-8")
@@ -180,8 +181,8 @@ class EvoSuiteProcessManager(
                         indicator.setFraction(coverage)
                     }
 
-                    if (indicator.getFraction() == 1.0 && indicator.getText() != TestSparkBundle.message("testCasesSaving")) {
-                        indicator.setText(TestSparkBundle.message("testCasesSaving"))
+                    if (indicator.getFraction() == 1.0 && indicator.getText() != PluginMessagesBundle.get("testCasesSaving")) {
+                        indicator.setText(PluginMessagesBundle.get("testCasesSaving"))
                     }
                 }
             })
@@ -207,7 +208,7 @@ class EvoSuiteProcessManager(
                 generatedTestData,
             )
         } catch (e: Exception) {
-            evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
+            evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()
         }
 

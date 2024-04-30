@@ -10,7 +10,7 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiFile
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -80,7 +80,7 @@ class Pipeline(
         var result: UIContext? = null
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestSparkBundle.message("testGenerationMessage")) {
+            .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
 

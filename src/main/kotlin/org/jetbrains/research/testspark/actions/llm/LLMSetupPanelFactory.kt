@@ -7,7 +7,8 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.display.JUnitCombobox
@@ -36,8 +37,8 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
     private var platformSelector = ComboBox(arrayOf(settingsState.openAIName))
-    private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
-    private val okLlmButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
+    private val backLlmButton = JButton(PluginLabelsBundle.get("back"))
+    private val okLlmButton = JButton(PluginLabelsBundle.get("next"))
     private val junitSelector = JUnitCombobox(e)
 
     private val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
@@ -67,7 +68,7 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
      * @return the title panel containing the setup title label.
      */
     override fun getTitlePanel(): JPanel {
-        val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("llmSetup"))
+        val textTitle = JLabel(PluginLabelsBundle.get("llmSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()
@@ -92,31 +93,31 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("llmPlatform")),
+                JBLabel(LLMLabelsBundle.get("llmPlatform")),
                 platformSelector,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("llmToken")),
+                JBLabel(LLMLabelsBundle.get("llmToken")),
                 llmUserTokenField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("model")),
+                JBLabel(LLMLabelsBundle.get("model")),
                 modelSelector,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("junitVersion")),
+                JBLabel(LLMLabelsBundle.get("junitVersion")),
                 junitSelector,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("selectPrompt")),
+                JBLabel(LLMLabelsBundle.get("selectPrompt")),
                 getPromptSelectionPanel(),
                 10,
                 false,
@@ -188,7 +189,7 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
         okLlmButton.isOpaque = false
         okLlmButton.isContentAreaFilled = false
         if (!settingsState.provideTestSamplesCheckBoxSelected) {
-            okLlmButton.text = TestSparkLabelsBundle.defaultValue("ok")
+            okLlmButton.text = PluginLabelsBundle.get("ok")
         }
         bottomPanel.add(okLlmButton)
 

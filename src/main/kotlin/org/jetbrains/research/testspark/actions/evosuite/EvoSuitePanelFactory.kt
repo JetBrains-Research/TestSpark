@@ -5,8 +5,9 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteLabelsBundle
+import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteSettingsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
@@ -22,8 +23,8 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
 
     private var javaPathTextField = JTextField(30)
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
-    private val backEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
-    private val okEvoSuiteButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
+    private val backEvoSuiteButton = JButton(PluginLabelsBundle.get("back"))
+    private val okEvoSuiteButton = JButton(PluginLabelsBundle.get("ok"))
 
     /**
      * Returns the title panel for the component.
@@ -31,7 +32,7 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
      * @return the title panel as a JPanel instance.
      */
     override fun getTitlePanel(): JPanel {
-        val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("evosuiteSetup"))
+        val textTitle = JLabel(PluginLabelsBundle.get("evosuiteSetup"))
         textTitle.font = Font("Monochrome", Font.BOLD, 20)
 
         val titlePanel = JPanel()
@@ -46,7 +47,7 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
      * @return the middle panel as a JPanel.
      */
     override fun getMiddlePanel(): JPanel {
-        javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
+        javaPathTextField.toolTipText = EvoSuiteSettingsBundle.get("javaPath")
         javaPathTextField.text = settingsState.javaPath
 
         algorithmSelector.setMinimumAndPreferredWidth(300)
@@ -55,13 +56,13 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("javaPath")),
+                JBLabel(EvoSuiteSettingsBundle.get("javaPath")),
                 javaPathTextField,
                 10,
                 false,
             )
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("defaultSearch")),
+                JBLabel(EvoSuiteLabelsBundle.get("defaultSearch")),
                 algorithmSelector,
                 10,
                 false,

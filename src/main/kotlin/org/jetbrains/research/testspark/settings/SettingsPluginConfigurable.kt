@@ -5,7 +5,6 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.SettingsProjectService
-import java.io.File
 import javax.swing.JComponent
 
 /**
@@ -38,13 +37,6 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
         settingsComponent!!.colorGreen = settingsState.colorGreen
         settingsComponent!!.colorBlue = settingsState.colorBlue
         settingsComponent!!.buildCommand = settingsState.buildCommand
-        settingsComponent!!.telemetryEnabled = settingsState.telemetryEnabled
-        settingsComponent!!.telemetryPath =
-            if (settingsState.telemetryPath.endsWith(project.name)) {
-                settingsState.telemetryPath
-            } else {
-                settingsState.telemetryPath.plus(File.separator).plus(project.name)
-            }
     }
 
     /**
@@ -60,8 +52,6 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
         modified = modified or (settingsComponent!!.colorGreen != settingsState.colorGreen)
         modified = modified or (settingsComponent!!.colorBlue != settingsState.colorBlue)
         modified = modified or (settingsComponent!!.buildCommand != settingsState.buildCommand)
-        modified = modified or (settingsComponent!!.telemetryEnabled != settingsState.telemetryEnabled)
-        modified = modified or (settingsComponent!!.telemetryPath != settingsState.telemetryPath)
         return modified
     }
 
@@ -76,9 +66,6 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
         settingsState.colorBlue = settingsComponent!!.colorBlue
         settingsState.buildPath = settingsComponent!!.buildPath
         settingsState.buildCommand = settingsComponent!!.buildCommand
-        settingsState.telemetryEnabled = settingsComponent!!.telemetryEnabled
-        resetTelemetryPathIfEmpty(settingsState)
-        settingsState.telemetryPath = settingsComponent!!.telemetryPath
 
         // update coverage visualisation
         val coverageVisualisationService = project.service<CoverageVisualisationService>()
@@ -89,16 +76,6 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
             currentHighlightedData.selectedTests,
             currentHighlightedData.testReport,
         )
-    }
-
-    /**
-     * Check if the telemetry path is empty when telemetry is enabled.
-     * If empty, then sets to previous state. Else, keep the new one.
-     */
-    private fun resetTelemetryPathIfEmpty(settingsState: SettingsProjectState) {
-        if (settingsComponent!!.telemetryEnabled && settingsComponent!!.telemetryPath.isBlank()) {
-            settingsComponent!!.telemetryPath = settingsState.telemetryPath
-        }
     }
 
     /**

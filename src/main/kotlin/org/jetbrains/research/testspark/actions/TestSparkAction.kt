@@ -14,8 +14,8 @@ import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
 import org.jetbrains.research.testspark.actions.template.PanelFactory
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
 import org.jetbrains.research.testspark.services.SettingsApplicationService
@@ -93,7 +93,7 @@ class TestSparkAction : AnAction() {
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
-        private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
+        private val nextButton = JButton(PluginLabelsBundle.get("next"))
 
         private val cardLayout = CardLayout()
 
@@ -135,8 +135,8 @@ class TestSparkAction : AnAction() {
                 NotificationGroupManager.getInstance()
                     .getNotificationGroup("Generation Error")
                     .createNotification(
-                        TestSparkBundle.message("generationWindowWarningTitle"),
-                        TestSparkBundle.message("generationWindowWarningMessage"),
+                        PluginMessagesBundle.get("generationWindowWarningTitle"),
+                        PluginMessagesBundle.get("generationWindowWarningMessage"),
                         NotificationType.WARNING,
                     )
                     .notify(e.project)
@@ -350,9 +350,9 @@ class TestSparkAction : AnAction() {
             if ((llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected && !settingsState.provideTestSamplesCheckBoxSelected) ||
                 (evoSuiteButton.isSelected && !settingsState.evosuiteSetupCheckBoxSelected)
             ) {
-                nextButton.text = TestSparkLabelsBundle.defaultValue("ok")
+                nextButton.text = PluginLabelsBundle.get("ok")
             } else {
-                nextButton.text = TestSparkLabelsBundle.defaultValue("next")
+                nextButton.text = PluginLabelsBundle.get("next")
             }
         }
     }

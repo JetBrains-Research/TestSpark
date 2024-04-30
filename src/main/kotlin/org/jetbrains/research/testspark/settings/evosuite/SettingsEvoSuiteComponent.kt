@@ -4,8 +4,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteLabelsBundle
 import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import javax.swing.JCheckBox
 import javax.swing.JComponent
@@ -24,27 +23,27 @@ class SettingsEvoSuiteComponent {
     private var seedTextField = JTextField()
     private var evosuitePortField = JTextField()
 
-    private val evosuiteSetupCheckBox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("evosuiteSetupCheckBox"), true)
+    private val evosuiteSetupCheckBox: JCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("evosuiteSetupCheckBox"), true)
 
     // EvoSuite checkboxes options
-    private var sandboxCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("sandbox"))
-    private var assertionsCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("assertionCreation"))
-    private var clientOnThreadCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("debug"))
-    private var junitCheckCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("junitCheck"))
-    private var minimizeCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("minimize"))
+    private var sandboxCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("sandbox"))
+    private var assertionsCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("assertionCreation"))
+    private var clientOnThreadCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("debug"))
+    private var junitCheckCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("junitCheck"))
+    private var minimizeCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("minimize"))
 
     // Criterion selection checkboxes
     // There is a limited amount of criteria, but multiple can be selected at once.
     // Effectively, this requires its own section (or a checkboxed combobox of sorts)
-    private var criterionSeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("criterionSeparator"))
-    private var criterionLineCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("criterionLine"))
-    private var criterionBranchCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("criterionBranch"))
-    private var criterionExceptionCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("criterionException"))
-    private var criterionWeakMutationCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("criterionWeakMutation"))
-    private var criterionOutputCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("criterionOutput"))
-    private var criterionMethodCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("criterionMethod"))
-    private var criterionMethodNoExceptionCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("criterionMethodNoExc"))
-    private var criterionCBranchCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("criterionCBranch"))
+    private var criterionSeparator = JXTitledSeparator(EvoSuiteLabelsBundle.get("criterionSeparator"))
+    private var criterionLineCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("criterionLine"))
+    private var criterionBranchCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("criterionBranch"))
+    private var criterionExceptionCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("criterionException"))
+    private var criterionWeakMutationCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("criterionWeakMutation"))
+    private var criterionOutputCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("criterionOutput"))
+    private var criterionMethodCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("criterionMethod"))
+    private var criterionMethodNoExceptionCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("criterionMethodNoExc"))
+    private var criterionCBranchCheckBox = JCheckBox(EvoSuiteLabelsBundle.get("criterionCBranch"))
 
     // Java path
     private var javaPathTextField = JTextField()
@@ -63,15 +62,15 @@ class SettingsEvoSuiteComponent {
      */
     private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
-            .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("javaSettings")))
-            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("javaPath")), javaPathTextField, 10, false)
-            .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("generalSettings")))
+            .addComponent(JXTitledSeparator(EvoSuiteLabelsBundle.get("javaSettings")))
+            .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("javaPath")), javaPathTextField, 10, false)
+            .addComponent(JXTitledSeparator(EvoSuiteLabelsBundle.get("generalSettings")))
             // EvoSuite "input" options (e.g. text, number)
             // Important settings like algorithm selection, seed selection
-            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("defaultSearch")), algorithmSelector, 10, false)
-            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("seed")), seedTextField, 10, false)
-            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("port")), evosuitePortField, 10, false)
-            .addLabeledComponent(JBLabel(TestSparkLabelsBundle.defaultValue("configId")), configurationIdTextField, 5, false)
+            .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("defaultSearch")), algorithmSelector, 10, false)
+            .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("seed")), seedTextField, 10, false)
+            .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("port")), evosuitePortField, 10, false)
+            .addLabeledComponent(JBLabel(EvoSuiteLabelsBundle.get("configId")), configurationIdTextField, 5, false)
             .addComponent(evosuiteSetupCheckBox, 10)
             // Checkboxes settings
             .addComponent(sandboxCheckBox, 10)
@@ -101,14 +100,14 @@ class SettingsEvoSuiteComponent {
         algorithmSelector.setMinimumAndPreferredWidth(300)
 
         // Tooltips
-        seedTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("seed")
-        evosuitePortField.toolTipText = TestSparkToolTipsBundle.defaultValue("port")
-        configurationIdTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("configId")
-        clientOnThreadCheckBox.toolTipText = TestSparkToolTipsBundle.defaultValue("debug")
-        junitCheckCheckBox.toolTipText = TestSparkToolTipsBundle.defaultValue("junit")
-        criterionSeparator.toolTipText = TestSparkToolTipsBundle.defaultValue("criterion")
+        seedTextField.toolTipText = EvoSuiteLabelsBundle.get("seed")
+        evosuitePortField.toolTipText = EvoSuiteLabelsBundle.get("port")
+        configurationIdTextField.toolTipText = EvoSuiteLabelsBundle.get("configId")
+        clientOnThreadCheckBox.toolTipText = EvoSuiteLabelsBundle.get("debug")
+        junitCheckCheckBox.toolTipText = EvoSuiteLabelsBundle.get("junitCheck")
+        criterionSeparator.toolTipText = EvoSuiteLabelsBundle.get("assertionCreation")
 
-        javaPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("javaPath")
+        javaPathTextField.toolTipText = EvoSuiteLabelsBundle.get("javaPath")
     }
 
     /**

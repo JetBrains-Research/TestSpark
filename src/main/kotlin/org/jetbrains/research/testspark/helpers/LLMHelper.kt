@@ -4,7 +4,7 @@ import com.google.gson.JsonParser
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
@@ -175,10 +175,10 @@ fun stylizeMainComponents(
         platformSelector.isEnabled = false
     }
 
-    llmUserTokenField.toolTipText = TestSparkToolTipsBundle.defaultValue("llmToken")
+    llmUserTokenField.toolTipText = LLMSettingsBundle.get("llmToken")
     updateLlmUserTokenField(platformSelector, llmUserTokenField, llmPlatforms, settingsState)
 
-    modelSelector.toolTipText = TestSparkToolTipsBundle.defaultValue("model")
+    modelSelector.toolTipText = LLMSettingsBundle.get("model")
     updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
 }
 

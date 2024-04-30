@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.settings
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.TextBrowseFolderListener
@@ -9,9 +8,9 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.bundles.plugin.PluginDefaultsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import java.awt.Color
 import java.awt.Dimension
 import javax.swing.JCheckBox
@@ -41,16 +40,13 @@ class SettingsPluginComponent(project: Project) {
             "information about your usage patterns, such as the tests you generate and the way you " +
             "modify them manually before applying them to a test suite.",
     )
-    private val showCoverageCheckbox: JCheckBox = JCheckBox(TestSparkLabelsBundle.defaultValue("showCoverage"))
-    private val telemetrySeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("telemetry"))
-    private var telemetryEnabledCheckbox = JCheckBox(TestSparkLabelsBundle.defaultValue("telemetryEnabled"))
+    private val showCoverageCheckbox: JCheckBox = JCheckBox(PluginLabelsBundle.get("showCoverage"))
     private val fileChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
     private val textBrowseFolderListener = TextBrowseFolderListener(fileChooserDescriptor)
     private val telemetryPathChooser = TextFieldWithBrowseButton()
-    private val telemetryPathLabel = JBLabel(TestSparkLabelsBundle.defaultValue("telemetryPath"))
 
     // Accessibility options
-    private val accessibilitySeparator = JXTitledSeparator(TestSparkLabelsBundle.defaultValue("accessibility"))
+    private val accessibilitySeparator = JXTitledSeparator(PluginLabelsBundle.get("accessibility"))
     private var colorPicker = JColorChooser()
 
     init {
@@ -59,21 +55,6 @@ class SettingsPluginComponent(project: Project) {
 
         // Create panel
         createSettingsPanel()
-        // Create telemetry file chooser field
-        telemetryPathField()
-    }
-
-    private fun telemetryPathField() {
-        // Watch for the checkbox being clicked
-        telemetryEnabledCheckbox.addActionListener {
-            // If checkbox is clicked, change the path chooser according to the new status
-            telemetryPathChooser.isEditable = telemetryEnabledCheckbox.isSelected
-            telemetryPathChooser.isEnabled = telemetryEnabledCheckbox.isSelected
-        }
-        val telemetryEnabled = projectDuplicate.service<SettingsProjectService>().state.telemetryEnabled
-        telemetryPathChooser.addBrowseFolderListener(textBrowseFolderListener) // Add the ability to choose folders
-        telemetryPathChooser.isEditable = telemetryEnabled
-        telemetryPathChooser.isEnabled = telemetryEnabled
     }
 
     /**
@@ -81,31 +62,26 @@ class SettingsPluginComponent(project: Project) {
      */
     private fun createSettingsPanel() {
         panel = FormBuilder.createFormBuilder()
-            .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("showCoverageDescription")), 15)
+            .addComponent(JXTitledSeparator(PluginLabelsBundle.get("showCoverageDescription")), 15)
             .addComponent(showCoverageCheckbox, 10)
-            .addComponent(JXTitledSeparator(TestSparkLabelsBundle.defaultValue("environmentSettings")), 15)
+            .addComponent(JXTitledSeparator(PluginLabelsBundle.get("environmentSettings")), 15)
             // Add buildPath option
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("buildPath")),
+                JBLabel(PluginLabelsBundle.get("buildPath")),
                 buildPathTextField,
                 10,
                 false,
             )
             // Add buildPath option
             .addLabeledComponent(
-                JBLabel(TestSparkLabelsBundle.defaultValue("buildCommand")),
+                JBLabel(PluginLabelsBundle.get("buildCommand")),
                 buildCommandTextField,
                 10,
                 false,
             )
-            // Add telemetry options
-            .addComponent(telemetrySeparator, 15)
-            .addComponent(telemetryDescription, 10)
-            .addComponent(telemetryEnabledCheckbox, 10)
-            .addLabeledComponent(telemetryPathLabel, telemetryPathChooser, 10, false)
             // Add accessibility options
             .addComponent(accessibilitySeparator, 15)
-            .addComponent(JBLabel(TestSparkLabelsBundle.defaultValue("colorPicker")), 15)
+            .addComponent(JBLabel(PluginLabelsBundle.get("colorPicker")), 15)
             .addComponent(colorPicker, 10)
             .addComponentFillVertically(JPanel(), 0)
             .panel
@@ -117,19 +93,13 @@ class SettingsPluginComponent(project: Project) {
      */
     private fun stylizePanel() {
         // Add description to telemetry path show coverage checkbox
-        showCoverageCheckbox.toolTipText = TestSparkToolTipsBundle.defaultValue("showCoverage")
+        showCoverageCheckbox.toolTipText = PluginDefaultsBundle.get("showCoverageCheckboxSelected")
 
         // Add description to build Path
-        buildPathTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("buildPath")
+        buildPathTextField.toolTipText = PluginDefaultsBundle.get("buildPath")
 
         // Add description to build Command
-        buildCommandTextField.toolTipText = TestSparkToolTipsBundle.defaultValue("buildCommand")
-
-        // Add description to telemetry
-        telemetryEnabledCheckbox.toolTipText = TestSparkToolTipsBundle.defaultValue("telemetryEnabled")
-
-        // Add description to telemetry path
-        telemetryPathLabel.toolTipText = TestSparkToolTipsBundle.defaultValue("telemetryPath")
+        buildCommandTextField.toolTipText = PluginDefaultsBundle.get("buildCommand")
 
         // Get dimensions of visible rectangle
         val width = panel?.visibleRect?.width
@@ -167,23 +137,11 @@ class SettingsPluginComponent(project: Project) {
             buildCommandTextField.text = newConfig
         }
 
-    var telemetryEnabled: Boolean
-        get() = telemetryEnabledCheckbox.isSelected
-        set(newStatus) {
-            telemetryEnabledCheckbox.isSelected = newStatus
-        }
-
-    var telemetryPath: String
-        get() = telemetryPathChooser.text
-        set(newPath) {
-            telemetryPathChooser.text = newPath
-        }
-
     var colorRed: Int
         get() = colorPicker.color.red
         set(newStatus) {
             colorPicker.color = JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(newStatus, colorPicker.color.green, colorPicker.color.blue),
             )
         }
@@ -192,7 +150,7 @@ class SettingsPluginComponent(project: Project) {
         get() = colorPicker.color.green
         set(newStatus) {
             colorPicker.color = JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(colorPicker.color.red, newStatus, colorPicker.color.blue),
             )
         }
@@ -200,7 +158,7 @@ class SettingsPluginComponent(project: Project) {
         get() = colorPicker.color.blue
         set(newStatus) {
             colorPicker.color = JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(colorPicker.color.red, colorPicker.color.green, newStatus),
             )
         }

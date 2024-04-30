@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModificationRequest
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
@@ -17,7 +17,7 @@ import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
  */
 fun isCorrectToken(project: Project): Boolean {
     if (!SettingsArguments(project).isTokenSet()) {
-        LLMErrorManager().errorProcess(TestSparkBundle.message("missingToken"), project)
+        LLMErrorManager().errorProcess(LLMMessagesBundle.get("missingToken"), project)
         return false
     }
     return true

@@ -7,7 +7,6 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.settings.SettingsProjectState
-import java.io.File
 
 /**
  * This class is responsible for storing the project-level settings persistently. It uses SettingsProjectState class for that.
@@ -17,10 +16,6 @@ import java.io.File
 class SettingsProjectService(project: Project) : PersistentStateComponent<SettingsProjectState> {
 
     private var settingsProjectState: SettingsProjectState = SettingsProjectState()
-
-    init {
-        settingsProjectState.telemetryPath += File.separator.plus(project.name)
-    }
 
     /**
      * Gets the currently persisted state of the open project.

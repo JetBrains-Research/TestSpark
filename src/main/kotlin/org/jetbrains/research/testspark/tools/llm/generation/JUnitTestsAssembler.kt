@@ -5,7 +5,7 @@ import com.google.gson.JsonParser
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -89,7 +89,7 @@ class JUnitTestsAssembler(
         val generatedTestsCount = super.getContent().split("@Test").size - 1
 
         if (lastTestCount != generatedTestsCount) {
-            indicator.setText(TestSparkBundle.message("generatingTestNumber") + generatedTestsCount)
+            indicator.setText(PluginMessagesBundle.get("generatingTestNumber") + generatedTestsCount)
             lastTestCount = generatedTestsCount
         }
     }
