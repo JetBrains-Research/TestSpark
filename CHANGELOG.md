@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+## 0.2.1
+
+### Fixed
+- Several minor bugs related to JUnit5 support and default template.
+
 ## 0.2.0
 
 ### Fixed

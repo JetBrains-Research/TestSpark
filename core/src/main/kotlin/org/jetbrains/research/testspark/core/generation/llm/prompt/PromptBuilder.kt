@@ -77,7 +77,7 @@ internal class PromptBuilder(private var prompt: String) {
                 fullText += "Here are some information about other methods and classes used by the class under test. Only use them for creating objects, not your own ideas.\n"
             }
             for (interestingClass in interestingClasses) {
-                if (interestingClass.qualifiedName!!.startsWith("java")) {
+                if (interestingClass.qualifiedName.startsWith("java")) {
                     continue
                 }
 
@@ -101,7 +101,7 @@ internal class PromptBuilder(private var prompt: String) {
     }
 
     fun insertPolymorphismRelations(
-        polymorphismRelations: Map<ClassRepresentation?, List<ClassRepresentation?>>,
+        polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
     ) = apply {
         val keyword = "\$${PromptKeyword.POLYMORPHISM.text}"
         if (isPromptValid(PromptKeyword.POLYMORPHISM, prompt)) {
@@ -109,10 +109,7 @@ internal class PromptBuilder(private var prompt: String) {
 
             polymorphismRelations.forEach { entry ->
                 for (currentSubClass in entry.value) {
-                    entry.key ?: continue
-                    currentSubClass ?: continue
-                    currentSubClass.qualifiedName ?: continue
-                    fullText += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key!!.qualifiedName}.\n"
+                    fullText += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
                 }
             }
             prompt = prompt.replace(keyword, fullText, ignoreCase = false)

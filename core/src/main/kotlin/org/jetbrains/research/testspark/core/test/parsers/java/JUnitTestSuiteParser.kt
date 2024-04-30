@@ -36,7 +36,7 @@ class JUnitTestSuiteParser(
 
             // save annotations and pre-set methods
             val otherInfo: String = run {
-                val otherInfoList = testSet.removeAt(0).split("public class")[1].split("{").toMutableList()
+                val otherInfoList = testSet.removeAt(0).split("{").toMutableList()
                 otherInfoList.removeFirst()
                 val otherInfo = otherInfoList.joinToString("{").trimEnd() + "\n\n"
                 otherInfo.ifBlank { "" }
