@@ -101,7 +101,7 @@ class CoverageVisualisationService(private val project: Project) {
             HighlightedData(linesToCover, selectedTests, testReport, project.service<EditorService>().editor!!)
         clear()
 
-        val settingsProjectState = project.service<SettingsProjectService>().state
+        val settingsProjectState = project.service<PluginSettingsService>().state
 
         if (settingsProjectState.showCoverageCheckboxSelected) {
             val color = JBColor(

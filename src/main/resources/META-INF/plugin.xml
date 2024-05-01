@@ -153,25 +153,27 @@
 
         <!-- Application-level services -->
         <applicationService
-                serviceImplementation="org.jetbrains.research.testspark.services.SettingsApplicationService"/>
+                serviceImplementation="org.jetbrains.research.testspark.services.LLMSettingsService"/>
         <applicationService
-                serviceImplementation="org.jetbrains.research.testspark.services.SettingsProjectService"/>
+                serviceImplementation="org.jetbrains.research.testspark.services.PluginSettingsService"/>
+        <applicationService
+                serviceImplementation="org.jetbrains.research.testspark.services.EvoSuiteSettingsService"/>
 
         <!-- Configurables -->
         <projectConfigurable
                 parentId="tools"
-                instance="org.jetbrains.research.testspark.settings.SettingsPluginConfigurable"
-                id="TestSparkSettings"
+                instance="org.jetbrains.research.testspark.settings.plugin.PluginSettingsConfigurable"
+                id="PluginSettings"
                 displayName="TestSpark"/>
         <projectConfigurable
-                parentId="TestSparkSettings"
-                instance="org.jetbrains.research.testspark.settings.llm.SettingsLLMConfigurable"
-                id="TestSparkSettings.llm"
+                parentId="PluginSettings"
+                instance="org.jetbrains.research.testspark.settings.llm.LLMSettingsConfigurable"
+                id="LLMSettings"
                 displayName="Large Language Models"/>
         <projectConfigurable
-                parentId="TestSparkSettings"
-                instance="org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable"
-                id="TestSparkSettings.evosuite"
+                parentId="PluginSettings"
+                instance="org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable"
+                id="EvoSuiteSettings"
                 displayName="EvoSuite"/>
 
         <!-- Notifications -->
@@ -190,19 +192,10 @@
 
     </extensions>
 
-    <projectListeners>
-        <listener
-                class="org.jetbrains.research.testspark.listener.TelemetrySubmitListenerImpl"
-                topic="com.intellij.openapi.startup.ProjectActivity"/>
-        <listener
-                class="org.jetbrains.research.testspark.listener.ProjectCloseListenerImpl"
-                topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </projectListeners>
-
     <actions>
         <!-- TestSpark actions -->
         <action id="TestSpark.TestSparkActions" text="TestSpark" description="Actions related to TestSpark"
-               class="org.jetbrains.research.testspark.actions.TestSparkAction">
+                class="org.jetbrains.research.testspark.actions.TestSparkAction">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
 
         </action>

@@ -11,15 +11,13 @@ import org.jetbrains.research.testspark.bundles.llm.LLMLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.data.llm.PromptEditorType
 import org.jetbrains.research.testspark.display.JUnitCombobox
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.helpers.addLLMPanelListeners
-import org.jetbrains.research.testspark.helpers.getLLLMPlatforms
-import org.jetbrains.research.testspark.helpers.stylizeMainComponents
+import org.jetbrains.research.testspark.helpers.LLMHelper
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PromptParserService
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.settings.llm.PromptEditorType
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
 import java.awt.Font
@@ -30,33 +28,33 @@ import javax.swing.JPanel
 import javax.swing.JTextField
 
 class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : PanelFactory {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
-    private var platformSelector = ComboBox(arrayOf(settingsState.openAIName))
+    private var platformSelector = ComboBox(arrayOf(llmSettingsState.openAIName))
     private val backLlmButton = JButton(PluginLabelsBundle.get("back"))
     private val okLlmButton = JButton(PluginLabelsBundle.get("next"))
     private val junitSelector = JUnitCombobox(e)
 
-    private val llmPlatforms: List<LLMPlatform> = getLLLMPlatforms()
+    private val llmPlatforms: List<LLMPlatform> = LLMHelper.getLLLMPlatforms()
 
     private var promptEditorType: PromptEditorType = PromptEditorType.CLASS
     private val promptTemplateNames = ComboBox(arrayOf(""))
-    private var prompts: String = settingsState.classPrompts
-    private var promptNames: String = settingsState.classPromptNames
-    private var currentDefaultPromptIndex: Int = settingsState.classCurrentDefaultPromptIndex
+    private var prompts: String = llmSettingsState.classPrompts
+    private var promptNames: String = llmSettingsState.classPromptNames
+    private var currentDefaultPromptIndex: Int = llmSettingsState.classCurrentDefaultPromptIndex
     private var showCodeJLabel: JLabel = JLabel(TestSparkIcons.showCode)
 
     init {
-        addLLMPanelListeners(
+        LLMHelper.addLLMPanelListeners(
             platformSelector,
             modelSelector,
             llmUserTokenField,
             llmPlatforms,
-            settingsState,
+            llmSettingsState,
         )
 
         addListeners()
@@ -86,7 +84,7 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
      * The UI labels for the platform, token, and model components are retrieved using the
      * `TestSpark*/
     override fun getMiddlePanel(): JPanel {
-        stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
+        LLMHelper.stylizeMainComponents(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, llmSettingsState)
 
         updatePromptSelectionPanel()
 
@@ -128,19 +126,19 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
     private fun updatePromptSelectionPanel() {
         when (promptEditorType) {
             PromptEditorType.CLASS -> {
-                prompts = settingsState.classPrompts
-                promptNames = settingsState.classPromptNames
-                currentDefaultPromptIndex = settingsState.classCurrentDefaultPromptIndex
+                prompts = llmSettingsState.classPrompts
+                promptNames = llmSettingsState.classPromptNames
+                currentDefaultPromptIndex = llmSettingsState.classCurrentDefaultPromptIndex
             }
             PromptEditorType.METHOD -> {
-                prompts = settingsState.methodPrompts
-                promptNames = settingsState.methodPromptNames
-                currentDefaultPromptIndex = settingsState.methodCurrentDefaultPromptIndex
+                prompts = llmSettingsState.methodPrompts
+                promptNames = llmSettingsState.methodPromptNames
+                currentDefaultPromptIndex = llmSettingsState.methodCurrentDefaultPromptIndex
             }
             PromptEditorType.LINE -> {
-                prompts = settingsState.linePrompts
-                promptNames = settingsState.linePromptNames
-                currentDefaultPromptIndex = settingsState.lineCurrentDefaultPromptIndex
+                prompts = llmSettingsState.linePrompts
+                promptNames = llmSettingsState.linePromptNames
+                currentDefaultPromptIndex = llmSettingsState.lineCurrentDefaultPromptIndex
             }
         }
 
@@ -188,7 +186,7 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
 
         okLlmButton.isOpaque = false
         okLlmButton.isContentAreaFilled = false
-        if (!settingsState.provideTestSamplesCheckBoxSelected) {
+        if (!llmSettingsState.provideTestSamplesCheckBoxSelected) {
             okLlmButton.text = PluginLabelsBundle.get("ok")
         }
         bottomPanel.add(okLlmButton)
@@ -219,29 +217,29 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
     /**
      * Updates the settings state based on the selected values from the UI components.
      *
-     * This method sets the `llmPlatform`, `llmUserToken`, and `model` properties of the `settingsState` object
+     * This method sets the `llmPlatform`, `llmUserToken`, and `model` properties of the `llmSettingsState` object
      * based on the currently selected values from the UI components.
      *
      * Note: This method assumes all the required UI components (`platformSelector`, `llmUserTokenField`, and `modelSelector`) are properly initialized and have values selected.
      */
     override fun applyUpdates() {
-        settingsState.currentLLMPlatformName = platformSelector.selectedItem!!.toString()
+        llmSettingsState.currentLLMPlatformName = platformSelector.selectedItem!!.toString()
         for (index in llmPlatforms.indices) {
-            if (llmPlatforms[index].name == settingsState.openAIName) {
-                settingsState.openAIToken = llmPlatforms[index].token
-                settingsState.openAIModel = llmPlatforms[index].model
+            if (llmPlatforms[index].name == llmSettingsState.openAIName) {
+                llmSettingsState.openAIToken = llmPlatforms[index].token
+                llmSettingsState.openAIModel = llmPlatforms[index].model
             }
-            if (llmPlatforms[index].name == settingsState.grazieName) {
-                settingsState.grazieToken = llmPlatforms[index].token
-                settingsState.grazieModel = llmPlatforms[index].model
+            if (llmPlatforms[index].name == llmSettingsState.grazieName) {
+                llmSettingsState.grazieToken = llmPlatforms[index].token
+                llmSettingsState.grazieModel = llmPlatforms[index].model
             }
         }
-        settingsState.junitVersion = junitSelector.selectedItem!! as JUnitVersion
+        llmSettingsState.junitVersion = junitSelector.selectedItem!! as JUnitVersion
 
         when (promptEditorType) {
-            PromptEditorType.CLASS -> settingsState.classCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
-            PromptEditorType.METHOD -> settingsState.methodCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
-            PromptEditorType.LINE -> settingsState.lineCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
+            PromptEditorType.CLASS -> llmSettingsState.classCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
+            PromptEditorType.METHOD -> llmSettingsState.methodCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
+            PromptEditorType.LINE -> llmSettingsState.lineCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
         }
     }
 }

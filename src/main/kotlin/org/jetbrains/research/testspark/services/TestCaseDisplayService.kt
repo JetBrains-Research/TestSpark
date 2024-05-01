@@ -181,7 +181,7 @@ class TestCaseDisplayService(private val project: Project) {
         scrollToPanel(myPanel)
 
         val editor = getEditor(name) ?: return
-        val settingsProjectState = project.service<SettingsProjectService>().state
+        val settingsProjectState = project.service<PluginSettingsService>().state
         val highlightColor =
             JBColor(
                 PluginSettingsBundle.get("colorName"),

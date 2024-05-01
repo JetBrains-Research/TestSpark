@@ -21,9 +21,9 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
+import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -52,8 +52,8 @@ class EvoSuiteProcessManager(
 ) : ProcessManager {
     private val log = Logger.getInstance(this::class.java)
 
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val evoSuiteSettingsState: EvoSuiteSettingsState
+        get() = project.getService(EvoSuiteSettingsService::class.java).state
 
     private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
     private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
@@ -61,7 +61,7 @@ class EvoSuiteProcessManager(
     private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
     private var evoSuitePath = "$pluginsPath${sep}TestSpark${sep}lib${sep}evosuite-$evosuiteVersion.jar"
 
-    private val settingsProjectState = project.service<SettingsProjectService>().state
+    private val settingsProjectState = project.service<PluginSettingsService>().state
 
     private val evoSuiteErrorManager: EvoSuiteErrorManager = EvoSuiteErrorManager()
 
@@ -81,7 +81,7 @@ class EvoSuiteProcessManager(
             if (isProcessStopped(project, indicator)) return null
 
             val regex = Regex("version \"(.*?)\"")
-            val version = regex.find(CommandLineRunner.run(arrayListOf(settingsState.javaPath, "-version")))
+            val version = regex.find(CommandLineRunner.run(arrayListOf(evoSuiteSettingsState.javaPath, "-version")))
                 ?.groupValues
                 ?.get(1)
                 ?.split(".")
@@ -102,17 +102,17 @@ class EvoSuiteProcessManager(
 
             // get command
             val command = when (codeType.type!!) {
-                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, settingsState).build()
+                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).build()
                 CodeType.METHOD -> {
-                    SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, settingsState).forMethod(codeType.objectDescription).build()
+                    SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).forMethod(codeType.objectDescription).build()
                 }
 
-                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, settingsState).forLine(codeType.objectIndex).build(true)
+                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).forLine(codeType.objectIndex).build(true)
             }
 
-            if (settingsState.seed.isNotBlank()) command.add("-seed=${settingsState.seed}")
-            if (settingsState.configurationId.isNotBlank()) command.add("-Dconfiguration_id=${settingsState.configurationId}")
-            if (settingsState.evosuitePort.isNotBlank()) command.add("-Dprocess_communication_port=${settingsState.evosuitePort}")
+            if (evoSuiteSettingsState.seed.isNotBlank()) command.add("-seed=${evoSuiteSettingsState.seed}")
+            if (evoSuiteSettingsState.configurationId.isNotBlank()) command.add("-Dconfiguration_id=${evoSuiteSettingsState.configurationId}")
+            if (evoSuiteSettingsState.evosuitePort.isNotBlank()) command.add("-Dprocess_communication_port=${evoSuiteSettingsState.evosuitePort}")
 
             // update build path
             var buildPath = projectClassPath
@@ -125,7 +125,7 @@ class EvoSuiteProcessManager(
 
             // construct command
             val cmd = ArrayList<String>()
-            cmd.add(settingsState.javaPath)
+            cmd.add(evoSuiteSettingsState.javaPath)
             cmd.add("-Djdk.attach.allowAttachSelf=true")
             cmd.add("-jar")
             cmd.add(evoSuitePath)

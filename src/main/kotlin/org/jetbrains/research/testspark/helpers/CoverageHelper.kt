@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.coverage
+package org.jetbrains.research.testspark.helpers
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.hint.HintManagerImpl
@@ -35,7 +35,7 @@ import java.awt.event.MouseEvent
  * @param mapMutantsToTests map of mutant operation -> List of names of tests which cover mutant
  * @param project the current project
  */
-class CoverageRenderer(
+class CoverageHelper(
     private val color: Color,
     private val lineNumber: Int,
     private val tests: List<String>,

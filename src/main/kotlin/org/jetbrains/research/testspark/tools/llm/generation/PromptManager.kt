@@ -25,9 +25,9 @@ import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.helpers.PsiHelper
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 
@@ -43,8 +43,8 @@ class PromptManager(
     private val cut: PsiClass,
     private val classesToTest: MutableList<PsiClass>,
 ) {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
@@ -65,15 +65,15 @@ class PromptManager(
                     polymorphismRelations = polymorphismRelations,
                     promptConfiguration = PromptConfiguration(
                         desiredLanguage = "Java",
-                        desiredTestingPlatform = settingsState.junitVersion.showName,
+                        desiredTestingPlatform = llmSettingsState.junitVersion.showName,
                         desiredMockingFramework = "Mockito 5",
                     ),
                 )
 
                 val promptTemplates = PromptTemplates(
-                    classPrompt = JsonEncoding.decode(settingsState.classPrompts)[settingsState.classCurrentDefaultPromptIndex],
-                    methodPrompt = JsonEncoding.decode(settingsState.methodPrompts)[settingsState.methodCurrentDefaultPromptIndex],
-                    linePrompt = JsonEncoding.decode(settingsState.linePrompts)[settingsState.lineCurrentDefaultPromptIndex],
+                    classPrompt = JsonEncoding.decode(llmSettingsState.classPrompts)[llmSettingsState.classCurrentDefaultPromptIndex],
+                    methodPrompt = JsonEncoding.decode(llmSettingsState.methodPrompts)[llmSettingsState.methodCurrentDefaultPromptIndex],
+                    linePrompt = JsonEncoding.decode(llmSettingsState.linePrompts)[llmSettingsState.lineCurrentDefaultPromptIndex],
                 )
 
                 val promptGenerator = PromptGenerator(context, promptTemplates)
@@ -295,7 +295,7 @@ class PromptManager(
         methodDescriptor: String,
     ): PsiMethod? {
         for (currentPsiMethod in psiClass.allMethods) {
-            if (generateMethodDescriptor(currentPsiMethod) == methodDescriptor) return currentPsiMethod
+            if (PsiHelper.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) return currentPsiMethod
         }
         return null
     }
@@ -312,7 +312,7 @@ class PromptManager(
         lineNumber: Int,
     ): String {
         for (currentPsiMethod in psiClass.allMethods) {
-            if (isLineInPsiMethod(currentPsiMethod, lineNumber)) return generateMethodDescriptor(currentPsiMethod)
+            if (isLineInPsiMethod(currentPsiMethod, lineNumber)) return PsiHelper.generateMethodDescriptor(currentPsiMethod)
         }
         return ""
     }

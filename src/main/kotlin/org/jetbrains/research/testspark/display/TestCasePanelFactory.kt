@@ -29,11 +29,11 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.ReportLockingService
-import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
 import org.jetbrains.research.testspark.tools.isProcessStopped
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
@@ -62,19 +62,19 @@ class TestCasePanelFactory(
     private val checkbox: JCheckBox,
     val uiContext: UIContext?,
 ) {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
     private val panel = JPanel()
     private val previousButton =
-        createButton(TestSparkIcons.previous, PluginLabelsBundle.get("previousRequest"))
+        IconButtonCreator.getButton(TestSparkIcons.previous, PluginLabelsBundle.get("previousRequest"))
     private var requestNumber: String = "%d / %d"
     private var requestLabel: JLabel = JLabel(requestNumber)
-    private val nextButton = createButton(TestSparkIcons.next, PluginLabelsBundle.get("nextRequest"))
+    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, PluginLabelsBundle.get("nextRequest"))
     private val errorLabel = JLabel(TestSparkIcons.showError)
-    private val copyButton = createButton(TestSparkIcons.copy, PluginLabelsBundle.get("copyTip"))
-    private val likeButton = createButton(TestSparkIcons.like, PluginLabelsBundle.get("likeTip"))
-    private val dislikeButton = createButton(TestSparkIcons.dislike, PluginLabelsBundle.get("dislikeTip"))
+    private val copyButton = IconButtonCreator.getButton(TestSparkIcons.copy, PluginLabelsBundle.get("copyTip"))
+    private val likeButton = IconButtonCreator.getButton(TestSparkIcons.like, PluginLabelsBundle.get("likeTip"))
+    private val dislikeButton = IconButtonCreator.getButton(TestSparkIcons.dislike, PluginLabelsBundle.get("dislikeTip"))
 
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
@@ -103,22 +103,22 @@ class TestCasePanelFactory(
     )
 
     // Create "Remove" button to remove the test from cache
-    private val removeButton = createButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
 
     // Create "Reset" button to reset the changes in the source code of the test
-    private val resetButton = createButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
+    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
 
     // Create "Reset" button to reset the changes to last run in the source code of the test
     private val resetToLastRunButton =
-        createButton(TestSparkIcons.resetToLastRun, PluginLabelsBundle.get("resetToLastRunTip"))
+        IconButtonCreator.getButton(TestSparkIcons.resetToLastRun, PluginLabelsBundle.get("resetToLastRunTip"))
 
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
 
     private val requestJLabel = JLabel(PluginLabelsBundle.get("requestJLabel"))
-    private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(settingsState.defaultLLMRequests))
+    private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(llmSettingsState.defaultLLMRequests))
 
-    private val sendButton = createButton(TestSparkIcons.send, PluginLabelsBundle.get("send"))
+    private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, PluginLabelsBundle.get("send"))
 
     private val loadingLabel: JLabel = JLabel(TestSparkIcons.loading)
 

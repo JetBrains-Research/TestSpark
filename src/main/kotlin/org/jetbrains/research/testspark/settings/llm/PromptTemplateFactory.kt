@@ -8,10 +8,10 @@ import com.intellij.ui.JBColor
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.data.llm.PromptEditorType
+import org.jetbrains.research.testspark.display.IconButtonCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.services.PromptParserService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.FlowLayout
 import javax.swing.BorderFactory
 import javax.swing.JButton
@@ -26,9 +26,10 @@ import kotlin.math.max
  * Creating the part of LLM settings that is responsible for prompt templates is organized
  */
 class PromptTemplateFactory(
-    private val settingsState: SettingsApplicationState,
+    private val llmSettingsState: LLMSettingsState,
     private val promptEditorType: PromptEditorType,
 ) {
+    // init components
     private var templates = mutableListOf<String>()
     private var names = mutableListOf<String>()
 
@@ -37,7 +38,7 @@ class PromptTemplateFactory(
     private var currentTemplateNumber = 0
 
     private val promptTemplateName = JTextField()
-    private val removeButton = createButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTemplate"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTemplate"))
     private val setAsDefaultButton =
         JButton(PluginLabelsBundle.get("setAsDefault"), TestSparkIcons.setDefault)
 
@@ -48,8 +49,8 @@ class PromptTemplateFactory(
     private val redBorder = BorderFactory.createLineBorder(JBColor.RED)
 
     private val previousButton =
-        createButton(TestSparkIcons.previous, PluginLabelsBundle.get("previousRequest"))
-    private val nextButton = createButton(TestSparkIcons.next, PluginLabelsBundle.get("nextRequest"))
+        IconButtonCreator.getButton(TestSparkIcons.previous, PluginLabelsBundle.get("previousRequest"))
+    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, PluginLabelsBundle.get("nextRequest"))
     private val addButton = JButton(PluginLabelsBundle.get("addPromptTemplate"), TestSparkIcons.add)
 
     init {
@@ -115,19 +116,19 @@ class PromptTemplateFactory(
     private fun setSettingsStateParameters() {
         templates.clear()
         templates = when (promptEditorType) {
-            PromptEditorType.CLASS -> JsonEncoding.decode(settingsState.classPrompts)
-            PromptEditorType.METHOD -> JsonEncoding.decode(settingsState.methodPrompts)
-            PromptEditorType.LINE -> JsonEncoding.decode(settingsState.linePrompts)
+            PromptEditorType.CLASS -> JsonEncoding.decode(llmSettingsState.classPrompts)
+            PromptEditorType.METHOD -> JsonEncoding.decode(llmSettingsState.methodPrompts)
+            PromptEditorType.LINE -> JsonEncoding.decode(llmSettingsState.linePrompts)
         }
         names = when (promptEditorType) {
-            PromptEditorType.CLASS -> JsonEncoding.decode(settingsState.classPromptNames)
-            PromptEditorType.METHOD -> JsonEncoding.decode(settingsState.methodPromptNames)
-            PromptEditorType.LINE -> JsonEncoding.decode(settingsState.linePromptNames)
+            PromptEditorType.CLASS -> JsonEncoding.decode(llmSettingsState.classPromptNames)
+            PromptEditorType.METHOD -> JsonEncoding.decode(llmSettingsState.methodPromptNames)
+            PromptEditorType.LINE -> JsonEncoding.decode(llmSettingsState.linePromptNames)
         }
         currentDefaultIndex = when (promptEditorType) {
-            PromptEditorType.CLASS -> settingsState.classCurrentDefaultPromptIndex
-            PromptEditorType.METHOD -> settingsState.methodCurrentDefaultPromptIndex
-            PromptEditorType.LINE -> settingsState.lineCurrentDefaultPromptIndex
+            PromptEditorType.CLASS -> llmSettingsState.classCurrentDefaultPromptIndex
+            PromptEditorType.METHOD -> llmSettingsState.methodCurrentDefaultPromptIndex
+            PromptEditorType.LINE -> llmSettingsState.lineCurrentDefaultPromptIndex
         }
         currentTemplateNumber = currentDefaultIndex
     }

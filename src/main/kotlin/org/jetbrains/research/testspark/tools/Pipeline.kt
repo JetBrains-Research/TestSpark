@@ -17,7 +17,7 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.IJProgressIndicator
-import org.jetbrains.research.testspark.helpers.getSurroundingClass
+import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.ReportLockingService
@@ -47,7 +47,7 @@ class Pipeline(
     val generatedTestsData = TestGenerationData()
 
     init {
-        val cutPsiClass = getSurroundingClass(psiFile, caretOffset)!!
+        val cutPsiClass = PsiHelper.getSurroundingClass(psiFile, caretOffset)!!
 
         // get generated test path
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"

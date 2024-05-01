@@ -8,10 +8,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.helpers.getSurroundingClass
-import org.jetbrains.research.testspark.helpers.getSurroundingLine
-import org.jetbrains.research.testspark.helpers.getSurroundingMethod
+import org.jetbrains.research.testspark.helpers.*
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
@@ -60,7 +57,7 @@ class Llm(override val name: String = "LLM") : Tool {
         // check if cut has any none java super class
         val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(0)
 
-        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caretOffset)!!
+        val cutPsiClass: PsiClass = PsiHelper.getSurroundingClass(psiFile, caretOffset)!!
         var currentPsiClass = cutPsiClass
         for (index in 0 until maxPolymorphismDepth) {
             if (!classesToTest.contains(currentPsiClass)) {
@@ -107,8 +104,8 @@ class Llm(override val name: String = "LLM") : Tool {
         if (!isCorrectToken(project)) {
             return
         }
-        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caretOffset)!!
-        val codeType = FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod))
+        val psiMethod: PsiMethod = PsiHelper.getSurroundingMethod(psiFile, caretOffset)!!
+        val codeType = FragmentToTestData(CodeType.METHOD, PsiHelper.generateMethodDescriptor(psiMethod))
         createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
     }
 
@@ -125,7 +122,7 @@ class Llm(override val name: String = "LLM") : Tool {
         if (!isCorrectToken(project)) {
             return
         }
-        val selectedLine: Int = getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
+        val selectedLine: Int = PsiHelper.getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
         val codeType = FragmentToTestData(CodeType.LINE, selectedLine)
         createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
     }
@@ -140,7 +137,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @return a LLMPipeline instance
      */
     private fun createLLMPipeline(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?): Pipeline {
-        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caretOffset)!!
+        val cutPsiClass: PsiClass = PsiHelper.getSurroundingClass(psiFile, caretOffset)!!
 
         val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
         packageList.removeLast()

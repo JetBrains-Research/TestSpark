@@ -1,10 +1,10 @@
-package org.jetbrains.research.testspark.settings
+package org.jetbrains.research.testspark.settings.plugin
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
-import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.template.SettingsConfigurable
 import javax.swing.JComponent
 
 /**
@@ -12,9 +12,9 @@ import javax.swing.JComponent
  * It interacts with the SettingsPluginComponent, TestSparkSettingsService and TestSparkSettingsState.
  * It provides controller functionality for the TestSparkSettingsState.
  */
-class SettingsPluginConfigurable(val project: Project) : Configurable {
+class PluginSettingsConfigurable(val project: Project) : SettingsConfigurable {
 
-    var settingsComponent: SettingsPluginComponent? = null
+    var settingsComponent: PluginSettingsComponent? = null
 
     /**
      * Creates a settings component that holds the panel with the settings entries, and returns this panel
@@ -22,7 +22,7 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
      * @return the panel used for displaying settings
      */
     override fun createComponent(): JComponent? {
-        settingsComponent = SettingsPluginComponent(project)
+        settingsComponent = PluginSettingsComponent()
         return settingsComponent!!.panel
     }
 
@@ -30,7 +30,7 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
      * Sets the stored state values to the corresponding UI components. This method is called immediately after `createComponent` method.
      */
     override fun reset() {
-        val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
+        val settingsState: PluginSettingsState = project.service<PluginSettingsService>().state
         settingsComponent!!.showCoverageCheckboxSelected = settingsState.showCoverageCheckboxSelected
         settingsComponent!!.buildPath = settingsState.buildPath
         settingsComponent!!.colorRed = settingsState.colorRed
@@ -45,7 +45,7 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
      * @return whether any setting has been modified
      */
     override fun isModified(): Boolean {
-        val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
+        val settingsState: PluginSettingsState = project.service<PluginSettingsService>().state
         var modified: Boolean = settingsComponent!!.buildPath != settingsState.buildPath
         modified = modified or (settingsComponent!!.showCoverageCheckboxSelected != settingsState.showCoverageCheckboxSelected)
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
@@ -59,7 +59,7 @@ class SettingsPluginConfigurable(val project: Project) : Configurable {
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        val settingsState: SettingsProjectState = project.service<SettingsProjectService>().state
+        val settingsState: PluginSettingsState = project.service<PluginSettingsService>().state
         settingsState.showCoverageCheckboxSelected = settingsComponent!!.showCoverageCheckboxSelected
         settingsState.colorRed = settingsComponent!!.colorRed
         settingsState.colorGreen = settingsComponent!!.colorGreen

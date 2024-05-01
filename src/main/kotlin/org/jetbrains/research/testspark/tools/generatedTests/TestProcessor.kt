@@ -12,10 +12,10 @@ import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.LibraryPathsProvider
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.getBuildPath
@@ -29,10 +29,10 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
 
     private val log = Logger.getInstance(this::class.java)
 
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
-    private val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, settingsState.junitVersion)
+    private val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion)
 
     override fun saveGeneratedTest(packageString: String, code: String, resultPath: String, testFileName: String): String {
         // Generate the final path for the generated tests
@@ -87,7 +87,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
         name += "$className#$testCaseName"
 
-        val junitVersion = settingsState.junitVersion.version
+        val junitVersion = llmSettingsState.junitVersion.version
 
         // run the test method with jacoco agent
         val junitRunnerLibraryPath = LibraryPathsProvider.getJUnitRunnerLibraryPath()
@@ -154,7 +154,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
     ): TestCase {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-        if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
+        if (project.service<PluginSettingsService>().state.buildPath.isEmpty()) {
             // User did not set own path
             buildPath = getBuildPath(project)
         }

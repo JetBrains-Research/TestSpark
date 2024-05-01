@@ -9,8 +9,8 @@ import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteLabelsBundle
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteSettingsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import java.awt.Font
 import javax.swing.JButton
 import javax.swing.JLabel
@@ -18,8 +18,8 @@ import javax.swing.JPanel
 import javax.swing.JTextField
 
 class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val evoSuiteSettingsState: EvoSuiteSettingsState
+        get() = project.getService(EvoSuiteSettingsService::class.java).state
 
     private var javaPathTextField = JTextField(30)
     private var algorithmSelector = ComboBox(ContentDigestAlgorithm.values())
@@ -48,10 +48,10 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
      */
     override fun getMiddlePanel(): JPanel {
         javaPathTextField.toolTipText = EvoSuiteSettingsBundle.get("javaPath")
-        javaPathTextField.text = settingsState.javaPath
+        javaPathTextField.text = evoSuiteSettingsState.javaPath
 
         algorithmSelector.setMinimumAndPreferredWidth(300)
-        algorithmSelector.selectedItem = settingsState.algorithm
+        algorithmSelector.selectedItem = evoSuiteSettingsState.algorithm
 
         return FormBuilder.createFormBuilder()
             .setFormLeftIndent(10)
@@ -107,7 +107,7 @@ class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
      * Updates the state of the settings.
      */
     override fun applyUpdates() {
-        settingsState.javaPath = javaPathTextField.text
-        settingsState.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm
+        evoSuiteSettingsState.javaPath = javaPathTextField.text
+        evoSuiteSettingsState.algorithm = algorithmSelector.selectedItem!! as ContentDigestAlgorithm
     }
 }

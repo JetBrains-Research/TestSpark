@@ -8,8 +8,8 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
+import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.SettingsProjectService
 import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteComponent
 import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
 import org.junit.jupiter.api.AfterEach
@@ -53,7 +53,7 @@ class SettingsPluginConfigurableTest {
         settingsEvoComponent = settingsEvoConfigurable.settingsComponent!!
 
         settingsComponent = settingsConfigurable.settingsComponent!!
-        settingsState = fixture.project.service<SettingsProjectService>().state
+        settingsState = fixture.project.service<PluginSettingsService>().state
 
         settingsApplicationState = ApplicationManager.getApplication().getService(SettingsApplicationService::class.java).state
     }

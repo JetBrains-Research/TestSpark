@@ -7,24 +7,24 @@ import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.ui.ComboBox
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JList
 
 class JUnitCombobox(val e: AnActionEvent) : ComboBox<JUnitVersion>(JUnitVersion.entries.toTypedArray()) {
-    private val settingsState: SettingsApplicationState
-        get() = e.project!!.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = e.project!!.getService(LLMSettingsService::class.java).state
 
     init {
         val detected = findJUnitDependency()
 
-        if (settingsState.junitVersionPriorityCheckBoxSelected && detected.size == 1) {
+        if (llmSettingsState.junitVersionPriorityCheckBoxSelected && detected.size == 1) {
             this.selectedItem = detected[0]
         } else {
             for (junitVersion in JUnitVersion.entries) {
-                if (junitVersion == settingsState.junitVersion) {
+                if (junitVersion == llmSettingsState.junitVersion) {
                     this.selectedItem = junitVersion
                 }
             }

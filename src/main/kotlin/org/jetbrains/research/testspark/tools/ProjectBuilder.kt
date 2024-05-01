@@ -14,7 +14,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.services.PluginSettingsService
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -26,7 +26,7 @@ class ProjectBuilder(private val project: Project) {
     private val builderTimeout: Long = 12000000 // TODO: Source from config
 
     private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    private val settingsState = project.service<SettingsProjectService>().state
+    private val settingsState = project.service<PluginSettingsService>().state
 
     /**
      * Runs the build process.
