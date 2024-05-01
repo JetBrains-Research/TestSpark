@@ -7,7 +7,7 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.data.JsonEncoding
+import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.services.PromptParserService

@@ -17,7 +17,7 @@ import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptKeyword
-import org.jetbrains.research.testspark.data.JsonEncoding
+import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.createButton
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners

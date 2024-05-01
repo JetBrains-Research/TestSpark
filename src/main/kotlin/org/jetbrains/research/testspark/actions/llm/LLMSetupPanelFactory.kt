@@ -10,7 +10,7 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.llm.LLMLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.data.JsonEncoding
+import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.JUnitCombobox
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.addLLMPanelListeners

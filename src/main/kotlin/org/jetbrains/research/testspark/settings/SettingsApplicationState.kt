@@ -4,8 +4,8 @@ import com.intellij.util.xmlb.annotations.OptionTag
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteDefaultsBundle
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.data.JUnitVersionConverter
+import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
 
 /**
  * This class is the actual data class that stores the values of the EvoSuite Settings entries.

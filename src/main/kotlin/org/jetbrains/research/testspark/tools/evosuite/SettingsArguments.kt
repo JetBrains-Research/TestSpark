@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.tools.evosuite
 
-import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 
 /**

@@ -8,7 +8,7 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteLabelsBundle
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteSettingsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
 import org.jetbrains.research.testspark.services.SettingsApplicationService
 import org.jetbrains.research.testspark.settings.SettingsApplicationState
 import java.awt.Font

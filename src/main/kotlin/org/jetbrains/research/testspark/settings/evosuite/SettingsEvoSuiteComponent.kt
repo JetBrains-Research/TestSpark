@@ -5,7 +5,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
 import org.jdesktop.swingx.JXTitledSeparator
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteLabelsBundle
-import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
 import javax.swing.JCheckBox
 import javax.swing.JComponent
 import javax.swing.JPanel
