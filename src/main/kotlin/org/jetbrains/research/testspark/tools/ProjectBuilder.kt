@@ -15,18 +15,21 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.plugin.PluginSettingsState
 import java.util.concurrent.CountDownLatch
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
  */
 class ProjectBuilder(private val project: Project) {
+    private val pluginSettingsState: PluginSettingsState
+        get() = project.getService(PluginSettingsService::class.java).state
+
     private val log = Logger.getInstance(this::class.java)
 
-    private val builderTimeout: Long = 12000000 // TODO: Source from config
+    private val builderTimeout: Long = 12000000
 
     private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    private val settingsState = project.service<PluginSettingsService>().state
 
     /**
      * Runs the build process.
@@ -43,7 +46,7 @@ class ProjectBuilder(private val project: Project) {
             indicator.setIndeterminate(true)
             indicator.setText(PluginMessagesBundle.get("buildMessage"))
 
-            if (settingsState.buildCommand.isEmpty()) {
+            if (pluginSettingsState.buildCommand.isEmpty()) {
                 // User did not put own command line
                 val promise = ProjectTaskManager.getInstance(project).buildAllModules()
                 val finished = Semaphore()
@@ -74,7 +77,7 @@ class ProjectBuilder(private val project: Project) {
                     cmd.add("-c")
                 }
 
-                cmd.add(settingsState.buildCommand)
+                cmd.add(pluginSettingsState.buildCommand)
 
                 val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
                 log.info("Starting build process with arguments: $cmdString")

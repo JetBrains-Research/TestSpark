@@ -8,6 +8,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
@@ -84,7 +85,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode The code of the test samples.
      */
     override fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
-        if (!isCorrectToken(project)) {
+        if (!LLMHelper.isCorrectToken(project)) {
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
@@ -101,7 +102,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode the code of the test samples to use for test generation
      */
     override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
-        if (!isCorrectToken(project)) {
+        if (!LLMHelper.isCorrectToken(project)) {
             return
         }
         val psiMethod: PsiMethod = PsiHelper.getSurroundingMethod(psiFile, caretOffset)!!
@@ -119,7 +120,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode The code for the test samples.
      */
     override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
-        if (!isCorrectToken(project)) {
+        if (!LLMHelper.isCorrectToken(project)) {
             return
         }
         val selectedLine: Int = PsiHelper.getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
