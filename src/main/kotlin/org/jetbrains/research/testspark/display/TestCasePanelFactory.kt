@@ -21,6 +21,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -29,10 +30,10 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.LLMHelper
+import org.jetbrains.research.testspark.helpers.ReportHelper
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
@@ -62,6 +63,7 @@ class TestCasePanelFactory(
     editor: Editor,
     private val checkbox: JCheckBox,
     val uiContext: UIContext?,
+    val report: Report,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -383,7 +385,7 @@ class TestCasePanelFactory(
             testCase.coveredLines = setOf()
         }
 
-        project.service<ReportLockingService>().updateTestCase(testCase)
+        ReportHelper.updateTestCase(project, report, testCase)
         project.service<TestCaseDisplayService>().updateUI()
     }
 
@@ -588,7 +590,7 @@ class TestCasePanelFactory(
         runTestButton.isEnabled = false
         isRemoved = true
 
-        project.service<ReportLockingService>().removeTestCase(testCase)
+        ReportHelper.removeTestCase(project, report, testCase)
         project.service<TestCaseDisplayService>().updateUI()
     }
 
