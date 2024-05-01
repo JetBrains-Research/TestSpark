@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.custom
 
 import com.intellij.openapi.progress.ProgressIndicator
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -15,6 +15,7 @@ class IJProgressIndicator(private val indicator: ProgressIndicator) : CustomProg
     }
 
     override fun isIndeterminate(): Boolean = indicator.isIndeterminate
+
     override fun setFraction(value: Double) {
         indicator.fraction = value
     }

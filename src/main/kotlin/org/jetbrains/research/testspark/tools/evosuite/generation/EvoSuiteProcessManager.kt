@@ -26,13 +26,8 @@ import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
-import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.isProcessStopped
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
-import org.jetbrains.research.testspark.tools.saveData
-import org.jetbrains.research.testspark.tools.sep
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.FileReader
 import java.nio.charset.Charset
@@ -59,7 +54,7 @@ class EvoSuiteProcessManager(
     private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
 
     private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
-    private var evoSuitePath = "$pluginsPath${sep}TestSpark${sep}lib${sep}evosuite-$evosuiteVersion.jar"
+    private var evoSuitePath = "$pluginsPath${ToolUtils.sep}TestSpark${ToolUtils.sep}lib${ToolUtils.sep}evosuite-$evosuiteVersion.jar"
 
     private val settingsProjectState = project.service<PluginSettingsService>().state
 
@@ -78,7 +73,7 @@ class EvoSuiteProcessManager(
         generatedTestData: TestGenerationData,
     ): UIContext? {
         try {
-            if (isProcessStopped(project, indicator)) return null
+            if (ToolUtils.isProcessStopped(project, indicator)) return null
 
             val regex = Regex("version \"(.*?)\"")
             val version = regex.find(CommandLineRunner.run(arrayListOf(evoSuiteSettingsState.javaPath, "-version")))
@@ -96,7 +91,7 @@ class EvoSuiteProcessManager(
             val projectClassPath = projectContext.projectClassPath!!
             val classFQN = projectContext.classFQN!!
             val baseDir = generatedTestData.baseDir!!
-            val resultName = "${generatedTestData.resultPath}${sep}EvoSuiteResult"
+            val resultName = "${generatedTestData.resultPath}${ToolUtils.sep}EvoSuiteResult"
 
             Path(generatedTestData.resultPath).createDirectories()
 
@@ -118,7 +113,7 @@ class EvoSuiteProcessManager(
             var buildPath = projectClassPath
             if (settingsProjectState.buildPath.isEmpty()) {
                 // User did not set own path
-                buildPath = getBuildPath(project)
+                buildPath = ToolUtils.getBuildPath(project)
             }
             command[command.indexOf(projectClassPath)] = buildPath
             log.info("Generating tests for project $projectPath with classpath $buildPath inside the project")
@@ -145,7 +140,7 @@ class EvoSuiteProcessManager(
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (isProcessStopped(project, indicator)) {
+                    if (ToolUtils.isProcessStopped(project, indicator)) {
                         handler.destroyProcess()
                         return
                     }
@@ -189,7 +184,7 @@ class EvoSuiteProcessManager(
 
             handler.startNotify()
 
-            if (isProcessStopped(project, indicator)) return null
+            if (ToolUtils.isProcessStopped(project, indicator)) return null
 
             // evosuite errors check
             if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return null
@@ -199,11 +194,11 @@ class EvoSuiteProcessManager(
 
             val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
 
-            saveData(
+            ToolUtils.saveData(
                 project,
                 IJReport(testGenerationResult),
-                getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
-                getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
+                ToolUtils.getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
+                ToolUtils.getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
                 projectContext.fileUrlAsString!!,
                 generatedTestData,
             )

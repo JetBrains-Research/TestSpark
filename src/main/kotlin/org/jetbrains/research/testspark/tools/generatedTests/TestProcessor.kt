@@ -18,7 +18,7 @@ import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.LibraryPathsProvider
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
-import org.jetbrains.research.testspark.tools.getBuildPath
+import org.jetbrains.research.testspark.tools.ToolUtils
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -156,7 +156,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         if (project.service<PluginSettingsService>().state.buildPath.isEmpty()) {
             // User did not set own path
-            buildPath = getBuildPath(project)
+            buildPath = ToolUtils.getBuildPath(project)
         }
 
         // save new test to file
