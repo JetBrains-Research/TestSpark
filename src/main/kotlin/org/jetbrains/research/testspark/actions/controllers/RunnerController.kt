@@ -1,25 +1,24 @@
-package org.jetbrains.research.testspark.services
+package org.jetbrains.research.testspark.actions.controllers
 
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.services.ErrorService
 
 /**
- * Service used for the sole purpose to limit TestSpark to generate tests only once at a time.
+ * Manager used for the sole purpose to limit TestSpark to generate tests only once at a time.
  */
-@Service(Service.Level.PROJECT)
-class RunnerService(private val project: Project) {
+class RunnerController {
     private var isRunning: Boolean = false
 
     /**
      * Method to show notification that test generation is already running.
      */
-    private fun showGenerationRunningNotification() {
+    private fun showGenerationRunningNotification(project: Project) {
         val terminateButton: AnAction = object : AnAction("Terminate") {
             override fun actionPerformed(e: AnActionEvent) {
                 project.service<ErrorService>().errorOccurred()
@@ -39,7 +38,7 @@ class RunnerService(private val project: Project) {
         notification.notify(project)
     }
 
-    fun clear() {
+    fun finished() {
         isRunning = false
     }
 
@@ -48,9 +47,9 @@ class RunnerService(private val project: Project) {
      *
      * @return true if it is already running
      */
-    fun isGeneratorRunning(): Boolean {
+    fun isGeneratorRunning(project: Project): Boolean {
         if (isRunning) {
-            showGenerationRunningNotification()
+            showGenerationRunningNotification(project)
             return true
         }
         isRunning = true

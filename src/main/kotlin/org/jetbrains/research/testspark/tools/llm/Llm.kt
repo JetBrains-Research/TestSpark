@@ -6,6 +6,7 @@ import com.intellij.openapi.util.Computable
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
+import org.jetbrains.research.testspark.actions.controllers.RunnerController
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.LLMHelper
@@ -84,12 +85,12 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param fileUrl The URL of the class file. It can be null.
      * @param testSamplesCode The code of the test samples.
      */
-    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController) {
         if (!LLMHelper.isCorrectToken(project)) {
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
-        createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
+        createLLMPipeline(project, psiFile, caretOffset, fileUrl, runnerController).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
     }
 
     /**
@@ -101,13 +102,13 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param fileUrl the URL of the file to generate tests for (optional)
      * @param testSamplesCode the code of the test samples to use for test generation
      */
-    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController) {
         if (!LLMHelper.isCorrectToken(project)) {
             return
         }
         val psiMethod: PsiMethod = PsiHelper.getSurroundingMethod(psiFile, caretOffset)!!
         val codeType = FragmentToTestData(CodeType.METHOD, PsiHelper.generateMethodDescriptor(psiMethod))
-        createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
+        createLLMPipeline(project, psiFile, caretOffset, fileUrl, runnerController).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
     }
 
     /**
@@ -119,13 +120,13 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param fileUrl The URL of the file.
      * @param testSamplesCode The code for the test samples.
      */
-    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
+    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController) {
         if (!LLMHelper.isCorrectToken(project)) {
             return
         }
         val selectedLine: Int = PsiHelper.getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
         val codeType = FragmentToTestData(CodeType.LINE, selectedLine)
-        createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
+        createLLMPipeline(project, psiFile, caretOffset, fileUrl, runnerController).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
     }
 
     /**
@@ -137,7 +138,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param fileUrl the URL of the file to be processed by the pipeline
      * @return a LLMPipeline instance
      */
-    private fun createLLMPipeline(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?): Pipeline {
+    private fun createLLMPipeline(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, runnerController: RunnerController): Pipeline {
         val cutPsiClass: PsiClass = PsiHelper.getSurroundingClass(psiFile, caretOffset)!!
 
         val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
@@ -145,6 +146,6 @@ class Llm(override val name: String = "LLM") : Tool {
 
         val packageName = packageList.joinToString(".")
 
-        return Pipeline(project, psiFile, caretOffset, fileUrl, packageName)
+        return Pipeline(project, psiFile, caretOffset, fileUrl, packageName, runnerController)
     }
 }
