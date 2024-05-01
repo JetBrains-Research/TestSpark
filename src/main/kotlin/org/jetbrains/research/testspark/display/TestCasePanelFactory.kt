@@ -36,8 +36,8 @@ import org.jetbrains.research.testspark.services.ReportLockingService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import java.awt.Dimension
 import java.awt.Toolkit
