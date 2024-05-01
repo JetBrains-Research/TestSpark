@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.tools.template
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
+import org.jetbrains.research.testspark.actions.controllers.RunnerController
 
 /**
  * Represents a tool that can generate tests.
@@ -21,7 +22,7 @@ interface Tool {
      * @see Project
      * @see PsiFile
      */
-    fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String)
+    fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController)
 
     /**
      * Generates test cases for a given method.
@@ -32,7 +33,7 @@ interface Tool {
      * @param fileUrl The URL of the file where the method is defined (optional).
      * @param testSamplesCode The code snippets for test samples (optional).
      */
-    fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String)
+    fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController)
 
     /**
      * Generates tests for a specific line in a project.
@@ -46,5 +47,5 @@ interface Tool {
      * @see Project
      * @see PsiFile
      */
-    fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String)
+    fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController)
 }
