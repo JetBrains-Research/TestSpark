@@ -90,17 +90,19 @@ class TestSparkAction : AnAction() {
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
+
         private val codeTypes = PsiHelper.getCurrentListOfCodeTypes(e)!!
+
         private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
+
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
         private val nextButton = JButton(PluginLabelsBundle.get("next"))
 
         private val cardLayout = CardLayout()
-
         private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
         private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project)
         private val evoSuitePanelFactory = EvoSuitePanelFactory(project)
