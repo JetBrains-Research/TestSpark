@@ -10,6 +10,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.actions.controllers.RunnerController
+import org.jetbrains.research.testspark.actions.controllers.VisibilityController
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
@@ -22,7 +24,6 @@ import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.Manager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.awt.BorderLayout
@@ -46,11 +47,9 @@ import javax.swing.JRadioButton
  * It creates a dialog wrapper and displays it when the associated action is performed.
  */
 class TestSparkAction : AnAction() {
-    class VisibilityController {
-        var isVisible = false
-    }
-
+    // Controllers
     private val visibilityController = VisibilityController()
+    private val runnerController = RunnerController()
 
     /**
      * Handles the action performed event.
@@ -62,7 +61,7 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(e, visibilityController)
+        TestSparkActionWindow(e, visibilityController, runnerController)
     }
 
     /**
@@ -79,9 +78,14 @@ class TestSparkAction : AnAction() {
      *
      * @property e The AnActionEvent object.
      */
-    class TestSparkActionWindow(e: AnActionEvent, private val visibilityController: VisibilityController) :
+    class TestSparkActionWindow(
+        e: AnActionEvent,
+        private val visibilityController: VisibilityController,
+        private val runnerController: RunnerController,
+    ) :
         JFrame("TestSpark") {
         private val project: Project = e.project!!
+
         private val llmSettingsState: LLMSettingsState
             get() = project.getService(LLMSettingsService::class.java).state
         private val evoSuiteSettingsState: EvoSuiteSettingsState
@@ -309,31 +313,75 @@ class TestSparkAction : AnAction() {
         }
 
         private fun startEvoSuiteGeneration() {
-            val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
+            if (!runnerController.isGeneratorRunning(project)) {
+                val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
-            if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
+                if (codeTypeButtons[0].isSelected) {
+                    EvoSuite().generateTestsForClass(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                } else if (codeTypeButtons[1].isSelected) {
+                    EvoSuite().generateTestsForMethod(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                } else if (codeTypeButtons[2].isSelected) {
+                    EvoSuite().generateTestsForLine(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                }
             }
-
             visibilityController.isVisible = false
             dispose()
         }
 
         private fun startLLMGeneration() {
-            val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
+            if (!runnerController.isGeneratorRunning(project)) {
+                val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
-            if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
+                if (codeTypeButtons[0].isSelected) {
+                    Llm().generateTestsForClass(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                } else if (codeTypeButtons[1].isSelected) {
+                    Llm().generateTestsForMethod(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                } else if (codeTypeButtons[2].isSelected) {
+                    Llm().generateTestsForLine(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                }
             }
-
             visibilityController.isVisible = false
             dispose()
         }

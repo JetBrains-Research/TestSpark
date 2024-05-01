@@ -195,7 +195,7 @@
     <actions>
         <!-- TestSpark actions -->
         <action id="TestSpark.TestSparkActions" text="TestSpark" description="Actions related to TestSpark"
-               class="org.jetbrains.research.testspark.actions.TestSparkAction">
+                class="org.jetbrains.research.testspark.actions.TestSparkAction">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
 
         </action>
