@@ -29,10 +29,10 @@ import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -457,9 +457,7 @@ class TestCasePanelFactory(
         WriteCommandAction.runWriteCommandAction(project) {
             project.service<ErrorService>().clear()
             val code = testSuitePresenter.toString(testSuite)
-            testCase.testName =
-                project.service<JavaClassBuilderService>()
-                    .getTestMethodNameFromClassWithTestCase(testCase.testName, code)
+            testCase.testName = JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, code)
             testCase.testCode = code
 
             // update numbers
@@ -519,7 +517,7 @@ class TestCasePanelFactory(
 
         val newTestCase = TestProcessor(project)
             .processNewTestCase(
-                "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java",
                 testCase.id,
                 testCase.testName,
                 testCase.testCode,
@@ -664,8 +662,7 @@ class TestCasePanelFactory(
      */
     private fun updateTestCaseInformation() {
         testCase.testName =
-            project.service<JavaClassBuilderService>()
-                .getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
+            JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 }
