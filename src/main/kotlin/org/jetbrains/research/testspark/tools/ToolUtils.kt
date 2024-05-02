@@ -12,8 +12,8 @@ import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCase
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
+import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.JavaClassBuilderService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
 
@@ -76,7 +76,8 @@ object ToolUtils {
 
         for (testCase in report.testCaseList.values) {
             val code = testCase.testCode
-            testCase.testCode = project.service<JavaClassBuilderService>().generateCode(
+            testCase.testCode = JavaClassBuilderHelper.generateCode(
+                project,
                 getClassWithTestCaseName(testCase.testName),
                 code,
                 generatedTestData.importsCode,

@@ -1,6 +1,5 @@
-package org.jetbrains.research.testspark.services
+package org.jetbrains.research.testspark.helpers
 
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
@@ -12,8 +11,7 @@ import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiMethod
 import com.intellij.util.containers.stream
 
-@Service(Service.Level.PROJECT)
-class LLMTestSampleService {
+object LLMTestSampleHelper {
     /**
      * Retrieves a list of test samples from the given project.
      *
@@ -46,7 +44,8 @@ class LLMTestSampleService {
                             }
                         }
                     }
-                } catch (_: Exception) {}
+                } catch (_: Exception) {
+                }
             }
             true
         }
