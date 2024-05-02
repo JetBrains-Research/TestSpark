@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.services
+package org.jetbrains.research.testspark.helpers
 
 import com.github.javaparser.ParseProblemException
 import com.github.javaparser.StaticJavaParser
@@ -7,7 +7,6 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
@@ -16,8 +15,7 @@ import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import java.io.File
 
-@Service(Service.Level.PROJECT)
-class JavaClassBuilderService(private val project: Project) {
+object JavaClassBuilderHelper {
     /**
      * Generates the code for a test class.
      *
@@ -26,6 +24,7 @@ class JavaClassBuilderService(private val project: Project) {
      * @return the generated code as a string
      */
     fun generateCode(
+        project: Project,
         className: String,
         body: String,
         imports: Set<String>,
@@ -48,7 +47,7 @@ class JavaClassBuilderService(private val project: Project) {
          * for better readability and make the tests shorter, we reduce the number of line breaks:
          *  when we have three or more sequential \n, reduce it to two.
          */
-        return formatJavaCode(Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"), testGenerationData)
+        return formatJavaCode(project, Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"), testGenerationData)
     }
 
     /**
@@ -180,7 +179,7 @@ class JavaClassBuilderService(private val project: Project) {
      * @param code The Java code to be formatted.
      * @return The formatted Java code.
      */
-    fun formatJavaCode(code: String, generatedTestData: TestGenerationData): String {
+    fun formatJavaCode(project: Project, code: String, generatedTestData: TestGenerationData): String {
         var result = ""
         WriteCommandAction.runWriteCommandAction(project) {
             val fileName = generatedTestData.resultPath + File.separatorChar + "Formatted.java"

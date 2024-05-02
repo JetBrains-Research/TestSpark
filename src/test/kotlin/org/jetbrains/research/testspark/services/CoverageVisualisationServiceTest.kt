@@ -24,7 +24,6 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
 
     private lateinit var coverageVisualisationService: CoverageVisualisationService
     private val myEditor = Mockito.mock(Editor::class.java)
-    private lateinit var coverageToolWindowDisplayService: CoverageToolWindowDisplayService
 
     private val branch1 = Mockito.mock(BranchInfo::class.java)
     private val branch2 = Mockito.mock(BranchInfo::class.java)
@@ -43,7 +42,6 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
         super.setUp()
 
         coverageVisualisationService = project.service()
-        coverageToolWindowDisplayService = project.service()
 
         // Initialise the toolWindow TestSpark
         ToolWindowManager.getInstance(project)
