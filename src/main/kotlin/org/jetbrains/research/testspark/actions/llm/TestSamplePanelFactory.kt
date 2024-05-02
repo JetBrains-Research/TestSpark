@@ -10,10 +10,10 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.display.IconButtonCreator
+import org.jetbrains.research.testspark.display.ModifiedLinesGetter
 import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.createButton
-import org.jetbrains.research.testspark.display.getModifiedLines
 import javax.swing.BoxLayout
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
@@ -26,8 +26,8 @@ class TestSamplePanelFactory(
     private val testNames: MutableList<String>,
     private val initialTestCodes: MutableList<String>,
 ) {
+    // init components
     private val currentTestCodes = initialTestCodes.toMutableList()
-
     private val languageTextField = LanguageTextField(
         Language.findLanguageByID("JAVA"),
         project,
@@ -35,18 +35,14 @@ class TestSamplePanelFactory(
         TestCaseDocumentCreator("TestSample"),
         false,
     )
-
     private var languageTextFieldScrollPane = JBScrollPane(
         languageTextField,
         ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
-
     private var testSamplesSelector = ComboBox(arrayOf(""))
-
-    private val resetButton = createButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
-
-    private val removeButton = createButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
+    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
+    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
 
     init {
         addListeners()
@@ -54,6 +50,9 @@ class TestSamplePanelFactory(
         testSamplesSelector.model = DefaultComboBoxModel(testNames.toTypedArray())
     }
 
+    /**
+     * Add listeners.
+     */
     private fun addListeners() {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
@@ -63,7 +62,7 @@ class TestSamplePanelFactory(
                     if (testNames[index] == testSamplesSelector.selectedItem) {
                         currentTestCodes[index] = languageTextField.text
 
-                        val modifiedLineIndexes = getModifiedLines(
+                        val modifiedLineIndexes = ModifiedLinesGetter.getLines(
                             initialTestCodes[index].split("\n"),
                             currentTestCodes[index].split("\n"),
                         )
@@ -103,8 +102,14 @@ class TestSamplePanelFactory(
         }
     }
 
+    /**
+     * @return removeButton
+     */
     fun getRemoveButton(): JButton = removeButton
 
+    /**
+     *
+     */
     fun getTestSamplePanel(): JPanel {
         val testSamplePanel = JPanel()
 
@@ -116,10 +121,16 @@ class TestSamplePanelFactory(
         return testSamplePanel
     }
 
+    /**
+     * @return languageTextFieldScrollPane
+     */
     fun getCodeScrollPanel(): JBScrollPane {
         return languageTextFieldScrollPane
     }
 
+    /**
+     * Enables and disables the components in the panel in case of type button selection.
+     */
     fun enabledComponents(isEnabled: Boolean) {
         resetButton.isEnabled = false
         for (index in testNames.indices) {
@@ -133,5 +144,8 @@ class TestSamplePanelFactory(
         languageTextFieldScrollPane.isEnabled = isEnabled
     }
 
+    /**
+     * @return code of the sample
+     */
     fun getCode(): String = languageTextField.text
 }

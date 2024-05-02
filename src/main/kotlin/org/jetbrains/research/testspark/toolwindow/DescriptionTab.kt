@@ -6,9 +6,9 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.settings.SettingsPluginConfigurable
-import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
-import org.jetbrains.research.testspark.settings.llm.SettingsLLMConfigurable
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsConfigurable
+import org.jetbrains.research.testspark.settings.plugin.PluginSettingsConfigurable
 import java.awt.Desktop
 import java.awt.Font
 import java.net.URI
@@ -97,21 +97,21 @@ class DescriptionTab(private val project: Project) {
         llmSettingsButton.isOpaque = false
         llmSettingsButton.isContentAreaFilled = false
         llmSettingsButton.addActionListener {
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsLLMConfigurable::class.java)
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, LLMSettingsConfigurable::class.java)
         }
 
         // EvoSuite settings button setup
         evoSuiteSettingsButton.isOpaque = false
         evoSuiteSettingsButton.isContentAreaFilled = false
         evoSuiteSettingsButton.addActionListener {
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsEvoSuiteConfigurable::class.java)
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, EvoSuiteSettingsConfigurable::class.java)
         }
 
         // Settings button setup
         settingsButton.isOpaque = false
         settingsButton.isContentAreaFilled = false
         settingsButton.addActionListener {
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsPluginConfigurable::class.java)
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, PluginSettingsConfigurable::class.java)
         }
 
         // Documentation button setup

@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Dimension
 import java.util.LinkedList
@@ -23,11 +24,11 @@ import javax.swing.JPanel
 class TopButtonsPanelFactory(private val project: Project) {
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
-        createButton(TestSparkIcons.selectAll, PluginLabelsBundle.get("selectAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.selectAll, PluginLabelsBundle.get("selectAllTip"))
     private var unselectAllButton: JButton =
-        createButton(TestSparkIcons.unselectAll, PluginLabelsBundle.get("unselectAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.unselectAll, PluginLabelsBundle.get("unselectAllTip"))
     private var removeAllButton: JButton =
-        createButton(TestSparkIcons.removeAll, PluginLabelsBundle.get("removeAllTip"))
+        IconButtonCreator.getButton(TestSparkIcons.removeAll, PluginLabelsBundle.get("removeAllTip"))
 
     private var testsSelectedText: String = "${PluginLabelsBundle.get("testsSelected")}: %d/%d"
     private var testsSelectedLabel: JLabel = JLabel(testsSelectedText)

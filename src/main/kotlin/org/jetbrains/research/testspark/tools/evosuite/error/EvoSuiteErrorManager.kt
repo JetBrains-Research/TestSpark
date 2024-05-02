@@ -9,7 +9,7 @@ import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.tools.isProcessStopped
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.template.error.ErrorManager
 import java.util.Locale
 
@@ -74,7 +74,7 @@ class EvoSuiteErrorManager : ErrorManager {
         evoSuiteProcessTimeout: Long,
         indicator: CustomProgressIndicator,
     ): Boolean {
-        if (isProcessStopped(project, indicator)) return false
+        if (ToolUtils.isProcessStopped(project, indicator)) return false
 
         // exceeded timeout error
         if (!handler.waitFor(evoSuiteProcessTimeout)) {
