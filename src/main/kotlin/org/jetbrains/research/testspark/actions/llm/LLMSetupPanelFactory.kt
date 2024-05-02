@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.actions.llm
 
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
@@ -15,8 +14,8 @@ import org.jetbrains.research.testspark.data.llm.PromptEditorType
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.custom.JUnitCombobox
 import org.jetbrains.research.testspark.helpers.LLMHelper
+import org.jetbrains.research.testspark.helpers.PromptParserHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import java.awt.FlowLayout
@@ -190,7 +189,7 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
         var normalizedNames = arrayOf<String>()
         for (i in names.indices) {
             val prompt = JsonEncoding.decode(prompts)[i]
-            if (service<PromptParserService>().isPromptValid(prompt)) {
+            if (PromptParserHelper.isPromptValid(prompt)) {
                 normalizedNames += names[i]
             }
         }

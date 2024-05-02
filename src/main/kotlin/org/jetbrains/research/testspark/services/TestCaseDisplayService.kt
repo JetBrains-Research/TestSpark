@@ -29,9 +29,13 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
+import org.jetbrains.research.testspark.core.data.Report
+import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
+import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.ReportHelper
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -48,6 +52,9 @@ import javax.swing.SwingConstants
 
 @Service(Service.Level.PROJECT)
 class TestCaseDisplayService(private val project: Project) {
+    private var report: Report? = null
+
+    private val unselectedTestCases = HashMap<Int, TestCase>()
 
     private var mainPanel: JPanel = JPanel()
 
@@ -102,8 +109,10 @@ class TestCaseDisplayService(private val project: Project) {
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
      */
-    fun displayTestCases() {
-        val report = project.service<ReportLockingService>().getReport()
+    fun displayTestCases(report: Report, uiContext: UIContext) {
+        this.report = report
+        this.uiContext = uiContext
+
         val editor = project.service<EditorService>().editor!!
 
         allTestCasePanel.removeAll()
@@ -127,16 +136,16 @@ class TestCaseDisplayService(private val project: Project) {
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
                 if (checkbox.isSelected) {
-                    project.service<ReportLockingService>().selectTestCase(testCase.id)
+                    ReportHelper.selectTestCase(project, report, unselectedTestCases, testCase.id)
                 } else {
-                    project.service<ReportLockingService>().unselectTestCase(testCase.id)
+                    ReportHelper.unselectTestCase(project, report, unselectedTestCases, testCase.id)
                 }
 
                 updateUI()
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext)
+            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext, report)
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
@@ -438,17 +447,17 @@ class TestCaseDisplayService(private val project: Project) {
 
         // insert tests to a code
         testCaseComponents.reversed().forEach {
-            val testMethodCode = project
-                .service<JavaClassBuilderService>()
-                .getTestMethodCodeFromClassWithTestCase(
-                    project.service<JavaClassBuilderService>().formatJavaCode(
+            val testMethodCode =
+                JavaClassBuilderHelper.getTestMethodCodeFromClassWithTestCase(
+                    JavaClassBuilderHelper.formatJavaCode(
+                        project,
                         it.replace("\r\n", "\n")
                             .replace("verifyException(", "// verifyException("),
                         uiContext!!.testGenerationOutput,
                     ),
                 )
-                // Fix Windows line separators
-                .replace("\r\n", "\n")
+                    // Fix Windows line separators
+                    .replace("\r\n", "\n")
 
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,

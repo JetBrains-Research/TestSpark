@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.settings.llm
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.Messages
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
@@ -11,7 +10,7 @@ import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.data.llm.PromptEditorType
 import org.jetbrains.research.testspark.display.IconButtonCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.services.PromptParserService
+import org.jetbrains.research.testspark.helpers.PromptParserHelper
 import java.awt.FlowLayout
 import javax.swing.BorderFactory
 import javax.swing.JButton
@@ -224,7 +223,7 @@ class PromptTemplateFactory(
     private fun updateSetAsDefaultButton() {
         setAsDefaultButton.isEnabled = (currentDefaultIndex != currentTemplateNumber)
 
-        if (!service<PromptParserService>().isPromptValid(editorTextField.document.text)) {
+        if (!PromptParserHelper.isPromptValid(editorTextField.document.text)) {
             setAsDefaultButton.border = redBorder
             setAsDefaultButton.isEnabled = false
         } else {
@@ -233,8 +232,8 @@ class PromptTemplateFactory(
     }
 
     private fun updateEditorTextField() {
-        service<PromptParserService>().highlighter(editorTextField, editorTextField.document.text)
-        if (!service<PromptParserService>().isPromptValid(editorTextField.document.text)) {
+        PromptParserHelper.highlighter(editorTextField, editorTextField.document.text)
+        if (!PromptParserHelper.isPromptValid(editorTextField.document.text)) {
             editorTextField.border = redBorder
         } else {
             editorTextField.border = null
