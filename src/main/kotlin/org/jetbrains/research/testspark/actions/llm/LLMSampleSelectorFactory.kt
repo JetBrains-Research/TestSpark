@@ -1,11 +1,10 @@
 package org.jetbrains.research.testspark.actions.llm
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.services.LLMTestSampleService
+import org.jetbrains.research.testspark.helpers.LLMTestSampleHelper
 import java.awt.Font
 import javax.swing.ButtonGroup
 import javax.swing.JButton
@@ -25,8 +24,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     private val defaultTestName = "<html>provide manually</html>"
     private val defaultTestCode = "// provide test method code here"
     private val testNames = mutableListOf(defaultTestName)
-    private val initialTestCodes =
-        mutableListOf(project.service<LLMTestSampleService>().createTestSampleClass("", defaultTestCode))
+    private val initialTestCodes = mutableListOf(LLMTestSampleHelper.createTestSampleClass("", defaultTestCode))
     private val testSamplePanelFactories: MutableList<TestSamplePanelFactory> = mutableListOf()
     private var testSamplesCode: String = ""
 
@@ -41,12 +39,13 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
         .addComponent(JPanel(), 0)
         .addComponent(radioButtonsPanel, 10)
         .addComponent(addButtonPanel, 10)
+
     private var middlePanel = formBuilder.panel
 
     init {
         addListeners()
 
-        project.service<LLMTestSampleService>().collectTestSamples(project, testNames, initialTestCodes)
+        LLMTestSampleHelper.collectTestSamples(project, testNames, initialTestCodes)
     }
 
     override fun getTitlePanel(): JPanel {

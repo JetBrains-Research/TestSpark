@@ -1,12 +1,11 @@
 package org.jetbrains.research.testspark.settings.llm
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.helpers.PromptParserHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.PromptParserService
 import org.jetbrains.research.testspark.settings.template.SettingsConfigurable
 import javax.swing.JComponent
 
@@ -120,9 +119,9 @@ class LLMSettingsConfigurable(private val project: Project) : SettingsConfigurab
      * Persists the modified state after a user hit Apply button.
      */
     override fun apply() {
-        if (!service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.classPrompts)[settingsComponent!!.classCurrentDefaultPromptIndex]) ||
-            !service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.methodPrompts)[settingsComponent!!.methodCurrentDefaultPromptIndex]) ||
-            !service<PromptParserService>().isPromptValid(JsonEncoding.decode(settingsComponent!!.linePrompts)[settingsComponent!!.lineCurrentDefaultPromptIndex])
+        if (!PromptParserHelper.isPromptValid(JsonEncoding.decode(settingsComponent!!.classPrompts)[settingsComponent!!.classCurrentDefaultPromptIndex]) ||
+            !PromptParserHelper.isPromptValid(JsonEncoding.decode(settingsComponent!!.methodPrompts)[settingsComponent!!.methodCurrentDefaultPromptIndex]) ||
+            !PromptParserHelper.isPromptValid(JsonEncoding.decode(settingsComponent!!.linePrompts)[settingsComponent!!.lineCurrentDefaultPromptIndex])
         ) {
             Messages.showErrorDialog(
                 LLMMessagesBundle.get("defaultPromptIsNotValidMessage"),

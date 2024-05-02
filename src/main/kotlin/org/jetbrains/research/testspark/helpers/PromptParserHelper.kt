@@ -1,6 +1,5 @@
-package org.jetbrains.research.testspark.services
+package org.jetbrains.research.testspark.helpers
 
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.MarkupModel
@@ -10,14 +9,13 @@ import com.intellij.ui.JBColor
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptKeyword
 import java.awt.Font
 
-@Service
-class PromptParserService {
-    private val attributes = TextAttributes(JBColor.ORANGE, null, null, null, Font.BOLD or Font.ITALIC)
-
+object PromptParserHelper {
     fun highlighter(
         textField: EditorTextField,
         prompt: String,
     ): EditorTextField {
+        val attributes = TextAttributes(JBColor.ORANGE, null, null, null, Font.BOLD or Font.ITALIC)
+
         val editor = textField.editor
         var markup: MarkupModel? = null
         if (editor != null) {
@@ -25,7 +23,7 @@ class PromptParserService {
             markup.removeAllHighlighters()
         }
 
-        PromptKeyword.values().forEach {
+        PromptKeyword.entries.forEach {
             it.getOffsets(prompt)?.let { offsets ->
                 val startOffset = offsets.first
                 val endOffset = offsets.second
@@ -56,11 +54,11 @@ class PromptParserService {
     }
 
     fun getKeywords(): Array<PromptKeyword> {
-        return PromptKeyword.values()
+        return PromptKeyword.entries.toTypedArray()
     }
 
     fun isPromptValid(prompt: String): Boolean {
-        PromptKeyword.values().forEach {
+        PromptKeyword.entries.forEach {
             if (it.mandatory) {
                 val text = "\$${it.text}"
                 if (!prompt.contains(text)) {
