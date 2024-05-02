@@ -1,22 +1,22 @@
 package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 
 /**
  * A class that provides access to various settings arguments.
  */
 class SettingsArguments(private val project: Project) {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
     /**
      * Retrieves the maximum LLM (Longest Lasting Message) request value from the settings state.
      *
      * @return The maximum LLM request value.
      */
-    fun maxLLMRequest(): Int = settingsState.maxLLMRequest
+    fun maxLLMRequest(): Int = llmSettingsState.maxLLMRequest
 
     /**
      * Returns the maximum depth for input parameters.
@@ -25,7 +25,7 @@ class SettingsArguments(private val project: Project) {
      * @return The maximum depth for input parameters.
      */
     fun maxInputParamsDepth(inputParamsDepthReducing: Int): Int =
-        settingsState.maxInputParamsDepth - inputParamsDepthReducing
+        llmSettingsState.maxInputParamsDepth - inputParamsDepthReducing
 
     /**
      * Returns the maximum depth of polymorphism.
@@ -33,7 +33,7 @@ class SettingsArguments(private val project: Project) {
      * @return The maximum depth of polymorphism.
      */
     fun maxPolyDepth(polyDepthReducing: Int): Int =
-        settingsState.maxPolyDepth - polyDepthReducing
+        llmSettingsState.maxPolyDepth - polyDepthReducing
 
     /**
      * Checks if the token is set for the user in the settings.
@@ -47,7 +47,7 @@ class SettingsArguments(private val project: Project) {
      *
      * @return selected LLM platform
      */
-    fun currentLLMPlatformName(): String = settingsState.currentLLMPlatformName
+    fun currentLLMPlatformName(): String = llmSettingsState.currentLLMPlatformName
 
     /**
      * Retrieves the token for the current user.
@@ -55,8 +55,8 @@ class SettingsArguments(private val project: Project) {
      * @return The token as a string.
      */
     fun getToken(): String = when (currentLLMPlatformName()) {
-        settingsState.openAIName -> settingsState.openAIToken
-        settingsState.grazieName -> settingsState.grazieToken
+        llmSettingsState.openAIName -> llmSettingsState.openAIToken
+        llmSettingsState.grazieName -> llmSettingsState.grazieToken
         else -> ""
     }
 
@@ -66,8 +66,8 @@ class SettingsArguments(private val project: Project) {
      * @return The token as a string.
      */
     fun getModel(): String = when (currentLLMPlatformName()) {
-        settingsState.openAIName -> settingsState.openAIModel
-        settingsState.grazieName -> settingsState.grazieModel
+        llmSettingsState.openAIName -> llmSettingsState.openAIModel
+        llmSettingsState.grazieName -> llmSettingsState.grazieModel
         else -> ""
     }
 }

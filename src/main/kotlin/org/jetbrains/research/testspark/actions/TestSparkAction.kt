@@ -10,6 +10,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.actions.controllers.RunnerController
+import org.jetbrains.research.testspark.actions.controllers.VisibilityController
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
@@ -17,10 +19,11 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.Manager
+import org.jetbrains.research.testspark.helpers.PsiHelper
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.awt.BorderLayout
@@ -44,11 +47,9 @@ import javax.swing.JRadioButton
  * It creates a dialog wrapper and displays it when the associated action is performed.
  */
 class TestSparkAction : AnAction() {
-    class VisibilityController {
-        var isVisible = false
-    }
-
+    // Controllers
     private val visibilityController = VisibilityController()
+    private val runnerController = RunnerController()
 
     /**
      * Handles the action performed event.
@@ -60,7 +61,7 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(e, visibilityController)
+        TestSparkActionWindow(e, visibilityController, runnerController)
     }
 
     /**
@@ -69,7 +70,7 @@ class TestSparkAction : AnAction() {
      * @param e the AnActionEvent object representing the event
      */
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = getCurrentListOfCodeTypes(e) != null
+        e.presentation.isEnabled = PsiHelper.getCurrentListOfCodeTypes(e) != null
     }
 
     /**
@@ -77,26 +78,35 @@ class TestSparkAction : AnAction() {
      *
      * @property e The AnActionEvent object.
      */
-    class TestSparkActionWindow(e: AnActionEvent, private val visibilityController: VisibilityController) :
+    class TestSparkActionWindow(
+        e: AnActionEvent,
+        private val visibilityController: VisibilityController,
+        private val runnerController: RunnerController,
+    ) :
         JFrame("TestSpark") {
         private val project: Project = e.project!!
-        private val settingsState: SettingsApplicationState
-            get() = project.getService(SettingsApplicationService::class.java).state
+
+        private val llmSettingsState: LLMSettingsState
+            get() = project.getService(LLMSettingsService::class.java).state
+        private val evoSuiteSettingsState: EvoSuiteSettingsState
+            get() = project.getService(EvoSuiteSettingsService::class.java).state
 
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
-        private val codeTypes = getCurrentListOfCodeTypes(e)!!
+
+        private val codeTypes = PsiHelper.getCurrentListOfCodeTypes(e)!!
+
         private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
+
         private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
         private val nextButton = JButton(PluginLabelsBundle.get("next"))
 
         private val cardLayout = CardLayout()
-
         private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
         private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project)
         private val evoSuitePanelFactory = EvoSuitePanelFactory(project)
@@ -237,9 +247,9 @@ class TestSparkAction : AnAction() {
             }
 
             nextButton.addActionListener {
-                if (llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected && !settingsState.provideTestSamplesCheckBoxSelected) {
+                if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) {
                     startLLMGeneration()
-                } else if (llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected) {
+                } else if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected) {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     cardLayout.next(panel)
@@ -248,7 +258,7 @@ class TestSparkAction : AnAction() {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     pack()
-                } else if (evoSuiteButton.isSelected && !settingsState.evosuiteSetupCheckBoxSelected) {
+                } else if (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected) {
                     startEvoSuiteGeneration()
                 } else {
                     cardLayout.next(panel)
@@ -269,7 +279,7 @@ class TestSparkAction : AnAction() {
 
             llmSetupPanelFactory.getFinishedButton().addActionListener {
                 llmSetupPanelFactory.applyUpdates()
-                if (settingsState.provideTestSamplesCheckBoxSelected) {
+                if (llmSettingsState.provideTestSamplesCheckBoxSelected) {
                     cardLayout.next(panel)
                 } else {
                     startLLMGeneration()
@@ -281,7 +291,7 @@ class TestSparkAction : AnAction() {
             }
 
             llmSampleSelectorFactory.getBackButton().addActionListener {
-                if (settingsState.llmSetupCheckBoxSelected) {
+                if (llmSettingsState.llmSetupCheckBoxSelected) {
                     cardLayout.previous(panel)
                 } else {
                     cardLayout.previous(panel)
@@ -303,31 +313,75 @@ class TestSparkAction : AnAction() {
         }
 
         private fun startEvoSuiteGeneration() {
-            val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
+            if (!runnerController.isGeneratorRunning(project)) {
+                val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
-            if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
+                if (codeTypeButtons[0].isSelected) {
+                    EvoSuite().generateTestsForClass(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                } else if (codeTypeButtons[1].isSelected) {
+                    EvoSuite().generateTestsForMethod(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                } else if (codeTypeButtons[2].isSelected) {
+                    EvoSuite().generateTestsForLine(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                }
             }
-
             visibilityController.isVisible = false
             dispose()
         }
 
         private fun startLLMGeneration() {
-            val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
+            if (!runnerController.isGeneratorRunning(project)) {
+                val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
-            if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
+                if (codeTypeButtons[0].isSelected) {
+                    Llm().generateTestsForClass(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                } else if (codeTypeButtons[1].isSelected) {
+                    Llm().generateTestsForMethod(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                } else if (codeTypeButtons[2].isSelected) {
+                    Llm().generateTestsForLine(
+                        project,
+                        psiFile,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        runnerController,
+                    )
+                }
             }
-
             visibilityController.isVisible = false
             dispose()
         }
@@ -347,8 +401,8 @@ class TestSparkAction : AnAction() {
             }
             nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
 
-            if ((llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected && !settingsState.provideTestSamplesCheckBoxSelected) ||
-                (evoSuiteButton.isSelected && !settingsState.evosuiteSetupCheckBoxSelected)
+            if ((llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) ||
+                (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected)
             ) {
                 nextButton.text = PluginLabelsBundle.get("ok")
             } else {
