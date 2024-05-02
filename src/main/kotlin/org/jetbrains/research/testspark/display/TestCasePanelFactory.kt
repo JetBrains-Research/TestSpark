@@ -19,25 +19,27 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.data.JsonEncoding
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.LLMHelper
+import org.jetbrains.research.testspark.helpers.ReportHelper
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.JavaClassBuilderService
-import org.jetbrains.research.testspark.services.ReportLockingService
-import org.jetbrains.research.testspark.services.SettingsApplicationService
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
-import org.jetbrains.research.testspark.tools.isProcessStopped
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
-import org.jetbrains.research.testspark.tools.llm.testModificationRequest
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
@@ -61,20 +63,22 @@ class TestCasePanelFactory(
     editor: Editor,
     private val checkbox: JCheckBox,
     val uiContext: UIContext?,
+    val report: Report,
 ) {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
     private val panel = JPanel()
     private val previousButton =
-        createButton(TestSparkIcons.previous, TestSparkLabelsBundle.defaultValue("previousRequest"))
+        IconButtonCreator.getButton(TestSparkIcons.previous, PluginLabelsBundle.get("previousRequest"))
     private var requestNumber: String = "%d / %d"
     private var requestLabel: JLabel = JLabel(requestNumber)
-    private val nextButton = createButton(TestSparkIcons.next, TestSparkLabelsBundle.defaultValue("nextRequest"))
+    private val nextButton = IconButtonCreator.getButton(TestSparkIcons.next, PluginLabelsBundle.get("nextRequest"))
     private val errorLabel = JLabel(TestSparkIcons.showError)
-    private val copyButton = createButton(TestSparkIcons.copy, TestSparkLabelsBundle.defaultValue("copyTip"))
-    private val likeButton = createButton(TestSparkIcons.like, TestSparkLabelsBundle.defaultValue("likeTip"))
-    private val dislikeButton = createButton(TestSparkIcons.dislike, TestSparkLabelsBundle.defaultValue("dislikeTip"))
+    private val copyButton = IconButtonCreator.getButton(TestSparkIcons.copy, PluginLabelsBundle.get("copyTip"))
+    private val likeButton = IconButtonCreator.getButton(TestSparkIcons.like, PluginLabelsBundle.get("likeTip"))
+    private val dislikeButton =
+        IconButtonCreator.getButton(TestSparkIcons.dislike, PluginLabelsBundle.get("dislikeTip"))
 
     private var allRequestsNumber = 1
     private var currentRequestNumber = 1
@@ -103,22 +107,23 @@ class TestCasePanelFactory(
     )
 
     // Create "Remove" button to remove the test from cache
-    private val removeButton = createButton(TestSparkIcons.remove, TestSparkLabelsBundle.defaultValue("removeTip"))
+    private val removeButton =
+        IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
 
     // Create "Reset" button to reset the changes in the source code of the test
-    private val resetButton = createButton(TestSparkIcons.reset, TestSparkLabelsBundle.defaultValue("resetTip"))
+    private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
 
     // Create "Reset" button to reset the changes to last run in the source code of the test
     private val resetToLastRunButton =
-        createButton(TestSparkIcons.resetToLastRun, TestSparkLabelsBundle.defaultValue("resetToLastRunTip"))
+        IconButtonCreator.getButton(TestSparkIcons.resetToLastRun, PluginLabelsBundle.get("resetToLastRunTip"))
 
     // Create "Run tests" button to remove the test from cache
     private val runTestButton = createRunTestButton()
 
-    private val requestJLabel = JLabel(TestSparkLabelsBundle.defaultValue("requestJLabel"))
-    private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(settingsState.defaultLLMRequests))
+    private val requestJLabel = JLabel(PluginLabelsBundle.get("requestJLabel"))
+    private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(llmSettingsState.defaultLLMRequests))
 
-    private val sendButton = createButton(TestSparkIcons.send, TestSparkLabelsBundle.defaultValue("send"))
+    private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, PluginLabelsBundle.get("send"))
 
     private val loadingLabel: JLabel = JLabel(TestSparkIcons.loading)
 
@@ -196,7 +201,7 @@ class TestCasePanelFactory(
                 .getNotificationGroup("Test case copied")
                 .createNotification(
                     "",
-                    TestSparkBundle.message("testCaseCopied"),
+                    PluginMessagesBundle.get("testCaseCopied"),
                     NotificationType.INFORMATION,
                 )
                 .notify(project)
@@ -275,8 +280,8 @@ class TestCasePanelFactory(
         runTestButton.addActionListener {
             val choice = JOptionPane.showConfirmDialog(
                 null,
-                TestSparkBundle.message("runCautionMessage"),
-                TestSparkBundle.message("confirmationTitle"),
+                PluginMessagesBundle.get("runCautionMessage"),
+                PluginMessagesBundle.get("confirmationTitle"),
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.WARNING_MESSAGE,
             )
@@ -356,7 +361,7 @@ class TestCasePanelFactory(
 
         updateBorder()
 
-        val modifiedLineIndexes = getModifiedLines(
+        val modifiedLineIndexes = ModifiedLinesGetter.getLines(
             lastRunCode.split("\n"),
             testCase.testCode.split("\n"),
         )
@@ -380,7 +385,7 @@ class TestCasePanelFactory(
             testCase.coveredLines = setOf()
         }
 
-        project.service<ReportLockingService>().updateTestCase(testCase)
+        ReportHelper.updateTestCase(project, report, testCase)
         project.service<TestCaseDisplayService>().updateUI()
     }
 
@@ -395,15 +400,15 @@ class TestCasePanelFactory(
         enableComponents(false)
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
+            .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
-                    if (isProcessStopped(project, ijIndicator)) {
+                    if (ToolUtils.isProcessStopped(project, ijIndicator)) {
                         finishProcess()
                         return
                     }
 
-                    val modifiedTest = testModificationRequest(
+                    val modifiedTest = LLMHelper.testModificationRequest(
                         initialCodes[currentRequestNumber - 1],
                         requestComboBox.editor.item.toString(),
                         ijIndicator,
@@ -419,7 +424,7 @@ class TestCasePanelFactory(
                         addTest(modifiedTest)
                     }
 
-                    if (isProcessStopped(project, ijIndicator)) {
+                    if (ToolUtils.isProcessStopped(project, ijIndicator)) {
                         finishProcess()
                         return
                     }
@@ -452,9 +457,7 @@ class TestCasePanelFactory(
         WriteCommandAction.runWriteCommandAction(project) {
             project.service<ErrorService>().clear()
             val code = testSuitePresenter.toString(testSuite)
-            testCase.testName =
-                project.service<JavaClassBuilderService>()
-                    .getTestMethodNameFromClassWithTestCase(testCase.testName, code)
+            testCase.testName = JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, code)
             testCase.testCode = code
 
             // update numbers
@@ -490,7 +493,7 @@ class TestCasePanelFactory(
         enableComponents(false)
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestSparkBundle.message("sendingFeedback")) {
+            .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     runTest(IJProgressIndicator(indicator))
                 }
@@ -514,7 +517,7 @@ class TestCasePanelFactory(
 
         val newTestCase = TestProcessor(project)
             .processNewTestCase(
-                "${project.service<JavaClassBuilderService>().getClassFromTestCaseCode(testCase.testCode)}.java",
+                "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java",
                 testCase.id,
                 testCase.testName,
                 testCase.testCode,
@@ -585,7 +588,7 @@ class TestCasePanelFactory(
         runTestButton.isEnabled = false
         isRemoved = true
 
-        project.service<ReportLockingService>().removeTestCase(testCase)
+        ReportHelper.removeTestCase(project, report, testCase)
         project.service<TestCaseDisplayService>().updateUI()
     }
 
@@ -630,7 +633,7 @@ class TestCasePanelFactory(
      * @return the created button
      */
     private fun createRunTestButton(): JButton {
-        val runTestButton = JButton(TestSparkLabelsBundle.defaultValue("run"), TestSparkIcons.runTest)
+        val runTestButton = JButton(PluginLabelsBundle.get("run"), TestSparkIcons.runTest)
         runTestButton.isOpaque = false
         runTestButton.isContentAreaFilled = false
         runTestButton.isBorderPainted = true
@@ -659,8 +662,7 @@ class TestCasePanelFactory(
      */
     private fun updateTestCaseInformation() {
         testCase.testName =
-            project.service<JavaClassBuilderService>()
-                .getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
+            JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 }

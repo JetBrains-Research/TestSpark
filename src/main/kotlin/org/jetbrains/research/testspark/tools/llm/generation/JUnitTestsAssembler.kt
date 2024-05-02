@@ -5,7 +5,7 @@ import com.google.gson.JsonParser
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -13,9 +13,9 @@ import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.isProcessStopped
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
 
 /**
@@ -31,8 +31,8 @@ class JUnitTestsAssembler(
     val indicator: CustomProgressIndicator,
     val generationData: TestGenerationData,
 ) : TestsAssembler() {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
     private val log: Logger = Logger.getInstance(this.javaClass)
 
@@ -58,7 +58,7 @@ class JUnitTestsAssembler(
      */
     fun consume(httpRequest: HttpRequests.Request) {
         while (true) {
-            if (isProcessStopped(project, indicator)) return
+            if (ToolUtils.isProcessStopped(project, indicator)) return
 
             Thread.sleep(50L)
             var text = httpRequest.reader.readLine()
@@ -89,13 +89,13 @@ class JUnitTestsAssembler(
         val generatedTestsCount = super.getContent().split("@Test").size - 1
 
         if (lastTestCount != generatedTestsCount) {
-            indicator.setText(TestSparkBundle.message("generatingTestNumber") + generatedTestsCount)
+            indicator.setText(PluginMessagesBundle.get("generatingTestNumber") + generatedTestsCount)
             lastTestCount = generatedTestsCount
         }
     }
 
     override fun assembleTestSuite(packageName: String): TestSuiteGeneratedByLLM? {
-        val junitVersion = settingsState.junitVersion
+        val junitVersion = llmSettingsState.junitVersion
 
         val parser = createTestSuiteParser(packageName, junitVersion)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(super.getContent())

@@ -3,7 +3,8 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
@@ -16,21 +17,16 @@ import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
-import org.jetbrains.research.testspark.tools.generatedTests.TestProcessor
-import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.isProcessStopped
+import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
-import org.jetbrains.research.testspark.tools.saveData
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import org.jetbrains.research.testspark.tools.transferToIJTestCases
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -48,8 +44,8 @@ class LLMProcessManager(
     private val promptManager: PromptManager,
     private val testSamplesCode: String,
 ) : ProcessManager {
-    private val settingsState: SettingsApplicationState
-        get() = project.getService(SettingsApplicationService::class.java).state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
     private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
@@ -73,26 +69,26 @@ class LLMProcessManager(
     ): UIContext? {
         log.info("LLM test generation begins")
 
-        if (isProcessStopped(project, indicator)) return null
+        if (ToolUtils.isProcessStopped(project, indicator)) return null
 
         // update build path
         var buildPath = projectContext.projectClassPath!!
-        if (project.service<SettingsProjectService>().state.buildPath.isEmpty()) {
+        if (project.service<PluginSettingsService>().state.buildPath.isEmpty()) {
             // User did not set own path
-            buildPath = getBuildPath(project)
+            buildPath = ToolUtils.getBuildPath(project)
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
-            llmErrorManager.errorProcess(TestSparkBundle.message("emptyBuildPath"), project)
+            llmErrorManager.errorProcess(LLMMessagesBundle.get("emptyBuildPath"), project)
             return null
         }
-        indicator.setText(TestSparkBundle.message("searchMessage"))
+        indicator.setText(PluginMessagesBundle.get("searchMessage"))
 
         val report = IJReport()
 
         val initialPromptMessage = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
-        val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, settingsState.junitVersion)
+        val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion)
 
         // initiate a new RequestManager
         val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
@@ -146,16 +142,16 @@ class LLMProcessManager(
         val feedbackResponse = llmFeedbackCycle.run { warning ->
             when (warning) {
                 LLMWithFeedbackCycle.WarningType.TEST_SUITE_PARSING_FAILED ->
-                    llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse"), project)
+                    llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
                 LLMWithFeedbackCycle.WarningType.NO_TEST_CASES_GENERATED ->
-                    llmErrorManager.warningProcess(TestSparkBundle.message("emptyResponse"), project)
+                    llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
                 LLMWithFeedbackCycle.WarningType.COMPILATION_ERROR_OCCURRED ->
-                    llmErrorManager.warningProcess(TestSparkBundle.message("compilationError"), project)
+                    llmErrorManager.warningProcess(LLMMessagesBundle.get("compilationError"), project)
             }
         }
 
         // Process stopped checking
-        if (isProcessStopped(project, indicator)) return null
+        if (ToolUtils.isProcessStopped(project, indicator)) return null
         log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
 
         when (feedbackResponse.executionResult) {
@@ -165,22 +161,22 @@ class LLMProcessManager(
                 generatedTestsData.compilableTestCases.addAll(feedbackResponse.compilableTestCases)
             }
             FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED -> {
-                llmErrorManager.errorProcess(TestSparkBundle.message("invalidLLMResult"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project)
             }
             FeedbackCycleExecutionResult.CANCELED -> {
                 log.info("Process stopped")
                 return null
             }
             FeedbackCycleExecutionResult.PROVIDED_PROMPT_TOO_LONG -> {
-                llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPromptRequest"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("tooLongPromptRequest"), project)
                 return null
             }
             FeedbackCycleExecutionResult.SAVING_TEST_FILES_ISSUE -> {
-                llmErrorManager.errorProcess(TestSparkBundle.message("savingTestFileIssue"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("savingTestFileIssue"), project)
             }
         }
 
-        if (isProcessStopped(project, indicator)) return null
+        if (ToolUtils.isProcessStopped(project, indicator)) return null
 
         // Error during the collecting
         if (project.service<ErrorService>().isErrorOccurred()) return null
@@ -192,13 +188,13 @@ class LLMProcessManager(
         val testSuiteRepresentation =
             if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null
 
-        transferToIJTestCases(report)
+        ToolUtils.transferToIJTestCases(report)
 
-        saveData(
+        ToolUtils.saveData(
             project,
             report,
-            getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation),
-            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
+            ToolUtils.getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation),
+            ToolUtils.getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
             projectContext.fileUrlAsString!!,
             generatedTestsData,
         )
