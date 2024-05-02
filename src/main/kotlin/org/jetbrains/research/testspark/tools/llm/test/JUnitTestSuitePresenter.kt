@@ -1,15 +1,14 @@
 package org.jetbrains.research.testspark.tools.llm.test
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.services.JavaClassBuilderService
+import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 
 class JUnitTestSuitePresenter(
     private val project: Project,
-    val generatedTestsData: TestGenerationData,
+    private val generatedTestsData: TestGenerationData,
 ) {
     /**
      * Returns a string representation of this object.
@@ -35,7 +34,8 @@ class JUnitTestSuitePresenter(
             // Add each test
             testCases.forEach { testCase -> testBody += "$testCase\n" }
 
-            project.service<JavaClassBuilderService>().generateCode(
+            JavaClassBuilderHelper.generateCode(
+                project,
                 testFileName,
                 testBody,
                 imports,
@@ -57,7 +57,8 @@ class JUnitTestSuitePresenter(
         testCaseIndex: Int,
     ): String =
         testSuite.run {
-            project.service<JavaClassBuilderService>().generateCode(
+            JavaClassBuilderHelper.generateCode(
+                project,
                 getClassWithTestCaseName(testCases[testCaseIndex].name),
                 testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
                 imports,
@@ -80,7 +81,8 @@ class JUnitTestSuitePresenter(
             // Add each test (exclude expected exception)
             testCases.forEach { testCase -> testBody += "${testCase.toStringWithoutExpectedException()}\n" }
 
-            project.service<JavaClassBuilderService>().generateCode(
+            JavaClassBuilderHelper.generateCode(
+                project,
                 testFileName,
                 testBody,
                 imports,
