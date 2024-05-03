@@ -18,7 +18,7 @@ import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
-import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.display.utils.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService

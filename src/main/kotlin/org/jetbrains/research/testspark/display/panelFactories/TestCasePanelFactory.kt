@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.panelFactories
 
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
@@ -29,6 +29,10 @@ import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.utils.IconButtonCreator
+import org.jetbrains.research.testspark.display.utils.ModifiedLinesGetter
+import org.jetbrains.research.testspark.display.utils.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper

@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.panelFactories
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
@@ -9,6 +9,8 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.display.utils.IconButtonCreator
+import org.jetbrains.research.testspark.display.utils.TestSparkIcons
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Dimension
 import java.util.LinkedList

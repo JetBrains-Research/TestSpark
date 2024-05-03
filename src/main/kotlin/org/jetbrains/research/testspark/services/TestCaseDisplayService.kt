@@ -32,8 +32,8 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.TestCasePanelFactory
-import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
+import org.jetbrains.research.testspark.display.panelFactories.TestCasePanelFactory
+import org.jetbrains.research.testspark.display.panelFactories.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper
 import java.awt.BorderLayout

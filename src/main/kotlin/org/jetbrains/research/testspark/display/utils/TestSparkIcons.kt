@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.utils
 
 import com.intellij.openapi.util.IconLoader
 

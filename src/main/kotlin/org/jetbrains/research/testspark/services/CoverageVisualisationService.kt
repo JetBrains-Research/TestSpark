@@ -17,7 +17,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
-import org.jetbrains.research.testspark.helpers.CoverageHelper
+import org.jetbrains.research.testspark.display.CoverageRenderer
 import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
 import java.awt.Color
 import javax.swing.JScrollPane
@@ -162,7 +162,7 @@ class CoverageVisualisationService(private val project: Project) {
                 val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
                 val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 
-                hl.lineMarkerRenderer = CoverageHelper(
+                hl.lineMarkerRenderer = CoverageRenderer(
                     color,
                     line,
                     testsCoveringLine,
