@@ -210,6 +210,6 @@ class EvoSuiteProcessManager(
             e.printStackTrace()
         }
 
-        return UIContext(projectContext, generatedTestsData, StandardRequestManagerFactory(project).getRequestManager(project),errorMonitor)
+        return UIContext(projectContext, generatedTestsData, StandardRequestManagerFactory(project).getRequestManager(project), errorMonitor)
     }
 }

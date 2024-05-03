@@ -144,7 +144,7 @@ object ToolUtils {
         return false
     }
 
-    fun isProcessCanceled(indicator: CustomProgressIndicator): Boolean{
+    fun isProcessCanceled(indicator: CustomProgressIndicator): Boolean {
         if (indicator.isCanceled()) {
             indicator.stop()
             return true

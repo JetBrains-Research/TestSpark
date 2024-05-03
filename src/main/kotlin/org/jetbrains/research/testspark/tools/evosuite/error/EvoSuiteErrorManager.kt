@@ -10,7 +10,7 @@ import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.template.error.ErrorManager
-import java.util.*
+import java.util.Locale
 
 /**
  * This class represents the error manager for EvoSuite. It provides methods for handling and displaying errors and warnings
