@@ -105,7 +105,7 @@ class CoverageVisualisationTabFactory(private val project: Project) {
                 linesToCover,
                 selectedTests,
                 testReport,
-                project.service<TestCaseDisplayService>().getEditor()!!
+                project.service<TestCaseDisplayService>().getEditor()!!,
             )
         clear()
 
