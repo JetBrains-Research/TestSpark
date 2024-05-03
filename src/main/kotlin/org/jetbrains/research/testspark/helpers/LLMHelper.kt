@@ -10,6 +10,7 @@ import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModificationRequest
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
@@ -208,9 +209,9 @@ object LLMHelper {
      *
      * @return True if the token is set, false otherwise.
      */
-    fun isCorrectToken(project: Project): Boolean {
+    fun isCorrectToken(project: Project, errorMonitor: ErrorMonitor): Boolean {
         if (!SettingsArguments(project).isTokenSet()) {
-            LLMErrorManager().errorProcess(LLMMessagesBundle.get("missingToken"), project)
+            LLMErrorManager().errorProcess(LLMMessagesBundle.get("missingToken"), project, errorMonitor)
             return false
         }
         return true
@@ -234,9 +235,10 @@ object LLMHelper {
         requestManager: RequestManager,
         project: Project,
         testGenerationOutput: TestGenerationData,
+        errorMonitor: ErrorMonitor
     ): TestSuiteGeneratedByLLM? {
         // Update Token information
-        if (!updateToken(requestManager, project)) {
+        if (!updateToken(requestManager, project, errorMonitor)) {
             return null
         }
 
@@ -246,6 +248,7 @@ object LLMHelper {
             indicator,
             requestManager,
             testsAssembler = JUnitTestsAssembler(project, indicator, testGenerationOutput),
+            errorMonitor
         )
         return testSuite
     }
@@ -255,9 +258,9 @@ object LLMHelper {
      *
      * @return True if the token is set, false otherwise.
      */
-    private fun updateToken(requestManager: RequestManager, project: Project): Boolean {
+    private fun updateToken(requestManager: RequestManager, project: Project, errorMonitor: ErrorMonitor): Boolean {
         requestManager.token = SettingsArguments(project).getToken()
-        return isCorrectToken(project)
+        return isCorrectToken(project, errorMonitor)
     }
 
     /**

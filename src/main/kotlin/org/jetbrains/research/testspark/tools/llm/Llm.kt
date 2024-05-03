@@ -86,7 +86,8 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode The code of the test samples.
      */
     override fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController) {
-        if (!LLMHelper.isCorrectToken(project)) {
+        if (!LLMHelper.isCorrectToken(project, runnerController.errorMonitor)) {
+            runnerController.finished()
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
@@ -103,7 +104,8 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode the code of the test samples to use for test generation
      */
     override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController) {
-        if (!LLMHelper.isCorrectToken(project)) {
+        if (!LLMHelper.isCorrectToken(project, runnerController.errorMonitor)) {
+            runnerController.finished()
             return
         }
         val psiMethod: PsiMethod = PsiHelper.getSurroundingMethod(psiFile, caretOffset)!!
@@ -121,7 +123,8 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode The code for the test samples.
      */
     override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController) {
-        if (!LLMHelper.isCorrectToken(project)) {
+        if (!LLMHelper.isCorrectToken(project, runnerController.errorMonitor)) {
+            runnerController.finished()
             return
         }
         val selectedLine: Int = PsiHelper.getSurroundingLine(psiFile, caretOffset)?.plus(1)!!

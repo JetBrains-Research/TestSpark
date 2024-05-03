@@ -21,11 +21,10 @@ import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
-import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import java.util.UUID
+import java.util.*
 
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
@@ -76,7 +75,7 @@ class Pipeline(
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
         clear(project)
-        val projectBuilder = ProjectBuilder(project)
+        val projectBuilder = ProjectBuilder(project, runnerController.errorMonitor)
 
         var uiContext: UIContext? = null
 
@@ -85,10 +84,10 @@ class Pipeline(
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
 
-                    if (ToolUtils.isProcessStopped(project, ijIndicator)) return
+                    if (ToolUtils.isProcessStopped(runnerController.errorMonitor, ijIndicator)) return
 
                     if (projectBuilder.runBuild(ijIndicator)) {
-                        if (ToolUtils.isProcessStopped(project, ijIndicator)) return
+                        if (ToolUtils.isProcessStopped(runnerController.errorMonitor, ijIndicator)) return
 
                         uiContext = processManager.runTestGenerator(
                             ijIndicator,
@@ -96,10 +95,11 @@ class Pipeline(
                             packageName,
                             projectContext,
                             generatedTestsData,
+                            runnerController.errorMonitor,
                         )
                     }
 
-                    if (ToolUtils.isProcessStopped(project, ijIndicator)) return
+                    if (ToolUtils.isProcessStopped(runnerController.errorMonitor, ijIndicator)) return
 
                     ijIndicator.stop()
                 }
@@ -121,8 +121,8 @@ class Pipeline(
     }
 
     private fun clear(project: Project) { // should be removed totally!
+        runnerController.errorMonitor.clear()
         project.service<TestCaseDisplayService>().clear()
-        project.service<ErrorService>().clear()
         project.service<CoverageVisualisationService>().clear()
         project.service<TestsExecutionResultService>().clear()
     }

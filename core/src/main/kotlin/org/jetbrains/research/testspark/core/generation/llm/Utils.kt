@@ -1,10 +1,11 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import java.util.Locale
+import java.util.*
 
 // TODO: find a better place for the below functions
 
@@ -41,6 +42,8 @@ fun executeTestCaseModificationRequest(
     indicator: CustomProgressIndicator,
     requestManager: RequestManager,
     testsAssembler: TestsAssembler,
+//    errorMonitor: ErrorMonitor = DefaultErrorMonitor()
+    errorMonitor: ErrorMonitor
 ): TestSuiteGeneratedByLLM? {
     // Update Token information
     val prompt = "For this test:\n ```\n $testCase\n ```\nPerform the following task: $task"
@@ -61,6 +64,7 @@ fun executeTestCaseModificationRequest(
         packageName,
         testsAssembler,
         isUserFeedback = true,
+        errorMonitor
     )
 
     return response.testSuite
