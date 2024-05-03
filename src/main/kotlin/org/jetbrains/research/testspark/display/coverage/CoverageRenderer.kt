@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.coverage
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.hint.HintManagerImpl

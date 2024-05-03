@@ -19,8 +19,6 @@ import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.PsiHelper
-import org.jetbrains.research.testspark.services.CoverageVisualisationService
-import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -110,10 +108,10 @@ class Pipeline(
                     uiContext?.let {
                         project.service<TestCaseDisplayService>().updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
 
-                        if (project.service<EditorService>().editor != null) {
+                        if (project.service<TestCaseDisplayService>().getEditor() != null) {
                             val report = it.testGenerationOutput.testGenerationResultList[0]!!
                             project.service<TestCaseDisplayService>().displayTestCases(report, it)
-                            project.service<CoverageVisualisationService>().showCoverage(report)
+                            project.service<TestCaseDisplayService>().getCoverageVisualisationTabFactory().showCoverage(report)
                         }
                     }
                 }
@@ -123,7 +121,6 @@ class Pipeline(
     private fun clear(project: Project) { // should be removed totally!
         project.service<TestCaseDisplayService>().clear()
         project.service<ErrorService>().clear()
-        project.service<CoverageVisualisationService>().clear()
         project.service<TestsExecutionResultService>().clear()
     }
 }

@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.services
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -32,6 +33,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.panelFactories.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.panelFactories.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
@@ -74,6 +76,10 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var testsSelected: Int = 0
 
+    private var editor: Editor? = null
+
+    private val coverageVisualisationTabFactory = CoverageVisualisationTabFactory(project)
+
     /**
      * Default color for the editors in the tool window
      */
@@ -89,7 +95,7 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private var content: Content? = null
 
-    var uiContext: UIContext? = null
+    private var uiContext: UIContext? = null
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -112,8 +118,6 @@ class TestCaseDisplayService(private val project: Project) {
     fun displayTestCases(report: Report, uiContext: UIContext) {
         this.report = report
         this.uiContext = uiContext
-
-        val editor = project.service<EditorService>().editor!!
 
         allTestCasePanel.removeAll()
         testCasePanels.clear()
@@ -145,7 +149,7 @@ class TestCaseDisplayService(private val project: Project) {
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext, report)
+            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor!!, checkbox, uiContext, report)
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
@@ -170,14 +174,8 @@ class TestCaseDisplayService(private val project: Project) {
         createToolWindowTab()
     }
 
-    /**
-     * Adds a separator to the allTestCasePanel.
-     */
-    private fun addSeparator() {
-        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
-        allTestCasePanel.add(JSeparator(SwingConstants.HORIZONTAL))
-        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
-    }
+    // returns coverageVisualisationTabFactory
+    fun getCoverageVisualisationTabFactory() = coverageVisualisationTabFactory
 
     /**
      * Highlight the mini-editor in the tool window whose name corresponds with the name of the test provided
@@ -189,7 +187,7 @@ class TestCaseDisplayService(private val project: Project) {
         openToolWindowTab()
         scrollToPanel(myPanel)
 
-        val editor = getEditor(name) ?: return
+        val editor = getEditorTextField(name) ?: return
         val settingsProjectState = project.service<PluginSettingsService>().state
         val highlightColor =
             JBColor(
@@ -205,6 +203,124 @@ class TestCaseDisplayService(private val project: Project) {
         defaultEditorColor = editor.background
         editor.background = highlightColor
         returnOriginalEditorBackground(editor)
+    }
+
+    /**
+     * Highlight a range of editors
+     * @param names list of test names to pass to highlight function
+     */
+    fun highlightCoveredMutants(names: List<String>) {
+        names.forEach {
+            highlightTestCase(it)
+        }
+    }
+
+    fun getEditor() = editor
+
+    /**
+     * Retrieve the editor corresponding to a particular test case
+     *
+     * @param testCaseName the name of the test case
+     * @return the editor corresponding to the test case, or null if it does not exist
+     */
+    fun getEditorTextField(testCaseName: String): EditorTextField? {
+        val middlePanelComponent = testCasePanels[testCaseName]?.getComponent(2) ?: return null
+        val middlePanel = middlePanelComponent as JPanel
+        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
+    }
+
+    /**
+     * Utility function that returns the editor for a specific file url,
+     * in case it is opened in the IDE
+     */
+    fun updateEditorForFileUrl(fileUrl: String) {
+        val documentManager = FileDocumentManager.getInstance()
+        // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
+        FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
+            val currentFile = documentManager.getFile(it.document)
+            if (currentFile != null) {
+                if (currentFile.presentableUrl == fileUrl) {
+                    editor = it
+                }
+            }
+        }
+    }
+
+    fun clear() {
+        // Remove the tests
+        val testCasePanelsToRemove = testCasePanels.toMap()
+        removeSelectedTestCases(testCasePanelsToRemove)
+
+        topButtonsPanelFactory.clear()
+        coverageVisualisationTabFactory.clear()
+    }
+
+    /**
+     * A helper method to remove a test case from the cache and from the UI.
+     *
+     * @param testCaseName the name of the test
+     */
+    fun removeTestCase(testCaseName: String) {
+        // Update the number of selected test cases if necessary
+        if ((testCasePanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
+            testsSelected--
+        }
+
+        // Remove the test panel from the UI
+        allTestCasePanel.remove(testCasePanels[testCaseName])
+
+        // Remove the test panel
+        testCasePanels.remove(testCaseName)
+    }
+
+    /**
+     * Updates the user interface of the tool window.
+     *
+     * This method updates the UI of the tool window tab by calling the updateUI
+     * method of the allTestCasePanel object and the updateTopLabels method
+     * of the topButtonsPanel object. It also checks if there are no more tests remaining
+     * and closes the tool window if that is the case.
+     */
+    fun updateUI() {
+        // Update the UI of the tool window tab
+        allTestCasePanel.updateUI()
+
+        topButtonsPanelFactory.updateTopLabels()
+
+        // If no more tests are remaining, close the tool window
+        if (testCasePanels.size == 0) closeToolWindow()
+    }
+
+    /**
+     * Retrieves the list of test case panels.
+     *
+     * @return The list of test case panels.
+     */
+    fun getTestCasePanels() = testCasePanels
+
+    /**
+     * Retrieves the currently selected tests.
+     *
+     * @return The list of tests currently selected.
+     */
+    fun getTestsSelected() = testsSelected
+
+    /**
+     * Sets the number of tests selected.
+     *
+     * @param testsSelected The number of tests selected.
+     */
+    fun setTestsSelected(testsSelected: Int) {
+        this.testsSelected = testsSelected
+    }
+
+    /**
+     * Adds a separator to the allTestCasePanel.
+     */
+    private fun addSeparator() {
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
+        allTestCasePanel.add(JSeparator(SwingConstants.HORIZONTAL))
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
     }
 
     /**
@@ -241,7 +357,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Removes all coverage highlighting from the editor.
      */
     private fun removeAllHighlights() {
-        project.service<EditorService>().editor?.markupModel?.removeAllHighlighters()
+        editor?.markupModel?.removeAllHighlighters()
     }
 
     /**
@@ -256,16 +372,6 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Highlight a range of editors
-     * @param names list of test names to pass to highlight function
-     */
-    fun highlightCoveredMutants(names: List<String>) {
-        names.forEach {
-            highlightTestCase(it)
-        }
-    }
-
-    /**
      * Show a dialog where the user can select what test class the tests should be applied to,
      * and apply the selected tests to the test class.
      */
@@ -276,7 +382,7 @@ class TestCaseDisplayService(private val project: Project) {
 
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
-            .map { getEditor(it)!! }
+            .map { getEditorTextField(it)!! }
             .map { it.document.text }
 
         // Descriptor for choosing folders and java files
@@ -286,17 +392,17 @@ class TestCaseDisplayService(private val project: Project) {
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
                 file.isDirectory || (
-                    file.extension?.lowercase(Locale.getDefault()) == "java" && (
-                        PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
-                        ).classes.stream().map { it.name }
-                        .toArray()
-                        .contains(
-                            (
-                                PsiManager.getInstance(project)
-                                    .findFile(file) as PsiJavaFile
-                                ).name.removeSuffix(".java"),
+                        file.extension?.lowercase(Locale.getDefault()) == "java" && (
+                                PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                                ).classes.stream().map { it.name }
+                            .toArray()
+                            .contains(
+                                (
+                                        PsiManager.getInstance(project)
+                                            .findFile(file) as PsiJavaFile
+                                        ).name.removeSuffix(".java"),
+                            )
                         )
-                    )
             }
         }
 
@@ -421,18 +527,6 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Retrieve the editor corresponding to a particular test case
-     *
-     * @param testCaseName the name of the test case
-     * @return the editor corresponding to the test case, or null if it does not exist
-     */
-    fun getEditor(testCaseName: String): EditorTextField? {
-        val middlePanelComponent = testCasePanels[testCaseName]?.getComponent(2) ?: return null
-        val middlePanel = middlePanelComponent as JPanel
-        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
-    }
-
-    /**
      * Append the provided test cases to the provided class.
      *
      * @param testCaseComponents the test cases to be appended
@@ -490,23 +584,6 @@ class TestCaseDisplayService(private val project: Project) {
     }
 
     /**
-     * Utility function that returns the editor for a specific file url,
-     * in case it is opened in the IDE
-     */
-    fun updateEditorForFileUrl(fileUrl: String) {
-        val documentManager = FileDocumentManager.getInstance()
-        // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
-        FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
-            val currentFile = documentManager.getFile(it.document)
-            if (currentFile != null) {
-                if (currentFile.presentableUrl == fileUrl) {
-                    project.service<EditorService>().editor = it
-                }
-            }
-        }
-    }
-
-    /**
      * Creates a new toolWindow tab for the coverage visualisation.
      */
     private fun createToolWindowTab() {
@@ -537,8 +614,7 @@ class TestCaseDisplayService(private val project: Project) {
     private fun closeToolWindow() {
         contentManager?.removeContent(content!!, true)
         ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
-        val coverageVisualisationService = project.service<CoverageVisualisationService>()
-        coverageVisualisationService.closeToolWindowTab()
+        coverageVisualisationTabFactory.closeToolWindowTab()
     }
 
     /**
@@ -552,72 +628,5 @@ class TestCaseDisplayService(private val project: Project) {
         selectedTestCasePanels.forEach { removeTestCase(it.key) }
         removeAllHighlights()
         closeToolWindow()
-    }
-
-    fun clear() {
-        // Remove the tests
-        val testCasePanelsToRemove = testCasePanels.toMap()
-        removeSelectedTestCases(testCasePanelsToRemove)
-
-        topButtonsPanelFactory.clear()
-    }
-
-    /**
-     * A helper method to remove a test case from the cache and from the UI.
-     *
-     * @param testCaseName the name of the test
-     */
-    fun removeTestCase(testCaseName: String) {
-        // Update the number of selected test cases if necessary
-        if ((testCasePanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
-            testsSelected--
-        }
-
-        // Remove the test panel from the UI
-        allTestCasePanel.remove(testCasePanels[testCaseName])
-
-        // Remove the test panel
-        testCasePanels.remove(testCaseName)
-    }
-
-    /**
-     * Updates the user interface of the tool window.
-     *
-     * This method updates the UI of the tool window tab by calling the updateUI
-     * method of the allTestCasePanel object and the updateTopLabels method
-     * of the topButtonsPanel object. It also checks if there are no more tests remaining
-     * and closes the tool window if that is the case.
-     */
-    fun updateUI() {
-        // Update the UI of the tool window tab
-        allTestCasePanel.updateUI()
-
-        topButtonsPanelFactory.updateTopLabels()
-
-        // If no more tests are remaining, close the tool window
-        if (testCasePanels.size == 0) closeToolWindow()
-    }
-
-    /**
-     * Retrieves the list of test case panels.
-     *
-     * @return The list of test case panels.
-     */
-    fun getTestCasePanels() = testCasePanels
-
-    /**
-     * Retrieves the currently selected tests.
-     *
-     * @return The list of tests currently selected.
-     */
-    fun getTestsSelected() = testsSelected
-
-    /**
-     * Sets the number of tests selected.
-     *
-     * @param testsSelected The number of tests selected.
-     */
-    fun setTestsSelected(testsSelected: Int) {
-        this.testsSelected = testsSelected
     }
 }

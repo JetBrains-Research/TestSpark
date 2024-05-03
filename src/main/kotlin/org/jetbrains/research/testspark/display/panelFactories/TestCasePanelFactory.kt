@@ -197,7 +197,7 @@ class TestCasePanelFactory(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    project.service<TestCaseDisplayService>().getEditor(testCase.testName)!!.document.text,
+                    project.service<TestCaseDisplayService>().getEditorTextField(testCase.testName)!!.document.text,
                 ),
                 null,
             )

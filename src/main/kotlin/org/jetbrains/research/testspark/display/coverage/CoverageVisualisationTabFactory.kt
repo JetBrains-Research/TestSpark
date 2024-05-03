@@ -1,6 +1,5 @@
-package org.jetbrains.research.testspark.services
+package org.jetbrains.research.testspark.display.coverage
 
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -17,8 +16,9 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
-import org.jetbrains.research.testspark.display.CoverageRenderer
 import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
+import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Color
 import javax.swing.JScrollPane
 import kotlin.math.roundToInt
@@ -28,8 +28,7 @@ import kotlin.math.roundToInt
  *
  * @param project the project
  */
-@Service(Service.Level.PROJECT)
-class CoverageVisualisationService(private val project: Project) {
+class CoverageVisualisationTabFactory(private val project: Project) {
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -102,7 +101,12 @@ class CoverageVisualisationService(private val project: Project) {
         testReport: Report,
     ) {
         currentHighlightedData =
-            HighlightedData(linesToCover, selectedTests, testReport, project.service<EditorService>().editor!!)
+            HighlightedData(
+                linesToCover,
+                selectedTests,
+                testReport,
+                project.service<TestCaseDisplayService>().getEditor()!!
+            )
         clear()
 
         val settingsProjectState = project.service<PluginSettingsService>().state
@@ -150,7 +154,7 @@ class CoverageVisualisationService(private val project: Project) {
             for (i in linesToCover) {
                 val line = i - 1
 
-                val hl = project.service<EditorService>().editor!!.markupModel.addLineHighlighter(
+                val hl = project.service<TestCaseDisplayService>().getEditor()!!.markupModel.addLineHighlighter(
                     line,
                     HighlighterLayer.ADDITIONAL_SYNTAX,
                     textAttribute,
@@ -173,6 +177,13 @@ class CoverageVisualisationService(private val project: Project) {
                 )
             }
         }
+    }
+
+    /**
+     * Closes the toolWindow tab for the coverage visualisation
+     */
+    fun closeToolWindowTab() {
+        contentManager?.removeContent(content!!, true)
     }
 
     private fun getCoveringLines(testReport: Report, selectedTests: HashSet<Int>, lineNumber: Int): List<String> {
@@ -255,12 +266,5 @@ class CoverageVisualisationService(private val project: Project) {
             true,
         )
         contentManager!!.addContent(content!!)
-    }
-
-    /**
-     * Closes the toolWindow tab for the coverage visualisation
-     */
-    fun closeToolWindowTab() {
-        contentManager?.removeContent(content!!, true)
     }
 }

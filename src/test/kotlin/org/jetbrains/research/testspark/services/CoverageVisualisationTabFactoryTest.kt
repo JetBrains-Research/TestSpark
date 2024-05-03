@@ -13,6 +13,7 @@ import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.shaded.org.mockito.Mockito
 import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.data.IJReport
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -20,9 +21,9 @@ import org.junit.jupiter.params.provider.Arguments
 import java.util.stream.Stream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
+class CoverageVisualisationTabFactoryTest : LightJavaCodeInsightFixtureTestCase() {
 
-    private lateinit var coverageVisualisationService: CoverageVisualisationService
+    private lateinit var coverageVisualisationService: CoverageVisualisationTabFactory
     private val myEditor = Mockito.mock(Editor::class.java)
 
     private val branch1 = Mockito.mock(BranchInfo::class.java)
