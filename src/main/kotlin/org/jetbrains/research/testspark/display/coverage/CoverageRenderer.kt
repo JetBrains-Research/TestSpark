@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.display.coverage
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.hint.HintManagerImpl
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ex.EditorGutterComponentEx
@@ -16,7 +15,6 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import java.awt.Color
 import java.awt.Dimension
@@ -130,9 +128,7 @@ class CoverageRenderer(
      * @param name name of the test to highlight
      */
     private fun highlightInToolwindow(name: String) {
-        val testCaseDisplayService = project.service<TestCaseDisplayService>()
-
-        testCaseDisplayService.highlightTestCase(name)
+        testSparkDisplayFactory.highlightTestCase(name)
     }
 
     /**
@@ -141,9 +137,7 @@ class CoverageRenderer(
      * @param map map of mutant operations -> List of names of tests which cover the mutants
      */
     private fun highlightMutantsInToolwindow(mutantName: String, map: HashMap<String, MutableList<String>>) {
-        val testCaseDisplayService = project.service<TestCaseDisplayService>()
-
-        testCaseDisplayService.highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
+        testSparkDisplayFactory.highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
     }
 
     /**

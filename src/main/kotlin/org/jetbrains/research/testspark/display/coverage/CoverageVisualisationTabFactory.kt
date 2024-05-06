@@ -18,7 +18,6 @@ import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Color
 import javax.swing.JScrollPane
 import kotlin.math.roundToInt
@@ -28,7 +27,7 @@ import kotlin.math.roundToInt
  *
  * @param project the project
  */
-class CoverageVisualisationTabFactory(private val project: Project) {
+class CoverageVisualisationTabFactory(private val project: Project, private val editor: Editor) {
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -64,13 +63,6 @@ class CoverageVisualisationTabFactory(private val project: Project) {
     }
 
     /**
-     * Retrieves the current highlighted data.
-     *
-     * @return The current highlighted data, or null if there is no highlighted data.
-     */
-    fun getCurrentHighlightedData(): HighlightedData? = currentHighlightedData
-
-    /**
      * Instantiates tab for coverage table and calls function to update coverage.
      *
      * @param testReport the generated tests summary
@@ -100,13 +92,7 @@ class CoverageVisualisationTabFactory(private val project: Project) {
         selectedTests: HashSet<Int>,
         testReport: Report,
     ) {
-        currentHighlightedData =
-            HighlightedData(
-                linesToCover,
-                selectedTests,
-                testReport,
-                project.service<TestCaseDisplayService>().getEditor()!!,
-            )
+        currentHighlightedData = HighlightedData(linesToCover, selectedTests, testReport, editor)
         clear()
 
         val settingsProjectState = project.service<PluginSettingsService>().state
@@ -154,7 +140,7 @@ class CoverageVisualisationTabFactory(private val project: Project) {
             for (i in linesToCover) {
                 val line = i - 1
 
-                val hl = project.service<TestCaseDisplayService>().getEditor()!!.markupModel.addLineHighlighter(
+                val hl = editor.markupModel.addLineHighlighter(
                     line,
                     HighlighterLayer.ADDITIONAL_SYNTAX,
                     textAttribute,

@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.display.panelFactories
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -11,7 +10,6 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.utils.IconButtonCreator
 import org.jetbrains.research.testspark.display.utils.TestSparkIcons
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import java.awt.Dimension
 import java.util.LinkedList
 import java.util.Queue
@@ -76,14 +74,14 @@ class TopButtonsPanelFactory(private val project: Project) {
         }
         testsSelectedLabel.text = String.format(
             testsSelectedText,
-            project.service<TestCaseDisplayService>().getTestsSelected(),
-            project.service<TestCaseDisplayService>().getTestCasePanels().size,
+            testSparkDisplayFactory.getTestsSelected(),
+            testSparkDisplayFactory.getTestCasePanels().size,
         )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 numberOfPassedTests,
-                project.service<TestCaseDisplayService>().getTestCasePanels().size,
+                testSparkDisplayFactory.getTestCasePanels().size,
             )
         runAllButton.isEnabled = false
         for (testCasePanelFactory in testCasePanelFactories) {
@@ -107,12 +105,11 @@ class TopButtonsPanelFactory(private val project: Project) {
      *  @param selected whether the checkboxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean) {
-        project.service<TestCaseDisplayService>().getTestCasePanels().forEach { (_, jPanel) ->
+        testSparkDisplayFactory.getTestCasePanels().forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
-        project.service<TestCaseDisplayService>()
-            .setTestsSelected(if (selected) project.service<TestCaseDisplayService>().getTestCasePanels().size else 0)
+        testSparkDisplayFactory.setTestsSelected(if (selected) testSparkDisplayFactory.getTestCasePanels().size else 0)
     }
 
     /**
@@ -131,7 +128,7 @@ class TopButtonsPanelFactory(private val project: Project) {
         // Cancel the operation if the user did not press "Yes"
         if (choice == JOptionPane.NO_OPTION) return
 
-        project.service<TestCaseDisplayService>().clear()
+        testSparkDisplayFactory.clear()
     }
 
     /**

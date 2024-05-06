@@ -1,15 +1,12 @@
-package org.jetbrains.research.testspark.services
+package org.jetbrains.research.testspark.display
 
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
-import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
-import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
@@ -37,7 +34,8 @@ import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTa
 import org.jetbrains.research.testspark.display.panelFactories.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.panelFactories.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
-import org.jetbrains.research.testspark.helpers.ReportHelper
+import org.jetbrains.research.testspark.display.utils.ReportUpdater
+import org.jetbrains.research.testspark.services.PluginSettingsService
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -52,8 +50,7 @@ import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
 
-@Service(Service.Level.PROJECT)
-class TestCaseDisplayService(private val project: Project) {
+class TestSparkDisplayFactory(private val project: Project) {
     private var report: Report? = null
 
     private val unselectedTestCases = HashMap<Int, TestCase>()
@@ -78,7 +75,7 @@ class TestCaseDisplayService(private val project: Project) {
 
     private var editor: Editor? = null
 
-    private val coverageVisualisationTabFactory = CoverageVisualisationTabFactory(project)
+    private var coverageVisualisationTabFactory: CoverageVisualisationTabFactory? = null
 
     /**
      * Default color for the editors in the tool window
@@ -115,9 +112,11 @@ class TestCaseDisplayService(private val project: Project) {
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
      */
-    fun displayTestCases(report: Report, uiContext: UIContext) {
+    fun displayTestCases(report: Report, editor: Editor, uiContext: UIContext) {
         this.report = report
+        this.editor = editor
         this.uiContext = uiContext
+        coverageVisualisationTabFactory = CoverageVisualisationTabFactory(project, editor)
 
         allTestCasePanel.removeAll()
         testCasePanels.clear()
@@ -140,16 +139,16 @@ class TestCaseDisplayService(private val project: Project) {
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
                 if (checkbox.isSelected) {
-                    ReportHelper.selectTestCase(project, report, unselectedTestCases, testCase.id)
+                    ReportUpdater.selectTestCase(project, report, unselectedTestCases, testCase.id, coverageVisualisationTabFactory!!)
                 } else {
-                    ReportHelper.unselectTestCase(project, report, unselectedTestCases, testCase.id)
+                    ReportUpdater.unselectTestCase(project, report, unselectedTestCases, testCase.id, coverageVisualisationTabFactory!!)
                 }
 
                 updateUI()
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor!!, checkbox, uiContext, report)
+            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext, report, coverageVisualisationTabFactory!!)
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
@@ -172,10 +171,9 @@ class TestCaseDisplayService(private val project: Project) {
         topButtonsPanelFactory.updateTopLabels()
 
         createToolWindowTab()
-    }
 
-    // returns coverageVisualisationTabFactory
-    fun getCoverageVisualisationTabFactory() = coverageVisualisationTabFactory
+        coverageVisualisationTabFactory!!.showCoverage(report)
+    }
 
     /**
      * Highlight the mini-editor in the tool window whose name corresponds with the name of the test provided
@@ -229,30 +227,13 @@ class TestCaseDisplayService(private val project: Project) {
         return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
     }
 
-    /**
-     * Utility function that returns the editor for a specific file url,
-     * in case it is opened in the IDE
-     */
-    fun updateEditorForFileUrl(fileUrl: String) {
-        val documentManager = FileDocumentManager.getInstance()
-        // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
-        FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
-            val currentFile = documentManager.getFile(it.document)
-            if (currentFile != null) {
-                if (currentFile.presentableUrl == fileUrl) {
-                    editor = it
-                }
-            }
-        }
-    }
-
     fun clear() {
         // Remove the tests
         val testCasePanelsToRemove = testCasePanels.toMap()
         removeSelectedTestCases(testCasePanelsToRemove)
 
         topButtonsPanelFactory.clear()
-        coverageVisualisationTabFactory.clear()
+        coverageVisualisationTabFactory!!.clear()
     }
 
     /**
@@ -614,7 +595,7 @@ class TestCaseDisplayService(private val project: Project) {
     private fun closeToolWindow() {
         contentManager?.removeContent(content!!, true)
         ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
-        coverageVisualisationTabFactory.closeToolWindowTab()
+        coverageVisualisationTabFactory!!.closeToolWindowTab()
     }
 
     /**

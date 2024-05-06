@@ -2,6 +2,10 @@ package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -20,7 +24,7 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
@@ -58,7 +62,8 @@ class Pipeline(
             projectContext.fileUrlAsString = fileUrl
             projectContext.cutPsiClass = cutPsiClass
             projectContext.classFQN = cutPsiClass.qualifiedName!!
-            projectContext.cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
+            projectContext.cutModule =
+                ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
         }
 
         generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
@@ -76,6 +81,7 @@ class Pipeline(
         clear(project)
         val projectBuilder = ProjectBuilder(project)
 
+        var editor: Editor? = null
         var uiContext: UIContext? = null
 
         ProgressManager.getInstance()
@@ -106,20 +112,35 @@ class Pipeline(
                     super.onFinished()
                     runnerController.finished()
                     uiContext?.let {
-                        project.service<TestCaseDisplayService>().updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
+                        updateEditor(it.testGenerationOutput.fileUrl)
 
-                        if (project.service<TestCaseDisplayService>().getEditor() != null) {
-                            val report = it.testGenerationOutput.testGenerationResultList[0]!!
-                            project.service<TestCaseDisplayService>().displayTestCases(report, it)
-                            project.service<TestCaseDisplayService>().getCoverageVisualisationTabFactory().showCoverage(report)
+                        if (editor != null) {
+                            TestSparkDisplayFactory(project).displayTestCases(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it)
                         }
                     }
+                }
+
+                /**
+                 * Utility function that returns the editor for a specific file url,
+                 * in case it is opened in the IDE
+                 */
+                private fun updateEditor(fileUrl: String) {
+                    val documentManager = FileDocumentManager.getInstance()
+                    // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
+                    FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }
+                        .map {
+                            val currentFile = documentManager.getFile(it.document)
+                            if (currentFile != null) {
+                                if (currentFile.presentableUrl == fileUrl) {
+                                    editor = it
+                                }
+                            }
+                        }
                 }
             })
     }
 
     private fun clear(project: Project) { // should be removed totally!
-        project.service<TestCaseDisplayService>().clear()
         project.service<ErrorService>().clear()
         project.service<TestsExecutionResultService>().clear()
     }

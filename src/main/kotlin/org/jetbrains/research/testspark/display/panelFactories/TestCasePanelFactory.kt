@@ -28,6 +28,7 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.utils.IconButtonCreator
@@ -35,10 +36,9 @@ import org.jetbrains.research.testspark.display.utils.ModifiedLinesGetter
 import org.jetbrains.research.testspark.display.utils.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
-import org.jetbrains.research.testspark.helpers.ReportHelper
+import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestProcessor
@@ -68,6 +68,7 @@ class TestCasePanelFactory(
     private val checkbox: JCheckBox,
     val uiContext: UIContext?,
     val report: Report,
+    private val coverageVisualisationTabFactory: CoverageVisualisationTabFactory,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -197,7 +198,7 @@ class TestCasePanelFactory(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    project.service<TestCaseDisplayService>().getEditorTextField(testCase.testName)!!.document.text,
+                    testSparkDisplayFactory.getEditorTextField(testCase.testName)!!.document.text,
                 ),
                 null,
             )
@@ -389,8 +390,8 @@ class TestCasePanelFactory(
             testCase.coveredLines = setOf()
         }
 
-        ReportHelper.updateTestCase(project, report, testCase)
-        project.service<TestCaseDisplayService>().updateUI()
+        ReportUpdater.updateTestCase(project, report, testCase, coverageVisualisationTabFactory)
+        testSparkDisplayFactory.updateUI()
     }
 
     /**
@@ -587,13 +588,13 @@ class TestCasePanelFactory(
      */
     private fun remove() {
         // Remove the test case from the cache
-        project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
+        testSparkDisplayFactory.removeTestCase(testCase.testName)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportHelper.removeTestCase(project, report, testCase)
-        project.service<TestCaseDisplayService>().updateUI()
+        ReportUpdater.removeTestCase(project, report, testCase, coverageVisualisationTabFactory)
+        testSparkDisplayFactory.updateUI()
     }
 
     /**
