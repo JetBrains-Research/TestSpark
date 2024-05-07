@@ -31,8 +31,8 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
-import org.jetbrains.research.testspark.display.panelFactories.TestCasePanelFactory
-import org.jetbrains.research.testspark.display.panelFactories.TopButtonsPanelFactory
+import org.jetbrains.research.testspark.display.generatedTestsTab.TestCasePanelFactory
+import org.jetbrains.research.testspark.display.generatedTestsTab.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.services.PluginSettingsService
@@ -57,7 +57,7 @@ class TestSparkDisplayFactory(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
 
-    private val topButtonsPanelFactory = TopButtonsPanelFactory(project)
+    private val topButtonsPanelFactory = TopButtonsPanelFactory(project, this)
 
     private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
@@ -116,7 +116,7 @@ class TestSparkDisplayFactory(private val project: Project) {
         this.report = report
         this.editor = editor
         this.uiContext = uiContext
-        coverageVisualisationTabFactory = CoverageVisualisationTabFactory(project, editor)
+        coverageVisualisationTabFactory = CoverageVisualisationTabFactory(project, editor, this)
 
         allTestCasePanel.removeAll()
         testCasePanels.clear()
@@ -148,7 +148,7 @@ class TestSparkDisplayFactory(private val project: Project) {
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext, report, coverageVisualisationTabFactory!!)
+            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext, report, coverageVisualisationTabFactory!!, this)
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)

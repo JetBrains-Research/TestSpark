@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display.panelFactories
+package org.jetbrains.research.testspark.display.generatedTestsTab
 
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
@@ -28,6 +28,7 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
@@ -69,6 +70,7 @@ class TestCasePanelFactory(
     val uiContext: UIContext?,
     val report: Report,
     private val coverageVisualisationTabFactory: CoverageVisualisationTabFactory,
+    private val testSparkDisplayFactory: TestSparkDisplayFactory,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
