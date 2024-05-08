@@ -138,7 +138,7 @@ class LLMProcessManager(
             testsPresenter = testsPresenter,
             indicator = indicator,
             requestsCountThreshold = maxRequests,
-            errorMonitor = errorMonitor
+            errorMonitor = errorMonitor,
         )
 
         val feedbackResponse = llmFeedbackCycle.run { warning ->

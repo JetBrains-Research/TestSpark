@@ -24,6 +24,6 @@ interface ProcessManager {
         packageName: String,
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
-        errorMonitor: ErrorMonitor
+        errorMonitor: ErrorMonitor,
     ): UIContext?
 }

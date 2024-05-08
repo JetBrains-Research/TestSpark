@@ -30,7 +30,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
-        errorMonitor: ErrorMonitor
+        errorMonitor: ErrorMonitor,
     ): SendResult {
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(SettingsArguments(project).getModel(), chatHistory)
@@ -48,7 +48,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
                         llmErrorManager.errorProcess(
                             LLMMessagesBundle.get("serverProblems"),
                             project,
-                            errorMonitor
+                            errorMonitor,
                         )
                         sendResult = SendResult.OTHER
                     }
@@ -65,7 +65,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
                         llmErrorManager.errorProcess(
                             LLMMessagesBundle.get("wrongToken"),
                             project,
-                            errorMonitor
+                            errorMonitor,
                         )
                         sendResult = SendResult.OTHER
                     }
@@ -74,7 +74,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
                         llmErrorManager.errorProcess(
                             llmErrorManager.createRequestErrorMessage(responseCode),
                             project,
-                            errorMonitor
+                            errorMonitor,
                         )
                         sendResult = SendResult.OTHER
                     }
