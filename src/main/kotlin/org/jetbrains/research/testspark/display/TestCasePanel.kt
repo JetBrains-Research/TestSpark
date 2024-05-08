@@ -55,7 +55,6 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.MatteBorder
 
-class TestCaseResult(val testCase: TestCase, val error: String?)
 
 class TestCasePanel(
     private val project: Project,
@@ -535,7 +534,7 @@ class TestCasePanel(
 
         testCase.coveredLines = newTestCaseResult.testCase.coveredLines
         _error = newTestCaseResult.error
-        saveErrorForCode( newTestCaseResult.testCase.testCode, newTestCaseResult.error)
+        saveErrorForCode(newTestCaseResult.testCase.testCode, newTestCaseResult.error)
 
         testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
