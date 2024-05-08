@@ -16,6 +16,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
 import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
 import org.jetbrains.research.testspark.services.PluginSettingsService
@@ -28,7 +29,7 @@ import kotlin.math.roundToInt
  *
  * @param project the project
  */
-class CoverageVisualisationTabFactory(private val project: Project, private val editor: Editor, private val testSparkDisplayFactory: TestSparkDisplayFactory) {
+class CoverageVisualisationTabFactory(private val project: Project, private val editor: Editor, private val uiContext: UIContext) {
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -161,7 +162,7 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
                     mutationNotCoveredLine,
                     mapMutantsToTests,
                     project,
-                    testSparkDisplayFactory,
+                    uiContext,
                 )
             }
         }

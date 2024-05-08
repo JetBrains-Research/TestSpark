@@ -12,10 +12,7 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeRed
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.IJReport
-import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.data.*
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
@@ -199,6 +196,6 @@ class LLMProcessManager(
             generatedTestsData,
         )
 
-        return UIContext(projectContext, generatedTestsData, requestManager)
+        return UIContext(projectContext, generatedTestsData, TestCasesUIContext(), requestManager)
     }
 }

@@ -2,20 +2,26 @@ package org.jetbrains.research.testspark.display.coverage
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.hint.HintManagerImpl
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ex.EditorGutterComponentEx
 import com.intellij.openapi.editor.markup.ActiveGutterRenderer
 import com.intellij.openapi.editor.markup.LineMarkerRendererEx
 import com.intellij.openapi.project.Project
+import com.intellij.ui.EditorTextField
 import com.intellij.ui.HintHint
+import com.intellij.ui.JBColor
 import com.intellij.ui.LightweightHint
 import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
+import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import java.awt.Color
 import java.awt.Dimension
@@ -42,7 +48,7 @@ class CoverageRenderer(
     private val notCoveredMutation: List<String>,
     private val mapMutantsToTests: HashMap<String, MutableList<String>>,
     private val project: Project,
-    private val testSparkDisplayFactory: TestSparkDisplayFactory,
+    private val uiContext: UIContext,
 ) :
     ActiveGutterRenderer, LineMarkerRendererEx {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
@@ -63,7 +69,7 @@ class CoverageRenderer(
         for (testName in tests) {
             prePanel.addComponent(
                 ActionLink(testName) {
-                    highlightInToolwindow(testName)
+                    highlightTestCase(testName)
                 },
             )
         }
@@ -125,21 +131,61 @@ class CoverageRenderer(
     }
 
     /**
-     * Use Display service's mini-editor highlighter function
-     *
-     * @param name name of the test to highlight
-     */
-    private fun highlightInToolwindow(name: String) {
-        testSparkDisplayFactory.highlightTestCase(name)
-    }
-
-    /**
      * Use Display service's mutant highlighter function
      * @param mutantName name of the mutant whose coverage to visualise
      * @param map map of mutant operations -> List of names of tests which cover the mutants
      */
     private fun highlightMutantsInToolwindow(mutantName: String, map: HashMap<String, MutableList<String>>) {
-        testSparkDisplayFactory.highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
+        highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
+    }
+
+    /**
+     * Highlight the mini-editor in the tool window whose name corresponds with the name of the test provided
+     *
+     * @param name name of the test whose editor should be highlighted
+     */
+    private fun highlightTestCase(name: String) {
+        val myPanel = uiContext.testCasesUIContext.testCasePanels[name] ?: return
+        openToolWindowTab()
+        scrollToPanel(myPanel)
+
+        val editor = getEditorTextField(name) ?: return
+        val settingsProjectState = project.service<PluginSettingsService>().state
+        val highlightColor =
+            JBColor(
+                PluginSettingsBundle.get("colorName"),
+                Color(
+                    settingsProjectState.colorRed,
+                    settingsProjectState.colorGreen,
+                    settingsProjectState.colorBlue,
+                    30,
+                ),
+            )
+        if (editor.background.equals(highlightColor)) return
+        uiContext.testCasesUIContext.defaultEditorColor = editor.background
+        editor.background = highlightColor
+        returnOriginalEditorBackground(editor)
+    }
+
+    /**
+     * Reset the provided editors color to the default (initial) one after 10 seconds
+     * @param editor the editor whose color to change
+     */
+    private fun returnOriginalEditorBackground(editor: EditorTextField) {
+        Thread {
+            Thread.sleep(10000)
+            editor.background = uiContext.testCasesUIContext.defaultEditorColor
+        }.start()
+    }
+
+    /**
+     * Highlight a range of editors
+     * @param names list of test names to pass to highlight function
+     */
+    private fun highlightCoveredMutants(names: List<String>) {
+        names.forEach {
+            highlightTestCase(it)
+        }
     }
 
     /**

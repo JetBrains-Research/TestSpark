@@ -57,7 +57,7 @@ class TestSparkDisplayFactory(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
 
-    private val topButtonsPanelFactory = TopButtonsPanelFactory(project, this)
+    private var topButtonsPanelFactory: TopButtonsPanelFactory? = null
 
     private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
@@ -69,18 +69,9 @@ class TestSparkDisplayFactory(private val project: Project) {
         JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
     )
 
-    private var testCasePanels: HashMap<String, JPanel> = HashMap()
-
-    private var testsSelected: Int = 0
-
     private var editor: Editor? = null
 
     private var coverageVisualisationTabFactory: CoverageVisualisationTabFactory? = null
-
-    /**
-     * Default color for the editors in the tool window
-     */
-    private var defaultEditorColor: Color? = null
 
     /**
      * Content Manager to be able to add / remove tabs from tool window
@@ -94,20 +85,6 @@ class TestSparkDisplayFactory(private val project: Project) {
 
     private var uiContext: UIContext? = null
 
-    init {
-        allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
-        mainPanel.layout = BorderLayout()
-
-        mainPanel.add(topButtonsPanelFactory.getPanel(), BorderLayout.NORTH)
-        mainPanel.add(scrollPane, BorderLayout.CENTER)
-
-        applyButton.isOpaque = false
-        applyButton.isContentAreaFilled = false
-        mainPanel.add(applyButton, BorderLayout.SOUTH)
-
-        applyButton.addActionListener { applyTests() }
-    }
-
     /**
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
@@ -116,10 +93,12 @@ class TestSparkDisplayFactory(private val project: Project) {
         this.report = report
         this.editor = editor
         this.uiContext = uiContext
-        coverageVisualisationTabFactory = CoverageVisualisationTabFactory(project, editor, this)
+
+        coverageVisualisationTabFactory = CoverageVisualisationTabFactory(project, editor, uiContext)
+        topButtonsPanelFactory = TopButtonsPanelFactory(project, uiContext)
 
         allTestCasePanel.removeAll()
-        testCasePanels.clear()
+        uiContext.testCasesUIContext.testCasePanels.clear()
 
         addSeparator()
 
@@ -136,7 +115,7 @@ class TestSparkDisplayFactory(private val project: Project) {
             checkbox.isSelected = true
             checkbox.addItemListener {
                 // Update the number of selected tests
-                testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
+                uiContext.testCasesUIContext.testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
                 if (checkbox.isSelected) {
                     ReportUpdater.selectTestCase(project, report, unselectedTestCases, testCase.id, coverageVisualisationTabFactory!!)
@@ -148,7 +127,7 @@ class TestSparkDisplayFactory(private val project: Project) {
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext, report, coverageVisualisationTabFactory!!, this)
+            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext, report, coverageVisualisationTabFactory!!)
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
@@ -161,59 +140,35 @@ class TestSparkDisplayFactory(private val project: Project) {
             testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
             allTestCasePanel.add(testCasePanel)
             addSeparator()
-            testCasePanels[testCase.testName] = testCasePanel
+            uiContext.testCasesUIContext.testCasePanels[testCase.testName] = testCasePanel
         }
 
         // Update the number of selected tests (all tests are selected by default)
-        testsSelected = testCasePanels.size
+        uiContext.testCasesUIContext.testsSelected = uiContext.testCasesUIContext.testCasePanels.size
 
-        topButtonsPanelFactory.setTestCasePanelFactoriesArray(testCasePanelFactories)
-        topButtonsPanelFactory.updateTopLabels()
+        topButtonsPanelFactory!!.setTestCasePanelFactoriesArray(testCasePanelFactories)
+        topButtonsPanelFactory!!.updateTopLabels()
 
         createToolWindowTab()
 
         coverageVisualisationTabFactory!!.showCoverage(report)
+
+        fillPanels()
     }
 
-    /**
-     * Highlight the mini-editor in the tool window whose name corresponds with the name of the test provided
-     *
-     * @param name name of the test whose editor should be highlighted
-     */
-    fun highlightTestCase(name: String) {
-        val myPanel = testCasePanels[name] ?: return
-        openToolWindowTab()
-        scrollToPanel(myPanel)
+    private fun fillPanels() {
+        allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
+        mainPanel.layout = BorderLayout()
 
-        val editor = getEditorTextField(name) ?: return
-        val settingsProjectState = project.service<PluginSettingsService>().state
-        val highlightColor =
-            JBColor(
-                PluginSettingsBundle.get("colorName"),
-                Color(
-                    settingsProjectState.colorRed,
-                    settingsProjectState.colorGreen,
-                    settingsProjectState.colorBlue,
-                    30,
-                ),
-            )
-        if (editor.background.equals(highlightColor)) return
-        defaultEditorColor = editor.background
-        editor.background = highlightColor
-        returnOriginalEditorBackground(editor)
+        mainPanel.add(topButtonsPanelFactory!!.getPanel(), BorderLayout.NORTH)
+        mainPanel.add(scrollPane, BorderLayout.CENTER)
+
+        applyButton.isOpaque = false
+        applyButton.isContentAreaFilled = false
+        mainPanel.add(applyButton, BorderLayout.SOUTH)
+
+        applyButton.addActionListener { applyTests() }
     }
-
-    /**
-     * Highlight a range of editors
-     * @param names list of test names to pass to highlight function
-     */
-    fun highlightCoveredMutants(names: List<String>) {
-        names.forEach {
-            highlightTestCase(it)
-        }
-    }
-
-    fun getEditor() = editor
 
     /**
      * Retrieve the editor corresponding to a particular test case
@@ -222,17 +177,17 @@ class TestSparkDisplayFactory(private val project: Project) {
      * @return the editor corresponding to the test case, or null if it does not exist
      */
     fun getEditorTextField(testCaseName: String): EditorTextField? {
-        val middlePanelComponent = testCasePanels[testCaseName]?.getComponent(2) ?: return null
+        val middlePanelComponent = uiContext!!.testCasesUIContext.testCasePanels[testCaseName]?.getComponent(2) ?: return null
         val middlePanel = middlePanelComponent as JPanel
         return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
     }
 
     fun clear() {
         // Remove the tests
-        val testCasePanelsToRemove = testCasePanels.toMap()
+        val testCasePanelsToRemove = uiContext!!.testCasesUIContext.testCasePanels.toMap()
         removeSelectedTestCases(testCasePanelsToRemove)
 
-        topButtonsPanelFactory.clear()
+        topButtonsPanelFactory!!.clear()
         coverageVisualisationTabFactory!!.clear()
     }
 
@@ -243,15 +198,15 @@ class TestSparkDisplayFactory(private val project: Project) {
      */
     fun removeTestCase(testCaseName: String) {
         // Update the number of selected test cases if necessary
-        if ((testCasePanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
-            testsSelected--
+        if ((uiContext!!.testCasesUIContext.testCasePanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
+            uiContext!!.testCasesUIContext.testsSelected--
         }
 
         // Remove the test panel from the UI
-        allTestCasePanel.remove(testCasePanels[testCaseName])
+        allTestCasePanel.remove(uiContext!!.testCasesUIContext.testCasePanels[testCaseName])
 
         // Remove the test panel
-        testCasePanels.remove(testCaseName)
+        uiContext!!.testCasesUIContext.testCasePanels.remove(testCaseName)
     }
 
     /**
@@ -266,33 +221,10 @@ class TestSparkDisplayFactory(private val project: Project) {
         // Update the UI of the tool window tab
         allTestCasePanel.updateUI()
 
-        topButtonsPanelFactory.updateTopLabels()
+        topButtonsPanelFactory!!.updateTopLabels()
 
         // If no more tests are remaining, close the tool window
-        if (testCasePanels.size == 0) closeToolWindow()
-    }
-
-    /**
-     * Retrieves the list of test case panels.
-     *
-     * @return The list of test case panels.
-     */
-    fun getTestCasePanels() = testCasePanels
-
-    /**
-     * Retrieves the currently selected tests.
-     *
-     * @return The list of tests currently selected.
-     */
-    fun getTestsSelected() = testsSelected
-
-    /**
-     * Sets the number of tests selected.
-     *
-     * @param testsSelected The number of tests selected.
-     */
-    fun setTestsSelected(testsSelected: Int) {
-        this.testsSelected = testsSelected
+        if (uiContext!!.testCasesUIContext.testCasePanels.size == 0) closeToolWindow()
     }
 
     /**
@@ -342,23 +274,12 @@ class TestSparkDisplayFactory(private val project: Project) {
     }
 
     /**
-     * Reset the provided editors color to the default (initial) one after 10 seconds
-     * @param editor the editor whose color to change
-     */
-    private fun returnOriginalEditorBackground(editor: EditorTextField) {
-        Thread {
-            Thread.sleep(10000)
-            editor.background = defaultEditorColor
-        }.start()
-    }
-
-    /**
      * Show a dialog where the user can select what test class the tests should be applied to,
      * and apply the selected tests to the test class.
      */
     private fun applyTests() {
         // Filter the selected test cases
-        val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+        val selectedTestCasePanels = uiContext!!.testCasesUIContext.testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
         // Get the test case components (source code of the tests)

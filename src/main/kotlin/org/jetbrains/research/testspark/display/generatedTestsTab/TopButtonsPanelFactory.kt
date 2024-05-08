@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.utils.IconButtonCreator
 import org.jetbrains.research.testspark.display.utils.TestSparkIcons
@@ -22,7 +22,7 @@ import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 
-class TopButtonsPanelFactory(private val project: Project, private val testSparkDisplayFactory: TestSparkDisplayFactory) {
+class TopButtonsPanelFactory(private val project: Project, private val uiContext: UIContext) {
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
         IconButtonCreator.getButton(TestSparkIcons.selectAll, PluginLabelsBundle.get("selectAllTip"))
@@ -75,14 +75,14 @@ class TopButtonsPanelFactory(private val project: Project, private val testSpark
         }
         testsSelectedLabel.text = String.format(
             testsSelectedText,
-            testSparkDisplayFactory.getTestsSelected(),
-            testSparkDisplayFactory.getTestCasePanels().size,
+            uiContext.testCasesUIContext.testsSelected,
+            uiContext.testCasesUIContext.testCasePanels.size,
         )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 numberOfPassedTests,
-                testSparkDisplayFactory.getTestCasePanels().size,
+                uiContext.testCasesUIContext.testCasePanels.size,
             )
         runAllButton.isEnabled = false
         for (testCasePanelFactory in testCasePanelFactories) {
@@ -106,11 +106,11 @@ class TopButtonsPanelFactory(private val project: Project, private val testSpark
      *  @param selected whether the checkboxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean) {
-        testSparkDisplayFactory.getTestCasePanels().forEach { (_, jPanel) ->
+        uiContext.testCasesUIContext.testCasePanels.forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
-        testSparkDisplayFactory.setTestsSelected(if (selected) testSparkDisplayFactory.getTestCasePanels().size else 0)
+        uiContext.testCasesUIContext.testsSelected = if (selected) uiContext.testCasesUIContext.testCasePanels.size else 0
     }
 
     /**

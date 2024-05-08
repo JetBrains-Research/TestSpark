@@ -70,7 +70,6 @@ class TestCasePanelFactory(
     val uiContext: UIContext?,
     val report: Report,
     private val coverageVisualisationTabFactory: CoverageVisualisationTabFactory,
-    private val testSparkDisplayFactory: TestSparkDisplayFactory,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
