@@ -137,6 +137,7 @@ class TestCasePanel(
     private val initialCodes: MutableList<String> = mutableListOf()
     private val lastRunCodes: MutableList<String> = mutableListOf()
     private val currentCodes: MutableList<String> = mutableListOf()
+    private val trimmedCodeToError = mutableMapOf<String, String?>()
 
 
     init {
@@ -342,8 +343,7 @@ class TestCasePanel(
             errorLabel.toolTipText = error
         }
 
-        // TODO: why was error == null
-        runTestButton.isEnabled = true
+        runTestButton.isEnabled = previousError(testCase.testCode) == null
     }
 
     /**
@@ -372,6 +372,9 @@ class TestCasePanel(
         }
 
         currentCodes[currentRequestNumber - 1] = testCase.testCode
+
+        _error = previousError(testCase.testCode)
+        updateErrorRelatedUI()
 
         // select checkbox
         checkbox.isSelected = true
@@ -502,6 +505,8 @@ class TestCasePanel(
             })
     }
 
+    private fun trimCode(code: String): String = code.filter { !it.isWhitespace() }
+
     fun addTask(tasks: Queue<(CustomProgressIndicator) -> Unit>) {
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
@@ -530,6 +535,7 @@ class TestCasePanel(
 
         testCase.coveredLines = newTestCaseResult.testCase.coveredLines
         _error = newTestCaseResult.error
+        saveErrorForCode( newTestCaseResult.testCase.testCode, newTestCaseResult.error)
 
         testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
@@ -594,6 +600,12 @@ class TestCasePanel(
 
         ReportHelper.removeTestCase(project, report, testCase)
         project.service<TestCaseDisplayService>().updateUI()
+    }
+
+    private fun previousError(code: String) = trimmedCodeToError[trimCode(code)]
+
+    private fun saveErrorForCode(code: String, error: String?) {
+        trimmedCodeToError[trimCode(code)] = error
     }
 
     /**
