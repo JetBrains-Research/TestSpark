@@ -10,7 +10,8 @@ import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 
 /**
- * Manager used for monitoring the test generation process monitoring. It also limits TestSpark to generate tests only once at a time.
+ * Manager used for monitoring the unit test generation process.
+ * It also limits TestSpark to generate tests only once at a time.
  */
 class RunnerController {
     private var isRunning: Boolean = false
