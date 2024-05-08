@@ -436,7 +436,7 @@ class TestCasePanelFactory(
     }
 
     private fun finishProcess() {
-        uiContext!!.errorMonitor.isErrorOccurred = false
+        uiContext!!.errorMonitor.clear()
         loadingLabel.isVisible = false
         enableComponents(true)
     }
@@ -455,7 +455,7 @@ class TestCasePanelFactory(
         val testSuitePresenter = JUnitTestSuitePresenter(project, uiContext!!.testGenerationOutput)
 
         WriteCommandAction.runWriteCommandAction(project) {
-            uiContext.errorMonitor.isErrorOccurred = false
+            uiContext.errorMonitor.clear()
             val code = testSuitePresenter.toString(testSuite)
             testCase.testName = JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, code)
             testCase.testCode = code
