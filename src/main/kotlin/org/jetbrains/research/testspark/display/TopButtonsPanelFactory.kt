@@ -36,7 +36,7 @@ class TopButtonsPanelFactory(private val project: Project) {
     private val testsPassedText: String = "${PluginLabelsBundle.get("testsPassed")}: %d/%d"
     private var testsPassedLabel: JLabel = JLabel(testsPassedText)
 
-    private val testCasePanelFactories = arrayListOf<TestCasePanel>()
+    private val testCasePanels = arrayListOf<TestCasePanel>()
 
     fun getPanel(): JPanel {
         val panel = JPanel()
@@ -65,10 +65,10 @@ class TopButtonsPanelFactory(private val project: Project) {
      */
     fun updateTopLabels() {
         var numberOfPassedTests = 0
-        for (testCasePanelFactory in testCasePanelFactories) {
-            if (testCasePanelFactory.isRemoved()) continue
-            val error = testCasePanelFactory.getError()
-            if ((error is String) && error.isEmpty()) {
+        for (testCasePanel in testCasePanels) {
+            if (testCasePanel.isRemoved()) continue
+            val error = testCasePanel.error
+            if (error.isNullOrBlank()) {
                 numberOfPassedTests++
             }
         }
@@ -84,8 +84,8 @@ class TopButtonsPanelFactory(private val project: Project) {
                 project.service<TestCaseDisplayService>().getTestCasePanels().size,
             )
         runAllButton.isEnabled = false
-        for (testCasePanelFactory in testCasePanelFactories) {
-            runAllButton.isEnabled = runAllButton.isEnabled || testCasePanelFactory.isRunEnabled()
+        for (testCasePanel in testCasePanels) {
+            runAllButton.isEnabled = runAllButton.isEnabled || testCasePanel.isRunEnabled()
         }
     }
 
@@ -95,7 +95,7 @@ class TopButtonsPanelFactory(private val project: Project) {
      * @param testCasePanelFactories The ArrayList containing the TestCasePanelFactory objects to be set.
      */
     fun setTestCasePanelFactoriesArray(testCasePanelFactories: ArrayList<TestCasePanel>) {
-        this.testCasePanelFactories.addAll(testCasePanelFactories)
+        this.testCasePanels.addAll(testCasePanelFactories)
     }
 
     /**
@@ -154,7 +154,7 @@ class TopButtonsPanelFactory(private val project: Project) {
         // add each test generation task to queue
         val tasks: Queue<(CustomProgressIndicator) -> Unit> = LinkedList()
 
-        for (testCasePanelFactory in testCasePanelFactories) {
+        for (testCasePanelFactory in testCasePanels) {
             testCasePanelFactory.addTask(tasks)
         }
         // run tasks one after each other
@@ -192,6 +192,6 @@ class TopButtonsPanelFactory(private val project: Project) {
     }
 
     fun clear() {
-        testCasePanelFactories.clear()
+        testCasePanels.clear()
     }
 }

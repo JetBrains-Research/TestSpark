@@ -23,7 +23,6 @@ import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -124,6 +123,5 @@ class Pipeline(
         project.service<TestCaseDisplayService>().clear()
         project.service<ErrorService>().clear()
         project.service<CoverageVisualisationService>().clear()
-        project.service<TestsExecutionResultService>().clear()
     }
 }

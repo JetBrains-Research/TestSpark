@@ -35,7 +35,6 @@ import org.jetbrains.research.testspark.helpers.ReportHelper
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
@@ -93,6 +92,10 @@ class TestCasePanel(
 
     private var isRemoved = false
 
+    private var _error: String? = null
+    val error: String?
+        get() = _error
+
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
         Language.findLanguageByID("JAVA"),
@@ -140,6 +143,7 @@ class TestCasePanel(
         prepareUpperPanel()
         prepareMiddlePanel()
         prepareBottomPanel()
+        updateErrorRelatedUI()
     }
 
     /**
@@ -151,7 +155,6 @@ class TestCasePanel(
      * @return The JPanel object representing the upper panel.
      */
     private fun prepareUpperPanel(): JPanel {
-        updateErrorLabel()
         upperPanel.layout = BoxLayout(upperPanel, BoxLayout.X_AXIS)
         upperPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         upperPanel.add(previousButton)
@@ -317,19 +320,6 @@ class TestCasePanel(
     }
 
     /**
-     * Updates the error label with a new message.
-     */
-    private fun updateErrorLabel() {
-        val error = project.service<TestsExecutionResultService>().getCurrentError(testCase.id)
-        if (error.isBlank()) {
-            errorLabel.isVisible = false
-        } else {
-            errorLabel.isVisible = true
-            errorLabel.toolTipText = error
-        }
-    }
-
-    /**
      * Adds a document listener to the provided LanguageTextField.
      * The listener triggers the updateUI() method whenever the document of the LanguageTextField changes.
      *
@@ -343,7 +333,7 @@ class TestCasePanel(
         })
     }
 
-    private fun updateError(error: String?) {
+    private fun updateErrorRelatedUI() {
         updateBorder(error)
         if (error.isNullOrBlank()) {
             errorLabel.isVisible = false
@@ -352,8 +342,8 @@ class TestCasePanel(
             errorLabel.toolTipText = error
         }
 
-        // TODO: why?
-        runTestButton.isEnabled = (error == null)
+        // TODO: why was error == null
+        runTestButton.isEnabled = true
     }
 
     /**
@@ -434,6 +424,11 @@ class TestCasePanel(
                     if (ToolUtils.isProcessStopped(project, ijIndicator)) {
                         finishProcess()
                         return
+                    }
+
+                    SwingUtilities.invokeLater {
+                        _error = null
+                        updateErrorRelatedUI()
                     }
 
                     finishProcess()
@@ -534,6 +529,7 @@ class TestCasePanel(
             )
 
         testCase.coveredLines = newTestCaseResult.testCase.coveredLines
+        _error = newTestCaseResult.error
 
         testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
@@ -541,7 +537,7 @@ class TestCasePanel(
 
         SwingUtilities.invokeLater {
             updateUI()
-            updateError(newTestCaseResult.error)
+            updateErrorRelatedUI()
         }
 
         finishProcess()
@@ -612,20 +608,13 @@ class TestCasePanel(
      */
     private fun updateBorder(error: String?) {
         val size = 3
-        val border =  when (error) {
+        val border = when (error) {
             null -> JBUI.Borders.empty()
             "" -> MatteBorder(size, size, size, size, JBColor.GREEN)
             else -> MatteBorder(size, size, size, size, JBColor.RED)
         }
         languageTextField.border = border
     }
-
-    /**
-     * Retrieves the error message for a given test case.
-     *
-     * @return the error message for the test case
-     */
-    fun getError() = project.service<TestsExecutionResultService>().getError(testCase.id, testCase.testCode)
 
 
     /**
@@ -663,7 +652,10 @@ class TestCasePanel(
      */
     private fun updateTestCaseInformation() {
         testCase.testName =
-            JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
+            JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+                testCase.testName,
+                languageTextField.document.text
+            )
         testCase.testCode = languageTextField.document.text
     }
 }

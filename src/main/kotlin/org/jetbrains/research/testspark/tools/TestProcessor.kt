@@ -15,7 +15,6 @@ import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.display.TestCaseResult
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import java.io.File
 import kotlin.io.path.Path
