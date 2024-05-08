@@ -12,6 +12,7 @@ import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.ProjectContext
+import org.jetbrains.research.testspark.display.TestCaseResult
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -148,7 +149,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
         packageLine: String,
         resultPath: String,
         projectContext: ProjectContext,
-    ): TestCase {
+    ): TestCaseResult {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         if (project.service<PluginSettingsService>().state.buildPath.isEmpty()) {
@@ -167,7 +168,8 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
         // compilation checking
         val compilationResult = testCompiler.compileCode(generatedTestPath, buildPath)
         if (!compilationResult.first) {
-            project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, compilationResult.second)
+            DataFilesUtil.cleanFolder(resultPath)
+            return TestCaseResult(TestCase(testId, testName, testCode, emptySet()), compilationResult.second)
         } else {
             val dataFileName = "$resultPath/jacoco-${fileName.split(".")[0]}"
 
@@ -182,7 +184,8 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
             )
 
             if (!File("$dataFileName.xml").exists()) {
-                project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, testExecutionError)
+                DataFilesUtil.cleanFolder(resultPath)
+                return TestCaseResult(TestCase(testId, testName, testCode, emptySet()), testExecutionError)
             } else {
                 val testCase = getTestCaseFromXml(
                     testId,
@@ -194,19 +197,15 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
                 )
 
                 if (getExceptionData(testExecutionError, projectContext).first) {
-                    project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, testExecutionError)
+                    DataFilesUtil.cleanFolder(resultPath)
+                    return TestCaseResult(testCase, testExecutionError)
                 } else {
-                    project.service<TestsExecutionResultService>().addPassedTest(testId, testCode)
+                    DataFilesUtil.cleanFolder(resultPath)
+                    return TestCaseResult(testCase, "")
                 }
 
-                DataFilesUtil.cleanFolder(resultPath)
-
-                return testCase
             }
         }
-        DataFilesUtil.cleanFolder(resultPath)
-
-        return TestCase(testId, testName, testCode, setOf())
     }
 
     /**

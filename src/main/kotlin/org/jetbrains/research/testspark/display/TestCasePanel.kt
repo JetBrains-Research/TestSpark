@@ -54,10 +54,11 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
-import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
-class TestCasePanelFactory(
+class TestCaseResult(val testCase: TestCase, val error: String?)
+
+class TestCasePanel(
     private val project: Project,
     private val testCase: TestCase,
     editor: Editor,
@@ -68,7 +69,10 @@ class TestCasePanelFactory(
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
-    private val panel = JPanel()
+    val upperPanel = JPanel()
+    val middlePanel = JPanel()
+    val bottomPanel = JPanel()
+
     private val previousButton =
         IconButtonCreator.getButton(TestSparkIcons.previous, PluginLabelsBundle.get("previousRequest"))
     private var requestNumber: String = "%d / %d"
@@ -131,6 +135,13 @@ class TestCasePanelFactory(
     private val lastRunCodes: MutableList<String> = mutableListOf()
     private val currentCodes: MutableList<String> = mutableListOf()
 
+
+    init {
+        prepareUpperPanel()
+        prepareMiddlePanel()
+        prepareBottomPanel()
+    }
+
     /**
      * Retrieves the upper panel for the GUI.
      *
@@ -139,19 +150,19 @@ class TestCasePanelFactory(
      *
      * @return The JPanel object representing the upper panel.
      */
-    fun getUpperPanel(): JPanel {
+    private fun prepareUpperPanel(): JPanel {
         updateErrorLabel()
-        panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
-        panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
-        panel.add(previousButton)
-        panel.add(requestLabel)
-        panel.add(nextButton)
-        panel.add(errorLabel)
-        panel.add(Box.createHorizontalGlue())
-        panel.add(copyButton)
-        panel.add(likeButton)
-        panel.add(dislikeButton)
-        panel.add(Box.createRigidArea(Dimension(12, 0)))
+        upperPanel.layout = BoxLayout(upperPanel, BoxLayout.X_AXIS)
+        upperPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
+        upperPanel.add(previousButton)
+        upperPanel.add(requestLabel)
+        upperPanel.add(nextButton)
+        upperPanel.add(errorLabel)
+        upperPanel.add(Box.createHorizontalGlue())
+        upperPanel.add(copyButton)
+        upperPanel.add(likeButton)
+        upperPanel.add(dislikeButton)
+        upperPanel.add(Box.createRigidArea(Dimension(12, 0)))
 
         previousButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
@@ -209,7 +220,7 @@ class TestCasePanelFactory(
 
         updateRequestLabel()
 
-        return panel
+        return upperPanel
     }
 
     /**
@@ -217,32 +228,26 @@ class TestCasePanelFactory(
      * This method sets the border of the languageTextField and
      * adds it to the middlePanel with appropriate spacing.
      */
-    fun getMiddlePanel(): JPanel {
+    private fun prepareMiddlePanel(): JPanel {
         initialCodes.add(testCase.testCode)
         lastRunCodes.add(testCase.testCode)
         currentCodes.add(testCase.testCode)
 
-        // Set border
-        updateBorder()
-
-        val panel = JPanel()
-
-        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
-        panel.add(Box.createRigidArea(Dimension(0, 5)))
-        panel.add(languageTextFieldScrollPane)
-        panel.add(Box.createRigidArea(Dimension(0, 5)))
+        middlePanel.layout = BoxLayout(middlePanel, BoxLayout.Y_AXIS)
+        middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
+        middlePanel.add(languageTextFieldScrollPane)
+        middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
 
         addLanguageTextFieldListener(languageTextField)
 
-        return panel
+        return middlePanel
     }
 
     /**
      * Returns the bottom panel.
      */
-    fun getBottomPanel(): JPanel {
-        val panel = JPanel()
-        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+    private fun prepareBottomPanel(): JPanel {
+        bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
 
         val requestPanel = JPanel()
         requestPanel.layout = BoxLayout(requestPanel, BoxLayout.X_AXIS)
@@ -274,8 +279,8 @@ class TestCasePanelFactory(
         buttonsPanel.add(removeButton)
         buttonsPanel.add(Box.createRigidArea(Dimension(12, 0)))
 
-        panel.add(requestPanel)
-        panel.add(buttonsPanel)
+        bottomPanel.add(requestPanel)
+        bottomPanel.add(buttonsPanel)
 
         runTestButton.addActionListener {
             val choice = JOptionPane.showConfirmDialog(
@@ -296,7 +301,7 @@ class TestCasePanelFactory(
 
         requestComboBox.isEditable = true
 
-        return panel
+        return bottomPanel
     }
 
     /**
@@ -338,6 +343,19 @@ class TestCasePanelFactory(
         })
     }
 
+    private fun updateError(error: String?) {
+        updateBorder(error)
+        if (error.isNullOrBlank()) {
+            errorLabel.isVisible = false
+        } else {
+            errorLabel.isVisible = true
+            errorLabel.toolTipText = error
+        }
+
+        // TODO: why?
+        runTestButton.isEnabled = (error == null)
+    }
+
     /**
      * Updates the user interface based on the provided code.
      */
@@ -349,17 +367,6 @@ class TestCasePanelFactory(
 
         resetButton.isEnabled = testCase.testCode != initialCodes[currentRequestNumber - 1]
         resetToLastRunButton.isEnabled = testCase.testCode != lastRunCode
-
-        val error = getError()
-        if (error.isNullOrBlank()) {
-            project.service<TestsExecutionResultService>().addCurrentPassedTest(testCase.id)
-        } else {
-            project.service<TestsExecutionResultService>().addCurrentFailedTest(testCase.id, error)
-        }
-        updateErrorLabel()
-        runTestButton.isEnabled = (error == null)
-
-        updateBorder()
 
         val modifiedLineIndexes = ModifiedLinesGetter.getLines(
             lastRunCode.split("\n"),
@@ -515,7 +522,7 @@ class TestCasePanelFactory(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
-        val newTestCase = TestProcessor(project)
+        val newTestCaseResult = TestProcessor(project)
             .processNewTestCase(
                 "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java",
                 testCase.id,
@@ -526,7 +533,7 @@ class TestCasePanelFactory(
                 uiContext.projectContext,
             )
 
-        testCase.coveredLines = newTestCase.coveredLines
+        testCase.coveredLines = newTestCaseResult.testCase.coveredLines
 
         testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
@@ -534,6 +541,7 @@ class TestCasePanelFactory(
 
         SwingUtilities.invokeLater {
             updateUI()
+            updateError(newTestCaseResult.error)
         }
 
         finishProcess()
@@ -602,8 +610,14 @@ class TestCasePanelFactory(
     /**
      * Updates the border of the languageTextField based on the provided test name and text.
      */
-    private fun updateBorder() {
-        languageTextField.border = getBorder()
+    private fun updateBorder(error: String?) {
+        val size = 3
+        val border =  when (error) {
+            null -> JBUI.Borders.empty()
+            "" -> MatteBorder(size, size, size, size, JBColor.GREEN)
+            else -> MatteBorder(size, size, size, size, JBColor.RED)
+        }
+        languageTextField.border = border
     }
 
     /**
@@ -613,19 +627,6 @@ class TestCasePanelFactory(
      */
     fun getError() = project.service<TestsExecutionResultService>().getError(testCase.id, testCase.testCode)
 
-    /**
-     * Returns the border for a given test case.
-     *
-     * @return the border for the test case
-     */
-    private fun getBorder(): Border {
-        val size = 3
-        return when (getError()) {
-            null -> JBUI.Borders.empty()
-            "" -> MatteBorder(size, size, size, size, JBColor.GREEN)
-            else -> MatteBorder(size, size, size, size, JBColor.RED)
-        }
-    }
 
     /**
      * Creates a button to reset the changes in the test source code.

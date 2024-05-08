@@ -32,7 +32,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.TestCasePanelFactory
+import org.jetbrains.research.testspark.display.TestCasePanel
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper
@@ -121,12 +121,12 @@ class TestCaseDisplayService(private val project: Project) {
         addSeparator()
 
         // TestCasePanelFactories array
-        val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
+        val testCasePanelFactories = arrayListOf<TestCasePanel>()
 
         report.testCaseList.values.forEach {
             val testCase = it
-            val testCasePanel = JPanel()
-            testCasePanel.layout = BorderLayout()
+            val testCaseDisplayPanel = JPanel()
+            testCaseDisplayPanel.layout = BorderLayout()
 
             // Add a checkbox to select the test
             val checkbox = JCheckBox()
@@ -143,22 +143,22 @@ class TestCaseDisplayService(private val project: Project) {
 
                 updateUI()
             }
-            testCasePanel.add(checkbox, BorderLayout.WEST)
+            testCaseDisplayPanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext, report)
-            testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
-            testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
-            testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+            val testCasePanel = TestCasePanel(project, testCase, editor, checkbox, uiContext, report)
+            testCaseDisplayPanel.add(testCasePanel.upperPanel, BorderLayout.NORTH)
+            testCaseDisplayPanel.add(testCasePanel.middlePanel, BorderLayout.CENTER)
+            testCaseDisplayPanel.add(testCasePanel.bottomPanel, BorderLayout.SOUTH)
 
-            testCasePanelFactories.add(testCasePanelFactory)
+            testCasePanelFactories.add(testCasePanel)
 
-            testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
+            testCaseDisplayPanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
             // Add panel to parent panel
-            testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
-            allTestCasePanel.add(testCasePanel)
+            testCaseDisplayPanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
+            allTestCasePanel.add(testCaseDisplayPanel)
             addSeparator()
-            testCasePanels[testCase.testName] = testCasePanel
+            testCasePanels[testCase.testName] = testCaseDisplayPanel
         }
 
         // Update the number of selected tests (all tests are selected by default)

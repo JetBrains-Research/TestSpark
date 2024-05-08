@@ -36,7 +36,7 @@ class TopButtonsPanelFactory(private val project: Project) {
     private val testsPassedText: String = "${PluginLabelsBundle.get("testsPassed")}: %d/%d"
     private var testsPassedLabel: JLabel = JLabel(testsPassedText)
 
-    private val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
+    private val testCasePanelFactories = arrayListOf<TestCasePanel>()
 
     fun getPanel(): JPanel {
         val panel = JPanel()
@@ -94,7 +94,7 @@ class TopButtonsPanelFactory(private val project: Project) {
      *
      * @param testCasePanelFactories The ArrayList containing the TestCasePanelFactory objects to be set.
      */
-    fun setTestCasePanelFactoriesArray(testCasePanelFactories: ArrayList<TestCasePanelFactory>) {
+    fun setTestCasePanelFactoriesArray(testCasePanelFactories: ArrayList<TestCasePanel>) {
         this.testCasePanelFactories.addAll(testCasePanelFactories)
     }
 
