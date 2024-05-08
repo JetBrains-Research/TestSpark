@@ -278,8 +278,8 @@ class PromptManager(
         }
 
         return polymorphismRelations
-            /** filtering out the entries where the qualified name of any class is null **/
-            .filter { entry -> (entry.key.qualifiedName == null) || (entry.value.any { it.qualifiedName == null }) }
+            /** preserving the entries where qualified names of parent class and all of its subclasses are NOT null **/
+            .filter { entry -> (entry.key.qualifiedName != null) && (entry.value.all { it.qualifiedName != null }) }
             .toMutableMap()
     }
 
