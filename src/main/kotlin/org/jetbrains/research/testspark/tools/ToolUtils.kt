@@ -133,7 +133,7 @@ object ToolUtils {
     /**
      * Checks if the process has been stopped.
      *
-     * @param project the project in which the process is running
+     * @param errorMonitor the class responsible for monitoring the errors during the test generation process
      * @param indicator the progress indicator for tracking the progress of the process
      *
      * @return true if the process has been stopped, false otherwise
