@@ -35,7 +35,7 @@ class LLMErrorManager : ErrorManager {
      * @param project The project in which the error occurred.
      */
     override fun errorProcess(message: String, project: Project, errorMonitor: ErrorMonitor) {
-        if (errorMonitor.errorOccurred()) {
+        if (errorMonitor.notifyErrorOccurrence()) {
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("LLM Execution Error")
                 .createNotification(

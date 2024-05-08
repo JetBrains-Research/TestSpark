@@ -1,19 +1,20 @@
 package org.jetbrains.research.testspark.core.monitor
 
 interface ErrorMonitor {
-    var isErrorOccurred: Boolean
+    var errorOccurred: Boolean
 
-    fun errorOccurred(): Boolean
+
+    fun notifyErrorOccurrence(): Boolean
     fun clear() {
-        isErrorOccurred = false
+        errorOccurred = false
     }
 }
 
 class DefaultErrorMonitor : ErrorMonitor {
-    override var isErrorOccurred = false
-    override fun errorOccurred(): Boolean {
-        if (isErrorOccurred) return false
-        isErrorOccurred = true
+    override var errorOccurred = false
+    override fun notifyErrorOccurrence(): Boolean {
+        if (errorOccurred) return false
+        errorOccurred = true
         return true
     }
 }

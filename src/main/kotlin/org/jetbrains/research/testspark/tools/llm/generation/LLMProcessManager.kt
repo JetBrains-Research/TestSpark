@@ -181,7 +181,7 @@ class LLMProcessManager(
         if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
         // Error during the collecting
-        if (errorMonitor.isErrorOccurred) return null
+        if (errorMonitor.errorOccurred) return null
 
         log.info("Save generated test suite and test cases into the project workspace")
 

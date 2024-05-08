@@ -117,7 +117,7 @@ class EvoSuiteErrorManager : ErrorManager {
      * @param message the balloon content to display
      */
     override fun errorProcess(message: String, project: Project, errorMonitor: ErrorMonitor) {
-        if (errorMonitor.errorOccurred()) {
+        if (errorMonitor.notifyErrorOccurrence()) {
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("EvoSuite Execution Error")
                 .createNotification(

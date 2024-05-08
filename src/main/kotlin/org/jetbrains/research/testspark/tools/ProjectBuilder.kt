@@ -113,7 +113,7 @@ class ProjectBuilder(private val project: Project, private val errorMonitor: Err
     }
 
     private fun errorProcess() {
-        if (errorMonitor.errorOccurred()) {
+        if (errorMonitor.notifyErrorOccurrence()) {
             NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
                 PluginMessagesBundle.get("buildErrorTitle"),
                 PluginMessagesBundle.get("commonBuildErrorMessage"),

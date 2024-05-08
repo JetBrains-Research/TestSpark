@@ -24,7 +24,7 @@ class RunnerController {
     private fun showGenerationRunningNotification(project: Project) {
         val terminateButton: AnAction = object : AnAction("Terminate") {
             override fun actionPerformed(e: AnActionEvent) {
-                errorMonitor.errorOccurred()
+                errorMonitor.notifyErrorOccurrence()
             }
         }
 
