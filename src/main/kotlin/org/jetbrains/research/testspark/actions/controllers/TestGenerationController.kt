@@ -13,7 +13,7 @@ import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
  * Manager used for monitoring the unit test generation process.
  * It also limits TestSpark to generate tests only once at a time.
  */
-class RunnerController {
+class TestGenerationController {
     private var isRunning: Boolean = false
     // errorMonitor is passed in many places in the project
     // and reflects if any bug happened in the test generation process

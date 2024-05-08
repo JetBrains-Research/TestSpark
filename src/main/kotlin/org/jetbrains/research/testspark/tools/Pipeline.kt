@@ -10,7 +10,7 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiFile
-import org.jetbrains.research.testspark.actions.controllers.RunnerController
+import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -41,7 +41,7 @@ class Pipeline(
     caretOffset: Int,
     fileUrl: String?,
     private val packageName: String,
-    private val runnerController: RunnerController,
+    private val testGenerationController: TestGenerationController,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
@@ -75,7 +75,7 @@ class Pipeline(
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
         clear(project)
-        val projectBuilder = ProjectBuilder(project, runnerController.errorMonitor)
+        val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
 
         var uiContext: UIContext? = null
 
@@ -84,10 +84,10 @@ class Pipeline(
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
 
-                    if (ToolUtils.isProcessStopped(runnerController.errorMonitor, ijIndicator)) return
+                    if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
                     if (projectBuilder.runBuild(ijIndicator)) {
-                        if (ToolUtils.isProcessStopped(runnerController.errorMonitor, ijIndicator)) return
+                        if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
                         uiContext = processManager.runTestGenerator(
                             ijIndicator,
@@ -95,18 +95,18 @@ class Pipeline(
                             packageName,
                             projectContext,
                             generatedTestsData,
-                            runnerController.errorMonitor,
+                            testGenerationController.errorMonitor,
                         )
                     }
 
-                    if (ToolUtils.isProcessStopped(runnerController.errorMonitor, ijIndicator)) return
+                    if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
                     ijIndicator.stop()
                 }
 
                 override fun onFinished() {
                     super.onFinished()
-                    runnerController.finished()
+                    testGenerationController.finished()
                     uiContext?.let {
                         project.service<TestCaseDisplayService>().updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
 
@@ -121,7 +121,7 @@ class Pipeline(
     }
 
     private fun clear(project: Project) { // should be removed totally!
-        runnerController.errorMonitor.clear()
+        testGenerationController.errorMonitor.clear()
         project.service<TestCaseDisplayService>().clear()
         project.service<CoverageVisualisationService>().clear()
         project.service<TestsExecutionResultService>().clear()
