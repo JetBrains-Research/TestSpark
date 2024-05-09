@@ -71,7 +71,6 @@ object ToolUtils {
         generatedTestData.packageLine = packageLine
         generatedTestData.importsCode.addAll(importsCode)
 
-
         for (testCase in report.testCaseList.values) {
             val code = testCase.testCode
             testCase.testCode = JavaClassBuilderHelper.generateCode(

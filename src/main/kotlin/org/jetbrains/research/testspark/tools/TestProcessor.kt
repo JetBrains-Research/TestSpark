@@ -202,7 +202,6 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
                     DataFilesUtil.cleanFolder(resultPath)
                     return TestCaseResult(testCase, "")
                 }
-
             }
         }
     }

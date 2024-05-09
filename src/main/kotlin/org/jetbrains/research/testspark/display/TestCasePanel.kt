@@ -55,7 +55,6 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.MatteBorder
 
-
 class TestCasePanel(
     private val project: Project,
     private val testCase: TestCase,
@@ -137,7 +136,6 @@ class TestCasePanel(
     private val lastRunCodes: MutableList<String> = mutableListOf()
     private val currentCodes: MutableList<String> = mutableListOf()
     private val trimmedCodeToError = mutableMapOf<String, String?>()
-
 
     init {
         prepareUpperPanel()
@@ -627,7 +625,6 @@ class TestCasePanel(
         languageTextField.border = border
     }
 
-
     /**
      * Creates a button to reset the changes in the test source code.
      *
@@ -665,7 +662,7 @@ class TestCasePanel(
         testCase.testName =
             JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
                 testCase.testName,
-                languageTextField.document.text
+                languageTextField.document.text,
             )
         testCase.testCode = languageTextField.document.text
     }
