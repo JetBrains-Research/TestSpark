@@ -67,8 +67,8 @@ class TopButtonsPanelFactory(private val project: Project) {
         var numberOfPassedTests = 0
         for (testCasePanel in testCasePanels) {
             if (testCasePanel.isRemoved()) continue
-            val error = testCasePanel.error
-            if (error.isNullOrBlank()) {
+            val error = testCasePanel.error ?: continue
+            if (error.isBlank()) {
                 numberOfPassedTests++
             }
         }
