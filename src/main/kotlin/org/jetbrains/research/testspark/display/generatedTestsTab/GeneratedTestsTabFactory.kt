@@ -16,8 +16,6 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.*
 import com.intellij.refactoring.suggested.startOffset
-import com.intellij.ui.EditorTextField
-import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
@@ -25,9 +23,9 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.GeneratedTestsTabData
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.display.utils.GenerateTestsTabHelper
 import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import java.awt.BorderLayout
@@ -111,7 +109,6 @@ class GeneratedTestsTabFactory(
             checkbox.addItemListener {
                 if (checkbox.isSelected) {
                     ReportUpdater.selectTestCase(
-                        project,
                         report,
                         generatedTestsTabData.unselectedTestCases,
                         testCase.id,
@@ -120,7 +117,6 @@ class GeneratedTestsTabFactory(
                     )
                 } else {
                     ReportUpdater.unselectTestCase(
-                        project,
                         report,
                         generatedTestsTabData.unselectedTestCases,
                         testCase.id,
@@ -192,7 +188,7 @@ class GeneratedTestsTabFactory(
 
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
-            .map { getEditorTextField(it)!! }
+            .map { GenerateTestsTabHelper.getEditorTextField(it, generatedTestsTabData)!! }
             .map { it.document.text }
 
         // Descriptor for choosing folders and java files
@@ -318,7 +314,7 @@ class GeneratedTestsTabFactory(
         }
 
         // Remove the selected test cases from the cache and the tool window UI
-        selectedTestCasePanels.forEach { removeTestCase(it.key) }
+        selectedTestCasePanels.forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
 
         // Open the file after adding
         FileEditorManager.getInstance(project).openTextEditor(
@@ -450,24 +446,6 @@ class GeneratedTestsTabFactory(
     }
 
     /**
-     * A helper method to remove a test case from the cache and from the UI.
-     *
-     * @param testCaseName the name of the test
-     */
-    private fun removeTestCase(testCaseName: String) {
-        // Update the number of selected test cases if necessary
-        if ((generatedTestsTabData.testCasePanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
-            generatedTestsTabData.testsSelected--
-        }
-
-        // Remove the test panel from the UI
-        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCasePanels[testCaseName])
-
-        // Remove the test panel
-        generatedTestsTabData.testCasePanels.remove(testCaseName)
-    }
-
-    /**
      * Toggles check boxes so that they are either all selected or all not selected,
      *  depending on the provided parameter.
      *
@@ -481,18 +459,6 @@ class GeneratedTestsTabFactory(
         generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCasePanels.size else 0
     }
 
-    /**
-     * Retrieve the editor corresponding to a particular test case
-     *
-     * @param testCaseName the name of the test case
-     * @return the editor corresponding to the test case, or null if it does not exist
-     */
-    private fun getEditorTextField(testCaseName: String): EditorTextField? {
-        val middlePanelComponent = generatedTestsTabData.testCasePanels[testCaseName]?.getComponent(2) ?: return null
-        val middlePanel = middlePanelComponent as JPanel
-        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
-    }
-
     private fun showErrorWindow(message: String) {
         JOptionPane.showMessageDialog(
             null,
@@ -503,7 +469,7 @@ class GeneratedTestsTabFactory(
     }
 
     fun clear() {
-        generatedTestsTabData.testCasePanels.toMap().forEach { removeTestCase(it.key) }
+        generatedTestsTabData.testCasePanels.toMap().forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
         generatedTestsTabData.testCasePanelFactories.clear()
     }
 

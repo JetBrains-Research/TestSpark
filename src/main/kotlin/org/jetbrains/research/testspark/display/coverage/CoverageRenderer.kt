@@ -19,7 +19,8 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
-import org.jetbrains.research.testspark.display.GeneratedTestsTabData
+import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
+import org.jetbrains.research.testspark.display.utils.GenerateTestsTabHelper
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -152,7 +153,7 @@ class CoverageRenderer(
         openToolWindowTab()
         scrollToPanel(myPanel)
 
-        val editorTextField = getEditorTextField(name) ?: return
+        val editorTextField = GenerateTestsTabHelper.getEditorTextField(name, generatedTestsTabData) ?: return
         val settingsProjectState = project.service<PluginSettingsService>().state
         val highlightColor =
             JBColor(
@@ -168,19 +169,6 @@ class CoverageRenderer(
         defaultEditorColor = editorTextField.background
         editorTextField.background = highlightColor
         returnOriginalEditorBackground(editorTextField)
-    }
-
-    // TODO move to a sep file
-    /**
-     * Retrieve the editor corresponding to a particular test case
-     *
-     * @param testCaseName the name of the test case
-     * @return the editor corresponding to the test case, or null if it does not exist
-     */
-    private fun getEditorTextField(testCaseName: String): EditorTextField? {
-        val middlePanelComponent = generatedTestsTabData.testCasePanels[testCaseName]?.getComponent(2) ?: return null
-        val middlePanel = middlePanelComponent as JPanel
-        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
     }
 
     /**
