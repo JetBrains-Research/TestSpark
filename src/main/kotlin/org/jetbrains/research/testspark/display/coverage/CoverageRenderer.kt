@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.ex.EditorGutterComponentEx
 import com.intellij.openapi.editor.markup.ActiveGutterRenderer
 import com.intellij.openapi.editor.markup.LineMarkerRendererEx
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.HintHint
 import com.intellij.ui.JBColor
@@ -18,8 +19,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
-import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
+import org.jetbrains.research.testspark.display.GeneratedTestsTabData
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -28,6 +28,7 @@ import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
+import javax.swing.JPanel
 
 /**
  * This class extends the line marker and gutter editor to allow more functionality.
@@ -48,11 +49,13 @@ class CoverageRenderer(
     private val notCoveredMutation: List<String>,
     private val mapMutantsToTests: HashMap<String, MutableList<String>>,
     private val project: Project,
-    private val uiContext: UIContext,
+    private val generatedTestsTabData: GeneratedTestsTabData,
 ) :
     ActiveGutterRenderer, LineMarkerRendererEx {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
         get() = project.getService(EvoSuiteSettingsService::class.java).state
+
+    private var defaultEditorColor: Color? = null
 
     /**
      * Perform the action - show toolTip on mouse click.
@@ -145,11 +148,11 @@ class CoverageRenderer(
      * @param name name of the test whose editor should be highlighted
      */
     private fun highlightTestCase(name: String) {
-        val myPanel = uiContext.testCasesUIContext.testCasePanels[name] ?: return
+        val myPanel = generatedTestsTabData.testCasePanels[name] ?: return
         openToolWindowTab()
         scrollToPanel(myPanel)
 
-        val editor = getEditorTextField(name) ?: return
+        val editorTextField = getEditorTextField(name) ?: return
         val settingsProjectState = project.service<PluginSettingsService>().state
         val highlightColor =
             JBColor(
@@ -161,10 +164,53 @@ class CoverageRenderer(
                     30,
                 ),
             )
-        if (editor.background.equals(highlightColor)) return
-        uiContext.testCasesUIContext.defaultEditorColor = editor.background
-        editor.background = highlightColor
-        returnOriginalEditorBackground(editor)
+        if (editorTextField.background.equals(highlightColor)) return
+        defaultEditorColor = editorTextField.background
+        editorTextField.background = highlightColor
+        returnOriginalEditorBackground(editorTextField)
+    }
+
+    // TODO move to a sep file
+    /**
+     * Retrieve the editor corresponding to a particular test case
+     *
+     * @param testCaseName the name of the test case
+     * @return the editor corresponding to the test case, or null if it does not exist
+     */
+    private fun getEditorTextField(testCaseName: String): EditorTextField? {
+        val middlePanelComponent = generatedTestsTabData.testCasePanels[testCaseName]?.getComponent(2) ?: return null
+        val middlePanel = middlePanelComponent as JPanel
+        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
+    }
+
+    /**
+     * Method to open the toolwindow tab with generated tests if not already open.
+     */
+    private fun openToolWindowTab() {
+        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
+        generatedTestsTabData.contentManager = toolWindowManager!!.contentManager
+        if (generatedTestsTabData.content != null) {
+            toolWindowManager.show()
+            toolWindowManager.contentManager.setSelectedContent(generatedTestsTabData.content!!)
+        }
+    }
+
+    /**
+     * Scrolls to the highlighted panel.
+     *
+     * @param myPanel the panel to scroll to
+     */
+    private fun scrollToPanel(myPanel: JPanel) {
+        var sum = 0
+        for (component in generatedTestsTabData.allTestCasePanel.components) {
+            if (component == myPanel) {
+                break
+            } else {
+                sum += component.height
+            }
+        }
+        val scroll = generatedTestsTabData.scrollPane.verticalScrollBar
+        scroll.value = (scroll.minimum + scroll.maximum) * sum / generatedTestsTabData.allTestCasePanel.height
     }
 
     /**
@@ -174,7 +220,7 @@ class CoverageRenderer(
     private fun returnOriginalEditorBackground(editor: EditorTextField) {
         Thread {
             Thread.sleep(10000)
-            editor.background = uiContext.testCasesUIContext.defaultEditorColor
+            editor.background = defaultEditorColor
         }.start()
     }
 

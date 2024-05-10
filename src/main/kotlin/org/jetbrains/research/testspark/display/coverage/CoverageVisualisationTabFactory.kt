@@ -17,7 +17,7 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
+import org.jetbrains.research.testspark.display.GeneratedTestsTabData
 import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import java.awt.Color
@@ -29,8 +29,7 @@ import kotlin.math.roundToInt
  *
  * @param project the project
  */
-class CoverageVisualisationTabFactory(private val project: Project, private val editor: Editor, private val uiContext: UIContext) {
-
+class CoverageVisualisationTabFactory(private val project: Project, private val editor: Editor) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
     private var contentManager: ContentManager? = null
@@ -69,7 +68,7 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
      *
      * @param testReport the generated tests summary
      */
-    fun showCoverage(testReport: Report) {
+    fun show(testReport: Report, generatedTestsTabData: GeneratedTestsTabData) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
         createToolWindowTab()
@@ -78,6 +77,7 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
             testReport.allCoveredLines,
             testReport.testCaseList.values.stream().map { it.id }.toList().toHashSet(),
             testReport,
+            generatedTestsTabData,
         )
     }
 
@@ -89,10 +89,11 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
      * @param testReport report used for gutter information
      * @param selectedTests hash set of selected test names
      */
-    fun updateCoverage(
+    private fun updateCoverage(
         linesToCover: Set<Int>,
         selectedTests: HashSet<Int>,
         testReport: Report,
+        generatedTestsTabData: GeneratedTestsTabData,
     ) {
         currentHighlightedData = HighlightedData(linesToCover, selectedTests, testReport, editor)
         clear()
@@ -162,7 +163,7 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
                     mutationNotCoveredLine,
                     mapMutantsToTests,
                     project,
-                    uiContext,
+                    generatedTestsTabData,
                 )
             }
         }

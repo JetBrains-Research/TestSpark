@@ -15,6 +15,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
@@ -28,16 +29,16 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
+import org.jetbrains.research.testspark.display.GeneratedTestsTabData
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.utils.IconButtonCreator
 import org.jetbrains.research.testspark.display.utils.ModifiedLinesGetter
+import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.display.utils.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
-import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -67,9 +68,10 @@ class TestCasePanelFactory(
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
-    val uiContext: UIContext?,
-    val report: Report,
+    private val uiContext: UIContext?,
+    private val report: Report,
     private val coverageVisualisationTabFactory: CoverageVisualisationTabFactory,
+    private val generatedTestsTabData: GeneratedTestsTabData,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -199,7 +201,7 @@ class TestCasePanelFactory(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    testSparkDisplayFactory.getEditorTextField(testCase.testName)!!.document.text,
+                    getEditorTextField(testCase.testName)!!.document.text,
                 ),
                 null,
             )
@@ -391,8 +393,8 @@ class TestCasePanelFactory(
             testCase.coveredLines = setOf()
         }
 
-        ReportUpdater.updateTestCase(project, report, testCase, coverageVisualisationTabFactory)
-        testSparkDisplayFactory.updateUI()
+        ReportUpdater.updateTestCase(project, report, testCase, coverageVisualisationTabFactory, generatedTestsTabData)
+        update()
     }
 
     /**
@@ -588,14 +590,60 @@ class TestCasePanelFactory(
      * 3. Updating the UI.
      */
     private fun remove() {
-        // Remove the test case from the cache
-        testSparkDisplayFactory.removeTestCase(testCase.testName)
+        removeTestCase(testCase.testName)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportUpdater.removeTestCase(project, report, testCase, coverageVisualisationTabFactory)
-        testSparkDisplayFactory.updateUI()
+        ReportUpdater.removeTestCase(project, report, testCase, coverageVisualisationTabFactory, generatedTestsTabData)
+        update()
+    }
+
+    // TODO move to a sep file
+    /**
+     * Updates the user interface of the tool window.
+     *
+     * This method updates the UI of the tool window tab by calling the updateUI
+     * method of the allTestCasePanel object and the updateTopLabels method
+     * of the topButtonsPanel object. It also checks if there are no more tests remaining
+     * and closes the tool window if that is the case.
+     */
+    private fun update() {
+        generatedTestsTabData.allTestCasePanel.updateUI()
+        generatedTestsTabData.topButtonsPanelFactory.update(generatedTestsTabData.testCasePanels, generatedTestsTabData.testsSelected, generatedTestsTabData.testCasePanelFactories)
+
+    }
+
+    // TODO move to a sep file
+    /**
+     * A helper method to remove a test case from the cache and from the UI.
+     *
+     * @param testCaseName the name of the test
+     */
+    private fun removeTestCase(testCaseName: String) {
+        // Update the number of selected test cases if necessary
+        if ((generatedTestsTabData.testCasePanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
+            generatedTestsTabData.testsSelected--
+        }
+
+        // Remove the test panel from the UI
+        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCasePanels[testCaseName])
+
+        // Remove the test panel
+        generatedTestsTabData.testCasePanels.remove(testCaseName)
+    }
+
+    // TODO move to a sep file
+    /**
+     * Retrieve the editor corresponding to a particular test case
+     *
+     * @param testCaseName the name of the test case
+     * @return the editor corresponding to the test case, or null if it does not exist
+     */
+    private fun getEditorTextField(testCaseName: String): EditorTextField? {
+        val middlePanelComponent = generatedTestsTabData.testCasePanels[testCaseName]?.getComponent(2) ?: return null
+        val middlePanel = middlePanelComponent as JPanel
+        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
     }
 
     /**

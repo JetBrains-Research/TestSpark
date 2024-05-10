@@ -196,6 +196,6 @@ class LLMProcessManager(
             generatedTestsData,
         )
 
-        return UIContext(projectContext, generatedTestsData, TestCasesUIContext(), requestManager)
+        return UIContext(projectContext, generatedTestsData, requestManager)
     }
 }

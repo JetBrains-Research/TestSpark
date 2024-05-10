@@ -21,10 +21,10 @@ import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
@@ -115,7 +115,7 @@ class Pipeline(
                         updateEditor(it.testGenerationOutput.fileUrl)
 
                         if (editor != null) {
-                            TestSparkDisplayFactory(project).displayTestCases(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it)
+                            TestSparkDisplayFactory(project).display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it)
                         }
                     }
                 }
