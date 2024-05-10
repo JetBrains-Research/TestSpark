@@ -25,7 +25,7 @@ class TopButtonsPanelFactory {
     private val testsPassedText: String = "${PluginLabelsBundle.get("testsPassed")}: %d/%d"
     private var testsPassedLabel: JLabel = JLabel(testsPassedText)
 
-    private var numberOfPassedTests = 0;
+    private var numberOfPassedTests = 0
 
     fun getPanel(): JPanel {
         val panel = JPanel()

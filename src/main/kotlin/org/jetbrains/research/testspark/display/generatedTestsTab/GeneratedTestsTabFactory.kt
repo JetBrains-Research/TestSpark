@@ -14,7 +14,11 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.*
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElementFactory
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiManager
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.content.ContentFactory
 import com.intellij.util.containers.stream
@@ -31,8 +35,17 @@ import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.io.File
-import java.util.*
-import javax.swing.*
+import java.util.LinkedList
+import java.util.Locale
+import java.util.Queue
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JOptionPane
+import javax.swing.JPanel
+import javax.swing.JSeparator
+import javax.swing.SwingConstants
 
 class GeneratedTestsTabFactory(
     private val project: Project,
@@ -167,7 +180,7 @@ class GeneratedTestsTabFactory(
         generatedTestsTabData.topButtonsPanelFactory.update(
             generatedTestsTabData.testCasePanels,
             generatedTestsTabData.testsSelected,
-            generatedTestsTabData.testCasePanelFactories
+            generatedTestsTabData.testCasePanelFactories,
         )
     }
 
@@ -184,7 +197,7 @@ class GeneratedTestsTabFactory(
         generatedTestsTabData.topButtonsPanelFactory.update(
             generatedTestsTabData.testCasePanels,
             generatedTestsTabData.testsSelected,
-            generatedTestsTabData.testCasePanelFactories
+            generatedTestsTabData.testCasePanelFactories,
         )
     }
 
@@ -210,17 +223,17 @@ class GeneratedTestsTabFactory(
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
                 file.isDirectory || (
-                        file.extension?.lowercase(Locale.getDefault()) == "java" && (
-                                PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
-                                ).classes.stream().map { it.name }
-                            .toArray()
-                            .contains(
-                                (
-                                        PsiManager.getInstance(project)
-                                            .findFile(file) as PsiJavaFile
-                                        ).name.removeSuffix(".java"),
-                            )
+                    file.extension?.lowercase(Locale.getDefault()) == "java" && (
+                        PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                        ).classes.stream().map { it.name }
+                        .toArray()
+                        .contains(
+                            (
+                                PsiManager.getInstance(project)
+                                    .findFile(file) as PsiJavaFile
+                                ).name.removeSuffix(".java"),
                         )
+                    )
             }
         }
 

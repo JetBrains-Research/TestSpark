@@ -17,7 +17,11 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
-import org.jetbrains.research.testspark.data.*
+import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.IJReport
+import org.jetbrains.research.testspark.data.ProjectContext
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -67,7 +71,7 @@ class EvoSuiteProcessManager(
         codeType: FragmentToTestData,
         packageName: String,
         projectContext: ProjectContext,
-        generatedTestData: TestGenerationData,
+        generatedTestsData: TestGenerationData,
     ): UIContext? {
         try {
             if (ToolUtils.isProcessStopped(project, indicator)) return null
@@ -87,10 +91,10 @@ class EvoSuiteProcessManager(
 
             val projectClassPath = projectContext.projectClassPath!!
             val classFQN = projectContext.classFQN!!
-            val baseDir = generatedTestData.baseDir!!
-            val resultName = "${generatedTestData.resultPath}${ToolUtils.sep}EvoSuiteResult"
+            val baseDir = generatedTestsData.baseDir!!
+            val resultName = "${generatedTestsData.resultPath}${ToolUtils.sep}EvoSuiteResult"
 
-            Path(generatedTestData.resultPath).createDirectories()
+            Path(generatedTestsData.resultPath).createDirectories()
 
             // get command
             val command = when (codeType.type!!) {
@@ -197,13 +201,13 @@ class EvoSuiteProcessManager(
                 ToolUtils.getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
                 ToolUtils.getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
                 projectContext.fileUrlAsString!!,
-                generatedTestData,
+                generatedTestsData,
             )
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("evosuiteErrorMessage").format(e.message), project)
             e.printStackTrace()
         }
 
-        return UIContext(projectContext, generatedTestData, StandardRequestManagerFactory(project).getRequestManager(project))
+        return UIContext(projectContext, generatedTestsData, StandardRequestManagerFactory(project).getRequestManager(project))
     }
 }

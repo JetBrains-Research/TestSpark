@@ -2,8 +2,8 @@ package org.jetbrains.research.testspark.display.utils
 
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
-import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
+import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
 
 object ReportUpdater {
     fun updateTestCase(
