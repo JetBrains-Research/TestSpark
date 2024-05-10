@@ -31,24 +31,22 @@ object ReportUpdater {
 
     fun unselectTestCase(
         report: Report,
-        unselectedTestCases: HashMap<Int, TestCase>,
         testCaseId: Int,
         coverageVisualisationTabFactory: CoverageVisualisationTabFactory,
         generatedTestsTabData: GeneratedTestsTabData,
     ) {
-        unselectedTestCases[testCaseId] = report.testCaseList[testCaseId]!!
+        generatedTestsTabData.unselectedTestCases[testCaseId] = report.testCaseList[testCaseId]!!
         removeTestCase(report, report.testCaseList[testCaseId]!!, coverageVisualisationTabFactory, generatedTestsTabData)
     }
 
     fun selectTestCase(
         report: Report,
-        unselectedTestCases: HashMap<Int, TestCase>,
         testCaseId: Int,
         coverageVisualisationTabFactory: CoverageVisualisationTabFactory,
         generatedTestsTabData: GeneratedTestsTabData,
     ) {
-        report.testCaseList[testCaseId] = unselectedTestCases[testCaseId]!!
-        unselectedTestCases.remove(testCaseId)
+        report.testCaseList[testCaseId] = generatedTestsTabData.unselectedTestCases[testCaseId]!!
+        generatedTestsTabData.unselectedTestCases.remove(testCaseId)
         report.normalized()
         coverageVisualisationTabFactory.show(report, generatedTestsTabData)
     }

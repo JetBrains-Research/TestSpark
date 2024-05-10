@@ -68,14 +68,17 @@ class GeneratedTestsTabFactory(
 
     private fun addActionListeners() {
         applyButton.addActionListener { applyTests() }
-        generatedTestsTabData.topButtonsPanelFactory.getSelectAllButton().addActionListener { toggleAllCheckboxes(true) }
-        generatedTestsTabData.topButtonsPanelFactory.getUnselectAllButton().addActionListener { toggleAllCheckboxes(false) }
+        generatedTestsTabData.topButtonsPanelFactory.getSelectAllButton()
+            .addActionListener { toggleAllCheckboxes(true) }
+        generatedTestsTabData.topButtonsPanelFactory.getUnselectAllButton()
+            .addActionListener { toggleAllCheckboxes(false) }
         generatedTestsTabData.topButtonsPanelFactory.getRemoveAllButton().addActionListener { removeAllTestCases() }
         generatedTestsTabData.topButtonsPanelFactory.getRunAllButton().addActionListener { runAllTestCases() }
     }
 
     private fun fillPanels() {
-        generatedTestsTabData.allTestCasePanel.layout = BoxLayout(generatedTestsTabData.allTestCasePanel, BoxLayout.Y_AXIS)
+        generatedTestsTabData.allTestCasePanel.layout =
+            BoxLayout(generatedTestsTabData.allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
 
         mainPanel.add(generatedTestsTabData.topButtonsPanelFactory.getPanel(), BorderLayout.NORTH)
@@ -107,10 +110,11 @@ class GeneratedTestsTabFactory(
             val checkbox = JCheckBox()
             checkbox.isSelected = true
             checkbox.addItemListener {
+                generatedTestsTabData.testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
+
                 if (checkbox.isSelected) {
                     ReportUpdater.selectTestCase(
                         report,
-                        generatedTestsTabData.unselectedTestCases,
                         testCase.id,
                         coverageVisualisationTabFactory,
                         generatedTestsTabData,
@@ -118,7 +122,6 @@ class GeneratedTestsTabFactory(
                 } else {
                     ReportUpdater.unselectTestCase(
                         report,
-                        generatedTestsTabData.unselectedTestCases,
                         testCase.id,
                         coverageVisualisationTabFactory,
                         generatedTestsTabData,
@@ -161,7 +164,11 @@ class GeneratedTestsTabFactory(
 
         generatedTestsTabData.testsSelected = generatedTestsTabData.testCasePanels.size
 
-        generatedTestsTabData.topButtonsPanelFactory.update(generatedTestsTabData.testCasePanels, generatedTestsTabData.testsSelected, generatedTestsTabData.testCasePanelFactories)
+        generatedTestsTabData.topButtonsPanelFactory.update(
+            generatedTestsTabData.testCasePanels,
+            generatedTestsTabData.testsSelected,
+            generatedTestsTabData.testCasePanelFactories
+        )
     }
 
     /**
@@ -174,7 +181,11 @@ class GeneratedTestsTabFactory(
      */
     private fun update() {
         generatedTestsTabData.allTestCasePanel.updateUI()
-        generatedTestsTabData.topButtonsPanelFactory.update(generatedTestsTabData.testCasePanels, generatedTestsTabData.testsSelected, generatedTestsTabData.testCasePanelFactories)
+        generatedTestsTabData.topButtonsPanelFactory.update(
+            generatedTestsTabData.testCasePanels,
+            generatedTestsTabData.testsSelected,
+            generatedTestsTabData.testCasePanelFactories
+        )
     }
 
     /**
@@ -183,7 +194,8 @@ class GeneratedTestsTabFactory(
      */
     private fun applyTests() {
         // Filter the selected test cases
-        val selectedTestCasePanels = generatedTestsTabData.testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+        val selectedTestCasePanels =
+            generatedTestsTabData.testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
         // Get the test case components (source code of the tests)
@@ -457,6 +469,8 @@ class GeneratedTestsTabFactory(
             checkBox.isSelected = selected
         }
         generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCasePanels.size else 0
+
+        update()
     }
 
     private fun showErrorWindow(message: String) {
@@ -469,7 +483,8 @@ class GeneratedTestsTabFactory(
     }
 
     fun clear() {
-        generatedTestsTabData.testCasePanels.toMap().forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
+        generatedTestsTabData.testCasePanels.toMap()
+            .forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
         generatedTestsTabData.testCasePanelFactories.clear()
     }
 
