@@ -499,6 +499,8 @@ class GeneratedTestsTabFactory(
         generatedTestsTabData.testCasePanels.toMap()
             .forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
         generatedTestsTabData.testCasePanelFactories.clear()
+
+        generatedTestsTabData.contentManager?.removeContent(generatedTestsTabData.content!!, true)
     }
 
     /**
@@ -524,9 +526,5 @@ class GeneratedTestsTabFactory(
         // Focus on generated tests tab and open toolWindow if not opened already
         generatedTestsTabData.contentManager!!.setSelectedContent(generatedTestsTabData.content!!)
         toolWindowManager.show()
-    }
-
-    fun closeToolWindowTab() {
-        generatedTestsTabData.contentManager?.removeContent(generatedTestsTabData.content!!, true)
     }
 }

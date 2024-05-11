@@ -18,6 +18,7 @@ import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
 import org.jetbrains.research.testspark.display.utils.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
@@ -51,6 +52,8 @@ class TestSparkAction : AnAction() {
     private val visibilityController = VisibilityController()
     private val runnerController = RunnerController()
 
+    private val testSparkDisplayFactory = TestSparkDisplayFactory()
+
     /**
      * Handles the action performed event.
      *
@@ -61,7 +64,7 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(e, visibilityController, runnerController)
+        TestSparkActionWindow(e, visibilityController, runnerController, testSparkDisplayFactory)
     }
 
     /**
@@ -82,6 +85,7 @@ class TestSparkAction : AnAction() {
         e: AnActionEvent,
         private val visibilityController: VisibilityController,
         private val runnerController: RunnerController,
+        private val testSparkDisplayFactory: TestSparkDisplayFactory,
     ) :
         JFrame("TestSpark") {
         private val project: Project = e.project!!
@@ -324,6 +328,7 @@ class TestSparkAction : AnAction() {
                         fileUrl,
                         testSamplesCode,
                         runnerController,
+                        testSparkDisplayFactory,
                     )
                 } else if (codeTypeButtons[1].isSelected) {
                     EvoSuite().generateTestsForMethod(
@@ -333,6 +338,7 @@ class TestSparkAction : AnAction() {
                         fileUrl,
                         testSamplesCode,
                         runnerController,
+                        testSparkDisplayFactory,
                     )
                 } else if (codeTypeButtons[2].isSelected) {
                     EvoSuite().generateTestsForLine(
@@ -342,9 +348,11 @@ class TestSparkAction : AnAction() {
                         fileUrl,
                         testSamplesCode,
                         runnerController,
+                        testSparkDisplayFactory,
                     )
                 }
             }
+            testSparkDisplayFactory.clear(project)
             visibilityController.isVisible = false
             dispose()
         }
@@ -361,6 +369,7 @@ class TestSparkAction : AnAction() {
                         fileUrl,
                         testSamplesCode,
                         runnerController,
+                        testSparkDisplayFactory,
                     )
                 } else if (codeTypeButtons[1].isSelected) {
                     Llm().generateTestsForMethod(
@@ -370,6 +379,7 @@ class TestSparkAction : AnAction() {
                         fileUrl,
                         testSamplesCode,
                         runnerController,
+                        testSparkDisplayFactory,
                     )
                 } else if (codeTypeButtons[2].isSelected) {
                     Llm().generateTestsForLine(
@@ -379,9 +389,11 @@ class TestSparkAction : AnAction() {
                         fileUrl,
                         testSamplesCode,
                         runnerController,
+                        testSparkDisplayFactory,
                     )
                 }
             }
+            testSparkDisplayFactory.clear(project)
             visibilityController.isVisible = false
             dispose()
         }

@@ -57,9 +57,8 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
      * Clears all highlighters from the list of editors.
      */
     fun clear() {
-        currentHighlightedData ?: return
-        currentHighlightedData!!.editor.markupModel ?: return
-        currentHighlightedData!!.editor.markupModel.removeAllHighlighters()
+        currentHighlightedData?.editor?.markupModel?.removeAllHighlighters()
+        contentManager?.removeContent(content!!, true)
     }
 
     /**
@@ -166,13 +165,6 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
                 )
             }
         }
-    }
-
-    /**
-     * Closes the toolWindow tab for the coverage visualisation
-     */
-    fun closeToolWindowTab() {
-        contentManager?.removeContent(content!!, true)
     }
 
     private fun getCoveringLines(testReport: Report, selectedTests: HashSet<Int>, lineNumber: Int): List<String> {

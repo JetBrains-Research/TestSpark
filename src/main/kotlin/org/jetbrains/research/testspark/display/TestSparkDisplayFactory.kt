@@ -8,7 +8,7 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabFactory
 
-class TestSparkDisplayFactory(private val project: Project) {
+class TestSparkDisplayFactory {
     private var editor: Editor? = null
 
     private var coverageVisualisationTabFactory: CoverageVisualisationTabFactory? = null
@@ -18,7 +18,7 @@ class TestSparkDisplayFactory(private val project: Project) {
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
      */
-    fun display(report: Report, editor: Editor, uiContext: UIContext) {
+    fun display(report: Report, editor: Editor, uiContext: UIContext, project: Project) {
         this.editor = editor
 
         coverageVisualisationTabFactory = CoverageVisualisationTabFactory(project, editor)
@@ -28,21 +28,11 @@ class TestSparkDisplayFactory(private val project: Project) {
         generatedTestsTabFactory!!.show()
     }
 
-    fun clear() {
+    fun clear(project: Project) {
         editor?.markupModel?.removeAllHighlighters()
 
-        coverageVisualisationTabFactory!!.clear()
-        generatedTestsTabFactory!!.clear()
-
-        closeToolWindow()
-    }
-
-    /**
-     * Closes the tool window and destroys the content of the tab.
-     */
-    private fun closeToolWindow() {
-        coverageVisualisationTabFactory!!.closeToolWindowTab()
-        generatedTestsTabFactory!!.closeToolWindowTab()
+        coverageVisualisationTabFactory?.clear()
+        generatedTestsTabFactory?.clear()
 
         ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
     }

@@ -45,6 +45,7 @@ class Pipeline(
     fileUrl: String?,
     private val packageName: String,
     private val runnerController: RunnerController,
+    private val testSparkDisplayFactory: TestSparkDisplayFactory,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
@@ -115,7 +116,7 @@ class Pipeline(
                         updateEditor(it.testGenerationOutput.fileUrl)
 
                         if (editor != null) {
-                            TestSparkDisplayFactory(project).display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it)
+                            testSparkDisplayFactory.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project)
                         }
                     }
                 }
