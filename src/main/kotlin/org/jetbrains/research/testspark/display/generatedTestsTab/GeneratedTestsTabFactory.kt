@@ -79,13 +79,14 @@ class GeneratedTestsTabFactory(
 
     fun getGeneratedTestsTabData() = generatedTestsTabData
 
+    fun getRemoveAllButton() = generatedTestsTabData.topButtonsPanelFactory.getRemoveAllButton()
+
     private fun addActionListeners() {
         applyButton.addActionListener { applyTests() }
         generatedTestsTabData.topButtonsPanelFactory.getSelectAllButton()
             .addActionListener { toggleAllCheckboxes(true) }
         generatedTestsTabData.topButtonsPanelFactory.getUnselectAllButton()
             .addActionListener { toggleAllCheckboxes(false) }
-        generatedTestsTabData.topButtonsPanelFactory.getRemoveAllButton().addActionListener { removeAllTestCases() }
         generatedTestsTabData.topButtonsPanelFactory.getRunAllButton().addActionListener { runAllTestCases() }
     }
 

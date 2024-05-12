@@ -589,6 +589,16 @@ class TestCasePanelFactory(
      * 3. Updating the UI.
      */
     private fun remove() {
+        val choice = JOptionPane.showConfirmDialog(
+            null,
+            PluginMessagesBundle.get("removeCautionMessage"),
+            PluginMessagesBundle.get("confirmationTitle"),
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.WARNING_MESSAGE,
+        )
+
+        if (choice == JOptionPane.CANCEL_OPTION) return
+
         GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
