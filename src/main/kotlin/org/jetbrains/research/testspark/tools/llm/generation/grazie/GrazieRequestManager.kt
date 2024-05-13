@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -15,6 +16,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
+        errorMonitor: ErrorMonitor
     ): SendResult {
         var sendResult = SendResult.OK
 
@@ -31,6 +33,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
                             llmErrorManager.errorProcess(
                                 LLMMessagesBundle.get("wrongToken"),
                                 project,
+                                errorMonitor = errorMonitor
                             )
                             sendResult = SendResult.OTHER
                         }
@@ -44,14 +47,14 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
                         }
 
                         else -> {
-                            llmErrorManager.errorProcess(requestError, project)
+                            llmErrorManager.errorProcess(requestError, project, errorMonitor)
                             sendResult = SendResult.OTHER
                         }
                     }
                 }
             }
         } catch (e: ClassNotFoundException) {
-            llmErrorManager.errorProcess(LLMMessagesBundle.get("grazieError"), project)
+            llmErrorManager.errorProcess(LLMMessagesBundle.get("grazieError"), project, errorMonitor)
         }
 
         return sendResult

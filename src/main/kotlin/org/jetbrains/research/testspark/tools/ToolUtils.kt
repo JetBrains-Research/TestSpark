@@ -9,11 +9,11 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
-import org.jetbrains.research.testspark.services.ErrorService
 import java.io.File
 
 object ToolUtils {
@@ -130,15 +130,17 @@ object ToolUtils {
     /**
      * Checks if the process has been stopped.
      *
-     * @param project the project in which the process is running
+     * @param errorMonitor the class responsible for monitoring the errors during the test generation process
      * @param indicator the progress indicator for tracking the progress of the process
      *
      * @return true if the process has been stopped, false otherwise
      */
-    fun isProcessStopped(project: Project, indicator: CustomProgressIndicator): Boolean {
-        if (project.service<ErrorService>().isErrorOccurred()) return true
+    fun isProcessStopped(errorMonitor: ErrorMonitor, indicator: CustomProgressIndicator): Boolean {
+        return errorMonitor.hasErrorOccurred() || isProcessCanceled(indicator)
+    }
+
+    fun isProcessCanceled(indicator: CustomProgressIndicator): Boolean {
         if (indicator.isCanceled()) {
-            project.service<ErrorService>().errorOccurred()
             indicator.stop()
             return true
         }

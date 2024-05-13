@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.tools.template
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import org.jetbrains.research.testspark.actions.controllers.RunnerController
+import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 
 /**
  * Represents a tool that can generate tests.
@@ -22,7 +22,7 @@ interface Tool {
      * @see Project
      * @see PsiFile
      */
-    fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController)
+    fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController)
 
     /**
      * Generates test cases for a given method.
@@ -33,7 +33,7 @@ interface Tool {
      * @param fileUrl The URL of the file where the method is defined (optional).
      * @param testSamplesCode The code snippets for test samples (optional).
      */
-    fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController)
+    fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController)
 
     /**
      * Generates tests for a specific line in a project.
@@ -47,5 +47,5 @@ interface Tool {
      * @see Project
      * @see PsiFile
      */
-    fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController)
+    fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController)
 }
