@@ -91,6 +91,10 @@ class TestCaseDisplayService(private val project: Project) {
 
     var uiContext: UIContext? = null
 
+    // TestCasePanelFactories array
+    val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
+
+
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
@@ -119,9 +123,6 @@ class TestCaseDisplayService(private val project: Project) {
         testCasePanels.clear()
 
         addSeparator()
-
-        // TestCasePanelFactories array
-        val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
 
         report.testCaseList.values.forEach {
             val testCase = it
@@ -168,6 +169,20 @@ class TestCaseDisplayService(private val project: Project) {
         topButtonsPanelFactory.updateTopLabels()
 
         createToolWindowTab()
+
+        // Add collector logging
+        project.service<CollectorService>().testGenerationFinishedCollector.logEvent(
+            System.currentTimeMillis() - project.service<CollectorService>().data.testGenerationStartTime!!,
+            project.service<CollectorService>().data.technique!!,
+            project.service<CollectorService>().data.codeType!!,
+        )
+
+        // Add collector logging
+        project.service<CollectorService>().generatedTestsCollector.logEvent(
+            report.testCaseList.size,
+            project.service<CollectorService>().data.technique!!,
+            project.service<CollectorService>().data.codeType!!,
+        )
     }
 
     /**
@@ -408,6 +423,20 @@ class TestCaseDisplayService(private val project: Project) {
         FileEditorManager.getInstance(project).openTextEditor(
             OpenFileDescriptor(project, virtualFile!!),
             true,
+        )
+
+        // Get number of modified tests
+        var modifiedTestsCount = 0
+        for (testCasePanelFactory in testCasePanelFactories) {
+            if (testCasePanelFactory.isGlobalModified()) modifiedTestsCount++
+        }
+
+        // Add collector logging
+        project.service<CollectorService>().integratedTestsCollector.logEvent(
+            selectedTestCases.size,
+            project.service<CollectorService>().data.technique!!,
+            project.service<CollectorService>().data.codeType!!,
+            modifiedTestsCount,
         )
     }
 

@@ -32,6 +32,7 @@ import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper
+import org.jetbrains.research.testspark.services.CollectorService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -175,7 +176,13 @@ class TestCasePanelFactory(
                 likeButton.icon = TestSparkIcons.likeSelected
             }
             dislikeButton.icon = TestSparkIcons.dislike
-//            TODO add implementation
+            project.service<CollectorService>().likedDislikedCollector.logEvent(
+                true,
+                getTestId(),
+                project.service<CollectorService>().data.technique!!,
+                project.service<CollectorService>().data.codeType!!,
+                testCase.testCode != initialCodes[currentRequestNumber - 1],
+            )
         }
 
         dislikeButton.addActionListener {
@@ -185,7 +192,13 @@ class TestCasePanelFactory(
                 dislikeButton.icon = TestSparkIcons.dislikeSelected
             }
             likeButton.icon = TestSparkIcons.like
-//            TODO add implementation
+            project.service<CollectorService>().likedDislikedCollector.logEvent(
+                false,
+                getTestId(),
+                project.service<CollectorService>().data.technique!!,
+                project.service<CollectorService>().data.codeType!!,
+                testCase.testCode != initialCodes[currentRequestNumber - 1],
+            )
         }
 
         copyButton.addActionListener {
@@ -407,6 +420,13 @@ class TestCasePanelFactory(
                         return
                     }
 
+                    project.service<CollectorService>().feedbackSentCollector.logEvent(
+                        project.service<CollectorService>().data.id!! + "_" + testCase.id,
+                        project.service<CollectorService>().data.technique!!,
+                        project.service<CollectorService>().data.codeType!!,
+                        testCase.testCode != initialCodes[currentRequestNumber - 1],
+                    )
+
                     val modifiedTest = LLMHelper.testModificationRequest(
                         initialCodes[currentRequestNumber - 1],
                         requestComboBox.editor.item.toString(),
@@ -599,6 +619,8 @@ class TestCasePanelFactory(
      */
     fun isRunEnabled() = runTestButton.isEnabled
 
+    fun isGlobalModified(): Boolean = testCase.testCode != initialCodes[0]
+
     /**
      * Updates the border of the languageTextField based on the provided test name and text.
      */
@@ -665,4 +687,6 @@ class TestCasePanelFactory(
             JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
+
+    private fun getTestId(): String = project.service<CollectorService>().data.id!! + "_" + testCase.id
 }

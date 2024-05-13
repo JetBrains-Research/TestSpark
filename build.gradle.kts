@@ -261,6 +261,9 @@ tasks {
         systemProperty("jb.consents.confirmation.enabled", "false")
         systemProperty("ide.mac.file.chooser.native", "false")
         systemProperty("apple.laf.useScreenMenuBar", "false")
+        // VM options to include FUS collector
+        jvmArgs("-Dfus.internal.test.mode=true")
+        jvmArgs("-Didea.is.internal=true")
     }
 
     signPlugin {

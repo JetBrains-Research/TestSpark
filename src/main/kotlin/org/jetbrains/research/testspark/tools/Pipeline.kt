@@ -19,10 +19,7 @@ import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.PsiHelper
-import org.jetbrains.research.testspark.services.CoverageVisualisationService
-import org.jetbrains.research.testspark.services.EditorService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.services.*
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -62,6 +59,8 @@ class Pipeline(
             projectContext.cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
         }
 
+        project.service<CollectorService>().data.id = id
+
         generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
         generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
         generatedTestsData.testResultName = testResultName
@@ -85,6 +84,16 @@ class Pipeline(
                     val ijIndicator = IJProgressIndicator(indicator)
 
                     if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
+
+                    project.service<CollectorService>().data.technique = processManager.getTechnique()
+                    project.service<CollectorService>().data.codeType = codeType.type!!
+                    project.service<CollectorService>().data.testGenerationStartTime = System.currentTimeMillis()
+
+                    // Add collector logging
+                    project.service<CollectorService>().testGenerationStartedCollector.logEvent(
+                        processManager.getTechnique(),
+                        codeType.type!!,
+                    )
 
                     if (projectBuilder.runBuild(ijIndicator)) {
                         if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
