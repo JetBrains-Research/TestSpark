@@ -411,7 +411,7 @@ class TestCasePanel(
                         uiContext.requestManager!!,
                         project,
                         uiContext.testGenerationOutput,
-                        uiContext.errorMonitor
+                        uiContext.errorMonitor,
                     )
 
                     if (modifiedTest != null) {
