@@ -58,7 +58,7 @@ class JUnitTestsAssembler(
      */
     fun consume(httpRequest: HttpRequests.Request) {
         while (true) {
-            if (ToolUtils.isProcessStopped(project, indicator)) return
+            if (ToolUtils.isProcessCanceled(indicator)) return
 
             Thread.sleep(50L)
             var text = httpRequest.reader.readLine()

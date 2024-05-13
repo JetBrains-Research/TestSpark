@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
-import org.jetbrains.research.testspark.actions.controllers.RunnerController
+import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.PsiHelper
@@ -47,9 +47,9 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @param fileUrl The URL of the file being tested.
      * @param testSamplesCode The code to be used as test samples.
      */
-    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController) {
+    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController) {
         log.info("Starting tests generation for class by EvoSuite")
-        createPipeline(project, psiFile, caretOffset, fileUrl, runnerController).runTestGeneration(
+        createPipeline(project, psiFile, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(
                 CodeType.CLASS,
@@ -66,10 +66,10 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @param fileUrl The URL of the file containing the method.
      * @param testSamplesCode The sample code for the test cases.
      */
-    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController) {
+    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController) {
         log.info("Starting tests generation for method by EvoSuite")
         val psiMethod: PsiMethod = PsiHelper.getSurroundingMethod(psiFile, caretOffset)!!
-        createPipeline(project, psiFile, caretOffset, fileUrl, runnerController).runTestGeneration(
+        createPipeline(project, psiFile, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(
                 CodeType.METHOD,
@@ -87,10 +87,10 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @param fileUrl The URL of the code file.
      * @param testSamplesCode The code samples used for testing.
      */
-    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, runnerController: RunnerController) {
+    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController) {
         log.info("Starting tests generation for line by EvoSuite")
         val selectedLine: Int = PsiHelper.getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
-        createPipeline(project, psiFile, caretOffset, fileUrl, runnerController).runTestGeneration(
+        createPipeline(project, psiFile, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(
                 CodeType.LINE,
@@ -109,12 +109,12 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @param fileUrl The URL of the file associated with the pipeline. Can be null.
      * @return The created pipeline object.
      */
-    private fun createPipeline(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, runnerController: RunnerController): Pipeline {
+    private fun createPipeline(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testGenerationController: TestGenerationController): Pipeline {
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
         val settingsProjectState = project.service<PluginSettingsService>().state
         val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
 
-        return Pipeline(project, psiFile, caretOffset, fileUrl, packageName, runnerController)
+        return Pipeline(project, psiFile, caretOffset, fileUrl, packageName, testGenerationController)
     }
 }

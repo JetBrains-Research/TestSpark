@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -29,6 +30,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
+        errorMonitor: ErrorMonitor,
     ): SendResult {
         // Prepare the chat
         val llmRequestBody = OpenAIRequestBody(SettingsArguments(project).getModel(), chatHistory)
@@ -46,6 +48,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
                         llmErrorManager.errorProcess(
                             LLMMessagesBundle.get("serverProblems"),
                             project,
+                            errorMonitor,
                         )
                         sendResult = SendResult.OTHER
                     }
@@ -62,6 +65,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
                         llmErrorManager.errorProcess(
                             LLMMessagesBundle.get("wrongToken"),
                             project,
+                            errorMonitor,
                         )
                         sendResult = SendResult.OTHER
                     }
@@ -70,6 +74,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
                         llmErrorManager.errorProcess(
                             llmErrorManager.createRequestErrorMessage(responseCode),
                             project,
+                            errorMonitor,
                         )
                         sendResult = SendResult.OTHER
                     }

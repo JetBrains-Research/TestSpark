@@ -3,12 +3,11 @@ package org.jetbrains.research.testspark.tools.evosuite.error
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.template.error.ErrorManager
 import java.util.Locale
@@ -73,27 +72,29 @@ class EvoSuiteErrorManager : ErrorManager {
         project: Project,
         evoSuiteProcessTimeout: Long,
         indicator: CustomProgressIndicator,
+        errorMonitor: ErrorMonitor
     ): Boolean {
-        if (ToolUtils.isProcessStopped(project, indicator)) return false
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return false
 
         // exceeded timeout error
         if (!handler.waitFor(evoSuiteProcessTimeout)) {
             errorProcess(
                 getExceededTimeoutMessage(evoSuiteProcessTimeout),
                 project,
+                errorMonitor
             )
             return false
         }
 
         // non zero exit code error
         if (handler.exitCode != 0) {
-            errorProcess(getEvoSuiteNonZeroExitCodeMessage(output), project)
+            errorProcess(getEvoSuiteNonZeroExitCodeMessage(output), project, errorMonitor)
             return false
         }
 
         // unknown class error
         if (output.contains(EvoSuiteMessagesBundle.get("unknownClassError"))) {
-            errorProcess(EvoSuiteMessagesBundle.get("unknownClassMessage"), project)
+            errorProcess(EvoSuiteMessagesBundle.get("unknownClassMessage"), project, errorMonitor)
             return false
         }
 
@@ -102,6 +103,7 @@ class EvoSuiteErrorManager : ErrorManager {
             errorProcess(
                 EvoSuiteMessagesBundle.get("errorWhileInitializingTargetClass").lowercase(Locale.getDefault()),
                 project,
+                errorMonitor
             )
             return false
         }
@@ -114,8 +116,8 @@ class EvoSuiteErrorManager : ErrorManager {
      *
      * @param message the balloon content to display
      */
-    override fun errorProcess(message: String, project: Project) {
-        if (project.service<ErrorService>().errorOccurred()) {
+    override fun errorProcess(message: String, project: Project, errorMonitor: ErrorMonitor) {
+        if (errorMonitor.notifyErrorOccurrence()) {
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("EvoSuite Execution Error")
                 .createNotification(
