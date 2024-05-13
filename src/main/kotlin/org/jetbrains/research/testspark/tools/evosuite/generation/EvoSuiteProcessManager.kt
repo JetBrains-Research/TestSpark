@@ -15,6 +15,7 @@ import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteDefaultsBundle
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
@@ -72,9 +73,10 @@ class EvoSuiteProcessManager(
         packageName: String,
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
+        errorMonitor: ErrorMonitor,
     ): UIContext? {
         try {
-            if (ToolUtils.isProcessStopped(project, indicator)) return null
+            if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
             val regex = Regex("version \"(.*?)\"")
             val version = regex.find(CommandLineRunner.run(arrayListOf(evoSuiteSettingsState.javaPath, "-version")))
@@ -85,7 +87,7 @@ class EvoSuiteProcessManager(
                 ?.toInt()
 
             if (version == null || version > 11) {
-                evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("incorrectJavaVersion"), project)
+                evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("incorrectJavaVersion"), project, errorMonitor)
                 return null
             }
 
@@ -141,7 +143,7 @@ class EvoSuiteProcessManager(
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (ToolUtils.isProcessStopped(project, indicator)) {
+                    if (ToolUtils.isProcessStopped(errorMonitor, indicator)) {
                         handler.destroyProcess()
                         return
                     }
@@ -185,10 +187,10 @@ class EvoSuiteProcessManager(
 
             handler.startNotify()
 
-            if (ToolUtils.isProcessStopped(project, indicator)) return null
+            if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
             // evosuite errors check
-            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return null
+            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator, errorMonitor)) return null
 
             val gson = Gson()
             val reader = JsonReader(FileReader(resultName))
@@ -204,10 +206,10 @@ class EvoSuiteProcessManager(
                 generatedTestsData,
             )
         } catch (e: Exception) {
-            evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("evosuiteErrorMessage").format(e.message), project)
+            evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("evosuiteErrorMessage").format(e.message), project, errorMonitor)
             e.printStackTrace()
         }
 
-        return UIContext(projectContext, generatedTestsData, StandardRequestManagerFactory(project).getRequestManager(project))
+        return UIContext(projectContext, generatedTestsData, StandardRequestManagerFactory(project).getRequestManager(project), errorMonitor)
     }
 }

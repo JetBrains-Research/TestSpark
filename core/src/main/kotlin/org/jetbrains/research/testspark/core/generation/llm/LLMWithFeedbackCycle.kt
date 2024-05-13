@@ -7,6 +7,8 @@ import org.jetbrains.research.testspark.core.generation.llm.network.LLMResponse
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.generation.llm.network.ResponseErrorCode
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
+import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.TestsAssembler
@@ -58,6 +60,7 @@ class LLMWithFeedbackCycle(
     private val testsPresenter: TestsPresenter,
     private val indicator: CustomProgressIndicator,
     private val requestsCountThreshold: Int,
+    private val errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
 ) {
     enum class WarningType {
         TEST_SUITE_PARSING_FAILED,
@@ -101,6 +104,7 @@ class LLMWithFeedbackCycle(
                 packageName = packageName,
                 testsAssembler = testsAssembler,
                 isUserFeedback = false,
+                errorMonitor,
             )
 
             when (response.errorCode) {

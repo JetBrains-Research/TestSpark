@@ -9,6 +9,7 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
@@ -16,7 +17,6 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
@@ -66,10 +66,11 @@ class LLMProcessManager(
         packageName: String,
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
+        errorMonitor: ErrorMonitor,
     ): UIContext? {
         log.info("LLM test generation begins")
 
-        if (ToolUtils.isProcessStopped(project, indicator)) return null
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
         // update build path
         var buildPath = projectContext.projectClassPath!!
@@ -79,7 +80,7 @@ class LLMProcessManager(
         }
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
-            llmErrorManager.errorProcess(LLMMessagesBundle.get("emptyBuildPath"), project)
+            llmErrorManager.errorProcess(LLMMessagesBundle.get("emptyBuildPath"), project, errorMonitor)
             return null
         }
         indicator.setText(PluginMessagesBundle.get("searchMessage"))
@@ -137,6 +138,7 @@ class LLMProcessManager(
             testsPresenter = testsPresenter,
             indicator = indicator,
             requestsCountThreshold = maxRequests,
+            errorMonitor = errorMonitor,
         )
 
         val feedbackResponse = llmFeedbackCycle.run { warning ->
@@ -151,7 +153,7 @@ class LLMProcessManager(
         }
 
         // Process stopped checking
-        if (ToolUtils.isProcessStopped(project, indicator)) return null
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
         log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
 
         when (feedbackResponse.executionResult) {
@@ -161,25 +163,25 @@ class LLMProcessManager(
                 generatedTestsData.compilableTestCases.addAll(feedbackResponse.compilableTestCases)
             }
             FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED -> {
-                llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project, errorMonitor)
             }
             FeedbackCycleExecutionResult.CANCELED -> {
                 log.info("Process stopped")
                 return null
             }
             FeedbackCycleExecutionResult.PROVIDED_PROMPT_TOO_LONG -> {
-                llmErrorManager.errorProcess(LLMMessagesBundle.get("tooLongPromptRequest"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("tooLongPromptRequest"), project, errorMonitor)
                 return null
             }
             FeedbackCycleExecutionResult.SAVING_TEST_FILES_ISSUE -> {
-                llmErrorManager.errorProcess(LLMMessagesBundle.get("savingTestFileIssue"), project)
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("savingTestFileIssue"), project, errorMonitor)
             }
         }
 
-        if (ToolUtils.isProcessStopped(project, indicator)) return null
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
         // Error during the collecting
-        if (project.service<ErrorService>().isErrorOccurred()) return null
+        if (errorMonitor.hasErrorOccurred()) return null
 
         log.info("Save generated test suite and test cases into the project workspace")
 
@@ -199,6 +201,6 @@ class LLMProcessManager(
             generatedTestsData,
         )
 
-        return UIContext(projectContext, generatedTestsData, requestManager)
+        return UIContext(projectContext, generatedTestsData, requestManager, errorMonitor)
     }
 }

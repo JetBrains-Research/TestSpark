@@ -10,7 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.actions.controllers.RunnerController
+import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.actions.controllers.VisibilityController
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
@@ -50,7 +50,7 @@ import javax.swing.JRadioButton
 class TestSparkAction : AnAction() {
     // Controllers
     private val visibilityController = VisibilityController()
-    private val runnerController = RunnerController()
+    private val testGenerationController = TestGenerationController()
 
     private val testSparkDisplayFactory = TestSparkDisplayFactory()
 
@@ -64,7 +64,7 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(e, visibilityController, runnerController, testSparkDisplayFactory)
+        TestSparkActionWindow(e, visibilityController, testGenerationController, testSparkDisplayFactory)
     }
 
     /**
@@ -84,7 +84,7 @@ class TestSparkAction : AnAction() {
     class TestSparkActionWindow(
         e: AnActionEvent,
         private val visibilityController: VisibilityController,
-        private val runnerController: RunnerController,
+        private val testGenerationController: TestGenerationController,
         private val testSparkDisplayFactory: TestSparkDisplayFactory,
     ) :
         JFrame("TestSpark") {
@@ -317,7 +317,7 @@ class TestSparkAction : AnAction() {
         }
 
         private fun startEvoSuiteGeneration() {
-            if (!runnerController.isGeneratorRunning(project)) {
+            if (!testGenerationController.isGeneratorRunning(project)) {
                 val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
                 if (codeTypeButtons[0].isSelected) {
@@ -327,7 +327,7 @@ class TestSparkAction : AnAction() {
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
-                        runnerController,
+                        testGenerationController,
                         testSparkDisplayFactory,
                     )
                 } else if (codeTypeButtons[1].isSelected) {
@@ -337,7 +337,7 @@ class TestSparkAction : AnAction() {
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
-                        runnerController,
+                        testGenerationController,
                         testSparkDisplayFactory,
                     )
                 } else if (codeTypeButtons[2].isSelected) {
@@ -347,7 +347,7 @@ class TestSparkAction : AnAction() {
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
-                        runnerController,
+                        testGenerationController,
                         testSparkDisplayFactory,
                     )
                 }
@@ -358,7 +358,7 @@ class TestSparkAction : AnAction() {
         }
 
         private fun startLLMGeneration() {
-            if (!runnerController.isGeneratorRunning(project)) {
+            if (!testGenerationController.isGeneratorRunning(project)) {
                 val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
                 if (codeTypeButtons[0].isSelected) {
@@ -368,7 +368,7 @@ class TestSparkAction : AnAction() {
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
-                        runnerController,
+                        testGenerationController,
                         testSparkDisplayFactory,
                     )
                 } else if (codeTypeButtons[1].isSelected) {
@@ -378,7 +378,7 @@ class TestSparkAction : AnAction() {
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
-                        runnerController,
+                        testGenerationController,
                         testSparkDisplayFactory,
                     )
                 } else if (codeTypeButtons[2].isSelected) {
@@ -388,7 +388,7 @@ class TestSparkAction : AnAction() {
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
-                        runnerController,
+                        testGenerationController,
                         testSparkDisplayFactory,
                     )
                 }

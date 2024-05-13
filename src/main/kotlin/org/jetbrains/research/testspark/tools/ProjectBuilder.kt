@@ -4,16 +4,15 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.task.ProjectTaskManager
 import com.intellij.util.concurrency.Semaphore
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
-import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.plugin.PluginSettingsState
 import java.util.concurrent.CountDownLatch
@@ -21,7 +20,7 @@ import java.util.concurrent.CountDownLatch
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
  */
-class ProjectBuilder(private val project: Project) {
+class ProjectBuilder(private val project: Project, private val errorMonitor: ErrorMonitor) {
     private val pluginSettingsState: PluginSettingsState
         get() = project.getService(PluginSettingsService::class.java).state
 
@@ -114,7 +113,7 @@ class ProjectBuilder(private val project: Project) {
     }
 
     private fun errorProcess() {
-        if (project.service<ErrorService>().errorOccurred()) {
+        if (errorMonitor.notifyErrorOccurrence()) {
             NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
                 PluginMessagesBundle.get("buildErrorTitle"),
                 PluginMessagesBundle.get("commonBuildErrorMessage"),

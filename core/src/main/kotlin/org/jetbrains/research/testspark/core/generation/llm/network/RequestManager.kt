@@ -2,6 +2,8 @@ package org.jetbrains.research.testspark.core.generation.llm.network
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.research.testspark.core.data.ChatMessage
+import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 
@@ -31,6 +33,7 @@ abstract class RequestManager(var token: String) {
         packageName: String,
         testsAssembler: TestsAssembler,
         isUserFeedback: Boolean = false,
+        errorMonitor: ErrorMonitor = DefaultErrorMonitor(), // The plugin for other IDEs can send LLM requests without passing an errorMonitor
     ): LLMResponse {
         // save the prompt in chat history
         // TODO: make role to be an enum class
@@ -39,7 +42,7 @@ abstract class RequestManager(var token: String) {
         // Send Request to LLM
         log.info { "Sending Request..." }
 
-        val sendResult = send(prompt, indicator, testsAssembler)
+        val sendResult = send(prompt, indicator, testsAssembler, errorMonitor)
 
         if (sendResult == SendResult.PROMPT_TOO_LONG) {
             return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, null)
@@ -84,6 +87,7 @@ abstract class RequestManager(var token: String) {
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
+        errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
     ): SendResult
 
     open fun processUserFeedbackResponse(

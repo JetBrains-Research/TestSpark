@@ -2,11 +2,10 @@ package org.jetbrains.research.testspark.tools.llm.error
 
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
-import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.tools.template.error.ErrorManager
 
 /**
@@ -35,8 +34,8 @@ class LLMErrorManager : ErrorManager {
      * @param message The error message to be displayed in the notification.
      * @param project The project in which the error occurred.
      */
-    override fun errorProcess(message: String, project: Project) {
-        if (project.service<ErrorService>().errorOccurred()) {
+    override fun errorProcess(message: String, project: Project, errorMonitor: ErrorMonitor) {
+        if (errorMonitor.notifyErrorOccurrence()) {
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("LLM Execution Error")
                 .createNotification(

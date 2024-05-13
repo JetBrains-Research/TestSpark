@@ -38,7 +38,6 @@ import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.display.utils.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
-import org.jetbrains.research.testspark.services.ErrorService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
@@ -410,7 +409,7 @@ class TestCasePanelFactory(
             .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
-                    if (ToolUtils.isProcessStopped(project, ijIndicator)) {
+                    if (ToolUtils.isProcessStopped(uiContext!!.errorMonitor, ijIndicator)) {
                         finishProcess()
                         return
                     }
@@ -419,9 +418,10 @@ class TestCasePanelFactory(
                         initialCodes[currentRequestNumber - 1],
                         requestComboBox.editor.item.toString(),
                         ijIndicator,
-                        uiContext!!.requestManager!!,
+                        uiContext.requestManager!!,
                         project,
                         uiContext.testGenerationOutput,
+                        uiContext.errorMonitor,
                     )
 
                     if (modifiedTest != null) {
@@ -431,7 +431,7 @@ class TestCasePanelFactory(
                         addTest(modifiedTest)
                     }
 
-                    if (ToolUtils.isProcessStopped(project, ijIndicator)) {
+                    if (ToolUtils.isProcessStopped(uiContext.errorMonitor, ijIndicator)) {
                         finishProcess()
                         return
                     }
@@ -443,7 +443,7 @@ class TestCasePanelFactory(
     }
 
     private fun finishProcess() {
-        project.service<ErrorService>().clear()
+        uiContext!!.errorMonitor.clear()
         loadingLabel.isVisible = false
         enableComponents(true)
     }
@@ -462,7 +462,7 @@ class TestCasePanelFactory(
         val testSuitePresenter = JUnitTestSuitePresenter(project, uiContext!!.testGenerationOutput)
 
         WriteCommandAction.runWriteCommandAction(project) {
-            project.service<ErrorService>().clear()
+            uiContext.errorMonitor.clear()
             val code = testSuitePresenter.toString(testSuite)
             testCase.testName = JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, code)
             testCase.testCode = code
