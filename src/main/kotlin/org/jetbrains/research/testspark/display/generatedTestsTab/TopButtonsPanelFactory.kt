@@ -1,8 +1,8 @@
 package org.jetbrains.research.testspark.display.generatedTestsTab
 
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.display.utils.IconButtonCreator
-import org.jetbrains.research.testspark.display.utils.TestSparkIcons
+import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
+import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import java.awt.Dimension
 import javax.swing.Box
 import javax.swing.BoxLayout

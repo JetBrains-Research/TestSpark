@@ -31,11 +31,11 @@ import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
-import org.jetbrains.research.testspark.display.utils.GenerateTestsTabHelper
-import org.jetbrains.research.testspark.display.utils.IconButtonCreator
-import org.jetbrains.research.testspark.display.utils.ModifiedLinesGetter
-import org.jetbrains.research.testspark.display.utils.ReportUpdater
-import org.jetbrains.research.testspark.display.utils.TestSparkIcons
+import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
+import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
+import org.jetbrains.research.testspark.uiUtils.ModifiedLinesGetter
+import org.jetbrains.research.testspark.display.ReportUpdater
+import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService

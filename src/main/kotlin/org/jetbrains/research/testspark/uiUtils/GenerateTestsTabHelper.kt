@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display.utils
+package org.jetbrains.research.testspark.uiUtils
 
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane

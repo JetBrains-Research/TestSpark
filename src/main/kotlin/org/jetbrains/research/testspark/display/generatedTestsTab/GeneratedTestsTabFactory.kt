@@ -29,8 +29,8 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.display.utils.GenerateTestsTabHelper
-import org.jetbrains.research.testspark.display.utils.ReportUpdater
+import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
+import org.jetbrains.research.testspark.display.ReportUpdater
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import java.awt.BorderLayout
 import java.awt.Dimension
