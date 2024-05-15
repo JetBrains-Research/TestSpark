@@ -20,10 +20,10 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
-import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
+import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics

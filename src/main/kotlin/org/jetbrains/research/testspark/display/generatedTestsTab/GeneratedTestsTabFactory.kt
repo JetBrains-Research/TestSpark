@@ -27,11 +27,11 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.ReportUpdater
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
-import org.jetbrains.research.testspark.display.ReportUpdater
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.io.File

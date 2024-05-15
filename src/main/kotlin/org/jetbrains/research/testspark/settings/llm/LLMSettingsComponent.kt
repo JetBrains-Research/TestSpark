@@ -18,13 +18,13 @@ import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptKeyword
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.data.llm.PromptEditorType
-import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
-import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.PromptParserHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.template.SettingsComponent
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
+import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
+import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import java.awt.FlowLayout
 import java.awt.Font
 import javax.swing.BoxLayout

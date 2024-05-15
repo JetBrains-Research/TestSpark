@@ -28,14 +28,10 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.display.ReportUpdater
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
-import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
-import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
-import org.jetbrains.research.testspark.uiUtils.ModifiedLinesGetter
-import org.jetbrains.research.testspark.display.ReportUpdater
-import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
@@ -44,6 +40,10 @@ import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
+import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
+import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
+import org.jetbrains.research.testspark.uiUtils.ModifiedLinesGetter
+import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard

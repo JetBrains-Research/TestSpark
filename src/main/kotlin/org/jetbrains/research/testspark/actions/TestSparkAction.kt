@@ -19,7 +19,6 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
-import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
@@ -27,6 +26,7 @@ import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
+import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Dimension
