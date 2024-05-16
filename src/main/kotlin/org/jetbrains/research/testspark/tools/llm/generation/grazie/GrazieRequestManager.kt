@@ -16,7 +16,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
-        errorMonitor: ErrorMonitor
+        errorMonitor: ErrorMonitor,
     ): SendResult {
         var sendResult = SendResult.OK
 
@@ -33,7 +33,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
                             llmErrorManager.errorProcess(
                                 LLMMessagesBundle.get("wrongToken"),
                                 project,
-                                errorMonitor = errorMonitor
+                                errorMonitor = errorMonitor,
                             )
                             sendResult = SendResult.OTHER
                         }

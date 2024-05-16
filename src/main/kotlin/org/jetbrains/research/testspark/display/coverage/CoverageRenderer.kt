@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers
+package org.jetbrains.research.testspark.display.coverage
 
 import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.hint.HintManagerImpl
@@ -9,20 +9,27 @@ import com.intellij.openapi.editor.ex.EditorGutterComponentEx
 import com.intellij.openapi.editor.markup.ActiveGutterRenderer
 import com.intellij.openapi.editor.markup.LineMarkerRendererEx
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.ui.EditorTextField
 import com.intellij.ui.HintHint
+import com.intellij.ui.JBColor
 import com.intellij.ui.LightweightHint
 import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
+import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
+import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
+import javax.swing.JPanel
 
 /**
  * This class extends the line marker and gutter editor to allow more functionality.
@@ -35,7 +42,7 @@ import java.awt.event.MouseEvent
  * @param mapMutantsToTests map of mutant operation -> List of names of tests which cover mutant
  * @param project the current project
  */
-class CoverageHelper(
+class CoverageRenderer(
     private val color: Color,
     private val lineNumber: Int,
     private val tests: List<String>,
@@ -43,10 +50,13 @@ class CoverageHelper(
     private val notCoveredMutation: List<String>,
     private val mapMutantsToTests: HashMap<String, MutableList<String>>,
     private val project: Project,
+    private val generatedTestsTabData: GeneratedTestsTabData,
 ) :
     ActiveGutterRenderer, LineMarkerRendererEx {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
         get() = project.getService(EvoSuiteSettingsService::class.java).state
+
+    private var defaultEditorColor: Color? = null
 
     /**
      * Perform the action - show toolTip on mouse click.
@@ -63,7 +73,7 @@ class CoverageHelper(
         for (testName in tests) {
             prePanel.addComponent(
                 ActionLink(testName) {
-                    highlightInToolwindow(testName)
+                    highlightTestCase(testName)
                 },
             )
         }
@@ -125,25 +135,91 @@ class CoverageHelper(
     }
 
     /**
-     * Use Display service's mini-editor highlighter function
-     *
-     * @param name name of the test to highlight
-     */
-    private fun highlightInToolwindow(name: String) {
-        val testCaseDisplayService = project.service<TestCaseDisplayService>()
-
-        testCaseDisplayService.highlightTestCase(name)
-    }
-
-    /**
      * Use Display service's mutant highlighter function
      * @param mutantName name of the mutant whose coverage to visualise
      * @param map map of mutant operations -> List of names of tests which cover the mutants
      */
     private fun highlightMutantsInToolwindow(mutantName: String, map: HashMap<String, MutableList<String>>) {
-        val testCaseDisplayService = project.service<TestCaseDisplayService>()
+        highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
+    }
 
-        testCaseDisplayService.highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
+    /**
+     * Highlight the mini-editor in the tool window whose name corresponds with the name of the test provided
+     *
+     * @param name name of the test whose editor should be highlighted
+     */
+    private fun highlightTestCase(name: String) {
+        val myPanel = generatedTestsTabData.testCaseNameToPanels[name] ?: return
+        openToolWindowTab()
+        scrollToPanel(myPanel)
+
+        val editorTextField = GenerateTestsTabHelper.getEditorTextField(name, generatedTestsTabData) ?: return
+        val settingsProjectState = project.service<PluginSettingsService>().state
+        val highlightColor =
+            JBColor(
+                PluginSettingsBundle.get("colorName"),
+                Color(
+                    settingsProjectState.colorRed,
+                    settingsProjectState.colorGreen,
+                    settingsProjectState.colorBlue,
+                    30,
+                ),
+            )
+        if (editorTextField.background.equals(highlightColor)) return
+        defaultEditorColor = editorTextField.background
+        editorTextField.background = highlightColor
+        returnOriginalEditorBackground(editorTextField)
+    }
+
+    /**
+     * Method to open the toolwindow tab with generated tests if not already open.
+     */
+    private fun openToolWindowTab() {
+        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
+        generatedTestsTabData.contentManager = toolWindowManager!!.contentManager
+        if (generatedTestsTabData.content != null) {
+            toolWindowManager.show()
+            toolWindowManager.contentManager.setSelectedContent(generatedTestsTabData.content!!)
+        }
+    }
+
+    /**
+     * Scrolls to the highlighted panel.
+     *
+     * @param myPanel the panel to scroll to
+     */
+    private fun scrollToPanel(myPanel: JPanel) {
+        var sum = 0
+        for (component in generatedTestsTabData.allTestCasePanel.components) {
+            if (component == myPanel) {
+                break
+            } else {
+                sum += component.height
+            }
+        }
+        val scroll = generatedTestsTabData.scrollPane.verticalScrollBar
+        scroll.value = (scroll.minimum + scroll.maximum) * sum / generatedTestsTabData.allTestCasePanel.height
+    }
+
+    /**
+     * Reset the provided editors color to the default (initial) one after 10 seconds
+     * @param editor the editor whose color to change
+     */
+    private fun returnOriginalEditorBackground(editor: EditorTextField) {
+        Thread {
+            Thread.sleep(10000)
+            editor.background = defaultEditorColor
+        }.start()
+    }
+
+    /**
+     * Highlight a range of editors
+     * @param names list of test names to pass to highlight function
+     */
+    private fun highlightCoveredMutants(names: List<String>) {
+        names.forEach {
+            highlightTestCase(it)
+        }
     }
 
     /**

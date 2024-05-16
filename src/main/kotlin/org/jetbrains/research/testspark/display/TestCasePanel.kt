@@ -1,10 +1,9 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.generatedTestsTab
 
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.DocumentEvent
@@ -28,16 +27,21 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.display.ReportUpdater
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
-import org.jetbrains.research.testspark.helpers.ReportHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
+import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
+import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
+import org.jetbrains.research.testspark.uiUtils.ModifiedLinesGetter
+import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
@@ -59,8 +63,10 @@ class TestCasePanel(
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
-    val uiContext: UIContext?,
-    val report: Report,
+    private val uiContext: UIContext?,
+    private val report: Report,
+    private val coverageVisualisationTabFactory: CoverageVisualisationTabFactory,
+    private val generatedTestsTabData: GeneratedTestsTabData,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -204,7 +210,7 @@ class TestCasePanel(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    project.service<TestCaseDisplayService>().getEditor(testCase.testName)!!.document.text,
+                    GenerateTestsTabHelper.getEditorTextField(testCase.testName, generatedTestsTabData)!!.document.text,
                 ),
                 null,
             )
@@ -325,7 +331,7 @@ class TestCasePanel(
     private fun addLanguageTextFieldListener(languageTextField: LanguageTextField) {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                updateUI()
+                update()
             }
         })
     }
@@ -345,7 +351,7 @@ class TestCasePanel(
     /**
      * Updates the user interface based on the provided code.
      */
-    private fun updateUI() {
+    private fun update() {
         updateTestCaseInformation()
 
         val lastRunCode = lastRunCodes[currentRequestNumber - 1]
@@ -381,8 +387,8 @@ class TestCasePanel(
             testCase.coveredLines = setOf()
         }
 
-        ReportHelper.updateTestCase(project, report, testCase)
-        project.service<TestCaseDisplayService>().updateUI()
+        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabFactory, generatedTestsTabData)
+        GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
     /**
@@ -539,7 +545,7 @@ class TestCasePanel(
         lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
         SwingUtilities.invokeLater {
-            updateUI()
+            update()
             updateErrorRelatedUI()
         }
 
@@ -564,7 +570,7 @@ class TestCasePanel(
             currentCodes[currentRequestNumber - 1] = testCase.testCode
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
-            updateUI()
+            update()
         }
     }
 
@@ -576,7 +582,7 @@ class TestCasePanel(
             languageTextField.document.setText(lastRunCodes[currentRequestNumber - 1])
             currentCodes[currentRequestNumber - 1] = testCase.testCode
 
-            updateUI()
+            update()
         }
     }
 
@@ -589,14 +595,23 @@ class TestCasePanel(
      * 3. Updating the UI.
      */
     private fun remove() {
-        // Remove the test case from the cache
-        project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
+        val choice = JOptionPane.showConfirmDialog(
+            null,
+            PluginMessagesBundle.get("removeCautionMessage"),
+            PluginMessagesBundle.get("confirmationTitle"),
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.WARNING_MESSAGE,
+        )
+
+        if (choice == JOptionPane.CANCEL_OPTION) return
+
+        GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportHelper.removeTestCase(project, report, testCase)
-        project.service<TestCaseDisplayService>().updateUI()
+        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabFactory, generatedTestsTabData)
+        GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
     private fun previousError(code: String) = trimmedCodeToError[trimCode(code)]
@@ -645,7 +660,7 @@ class TestCasePanel(
      */
     private fun switchToAnotherCode() {
         languageTextField.document.setText(currentCodes[currentRequestNumber - 1])
-        updateUI()
+        update()
     }
 
     /**
