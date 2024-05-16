@@ -6,6 +6,7 @@ import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieRequestManager
+import org.jetbrains.research.testspark.tools.llm.generation.hf.HuggingFaceRequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIRequestManager
 
 interface RequestManagerFactory {
@@ -20,6 +21,7 @@ class StandardRequestManagerFactory(private val project: Project) : RequestManag
         return when (val platform = SettingsArguments(project).currentLLMPlatformName()) {
             llmSettingsState.openAIName -> OpenAIRequestManager(project)
             llmSettingsState.grazieName -> GrazieRequestManager(project)
+            llmSettingsState.huggingFaceName -> HuggingFaceRequestManager(project)
             else -> throw IllegalStateException("Unknown selected platform: $platform")
         }
     }

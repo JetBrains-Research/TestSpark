@@ -85,6 +85,28 @@ class JUnitTestsAssembler(
         log.debug(super.getContent())
     }
 
+    /**
+     * Receives a response from the HuggingFace API and processes it.
+     */
+    fun consumeHFRequest(httpRequest: HttpRequests.Request) {
+        Thread.sleep(50L)
+        val text = httpRequest.reader.readLine()
+        val generatedTestCases = removeDelimiterLines(JsonParser.parseString(text).asJsonArray[0]
+            .asJsonObject["generated_text"].asString.trim())
+        super.consume(generatedTestCases)
+        log.debug(super.getContent())
+        updateProgressBar()
+    }
+
+    /**
+     * Removes delimiter lines used for code blocks in LLMs' response
+     */
+    private fun removeDelimiterLines(text: String): String {
+        return text.lines()
+            .filter { line -> line != "```" && line != "```java" }
+            .joinToString("\n")
+    }
+
     private fun updateProgressBar() {
         val generatedTestsCount = super.getContent().split("@Test").size - 1
 
