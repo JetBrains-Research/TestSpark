@@ -55,10 +55,11 @@ class PromptManager(
                 val interestingPsiClasses = getInterestingPsiClassesWithQualifiedNames(classesToTest, polyDepthReducing)
 
                 val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
-                val polymorphismRelations =
-                    getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses, cut)
-                        .map(this::createClassRepresentation)
-                        .toMap()
+                val polymorphismRelations = getPolymorphismRelationsWithQualifiedNames(
+                    project,
+                    interestingPsiClasses,
+                    cut,
+                ).map(this::createClassRepresentation).toMap()
 
                 val context = PromptGenerationContext(
                     cut = createClassRepresentation(cut),
@@ -151,8 +152,13 @@ class PromptManager(
     }
 
     fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
-        return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
-                (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+        return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) || (
+            SettingsArguments(
+                project,
+            ).maxInputParamsDepth(
+                testGenerationData.inputParamsDepthReducing,
+            ) > 1
+            )
     }
 
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
@@ -177,13 +183,15 @@ class PromptManager(
 
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
-            LLMMessagesBundle.get("promptReduction") + "\n" +
-                    "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
-                    "Maximum depth for input parameters is ${
-                        SettingsArguments(project).maxInputParamsDepth(
-                            testGenerationData.inputParamsDepthReducing,
-                        )
-                    }.",
+            LLMMessagesBundle.get("promptReduction") + "\n" + "Maximum depth of polymorphism is ${
+                SettingsArguments(
+                    project,
+                ).maxPolyDepth(testGenerationData.polyDepthReducing)
+            }.\n" + "Maximum depth for input parameters is ${
+                SettingsArguments(project).maxInputParamsDepth(
+                    testGenerationData.inputParamsDepthReducing,
+                )
+            }.",
             project,
         )
     }
@@ -215,9 +223,7 @@ class PromptManager(
             }
         }
 
-        return interestingPsiClasses
-            .filter { it.qualifiedName != null }
-            .toMutableSet()
+        return interestingPsiClasses.filter { it.qualifiedName != null }.toMutableSet()
     }
 
     /**
@@ -241,8 +247,9 @@ class PromptManager(
                 classIt.methods.forEach { methodIt ->
                     methodIt.parameterList.parameters.forEach { paramIt ->
                         PsiTypesUtil.getPsiClass(paramIt.type)?.let {
-                            if (!interestingPsiClasses.contains(it) && it.qualifiedName != null &&
-                                !it.qualifiedName!!.startsWith("java.")
+                            if (!interestingPsiClasses.contains(it) && it.qualifiedName != null && !it.qualifiedName!!.startsWith(
+                                    "java.",
+                                )
                             ) {
                                 tempListOfClasses.add(it)
                             }
@@ -255,9 +262,7 @@ class PromptManager(
         }
 
         /** filtering out classes that do not have a qualified name as it's required further **/
-        return interestingPsiClasses
-            .filter { it.qualifiedName != null }
-            .toMutableSet()
+        return interestingPsiClasses.filter { it.qualifiedName != null }.toMutableSet()
     }
 
     /**
