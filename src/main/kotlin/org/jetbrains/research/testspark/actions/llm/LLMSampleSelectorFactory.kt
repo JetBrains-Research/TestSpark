@@ -53,7 +53,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     init {
         addListeners()
 
-        collectTestSamples(project, testNames, initialTestCodes)
+        collectTestSamples(project, testNames)
     }
 
     override fun getTitlePanel(): JPanel {
@@ -182,11 +182,12 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     }
 
     /**
-     * Retrieves a list of test samples from the given project.
+     * Collects names and code samples of test methods in the project.
      *
-     * @return A list of strings, representing the names of the test samples.
+     * @param project The project to scan for test methods.
+     * @param testNames The list to store the names of found test methods.
      */
-    private fun collectTestSamples(project: Project, testNames: MutableList<String>, initialTestCodes: MutableList<String>) {
+    private fun collectTestSamples(project: Project, testNames: MutableList<String>) {
         val projectFileIndex: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
         val javaFileType: FileType = FileTypeManager.getInstance().getFileTypeByExtension("java")
 
