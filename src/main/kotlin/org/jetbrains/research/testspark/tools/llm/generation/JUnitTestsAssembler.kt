@@ -8,6 +8,7 @@ import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
@@ -56,9 +57,9 @@ class JUnitTestsAssembler(
      *
      * @param httpRequest the httpRequest sent to OpenAI
      */
-    fun consume(httpRequest: HttpRequests.Request) {
+    fun consume(errorMonitor: ErrorMonitor, httpRequest: HttpRequests.Request) {
         while (true) {
-            if (ToolUtils.isProcessCanceled(indicator)) return
+            if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return
 
             Thread.sleep(50L)
             var text = httpRequest.reader.readLine()

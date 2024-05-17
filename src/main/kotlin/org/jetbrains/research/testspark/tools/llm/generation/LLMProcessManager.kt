@@ -152,8 +152,8 @@ class LLMProcessManager(
             }
         }
 
-        // Process stopped checking
         if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
+
         log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
 
         when (feedbackResponse.executionResult) {

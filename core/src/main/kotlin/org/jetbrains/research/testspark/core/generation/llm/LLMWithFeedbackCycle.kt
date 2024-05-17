@@ -107,6 +107,12 @@ class LLMWithFeedbackCycle(
                 errorMonitor,
             )
 
+            // Process stopped checking
+            if (indicator.isCanceled()) {
+                executionResult = FeedbackCycleExecutionResult.CANCELED
+                break
+            }
+
             when (response.errorCode) {
                 ResponseErrorCode.OK -> {
                     log.info { "Test suite generated successfully: ${response.testSuite!!}" }
@@ -147,12 +153,6 @@ class LLMWithFeedbackCycle(
             }
 
             generatedTestSuite = response.testSuite
-
-            // Process stopped checking
-            if (indicator.isCanceled()) {
-                executionResult = FeedbackCycleExecutionResult.CANCELED
-                break
-            }
 
             // Save the generated TestSuite into a temp file
             val generatedTestCasesPaths: MutableList<String> = mutableListOf()
@@ -210,6 +210,12 @@ class LLMWithFeedbackCycle(
 
             // saving the compilable test cases
             compilableTestCases.addAll(testCasesCompilationResult.compilableTestCases)
+
+            // Process stopped checking
+            if (indicator.isCanceled()) {
+                executionResult = FeedbackCycleExecutionResult.CANCELED
+                break
+            }
 
             if (!testCasesCompilationResult.allTestCasesCompilable && !isLastIteration(requestsCount)) {
                 log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite!!)}" }

@@ -138,9 +138,11 @@ object ToolUtils {
         return errorMonitor.hasErrorOccurred() || isProcessCanceled(indicator)
     }
 
-    fun isProcessCanceled(indicator: CustomProgressIndicator): Boolean {
+    private fun isProcessCanceled(indicator: CustomProgressIndicator): Boolean {
         if (indicator.isCanceled()) {
-            indicator.stop()
+            if (!indicator.isStopped()) {
+                indicator.stop()
+            }
             return true
         }
         return false

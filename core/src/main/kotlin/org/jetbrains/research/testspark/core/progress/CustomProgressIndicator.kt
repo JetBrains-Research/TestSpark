@@ -9,6 +9,7 @@ interface CustomProgressIndicator {
     fun getFraction(): Double
     fun cancel()
     fun isCanceled(): Boolean
+    fun isStopped(): Boolean
     fun start()
     fun stop()
 }

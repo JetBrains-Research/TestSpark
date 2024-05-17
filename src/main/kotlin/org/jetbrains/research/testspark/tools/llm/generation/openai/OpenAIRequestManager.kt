@@ -43,7 +43,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
 
                 // check response
                 when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
-                    HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consume(it)
+                    HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consume(errorMonitor, it)
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         llmErrorManager.errorProcess(
                             LLMMessagesBundle.get("serverProblems"),
