@@ -31,7 +31,7 @@ import kotlin.math.roundToInt
  *
  * @param project the project
  */
-class CoverageVisualisationTabFactory(private val project: Project, private val editor: Editor) {
+class CoverageVisualisationTabBuilder(private val project: Project, private val editor: Editor) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
     private var contentManager: ContentManager? = null

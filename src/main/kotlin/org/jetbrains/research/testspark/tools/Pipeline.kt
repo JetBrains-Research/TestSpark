@@ -21,7 +21,7 @@ import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
+import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.PsiHelper
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -44,7 +44,7 @@ class Pipeline(
     fileUrl: String?,
     private val packageName: String,
     private val testGenerationController: TestGenerationController,
-    private val testSparkDisplayFactory: TestSparkDisplayFactory,
+    private val testSparkDisplayBuilder: TestSparkDisplayBuilder,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
@@ -116,7 +116,7 @@ class Pipeline(
                         updateEditor(it.testGenerationOutput.fileUrl)
 
                         if (editor != null) {
-                            testSparkDisplayFactory.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project)
+                            testSparkDisplayBuilder.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project)
                         }
                     }
                 }

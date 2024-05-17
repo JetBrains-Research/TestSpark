@@ -27,8 +27,8 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 import org.jetbrains.research.testspark.display.ReportUpdater
-import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
@@ -47,12 +47,12 @@ import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
 
-class GeneratedTestsTabFactory(
+class GeneratedTestsTabBuilder(
     private val project: Project,
     private val report: Report,
     private val editor: Editor,
     private val uiContext: UIContext,
-    private val coverageVisualisationTabFactory: CoverageVisualisationTabFactory,
+    private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
 ) {
     private var mainPanel: JPanel = JPanel()
 
@@ -61,7 +61,7 @@ class GeneratedTestsTabFactory(
     private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData()
 
     fun show() {
-        generatedTestsTabData.topButtonsPanelFactory = TopButtonsPanelFactory()
+        generatedTestsTabData.topButtonsPanelBuilder = TopButtonsPanelBuilder()
 
         generatedTestsTabData.allTestCasePanel.removeAll()
         generatedTestsTabData.testCasePanels.clear()
@@ -79,15 +79,15 @@ class GeneratedTestsTabFactory(
 
     fun getGeneratedTestsTabData() = generatedTestsTabData
 
-    fun getRemoveAllButton() = generatedTestsTabData.topButtonsPanelFactory.getRemoveAllButton()
+    fun getRemoveAllButton() = generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton()
 
     private fun addActionListeners() {
         applyButton.addActionListener { applyTests() }
-        generatedTestsTabData.topButtonsPanelFactory.getSelectAllButton()
+        generatedTestsTabData.topButtonsPanelBuilder.getSelectAllButton()
             .addActionListener { toggleAllCheckboxes(true) }
-        generatedTestsTabData.topButtonsPanelFactory.getUnselectAllButton()
+        generatedTestsTabData.topButtonsPanelBuilder.getUnselectAllButton()
             .addActionListener { toggleAllCheckboxes(false) }
-        generatedTestsTabData.topButtonsPanelFactory.getRunAllButton().addActionListener { runAllTestCases() }
+        generatedTestsTabData.topButtonsPanelBuilder.getRunAllButton().addActionListener { runAllTestCases() }
     }
 
     private fun fillPanels() {
@@ -95,7 +95,7 @@ class GeneratedTestsTabFactory(
             BoxLayout(generatedTestsTabData.allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
 
-        mainPanel.add(generatedTestsTabData.topButtonsPanelFactory.getPanel(), BorderLayout.NORTH)
+        mainPanel.add(generatedTestsTabData.topButtonsPanelBuilder.getPanel(), BorderLayout.NORTH)
         mainPanel.add(generatedTestsTabData.scrollPane, BorderLayout.CENTER)
 
         applyButton.isOpaque = false
@@ -130,14 +130,14 @@ class GeneratedTestsTabFactory(
                     ReportUpdater.selectTestCase(
                         report,
                         testCase.id,
-                        coverageVisualisationTabFactory,
+                        coverageVisualisationTabBuilder,
                         generatedTestsTabData,
                     )
                 } else {
                     ReportUpdater.unselectTestCase(
                         report,
                         testCase.id,
-                        coverageVisualisationTabFactory,
+                        coverageVisualisationTabBuilder,
                         generatedTestsTabData,
                     )
                 }
@@ -147,22 +147,22 @@ class GeneratedTestsTabFactory(
 
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory = TestCasePanelFactory(
+            val testCasePanelBuilder = TestCasePanelBuilder(
                 project,
                 testCase,
                 editor,
                 checkbox,
                 uiContext,
                 report,
-                coverageVisualisationTabFactory,
+                coverageVisualisationTabBuilder,
                 generatedTestsTabData,
             )
 
-            testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
-            testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
-            testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+            testCasePanel.add(testCasePanelBuilder.getUpperPanel(), BorderLayout.NORTH)
+            testCasePanel.add(testCasePanelBuilder.getMiddlePanel(), BorderLayout.CENTER)
+            testCasePanel.add(testCasePanelBuilder.getBottomPanel(), BorderLayout.SOUTH)
 
-            generatedTestsTabData.testCasePanelFactories.add(testCasePanelFactory)
+            generatedTestsTabData.testCasePanelFactories.add(testCasePanelBuilder)
 
             testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
@@ -178,7 +178,7 @@ class GeneratedTestsTabFactory(
 
         generatedTestsTabData.testsSelected = generatedTestsTabData.testCasePanels.size
 
-        generatedTestsTabData.topButtonsPanelFactory.update(
+        generatedTestsTabData.topButtonsPanelBuilder.update(
             generatedTestsTabData.testCasePanels,
             generatedTestsTabData.testsSelected,
             generatedTestsTabData.testCasePanelFactories,
@@ -195,7 +195,7 @@ class GeneratedTestsTabFactory(
      */
     private fun update() {
         generatedTestsTabData.allTestCasePanel.updateUI()
-        generatedTestsTabData.topButtonsPanelFactory.update(
+        generatedTestsTabData.topButtonsPanelBuilder.update(
             generatedTestsTabData.testCasePanels,
             generatedTestsTabData.testsSelected,
             generatedTestsTabData.testCasePanelFactories,
@@ -385,7 +385,7 @@ class GeneratedTestsTabFactory(
 
         if (choice == JOptionPane.CANCEL_OPTION) return
 
-        generatedTestsTabData.topButtonsPanelFactory.getRunAllButton().isEnabled = false
+        generatedTestsTabData.topButtonsPanelBuilder.getRunAllButton().isEnabled = false
 
         // add each test generation task to queue
         val tasks: Queue<(CustomProgressIndicator) -> Unit> = LinkedList()

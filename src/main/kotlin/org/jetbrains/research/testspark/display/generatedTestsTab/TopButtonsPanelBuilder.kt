@@ -10,7 +10,7 @@ import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class TopButtonsPanelFactory {
+class TopButtonsPanelBuilder {
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
         IconButtonCreator.getButton(TestSparkIcons.selectAll, PluginLabelsBundle.get("selectAllTip"))
@@ -47,7 +47,7 @@ class TopButtonsPanelFactory {
     /**
      * Updates the labels.
      */
-    fun update(testCasePanels: HashMap<String, JPanel>, testsSelected: Int, testCasePanelFactories: ArrayList<TestCasePanelFactory>) {
+    fun update(testCasePanels: HashMap<String, JPanel>, testsSelected: Int, testCasePanelFactories: ArrayList<TestCasePanelBuilder>) {
         var numberOfPassedTests = 0
         for (testCasePanelFactory in testCasePanelFactories) {
             if (testCasePanelFactory.isRemoved()) continue

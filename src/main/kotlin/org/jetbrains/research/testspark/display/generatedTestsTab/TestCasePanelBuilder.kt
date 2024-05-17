@@ -29,7 +29,7 @@ import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.ReportUpdater
-import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
@@ -61,14 +61,14 @@ import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
-class TestCasePanelFactory(
+class TestCasePanelBuilder(
     private val project: Project,
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
     private val uiContext: UIContext?,
     private val report: Report,
-    private val coverageVisualisationTabFactory: CoverageVisualisationTabFactory,
+    private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
     private val generatedTestsTabData: GeneratedTestsTabData,
 ) {
     private val llmSettingsState: LLMSettingsState
@@ -391,7 +391,7 @@ class TestCasePanelFactory(
             testCase.coveredLines = setOf()
         }
 
-        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabFactory, generatedTestsTabData)
+        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
@@ -604,7 +604,7 @@ class TestCasePanelFactory(
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabFactory, generatedTestsTabData)
+        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
