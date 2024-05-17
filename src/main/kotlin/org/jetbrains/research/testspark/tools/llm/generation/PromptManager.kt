@@ -152,13 +152,8 @@ class PromptManager(
     }
 
     fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
-        return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) || (
-            SettingsArguments(
-                project,
-            ).maxInputParamsDepth(
-                testGenerationData.inputParamsDepthReducing,
-            ) > 1
-            )
+        return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
+            (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
     }
 
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
