@@ -81,7 +81,8 @@ class Pipeline(
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-        clear(project)
+        testGenerationController.errorMonitor.clear()
+
         val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
 
         var editor: Editor? = null
@@ -152,9 +153,5 @@ class Pipeline(
                         }
                 }
             })
-    }
-
-    private fun clear(project: Project) { // should be removed totally!
-        testGenerationController.errorMonitor.clear()
     }
 }

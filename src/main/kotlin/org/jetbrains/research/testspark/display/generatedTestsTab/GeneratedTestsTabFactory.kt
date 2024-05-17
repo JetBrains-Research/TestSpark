@@ -348,6 +348,8 @@ class GeneratedTestsTabFactory(
             true,
         )
 
+        getRemoveAllButton().doClick()
+
         // Get number of modified tests
         var modifiedTestsCount = 0
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
@@ -361,25 +363,6 @@ class GeneratedTestsTabFactory(
             collectorsData.codeType!!,
             modifiedTestsCount,
         )
-    }
-
-    /**
-     * Removes all test cases from the cache and tool window UI.
-     */
-    private fun removeAllTestCases() {
-        // Ask the user for the confirmation
-        val choice = JOptionPane.showConfirmDialog(
-            null,
-            PluginMessagesBundle.get("removeAllMessage"),
-            PluginMessagesBundle.get("confirmationTitle"),
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE,
-        )
-
-        // Cancel the operation if the user did not press "Yes"
-        if (choice == JOptionPane.NO_OPTION) return
-
-        clear()
     }
 
     /**
