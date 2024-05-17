@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
@@ -61,7 +60,8 @@ class Pipeline(
             projectContext.fileUrlAsString = fileUrl
             projectContext.cutPsiClass = cutPsiClass
             projectContext.classFQN = cutPsiClass.qualifiedName!!
-            projectContext.cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
+            projectContext.cutModule =
+                ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
         }
 
         generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
@@ -110,7 +110,8 @@ class Pipeline(
                     super.onFinished()
                     testGenerationController.finished()
                     uiContext?.let {
-                        project.service<TestCaseDisplayService>().updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
+                        project.service<TestCaseDisplayService>()
+                            .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
 
                         if (project.service<EditorService>().editor != null) {
                             val report = it.testGenerationOutput.testGenerationResultList[0]!!
