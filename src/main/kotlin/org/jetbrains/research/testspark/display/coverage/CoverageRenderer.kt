@@ -24,7 +24,6 @@ import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTests
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
-import org.jetbrains.research.testspark.settings.plugin.PluginSettingsState
 import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
 import java.awt.Color
 import java.awt.Dimension

@@ -1,12 +1,12 @@
 package org.jetbrains.research.testspark.data
 
-import org.jetbrains.research.testspark.collectors.FeedbackSentCollector
-import org.jetbrains.research.testspark.collectors.LikedDislikedCollector
 import org.jetbrains.research.testspark.collectors.CoverageStatusShowedCollector
-import org.jetbrains.research.testspark.collectors.TestGenerationStartedCollector
-import org.jetbrains.research.testspark.collectors.TestGenerationFinishedCollector
+import org.jetbrains.research.testspark.collectors.FeedbackSentCollector
 import org.jetbrains.research.testspark.collectors.GeneratedTestsCollector
 import org.jetbrains.research.testspark.collectors.IntegratedTestsCollector
+import org.jetbrains.research.testspark.collectors.LikedDislikedCollector
+import org.jetbrains.research.testspark.collectors.TestGenerationFinishedCollector
+import org.jetbrains.research.testspark.collectors.TestGenerationStartedCollector
 
 class CollectorsData {
     var id: String? = null
