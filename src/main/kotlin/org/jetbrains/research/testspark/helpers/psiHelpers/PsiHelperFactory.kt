@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.helpers.psiHelpers
 
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
-import org.jetbrains.kotlin.psi.KtFile
 
 object PsiHelperFactory {
     fun getPsiHelper(psiFile: PsiFile): PsiHelperInterface {
