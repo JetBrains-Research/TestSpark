@@ -25,7 +25,7 @@ import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.helpers.PsiHelper
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -55,9 +55,10 @@ class PromptManager(
                 val interestingPsiClasses = getInterestingPsiClassesWithQualifiedNames(classesToTest, polyDepthReducing)
 
                 val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
-                val polymorphismRelations = getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses, cut)
-                    .map(this::createClassRepresentation)
-                    .toMap()
+                val polymorphismRelations =
+                    getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses, cut)
+                        .map(this::createClassRepresentation)
+                        .toMap()
 
                 val context = PromptGenerationContext(
                     cut = createClassRepresentation(cut),
@@ -82,14 +83,17 @@ class PromptManager(
                     CodeType.CLASS -> {
                         promptGenerator.generatePromptForClass(interestingClasses, testSamplesCode)
                     }
+
                     CodeType.METHOD -> {
                         val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
                         val method = createMethodRepresentation(psiMethod)!!
                         val interestingClassesFromMethod =
-                            getInterestingPsiClassesWithQualifiedNames(psiMethod).map(this::createClassRepresentation).toList()
+                            getInterestingPsiClassesWithQualifiedNames(psiMethod).map(this::createClassRepresentation)
+                                .toList()
 
                         promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, testSamplesCode)
                     }
+
                     CodeType.LINE -> {
                         val lineNumber = codeType.objectIndex
                         val psiMethod = getPsiMethod(cut, getMethodDescriptor(cut, lineNumber))!!
@@ -102,9 +106,15 @@ class PromptManager(
                         val lineUnderTest = document.getText(TextRange.create(lineStartOffset, lineEndOffset))
                         val method = createMethodRepresentation(psiMethod)!!
                         val interestingClassesFromMethod =
-                            getInterestingPsiClassesWithQualifiedNames(psiMethod).map(this::createClassRepresentation).toList()
+                            getInterestingPsiClassesWithQualifiedNames(psiMethod).map(this::createClassRepresentation)
+                                .toList()
 
-                        promptGenerator.generatePromptForLine(lineUnderTest, method, interestingClassesFromMethod, testSamplesCode)
+                        promptGenerator.generatePromptForLine(
+                            lineUnderTest,
+                            method,
+                            interestingClassesFromMethod,
+                            testSamplesCode
+                        )
                     }
                 }
             },
@@ -142,7 +152,7 @@ class PromptManager(
 
     fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
         return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
-            (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+                (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
     }
 
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
@@ -168,8 +178,12 @@ class PromptManager(
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
-                "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
-                "Maximum depth for input parameters is ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
+                    "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                    "Maximum depth for input parameters is ${
+                        SettingsArguments(project).maxInputParamsDepth(
+                            testGenerationData.inputParamsDepthReducing
+                        )
+                    }.",
             project,
         )
     }
@@ -212,7 +226,10 @@ class PromptManager(
      * @param classesToTest The list of classes to test for interesting PsiClasses.
      * @return The set of interesting PsiClasses found during the search.
      */
-    private fun getInterestingPsiClassesWithQualifiedNames(classesToTest: MutableList<PsiClass>, polyDepthReducing: Int): MutableSet<PsiClass> {
+    private fun getInterestingPsiClassesWithQualifiedNames(
+        classesToTest: MutableList<PsiClass>,
+        polyDepthReducing: Int
+    ): MutableSet<PsiClass> {
         val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
 
         var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
@@ -295,7 +312,9 @@ class PromptManager(
         methodDescriptor: String,
     ): PsiMethod? {
         for (currentPsiMethod in psiClass.allMethods) {
-            if (PsiHelper.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) return currentPsiMethod
+            if (PsiHelperFactory.getPsiHelper(psiClass.containingFile)
+                    .generateMethodDescriptor(currentPsiMethod) == methodDescriptor
+            ) return currentPsiMethod
         }
         return null
     }
@@ -312,7 +331,11 @@ class PromptManager(
         lineNumber: Int,
     ): String {
         for (currentPsiMethod in psiClass.allMethods) {
-            if (isLineInPsiMethod(currentPsiMethod, lineNumber)) return PsiHelper.generateMethodDescriptor(currentPsiMethod)
+            if (isLineInPsiMethod(
+                    currentPsiMethod,
+                    lineNumber
+                )
+            ) return PsiHelperFactory.getPsiHelper(psiClass.containingFile).generateMethodDescriptor(currentPsiMethod)
         }
         return ""
     }
