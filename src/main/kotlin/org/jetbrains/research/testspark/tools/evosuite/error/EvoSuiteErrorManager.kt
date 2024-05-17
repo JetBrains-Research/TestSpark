@@ -72,7 +72,7 @@ class EvoSuiteErrorManager : ErrorManager {
         project: Project,
         evoSuiteProcessTimeout: Long,
         indicator: CustomProgressIndicator,
-        errorMonitor: ErrorMonitor
+        errorMonitor: ErrorMonitor,
     ): Boolean {
         if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return false
 
@@ -81,7 +81,7 @@ class EvoSuiteErrorManager : ErrorManager {
             errorProcess(
                 getExceededTimeoutMessage(evoSuiteProcessTimeout),
                 project,
-                errorMonitor
+                errorMonitor,
             )
             return false
         }
@@ -103,7 +103,7 @@ class EvoSuiteErrorManager : ErrorManager {
             errorProcess(
                 EvoSuiteMessagesBundle.get("errorWhileInitializingTargetClass").lowercase(Locale.getDefault()),
                 project,
-                errorMonitor
+                errorMonitor,
             )
             return false
         }

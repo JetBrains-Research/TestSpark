@@ -113,7 +113,7 @@ class PromptManager(
                             lineUnderTest,
                             method,
                             interestingClassesFromMethod,
-                            testSamplesCode
+                            testSamplesCode,
                         )
                     }
                 }
@@ -152,7 +152,7 @@ class PromptManager(
 
     fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
         return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
-                (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+            (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
     }
 
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
@@ -178,12 +178,12 @@ class PromptManager(
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
-                    "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
-                    "Maximum depth for input parameters is ${
-                        SettingsArguments(project).maxInputParamsDepth(
-                            testGenerationData.inputParamsDepthReducing
-                        )
-                    }.",
+                "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                "Maximum depth for input parameters is ${
+                    SettingsArguments(project).maxInputParamsDepth(
+                        testGenerationData.inputParamsDepthReducing,
+                    )
+                }.",
             project,
         )
     }
@@ -228,7 +228,7 @@ class PromptManager(
      */
     private fun getInterestingPsiClassesWithQualifiedNames(
         classesToTest: MutableList<PsiClass>,
-        polyDepthReducing: Int
+        polyDepthReducing: Int,
     ): MutableSet<PsiClass> {
         val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
 
@@ -314,7 +314,9 @@ class PromptManager(
         for (currentPsiMethod in psiClass.allMethods) {
             if (PsiHelperFactory.getPsiHelper(psiClass.containingFile)
                     .generateMethodDescriptor(currentPsiMethod) == methodDescriptor
-            ) return currentPsiMethod
+            ) {
+                return currentPsiMethod
+            }
         }
         return null
     }
@@ -333,9 +335,11 @@ class PromptManager(
         for (currentPsiMethod in psiClass.allMethods) {
             if (isLineInPsiMethod(
                     currentPsiMethod,
-                    lineNumber
+                    lineNumber,
                 )
-            ) return PsiHelperFactory.getPsiHelper(psiClass.containingFile).generateMethodDescriptor(currentPsiMethod)
+            ) {
+                return PsiHelperFactory.getPsiHelper(psiClass.containingFile).generateMethodDescriptor(currentPsiMethod)
+            }
         }
         return ""
     }
