@@ -152,7 +152,7 @@ class PromptManager(
 
     fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
         return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
-            (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+                (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
     }
 
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
@@ -178,12 +178,12 @@ class PromptManager(
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
-                "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
-                "Maximum depth for input parameters is ${
-                    SettingsArguments(project).maxInputParamsDepth(
-                        testGenerationData.inputParamsDepthReducing,
-                    )
-                }.",
+                    "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                    "Maximum depth for input parameters is ${
+                        SettingsArguments(project).maxInputParamsDepth(
+                            testGenerationData.inputParamsDepthReducing,
+                        )
+                    }.",
             project,
         )
     }
