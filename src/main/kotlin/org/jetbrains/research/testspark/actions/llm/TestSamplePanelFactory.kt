@@ -10,10 +10,10 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.display.IconButtonCreator
-import org.jetbrains.research.testspark.display.ModifiedLinesGetter
-import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
-import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
+import org.jetbrains.research.testspark.uiUtils.ModifiedLinesGetter
+import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import javax.swing.BoxLayout
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton

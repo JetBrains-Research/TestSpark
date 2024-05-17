@@ -43,7 +43,7 @@ fun executeTestCaseModificationRequest(
     indicator: CustomProgressIndicator,
     requestManager: RequestManager,
     testsAssembler: TestsAssembler,
-    errorMonitor: ErrorMonitor = DefaultErrorMonitor()
+    errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
 ): TestSuiteGeneratedByLLM? {
     // Update Token information
     val prompt = "For this test:\n ```\n $testCase\n ```\nPerform the following task: $task"
@@ -64,7 +64,7 @@ fun executeTestCaseModificationRequest(
         packageName,
         testsAssembler,
         isUserFeedback = true,
-        errorMonitor
+        errorMonitor,
     )
 
     return response.testSuite

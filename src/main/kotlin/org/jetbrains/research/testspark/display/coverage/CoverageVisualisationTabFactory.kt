@@ -1,6 +1,5 @@
-package org.jetbrains.research.testspark.services
+package org.jetbrains.research.testspark.display.coverage
 
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -8,19 +7,24 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.JBColor
+import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
+import com.intellij.ui.table.JBTable
 import org.evosuite.result.MutationInfo
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
+import org.jetbrains.research.testspark.data.CollectorsData
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
-import org.jetbrains.research.testspark.helpers.CoverageHelper
-import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
+import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
+import org.jetbrains.research.testspark.services.PluginSettingsService
 import java.awt.Color
+import java.awt.Dimension
 import javax.swing.JScrollPane
+import javax.swing.table.AbstractTableModel
 import kotlin.math.roundToInt
 
 /**
@@ -28,9 +32,7 @@ import kotlin.math.roundToInt
  *
  * @param project the project
  */
-@Service(Service.Level.PROJECT)
-class CoverageVisualisationService(private val project: Project) {
-
+class CoverageVisualisationTabFactory(private val project: Project, private val editor: Editor, private val collectorsData: CollectorsData) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
     private var contentManager: ContentManager? = null
@@ -59,24 +61,16 @@ class CoverageVisualisationService(private val project: Project) {
      * Clears all highlighters from the list of editors.
      */
     fun clear() {
-        currentHighlightedData ?: return
-        currentHighlightedData!!.editor.markupModel ?: return
-        currentHighlightedData!!.editor.markupModel.removeAllHighlighters()
+        currentHighlightedData?.editor?.markupModel?.removeAllHighlighters()
+        contentManager?.removeContent(content!!, true)
     }
-
-    /**
-     * Retrieves the current highlighted data.
-     *
-     * @return The current highlighted data, or null if there is no highlighted data.
-     */
-    fun getCurrentHighlightedData(): HighlightedData? = currentHighlightedData
 
     /**
      * Instantiates tab for coverage table and calls function to update coverage.
      *
      * @param testReport the generated tests summary
      */
-    fun showCoverage(testReport: Report) {
+    fun show(testReport: Report, generatedTestsTabData: GeneratedTestsTabData) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
         createToolWindowTab()
@@ -85,6 +79,7 @@ class CoverageVisualisationService(private val project: Project) {
             testReport.allCoveredLines,
             testReport.testCaseList.values.stream().map { it.id }.toList().toHashSet(),
             testReport,
+            generatedTestsTabData,
         )
     }
 
@@ -96,13 +91,13 @@ class CoverageVisualisationService(private val project: Project) {
      * @param testReport report used for gutter information
      * @param selectedTests hash set of selected test names
      */
-    fun updateCoverage(
+    private fun updateCoverage(
         linesToCover: Set<Int>,
         selectedTests: HashSet<Int>,
         testReport: Report,
+        generatedTestsTabData: GeneratedTestsTabData,
     ) {
-        currentHighlightedData =
-            HighlightedData(linesToCover, selectedTests, testReport, project.service<EditorService>().editor!!)
+        currentHighlightedData = HighlightedData(linesToCover, selectedTests, testReport, editor)
         clear()
 
         val settingsProjectState = project.service<PluginSettingsService>().state
@@ -150,7 +145,7 @@ class CoverageVisualisationService(private val project: Project) {
             for (i in linesToCover) {
                 val line = i - 1
 
-                val hl = project.service<EditorService>().editor!!.markupModel.addLineHighlighter(
+                val hl = editor.markupModel.addLineHighlighter(
                     line,
                     HighlighterLayer.ADDITIONAL_SYNTAX,
                     textAttribute,
@@ -162,7 +157,7 @@ class CoverageVisualisationService(private val project: Project) {
                 val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
                 val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 
-                hl.lineMarkerRenderer = CoverageHelper(
+                hl.lineMarkerRenderer = CoverageRenderer(
                     color,
                     line,
                     testsCoveringLine,
@@ -170,6 +165,8 @@ class CoverageVisualisationService(private val project: Project) {
                     mutationNotCoveredLine,
                     mapMutantsToTests,
                     project,
+                    generatedTestsTabData,
+                    collectorsData,
                 )
             }
         }
@@ -226,7 +223,7 @@ class CoverageVisualisationService(private val project: Project) {
         }
 
         // Change the values in the table
-        mainScrollPane = CoverageToolWindowDisplayHelper.getPanel(
+        mainScrollPane = getPanel(
             arrayListOf(
                 testReport.UUT,
                 "$relativeLines% ($coveredLines/$allLines)",
@@ -234,6 +231,55 @@ class CoverageVisualisationService(private val project: Project) {
                 "$relativeMutations% ($coveredMutations/$allMutations)",
             ),
         )
+    }
+
+    private fun getPanel(data: ArrayList<String>): JScrollPane {
+        // Implementation of abstract table model
+        val tableModel = object : AbstractTableModel() {
+            /**
+             * Returns the number of rows.
+             *
+             * @return row count
+             */
+            override fun getRowCount(): Int {
+                return 1
+            }
+
+            /**
+             * Returns the number of columns.
+             *
+             * @return column count
+             */
+            override fun getColumnCount(): Int {
+                return 4
+            }
+
+            /**
+             * Returns the value at index.
+             *
+             * @param rowIndex index of row
+             * @param columnIndex index of column
+             * @return value at row
+             */
+            override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
+                return data[rowIndex * 4 + columnIndex]
+            }
+        }
+
+        val table = JBTable(tableModel)
+
+        val mainPanel = ScrollPaneFactory.createScrollPane(table)
+
+        val tableColumnModel = table.columnModel
+        tableColumnModel.getColumn(0).headerValue = PluginLabelsBundle.get("unitsUndertest")
+        tableColumnModel.getColumn(1).headerValue = PluginLabelsBundle.get("lineCoverage")
+        tableColumnModel.getColumn(2).headerValue = PluginLabelsBundle.get("branchCoverage")
+        tableColumnModel.getColumn(3).headerValue = PluginLabelsBundle.get("weakMutationCoverage")
+
+        table.columnModel = tableColumnModel
+        table.minimumSize = Dimension(700, 100)
+
+        return mainPanel
     }
 
     /**
@@ -255,12 +301,5 @@ class CoverageVisualisationService(private val project: Project) {
             true,
         )
         contentManager!!.addContent(content!!)
-    }
-
-    /**
-     * Closes the toolWindow tab for the coverage visualisation
-     */
-    fun closeToolWindowTab() {
-        contentManager?.removeContent(content!!, true)
     }
 }

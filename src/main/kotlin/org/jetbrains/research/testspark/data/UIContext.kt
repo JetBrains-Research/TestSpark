@@ -9,5 +9,5 @@ data class UIContext(
     val projectContext: ProjectContext,
     val testGenerationOutput: TestGenerationData,
     var requestManager: RequestManager? = null,
-    val errorMonitor: ErrorMonitor = DefaultErrorMonitor()
+    val errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
 )
