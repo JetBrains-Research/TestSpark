@@ -15,7 +15,6 @@ import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.services.CollectorService
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -109,7 +108,7 @@ class CoverageHelper(
             HintHint(editor, point),
         )
 
-        project.service<CollectorService>().coverageStatusShowedCollector.logEvent(project.service<CollectorService>().data.id!!)
+        collectorsData.coverageStatusShowedCollector.logEvent(collectorsData.id!!)
     }
 
     /**

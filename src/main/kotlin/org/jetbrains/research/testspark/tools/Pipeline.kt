@@ -14,6 +14,7 @@ import org.jetbrains.research.testspark.actions.controllers.TestGenerationContro
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
+import org.jetbrains.research.testspark.data.CollectorsData
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
@@ -43,6 +44,8 @@ class Pipeline(
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
 
+    val collectorsData = CollectorsData()
+
     init {
         val cutPsiClass = PsiHelper.getSurroundingClass(psiFile, caretOffset)!!
 
@@ -59,7 +62,7 @@ class Pipeline(
             projectContext.cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
         }
 
-        project.service<CollectorService>().data.id = id
+        collectorsData.id = id
 
         generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
         generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
@@ -85,12 +88,12 @@ class Pipeline(
 
                     if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
-                    project.service<CollectorService>().data.technique = processManager.getTechnique()
-                    project.service<CollectorService>().data.codeType = codeType.type!!
-                    project.service<CollectorService>().data.testGenerationStartTime = System.currentTimeMillis()
+                    collectorsData.technique = processManager.getTechnique()
+                    collectorsData.codeType = codeType.type!!
+                    collectorsData.testGenerationStartTime = System.currentTimeMillis()
 
                     // Add collector logging
-                    project.service<CollectorService>().testGenerationStartedCollector.logEvent(
+                    collectorsData.testGenerationStartedCollector.logEvent(
                         processManager.getTechnique(),
                         codeType.type!!,
                     )

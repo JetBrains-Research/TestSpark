@@ -171,17 +171,17 @@ class TestCaseDisplayService(private val project: Project) {
         createToolWindowTab()
 
         // Add collector logging
-        project.service<CollectorService>().testGenerationFinishedCollector.logEvent(
-            System.currentTimeMillis() - project.service<CollectorService>().data.testGenerationStartTime!!,
-            project.service<CollectorService>().data.technique!!,
-            project.service<CollectorService>().data.codeType!!,
+        collectorsData.testGenerationFinishedCollector.logEvent(
+            System.currentTimeMillis() - collectorsData.testGenerationStartTime!!,
+            collectorsData.technique!!,
+            collectorsData.codeType!!,
         )
 
         // Add collector logging
-        project.service<CollectorService>().generatedTestsCollector.logEvent(
+        collectorsData.generatedTestsCollector.logEvent(
             report.testCaseList.size,
-            project.service<CollectorService>().data.technique!!,
-            project.service<CollectorService>().data.codeType!!,
+            collectorsData.technique!!,
+            collectorsData.codeType!!,
         )
     }
 
@@ -432,10 +432,10 @@ class TestCaseDisplayService(private val project: Project) {
         }
 
         // Add collector logging
-        project.service<CollectorService>().integratedTestsCollector.logEvent(
+        collectorsData.integratedTestsCollector.logEvent(
             selectedTestCases.size,
-            project.service<CollectorService>().data.technique!!,
-            project.service<CollectorService>().data.codeType!!,
+            collectorsData.technique!!,
+            collectorsData.codeType!!,
             modifiedTestsCount,
         )
     }

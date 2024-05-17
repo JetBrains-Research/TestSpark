@@ -32,7 +32,6 @@ import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper
-import org.jetbrains.research.testspark.services.CollectorService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -176,11 +175,11 @@ class TestCasePanelFactory(
                 likeButton.icon = TestSparkIcons.likeSelected
             }
             dislikeButton.icon = TestSparkIcons.dislike
-            project.service<CollectorService>().likedDislikedCollector.logEvent(
+            collectorsData.likedDislikedCollector.logEvent(
                 true,
                 getTestId(),
-                project.service<CollectorService>().data.technique!!,
-                project.service<CollectorService>().data.codeType!!,
+                collectorsData.data.technique!!,
+                collectorsData.data.codeType!!,
                 testCase.testCode != initialCodes[currentRequestNumber - 1],
             )
         }
@@ -192,11 +191,11 @@ class TestCasePanelFactory(
                 dislikeButton.icon = TestSparkIcons.dislikeSelected
             }
             likeButton.icon = TestSparkIcons.like
-            project.service<CollectorService>().likedDislikedCollector.logEvent(
+            collectorsData.likedDislikedCollector.logEvent(
                 false,
                 getTestId(),
-                project.service<CollectorService>().data.technique!!,
-                project.service<CollectorService>().data.codeType!!,
+                collectorsData.data.technique!!,
+                collectorsData.data.codeType!!,
                 testCase.testCode != initialCodes[currentRequestNumber - 1],
             )
         }
@@ -420,10 +419,10 @@ class TestCasePanelFactory(
                         return
                     }
 
-                    project.service<CollectorService>().feedbackSentCollector.logEvent(
-                        project.service<CollectorService>().data.id!! + "_" + testCase.id,
-                        project.service<CollectorService>().data.technique!!,
-                        project.service<CollectorService>().data.codeType!!,
+                    collectorsData.feedbackSentCollector.logEvent(
+                        collectorsData.data.id!! + "_" + testCase.id,
+                        collectorsData.data.technique!!,
+                        collectorsData.data.codeType!!,
                         testCase.testCode != initialCodes[currentRequestNumber - 1],
                     )
 
@@ -688,5 +687,5 @@ class TestCasePanelFactory(
         testCase.testCode = languageTextField.document.text
     }
 
-    private fun getTestId(): String = project.service<CollectorService>().data.id!! + "_" + testCase.id
+    private fun getTestId(): String = collectorsData.data.id!! + "_" + testCase.id
 }
