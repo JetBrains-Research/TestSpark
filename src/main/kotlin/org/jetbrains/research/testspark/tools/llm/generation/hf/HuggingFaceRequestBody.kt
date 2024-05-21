@@ -4,12 +4,12 @@ import org.jetbrains.research.testspark.core.data.ChatMessage
 
 data class Parameters(
     val topProbability: Double,
-    val temperature: Double
+    val temperature: Double,
 )
 
-data class HuggingFaceRequestBody (
+data class HuggingFaceRequestBody(
     val messages: List<ChatMessage>,
-    val parameters: Parameters
+    val parameters: Parameters,
 )
 
 fun HuggingFaceRequestBody.toMap(): Map<String, Any> {
@@ -23,7 +23,7 @@ fun HuggingFaceRequestBody.toMap(): Map<String, Any> {
             "max_length" to 8192,
             "max_new_tokens" to 250,
             "max_time" to 120.0,
-            "return_full_text" to false
-        )
+            "return_full_text" to false,
+        ),
     )
 }

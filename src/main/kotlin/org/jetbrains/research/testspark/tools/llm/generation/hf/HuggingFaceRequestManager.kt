@@ -20,7 +20,8 @@ import java.net.HttpURLConnection
 class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
     private val url = "https://api-inference.huggingface.co/models/meta-llama/"
     private val systemPrompt = "You are a helpful and honest code and programming assistant." +
-            " Please, respond concisely and truthfully."
+        " Please, respond concisely and truthfully."
+
     // TODO: The user should be able to change these numbers in the plugin's settings
     private val topProbability = 0.9
     private val temperature = 0.9
@@ -31,10 +32,12 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
-        errorMonitor: ErrorMonitor
+        errorMonitor: ErrorMonitor,
     ): SendResult {
-        val httpRequest = HttpRequests.post(url + SettingsArguments(project).getModel(),
-            "application/json").tuner {
+        val httpRequest = HttpRequests.post(
+            url + SettingsArguments(project).getModel(),
+            "application/json",
+        ).tuner {
             it.setRequestProperty("Authorization", "Bearer $token")
         }
 
@@ -61,7 +64,7 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
             }
         }
 
-        return sendResult;
+        return sendResult
     }
 
     /**

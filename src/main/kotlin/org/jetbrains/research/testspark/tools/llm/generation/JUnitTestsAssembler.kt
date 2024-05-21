@@ -91,8 +91,10 @@ class JUnitTestsAssembler(
     fun consumeHFRequest(httpRequest: HttpRequests.Request) {
         Thread.sleep(50L)
         val text = httpRequest.reader.readLine()
-        val generatedTestCases = removeDelimiterLines(JsonParser.parseString(text).asJsonArray[0]
-            .asJsonObject["generated_text"].asString.trim())
+        val generatedTestCases = removeDelimiterLines(
+            JsonParser.parseString(text).asJsonArray[0]
+                .asJsonObject["generated_text"].asString.trim(),
+        )
         super.consume(generatedTestCases)
         log.debug(super.getContent())
         updateProgressBar()

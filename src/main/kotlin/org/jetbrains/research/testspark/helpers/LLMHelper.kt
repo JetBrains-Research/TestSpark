@@ -122,7 +122,8 @@ object LLMHelper {
                 llmPlatforms[index].token = settingsState.grazieToken
             }
             if (llmPlatforms[index].name == settingsState.huggingFaceName &&
-                llmPlatforms[index].name == platformSelector.selectedItem!!.toString()) {
+                llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+            ) {
                 llmUserTokenField.text = settingsState.huggingFaceToken
                 llmPlatforms[index].token = settingsState.huggingFaceToken
             }
@@ -248,7 +249,7 @@ object LLMHelper {
         requestManager: RequestManager,
         project: Project,
         testGenerationOutput: TestGenerationData,
-        errorMonitor: ErrorMonitor
+        errorMonitor: ErrorMonitor,
     ): TestSuiteGeneratedByLLM? {
         // Update Token information
         if (!updateToken(requestManager, project, errorMonitor)) {
@@ -261,7 +262,7 @@ object LLMHelper {
             indicator,
             requestManager,
             testsAssembler = JUnitTestsAssembler(project, indicator, testGenerationOutput),
-            errorMonitor
+            errorMonitor,
         )
         return testSuite
     }
