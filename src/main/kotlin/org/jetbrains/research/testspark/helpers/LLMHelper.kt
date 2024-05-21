@@ -235,7 +235,7 @@ object LLMHelper {
         requestManager: RequestManager,
         project: Project,
         testGenerationOutput: TestGenerationData,
-        errorMonitor: ErrorMonitor
+        errorMonitor: ErrorMonitor,
     ): TestSuiteGeneratedByLLM? {
         // Update Token information
         if (!updateToken(requestManager, project, errorMonitor)) {
@@ -248,7 +248,7 @@ object LLMHelper {
             indicator,
             requestManager,
             testsAssembler = JUnitTestsAssembler(project, indicator, testGenerationOutput),
-            errorMonitor
+            errorMonitor,
         )
         return testSuite
     }
