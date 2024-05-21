@@ -33,7 +33,7 @@ abstract class RequestManager(var token: String) {
         packageName: String,
         testsAssembler: TestsAssembler,
         isUserFeedback: Boolean = false,
-        errorMonitor: ErrorMonitor = DefaultErrorMonitor() // The plugin for other IDEs can send LLM requests without passing an errorMonitor
+        errorMonitor: ErrorMonitor = DefaultErrorMonitor(), // The plugin for other IDEs can send LLM requests without passing an errorMonitor
     ): LLMResponse {
         // save the prompt in chat history
         // TODO: make role to be an enum class
@@ -87,7 +87,7 @@ abstract class RequestManager(var token: String) {
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
-        errorMonitor: ErrorMonitor = DefaultErrorMonitor()
+        errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
     ): SendResult
 
     open fun processUserFeedbackResponse(

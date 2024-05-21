@@ -18,7 +18,7 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.helpers.PsiHelper
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
@@ -47,7 +47,8 @@ class Pipeline(
     val generatedTestsData = TestGenerationData()
 
     init {
-        val cutPsiClass = PsiHelper.getSurroundingClass(psiFile, caretOffset)!!
+
+        val cutPsiClass = PsiHelperFactory.getPsiHelper(psiFile).getSurroundingClass(psiFile, caretOffset)!!
 
         // get generated test path
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults$ToolUtils.sep"
@@ -59,7 +60,8 @@ class Pipeline(
             projectContext.fileUrlAsString = fileUrl
             projectContext.cutPsiClass = cutPsiClass
             projectContext.classFQN = cutPsiClass.qualifiedName!!
-            projectContext.cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
+            projectContext.cutModule =
+                ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
         }
 
         generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
@@ -108,7 +110,8 @@ class Pipeline(
                     super.onFinished()
                     testGenerationController.finished()
                     uiContext?.let {
-                        project.service<TestCaseDisplayService>().updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
+                        project.service<TestCaseDisplayService>()
+                            .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
 
                         if (project.service<EditorService>().editor != null) {
                             val report = it.testGenerationOutput.testGenerationResultList[0]!!
