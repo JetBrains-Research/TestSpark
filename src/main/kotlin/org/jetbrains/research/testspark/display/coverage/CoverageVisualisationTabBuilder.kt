@@ -260,6 +260,7 @@ class CoverageVisualisationTabBuilder(private val project: Project, private val 
 
         val table = JBTable(tableModel)
 
+        // panel contains all information about the coverage status after the generation
         val mainPanel = ScrollPaneFactory.createScrollPane(table)
 
         val tableColumnModel = table.columnModel
