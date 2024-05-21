@@ -31,7 +31,7 @@ import kotlin.math.roundToInt
  *
  * @param project the project
  */
-class CoverageVisualisationTabFactory(private val project: Project, private val editor: Editor) {
+class CoverageVisualisationTabBuilder(private val project: Project, private val editor: Editor) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
     private var contentManager: ContentManager? = null
@@ -39,7 +39,7 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
 
     private var currentHighlightedData: HighlightedData? = null
 
-    private var mainScrollPane: JScrollPane? = null
+    private var mainScrollPanel: JScrollPane? = null
 
     /**
      * Represents highlighted data in the editor.
@@ -221,7 +221,7 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
         }
 
         // Change the values in the table
-        mainScrollPane = getPanel(
+        mainScrollPanel = getPanel(
             arrayListOf(
                 testReport.UUT,
                 "$relativeLines% ($coveredLines/$allLines)",
@@ -239,18 +239,14 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
              *
              * @return row count
              */
-            override fun getRowCount(): Int {
-                return 1
-            }
+            override fun getRowCount(): Int = 1
 
             /**
              * Returns the number of columns.
              *
              * @return column count
              */
-            override fun getColumnCount(): Int {
-                return 4
-            }
+            override fun getColumnCount(): Int = 4
 
             /**
              * Returns the value at index.
@@ -259,13 +255,12 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
              * @param columnIndex index of column
              * @return value at row
              */
-            override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
-                return data[rowIndex * 4 + columnIndex]
-            }
+            override fun getValueAt(rowIndex: Int, columnIndex: Int): Any = data[rowIndex * 4 + columnIndex]
         }
 
         val table = JBTable(tableModel)
 
+        // panel contains all information about the coverage status after the generation
         val mainPanel = ScrollPaneFactory.createScrollPane(table)
 
         val tableColumnModel = table.columnModel
@@ -294,7 +289,7 @@ class CoverageVisualisationTabFactory(private val project: Project, private val 
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
-            mainScrollPane,
+            mainScrollPanel,
             PluginLabelsBundle.get("coverageVisualisation"),
             true,
         )

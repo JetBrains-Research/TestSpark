@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display.generatedTestsTab
+package org.jetbrains.research.testspark.display
 
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
@@ -27,10 +27,10 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.display.ReportUpdater
-import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
@@ -65,7 +65,7 @@ class TestCasePanel(
     private val checkbox: JCheckBox,
     private val uiContext: UIContext?,
     private val report: Report,
-    private val coverageVisualisationTabFactory: CoverageVisualisationTabFactory,
+    private val coverageVisualisationTabFactory: CoverageVisualisationTabBuilder,
     private val generatedTestsTabData: GeneratedTestsTabData,
 ) {
     private val llmSettingsState: LLMSettingsState
