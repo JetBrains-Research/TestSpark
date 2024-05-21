@@ -5,10 +5,8 @@ import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.PsiMethod
 import com.intellij.util.containers.stream
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
@@ -53,7 +51,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     init {
         addListeners()
 
-        collectTestSamples(project, testNames, initialTestCodes)
+        collectTestSamples(project, testNames)
     }
 
     override fun getTitlePanel(): JPanel {
@@ -182,24 +180,25 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     }
 
     /**
-     * Retrieves a list of test samples from the given project.
+     * Collects names and code samples of test methods in the project.
      *
-     * @return A list of strings, representing the names of the test samples.
+     * @param project The project to scan for test methods.
+     * @param testNames The list to store the names of found test methods.
      */
-    private fun collectTestSamples(project: Project, testNames: MutableList<String>, initialTestCodes: MutableList<String>) {
+    private fun collectTestSamples(project: Project, testNames: MutableList<String>) {
         val projectFileIndex: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
         val javaFileType: FileType = FileTypeManager.getInstance().getFileTypeByExtension("java")
 
         projectFileIndex.iterateContent { file ->
             if (file.fileType === javaFileType) {
-                try {
-                    val psiJavaFile = (PsiManager.getInstance(project).findFile(file) as PsiJavaFile)
-                    val psiClass = psiJavaFile.classes[
-                        psiJavaFile.classes.stream().map { it.name }.toArray()
-                            .indexOf(psiJavaFile.name.removeSuffix(".java")),
-                    ]
+                val psiJavaFile = (PsiManager.getInstance(project).findFile(file) as PsiJavaFile)
+                val psiClassIndex = psiJavaFile.classes.stream().map { it.name }.toArray()
+                    .indexOf(psiJavaFile.name.removeSuffix(".java"))
+                if (psiClassIndex in 0 until psiJavaFile.classes.size) {
+                    val psiClass = psiJavaFile.classes[psiClassIndex]
                     var imports = psiJavaFile.importList?.allImportStatements?.map { it.text }?.toList()
                         ?.joinToString("\n") ?: ""
+                    // add imports of all files inside the current package
                     if (psiClass.qualifiedName != null && psiClass.qualifiedName!!.contains(".")) {
                         imports += "\nimport ${psiClass.qualifiedName?.substringBeforeLast(".") + ".*"};"
                     }
@@ -208,12 +207,11 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
                         annotations.forEach { annotation ->
                             if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
                                 val code: String = createTestSampleClass(imports, method.text)
-                                testNames.add(createMethodName(psiClass, method))
+                                testNames.add(createUIPresentableMethodName(psiClass.qualifiedName!!, method.name))
                                 initialTestCodes.add(code)
                             }
                         }
                     }
-                } catch (_: Exception) {
                 }
             }
             true
@@ -229,6 +227,6 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
             "}"
     }
 
-    private fun createMethodName(psiClass: PsiClass, method: PsiMethod): String =
-        "<html>${psiClass.qualifiedName}#${method.name}</html>"
+    private fun createUIPresentableMethodName(classQualifiedName: String, methodName: String): String =
+        "<html>$classQualifiedName#$methodName</html>"
 }

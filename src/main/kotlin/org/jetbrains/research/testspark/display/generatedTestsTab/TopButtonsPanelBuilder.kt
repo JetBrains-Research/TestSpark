@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.display.generatedTestsTab
 
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.display.TestCasePanel
 import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
 import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import java.awt.Dimension
@@ -10,7 +11,7 @@ import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class TopButtonsPanelFactory {
+class TopButtonsPanelBuilder {
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
         IconButtonCreator.getButton(TestSparkIcons.selectAll, PluginLabelsBundle.get("selectAllTip"))

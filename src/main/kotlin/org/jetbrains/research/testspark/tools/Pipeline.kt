@@ -20,9 +20,9 @@ import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
+import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.helpers.PsiHelper
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -42,13 +42,14 @@ class Pipeline(
     fileUrl: String?,
     private val packageName: String,
     private val testGenerationController: TestGenerationController,
-    private val testSparkDisplayFactory: TestSparkDisplayFactory,
+    private val testSparkDisplayBuilder: TestSparkDisplayBuilder,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
 
     init {
-        val cutPsiClass = PsiHelper.getSurroundingClass(psiFile, caretOffset)!!
+
+        val cutPsiClass = PsiHelperFactory.getPsiHelper(psiFile).getSurroundingClass(psiFile, caretOffset)!!
 
         // get generated test path
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults$ToolUtils.sep"
@@ -76,7 +77,7 @@ class Pipeline(
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-        clear(project)
+        clear()
         val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
 
         var editor: Editor? = null
@@ -114,7 +115,7 @@ class Pipeline(
                         updateEditor(it.testGenerationOutput.fileUrl)
 
                         if (editor != null) {
-                            testSparkDisplayFactory.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project)
+                            testSparkDisplayBuilder.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project)
                         }
                     }
                 }
@@ -139,7 +140,7 @@ class Pipeline(
             })
     }
 
-    private fun clear(project: Project) { // should be removed totally!
+    private fun clear() { // should be removed totally!
         testGenerationController.errorMonitor.clear()
     }
 }
