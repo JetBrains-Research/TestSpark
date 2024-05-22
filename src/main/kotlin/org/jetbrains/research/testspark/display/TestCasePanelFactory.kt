@@ -414,7 +414,7 @@ class TestCasePanelFactory(
                         uiContext.requestManager!!,
                         project,
                         uiContext.testGenerationOutput,
-                        uiContext.errorMonitor
+                        uiContext.errorMonitor,
                     )
 
                     if (modifiedTest != null) {

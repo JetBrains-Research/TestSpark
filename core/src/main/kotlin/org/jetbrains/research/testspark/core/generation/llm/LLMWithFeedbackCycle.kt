@@ -60,7 +60,7 @@ class LLMWithFeedbackCycle(
     private val testsPresenter: TestsPresenter,
     private val indicator: CustomProgressIndicator,
     private val requestsCountThreshold: Int,
-    private val errorMonitor: ErrorMonitor = DefaultErrorMonitor()
+    private val errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
 ) {
     enum class WarningType {
         TEST_SUITE_PARSING_FAILED,
@@ -104,7 +104,7 @@ class LLMWithFeedbackCycle(
                 packageName = packageName,
                 testsAssembler = testsAssembler,
                 isUserFeedback = false,
-                errorMonitor
+                errorMonitor,
             )
 
             when (response.errorCode) {

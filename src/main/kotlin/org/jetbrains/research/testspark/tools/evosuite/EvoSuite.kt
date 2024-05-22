@@ -9,7 +9,7 @@ import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.helpers.PsiHelper
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.evosuite.generation.EvoSuiteProcessManager
@@ -68,12 +68,12 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      */
     override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController) {
         log.info("Starting tests generation for method by EvoSuite")
-        val psiMethod: PsiMethod = PsiHelper.getSurroundingMethod(psiFile, caretOffset)!!
+        val psiMethod: PsiMethod = PsiHelperFactory.getPsiHelper(psiFile).getSurroundingMethod(psiFile, caretOffset)!!
         createPipeline(project, psiFile, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(
                 CodeType.METHOD,
-                PsiHelper.generateMethodDescriptor(psiMethod),
+                PsiHelperFactory.getPsiHelper(psiFile).generateMethodDescriptor(psiMethod),
             ),
         )
     }
@@ -89,7 +89,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      */
     override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController) {
         log.info("Starting tests generation for line by EvoSuite")
-        val selectedLine: Int = PsiHelper.getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
+        val selectedLine: Int = PsiHelperFactory.getPsiHelper(psiFile).getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
         createPipeline(project, psiFile, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(

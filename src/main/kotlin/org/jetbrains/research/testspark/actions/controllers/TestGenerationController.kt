@@ -15,6 +15,7 @@ import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
  */
 class TestGenerationController {
     private var isRunning: Boolean = false
+
     // errorMonitor is passed in many places in the project
     // and reflects if any bug happened in the test generation process
     val errorMonitor: ErrorMonitor = DefaultErrorMonitor()

@@ -19,7 +19,7 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.helpers.PsiHelper
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -70,7 +70,9 @@ class TestSparkAction : AnAction() {
      * @param e the AnActionEvent object representing the event
      */
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = PsiHelper.getCurrentListOfCodeTypes(e) != null
+        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+        val psiHelper = PsiHelperFactory.getPsiHelper(psiFile)
+        e.presentation.isEnabled = psiHelper.getCurrentListOfCodeTypes(e) != null
     }
 
     /**
@@ -95,9 +97,9 @@ class TestSparkAction : AnAction() {
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
 
-        private val codeTypes = PsiHelper.getCurrentListOfCodeTypes(e)!!
-
         private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+
+        private val codeTypes = PsiHelperFactory.getPsiHelper(psiFile).getCurrentListOfCodeTypes(e)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
