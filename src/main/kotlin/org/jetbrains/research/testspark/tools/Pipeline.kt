@@ -21,9 +21,9 @@ import org.jetbrains.research.testspark.data.CollectorsData
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.TestSparkDisplayFactory
+import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.helpers.PsiHelper
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -43,7 +43,7 @@ class Pipeline(
     fileUrl: String?,
     private val packageName: String,
     private val testGenerationController: TestGenerationController,
-    private val testSparkDisplayFactory: TestSparkDisplayFactory,
+    private val testSparkDisplayBuilder: TestSparkDisplayBuilder,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
@@ -51,7 +51,8 @@ class Pipeline(
     val collectorsData = CollectorsData()
 
     init {
-        val cutPsiClass = PsiHelper.getSurroundingClass(psiFile, caretOffset)!!
+
+        val cutPsiClass = PsiHelperFactory.getPsiHelper(psiFile).getSurroundingClass(psiFile, caretOffset)!!
 
         // get generated test path
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults$ToolUtils.sep"
@@ -130,7 +131,7 @@ class Pipeline(
                         updateEditor(it.testGenerationOutput.fileUrl)
 
                         if (editor != null) {
-                            testSparkDisplayFactory.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project, collectorsData)
+                            testSparkDisplayBuilder.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project, collectorsData)
                         }
                     }
                 }

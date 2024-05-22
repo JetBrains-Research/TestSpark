@@ -7,15 +7,15 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.CollectorsData
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabFactory
-import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabFactory
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
+import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabBuilder
 import javax.swing.JOptionPane
 
-class TestSparkDisplayFactory {
+class TestSparkDisplayBuilder {
     private var editor: Editor? = null
 
-    private var coverageVisualisationTabFactory: CoverageVisualisationTabFactory? = null
-    private var generatedTestsTabFactory: GeneratedTestsTabFactory? = null
+    private var coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder? = null
+    private var generatedTestsTabBuilder: GeneratedTestsTabBuilder? = null
 
     /**
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
@@ -24,14 +24,14 @@ class TestSparkDisplayFactory {
     fun display(report: Report, editor: Editor, uiContext: UIContext, project: Project, collectorsData: CollectorsData) {
         this.editor = editor
 
-        coverageVisualisationTabFactory = CoverageVisualisationTabFactory(project, editor, collectorsData)
-        generatedTestsTabFactory = GeneratedTestsTabFactory(project, report, editor, uiContext, coverageVisualisationTabFactory!!, collectorsData)
+        coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project, editor, collectorsData)
+        generatedTestsTabBuilder = GeneratedTestsTabBuilder(project, report, editor, uiContext, coverageVisualisationTabBuilder!!, collectorsData)
 
-        coverageVisualisationTabFactory!!.show(report, generatedTestsTabFactory!!.getGeneratedTestsTabData())
-        generatedTestsTabFactory!!.show()
+        coverageVisualisationTabBuilder!!.show(report, generatedTestsTabBuilder!!.getGeneratedTestsTabData())
+        generatedTestsTabBuilder!!.show()
 
-        generatedTestsTabFactory!!.getRemoveAllButton().addActionListener {
-            if (generatedTestsTabFactory!!.getGeneratedTestsTabData().testCaseNameToPanels.isEmpty()) {
+        generatedTestsTabBuilder!!.getRemoveAllButton().addActionListener {
+            if (generatedTestsTabBuilder!!.getGeneratedTestsTabData().testCaseNameToPanels.isEmpty()) {
                 clear(project)
                 return@addActionListener
             }
@@ -67,8 +67,8 @@ class TestSparkDisplayFactory {
     fun clear(project: Project) {
         editor?.markupModel?.removeAllHighlighters()
 
-        coverageVisualisationTabFactory?.clear()
-        generatedTestsTabFactory?.clear()
+        coverageVisualisationTabBuilder?.clear()
+        generatedTestsTabBuilder?.clear()
 
         ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
     }
