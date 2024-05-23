@@ -8,6 +8,13 @@ import com.intellij.internal.statistic.service.fus.collectors.CounterUsagesColle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.Technique
 
+/**
+ * This class represents a collector for tracking the event of test generation being finished.
+ *
+ * @property durationMs The LongEventField instance representing the duration of test generation.
+ * @property technique The EnumEventField<Technique> instance representing the technique used for test generation.
+ * @property level The EnumEventField<CodeType> instance representing the code type for which test generation was performed.
+ */
 class TestGenerationFinishedCollector : CounterUsagesCollector() {
     private val groupId = "tests.set"
     private val group = EventLogGroup(groupId, 1)

@@ -4,6 +4,11 @@ import com.intellij.internal.statistic.eventLog.EventLogGroup
 import com.intellij.internal.statistic.eventLog.events.EventFields
 import com.intellij.internal.statistic.service.fus.collectors.CounterUsagesCollector
 
+/**
+ * This class represents a collector for tracking the event of coverage status being showed.
+ *
+ * @property sessionId the EventFields.StringValidatedByRegexp instance representing the session ID for the event
+ */
 class CoverageStatusShowedCollector : CounterUsagesCollector() {
     private val groupId = "tests.coverage"
     private val group = EventLogGroup(groupId, 1)

@@ -8,6 +8,14 @@ import com.intellij.internal.statistic.service.fus.collectors.CounterUsagesColle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.Technique
 
+/**
+ * This class represents a collector for tracking the event of llm feedback in test cases being sent.
+ *
+ * @property testId the EventFields.StringValidatedByRegexp instance representing the test ID for the event
+ * @property technique the EnumEventField<Technique> instance representing the technique for the event
+ * @property level the EnumEventField<CodeType> instance representing the code type for the event
+ * @property isModified the EventFields.Boolean instance representing whether the test was modified for the event
+ */
 class FeedbackSentCollector : CounterUsagesCollector() {
     private val groupId = "individual.tests"
     private val group = EventLogGroup(groupId, 1)

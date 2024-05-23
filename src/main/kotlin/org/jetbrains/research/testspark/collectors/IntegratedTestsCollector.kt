@@ -9,6 +9,14 @@ import com.intellij.internal.statistic.service.fus.collectors.CounterUsagesColle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.Technique
 
+/**
+ * This class represents a collector for tracking integrated tests to the project events.
+ *
+ * @property count the IntEventField instance representing the count for the event
+ * @property technique the EnumEventField<Technique> instance representing the technique for the event
+ * @property level the EnumEventField<CodeType> instance representing the code type for the event
+ * @property modifiedTestsCount the IntEventField instance representing the modified tests count for the event
+ * @*/
 class IntegratedTestsCollector : CounterUsagesCollector() {
     private val groupId = "tests.set"
     private val group = EventLogGroup(groupId, 1)
