@@ -25,7 +25,7 @@ import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperGetter
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -295,7 +295,7 @@ class PromptManager(
         methodDescriptor: String,
     ): PsiMethod? {
         for (currentPsiMethod in psiClass.allMethods) {
-            if (PsiHelperFactory.getPsiHelper(
+            if (PsiHelperGetter.getPsiHelper(
                     psiClass.containingFile,
                 ).generateMethodDescriptor(currentPsiMethod) == methodDescriptor
             ) {
@@ -318,7 +318,7 @@ class PromptManager(
     ): String {
         for (currentPsiMethod in psiClass.allMethods) {
             if (isLineInPsiMethod(currentPsiMethod, lineNumber)) {
-                return PsiHelperFactory.getPsiHelper(psiClass.containingFile).generateMethodDescriptor(currentPsiMethod)
+                return PsiHelperGetter.getPsiHelper(psiClass.containingFile).generateMethodDescriptor(currentPsiMethod)
             }
         }
         return ""
