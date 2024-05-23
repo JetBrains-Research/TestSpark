@@ -50,7 +50,7 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
         var sendResult = SendResult.OK
 
         httpRequest.connect {
-            it.write(GsonBuilder().create().toJson(llmRequestBody))
+            it.write(GsonBuilder().disableHtmlEscaping().create().toJson(llmRequestBody))
             when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
                 HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consumeHFRequest(it)
                 HttpURLConnection.HTTP_INTERNAL_ERROR -> {
