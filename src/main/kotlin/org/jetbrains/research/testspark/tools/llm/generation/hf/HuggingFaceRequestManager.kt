@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.tools.llm.generation.hf
 import com.google.gson.GsonBuilder
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
+import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
@@ -48,22 +49,33 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
 
         val llmRequestBody = HuggingFaceRequestBody(chatHistory, Parameters(topProbability, temperature)).toMap()
         var sendResult = SendResult.OK
+        try {
+            httpRequest.connect {
+                it.write(GsonBuilder().disableHtmlEscaping().create().toJson(llmRequestBody))
+                when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
+                    HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consumeHFRequest(it)
+                    HttpURLConnection.HTTP_INTERNAL_ERROR -> {
+                        llmErrorManager.errorProcess(
+                            LLMMessagesBundle.get("serverProblems"),
+                            project,
+                            errorMonitor,
+                        )
+                        sendResult = SendResult.OTHER
+                    }
 
-        httpRequest.connect {
-            it.write(GsonBuilder().disableHtmlEscaping().create().toJson(llmRequestBody))
-            when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
-                HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consumeHFRequest(it)
-                HttpURLConnection.HTTP_INTERNAL_ERROR -> {
-                    llmErrorManager.errorProcess(
-                        LLMMessagesBundle.get("serverProblems"),
-                        project,
-                        errorMonitor,
-                    )
-                    sendResult = SendResult.OTHER
+                    HttpURLConnection.HTTP_BAD_REQUEST -> {
+                        llmErrorManager.errorProcess(
+                            "The selected model may need an HF PRO subscription to use!",
+                            project,
+                            errorMonitor,
+                        )
+                        sendResult = SendResult.OTHER
+                    }
                 }
             }
+        } catch (e: HttpStatusException) {
+            log.error { "Error in sending request: ${e.message}" }
         }
-
         return sendResult
     }
 
