@@ -24,7 +24,7 @@ import kotlin.math.max
 /**
  * Creating the part of LLM settings that is responsible for prompt templates is organized
  */
-class PromptTemplateFactory(
+class PromptTemplateBuilder(
     private val llmSettingsState: LLMSettingsState,
     private val promptEditorType: PromptEditorType,
 ) {
