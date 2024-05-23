@@ -12,15 +12,15 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.actions.controllers.VisibilityController
-import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
-import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
-import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
-import org.jetbrains.research.testspark.actions.template.PanelFactory
+import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelBuilder
+import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorBuilder
+import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelBuilder
+import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.display.utils.TestSparkIcons
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperGetter
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -74,7 +74,7 @@ class TestSparkAction : AnAction() {
      */
     override fun update(e: AnActionEvent) {
         val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val psiHelper = PsiHelperFactory.getPsiHelper(psiFile)
+        val psiHelper = PsiHelperGetter.getPsiHelper(psiFile)
         e.presentation.isEnabled = psiHelper.getCurrentListOfCodeTypes(e) != null
     }
 
@@ -103,7 +103,7 @@ class TestSparkAction : AnAction() {
 
         private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
 
-        private val codeTypes = PsiHelperFactory.getPsiHelper(psiFile).getCurrentListOfCodeTypes(e)!!
+        private val codeTypes = PsiHelperGetter.getPsiHelper(psiFile).getCurrentListOfCodeTypes(e)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
@@ -113,9 +113,9 @@ class TestSparkAction : AnAction() {
         private val nextButton = JButton(PluginLabelsBundle.get("next"))
 
         private val cardLayout = CardLayout()
-        private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
-        private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project)
-        private val evoSuitePanelFactory = EvoSuitePanelFactory(project)
+        private val llmSetupPanelFactory = LLMSetupPanelBuilder(e, project)
+        private val llmSampleSelectorFactory = LLMSampleSelectorBuilder(project)
+        private val evoSuitePanelFactory = EvoSuitePanelBuilder(project)
 
         init {
             if (!visibilityController.isVisible) {
@@ -159,11 +159,11 @@ class TestSparkAction : AnAction() {
             }
         }
 
-        private fun createCardPanel(toolPanelFactory: PanelFactory): JPanel {
+        private fun createCardPanel(toolPanelBuilder: PanelBuilder): JPanel {
             val cardPanel = JPanel(BorderLayout())
-            cardPanel.add(toolPanelFactory.getTitlePanel(), BorderLayout.NORTH)
-            cardPanel.add(toolPanelFactory.getMiddlePanel(), BorderLayout.CENTER)
-            cardPanel.add(toolPanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+            cardPanel.add(toolPanelBuilder.getTitlePanel(), BorderLayout.NORTH)
+            cardPanel.add(toolPanelBuilder.getMiddlePanel(), BorderLayout.CENTER)
+            cardPanel.add(toolPanelBuilder.getBottomPanel(), BorderLayout.SOUTH)
 
             return cardPanel
         }

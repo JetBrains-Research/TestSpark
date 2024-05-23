@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.actions.template.PanelFactory
+import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.llm.LLMLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
@@ -26,7 +26,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : PanelFactory {
+class LLMSetupPanelBuilder(e: AnActionEvent, private val project: Project) : PanelBuilder {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 

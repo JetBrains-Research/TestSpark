@@ -62,9 +62,9 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(LLMLabelsBundle.get("PromptSeparator"))
 
-    private val promptClassTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(llmSettingsState, PromptEditorType.CLASS)
-    private val promptMethodTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(llmSettingsState, PromptEditorType.METHOD)
-    private val promptLineTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(llmSettingsState, PromptEditorType.LINE)
+    private val promptClassTemplateFactory: PromptTemplateBuilder = PromptTemplateBuilder(llmSettingsState, PromptEditorType.CLASS)
+    private val promptMethodTemplateFactory: PromptTemplateBuilder = PromptTemplateBuilder(llmSettingsState, PromptEditorType.METHOD)
+    private val promptLineTemplateFactory: PromptTemplateBuilder = PromptTemplateBuilder(llmSettingsState, PromptEditorType.LINE)
 
     private var promptEditorTabbedPane = createTabbedPane()
 
@@ -289,15 +289,15 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
 
         // Prompt
-        val promptTemplateFactory: PromptTemplateFactory = when (promptEditorType) {
+        val promptTemplateBuilder: PromptTemplateBuilder = when (promptEditorType) {
             PromptEditorType.CLASS -> promptClassTemplateFactory
             PromptEditorType.METHOD -> promptMethodTemplateFactory
             PromptEditorType.LINE -> promptLineTemplateFactory
         }
 
-        panel.add(promptTemplateFactory.getUpperButtonsPanel())
-        panel.add(promptTemplateFactory.getEditorTextField())
-        panel.add(promptTemplateFactory.getLowerButtonsPanel())
+        panel.add(promptTemplateBuilder.getUpperButtonsPanel())
+        panel.add(promptTemplateBuilder.getEditorTextField())
+        panel.add(promptTemplateBuilder.getLowerButtonsPanel())
 
         // add buttons for inserting keywords to the prompt editor
         addPromptButtons(panel)
