@@ -10,7 +10,7 @@ import org.jetbrains.research.testspark.actions.controllers.TestGenerationContro
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperGetter
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.evosuite.generation.EvoSuiteProcessManager
@@ -69,12 +69,12 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      */
     override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController, testSparkDisplayBuilder: TestSparkDisplayBuilder) {
         log.info("Starting tests generation for method by EvoSuite")
-        val psiMethod: PsiMethod = PsiHelperFactory.getPsiHelper(psiFile).getSurroundingMethod(psiFile, caretOffset)!!
+        val psiMethod: PsiMethod = PsiHelperGetter.getPsiHelper(psiFile).getSurroundingMethod(psiFile, caretOffset)!!
         createPipeline(project, psiFile, caretOffset, fileUrl, testGenerationController, testSparkDisplayBuilder).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(
                 CodeType.METHOD,
-                PsiHelperFactory.getPsiHelper(psiFile).generateMethodDescriptor(psiMethod),
+                PsiHelperGetter.getPsiHelper(psiFile).generateMethodDescriptor(psiMethod),
             ),
         )
     }
@@ -90,7 +90,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      */
     override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController, testSparkDisplayBuilder: TestSparkDisplayBuilder) {
         log.info("Starting tests generation for line by EvoSuite")
-        val selectedLine: Int = PsiHelperFactory.getPsiHelper(psiFile).getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
+        val selectedLine: Int = PsiHelperGetter.getPsiHelper(psiFile).getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
         createPipeline(project, psiFile, caretOffset, fileUrl, testGenerationController, testSparkDisplayBuilder).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(

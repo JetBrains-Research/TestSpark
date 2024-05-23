@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.actions.template
 import javax.swing.JButton
 import javax.swing.JPanel
 
-interface PanelFactory {
+interface PanelBuilder {
     /**
      * Returns a JPanel object containing the title panel.
      *
