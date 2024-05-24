@@ -303,7 +303,7 @@ object LLMHelper {
             }
         }
 
-        val inappropriateModelSubstrings = mutableListOf("vision", "test", "preview")
+        val inappropriateModelSubstrings = mutableListOf("vision", "test")
 
         if (models.isNotEmpty()) {
             return models.sortedWith(gptComparator).toTypedArray().filter { model ->
