@@ -65,7 +65,7 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
 
                     HttpURLConnection.HTTP_BAD_REQUEST -> {
                         llmErrorManager.errorProcess(
-                            "The selected model may need an HF PRO subscription to use!",
+                            LLMMessagesBundle.get("hfServerError"),
                             project,
                             errorMonitor,
                         )
