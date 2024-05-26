@@ -28,11 +28,11 @@ import java.util.UUID
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
  *
- * @param project the project in which the pipeline is executed
- * @param psiFile the PSI file in which the pipeline is executed
- * @param caretOffset the offset of the caret position in the PSI file
- * @param fileUrl the URL of the file being processed, if applicable
- * @param packageName the package name of the file being processed
+ * @param project the project in which the pipeline is executed.
+ * @param psiHelper The PsiHelper in the context of witch the pipeline is executed.
+ * @param caretOffset the offset of the caret position in the PSI file.
+ * @param fileUrl the URL of the file being processed, if applicable.
+ * @param packageName the package name of the file being processed.
  */
 class Pipeline(
     private val project: Project,

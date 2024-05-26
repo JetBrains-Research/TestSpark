@@ -31,8 +31,8 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
  * A class that manages prompts for generating unit tests.
  *
  * @constructor Creates a PromptManager with the given parameters.
- * @param cut The class under test.
- * @param classesToTest The classes to be tested.
+ * @param psiHelper The PsiHelper in the context of witch the pipeline is executed.
+ * @param caret The place of the caret.
  */
 class PromptManager(
     private val project: Project,
@@ -193,9 +193,7 @@ class PromptManager(
             LLMMessagesBundle.get("promptReduction") + "\n" +
                 "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
                 "Maximum depth for input parameters is ${
-                    SettingsArguments(project).maxInputParamsDepth(
-                        testGenerationData.inputParamsDepthReducing,
-                    )
+                    SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)
                 }.",
             project,
         )
