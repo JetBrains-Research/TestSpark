@@ -9,7 +9,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
-import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
@@ -18,7 +17,7 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
@@ -37,7 +36,7 @@ import java.util.UUID
  */
 class Pipeline(
     private val project: Project,
-    psiFile: PsiFile,
+    psiHelper: PsiHelper,
     caretOffset: Int,
     fileUrl: String?,
     private val packageName: String,
@@ -48,7 +47,7 @@ class Pipeline(
 
     init {
 
-        val cutPsiClass = PsiHelperFactory.getPsiHelper(psiFile).getSurroundingClass(psiFile, caretOffset)!!
+        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
 
         // get generated test path
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults$ToolUtils.sep"
@@ -58,10 +57,10 @@ class Pipeline(
         ApplicationManager.getApplication().runWriteAction {
             projectContext.projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
             projectContext.fileUrlAsString = fileUrl
-            projectContext.cutPsiClass = cutPsiClass
-            projectContext.classFQN = cutPsiClass.qualifiedName!!
+            projectContext.classFQN = cutPsiClass.qualifiedName
+            // TODO probably can be made easier
             projectContext.cutModule =
-                ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
+                ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.virtualFile)!!
         }
 
         generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)

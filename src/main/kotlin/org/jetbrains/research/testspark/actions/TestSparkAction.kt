@@ -7,7 +7,6 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiFile
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
@@ -19,6 +18,7 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelper
 import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
@@ -70,7 +70,7 @@ class TestSparkAction : AnAction() {
      * @param e the AnActionEvent object representing the event
      */
     override fun update(e: AnActionEvent) {
-        val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+        val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val psiHelper = PsiHelperFactory.getPsiHelper(psiFile)
         e.presentation.isEnabled = psiHelper.getCurrentListOfCodeTypes(e) != null
     }
@@ -97,9 +97,9 @@ class TestSparkAction : AnAction() {
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
 
-        private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+        private val psiHelper: PsiHelper = PsiHelperFactory.getPsiHelper(e.dataContext.getData(CommonDataKeys.PSI_FILE)!!)
 
-        private val codeTypes = PsiHelperFactory.getPsiHelper(psiFile).getCurrentListOfCodeTypes(e)!!
+        private val codeTypes = psiHelper.getCurrentListOfCodeTypes(e)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
@@ -321,7 +321,7 @@ class TestSparkAction : AnAction() {
                 if (codeTypeButtons[0].isSelected) {
                     EvoSuite().generateTestsForClass(
                         project,
-                        psiFile,
+                        psiHelper,
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
@@ -330,7 +330,7 @@ class TestSparkAction : AnAction() {
                 } else if (codeTypeButtons[1].isSelected) {
                     EvoSuite().generateTestsForMethod(
                         project,
-                        psiFile,
+                        psiHelper,
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
@@ -339,7 +339,7 @@ class TestSparkAction : AnAction() {
                 } else if (codeTypeButtons[2].isSelected) {
                     EvoSuite().generateTestsForLine(
                         project,
-                        psiFile,
+                        psiHelper,
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
@@ -358,7 +358,7 @@ class TestSparkAction : AnAction() {
                 if (codeTypeButtons[0].isSelected) {
                     Llm().generateTestsForClass(
                         project,
-                        psiFile,
+                        psiHelper,
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
@@ -367,7 +367,7 @@ class TestSparkAction : AnAction() {
                 } else if (codeTypeButtons[1].isSelected) {
                     Llm().generateTestsForMethod(
                         project,
-                        psiFile,
+                        psiHelper,
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
@@ -376,7 +376,7 @@ class TestSparkAction : AnAction() {
                 } else if (codeTypeButtons[2].isSelected) {
                     Llm().generateTestsForLine(
                         project,
-                        psiFile,
+                        psiHelper,
                         caretOffset,
                         fileUrl,
                         testSamplesCode,
