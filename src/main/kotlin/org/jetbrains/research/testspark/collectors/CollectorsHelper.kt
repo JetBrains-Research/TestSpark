@@ -4,8 +4,8 @@ import com.intellij.internal.statistic.eventLog.EventLogGroup
 import com.intellij.internal.statistic.eventLog.events.EnumEventField
 import com.intellij.internal.statistic.eventLog.events.EventFields
 import com.intellij.internal.statistic.eventLog.events.IntEventField
+import org.jetbrains.research.testspark.collectors.data.Technique
 import org.jetbrains.research.testspark.data.CodeType
-import org.jetbrains.research.testspark.data.Technique
 
 /**
  * Helper class for working with collectors and event logging.

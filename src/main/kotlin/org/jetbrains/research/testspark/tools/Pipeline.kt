@@ -15,13 +15,13 @@ import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.data.DataToCollect
+import org.jetbrains.research.testspark.collectors.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
-import org.jetbrains.research.testspark.data.DataToCollect
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperGetter

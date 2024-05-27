@@ -4,8 +4,8 @@ import com.intellij.internal.statistic.eventLog.events.EnumEventField
 import com.intellij.internal.statistic.eventLog.events.EventPair
 import com.intellij.internal.statistic.eventLog.events.IntEventField
 import com.intellij.internal.statistic.service.fus.collectors.CounterUsagesCollector
+import org.jetbrains.research.testspark.collectors.data.Technique
 import org.jetbrains.research.testspark.data.CodeType
-import org.jetbrains.research.testspark.data.Technique
 
 /**
  * This class represents a collector for tracking integrated tests to the project events.

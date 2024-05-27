@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.data
+package org.jetbrains.research.testspark.collectors.data
 
 /**
  * Enum representing different techniques.

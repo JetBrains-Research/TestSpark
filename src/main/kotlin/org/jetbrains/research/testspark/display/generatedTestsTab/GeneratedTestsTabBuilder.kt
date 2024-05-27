@@ -24,11 +24,11 @@ import com.intellij.ui.content.ContentFactory
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.data.DataToCollect
+import org.jetbrains.research.testspark.collectors.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.data.DataToCollect
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.display.ReportUpdater
 import org.jetbrains.research.testspark.display.TestCasePanel
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder

@@ -4,8 +4,8 @@ import com.intellij.internal.statistic.eventLog.events.EnumEventField
 import com.intellij.internal.statistic.eventLog.events.EventFields
 import com.intellij.internal.statistic.eventLog.events.EventPair
 import com.intellij.internal.statistic.service.fus.collectors.CounterUsagesCollector
+import org.jetbrains.research.testspark.collectors.data.Technique
 import org.jetbrains.research.testspark.data.CodeType
-import org.jetbrains.research.testspark.data.Technique
 
 /**
  * This class represents a collector for tracking the event of llm feedback in test cases being sent.

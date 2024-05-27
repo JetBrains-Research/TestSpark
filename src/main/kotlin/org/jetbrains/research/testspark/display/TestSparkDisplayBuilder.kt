@@ -4,10 +4,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.data.DataToCollect
+import org.jetbrains.research.testspark.collectors.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.core.data.Report
-import org.jetbrains.research.testspark.data.DataToCollect
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabBuilder
 import javax.swing.JOptionPane

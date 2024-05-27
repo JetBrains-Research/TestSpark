@@ -20,14 +20,14 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.data.DataToCollect
+import org.jetbrains.research.testspark.collectors.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.data.DataToCollect
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator

@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.data
+package org.jetbrains.research.testspark.collectors.data
 
 import org.jetbrains.research.testspark.collectors.CoverageStatusShowedCollector
 import org.jetbrains.research.testspark.collectors.FeedbackSentCollector
@@ -8,6 +8,9 @@ import org.jetbrains.research.testspark.collectors.LikedDislikedCollector
 import org.jetbrains.research.testspark.collectors.TestGenerationFinishedCollector
 import org.jetbrains.research.testspark.collectors.TestGenerationStartedCollector
 
+/**
+ * This class represents a container for different user experience event collectors.
+ */
 class UserExperienceCollectors {
     val feedbackSentCollector = FeedbackSentCollector()
 
