@@ -354,7 +354,7 @@ class TestSparkAction : AnAction() {
                     )
                 }
             }
-            testSparkDisplayBuilder.clear(project)
+            testSparkDisplayBuilder.clear()
             visibilityController.isVisible = false
             dispose()
         }
@@ -395,7 +395,7 @@ class TestSparkAction : AnAction() {
                     )
                 }
             }
-            testSparkDisplayBuilder.clear(project)
+            testSparkDisplayBuilder.clear()
             visibilityController.isVisible = false
             dispose()
         }
