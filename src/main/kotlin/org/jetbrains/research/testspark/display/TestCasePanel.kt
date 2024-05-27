@@ -25,8 +25,9 @@ import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.data.CollectorsData
+import org.jetbrains.research.testspark.data.DataToCollect
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
@@ -68,7 +69,8 @@ class TestCasePanel(
     private val report: Report,
     private val coverageVisualisationTabFactory: CoverageVisualisationTabBuilder,
     private val generatedTestsTabData: GeneratedTestsTabData,
-    private val collectorsData: CollectorsData,
+    private val userExperienceCollectors: UserExperienceCollectors,
+    private val dataToCollect: DataToCollect,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -195,11 +197,11 @@ class TestCasePanel(
                 likeButton.icon = TestSparkIcons.likeSelected
             }
             dislikeButton.icon = TestSparkIcons.dislike
-            collectorsData.likedDislikedCollector.logEvent(
+            userExperienceCollectors.likedDislikedCollector.logEvent(
                 true,
                 getTestId(),
-                collectorsData.technique!!,
-                collectorsData.codeType!!,
+                dataToCollect.technique!!,
+                dataToCollect.codeType!!,
                 testCase.testCode != initialCodes[currentRequestNumber - 1],
             )
         }
@@ -211,11 +213,11 @@ class TestCasePanel(
                 dislikeButton.icon = TestSparkIcons.dislikeSelected
             }
             likeButton.icon = TestSparkIcons.like
-            collectorsData.likedDislikedCollector.logEvent(
+            userExperienceCollectors.likedDislikedCollector.logEvent(
                 false,
                 getTestId(),
-                collectorsData.technique!!,
-                collectorsData.codeType!!,
+                dataToCollect.technique!!,
+                dataToCollect.codeType!!,
                 testCase.testCode != initialCodes[currentRequestNumber - 1],
             )
         }
@@ -424,10 +426,10 @@ class TestCasePanel(
                         return
                     }
 
-                    collectorsData.feedbackSentCollector.logEvent(
-                        collectorsData.id!! + "_" + testCase.id,
-                        collectorsData.technique!!,
-                        collectorsData.codeType!!,
+                    userExperienceCollectors.feedbackSentCollector.logEvent(
+                        dataToCollect.id!! + "_" + testCase.id,
+                        dataToCollect.technique!!,
+                        dataToCollect.codeType!!,
                         testCase.testCode != initialCodes[currentRequestNumber - 1],
                     )
 
@@ -705,5 +707,5 @@ class TestCasePanel(
         testCase.testCode = languageTextField.document.text
     }
 
-    private fun getTestId(): String = collectorsData.id!! + "_" + testCase.id
+    private fun getTestId(): String = dataToCollect.id!! + "_" + testCase.id
 }

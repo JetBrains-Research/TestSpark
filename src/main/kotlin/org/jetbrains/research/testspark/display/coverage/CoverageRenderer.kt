@@ -19,7 +19,8 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
-import org.jetbrains.research.testspark.data.CollectorsData
+import org.jetbrains.research.testspark.data.DataToCollect
+import org.jetbrains.research.testspark.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
@@ -52,7 +53,8 @@ class CoverageRenderer(
     private val mapMutantsToTests: HashMap<String, MutableList<String>>,
     private val project: Project,
     private val generatedTestsTabData: GeneratedTestsTabData,
-    private val collectorsData: CollectorsData,
+    private val userExperienceCollectors: UserExperienceCollectors,
+    private val dataToCollect: DataToCollect,
 ) :
     ActiveGutterRenderer, LineMarkerRendererEx {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
@@ -120,7 +122,7 @@ class CoverageRenderer(
             HintHint(editor, point),
         )
 
-        collectorsData.coverageStatusShowedCollector.logEvent(collectorsData.id!!)
+        userExperienceCollectors.coverageStatusShowedCollector.logEvent(dataToCollect.id!!)
     }
 
     /**

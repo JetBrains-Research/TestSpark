@@ -17,10 +17,11 @@ import org.jetbrains.research.testspark.actions.controllers.TestGenerationContro
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
-import org.jetbrains.research.testspark.data.CollectorsData
+import org.jetbrains.research.testspark.data.DataToCollect
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperGetter
@@ -48,7 +49,8 @@ class Pipeline(
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
 
-    val collectorsData = CollectorsData()
+    val userExperienceCollectors = UserExperienceCollectors()
+    val dataToCollect: DataToCollect = DataToCollect()
 
     init {
 
@@ -68,7 +70,7 @@ class Pipeline(
                 ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
         }
 
-        collectorsData.id = id
+        dataToCollect.id = id
 
         generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
         generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
@@ -96,12 +98,12 @@ class Pipeline(
 
                     if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
-                    collectorsData.technique = processManager.getTechnique()
-                    collectorsData.codeType = codeType.type!!
-                    collectorsData.testGenerationStartTime = System.currentTimeMillis()
+                    dataToCollect.technique = processManager.getTechnique()
+                    dataToCollect.codeType = codeType.type!!
+                    dataToCollect.testGenerationStartTime = System.currentTimeMillis()
 
                     // Add collector logging
-                    collectorsData.testGenerationStartedCollector.logEvent(
+                    userExperienceCollectors.testGenerationStartedCollector.logEvent(
                         processManager.getTechnique(),
                         codeType.type!!,
                     )
@@ -131,7 +133,7 @@ class Pipeline(
                         updateEditor(it.testGenerationOutput.fileUrl)
 
                         if (editor != null) {
-                            testSparkDisplayBuilder.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project, collectorsData)
+                            testSparkDisplayBuilder.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project, userExperienceCollectors, dataToCollect)
                         }
                     }
                 }

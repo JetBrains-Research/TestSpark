@@ -8,15 +8,7 @@ import org.jetbrains.research.testspark.collectors.LikedDislikedCollector
 import org.jetbrains.research.testspark.collectors.TestGenerationFinishedCollector
 import org.jetbrains.research.testspark.collectors.TestGenerationStartedCollector
 
-class CollectorsData {
-    var id: String? = null
-
-    var testGenerationStartTime: Long? = null
-
-    var technique: Technique? = null
-
-    var codeType: CodeType? = null
-
+class UserExperienceCollectors {
     val feedbackSentCollector = FeedbackSentCollector()
 
     val likedDislikedCollector = LikedDislikedCollector()

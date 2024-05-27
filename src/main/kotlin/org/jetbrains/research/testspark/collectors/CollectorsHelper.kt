@@ -14,7 +14,7 @@ object CollectorsHelper {
     /**
      * The version number of the event log group.
      */
-    private val EVENT_LOG_GROUP_VERSION: Int = 1
+    private const val EVENT_LOG_GROUP_VERSION: Int = 1
 
     /**
      * Regular expression pattern used to validate session IDs.
