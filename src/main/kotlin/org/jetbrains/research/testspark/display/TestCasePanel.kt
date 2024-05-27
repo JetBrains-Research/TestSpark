@@ -99,6 +99,9 @@ class TestCasePanel(
 
     private var isRemoved = false
 
+    private var isLikeLogged = false
+    private var isDislikeLogged = false
+
     private var _error: String? = null
     val error: String?
         get() = _error
@@ -196,14 +199,17 @@ class TestCasePanel(
             } else if (likeButton.icon == TestSparkIcons.like) {
                 likeButton.icon = TestSparkIcons.likeSelected
 
-                val isLiked = true
-                userExperienceCollectors.likedDislikedCollector.logEvent(
-                    isLiked,
-                    getTestId(),
-                    dataToCollect.technique!!,
-                    dataToCollect.codeType!!,
-                    testCase.testCode != initialCodes[currentRequestNumber - 1],
-                )
+                if (!isLikeLogged) {
+                    val isLiked = true
+                    userExperienceCollectors.likedDislikedCollector.logEvent(
+                        isLiked,
+                        getTestId(),
+                        dataToCollect.technique!!,
+                        dataToCollect.codeType!!,
+                        testCase.testCode != initialCodes[currentRequestNumber - 1],
+                    )
+                    isLikeLogged = true
+                }
             }
             dislikeButton.icon = TestSparkIcons.dislike
         }
@@ -214,14 +220,17 @@ class TestCasePanel(
             } else if (dislikeButton.icon == TestSparkIcons.dislike) {
                 dislikeButton.icon = TestSparkIcons.dislikeSelected
 
-                val isLiked = false
-                userExperienceCollectors.likedDislikedCollector.logEvent(
-                    isLiked,
-                    getTestId(),
-                    dataToCollect.technique!!,
-                    dataToCollect.codeType!!,
-                    testCase.testCode != initialCodes[currentRequestNumber - 1],
-                )
+                if (!isDislikeLogged) {
+                    val isLiked = false
+                    userExperienceCollectors.likedDislikedCollector.logEvent(
+                        isLiked,
+                        getTestId(),
+                        dataToCollect.technique!!,
+                        dataToCollect.codeType!!,
+                        testCase.testCode != initialCodes[currentRequestNumber - 1],
+                    )
+                    isDislikeLogged = true
+                }
             }
             likeButton.icon = TestSparkIcons.like
         }
