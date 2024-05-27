@@ -5,12 +5,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.JBColor
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
-import com.intellij.ui.content.ContentManager
 import com.intellij.ui.table.JBTable
 import org.evosuite.result.MutationInfo
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
@@ -34,7 +32,6 @@ import kotlin.math.roundToInt
 class CoverageVisualisationTabBuilder(private val project: Project, private val editor: Editor) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
-    private var contentManager: ContentManager? = null
     private val textAttribute = TextAttributes()
 
     private var currentHighlightedData: HighlightedData? = null
@@ -61,7 +58,6 @@ class CoverageVisualisationTabBuilder(private val project: Project, private val 
      */
     fun clear() {
         currentHighlightedData?.editor?.markupModel?.removeAllHighlighters()
-        contentManager?.removeContent(content!!, true)
     }
 
     /**
@@ -72,7 +68,7 @@ class CoverageVisualisationTabBuilder(private val project: Project, private val 
     fun show(testReport: Report, generatedTestsTabData: GeneratedTestsTabData) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
-        createToolWindowTab()
+        createToolWindowTab(generatedTestsTabData)
 
         updateCoverage(
             testReport.allCoveredLines,
@@ -278,12 +274,10 @@ class CoverageVisualisationTabBuilder(private val project: Project, private val 
     /**
      * Creates a new toolWindow tab for the coverage visualisation.
      */
-    private fun createToolWindowTab() {
+    private fun createToolWindowTab(generatedTestsTabData: GeneratedTestsTabData) {
         // Remove coverage visualisation from content manager if necessary
-        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
-        contentManager = toolWindowManager!!.contentManager
         if (content != null) {
-            contentManager!!.removeContent(content!!, true)
+            generatedTestsTabData.contentManager!!.removeContent(content!!, true)
         }
 
         // If there is no coverage visualisation tab, make it
@@ -293,6 +287,6 @@ class CoverageVisualisationTabBuilder(private val project: Project, private val 
             PluginLabelsBundle.get("coverageVisualisation"),
             true,
         )
-        contentManager!!.addContent(content!!)
+        generatedTestsTabData.contentManager!!.addContent(content!!)
     }
 }
