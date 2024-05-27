@@ -2,7 +2,10 @@ package org.jetbrains.research.testspark.display
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.ui.content.ContentManager
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.UIContext
@@ -11,6 +14,9 @@ import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTests
 import javax.swing.JOptionPane
 
 class TestSparkDisplayBuilder {
+    private var toolWindow: ToolWindow? = null
+    private var contentManager: ContentManager? = null
+
     private var editor: Editor? = null
 
     private var coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder? = null
@@ -21,13 +27,18 @@ class TestSparkDisplayBuilder {
      * Add Tests and their names to a List of pairs (used for highlighting)
      */
     fun display(report: Report, editor: Editor, uiContext: UIContext, project: Project) {
+        this.toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
+        this.contentManager = toolWindow!!.contentManager
+
         this.editor = editor
 
         coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project, editor)
         generatedTestsTabBuilder = GeneratedTestsTabBuilder(project, report, editor, uiContext, coverageVisualisationTabBuilder!!)
 
+        generatedTestsTabBuilder!!.show(contentManager!!)
         coverageVisualisationTabBuilder!!.show(report, generatedTestsTabBuilder!!.getGeneratedTestsTabData())
-        generatedTestsTabBuilder!!.show()
+
+        toolWindow!!.show()
 
         generatedTestsTabBuilder!!.getRemoveAllButton().addActionListener {
             val choice = JOptionPane.showConfirmDialog(
@@ -39,17 +50,25 @@ class TestSparkDisplayBuilder {
             )
 
             if (choice == JOptionPane.OK_OPTION) {
-                clear(project)
+                clear()
             }
         }
     }
 
-    fun clear(project: Project) {
+    fun clear() {
         editor?.markupModel?.removeAllHighlighters()
 
         coverageVisualisationTabBuilder?.clear()
         generatedTestsTabBuilder?.clear()
 
-        ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
+        if (contentManager != null) {
+            for (content in contentManager!!.contents) {
+                if (content.tabName != PluginLabelsBundle.get("descriptionWindow")) {
+                    contentManager?.removeContent(content, true)
+                }
+            }
+        }
+
+        toolWindow?.hide()
     }
 }

@@ -13,7 +13,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElementFactory
@@ -21,6 +20,7 @@ import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
@@ -61,15 +61,16 @@ class GeneratedTestsTabBuilder(
 
     private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData()
 
-    fun show() {
+    fun show(contentManager: ContentManager) {
         generatedTestsTabData.topButtonsPanelBuilder = TopButtonsPanelBuilder()
-
         generatedTestsTabData.allTestCasePanel.removeAll()
         generatedTestsTabData.testCaseNameToPanels.clear()
 
         fillAllTestCasePanel()
 
         generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanels.size
+
+        generatedTestsTabData.contentManager = contentManager
 
         fillPanels()
 
@@ -498,8 +499,6 @@ class GeneratedTestsTabBuilder(
         generatedTestsTabData.testCaseNameToPanels.toMap()
             .forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
         generatedTestsTabData.testCasePanelFactories.clear()
-
-        generatedTestsTabData.contentManager?.removeContent(generatedTestsTabData.content!!, true)
     }
 
     /**
@@ -507,8 +506,6 @@ class GeneratedTestsTabBuilder(
      */
     private fun createToolWindowTab() {
         // Remove generated tests tab from content manager if necessary
-        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
-        generatedTestsTabData.contentManager = toolWindowManager!!.contentManager
         if (generatedTestsTabData.content != null) {
             generatedTestsTabData.contentManager!!.removeContent(generatedTestsTabData.content!!, true)
         }
@@ -524,6 +521,5 @@ class GeneratedTestsTabBuilder(
 
         // Focus on generated tests tab and open toolWindow if not opened already
         generatedTestsTabData.contentManager!!.setSelectedContent(generatedTestsTabData.content!!)
-        toolWindowManager.show()
     }
 }
