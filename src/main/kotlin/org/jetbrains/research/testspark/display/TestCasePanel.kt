@@ -440,7 +440,7 @@ class TestCasePanel(
                     }
 
                     userExperienceCollectors.feedbackSentCollector.logEvent(
-                        dataToCollect.id!! + "_" + testCase.id,
+                        getTestId(),
                         dataToCollect.technique!!,
                         dataToCollect.codeType!!,
                         testCase.testCode != initialCodes[currentRequestNumber - 1],
@@ -663,6 +663,11 @@ class TestCasePanel(
      */
     fun isRunEnabled() = runTestButton.isEnabled
 
+    /**
+     * Checks if the test case code has been modified before the applying to file.
+     *
+     * @return true if the final version of the code not differ from the initial one on the first request page.
+     */
     fun isGlobalModified(): Boolean = testCase.testCode != initialCodes[0]
 
     /**

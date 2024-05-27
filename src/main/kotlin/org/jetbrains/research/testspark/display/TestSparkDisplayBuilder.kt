@@ -51,8 +51,9 @@ class TestSparkDisplayBuilder {
         }
 
         // Add collector logging
+        val testGenerationElapsedTime = System.currentTimeMillis() - dataToCollect.testGenerationStartTime!!
         userExperienceCollectors.testGenerationFinishedCollector.logEvent(
-            System.currentTimeMillis() - dataToCollect.testGenerationStartTime!!,
+            testGenerationElapsedTime,
             dataToCollect.technique!!,
             dataToCollect.codeType!!,
         )

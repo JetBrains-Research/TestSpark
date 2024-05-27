@@ -104,8 +104,8 @@ class Pipeline(
 
                     // Add collector logging
                     userExperienceCollectors.testGenerationStartedCollector.logEvent(
-                        processManager.getTechnique(),
-                        codeType.type!!,
+                        dataToCollect.technique!!,
+                        dataToCollect.codeType!!,
                     )
 
                     if (projectBuilder.runBuild(ijIndicator)) {
