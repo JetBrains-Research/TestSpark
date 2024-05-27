@@ -135,14 +135,13 @@ object ToolUtils {
      * @return true if the process has been stopped, false otherwise
      */
     fun isProcessStopped(errorMonitor: ErrorMonitor, indicator: CustomProgressIndicator): Boolean {
-        return errorMonitor.hasErrorOccurred() || isProcessCanceled(indicator)
+        return errorMonitor.hasErrorOccurred() || isProcessCanceled(errorMonitor, indicator)
     }
 
-    private fun isProcessCanceled(indicator: CustomProgressIndicator): Boolean {
+    private fun isProcessCanceled(errorMonitor: ErrorMonitor, indicator: CustomProgressIndicator): Boolean {
         if (indicator.isCanceled()) {
-            if (!indicator.isStopped()) {
-                indicator.stop()
-            }
+            errorMonitor.notifyErrorOccurrence()
+            indicator.stop()
             return true
         }
         return false
