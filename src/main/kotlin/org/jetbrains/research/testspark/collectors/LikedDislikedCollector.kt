@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.collectors
 
-import com.intellij.internal.statistic.eventLog.EventLogGroup
 import com.intellij.internal.statistic.eventLog.events.EnumEventField
 import com.intellij.internal.statistic.eventLog.events.EventFields
 import com.intellij.internal.statistic.eventLog.events.EventPair
@@ -18,24 +17,17 @@ import org.jetbrains.research.testspark.data.Technique
  * @property isModified the EventFields.Boolean instance representing whether the test was modified for the event
  */
 class LikedDislikedCollector : CounterUsagesCollector() {
-    private val groupId = "individual.tests"
-    private val group = EventLogGroup(groupId, 1)
+    private val groupId = CollectorsHelper.getIndividualTestsGroupID()
+    private val group = CollectorsHelper.getGroup(groupId)
 
     private val eventId = "liked.disliked"
     private val liked = EventFields.Boolean("liked")
-    private val testId = EventFields.StringValidatedByRegexp("id", CollectorsHelper().testIDRegex.pattern)
-    private val technique: EnumEventField<Technique> = EventFields.Enum("technique", Technique::class.java)
-    private val level: EnumEventField<CodeType> = EventFields.Enum("level", CodeType::class.java)
+    private val testId = CollectorsHelper.getTestID()
+    private val technique: EnumEventField<Technique> = CollectorsHelper.getTechnique()
+    private val level: EnumEventField<CodeType> = CollectorsHelper.getLevel()
     private val isModified = EventFields.Boolean("is_modified")
 
-    private val event = group.registerVarargEvent(
-        eventId,
-        liked,
-        testId,
-        technique,
-        level,
-        isModified,
-    )
+    private val event = group.registerVarargEvent(eventId, liked, testId, technique, level, isModified)
 
     override fun getGroup() = group
 
