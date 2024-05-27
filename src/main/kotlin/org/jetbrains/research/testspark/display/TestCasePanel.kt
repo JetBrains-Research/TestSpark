@@ -195,15 +195,17 @@ class TestCasePanel(
                 likeButton.icon = TestSparkIcons.like
             } else if (likeButton.icon == TestSparkIcons.like) {
                 likeButton.icon = TestSparkIcons.likeSelected
+
+                val isLiked = true
+                userExperienceCollectors.likedDislikedCollector.logEvent(
+                    isLiked,
+                    getTestId(),
+                    dataToCollect.technique!!,
+                    dataToCollect.codeType!!,
+                    testCase.testCode != initialCodes[currentRequestNumber - 1],
+                )
             }
             dislikeButton.icon = TestSparkIcons.dislike
-            userExperienceCollectors.likedDislikedCollector.logEvent(
-                true,
-                getTestId(),
-                dataToCollect.technique!!,
-                dataToCollect.codeType!!,
-                testCase.testCode != initialCodes[currentRequestNumber - 1],
-            )
         }
 
         dislikeButton.addActionListener {
@@ -211,15 +213,17 @@ class TestCasePanel(
                 dislikeButton.icon = TestSparkIcons.dislike
             } else if (dislikeButton.icon == TestSparkIcons.dislike) {
                 dislikeButton.icon = TestSparkIcons.dislikeSelected
+
+                val isLiked = false
+                userExperienceCollectors.likedDislikedCollector.logEvent(
+                    isLiked,
+                    getTestId(),
+                    dataToCollect.technique!!,
+                    dataToCollect.codeType!!,
+                    testCase.testCode != initialCodes[currentRequestNumber - 1],
+                )
             }
             likeButton.icon = TestSparkIcons.like
-            userExperienceCollectors.likedDislikedCollector.logEvent(
-                false,
-                getTestId(),
-                dataToCollect.technique!!,
-                dataToCollect.codeType!!,
-                testCase.testCode != initialCodes[currentRequestNumber - 1],
-            )
         }
 
         copyButton.addActionListener {
