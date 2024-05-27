@@ -1,4 +1,5 @@
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
 import java.net.URL
@@ -360,7 +361,14 @@ tasks.register<UpdateEvoSuite>("updateEvosuite") {
     evoSuiteVersion = properties("evosuiteVersion")
 }
 
-tasks.register<Copy>("copyJUnitRunnerLib") {
+
+/**
+ * Copies the JUnitRunner.jar file to the lib directory of the project.
+ * This task depends on the "JUnitRunner" module being built beforehand.
+ * JUnitRunner.jar is required for running tests with coverage in the main plugin
+ */
+tasks.register<Copy>("copyJUnitRunnerLib")
+{
     dependsOn(":JUnitRunner:jar")
 
     val libName = "JUnitRunner.jar"
@@ -371,6 +379,39 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
 
     from(libSrcPath)
     into(libDestDir)
+}
+
+/**
+ * This code sets up a Gradle task for running the plugin in headless mode
+ *
+ * @param root The root directory of the project under test.
+ * @param file The file containing unit under test.
+ * @param cut The class under test.
+ * @param cp The classpath of the project.
+ * @param llm The model used for the test generation task.
+ * @param token The token for using LLM.
+ * @param prompt a txt file containing the LLM's prompt template
+ * @param out The output directory for the project.
+ */
+tasks.create<RunIdeTask>("headless") {
+    val root: String? by project
+    val file: String? by project
+    val cut: String? by project
+    val cp: String? by project
+    val llm: String? by project
+    val token: String? by project
+    val prompt: String? by project
+    val out: String? by project
+
+    args = listOfNotNull("testspark", root, file, cut, cp, llm, token, prompt, out)
+
+    jvmArgs(
+        "-Xmx16G",
+        "-Djava.awt.headless=true",
+        "--add-exports",
+        "java.base/jdk.internal.vm=ALL-UNNAMED",
+        "-Didea.system.path",
+    )
 }
 
 fun spaceCredentialsProvided() = spaceUsername.isNotEmpty() && spacePassword.isNotEmpty()
