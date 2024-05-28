@@ -21,6 +21,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.util.containers.stream
+import org.jetbrains.research.testspark.helpers.ClassTypeProcessHelper
 import java.util.stream.Collectors
 
 class JavaPsiHelper : PsiHelperInterface {
@@ -111,7 +112,7 @@ class JavaPsiHelper : PsiHelperInterface {
         val psiMethod: PsiMethod? = getSurroundingMethod(psiFile, caret.offset)
         val line: Int? = getSurroundingLine(psiFile, caret.offset)?.plus(1)
 
-        result.add(getClassDisplayName(psiClass))
+        result.add(ClassTypeProcessHelper.getClassDisplayName(psiClass))
         psiMethod?.let { result.add(getMethodDisplayName(it)) }
         line?.let { result.add("<html><b><font color='orange'>line</font> $line</b></html>") }
 
@@ -277,23 +278,6 @@ class JavaPsiHelper : PsiHelperInterface {
         caretOffset: Int,
     ): Boolean {
         return (psiElement.startOffset <= caretOffset) && (psiElement.endOffset >= caretOffset)
-    }
-
-    /**
-     * Gets the display name of a class, depending on if it is a normal class, an abstract class or an interface.
-     * This is used when displaying the name of a class in GenerateTestsActionClass menu entry.
-     *
-     * @param psiClass the PSI class of interest
-     * @return the display name of the PSI class
-     */
-    private fun getClassDisplayName(psiClass: PsiClass): String {
-        return if (psiClass.isInterface) {
-            "<html><b><font color='orange'>interface</font> ${psiClass.qualifiedName}</b></html>"
-        } else if (isAbstractClass(psiClass)) {
-            "<html><b><font color='orange'>abstract class</font> ${psiClass.qualifiedName}</b></html>"
-        } else {
-            "<html><b><font color='orange'>class</font> ${psiClass.qualifiedName}</b></html>"
-        }
     }
 
     /**

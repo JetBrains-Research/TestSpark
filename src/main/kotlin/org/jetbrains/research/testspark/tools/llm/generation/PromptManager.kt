@@ -25,6 +25,7 @@ import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.helpers.ClassTypeProcessHelper
 import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
@@ -128,6 +129,7 @@ class PromptManager(
             psiClass.qualifiedName!!,
             getClassFullText(psiClass),
             psiClass.allMethods.map(this::createMethodRepresentation).toList().filterNotNull(),
+            ClassTypeProcessHelper.getClassType(psiClass),
         )
     }
 
