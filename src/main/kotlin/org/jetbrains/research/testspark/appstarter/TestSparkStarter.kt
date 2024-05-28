@@ -92,11 +92,11 @@ class TestSparkStarter : ApplicationStarter {
 
                     // update settings
                     val settingsState = project.getService(LLMSettingsService::class.java).state
-                    settingsState.currentLLMPlatformName =  LLMDefaultsBundle.get("grazieName")
+                    settingsState.currentLLMPlatformName = LLMDefaultsBundle.get("grazieName")
                     settingsState.grazieToken = token
                     settingsState.grazieModel = model
                     settingsState.classPrompts = JsonEncoding.encode(mutableListOf(File(promptTemplateFile).readText()))
-                    settingsState.junitVersion = when(jUnitVersion.filter{it.isDigit()}){
+                    settingsState.junitVersion = when (jUnitVersion.filter { it.isDigit() }) {
                         "4" -> JUnitVersion.JUnit4
                         "5" -> JUnitVersion.JUnit5
                         else -> {
@@ -119,7 +119,7 @@ class TestSparkStarter : ApplicationStarter {
                         cutModule
                     )
                     // Prepare the test generation data
-                    val testGenerationData =  TestGenerationData(
+                    val testGenerationData = TestGenerationData(
                         resultPath = output,
                         testResultName = "HeadlessGeneratedTests"
                     )
@@ -136,7 +136,8 @@ class TestSparkStarter : ApplicationStarter {
                             project,
                             psiFile,
                             targetPsiClass.textRange.startOffset,
-                            "")
+                            ""
+                        )
 
                     println("[TestSpark Starter] Starting the test generation process")
                     // Start test generation
@@ -149,16 +150,16 @@ class TestSparkStarter : ApplicationStarter {
                         projectContext,
                         testGenerationData,
                         errorMonitor
-                        )
+                    )
 
                     // Check test Generation Output
                     if (uiContext != null) {
-                            println("[TestSpark Starter] Test generation completed successfully")
-                            // Run test file
-                            runTests(project, output, packageList, classPath, projectContext)
-                        } else {
-                            println("[TestSpark Starter] Test generation failed")
-                        }
+                        println("[TestSpark Starter] Test generation completed successfully")
+                        // Run test file
+                        runTests(project, output, packageList, classPath, projectContext)
+                    } else {
+                        println("[TestSpark Starter] Test generation failed")
+                    }
 
                     ProjectManager.getInstance().closeAndDispose(project)
 

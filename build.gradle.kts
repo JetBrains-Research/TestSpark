@@ -360,17 +360,13 @@ abstract class UpdateEvoSuite : DefaultTask() {
 tasks.register<UpdateEvoSuite>("updateEvosuite") {
     evoSuiteVersion = properties("evosuiteVersion")
 }
-
-
 /**
  * Copies the JUnitRunner.jar file to the lib directory of the project.
  * This task depends on the "JUnitRunner" module being built beforehand.
  * JUnitRunner.jar is required for running tests with coverage in the main plugin
  */
-tasks.register<Copy>("copyJUnitRunnerLib")
-{
+tasks.register<Copy>("copyJUnitRunnerLib") {
     dependsOn(":JUnitRunner:jar")
-
     val libName = "JUnitRunner.jar"
     val libSrcDir =
         "${project.projectDir}${File.separator}JUnitRunner${File.separator}build${File.separator}libs${File.separator}"

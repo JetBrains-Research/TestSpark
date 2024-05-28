@@ -6,7 +6,7 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
  * A class that mocking the IDE progress indicator in headless environment.
  * It implements the CustomProgressIndicator interface.
  */
-class HeadlessProgressIndicator: CustomProgressIndicator {
+class HeadlessProgressIndicator : CustomProgressIndicator {
     override fun setText(text: String) {}
 
     override fun getText(): String = ""
