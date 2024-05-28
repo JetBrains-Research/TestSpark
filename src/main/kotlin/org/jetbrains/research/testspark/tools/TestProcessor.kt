@@ -58,7 +58,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
      * @param generatedTestPackage The package where the generated test class is located.
      * @return An empty string if the test execution is successful, otherwise an error message.
      */
-    private fun createXmlFromJacoco(
+    fun createXmlFromJacoco(
         className: String,
         dataFileName: String,
         testCaseName: String,
