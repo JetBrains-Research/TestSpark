@@ -93,6 +93,7 @@ class TestSparkStarter : ApplicationStarter {
                     settingsState.grazieToken = token
                     settingsState.grazieModel = model
                     settingsState.classPrompts = JsonEncoding.encode(mutableListOf(File(promptTemplateFile).readText()))
+//                    settingsState.junitVersion = JUnitVersion.JUnit4 or JUnitVersion.JUnit5 ToDo: add a new parameter
                     project.service<PluginSettingsService>().state.buildPath = classPath
 
                     // Prepare Project Context
@@ -109,14 +110,11 @@ class TestSparkStarter : ApplicationStarter {
                         cutModule
                     )
                     // Prepare the test generation data
-
-//                    generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
-//                    generatedTestsData.testResultName = testResultName
                     val testGenerationData =  TestGenerationData(
                         resultPath = output,
                         testResultName = "HeadlessGeneratedTests"
                     )
-                    println("[TestSpark Starter]Indexing is done")
+                    println("[TestSpark Starter] Indexing is done")
 
                     // get package name
                     val packageList = targetPsiClass.qualifiedName.toString().split(".").toMutableList()
@@ -130,6 +128,8 @@ class TestSparkStarter : ApplicationStarter {
                             psiFile,
                             targetPsiClass.textRange.startOffset,
                             "")
+
+                    println("[TestSpark Starter] Starting the test generation process")
                     // Start test generation
                     val indicator = HeadlessProgressIndicator()
                     val errorMonitor = DefaultErrorMonitor()
@@ -168,7 +168,7 @@ class TestSparkStarter : ApplicationStarter {
                 println("Running test ${it.name}")
                 var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
-                // Test is compiled and it is ready to run jacoco
+                // The current test is compiled and is ready to run jacoco
                 val testExecutionError = TestProcessor(project).createXmlFromJacoco(
                     it.nameWithoutExtension,
                     "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
@@ -178,7 +178,7 @@ class TestSparkStarter : ApplicationStarter {
                     out,
                     projectContext
                 )
-
+                // Saving exception (if exists) thrown during the test execution
                 saveException(testcaseName, targetDirectory, testExecutionError)
             }
         }
