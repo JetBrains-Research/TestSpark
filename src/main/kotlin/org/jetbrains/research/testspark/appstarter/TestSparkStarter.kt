@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ApplicationStarter
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -22,6 +23,8 @@ import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.io.File
 import kotlin.system.exitProcess
@@ -47,7 +50,7 @@ class TestSparkStarter : ApplicationStarter {
         // CUT name (<package-name>.<class-name>)
         val classUnderTestName = args[3]
         // Paths to compilation output of the project under test (seperated by ':')
-        val classPath = "$projectPath:${args[4]}"
+        val classPath = "$projectPath${ToolUtils.sep}${args[4]}"
         // Selected mode
         val model = args[5]
         // Token
@@ -140,8 +143,7 @@ class TestSparkStarter : ApplicationStarter {
 
 
                     // Run test file
-                    // ToDO: run tests
-//                    runTests(project, output, packageList, classPath)
+                    runTests(project, output, packageList, classPath, projectContext)
 
                     ProjectManager.getInstance().closeAndDispose(project)
 
@@ -152,28 +154,29 @@ class TestSparkStarter : ApplicationStarter {
         }
     }
 
-//    private fun runTests(project: Project, out: String, packageList: MutableList<String>, classPath: String) {
-//        val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
-//        println("Run tests in $targetDirectory")
-//        File(targetDirectory).walk().forEach {
-//            if (it.name.endsWith(".class")) {
-//                println("Running test ${it.name}")
-//                var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
-//                testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
-//                // Test is compiled and it is ready to run jacoco
-//                val testExecutionError = project.service<TestStorageProcessingService>().createXmlFromJacoco(
-//                    it.nameWithoutExtension,
-//                    "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
-//                    testcaseName,
-//                    classPath,
-//                    packageList.joinToString("."),
-//                    out,
-//                )
-//
-//                saveException(testcaseName, targetDirectory, testExecutionError)
-//            }
-//        }
-//    }
+    private fun runTests(project: Project, out: String, packageList: MutableList<String>, classPath: String, projectContext: ProjectContext) {
+        val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
+        println("Run tests in $targetDirectory")
+        File(targetDirectory).walk().forEach {
+            if (it.name.endsWith(".class")) {
+                println("Running test ${it.name}")
+                var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
+                testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
+                // Test is compiled and it is ready to run jacoco
+                val testExecutionError = TestProcessor(project).createXmlFromJacoco(
+                    it.nameWithoutExtension,
+                    "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
+                    testcaseName,
+                    classPath,
+                    packageList.joinToString("."),
+                    out,
+                    projectContext
+                )
+
+                saveException(testcaseName, targetDirectory, testExecutionError)
+            }
+        }
+    }
 
     private fun saveException(
         testcaseName: String,
