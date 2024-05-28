@@ -116,7 +116,7 @@ class TestSparkStarter : ApplicationStarter {
                         resultPath = output,
                         testResultName = "HeadlessGeneratedTests"
                     )
-                    println("Indexing is done")
+                    println("[TestSpark Starter]Indexing is done")
 
                     // get package name
                     val packageList = targetPsiClass.qualifiedName.toString().split(".").toMutableList()
@@ -131,19 +131,25 @@ class TestSparkStarter : ApplicationStarter {
                             targetPsiClass.textRange.startOffset,
                             "")
                     // Start test generation
+                    val indicator = HeadlessProgressIndicator()
+                    val errorMonitor = DefaultErrorMonitor()
                     val uiContext = llmProcessManager.runTestGenerator(
-                        HeadlessProgressIndicator(),
+                        indicator,
                         FragmentToTestData(CodeType.CLASS),
                         packageName,
                         projectContext,
                         testGenerationData,
-                        DefaultErrorMonitor()
+                        errorMonitor
                         )
 
-
-
-                    // Run test file
-                    runTests(project, output, packageList, classPath, projectContext)
+                    // Check test Generation Output
+                    if (uiContext != null) {
+                            println("[TestSpark Starter] Test generation completed successfully")
+                            // Run test file
+                            runTests(project, output, packageList, classPath, projectContext)
+                        } else {
+                            println("[TestSpark Starter] Test generation failed")
+                        }
 
                     ProjectManager.getInstance().closeAndDispose(project)
 
