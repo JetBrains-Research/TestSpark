@@ -55,7 +55,7 @@ class PromptManager(
                 val interestingPsiClasses = getInterestingPsiClassesWithQualifiedNames(classesToTest, polyDepthReducing)
 
                 val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
-                val polymorphismRelations = getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses, cut)
+                val polymorphismRelations = getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses)
                     .map(this::createClassRepresentation)
                     .toMap()
 
@@ -201,6 +201,8 @@ class PromptManager(
             }
         }
 
+        interestingPsiClasses.remove(cut)
+
         return interestingPsiClasses
             .filter { it.qualifiedName != null }
             .toMutableSet()
@@ -237,6 +239,8 @@ class PromptManager(
             interestingPsiClasses.addAll(tempListOfClasses)
         }
 
+        interestingPsiClasses.remove(cut)
+
         /** filtering out classes that do not have a qualified name as it's required further **/
         return interestingPsiClasses
             .filter { it.qualifiedName != null }
@@ -254,12 +258,11 @@ class PromptManager(
     private fun getPolymorphismRelationsWithQualifiedNames(
         project: Project,
         interestingPsiClasses: MutableSet<PsiClass>,
-        cutPsiClass: PsiClass,
     ): MutableMap<PsiClass, MutableList<PsiClass>> {
         val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
 
-        val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
-        interestingPsiClasses.add(cutPsiClass)
+        val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cut))
+        interestingPsiClasses.add(cut)
 
         interestingPsiClasses.forEach { currentInterestingClass ->
             val scope = GlobalSearchScope.projectScope(project)
@@ -276,6 +279,8 @@ class PromptManager(
                 }
             }
         }
+
+        interestingPsiClasses.remove(cut)
 
         return polymorphismRelations
             /** preserving the entries where qualified names of parent class and all of its subclasses are NOT null **/
