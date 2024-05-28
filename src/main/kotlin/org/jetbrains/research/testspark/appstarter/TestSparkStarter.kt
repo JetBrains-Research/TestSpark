@@ -14,6 +14,7 @@ import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.data.CodeType
@@ -51,14 +52,16 @@ class TestSparkStarter : ApplicationStarter {
         val classUnderTestName = args[3]
         // Paths to compilation output of the project under test (seperated by ':')
         val classPath = "$projectPath${ToolUtils.sep}${args[4]}"
+        // JUnit Version
+        val jUnitVersion = args[5]
         // Selected mode
-        val model = args[5]
+        val model = args[6]
         // Token
-        val token = args[6]
+        val token = args[7]
         // A txt file containing the prompt template
-        val promptTemplateFile = args[7]
+        val promptTemplateFile = args[8]
         // Output directory
-        val output = args[8]
+        val output = args[9]
 
         println("Test generation requested for $projectPath")
 
@@ -93,7 +96,13 @@ class TestSparkStarter : ApplicationStarter {
                     settingsState.grazieToken = token
                     settingsState.grazieModel = model
                     settingsState.classPrompts = JsonEncoding.encode(mutableListOf(File(promptTemplateFile).readText()))
-//                    settingsState.junitVersion = JUnitVersion.JUnit4 or JUnitVersion.JUnit5 ToDo: add a new parameter
+                    settingsState.junitVersion = when(jUnitVersion.filter{it.isDigit()}){
+                        "4" -> JUnitVersion.JUnit4
+                        "5" -> JUnitVersion.JUnit5
+                        else -> {
+                            throw IllegalArgumentException("JUnit version $jUnitVersion is not supported. Supported JUnit versions are '4' and '5'")
+                        }
+                    }
                     project.service<PluginSettingsService>().state.buildPath = classPath
 
                     // Prepare Project Context
