@@ -34,8 +34,8 @@ class ErrorMessageNormalizerTest {
     fun testNormalizeWithMultipleBlocksNoSeparator() {
         val input = "a".repeat(ErrorMessageNormalizer.BLOCK_SIZE * 2 + 50)
         val expected = "a".repeat(ErrorMessageNormalizer.BLOCK_SIZE) + ErrorMessageNormalizer.SEPARATOR +
-                "a".repeat(ErrorMessageNormalizer.BLOCK_SIZE) + ErrorMessageNormalizer.SEPARATOR +
-                "a".repeat(50) + ErrorMessageNormalizer.SEPARATOR
+            "a".repeat(ErrorMessageNormalizer.BLOCK_SIZE) + ErrorMessageNormalizer.SEPARATOR +
+            "a".repeat(50) + ErrorMessageNormalizer.SEPARATOR
         val result = ErrorMessageNormalizer.normalize(input)
         assertEquals(expected, result)
     }
@@ -57,11 +57,11 @@ class ErrorMessageNormalizerTest {
     @Test
     fun testNormalizeWithMultipleSeparators() {
         val input = "a".repeat(40) + ErrorMessageNormalizer.SEPARATOR +
-                "b".repeat(40) + ErrorMessageNormalizer.SEPARATOR +
-                "c".repeat(20)
+            "b".repeat(40) + ErrorMessageNormalizer.SEPARATOR +
+            "c".repeat(20)
         val expected = "a".repeat(40) + ErrorMessageNormalizer.SEPARATOR +
-                "b".repeat(40) + ErrorMessageNormalizer.SEPARATOR +
-                "c".repeat(20) + ErrorMessageNormalizer.SEPARATOR
+            "b".repeat(40) + ErrorMessageNormalizer.SEPARATOR +
+            "c".repeat(20) + ErrorMessageNormalizer.SEPARATOR
         val result = ErrorMessageNormalizer.normalize(input)
         assertEquals(expected, result)
     }
