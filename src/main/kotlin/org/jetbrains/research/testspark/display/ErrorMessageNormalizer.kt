@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.display
 
 object ErrorMessageNormalizer {
     /**
-     * Normalizes an error message by inserting "<br/>" tags after every 300 characters,
+     * Normalizes an error message by inserting "<br/>" tags after every block size characters,
      * except if there is already a "<br/>" tag within the blockSize characters.
      * If the string length is a multiple of blockSize and the last character is a "<br/>" tag,
      * it is removed from the result.
@@ -33,9 +33,9 @@ object ErrorMessageNormalizer {
             lastIndex = nextIndex
         }
 
-        // remove the last <br/> if the string length is a multiple of 300 and it didn't have <br/>
+        // remove the last <br/> if the string length is a multiple of the block size, and it didn't have <br/>
         if (builder.endsWith(separator) && (error.length % blockSize == 0)) {
-            builder.setLength(builder.length - separator.length)
+            builder.deleteRange(builder.length - separator.length, builder.length)
         }
 
         return builder.toString()
