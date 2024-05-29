@@ -95,9 +95,8 @@ class TestCasePanel(
 
     private var isRemoved = false
 
-    private var _error: String? = null
-    val error: String?
-        get() = _error
+    var error: String? = null
+        private set
 
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
@@ -341,8 +340,8 @@ class TestCasePanel(
         if (error.isNullOrBlank()) {
             errorLabel.isVisible = false
         } else {
-            errorLabel.isVisible = true
             errorLabel.toolTipText = error
+            errorLabel.isVisible = true
         }
 
         runTestButton.isEnabled = previousError(testCase.testCode) == null
@@ -375,7 +374,7 @@ class TestCasePanel(
 
         currentCodes[currentRequestNumber - 1] = testCase.testCode
 
-        _error = previousError(testCase.testCode)
+        error = previousError(testCase.testCode)
         updateErrorRelatedUI()
 
         // select checkbox
@@ -433,7 +432,7 @@ class TestCasePanel(
                     }
 
                     SwingUtilities.invokeLater {
-                        _error = null
+                        error = null
                         updateErrorRelatedUI()
                     }
 
@@ -537,7 +536,7 @@ class TestCasePanel(
             )
 
         testCase.coveredLines = newTestCaseResult.testCase.coveredLines
-        _error = newTestCaseResult.error
+        error = newTestCaseResult.error
         saveErrorForCode(newTestCaseResult.testCase.testCode, newTestCaseResult.error)
 
         testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
