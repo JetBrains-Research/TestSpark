@@ -14,6 +14,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
@@ -207,7 +208,7 @@ class TestCasePanel(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    GenerateTestsTabHelper.getEditorTextField(testCase.testName, generatedTestsTabData)!!.document.text,
+                    generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName]!!.document.text,
                 ),
                 null,
             )
@@ -672,4 +673,11 @@ class TestCasePanel(
             )
         testCase.testCode = languageTextField.document.text
     }
+
+    /**
+     * Retrieves the editor text field from the current UI context.
+     *
+     * @return the editor text field
+     */
+    fun getEditorTextField(): EditorTextField = languageTextField
 }

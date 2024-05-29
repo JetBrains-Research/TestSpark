@@ -41,7 +41,7 @@ class TestSparkDisplayBuilder {
         toolWindow!!.show()
 
         generatedTestsTabBuilder!!.getRemoveAllButton().addActionListener {
-            if (generatedTestsTabBuilder!!.getGeneratedTestsTabData().testCaseNameToPanels.isEmpty()) {
+            if (generatedTestsTabBuilder!!.getGeneratedTestsTabData().testCaseNameToPanel.isEmpty()) {
                 clear()
                 return@addActionListener
             }
