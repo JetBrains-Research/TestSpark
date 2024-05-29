@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.display.generatedTestsTab
 
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.display.TestCasePanel
 import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
 import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import java.awt.Dimension
@@ -48,28 +47,33 @@ class TopButtonsPanelBuilder {
     /**
      * Updates the labels.
      */
-    fun update(testsSelected: Int, testCasePanels: ArrayList<TestCasePanel>) {
+    fun update(generatedTestsTabData: GeneratedTestsTabData) {
+        var numberOfTests = 0
         var numberOfPassedTests = 0
-        for (testCasePanel in testCasePanels) {
-            if (testCasePanel.isRemoved()) continue
-            val error = testCasePanel.error ?: continue
+        for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
+            if (testCasePanelFactory.isRemoved()) continue
+            numberOfTests++
+            val error = testCasePanelFactory.error ?: continue
             if (error.isBlank()) {
                 numberOfPassedTests++
             }
         }
+
         testsSelectedLabel.text = String.format(
             testsSelectedText,
-            testsSelected,
-            testCasePanels.size,
+            generatedTestsTabData.testsSelected,
+            numberOfTests,
         )
+
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 numberOfPassedTests,
-                testCasePanels.size,
+                numberOfTests,
             )
+
         runAllButton.isEnabled = false
-        for (testCasePanel in testCasePanels) {
+        for (testCasePanel in generatedTestsTabData.testCasePanelFactories) {
             runAllButton.isEnabled = runAllButton.isEnabled || testCasePanel.isRunEnabled()
         }
 

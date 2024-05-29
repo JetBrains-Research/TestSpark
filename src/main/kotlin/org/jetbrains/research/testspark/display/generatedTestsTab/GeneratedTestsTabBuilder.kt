@@ -181,10 +181,7 @@ class GeneratedTestsTabBuilder(
 
         generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanel.size
 
-        generatedTestsTabData.topButtonsPanelBuilder.update(
-            generatedTestsTabData.testsSelected,
-            generatedTestsTabData.testCasePanelFactories,
-        )
+        generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
     }
 
     /**
@@ -197,10 +194,7 @@ class GeneratedTestsTabBuilder(
      */
     private fun update() {
         generatedTestsTabData.allTestCasePanel.updateUI()
-        generatedTestsTabData.topButtonsPanelBuilder.update(
-            generatedTestsTabData.testsSelected,
-            generatedTestsTabData.testCasePanelFactories,
-        )
+        generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
     }
 
     /**

@@ -37,6 +37,6 @@ object GenerateTestsTabHelper {
      */
     fun update(generatedTestsTabData: GeneratedTestsTabData) {
         generatedTestsTabData.allTestCasePanel.updateUI()
-        generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData.testsSelected, generatedTestsTabData.testCasePanelFactories)
+        generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
     }
 }
