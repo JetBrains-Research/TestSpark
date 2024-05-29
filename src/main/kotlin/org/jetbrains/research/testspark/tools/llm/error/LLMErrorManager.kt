@@ -21,11 +21,6 @@ import org.jetbrains.research.testspark.tools.template.error.ErrorManager
  * This class is part of the LLMErrorManager module.
  */
 class LLMErrorManager : ErrorManager {
-    /**
-     * Represents a private logger instance for logging messages within the class.
-     *
-     * @property log The instance of the logger.
-     */
     private val log = Logger.getInstance(this::class.java)
 
     /**
