@@ -21,7 +21,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.util.containers.stream
-import org.jetbrains.research.testspark.helpers.ClassTypeProcessHelper
+import org.jetbrains.research.testspark.helpers.PsiClassHelper.getClassDisplayName
 import java.util.stream.Collectors
 
 class JavaPsiHelper : PsiHelperInterface {
@@ -112,7 +112,7 @@ class JavaPsiHelper : PsiHelperInterface {
         val psiMethod: PsiMethod? = getSurroundingMethod(psiFile, caret.offset)
         val line: Int? = getSurroundingLine(psiFile, caret.offset)?.plus(1)
 
-        result.add(ClassTypeProcessHelper.getClassDisplayName(psiClass))
+        result.add(psiClass.getClassDisplayName())
         psiMethod?.let { result.add(getMethodDisplayName(it)) }
         line?.let { result.add("<html><b><font color='orange'>line</font> $line</b></html>") }
 
