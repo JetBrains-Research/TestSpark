@@ -1,6 +1,13 @@
 package org.jetbrains.research.testspark.display
 
+/**
+ * The ErrorMessageNormalizer class is responsible for normalizing error messages by inserting "<br/>" tags after every block size characters.
+ */
 object ErrorMessageNormalizer {
+    const val BLOCK_SIZE = 100
+
+    const val SEPARATOR = "<br/>"
+
     /**
      * Normalizes an error message by inserting "<br/>" tags after every block size characters,
      * except if there is already a "<br/>" tag within the blockSize characters.
@@ -11,21 +18,17 @@ object ErrorMessageNormalizer {
      * @return The normalized error message.
      */
     fun normalize(error: String): String {
-        // set default parameters
-        val blockSize = 100
-        val separator = "<br/>"
-
         // init variables
         val builder = StringBuilder()
         var lastIndex = 0
 
         // string separating
         while (lastIndex < error.length) {
-            val nextIndex = (lastIndex + blockSize).coerceAtMost(error.length)
+            val nextIndex = (lastIndex + BLOCK_SIZE).coerceAtMost(error.length)
             val substring = error.substring(lastIndex, nextIndex)
 
-            if (!substring.contains(separator)) {
-                builder.append(substring).append(separator)
+            if (!substring.contains(SEPARATOR)) {
+                builder.append(substring).append(SEPARATOR)
             } else {
                 builder.append(substring)
             }
@@ -34,8 +37,8 @@ object ErrorMessageNormalizer {
         }
 
         // remove the last <br/> if the string length is a multiple of the block size, and it didn't have <br/>
-        if (builder.endsWith(separator) && (error.length % blockSize == 0)) {
-            builder.deleteRange(builder.length - separator.length, builder.length)
+        if (builder.endsWith(SEPARATOR) && (error.length % BLOCK_SIZE == 0)) {
+            builder.deleteRange(builder.length - SEPARATOR.length, builder.length)
         }
 
         return builder.toString()
