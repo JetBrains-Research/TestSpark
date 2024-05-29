@@ -142,21 +142,19 @@ class TestCasePanel(
     private val trimmedCodeToError = mutableMapOf<String, String?>()
 
     init {
-        prepareUpperPanel()
-        prepareMiddlePanel()
-        prepareBottomPanel()
+        initUpperPanel()
+        initMiddlePanel()
+        initBottomPanel()
         updateErrorRelatedUI()
     }
 
     /**
-     * Retrieves the upper panel for the GUI.
+     * Initialize upper panel for the GUI.
      *
      * This panel contains various components such as buttons, labels, and checkboxes. It is used to display information and
      * perform actions related to the GUI.
-     *
-     * @return The JPanel object representing the upper panel.
      */
-    private fun prepareUpperPanel(): JPanel {
+    private fun initUpperPanel() {
         upperPanel.layout = BoxLayout(upperPanel, BoxLayout.X_AXIS)
         upperPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         upperPanel.add(previousButton)
@@ -224,16 +222,12 @@ class TestCasePanel(
         }
 
         updateRequestLabel()
-
-        return upperPanel
     }
 
     /**
-     * Retrieves the middle panel of the application.
-     * This method sets the border of the languageTextField and
-     * adds it to the middlePanel with appropriate spacing.
+     * Initialize the middle panel of the application.
      */
-    private fun prepareMiddlePanel(): JPanel {
+    private fun initMiddlePanel() {
         initialCodes.add(testCase.testCode)
         lastRunCodes.add(testCase.testCode)
         currentCodes.add(testCase.testCode)
@@ -244,14 +238,14 @@ class TestCasePanel(
         middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
 
         addLanguageTextFieldListener(languageTextField)
-
-        return middlePanel
     }
 
     /**
-     * Returns the bottom panel.
+     * Initialize the bottom panel.
+     *
+     * This panel contains controls for running/resetting test cases and making additional LLM requests.
      */
-    private fun prepareBottomPanel(): JPanel {
+    private fun initBottomPanel() {
         bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
 
         val requestPanel = JPanel()
@@ -305,8 +299,6 @@ class TestCasePanel(
         sendButton.addActionListener { sendRequest() }
 
         requestComboBox.isEditable = true
-
-        return bottomPanel
     }
 
     /**
