@@ -28,11 +28,11 @@ import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.io.File
+import java.nio.file.Paths
 import kotlin.system.exitProcess
 
 /**
- * This class represents a test spark starter that implements the ApplicationStarter interface.
- * It is responsible for generating and running tests based on the provided arguments in headless mode.
+ * This class is responsible for generating and running tests based on the provided arguments in headless mode.
  */
 class TestSparkStarter : ApplicationStarter {
     @Deprecated("Specify it as `id` for extension definition in a plugin descriptor")
@@ -47,18 +47,19 @@ class TestSparkStarter : ApplicationStarter {
         // Project path
         val projectPath = args[1]
         // Path to the target file (.java file)
-        val filePath = "$projectPath/${args[2]}"
+        val cutSourceFilePath = Paths.get(projectPath, args[2]).toAbsolutePath()
         // CUT name (<package-name>.<class-name>)
         val classUnderTestName = args[3]
         // Paths to compilation output of the project under test (seperated by ':')
-        val classPath = "$projectPath${ToolUtils.sep}${args[4]}"
+        val projectClassPath = args[4]
+        val classPath = "$projectPath${ToolUtils.sep}$projectClassPath"
         // JUnit Version
         val jUnitVersion = args[5]
-        // Selected mode
+        // Selected model
         val model = args[6]
         // Token
         val token = args[7]
-        // A txt file containing the prompt template
+        // Filepath to a file containing the prompt template
         val promptTemplateFile = args[8]
         // Output directory
         val output = args[9]
@@ -67,7 +68,7 @@ class TestSparkStarter : ApplicationStarter {
 
         ApplicationManager.getApplication().invokeAndWait {
             val project = ProjectUtil.openOrImport(projectPath, null, true) ?: run {
-                println("couldn't find project in $projectPath")
+                println("Couldn't find project in $projectPath")
                 exitProcess(1)
             }
             println("Detected project: $project")
@@ -76,15 +77,15 @@ class TestSparkStarter : ApplicationStarter {
             project.let {
                 DumbService.getInstance(it).runWhenSmart {
                     // open target file
-                    val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath) ?: run {
-                        println("couldn't open file $filePath")
+                    val cutSourceVirtualFile = LocalFileSystem.getInstance().findFileByPath(cutSourceFilePath.toString()) ?: run {
+                        println("Couldn't open file $cutSourceFilePath")
                         exitProcess(1)
                     }
 
                     // get target PsiClass
-                    val psiFile = PsiManager.getInstance(project).findFile(virtualFile) as PsiJavaFile
+                    val psiFile = PsiManager.getInstance(project).findFile(cutSourceVirtualFile) as PsiJavaFile
                     val targetPsiClass = detectPsiClass(psiFile.classes, classUnderTestName) ?: run {
-                        println("couldn't find $classUnderTestName in $filePath")
+                        println("Couldn't find $classUnderTestName in $cutSourceFilePath")
                         exitProcess(1)
                     }
 
@@ -126,8 +127,7 @@ class TestSparkStarter : ApplicationStarter {
                     println("[TestSpark Starter] Indexing is done")
 
                     // get package name
-                    val packageList = targetPsiClass.qualifiedName.toString().split(".").toMutableList()
-                    packageList.removeLast()
+                    val packageList = targetPsiClass.qualifiedName.toString().split(".").dropLast(1).toMutableList()
                     val packageName = packageList.joinToString(".")
 
                     // Create a process Manager
@@ -136,7 +136,7 @@ class TestSparkStarter : ApplicationStarter {
                             project,
                             psiFile,
                             targetPsiClass.textRange.startOffset,
-                            ""
+                            testSamplesCode = "" // we dont provide samples to LLM
                         )
 
                     println("[TestSpark Starter] Starting the test generation process")
@@ -156,7 +156,7 @@ class TestSparkStarter : ApplicationStarter {
                     if (uiContext != null) {
                         println("[TestSpark Starter] Test generation completed successfully")
                         // Run test file
-                        runTests(project, output, packageList, classPath, projectContext)
+                        runTestsWithCoverageCollection(project, output, packageList, classPath, projectContext)
                     } else {
                         println("[TestSpark Starter] Test generation failed")
                     }
@@ -170,7 +170,7 @@ class TestSparkStarter : ApplicationStarter {
         }
     }
 
-    private fun runTests(project: Project, out: String, packageList: MutableList<String>, classPath: String, projectContext: ProjectContext) {
+    private fun runTestsWithCoverageCollection(project: Project, out: String, packageList: MutableList<String>, classPath: String, projectContext: ProjectContext) {
         val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
         println("Run tests in $targetDirectory")
         File(targetDirectory).walk().forEach {
@@ -202,10 +202,10 @@ class TestSparkStarter : ApplicationStarter {
         if (testExecutionError.isBlank() || !testExecutionError.contains("Exception", ignoreCase = false)) {
             return
         }
-        val targetPath = "$targetDirectory/$testcaseName-exception.log"
+        val targetPath = Paths.get(targetDirectory, "$testcaseName-exception.log")
 
         // Save the exception
-        File(targetPath).writeText(testExecutionError.replace("\tat ", "\nat "))
+        targetPath.toFile().writeText(testExecutionError.replace("\tat ", "\nat "))
     }
 
     private fun detectPsiClass(classes: Array<PsiClass>, classUnderTestName: String): PsiClass? {
