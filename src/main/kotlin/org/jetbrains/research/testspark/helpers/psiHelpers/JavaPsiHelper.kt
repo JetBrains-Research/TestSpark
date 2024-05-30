@@ -300,7 +300,7 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
             doc.getText(TextRange(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine)))
 
         if (selectedLineText.isBlank()) {
-            log.info("Line $selectedLine at caret $caretOffset is not valid")
+            log.info("Line $selectedLine at caret $caretOffset is blank")
             return null
         }
         log.info("Surrounding line at caret $caretOffset is $selectedLine")
