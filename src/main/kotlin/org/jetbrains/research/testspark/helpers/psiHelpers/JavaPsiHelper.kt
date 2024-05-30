@@ -10,7 +10,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiClassType
-import com.intellij.psi.PsiCodeBlock
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -21,8 +20,6 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
-import com.intellij.refactoring.suggested.endOffset
-import com.intellij.refactoring.suggested.startOffset
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
@@ -31,6 +28,12 @@ import java.util.stream.Collectors
 
 class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper {
     override val name: String get() = psiMethod.name
+
+    override val text: String? = psiMethod.text
+
+    override val containingClass: PsiClassWrapper? = psiMethod.containingClass?.let { JavaPsiClassWrapper(it) }
+
+    override val containingFile: PsiFile = psiMethod.containingFile
 
     override val methodDescriptor: String
         get() {
@@ -52,17 +55,9 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
             return psiMethod.text.substring(0, bodyStart).replace('\n', ' ').trim()
         }
 
-    override val text: String? = psiMethod.text
-
-    override val containingClass: PsiClassWrapper? = psiMethod.containingClass?.let { JavaPsiClassWrapper(it) }
-
-    override val containingFile: PsiFile = psiMethod.containingFile
-
     val parameterList = psiMethod.parameterList
 
     val isConstructor: Boolean = psiMethod.isConstructor
-
-    val body: PsiCodeBlock? = psiMethod.body
 
     val isMethodDefault: Boolean
         get() {
