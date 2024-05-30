@@ -5,7 +5,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 
 object PsiHelperFactory {
-    fun getPsiHelper(psiFile: PsiFile?): PsiHelper {
+    fun getPsiHelper(psiFile: PsiFile?): PsiHelper? {
         val log = Logger.getInstance(this::class.java)
         return when (psiFile) {
             is PsiJavaFile -> {
@@ -14,7 +14,7 @@ object PsiHelperFactory {
             }
             // TODO implement KotlinPsiHelper class
             // is KtFile -> KotlinPsiHelper(psiFile)
-            else -> throw IllegalArgumentException("Unsupported file type")
+            else -> null
         }
     }
 }

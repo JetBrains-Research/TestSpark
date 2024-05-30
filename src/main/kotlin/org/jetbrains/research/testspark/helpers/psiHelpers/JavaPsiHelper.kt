@@ -30,8 +30,7 @@ import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import java.util.stream.Collectors
 
 class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper {
-    override val name: String
-        get() = psiMethod.name
+    override val name: String get() = psiMethod.name
 
     override val methodDescriptor: String
         get() {
@@ -46,6 +45,7 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
 
             return "${psiMethod.name}($parameterTypes)$returnType"
         }
+
     override val signature: String
         get() {
             val bodyStart = psiMethod.body?.startOffsetInParent ?: psiMethod.textLength
@@ -57,14 +57,6 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
     override val containingClass: PsiClassWrapper? = psiMethod.containingClass?.let { JavaPsiClassWrapper(it) }
 
     override val containingFile: PsiFile = psiMethod.containingFile
-    override fun isLineIn(lineNumber: Int): Boolean {
-        val psiFile = psiMethod.containingFile ?: return false
-        val document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
-        val textRange = psiMethod.textRange
-        val startLine = document.getLineNumber(textRange.startOffset) + 1
-        val endLine = document.getLineNumber(textRange.endOffset) + 1
-        return lineNumber in startLine..endLine
-    }
 
     val parameterList = psiMethod.parameterList
 
@@ -78,8 +70,16 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
             return psiMethod.containingClass?.isInterface ?: return false
         }
 
-    val isDefaultConstructor: Boolean
-        get() = psiMethod.isConstructor && psiMethod.body?.isEmpty ?: false
+    val isDefaultConstructor: Boolean get() = psiMethod.isConstructor && (psiMethod.body?.isEmpty ?: false)
+
+    override fun containsLine(lineNumber: Int): Boolean {
+        val psiFile = psiMethod.containingFile ?: return false
+        val document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
+        val textRange = psiMethod.textRange
+        val startLine = document.getLineNumber(textRange.startOffset) + 1
+        val endLine = document.getLineNumber(textRange.endOffset) + 1
+        return lineNumber in startLine..endLine
+    }
 
     /**
      * Generates the return descriptor for a method.
@@ -141,13 +141,19 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
 class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
 
+    override val qualifiedName: String get() = psiClass.qualifiedName ?: ""
+
+    override val text: String get() = psiClass.text
+
     override val methods: List<PsiMethodWrapper> get() = psiClass.methods.map { JavaPsiMethodWrapper(it) }
 
     override val allMethods: List<PsiMethodWrapper> get() = psiClass.allMethods.map { JavaPsiMethodWrapper(it) }
 
-    override val qualifiedName: String get() = psiClass.qualifiedName ?: ""
+    override val superClass: PsiClassWrapper? get() = psiClass.superClass?.let { JavaPsiClassWrapper(it) }
 
-    override val text: String get() = psiClass.text
+    override val virtualFile: VirtualFile get() = psiClass.containingFile.virtualFile
+
+    override val containingFile: PsiFile get() = psiClass.containingFile
 
     override val fullText: String
         get() {
@@ -155,14 +161,14 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
             val fileText = psiClass.containingFile.text
 
             // get package
-            packagePattern.findAll(fileText, 0).map {
+            packagePattern.findAll(fileText).map {
                 it.groupValues[0]
             }.forEach {
                 fullText += "$it\n\n"
             }
 
             // get imports
-            importPattern.findAll(fileText, 0).map {
+            importPattern.findAll(fileText).map {
                 it.groupValues[0]
             }.forEach {
                 fullText += "$it\n"
@@ -173,41 +179,6 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
 
             return fullText
         }
-
-    override val superClass: PsiClassWrapper? get() = psiClass.superClass?.let { JavaPsiClassWrapper(it) }
-
-    override val virtualFile: VirtualFile get() = psiClass.containingFile.virtualFile
-
-    override val containingFile: PsiFile get() = psiClass.containingFile
-
-    override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
-        val scope = GlobalSearchScope.projectScope(project)
-        val query = ClassInheritorsSearch.search(psiClass, scope, false)
-        return query.findAll().map { JavaPsiClassWrapper(it) }
-    }
-
-    override fun getInterestingPsiClassesWithQualifiedNames(
-        psiMethod: PsiMethodWrapper,
-    ): MutableSet<PsiClassWrapper> {
-        val interestingMethods = mutableSetOf(psiMethod as JavaPsiMethodWrapper)
-        for (currentPsiMethod in allMethods) {
-            if ((currentPsiMethod as JavaPsiMethodWrapper).isConstructor) interestingMethods.add(currentPsiMethod)
-        }
-        val interestingPsiClasses = mutableSetOf(this)
-        interestingMethods.forEach { methodIt ->
-            methodIt.parameterList.parameters.forEach { paramIt ->
-                PsiTypesUtil.getPsiClass(paramIt.type)?.let { typeIt ->
-                    JavaPsiClassWrapper(typeIt).let {
-                        if (!it.qualifiedName.startsWith("java.")) {
-                            interestingPsiClasses.add(it)
-                        }
-                    }
-                }
-            }
-        }
-
-        return interestingPsiClasses.toMutableSet()
-    }
 
     val isInterface: Boolean get() = psiClass.isInterface
 
@@ -228,21 +199,49 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
                 .contains("abstractclass${psiClass.name}", ignoreCase = true)
         }
 
+    override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
+        val scope = GlobalSearchScope.projectScope(project)
+        val query = ClassInheritorsSearch.search(psiClass, scope, false)
+        return query.findAll().map { JavaPsiClassWrapper(it) }
+    }
+
+    override fun getInterestingPsiClassesWithQualifiedNames(
+        psiMethod: PsiMethodWrapper,
+    ): MutableSet<PsiClassWrapper> {
+        val interestingMethods = mutableSetOf(psiMethod as JavaPsiMethodWrapper)
+        for (currentPsiMethod in allMethods) {
+            if ((currentPsiMethod as JavaPsiMethodWrapper).isConstructor) interestingMethods.add(currentPsiMethod)
+        }
+        val interestingPsiClasses = mutableSetOf(this)
+        interestingMethods.forEach { methodIt ->
+            methodIt.parameterList.parameters.forEach { paramIt ->
+                PsiTypesUtil.getPsiClass(paramIt.type)?.let { typeIt ->
+                    JavaPsiClassWrapper(typeIt).let {
+                        if (it.qualifiedName != "" && !it.qualifiedName.startsWith("java.")) {
+                            interestingPsiClasses.add(it)
+                        }
+                    }
+                }
+            }
+        }
+
+        return interestingPsiClasses.toMutableSet()
+    }
+
     /**
      * Checks if the constraints on the selected class are satisfied, so that EvoSuite can generate tests for it.
      * Namely, it is not an enum and not an anonymous inner class.
      *
      * @return true if the constraints are satisfied, false otherwise
      */
-    fun isValid(): Boolean {
+    fun isTestableClass(): Boolean {
         return !psiClass.isEnum && psiClass !is PsiAnonymousClass
     }
 }
 
 class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
-    override val language: String
-        get() = "Java"
+    override val language: Language get() = Language.Java
 
     private val log = Logger.getInstance(this::class.java)
 
@@ -259,9 +258,9 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     ): PsiClassWrapper? {
         val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
         for (cls in classElements) {
-            if (withinElement(cls, caretOffset)) {
+            if (cls.containsOffset(caretOffset)) {
                 val javaClassWrapper = JavaPsiClassWrapper(cls)
-                if (javaClassWrapper.isValid()) {
+                if (javaClassWrapper.isTestableClass()) {
                     log.info("Surrounding class for caret in $caretOffset is ${javaClassWrapper.qualifiedName}")
                     return javaClassWrapper
                 }
@@ -276,11 +275,11 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     ): PsiMethodWrapper? {
         val methodElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiMethod::class.java)
         for (method in methodElements) {
-            if (method.body != null && withinElement(method, caretOffset)) {
+            if (method.body != null && method.containsOffset(caretOffset)) {
                 val surroundingClass =
                     PsiTreeUtil.getParentOfType(method, PsiClass::class.java) ?: continue
                 val surroundingClassWrapper = JavaPsiClassWrapper(surroundingClass)
-                if (surroundingClassWrapper.isValid()) {
+                if (surroundingClassWrapper.isTestableClass()) {
                     val javaMethod = JavaPsiMethodWrapper(method)
                     log.info("Surrounding method for caret in $caretOffset is ${javaMethod.methodDescriptor}")
                     return javaMethod
@@ -428,6 +427,14 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         }
     }
 
+    /**
+     * Validates whether the selected line is within the code block of a given PsiMethod.
+     *
+     * @param selectedLine The line number of the selected line.
+     * @param psiMethod The PsiMethod to validate against.
+     * @param psiFile The PsiFile containing the PsiMethod.
+     * @return true if the selected line is within the code block of the PsiMethod, false otherwise.
+     */
     private fun validateLine(selectedLine: Int, psiMethod: JavaPsiMethodWrapper, psiFile: PsiFile): Boolean {
         val doc = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
         val psiMethodBody: PsiCodeBlock = psiMethod.body ?: return false
@@ -442,7 +449,7 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return selectedLine in firstStatementLine..lastStatementLine
     }
 
-    private fun withinElement(psiElement: PsiElement, caretOffset: Int): Boolean {
-        return (psiElement.textRange.startOffset <= caretOffset) && (psiElement.textRange.endOffset >= caretOffset)
+    private fun PsiElement.containsOffset(caretOffset: Int): Boolean {
+        return (textRange.startOffset <= caretOffset) && (textRange.endOffset >= caretOffset)
     }
 }

@@ -76,7 +76,7 @@ class PromptManager(
                     classesToTest = classesToTest.map(this::createClassRepresentation).toList(),
                     polymorphismRelations = polymorphismRelations,
                     promptConfiguration = PromptConfiguration(
-                        desiredLanguage = psiHelper.language,
+                        desiredLanguage = psiHelper.language.languageName,
                         desiredTestingPlatform = llmSettingsState.junitVersion.showName,
                         desiredMockingFramework = "Mockito 5",
                     ),
@@ -193,7 +193,7 @@ class PromptManager(
             LLMMessagesBundle.get("promptReduction") + "\n" +
                 "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
                 "Maximum depth for input parameters is ${
-                SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)
+                    SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)
                 }.",
             project,
         )
@@ -246,10 +246,8 @@ class PromptManager(
         methodDescriptor: String,
     ): PsiMethodWrapper? {
         for (currentPsiMethod in psiClass.allMethods) {
-            if (PsiHelperFactory.getPsiHelper(
-                    psiClass.containingFile,
-                ).generateMethodDescriptor(currentPsiMethod) == methodDescriptor
-            ) {
+            val psiHelper = PsiHelperFactory.getPsiHelper(psiClass.containingFile) ?: return null
+            if (psiHelper.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) {
                 return currentPsiMethod
             }
         }
@@ -268,8 +266,9 @@ class PromptManager(
         lineNumber: Int,
     ): String {
         for (currentPsiMethod in psiClass.allMethods) {
-            if (currentPsiMethod.isLineIn(lineNumber)) {
-                return PsiHelperFactory.getPsiHelper(psiClass.containingFile).generateMethodDescriptor(currentPsiMethod)
+            if (currentPsiMethod.containsLine(lineNumber)) {
+                val psiHelper = PsiHelperFactory.getPsiHelper(psiClass.containingFile) ?: return ""
+                return psiHelper.generateMethodDescriptor(currentPsiMethod)
             }
         }
         return ""

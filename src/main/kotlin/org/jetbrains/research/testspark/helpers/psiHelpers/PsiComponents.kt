@@ -5,6 +5,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 
+enum class Language(val languageName: String) {
+    Java("Java"), Kotlin("Kotlin")
+}
+
 /**
  * Interface representing a wrapper for PSI methods,
  * providing common API to handle method-related data for different languages.
@@ -16,11 +20,11 @@ import com.intellij.psi.PsiFile
  * @property containingFile File where the method is located
  * */
 interface PsiMethodWrapper {
-    val name: String //
-    val methodDescriptor: String //
+    val name: String
+    val methodDescriptor: String
     val signature: String
-    val text: String? //
-    val containingClass: PsiClassWrapper? //
+    val text: String?
+    val containingClass: PsiClassWrapper?
     val containingFile: PsiFile?
 
     /**
@@ -29,7 +33,7 @@ interface PsiMethodWrapper {
      * @param lineNumber The line number to check.
      * @return `true` if the line number is within the range of the method, `false` otherwise.
      */
-    fun isLineIn(lineNumber: Int): Boolean
+    fun containsLine(lineNumber: Int): Boolean
 }
 
 /**
@@ -47,14 +51,14 @@ interface PsiMethodWrapper {
  * */
 interface PsiClassWrapper {
     val name: String
-    val qualifiedName: String //
+    val qualifiedName: String
     val text: String?
-    val fullText: String //
+    val methods: List<PsiMethodWrapper>
+    val allMethods: List<PsiMethodWrapper>
+    val superClass: PsiClassWrapper?
     val virtualFile: VirtualFile
     val containingFile: PsiFile
-    val superClass: PsiClassWrapper?
-    val methods: List<PsiMethodWrapper>
-    val allMethods: List<PsiMethodWrapper> //
+    val fullText: String
 
     /**
      * Searches for subclasses of the current class within the given project.
@@ -78,7 +82,7 @@ interface PsiClassWrapper {
  * handling the PSI (Program Structure Interface) for different languages.
  */
 interface PsiHelper {
-    val language: String
+    val language: Language
 
     /**
      * Returns the surrounding PsiClass object based on the caret position within the specified PsiFile.
