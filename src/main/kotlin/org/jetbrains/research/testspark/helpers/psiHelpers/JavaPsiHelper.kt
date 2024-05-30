@@ -293,14 +293,13 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     override fun getSurroundingLine(
         caretOffset: Int,
     ): Int? {
-        val psiMethod = (getSurroundingMethod(caretOffset) ?: return null) as JavaPsiMethodWrapper
         val doc = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
 
         val selectedLine = doc.getLineNumber(caretOffset)
         val selectedLineText =
             doc.getText(TextRange(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine)))
 
-        if (selectedLineText.isBlank() || !validateLine(selectedLine, psiMethod, psiFile)) {
+        if (selectedLineText.isBlank()) {
             log.info("Line $selectedLine at caret $caretOffset is not valid")
             return null
         }
@@ -425,28 +424,6 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         } else {
             "<html><b><font color='orange'>method</font> ${psiMethod.name}</b></html>"
         }
-    }
-
-    /**
-     * Validates whether the selected line is within the code block of a given PsiMethod.
-     *
-     * @param selectedLine The line number of the selected line.
-     * @param psiMethod The PsiMethod to validate against.
-     * @param psiFile The PsiFile containing the PsiMethod.
-     * @return true if the selected line is within the code block of the PsiMethod, false otherwise.
-     */
-    private fun validateLine(selectedLine: Int, psiMethod: JavaPsiMethodWrapper, psiFile: PsiFile): Boolean {
-        val doc = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
-        val psiMethodBody: PsiCodeBlock = psiMethod.body ?: return false
-        if (psiMethodBody.statements.isEmpty()) return false
-
-        val firstStatement = psiMethodBody.statements.first()
-        val lastStatement = psiMethodBody.statements.last()
-
-        val firstStatementLine = doc.getLineNumber(firstStatement.startOffset)
-        val lastStatementLine = doc.getLineNumber(lastStatement.endOffset)
-
-        return selectedLine in firstStatementLine..lastStatementLine
     }
 
     private fun PsiElement.containsOffset(caretOffset: Int): Boolean {
