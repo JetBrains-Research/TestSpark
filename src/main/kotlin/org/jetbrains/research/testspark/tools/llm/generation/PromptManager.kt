@@ -151,6 +151,7 @@ class PromptManager(
             psiClass.qualifiedName,
             psiClass.fullText,
             psiClass.allMethods.map(this::createMethodRepresentation).toList().filterNotNull(),
+            psiClass.classType,
         )
     }
 

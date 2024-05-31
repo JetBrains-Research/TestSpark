@@ -14,6 +14,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiModifier
 import com.intellij.psi.PsiSubstitutor
 import com.intellij.psi.PsiType
 import com.intellij.psi.search.GlobalSearchScope
@@ -21,6 +22,7 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.util.containers.stream
+import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
@@ -175,23 +177,15 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
             return fullText
         }
 
-    val isInterface: Boolean get() = psiClass.isInterface
-
-    val isAbstractClass: Boolean
+    override val classType: ClassType
         get() {
-            psiClass.containingFile.virtualFile
-            if (psiClass.isInterface) return false
-
-            val methods = PsiTreeUtil.findChildrenOfType(psiClass, PsiMethod::class.java)
-            for (psiMethod: PsiMethod in methods) {
-                if (psiMethod.body == null) {
-                    return true
-                }
+            if (psiClass.isInterface) {
+                return ClassType.INTERFACE
             }
-
-            // check if a class is noted as abstract in the text
-            return psiClass.text.replace(" ", "")
-                .contains("abstractclass${psiClass.name}", ignoreCase = true)
+            if (psiClass.hasModifierProperty(PsiModifier.ABSTRACT)) {
+                return ClassType.ABSTRACT_CLASS
+            }
+            return ClassType.CLASS
         }
 
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
@@ -232,6 +226,20 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     fun isTestableClass(): Boolean {
         return !psiClass.isEnum && psiClass !is PsiAnonymousClass
     }
+
+    /**
+     * Returns the representation of the type of PsiClass instance.
+     *
+     * @return the representation of the type of the PsiClass instance.
+     */
+    private fun getClassTypeName(): String = classType.representation
+
+    /**
+     * Returns the display name of a PsiClass instance.
+     *
+     * @return the display name of the PsiClass instance in HTML format.
+     */
+    fun getClassDisplayName() = "<html><b><font color='orange'>${getClassTypeName()}</font> ${this.qualifiedName}</b></html>"
 }
 
 class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
@@ -395,19 +403,9 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return result.toArray()
     }
 
-    override fun getLineDisplayName(line: Int): String {
-        return "<html><b><font color='orange'>line</font> $line</b></html>"
-    }
+    override fun getLineDisplayName(line: Int): String = "<html><b><font color='orange'>line</font> $line</b></html>"
 
-    override fun getClassDisplayName(psiClass: PsiClassWrapper): String {
-        return if ((psiClass as JavaPsiClassWrapper).isInterface) {
-            "<html><b><font color='orange'>interface</font> ${psiClass.qualifiedName}</b></html>"
-        } else if (psiClass.isAbstractClass) {
-            "<html><b><font color='orange'>abstract class</font> ${psiClass.qualifiedName}</b></html>"
-        } else {
-            "<html><b><font color='orange'>class</font> ${psiClass.qualifiedName}</b></html>"
-        }
-    }
+    override fun getClassDisplayName(psiClass: PsiClassWrapper): String = (psiClass as JavaPsiClassWrapper).getClassDisplayName()
 
     override fun getMethodDisplayName(psiMethod: PsiMethodWrapper): String {
         return if ((psiMethod as JavaPsiMethodWrapper).isDefaultConstructor) {

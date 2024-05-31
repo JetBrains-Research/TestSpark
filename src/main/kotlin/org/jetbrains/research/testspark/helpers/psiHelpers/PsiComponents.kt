@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
+import org.jetbrains.research.testspark.core.data.ClassType
 
 enum class Language(val languageName: String) {
     Java("Java"), Kotlin("Kotlin")
@@ -59,6 +60,7 @@ interface PsiClassWrapper {
     val virtualFile: VirtualFile
     val containingFile: PsiFile
     val fullText: String
+    val classType: ClassType
 
     /**
      * Searches for subclasses of the current class within the given project.
