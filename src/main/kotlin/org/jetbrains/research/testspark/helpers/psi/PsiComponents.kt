@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psiHelpers
+package org.jetbrains.research.testspark.helpers.psi
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project

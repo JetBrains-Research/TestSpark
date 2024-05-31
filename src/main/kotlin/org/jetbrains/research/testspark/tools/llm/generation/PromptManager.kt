@@ -18,10 +18,10 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiClassWrapper
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelper
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiMethodWrapper
+import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
+import org.jetbrains.research.testspark.helpers.psi.PsiHelper
+import org.jetbrains.research.testspark.helpers.psi.PsiHelperFactory
+import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments

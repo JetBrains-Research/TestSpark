@@ -18,8 +18,8 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelper
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
+import org.jetbrains.research.testspark.helpers.psi.PsiHelper
+import org.jetbrains.research.testspark.helpers.psi.PsiHelperFactory
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
