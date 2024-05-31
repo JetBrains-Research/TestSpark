@@ -307,7 +307,9 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
             return null
         }
         log.info("Surrounding line at caret $caretOffset is $selectedLine")
-        return selectedLine
+
+        // increase by one is necessary due to different start of numbering
+        return selectedLine + 1
     }
 
     override fun collectClassesToTest(
@@ -385,7 +387,7 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
         val javaPsiClassWrapped = getSurroundingClass(caret.offset) as JavaPsiClassWrapper?
         val javaPsiMethodWrapped = getSurroundingMethod(caret.offset) as JavaPsiMethodWrapper?
-        val line: Int? = getSurroundingLine(caret.offset)?.plus(1)
+        val line: Int? = getSurroundingLine(caret.offset)
 
         javaPsiClassWrapped?.let { result.add(getClassDisplayName(it)) }
         javaPsiMethodWrapped?.let { result.add(getMethodDisplayName(it)) }

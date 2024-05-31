@@ -88,7 +88,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      */
     override fun generateTestsForLine(project: Project, psiHelper: PsiHelper, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController) {
         log.info("Starting tests generation for line by EvoSuite")
-        val selectedLine: Int = psiHelper.getSurroundingLine(caretOffset)?.plus(1)!!
+        val selectedLine: Int = psiHelper.getSurroundingLine(caretOffset)!!
         createPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(
