@@ -41,6 +41,11 @@ class TestSparkDisplayBuilder {
         toolWindow!!.show()
 
         generatedTestsTabBuilder!!.getRemoveAllButton().addActionListener {
+            if (generatedTestsTabBuilder!!.getGeneratedTestsTabData().testCaseNameToPanel.isEmpty()) {
+                clear()
+                return@addActionListener
+            }
+
             val choice = JOptionPane.showConfirmDialog(
                 null,
                 PluginMessagesBundle.get("removeAllCautionMessage"),

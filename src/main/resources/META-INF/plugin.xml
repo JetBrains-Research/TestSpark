@@ -148,7 +148,7 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="TestSpark" secondary="true" anchor="right" icon="org.jetbrains.research.testspark.display.utils.TestSparkIcons.toolWindowIcon"
+        <toolWindow id="TestSpark" secondary="true" anchor="right" icon="org.jetbrains.research.testspark.uiUtils.TestSparkIcons.toolWindowIcon"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>
 
         <!-- Application-level services -->
