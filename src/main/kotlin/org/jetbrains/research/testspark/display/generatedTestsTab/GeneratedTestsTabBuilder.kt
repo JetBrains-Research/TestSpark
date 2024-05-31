@@ -68,11 +68,11 @@ class GeneratedTestsTabBuilder(
     fun show(contentManager: ContentManager) {
         generatedTestsTabData.topButtonsPanelBuilder = TopButtonsPanelBuilder()
         generatedTestsTabData.allTestCasePanel.removeAll()
-        generatedTestsTabData.testCaseNameToPanels.clear()
+        generatedTestsTabData.testCaseNameToPanel.clear()
 
         fillAllTestCasePanel()
 
-        generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanels.size
+        generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanel.size
 
         generatedTestsTabData.contentManager = contentManager
 
@@ -127,12 +127,12 @@ class GeneratedTestsTabBuilder(
             testCaseDisplayPanel.layout = BorderLayout()
 
             // Add a checkbox to select the test
-            val checkbox = JCheckBox()
-            checkbox.isSelected = true
-            checkbox.addItemListener {
-                generatedTestsTabData.testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
+            val testCaseSelectedCheckbox = JCheckBox()
+            testCaseSelectedCheckbox.isSelected = true
+            testCaseSelectedCheckbox.addItemListener {
+                generatedTestsTabData.testsSelected -= (1 - 2 * testCaseSelectedCheckbox.isSelected.compareTo(false))
 
-                if (checkbox.isSelected) {
+                if (testCaseSelectedCheckbox.isSelected) {
                     ReportUpdater.selectTestCase(
                         report,
                         testCase.id,
@@ -150,13 +150,13 @@ class GeneratedTestsTabBuilder(
 
                 update()
             }
-            testCaseDisplayPanel.add(checkbox, BorderLayout.WEST)
+            testCaseDisplayPanel.add(testCaseSelectedCheckbox, BorderLayout.WEST)
 
             val testCasePanel = TestCasePanel(
                 project,
                 testCase,
                 editor,
-                checkbox,
+                testCaseSelectedCheckbox,
                 uiContext,
                 report,
                 coverageVisualisationTabBuilder,
@@ -180,15 +180,14 @@ class GeneratedTestsTabBuilder(
 
             addSeparator()
 
-            generatedTestsTabData.testCaseNameToPanels[testCase.testName] = testCaseDisplayPanel
+            generatedTestsTabData.testCaseNameToPanel[testCase.testName] = testCaseDisplayPanel
+            generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName] = testCaseSelectedCheckbox
+            generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName] = testCasePanel.getEditorTextField()
         }
 
-        generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanels.size
+        generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanel.size
 
-        generatedTestsTabData.topButtonsPanelBuilder.update(
-            generatedTestsTabData.testsSelected,
-            generatedTestsTabData.testCasePanelFactories,
-        )
+        generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
     }
 
     /**
@@ -201,10 +200,7 @@ class GeneratedTestsTabBuilder(
      */
     private fun update() {
         generatedTestsTabData.allTestCasePanel.updateUI()
-        generatedTestsTabData.topButtonsPanelBuilder.update(
-            generatedTestsTabData.testsSelected,
-            generatedTestsTabData.testCasePanelFactories,
-        )
+        generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
     }
 
     /**
@@ -214,12 +210,12 @@ class GeneratedTestsTabBuilder(
     private fun applyTests() {
         // Filter the selected test cases
         val selectedTestCasePanels =
-            generatedTestsTabData.testCaseNameToPanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+            generatedTestsTabData.testCaseNameToSelectedCheckbox.filter { it.value.isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
         // Get the test case components (source code of the tests)
         val testCaseComponents = selectedTestCases
-            .map { GenerateTestsTabHelper.getEditorTextField(it, generatedTestsTabData)!! }
+            .map { generatedTestsTabData.testCaseNameToEditorTextField[it]!! }
             .map { it.document.text }
 
         // Descriptor for choosing folders and java files
@@ -480,11 +476,11 @@ class GeneratedTestsTabBuilder(
      *  @param selected whether the checkboxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean) {
-        generatedTestsTabData.testCaseNameToPanels.forEach { (_, jPanel) ->
+        generatedTestsTabData.testCaseNameToPanel.forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
-        generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseNameToPanels.size else 0
+        generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseNameToPanel.size else 0
 
         update()
     }
@@ -499,7 +495,7 @@ class GeneratedTestsTabBuilder(
     }
 
     fun clear() {
-        generatedTestsTabData.testCaseNameToPanels.toMap()
+        generatedTestsTabData.testCaseNameToPanel.toMap()
             .forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
         generatedTestsTabData.testCasePanelFactories.clear()
     }

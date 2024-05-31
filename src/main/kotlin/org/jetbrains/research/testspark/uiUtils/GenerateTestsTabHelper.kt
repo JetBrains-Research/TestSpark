@@ -1,24 +1,8 @@
 package org.jetbrains.research.testspark.uiUtils
 
-import com.intellij.ui.EditorTextField
-import com.intellij.ui.components.JBScrollPane
 import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
-import javax.swing.JCheckBox
-import javax.swing.JPanel
 
 object GenerateTestsTabHelper {
-    /**
-     * Retrieve the editor corresponding to a particular test case
-     *
-     * @param testCaseName the name of the test case
-     * @return the editor corresponding to the test case, or null if it does not exist
-     */
-    fun getEditorTextField(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData): EditorTextField? {
-        val middlePanelComponent = generatedTestsTabData.testCaseNameToPanels[testCaseName]?.getComponent(2) ?: return null
-        val middlePanel = middlePanelComponent as JPanel
-        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
-    }
-
     /**
      * A helper method to remove a test case from the cache and from the UI.
      *
@@ -26,15 +10,21 @@ object GenerateTestsTabHelper {
      */
     fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
         // Update the number of selected test cases if necessary
-        if ((generatedTestsTabData.testCaseNameToPanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
+        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
             generatedTestsTabData.testsSelected--
         }
 
         // Remove the test panel from the UI
-        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanels[testCaseName])
+        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
 
         // Remove the test panel
-        generatedTestsTabData.testCaseNameToPanels.remove(testCaseName)
+        generatedTestsTabData.testCaseNameToPanel.remove(testCaseName)
+
+        // Remove the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox.remove(testCaseName)
+
+        // Remove the editorTextField
+        generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
     }
 
     /**
@@ -47,6 +37,6 @@ object GenerateTestsTabHelper {
      */
     fun update(generatedTestsTabData: GeneratedTestsTabData) {
         generatedTestsTabData.allTestCasePanel.updateUI()
-        generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData.testsSelected, generatedTestsTabData.testCasePanelFactories)
+        generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
     }
 }

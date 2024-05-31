@@ -14,6 +14,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
@@ -102,9 +103,8 @@ class TestCasePanel(
     private var isLikeLogged = false
     private var isDislikeLogged = false
 
-    private var _error: String? = null
-    val error: String?
-        get() = _error
+    var error: String? = null
+        private set
 
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
@@ -150,21 +150,19 @@ class TestCasePanel(
     private val trimmedCodeToError = mutableMapOf<String, String?>()
 
     init {
-        prepareUpperPanel()
-        prepareMiddlePanel()
-        prepareBottomPanel()
+        initUpperPanel()
+        initMiddlePanel()
+        initBottomPanel()
         updateErrorRelatedUI()
     }
 
     /**
-     * Retrieves the upper panel for the GUI.
+     * Initialize upper panel for the GUI.
      *
      * This panel contains various components such as buttons, labels, and checkboxes. It is used to display information and
      * perform actions related to the GUI.
-     *
-     * @return The JPanel object representing the upper panel.
      */
-    private fun prepareUpperPanel(): JPanel {
+    private fun initUpperPanel() {
         upperPanel.layout = BoxLayout(upperPanel, BoxLayout.X_AXIS)
         upperPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         upperPanel.add(previousButton)
@@ -239,7 +237,7 @@ class TestCasePanel(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    GenerateTestsTabHelper.getEditorTextField(testCase.testName, generatedTestsTabData)!!.document.text,
+                    generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName]!!.document.text,
                 ),
                 null,
             )
@@ -254,16 +252,12 @@ class TestCasePanel(
         }
 
         updateRequestLabel()
-
-        return upperPanel
     }
 
     /**
-     * Retrieves the middle panel of the application.
-     * This method sets the border of the languageTextField and
-     * adds it to the middlePanel with appropriate spacing.
+     * Initialize the middle panel of the application.
      */
-    private fun prepareMiddlePanel(): JPanel {
+    private fun initMiddlePanel() {
         initialCodes.add(testCase.testCode)
         lastRunCodes.add(testCase.testCode)
         currentCodes.add(testCase.testCode)
@@ -274,14 +268,14 @@ class TestCasePanel(
         middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
 
         addLanguageTextFieldListener(languageTextField)
-
-        return middlePanel
     }
 
     /**
-     * Returns the bottom panel.
+     * Initialize the bottom panel.
+     *
+     * This panel contains controls for running/resetting test cases and making additional LLM requests.
      */
-    private fun prepareBottomPanel(): JPanel {
+    private fun initBottomPanel() {
         bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
 
         val requestPanel = JPanel()
@@ -335,8 +329,6 @@ class TestCasePanel(
         sendButton.addActionListener { sendRequest() }
 
         requestComboBox.isEditable = true
-
-        return bottomPanel
     }
 
     /**
@@ -370,8 +362,8 @@ class TestCasePanel(
         if (error.isNullOrBlank()) {
             errorLabel.isVisible = false
         } else {
-            errorLabel.isVisible = true
             errorLabel.toolTipText = error
+            errorLabel.isVisible = true
         }
 
         runTestButton.isEnabled = previousError(testCase.testCode) == null
@@ -404,7 +396,7 @@ class TestCasePanel(
 
         currentCodes[currentRequestNumber - 1] = testCase.testCode
 
-        _error = previousError(testCase.testCode)
+        error = previousError(testCase.testCode)
         updateErrorRelatedUI()
 
         // select checkbox
@@ -469,7 +461,7 @@ class TestCasePanel(
                     }
 
                     SwingUtilities.invokeLater {
-                        _error = null
+                        error = null
                         updateErrorRelatedUI()
                     }
 
@@ -573,7 +565,7 @@ class TestCasePanel(
             )
 
         testCase.coveredLines = newTestCaseResult.testCase.coveredLines
-        _error = newTestCaseResult.error
+        error = newTestCaseResult.error
         saveErrorForCode(newTestCaseResult.testCase.testCode, newTestCaseResult.error)
 
         testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
@@ -726,4 +718,11 @@ class TestCasePanel(
     }
 
     private fun getTestId(): String = dataToCollect.id!! + "_" + testCase.id
+
+    /**
+     * Retrieves the editor text field from the current UI context.
+     *
+     * @return the editor text field
+     */
+    fun getEditorTextField(): EditorTextField = languageTextField
 }
