@@ -261,7 +261,6 @@ class PromptManager(
     ): MutableMap<PsiClass, MutableList<PsiClass>> {
         val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
 
-        val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cut))
         interestingPsiClasses.add(cut)
 
         interestingPsiClasses.forEach { currentInterestingClass ->
@@ -274,9 +273,6 @@ class PromptManager(
                     polymorphismRelations[currentInterestingClass] = ArrayList()
                 }
                 polymorphismRelations[currentInterestingClass]?.add(detectedSubClass)
-                if (!psiClassesToVisit.contains(detectedSubClass)) {
-                    psiClassesToVisit.addLast(detectedSubClass)
-                }
             }
         }
 
