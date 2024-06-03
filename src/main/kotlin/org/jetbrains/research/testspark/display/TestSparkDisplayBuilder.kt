@@ -13,8 +13,20 @@ import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTa
 import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabBuilder
 import javax.swing.JOptionPane
 
+/**
+ * The TestSparkDisplayBuilder class is responsible for displaying the generated test cases and related information in the TestSpark tool window.
+ * It provides methods to fill the panel with the generated test cases, remove all previously shown test cases, and clear the panel.
+ * The TestSparkDisplayBuilder class uses the CoverageVisualisationTabBuilder and GeneratedTestsTabBuilder classes to build and show the tabs containing the coverage visualisation and generated test data.
+ *
+ * @property toolWindow The ToolWindow object representing the TestSpark tool window.
+ * @property contentManager The ContentManager object responsible for managing the contents of the tool window.
+ * @property editor The Editor object used to display and edit the code.
+ * @property coverageVisualisationTabBuilder The CoverageVisualisationTabBuilder object used to build and show the coverage visualisation tab.
+ * @property generatedTestsTabBuilder The GeneratedTestsTabBuilder object used to build and show the generated tests tab.
+ */
 class TestSparkDisplayBuilder {
     private var toolWindow: ToolWindow? = null
+
     private var contentManager: ContentManager? = null
 
     private var editor: Editor? = null
@@ -23,8 +35,7 @@ class TestSparkDisplayBuilder {
     private var generatedTestsTabBuilder: GeneratedTestsTabBuilder? = null
 
     /**
-     * Fill the panel with the generated test cases. Remove all previously shown test cases.
-     * Add Tests and their names to a List of pairs (used for highlighting)
+     * Fill the panel with the generated test cases.
      */
     fun display(report: Report, editor: Editor, uiContext: UIContext, project: Project) {
         this.toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")

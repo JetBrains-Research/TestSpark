@@ -192,11 +192,14 @@ class CoverageRenderer(
         for (component in generatedTestsTabData.allTestCasePanel.components) {
             if (component == myPanel) {
                 break
-            } else {
-                sum += component.height
             }
+            sum += component.height
         }
         val scroll = generatedTestsTabData.scrollPane.verticalScrollBar
+
+        // Get the value of the "myPanel" height to enable scrolling to that position.
+        // The current scroll percentage relative to the "myPanel" height is calculated as (sum / generatedTestsTabData.allTestCasePanel.height).
+        // The total scroll height is the sum of the minimum and maximum scroll values (scroll.minimum + scroll.maximum).
         scroll.value = (scroll.minimum + scroll.maximum) * sum / generatedTestsTabData.allTestCasePanel.height
     }
 

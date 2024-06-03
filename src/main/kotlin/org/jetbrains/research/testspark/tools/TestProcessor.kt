@@ -58,7 +58,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
      * @param generatedTestPackage The package where the generated test class is located.
      * @return An empty string if the test execution is successful, otherwise an error message.
      */
-    private fun createXmlFromJacoco(
+    fun createXmlFromJacoco(
         className: String,
         dataFileName: String,
         testCaseName: String,
@@ -93,7 +93,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentLibraryPath=destfile=$dataFileName.exec,append=false,includes=${projectContext.classFQN}",
                 "-cp",
-                "\"${testCompiler.getPath(projectBuildPath)}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
+                "\"${testCompiler.getPath(projectBuildPath)}${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
                 "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
             ),

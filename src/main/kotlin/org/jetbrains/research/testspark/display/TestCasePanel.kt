@@ -43,6 +43,7 @@ import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
 import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
 import org.jetbrains.research.testspark.uiUtils.ModifiedLinesGetter
 import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
+import java.awt.Component
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
@@ -587,8 +588,10 @@ class TestCasePanel(
      * 3. Updating the UI.
      */
     private fun remove() {
+        val parentComponent: Component? = null
+
         val choice = JOptionPane.showConfirmDialog(
-            null,
+            parentComponent,
             PluginMessagesBundle.get("removeCautionMessage"),
             PluginMessagesBundle.get("confirmationTitle"),
             JOptionPane.OK_CANCEL_OPTION,

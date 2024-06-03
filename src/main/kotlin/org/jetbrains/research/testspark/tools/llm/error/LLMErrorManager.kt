@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.tools.llm.error
 
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
@@ -20,6 +21,8 @@ import org.jetbrains.research.testspark.tools.template.error.ErrorManager
  * This class is part of the LLMErrorManager module.
  */
 class LLMErrorManager : ErrorManager {
+    private val log = Logger.getInstance(this::class.java)
+
     /**
      * Creates an error message for a request.
      *
@@ -36,6 +39,7 @@ class LLMErrorManager : ErrorManager {
      */
     override fun errorProcess(message: String, project: Project, errorMonitor: ErrorMonitor) {
         if (errorMonitor.notifyErrorOccurrence()) {
+            log.warn("Error in Test Generation: $message")
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("LLM Execution Error")
                 .createNotification(
@@ -54,6 +58,7 @@ class LLMErrorManager : ErrorManager {
      * @param project The project in which to display the notification.
      */
     override fun warningProcess(message: String, project: Project) {
+        log.warn("Error in Test Generation: $message")
         NotificationGroupManager.getInstance()
             .getNotificationGroup("LLM Execution Error")
             .createNotification(
