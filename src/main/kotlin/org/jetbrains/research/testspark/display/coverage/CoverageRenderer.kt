@@ -209,7 +209,8 @@ class CoverageRenderer(
      */
     private fun returnOriginalEditorBackground(editor: EditorTextField) {
         Thread {
-            Thread.sleep(10000)
+            val timeWithHighlightedBackground: Long = 10000
+            Thread.sleep(timeWithHighlightedBackground)
             editor.background = defaultEditorColor
         }.start()
     }
