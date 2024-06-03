@@ -148,6 +148,11 @@
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <appStarter
+                implementation="org.jetbrains.research.testspark.appstarter.TestSparkStarter"
+                id="testspark"
+        />
+
         <toolWindow id="TestSpark" secondary="true" anchor="right" icon="org.jetbrains.research.testspark.display.utils.TestSparkIcons.toolWindowIcon"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>
 
