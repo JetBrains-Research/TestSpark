@@ -45,6 +45,7 @@ import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
 import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
 import org.jetbrains.research.testspark.uiUtils.ModifiedLinesGetter
 import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
+import java.awt.Component
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
@@ -68,7 +69,7 @@ class TestCasePanel(
     private val checkbox: JCheckBox,
     private val uiContext: UIContext?,
     private val report: Report,
-    private val coverageVisualisationTabFactory: CoverageVisualisationTabBuilder,
+    private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
     private val generatedTestsTabData: GeneratedTestsTabData,
     private val userExperienceCollectors: UserExperienceCollectors,
     private val dataToCollect: DataToCollect,
@@ -366,7 +367,7 @@ class TestCasePanel(
             errorLabel.isVisible = true
         }
 
-        runTestButton.isEnabled = previousError(testCase.testCode) == null
+        runTestButton.isEnabled = getPreviousError(testCase.testCode) == null
     }
 
     /**
@@ -396,7 +397,7 @@ class TestCasePanel(
 
         currentCodes[currentRequestNumber - 1] = testCase.testCode
 
-        error = previousError(testCase.testCode)
+        error = getPreviousError(testCase.testCode)
         updateErrorRelatedUI()
 
         // select checkbox
@@ -408,7 +409,7 @@ class TestCasePanel(
             testCase.coveredLines = setOf()
         }
 
-        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabFactory, generatedTestsTabData)
+        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
@@ -623,8 +624,10 @@ class TestCasePanel(
      * 3. Updating the UI.
      */
     private fun remove() {
+        val parentComponent: Component? = null
+
         val choice = JOptionPane.showConfirmDialog(
-            null,
+            parentComponent,
             PluginMessagesBundle.get("removeCautionMessage"),
             PluginMessagesBundle.get("confirmationTitle"),
             JOptionPane.OK_CANCEL_OPTION,
@@ -638,11 +641,11 @@ class TestCasePanel(
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabFactory, generatedTestsTabData)
+        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
-    private fun previousError(code: String) = trimmedCodeToError[trimCode(code)]
+    private fun getPreviousError(code: String) = trimmedCodeToError[trimCode(code)]
 
     private fun saveErrorForCode(code: String, error: String?) {
         trimmedCodeToError[trimCode(code)] = error

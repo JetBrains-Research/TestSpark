@@ -57,7 +57,7 @@ class Pipeline(
         val cutPsiClass = PsiHelperGetter.getPsiHelper(psiFile).getSurroundingClass(psiFile, caretOffset)!!
 
         // get generated test path
-        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults$ToolUtils.sep"
+        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults${ToolUtils.sep}"
         val id = UUID.randomUUID().toString()
         val testResultName = "test_gen_result_$id"
 
@@ -133,7 +133,10 @@ class Pipeline(
                         updateEditor(it.testGenerationOutput.fileUrl)
 
                         if (editor != null) {
-                            testSparkDisplayBuilder.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project, userExperienceCollectors, dataToCollect)
+                            // TODO merge reports in case of mutable reports generation
+                            val report = it.testGenerationOutput.testGenerationResultList[0]!!
+
+                            testSparkDisplayBuilder.display(report, editor!!, it, project, userExperienceCollectors, dataToCollect)
                         }
                     }
                 }
