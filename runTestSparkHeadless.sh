@@ -11,7 +11,7 @@ echo $DIR
 echo "Provided arguments are $@"
 
 if [ $# -ne "11" ]; then
-  echo "$# arguments provided, expected 10 arguments in the following order:
+  echo "$# arguments provided, expected 11 arguments in the following order:
         1) Path to the root directory of the project under test (ProjectPath)
         2) Path to the target file (.java file) (it MUST be relative to the ProjectPath)
         3) Qualified name of the class under test (i.e., <package-name>.<class-name>)

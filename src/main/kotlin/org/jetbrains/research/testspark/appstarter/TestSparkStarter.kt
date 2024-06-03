@@ -136,7 +136,7 @@ class TestSparkStarter : ApplicationStarter {
                             project,
                             psiFile,
                             targetPsiClass.textRange.startOffset,
-                            testSamplesCode = "" // we dont provide samples to LLM
+                            testSamplesCode = "" // we don't provide samples to LLM
                         )
 
                     println("[TestSpark Starter] Starting the test generation process")
