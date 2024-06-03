@@ -133,12 +133,8 @@ class Llm(override val name: String = "LLM") : Tool {
         testGenerationController: TestGenerationController,
     ): Pipeline {
         val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
-
-        val packageList = cutPsiClass.qualifiedName.split(".").toMutableList()
-        packageList.removeLast()
-
+        val packageList = cutPsiClass.qualifiedName.split(".").dropLast(1)
         val packageName = packageList.joinToString(".")
-
         return Pipeline(project, psiHelper, caretOffset, fileUrl, packageName, testGenerationController)
     }
 }
