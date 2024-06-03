@@ -126,9 +126,8 @@ class GeneratedTestsTabBuilder(
             val testCaseSelectedCheckbox = JCheckBox()
             testCaseSelectedCheckbox.isSelected = true
             testCaseSelectedCheckbox.addItemListener {
-                generatedTestsTabData.testsSelected -= (1 - 2 * testCaseSelectedCheckbox.isSelected.compareTo(false))
-
                 if (testCaseSelectedCheckbox.isSelected) {
+                    generatedTestsTabData.testsSelected++
                     ReportUpdater.selectTestCase(
                         report,
                         testCase.id,
@@ -136,6 +135,7 @@ class GeneratedTestsTabBuilder(
                         generatedTestsTabData,
                     )
                 } else {
+                    generatedTestsTabData.testsSelected--
                     ReportUpdater.unselectTestCase(
                         report,
                         testCase.id,
