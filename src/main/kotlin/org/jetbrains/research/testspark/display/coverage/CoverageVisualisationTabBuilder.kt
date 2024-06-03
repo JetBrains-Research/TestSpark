@@ -13,6 +13,8 @@ import com.intellij.ui.table.JBTable
 import org.evosuite.result.MutationInfo
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
+import org.jetbrains.research.testspark.collectors.data.DataToCollect
+import org.jetbrains.research.testspark.collectors.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
@@ -29,7 +31,12 @@ import kotlin.math.roundToInt
  *
  * @param project the project
  */
-class CoverageVisualisationTabBuilder(private val project: Project, private val editor: Editor) {
+class CoverageVisualisationTabBuilder(
+    private val project: Project,
+    private val editor: Editor,
+    private val userExperienceCollectors: UserExperienceCollectors,
+    private val dataToCollect: DataToCollect,
+) {
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
     private val textAttribute = TextAttributes()
@@ -161,6 +168,8 @@ class CoverageVisualisationTabBuilder(private val project: Project, private val 
                     mapMutantsToTests,
                     project,
                     generatedTestsTabData,
+                    userExperienceCollectors,
+                    dataToCollect,
                 )
             }
         }

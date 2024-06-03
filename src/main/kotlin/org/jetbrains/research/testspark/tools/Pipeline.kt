@@ -15,6 +15,8 @@ import com.intellij.openapi.util.io.FileUtilRt
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.data.DataToCollect
+import org.jetbrains.research.testspark.collectors.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -47,6 +49,9 @@ class Pipeline(
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
 
+    val userExperienceCollectors = UserExperienceCollectors()
+    val dataToCollect: DataToCollect = DataToCollect()
+
     init {
 
         val cutPsiClass = PsiHelperGetter.getPsiHelper(psiFile).getSurroundingClass(psiFile, caretOffset)!!
@@ -64,6 +69,8 @@ class Pipeline(
             projectContext.cutModule =
                 ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
         }
+
+        dataToCollect.id = id
 
         generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
         generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
@@ -90,6 +97,16 @@ class Pipeline(
                     val ijIndicator = IJProgressIndicator(indicator)
 
                     if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
+
+                    dataToCollect.technique = processManager.getTechnique()
+                    dataToCollect.codeType = codeType.type!!
+                    dataToCollect.testGenerationStartTime = System.currentTimeMillis()
+
+                    // Add collector logging
+                    userExperienceCollectors.testGenerationStartedCollector.logEvent(
+                        dataToCollect.technique!!,
+                        dataToCollect.codeType!!,
+                    )
 
                     if (projectBuilder.runBuild(ijIndicator)) {
                         if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
@@ -119,7 +136,7 @@ class Pipeline(
                             // TODO merge reports in case of mutable reports generation
                             val report = it.testGenerationOutput.testGenerationResultList[0]!!
 
-                            testSparkDisplayBuilder.display(report, editor!!, it, project)
+                            testSparkDisplayBuilder.display(report, editor!!, it, project, userExperienceCollectors, dataToCollect)
                         }
                     }
                 }

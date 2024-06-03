@@ -21,6 +21,8 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.data.DataToCollect
+import org.jetbrains.research.testspark.collectors.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
@@ -69,6 +71,8 @@ class TestCasePanel(
     private val report: Report,
     private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
     private val generatedTestsTabData: GeneratedTestsTabData,
+    private val userExperienceCollectors: UserExperienceCollectors,
+    private val dataToCollect: DataToCollect,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -96,6 +100,9 @@ class TestCasePanel(
     private val dimensionSize = 7
 
     private var isRemoved = false
+
+    private var isLikeLogged = false
+    private var isDislikeLogged = false
 
     var error: String? = null
         private set
@@ -190,9 +197,20 @@ class TestCasePanel(
                 likeButton.icon = TestSparkIcons.like
             } else if (likeButton.icon == TestSparkIcons.like) {
                 likeButton.icon = TestSparkIcons.likeSelected
+
+                if (!isLikeLogged) {
+                    val isLiked = true
+                    userExperienceCollectors.likedDislikedCollector.logEvent(
+                        isLiked,
+                        getTestId(),
+                        dataToCollect.technique!!,
+                        dataToCollect.codeType!!,
+                        testCase.testCode != initialCodes[currentRequestNumber - 1],
+                    )
+                    isLikeLogged = true
+                }
             }
             dislikeButton.icon = TestSparkIcons.dislike
-//            TODO add implementation
         }
 
         dislikeButton.addActionListener {
@@ -200,9 +218,20 @@ class TestCasePanel(
                 dislikeButton.icon = TestSparkIcons.dislike
             } else if (dislikeButton.icon == TestSparkIcons.dislike) {
                 dislikeButton.icon = TestSparkIcons.dislikeSelected
+
+                if (!isDislikeLogged) {
+                    val isLiked = false
+                    userExperienceCollectors.likedDislikedCollector.logEvent(
+                        isLiked,
+                        getTestId(),
+                        dataToCollect.technique!!,
+                        dataToCollect.codeType!!,
+                        testCase.testCode != initialCodes[currentRequestNumber - 1],
+                    )
+                    isDislikeLogged = true
+                }
             }
             likeButton.icon = TestSparkIcons.like
-//            TODO add implementation
         }
 
         copyButton.addActionListener {
@@ -402,6 +431,13 @@ class TestCasePanel(
                         finishProcess()
                         return
                     }
+
+                    userExperienceCollectors.feedbackSentCollector.logEvent(
+                        getTestId(),
+                        dataToCollect.technique!!,
+                        dataToCollect.codeType!!,
+                        testCase.testCode != initialCodes[currentRequestNumber - 1],
+                    )
 
                     val modifiedTest = LLMHelper.testModificationRequest(
                         initialCodes[currentRequestNumber - 1],
@@ -623,6 +659,13 @@ class TestCasePanel(
     fun isRunEnabled() = runTestButton.isEnabled
 
     /**
+     * Checks if the test case code has been modified before the applying to file.
+     *
+     * @return true if the final version of the code does not differ from the initial one on the first request page.
+     */
+    fun isTestCaseModified(): Boolean = testCase.testCode != initialCodes[0]
+
+    /**
      * Updates the border of the languageTextField based on the provided test name and text.
      */
     private fun updateBorder(error: String?) {
@@ -676,6 +719,8 @@ class TestCasePanel(
             )
         testCase.testCode = languageTextField.document.text
     }
+
+    private fun getTestId(): String = dataToCollect.id!! + "_" + testCase.id
 
     /**
      * Retrieves the editor text field from the current UI context.

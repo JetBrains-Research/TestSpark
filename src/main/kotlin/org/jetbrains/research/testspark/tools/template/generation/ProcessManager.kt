@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.tools.template.generation
 
+import org.jetbrains.research.testspark.collectors.data.Technique
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -26,4 +27,11 @@ interface ProcessManager {
         generatedTestsData: TestGenerationData,
         errorMonitor: ErrorMonitor,
     ): UIContext?
+
+    /**
+     * Retrieves the technique used by a particular entity.
+     *
+     * @return The technique used.
+     */
+    fun getTechnique(): Technique
 }

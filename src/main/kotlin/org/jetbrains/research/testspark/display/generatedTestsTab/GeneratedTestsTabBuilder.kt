@@ -24,6 +24,8 @@ import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.data.DataToCollect
+import org.jetbrains.research.testspark.collectors.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.UIContext
@@ -54,6 +56,8 @@ class GeneratedTestsTabBuilder(
     private val editor: Editor,
     private val uiContext: UIContext,
     private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
+    private val userExperienceCollectors: UserExperienceCollectors,
+    private val dataToCollect: DataToCollect,
 ) {
     private var mainPanel: JPanel = JPanel()
 
@@ -157,6 +161,8 @@ class GeneratedTestsTabBuilder(
                 report,
                 coverageVisualisationTabBuilder,
                 generatedTestsTabData,
+                userExperienceCollectors,
+                dataToCollect,
             )
 
             testCaseDisplayPanel.add(testCasePanel.upperPanel, BorderLayout.NORTH)
@@ -344,6 +350,20 @@ class GeneratedTestsTabBuilder(
         )
 
         getRemoveAllButton().doClick()
+
+        // Get number of modified tests
+        var modifiedTestsCount = 0
+        for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
+            if (testCasePanelFactory.isTestCaseModified()) modifiedTestsCount++
+        }
+
+        // Add collector logging
+        userExperienceCollectors.integratedTestsCollector.logEvent(
+            selectedTestCases.size,
+            dataToCollect.technique!!,
+            dataToCollect.codeType!!,
+            modifiedTestsCount,
+        )
     }
 
     /**

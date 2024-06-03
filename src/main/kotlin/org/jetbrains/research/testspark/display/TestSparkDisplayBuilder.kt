@@ -7,6 +7,8 @@ import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.collectors.data.DataToCollect
+import org.jetbrains.research.testspark.collectors.data.UserExperienceCollectors
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
@@ -38,14 +40,14 @@ class TestSparkDisplayBuilder {
     /**
      * Fill the panel with the generated test cases.
      */
-    fun display(report: Report, editor: Editor, uiContext: UIContext, project: Project) {
+    fun display(report: Report, editor: Editor, uiContext: UIContext, project: Project, userExperienceCollectors: UserExperienceCollectors, dataToCollect: DataToCollect) {
         this.toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
         this.contentManager = toolWindow!!.contentManager
 
         this.editor = editor
 
-        coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project, editor)
-        generatedTestsTabBuilder = GeneratedTestsTabBuilder(project, report, editor, uiContext, coverageVisualisationTabBuilder!!)
+        coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project, editor, userExperienceCollectors, dataToCollect)
+        generatedTestsTabBuilder = GeneratedTestsTabBuilder(project, report, editor, uiContext, coverageVisualisationTabBuilder!!, userExperienceCollectors, dataToCollect)
 
         generatedTestsTabBuilder!!.show(contentManager!!)
         coverageVisualisationTabBuilder!!.show(report, generatedTestsTabBuilder!!.getGeneratedTestsTabData())
@@ -73,6 +75,21 @@ class TestSparkDisplayBuilder {
                 clear()
             }
         }
+
+        // Add collector logging
+        val testGenerationElapsedTime = System.currentTimeMillis() - dataToCollect.testGenerationStartTime!!
+        userExperienceCollectors.testGenerationFinishedCollector.logEvent(
+            testGenerationElapsedTime,
+            dataToCollect.technique!!,
+            dataToCollect.codeType!!,
+        )
+
+        // Add collector logging
+        userExperienceCollectors.generatedTestsCollector.logEvent(
+            report.testCaseList.size,
+            dataToCollect.technique!!,
+            dataToCollect.codeType!!,
+        )
     }
 
     fun clear() {
