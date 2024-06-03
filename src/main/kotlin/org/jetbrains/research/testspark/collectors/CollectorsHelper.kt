@@ -34,7 +34,7 @@ object CollectorsHelper {
      * - The second part is a number between 1 and 99, inclusive.
      */
     private val testIDRegex =
-        """^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}_[0-9]{1,2}$""".toRegex()
+        """^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}_[1-9][0-9]?$""".toRegex()
 
     /**
      * Returns the group ID for the tests set group.

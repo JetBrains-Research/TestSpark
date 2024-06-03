@@ -7,7 +7,7 @@ import org.jetbrains.research.testspark.collectors.data.Technique
 import org.jetbrains.research.testspark.data.CodeType
 
 /**
- * This class represents a collector for tracking the event of generated tests.
+ * This class represents a collector for tracking the event of test generation.
  *
  * @property count the IntEventField instance representing the count for the event
  * @property technique the EnumEventField<Technique> instance representing the technique for the event
