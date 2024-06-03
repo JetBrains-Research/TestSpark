@@ -50,7 +50,7 @@ class Pipeline(
         val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
 
         // get generated test path
-        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults$ToolUtils.sep"
+        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults${ToolUtils.sep}"
         val id = UUID.randomUUID().toString()
         val testResultName = "test_gen_result_$id"
 

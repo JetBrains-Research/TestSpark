@@ -87,7 +87,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * Generates tests for a specific line of code.
      *
      * @param project The current project.
-     * @param psiHelper the PsiHelper associated with the pipeline.
+     * @param psiFile The PSI file containing the code.
      * @param caretOffset The offset position of the caret.
      * @param fileUrl The URL of the file.
      * @param testSamplesCode The code for the test samples.
