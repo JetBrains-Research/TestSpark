@@ -117,7 +117,10 @@ class Pipeline(
                         updateEditor(it.testGenerationOutput.fileUrl)
 
                         if (editor != null) {
-                            testSparkDisplayBuilder.display(it.testGenerationOutput.testGenerationResultList[0]!!, editor!!, it, project)
+                            // TODO merge reports in case of mutable reports generation
+                            val report = it.testGenerationOutput.testGenerationResultList[0]!!
+
+                            testSparkDisplayBuilder.display(report, editor!!, it, project)
                         }
                     }
                 }
