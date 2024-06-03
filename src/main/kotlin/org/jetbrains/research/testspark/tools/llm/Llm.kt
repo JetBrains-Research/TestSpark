@@ -1,12 +1,13 @@
 package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Computable
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.LLMHelper
@@ -35,11 +36,11 @@ class Llm(override val name: String = "LLM") : Tool {
     fun getLLMProcessManager(project: Project, psiFile: PsiFile, caretOffset: Int, testSamplesCode: String): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClass>()
 
-        ApplicationManager.getApplication().runReadAction(
-            Computable {
+        ProgressManager.getInstance().runProcessWithProgressSynchronously({
+            ApplicationManager.getApplication().runReadAction {
                 collectClassesToTest(project, classesToTest, psiFile, caretOffset)
-            },
-        )
+            }
+        }, PluginMessagesBundle.get("collectingClassesToTest"), false, project)
 
         return LLMProcessManager(
             project,
