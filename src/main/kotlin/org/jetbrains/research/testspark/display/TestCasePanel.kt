@@ -661,9 +661,9 @@ class TestCasePanel(
     /**
      * Checks if the test case code has been modified before the applying to file.
      *
-     * @return true if the final version of the code not differ from the initial one on the first request page.
+     * @return true if the final version of the code does not differ from the initial one on the first request page.
      */
-    fun isGlobalModified(): Boolean = testCase.testCode != initialCodes[0]
+    fun isTestCaseModified(): Boolean = testCase.testCode != initialCodes[0]
 
     /**
      * Updates the border of the languageTextField based on the provided test name and text.

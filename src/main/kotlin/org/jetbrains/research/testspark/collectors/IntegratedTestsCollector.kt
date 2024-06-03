@@ -14,7 +14,7 @@ import org.jetbrains.research.testspark.data.CodeType
  * @property technique the EnumEventField<Technique> instance representing the technique for the event
  * @property level the EnumEventField<CodeType> instance representing the code type for the event
  * @property modifiedTestsCount the IntEventField instance representing the modified tests count for the event
- * @*/
+ * */
 class IntegratedTestsCollector : CounterUsagesCollector() {
     private val groupId = CollectorsHelper.getTestsSetGroupID()
     private val group = CollectorsHelper.getGroup(groupId)

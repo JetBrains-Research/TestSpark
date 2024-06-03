@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.collectors
 import com.intellij.internal.statistic.service.fus.collectors.CounterUsagesCollector
 
 /**
- * This class represents a collector for tracking the event of coverage status being showed.
+ * This class represents a collector for tracking the event of coverage status being shown.
  *
  * @property sessionId the EventFields.StringValidatedByRegexp instance representing the session ID for the event
  */

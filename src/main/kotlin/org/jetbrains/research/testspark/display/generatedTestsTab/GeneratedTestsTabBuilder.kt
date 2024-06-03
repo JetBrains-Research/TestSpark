@@ -354,7 +354,7 @@ class GeneratedTestsTabBuilder(
         // Get number of modified tests
         var modifiedTestsCount = 0
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
-            if (testCasePanelFactory.isGlobalModified()) modifiedTestsCount++
+            if (testCasePanelFactory.isTestCaseModified()) modifiedTestsCount++
         }
 
         // Add collector logging
