@@ -1,7 +1,10 @@
 package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -17,12 +20,9 @@ import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperFactory
-import org.jetbrains.research.testspark.services.CoverageVisualisationService
-import org.jetbrains.research.testspark.services.EditorService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperGetter
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -42,13 +42,14 @@ class Pipeline(
     fileUrl: String?,
     private val packageName: String,
     private val testGenerationController: TestGenerationController,
+    private val testSparkDisplayBuilder: TestSparkDisplayBuilder,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
 
     init {
 
-        val cutPsiClass = PsiHelperFactory.getPsiHelper(psiFile).getSurroundingClass(psiFile, caretOffset)!!
+        val cutPsiClass = PsiHelperGetter.getPsiHelper(psiFile).getSurroundingClass(psiFile, caretOffset)!!
 
         // get generated test path
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults${ToolUtils.sep}"
@@ -76,9 +77,11 @@ class Pipeline(
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-        clear(project)
+        testGenerationController.errorMonitor.clear()
+
         val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
 
+        var editor: Editor? = null
         var uiContext: UIContext? = null
 
         ProgressManager.getInstance()
@@ -110,23 +113,34 @@ class Pipeline(
                     super.onFinished()
                     testGenerationController.finished()
                     uiContext?.let {
-                        project.service<TestCaseDisplayService>()
-                            .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
+                        updateEditor(it.testGenerationOutput.fileUrl)
 
-                        if (project.service<EditorService>().editor != null) {
+                        if (editor != null) {
+                            // TODO merge reports in case of mutable reports generation
                             val report = it.testGenerationOutput.testGenerationResultList[0]!!
-                            project.service<TestCaseDisplayService>().displayTestCases(report, it)
-                            project.service<CoverageVisualisationService>().showCoverage(report)
+
+                            testSparkDisplayBuilder.display(report, editor!!, it, project)
                         }
                     }
                 }
-            })
-    }
 
-    private fun clear(project: Project) { // should be removed totally!
-        testGenerationController.errorMonitor.clear()
-        project.service<TestCaseDisplayService>().clear()
-        project.service<CoverageVisualisationService>().clear()
-        project.service<TestsExecutionResultService>().clear()
+                /**
+                 * Utility function that returns the editor for a specific file url,
+                 * in case it is opened in the IDE
+                 */
+                private fun updateEditor(fileUrl: String) {
+                    val documentManager = FileDocumentManager.getInstance()
+                    // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
+                    FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }
+                        .map {
+                            val currentFile = documentManager.getFile(it.document)
+                            if (currentFile != null) {
+                                if (currentFile.presentableUrl == fileUrl) {
+                                    editor = it
+                                }
+                            }
+                        }
+                }
+            })
     }
 }

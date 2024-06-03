@@ -1,10 +1,16 @@
 package org.jetbrains.research.testspark.actions.llm
 
+import com.intellij.openapi.fileTypes.FileType
+import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiManager
+import com.intellij.util.containers.stream
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.actions.template.PanelFactory
+import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.helpers.LLMTestSampleHelper
 import java.awt.Font
 import javax.swing.ButtonGroup
 import javax.swing.JButton
@@ -12,7 +18,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
 
-class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
+class LLMSampleSelectorBuilder(private val project: Project) : PanelBuilder {
     // init components
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
         JRadioButton(PluginLabelsBundle.get("provideTestSample")),
@@ -24,8 +30,8 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     private val defaultTestName = "<html>provide manually</html>"
     private val defaultTestCode = "// provide test method code here"
     private val testNames = mutableListOf(defaultTestName)
-    private val initialTestCodes = mutableListOf(LLMTestSampleHelper.createTestSampleClass("", defaultTestCode))
-    private val testSamplePanelFactories: MutableList<TestSamplePanelFactory> = mutableListOf()
+    private val initialTestCodes = mutableListOf(createTestSampleClass("", defaultTestCode))
+    private val testSamplePanelFactories: MutableList<TestSamplePanelBuilder> = mutableListOf()
     private var testSamplesCode: String = ""
 
     private val addButtonPanel = JPanel()
@@ -45,7 +51,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     init {
         addListeners()
 
-        LLMTestSampleHelper.collectTestSamples(project, testNames, initialTestCodes)
+        collectTestSamples(project, testNames)
     }
 
     override fun getTitlePanel(): JPanel {
@@ -128,18 +134,18 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
         }
 
         addButton.addActionListener {
-            val testSamplePanelFactory = TestSamplePanelFactory(project, middlePanel, testNames, initialTestCodes)
-            testSamplePanelFactories.add(testSamplePanelFactory)
-            val testSamplePanel = testSamplePanelFactory.getTestSamplePanel()
-            val codeScrollPanel = testSamplePanelFactory.getCodeScrollPanel()
+            val testSamplePanelBuilder = TestSamplePanelBuilder(project, middlePanel, testNames, initialTestCodes)
+            testSamplePanelFactories.add(testSamplePanelBuilder)
+            val testSamplePanel = testSamplePanelBuilder.getTestSamplePanel()
+            val codeScrollPanel = testSamplePanelBuilder.getCodeScrollPanel()
             formBuilder = formBuilder
                 .addComponent(testSamplePanel, 10)
                 .addComponent(codeScrollPanel, 10)
             middlePanel = formBuilder.panel
             middlePanel.revalidate()
 
-            testSamplePanelFactory.getRemoveButton().addActionListener {
-                testSamplePanelFactories.remove(testSamplePanelFactory)
+            testSamplePanelBuilder.getRemoveButton().addActionListener {
+                testSamplePanelFactories.remove(testSamplePanelBuilder)
                 middlePanel.remove(testSamplePanel)
                 middlePanel.remove(codeScrollPanel)
                 middlePanel.revalidate()
@@ -172,4 +178,55 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
             testSamplePanelFactory.enabledComponents(isEnabled)
         }
     }
+
+    /**
+     * Collects names and code samples of test methods in the project.
+     *
+     * @param project The project to scan for test methods.
+     * @param testNames The list to store the names of found test methods.
+     */
+    private fun collectTestSamples(project: Project, testNames: MutableList<String>) {
+        val projectFileIndex: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
+        val javaFileType: FileType = FileTypeManager.getInstance().getFileTypeByExtension("java")
+
+        projectFileIndex.iterateContent { file ->
+            if (file.fileType === javaFileType) {
+                val psiJavaFile = (PsiManager.getInstance(project).findFile(file) as PsiJavaFile)
+                val psiClassIndex = psiJavaFile.classes.stream().map { it.name }.toArray()
+                    .indexOf(psiJavaFile.name.removeSuffix(".java"))
+                if (psiClassIndex in 0 until psiJavaFile.classes.size) {
+                    val psiClass = psiJavaFile.classes[psiClassIndex]
+                    var imports = psiJavaFile.importList?.allImportStatements?.map { it.text }?.toList()
+                        ?.joinToString("\n") ?: ""
+                    // add imports of all files inside the current package
+                    if (psiClass.qualifiedName != null && psiClass.qualifiedName!!.contains(".")) {
+                        imports += "\nimport ${psiClass.qualifiedName?.substringBeforeLast(".") + ".*"};"
+                    }
+                    psiClass.allMethods.forEach { method ->
+                        val annotations = method.modifierList.annotations
+                        annotations.forEach { annotation ->
+                            if (annotation.qualifiedName == "org.junit.jupiter.api.Test" || annotation.qualifiedName == "org.junit.Test") {
+                                val code: String = createTestSampleClass(imports, method.text)
+                                testNames.add(createUIPresentableMethodName(psiClass.qualifiedName!!, method.name))
+                                initialTestCodes.add(code)
+                            }
+                        }
+                    }
+                }
+            }
+            true
+        }
+    }
+
+    private fun createTestSampleClass(imports: String, methodCode: String): String {
+        var normalizedImports = imports
+        if (normalizedImports.isNotBlank()) normalizedImports += "\n\n"
+        return normalizedImports +
+            "public class TestSample {\n" +
+            "   $methodCode\n" +
+            "}"
+    }
+
+    private fun createUIPresentableMethodName(classQualifiedName: String, methodName: String): String =
+        "<html>$classQualifiedName#$methodName</html>"
 }

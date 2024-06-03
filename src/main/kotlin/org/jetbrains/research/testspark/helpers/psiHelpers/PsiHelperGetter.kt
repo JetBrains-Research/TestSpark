@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.helpers.psiHelpers
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 
-object PsiHelperFactory {
+object PsiHelperGetter {
     fun getPsiHelper(psiFile: PsiFile): PsiHelperInterface {
         return when (psiFile) {
             is PsiJavaFile -> JavaPsiHelper()

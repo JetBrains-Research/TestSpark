@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
@@ -14,7 +13,6 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
 
 object ToolUtils {
@@ -71,8 +69,6 @@ object ToolUtils {
         generatedTestData.fileUrl = fileUrl
         generatedTestData.packageLine = packageLine
         generatedTestData.importsCode.addAll(importsCode)
-
-        project.service<TestsExecutionResultService>().initExecutionResult(report.testCaseList.values.map { it.id })
 
         for (testCase in report.testCaseList.values) {
             val code = testCase.testCode

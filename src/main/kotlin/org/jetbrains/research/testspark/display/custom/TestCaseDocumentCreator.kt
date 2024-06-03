@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.custom
 
 import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager

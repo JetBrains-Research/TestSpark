@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.settings.plugin
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.template.SettingsConfigurable
 import javax.swing.JComponent
@@ -47,7 +46,8 @@ class PluginSettingsConfigurable(val project: Project) : SettingsConfigurable {
     override fun isModified(): Boolean {
         val settingsState: PluginSettingsState = project.service<PluginSettingsService>().state
         var modified: Boolean = settingsComponent!!.buildPath != settingsState.buildPath
-        modified = modified or (settingsComponent!!.showCoverageCheckboxSelected != settingsState.showCoverageCheckboxSelected)
+        modified =
+            modified or (settingsComponent!!.showCoverageCheckboxSelected != settingsState.showCoverageCheckboxSelected)
         modified = modified or (settingsComponent!!.colorRed != settingsState.colorRed)
         modified = modified or (settingsComponent!!.colorGreen != settingsState.colorGreen)
         modified = modified or (settingsComponent!!.colorBlue != settingsState.colorBlue)
@@ -66,16 +66,6 @@ class PluginSettingsConfigurable(val project: Project) : SettingsConfigurable {
         settingsState.colorBlue = settingsComponent!!.colorBlue
         settingsState.buildPath = settingsComponent!!.buildPath
         settingsState.buildCommand = settingsComponent!!.buildCommand
-
-        // update coverage visualisation
-        val coverageVisualisationService = project.service<CoverageVisualisationService>()
-        val currentHighlightedData = coverageVisualisationService.getCurrentHighlightedData()
-        currentHighlightedData ?: return
-        coverageVisualisationService.updateCoverage(
-            currentHighlightedData.linesToCover,
-            currentHighlightedData.selectedTests,
-            currentHighlightedData.testReport,
-        )
     }
 
     /**

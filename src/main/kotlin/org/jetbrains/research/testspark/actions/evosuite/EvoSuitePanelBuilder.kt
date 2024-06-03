@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.actions.template.PanelFactory
+import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteLabelsBundle
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteSettingsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
@@ -17,7 +17,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-class EvoSuitePanelFactory(private val project: Project) : PanelFactory {
+class EvoSuitePanelBuilder(private val project: Project) : PanelBuilder {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
         get() = project.getService(EvoSuiteSettingsService::class.java).state
 

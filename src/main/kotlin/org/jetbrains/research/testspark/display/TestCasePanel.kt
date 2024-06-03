@@ -4,7 +4,6 @@ import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.DocumentEvent
@@ -15,6 +14,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
@@ -28,17 +28,22 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.display.custom.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
 import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
-import org.jetbrains.research.testspark.helpers.ReportHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
+import org.jetbrains.research.testspark.uiUtils.GenerateTestsTabHelper
+import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
+import org.jetbrains.research.testspark.uiUtils.ModifiedLinesGetter
+import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
+import java.awt.Component
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
@@ -53,21 +58,25 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
-import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
-class TestCasePanelFactory(
+class TestCasePanel(
     private val project: Project,
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
-    val uiContext: UIContext?,
-    val report: Report,
+    private val uiContext: UIContext?,
+    private val report: Report,
+    private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
+    private val generatedTestsTabData: GeneratedTestsTabData,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
-    private val panel = JPanel()
+    val upperPanel = JPanel()
+    val middlePanel = JPanel()
+    val bottomPanel = JPanel()
+
     private val previousButton =
         IconButtonCreator.getButton(TestSparkIcons.previous, PluginLabelsBundle.get("previousRequest"))
     private var requestNumber: String = "%d / %d"
@@ -87,6 +96,9 @@ class TestCasePanelFactory(
     private val dimensionSize = 7
 
     private var isRemoved = false
+
+    var error: String? = null
+        private set
 
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
@@ -129,28 +141,33 @@ class TestCasePanelFactory(
     private val initialCodes: MutableList<String> = mutableListOf()
     private val lastRunCodes: MutableList<String> = mutableListOf()
     private val currentCodes: MutableList<String> = mutableListOf()
+    private val trimmedCodeToError = mutableMapOf<String, String?>()
+
+    init {
+        initUpperPanel()
+        initMiddlePanel()
+        initBottomPanel()
+        updateErrorRelatedUI()
+    }
 
     /**
-     * Retrieves the upper panel for the GUI.
+     * Initialize upper panel for the GUI.
      *
      * This panel contains various components such as buttons, labels, and checkboxes. It is used to display information and
      * perform actions related to the GUI.
-     *
-     * @return The JPanel object representing the upper panel.
      */
-    fun getUpperPanel(): JPanel {
-        updateErrorLabel()
-        panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
-        panel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
-        panel.add(previousButton)
-        panel.add(requestLabel)
-        panel.add(nextButton)
-        panel.add(errorLabel)
-        panel.add(Box.createHorizontalGlue())
-        panel.add(copyButton)
-        panel.add(likeButton)
-        panel.add(dislikeButton)
-        panel.add(Box.createRigidArea(Dimension(12, 0)))
+    private fun initUpperPanel() {
+        upperPanel.layout = BoxLayout(upperPanel, BoxLayout.X_AXIS)
+        upperPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
+        upperPanel.add(previousButton)
+        upperPanel.add(requestLabel)
+        upperPanel.add(nextButton)
+        upperPanel.add(errorLabel)
+        upperPanel.add(Box.createHorizontalGlue())
+        upperPanel.add(copyButton)
+        upperPanel.add(likeButton)
+        upperPanel.add(dislikeButton)
+        upperPanel.add(Box.createRigidArea(Dimension(12, 0)))
 
         previousButton.addActionListener {
             WriteCommandAction.runWriteCommandAction(project) {
@@ -192,7 +209,7 @@ class TestCasePanelFactory(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    project.service<TestCaseDisplayService>().getEditor(testCase.testName)!!.document.text,
+                    generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName]!!.document.text,
                 ),
                 null,
             )
@@ -207,41 +224,31 @@ class TestCasePanelFactory(
         }
 
         updateRequestLabel()
-
-        return panel
     }
 
     /**
-     * Retrieves the middle panel of the application.
-     * This method sets the border of the languageTextField and
-     * adds it to the middlePanel with appropriate spacing.
+     * Initialize the middle panel of the application.
      */
-    fun getMiddlePanel(): JPanel {
+    private fun initMiddlePanel() {
         initialCodes.add(testCase.testCode)
         lastRunCodes.add(testCase.testCode)
         currentCodes.add(testCase.testCode)
 
-        // Set border
-        updateBorder()
-
-        val panel = JPanel()
-
-        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
-        panel.add(Box.createRigidArea(Dimension(0, 5)))
-        panel.add(languageTextFieldScrollPane)
-        panel.add(Box.createRigidArea(Dimension(0, 5)))
+        middlePanel.layout = BoxLayout(middlePanel, BoxLayout.Y_AXIS)
+        middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
+        middlePanel.add(languageTextFieldScrollPane)
+        middlePanel.add(Box.createRigidArea(Dimension(0, 5)))
 
         addLanguageTextFieldListener(languageTextField)
-
-        return panel
     }
 
     /**
-     * Returns the bottom panel.
+     * Initialize the bottom panel.
+     *
+     * This panel contains controls for running/resetting test cases and making additional LLM requests.
      */
-    fun getBottomPanel(): JPanel {
-        val panel = JPanel()
-        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+    private fun initBottomPanel() {
+        bottomPanel.layout = BoxLayout(bottomPanel, BoxLayout.Y_AXIS)
 
         val requestPanel = JPanel()
         requestPanel.layout = BoxLayout(requestPanel, BoxLayout.X_AXIS)
@@ -273,8 +280,8 @@ class TestCasePanelFactory(
         buttonsPanel.add(removeButton)
         buttonsPanel.add(Box.createRigidArea(Dimension(12, 0)))
 
-        panel.add(requestPanel)
-        panel.add(buttonsPanel)
+        bottomPanel.add(requestPanel)
+        bottomPanel.add(buttonsPanel)
 
         runTestButton.addActionListener {
             val choice = JOptionPane.showConfirmDialog(
@@ -294,8 +301,6 @@ class TestCasePanelFactory(
         sendButton.addActionListener { sendRequest() }
 
         requestComboBox.isEditable = true
-
-        return panel
     }
 
     /**
@@ -311,19 +316,6 @@ class TestCasePanelFactory(
     }
 
     /**
-     * Updates the error label with a new message.
-     */
-    private fun updateErrorLabel() {
-        val error = project.service<TestsExecutionResultService>().getCurrentError(testCase.id)
-        if (error.isBlank()) {
-            errorLabel.isVisible = false
-        } else {
-            errorLabel.isVisible = true
-            errorLabel.toolTipText = error
-        }
-    }
-
-    /**
      * Adds a document listener to the provided LanguageTextField.
      * The listener triggers the updateUI() method whenever the document of the LanguageTextField changes.
      *
@@ -332,15 +324,27 @@ class TestCasePanelFactory(
     private fun addLanguageTextFieldListener(languageTextField: LanguageTextField) {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                updateUI()
+                update()
             }
         })
+    }
+
+    private fun updateErrorRelatedUI() {
+        updateBorder(error)
+        if (error.isNullOrBlank()) {
+            errorLabel.isVisible = false
+        } else {
+            errorLabel.toolTipText = error
+            errorLabel.isVisible = true
+        }
+
+        runTestButton.isEnabled = getPreviousError(testCase.testCode) == null
     }
 
     /**
      * Updates the user interface based on the provided code.
      */
-    private fun updateUI() {
+    private fun update() {
         updateTestCaseInformation()
 
         val lastRunCode = lastRunCodes[currentRequestNumber - 1]
@@ -348,17 +352,6 @@ class TestCasePanelFactory(
 
         resetButton.isEnabled = testCase.testCode != initialCodes[currentRequestNumber - 1]
         resetToLastRunButton.isEnabled = testCase.testCode != lastRunCode
-
-        val error = getError()
-        if (error.isNullOrBlank()) {
-            project.service<TestsExecutionResultService>().addCurrentPassedTest(testCase.id)
-        } else {
-            project.service<TestsExecutionResultService>().addCurrentFailedTest(testCase.id, error)
-        }
-        updateErrorLabel()
-        runTestButton.isEnabled = (error == null)
-
-        updateBorder()
 
         val modifiedLineIndexes = ModifiedLinesGetter.getLines(
             lastRunCode.split("\n"),
@@ -375,6 +368,9 @@ class TestCasePanelFactory(
 
         currentCodes[currentRequestNumber - 1] = testCase.testCode
 
+        error = getPreviousError(testCase.testCode)
+        updateErrorRelatedUI()
+
         // select checkbox
         checkbox.isSelected = true
 
@@ -384,8 +380,8 @@ class TestCasePanelFactory(
             testCase.coveredLines = setOf()
         }
 
-        ReportHelper.updateTestCase(project, report, testCase)
-        project.service<TestCaseDisplayService>().updateUI()
+        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+        GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
     /**
@@ -427,6 +423,11 @@ class TestCasePanelFactory(
                     if (ToolUtils.isProcessStopped(uiContext.errorMonitor, ijIndicator)) {
                         finishProcess()
                         return
+                    }
+
+                    SwingUtilities.invokeLater {
+                        error = null
+                        updateErrorRelatedUI()
                     }
 
                     finishProcess()
@@ -500,6 +501,8 @@ class TestCasePanelFactory(
             })
     }
 
+    private fun trimCode(code: String): String = code.filter { !it.isWhitespace() }
+
     fun addTask(tasks: Queue<(CustomProgressIndicator) -> Unit>) {
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
@@ -515,7 +518,7 @@ class TestCasePanelFactory(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
-        val newTestCase = TestProcessor(project)
+        val newTestCaseResult = TestProcessor(project)
             .processNewTestCase(
                 "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java",
                 testCase.id,
@@ -526,14 +529,17 @@ class TestCasePanelFactory(
                 uiContext.projectContext,
             )
 
-        testCase.coveredLines = newTestCase.coveredLines
+        testCase.coveredLines = newTestCaseResult.testCase.coveredLines
+        error = newTestCaseResult.error
+        saveErrorForCode(newTestCaseResult.testCase.testCode, newTestCaseResult.error)
 
         testCaseCodeToListOfCoveredLines[testCase.testCode] = testCase.coveredLines
 
         lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
         SwingUtilities.invokeLater {
-            updateUI()
+            update()
+            updateErrorRelatedUI()
         }
 
         finishProcess()
@@ -557,7 +563,7 @@ class TestCasePanelFactory(
             currentCodes[currentRequestNumber - 1] = testCase.testCode
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
-            updateUI()
+            update()
         }
     }
 
@@ -569,7 +575,7 @@ class TestCasePanelFactory(
             languageTextField.document.setText(lastRunCodes[currentRequestNumber - 1])
             currentCodes[currentRequestNumber - 1] = testCase.testCode
 
-            updateUI()
+            update()
         }
     }
 
@@ -582,14 +588,31 @@ class TestCasePanelFactory(
      * 3. Updating the UI.
      */
     private fun remove() {
-        // Remove the test case from the cache
-        project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
+        val parentComponent: Component? = null
+
+        val choice = JOptionPane.showConfirmDialog(
+            parentComponent,
+            PluginMessagesBundle.get("removeCautionMessage"),
+            PluginMessagesBundle.get("confirmationTitle"),
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.WARNING_MESSAGE,
+        )
+
+        if (choice == JOptionPane.CANCEL_OPTION) return
+
+        GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportHelper.removeTestCase(project, report, testCase)
-        project.service<TestCaseDisplayService>().updateUI()
+        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+        GenerateTestsTabHelper.update(generatedTestsTabData)
+    }
+
+    private fun getPreviousError(code: String) = trimmedCodeToError[trimCode(code)]
+
+    private fun saveErrorForCode(code: String, error: String?) {
+        trimmedCodeToError[trimCode(code)] = error
     }
 
     /**
@@ -602,29 +625,14 @@ class TestCasePanelFactory(
     /**
      * Updates the border of the languageTextField based on the provided test name and text.
      */
-    private fun updateBorder() {
-        languageTextField.border = getBorder()
-    }
-
-    /**
-     * Retrieves the error message for a given test case.
-     *
-     * @return the error message for the test case
-     */
-    fun getError() = project.service<TestsExecutionResultService>().getError(testCase.id, testCase.testCode)
-
-    /**
-     * Returns the border for a given test case.
-     *
-     * @return the border for the test case
-     */
-    private fun getBorder(): Border {
+    private fun updateBorder(error: String?) {
         val size = 3
-        return when (getError()) {
+        val border = when (error) {
             null -> JBUI.Borders.empty()
             "" -> MatteBorder(size, size, size, size, JBColor.GREEN)
             else -> MatteBorder(size, size, size, size, JBColor.RED)
         }
+        languageTextField.border = border
     }
 
     /**
@@ -647,7 +655,7 @@ class TestCasePanelFactory(
      */
     private fun switchToAnotherCode() {
         languageTextField.document.setText(currentCodes[currentRequestNumber - 1])
-        updateUI()
+        update()
     }
 
     /**
@@ -662,7 +670,17 @@ class TestCasePanelFactory(
      */
     private fun updateTestCaseInformation() {
         testCase.testName =
-            JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
+            JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+                testCase.testName,
+                languageTextField.document.text,
+            )
         testCase.testCode = languageTextField.document.text
     }
+
+    /**
+     * Retrieves the editor text field from the current UI context.
+     *
+     * @return the editor text field
+     */
+    fun getEditorTextField(): EditorTextField = languageTextField
 }

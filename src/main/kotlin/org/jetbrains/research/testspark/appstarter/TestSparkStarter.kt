@@ -117,12 +117,12 @@ class TestSparkStarter : ApplicationStarter {
                         output,
                         targetPsiClass,
                         targetPsiClass.qualifiedName,
-                        cutModule
+                        cutModule,
                     )
                     // Prepare the test generation data
                     val testGenerationData = TestGenerationData(
                         resultPath = output,
-                        testResultName = "HeadlessGeneratedTests"
+                        testResultName = "HeadlessGeneratedTests",
                     )
                     println("[TestSpark Starter] Indexing is done")
 
@@ -136,7 +136,7 @@ class TestSparkStarter : ApplicationStarter {
                             project,
                             psiFile,
                             targetPsiClass.textRange.startOffset,
-                            testSamplesCode = "" // we don't provide samples to LLM
+                            testSamplesCode = "", // we don't provide samples to LLM
                         )
 
                     println("[TestSpark Starter] Starting the test generation process")
@@ -149,7 +149,7 @@ class TestSparkStarter : ApplicationStarter {
                         packageName,
                         projectContext,
                         testGenerationData,
-                        errorMonitor
+                        errorMonitor,
                     )
 
                     // Check test Generation Output
@@ -186,7 +186,7 @@ class TestSparkStarter : ApplicationStarter {
                     classPath,
                     packageList.joinToString("."),
                     out,
-                    projectContext
+                    projectContext,
                 )
                 // Saving exception (if exists) thrown during the test execution
                 saveException(testcaseName, targetDirectory, testExecutionError)

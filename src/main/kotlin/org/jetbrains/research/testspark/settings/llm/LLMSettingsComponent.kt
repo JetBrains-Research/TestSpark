@@ -18,13 +18,13 @@ import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptKeyword
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.data.llm.PromptEditorType
-import org.jetbrains.research.testspark.display.IconButtonCreator
-import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.PromptParserHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.template.SettingsComponent
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
+import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
+import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import java.awt.FlowLayout
 import java.awt.Font
 import javax.swing.BoxLayout
@@ -62,9 +62,9 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
     // Prompt Editor
     private var promptSeparator = JXTitledSeparator(LLMLabelsBundle.get("PromptSeparator"))
 
-    private val promptClassTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(llmSettingsState, PromptEditorType.CLASS)
-    private val promptMethodTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(llmSettingsState, PromptEditorType.METHOD)
-    private val promptLineTemplateFactory: PromptTemplateFactory = PromptTemplateFactory(llmSettingsState, PromptEditorType.LINE)
+    private val promptClassTemplateFactory: PromptTemplateBuilder = PromptTemplateBuilder(llmSettingsState, PromptEditorType.CLASS)
+    private val promptMethodTemplateFactory: PromptTemplateBuilder = PromptTemplateBuilder(llmSettingsState, PromptEditorType.METHOD)
+    private val promptLineTemplateFactory: PromptTemplateBuilder = PromptTemplateBuilder(llmSettingsState, PromptEditorType.LINE)
 
     private var promptEditorTabbedPane = createTabbedPane()
 
@@ -289,15 +289,15 @@ class LLMSettingsComponent(private val project: Project) : SettingsComponent {
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
 
         // Prompt
-        val promptTemplateFactory: PromptTemplateFactory = when (promptEditorType) {
+        val promptTemplateBuilder: PromptTemplateBuilder = when (promptEditorType) {
             PromptEditorType.CLASS -> promptClassTemplateFactory
             PromptEditorType.METHOD -> promptMethodTemplateFactory
             PromptEditorType.LINE -> promptLineTemplateFactory
         }
 
-        panel.add(promptTemplateFactory.getUpperButtonsPanel())
-        panel.add(promptTemplateFactory.getEditorTextField())
-        panel.add(promptTemplateFactory.getLowerButtonsPanel())
+        panel.add(promptTemplateBuilder.getUpperButtonsPanel())
+        panel.add(promptTemplateBuilder.getEditorTextField())
+        panel.add(promptTemplateBuilder.getLowerButtonsPanel())
 
         // add buttons for inserting keywords to the prompt editor
         addPromptButtons(panel)
