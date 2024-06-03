@@ -45,7 +45,7 @@ class PromptManager(
 
             ApplicationManager.getApplication().runReadAction(
                 Computable {
-                    psiHelper.collectClassesToTest(project, classesToTest, psiHelper, caret)
+                    psiHelper.collectClassesToTest(project, classesToTest, caret)
                 },
             )
             return classesToTest

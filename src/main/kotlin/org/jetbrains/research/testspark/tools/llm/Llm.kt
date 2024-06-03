@@ -1,10 +1,14 @@
 package org.jetbrains.research.testspark.tools.llm
 
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.LLMHelper
+import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
 import org.jetbrains.research.testspark.helpers.psi.PsiHelper
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
@@ -17,6 +21,36 @@ import org.jetbrains.research.testspark.tools.template.Tool
  * @param name The name of the tool. Default value is "Llm".
  */
 class Llm(override val name: String = "LLM") : Tool {
+
+    /**
+     * Returns an instance of the LLMProcessManager.
+     *
+     * @param project The current project.
+     * @param psiFile The PSI file.
+     * @param caretOffset The caret offset in the file.
+     * @param testSamplesCode The test samples code.
+     * @return An instance of LLMProcessManager.
+     */
+    fun getLLMProcessManager(
+        project: Project,
+        psiHelper: PsiHelper,
+        caretOffset: Int,
+        testSamplesCode: String,
+    ): LLMProcessManager {
+        val classesToTest = mutableListOf<PsiClassWrapper>()
+
+        ProgressManager.getInstance().runProcessWithProgressSynchronously({
+            ApplicationManager.getApplication().runReadAction {
+                psiHelper.collectClassesToTest(project, classesToTest, caretOffset)
+            }
+        }, PluginMessagesBundle.get("collectingClassesToTest"), false, project)
+
+        return LLMProcessManager(
+            project,
+            PromptManager(project, psiHelper, caretOffset),
+            testSamplesCode,
+        )
+    }
 
     /**
      * Generates test cases for a class in the specified project.

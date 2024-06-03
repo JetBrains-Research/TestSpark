@@ -168,7 +168,6 @@ interface PsiHelper {
     fun collectClassesToTest(
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
-        psiHelper: PsiHelper,
         caretOffset: Int,
     )
 
