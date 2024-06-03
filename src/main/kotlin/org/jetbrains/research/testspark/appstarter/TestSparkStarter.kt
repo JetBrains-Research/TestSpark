@@ -21,6 +21,7 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.helpers.psi.PsiHelperFactory
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
@@ -115,14 +116,13 @@ class TestSparkStarter : ApplicationStarter {
                     val projectContext = ProjectContext(
                         classPath,
                         output,
-                        targetPsiClass,
                         targetPsiClass.qualifiedName,
-                        cutModule
+                        cutModule,
                     )
                     // Prepare the test generation data
                     val testGenerationData = TestGenerationData(
                         resultPath = output,
-                        testResultName = "HeadlessGeneratedTests"
+                        testResultName = "HeadlessGeneratedTests",
                     )
                     println("[TestSpark Starter] Indexing is done")
 
@@ -130,13 +130,15 @@ class TestSparkStarter : ApplicationStarter {
                     val packageList = targetPsiClass.qualifiedName.toString().split(".").dropLast(1).toMutableList()
                     val packageName = packageList.joinToString(".")
 
+                    // Get PsiHelper
+                    val psiHelper = PsiHelperFactory.getPsiHelper(psiFile)!!
                     // Create a process Manager
                     val llmProcessManager = Llm()
                         .getLLMProcessManager(
                             project,
-                            psiFile,
+                            psiHelper,
                             targetPsiClass.textRange.startOffset,
-                            testSamplesCode = "" // we don't provide samples to LLM
+                            testSamplesCode = "", // we don't provide samples to LLM
                         )
 
                     println("[TestSpark Starter] Starting the test generation process")
@@ -149,7 +151,7 @@ class TestSparkStarter : ApplicationStarter {
                         packageName,
                         projectContext,
                         testGenerationData,
-                        errorMonitor
+                        errorMonitor,
                     )
 
                     // Check test Generation Output
@@ -186,7 +188,7 @@ class TestSparkStarter : ApplicationStarter {
                     classPath,
                     packageList.joinToString("."),
                     out,
-                    projectContext
+                    projectContext,
                 )
                 // Saving exception (if exists) thrown during the test execution
                 saveException(testcaseName, targetDirectory, testExecutionError)
