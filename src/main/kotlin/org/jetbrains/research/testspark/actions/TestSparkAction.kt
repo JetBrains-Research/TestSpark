@@ -72,7 +72,7 @@ class TestSparkAction : AnAction() {
     override fun update(e: AnActionEvent) {
         val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val psiHelper = PsiHelperFactory.getPsiHelper(psiFile)
-            ?: // TODO shouw the warning panel
+            ?: // TODO show the warning panel
             return
         e.presentation.isEnabled = psiHelper.getCurrentListOfCodeTypes(e) != null
     }
