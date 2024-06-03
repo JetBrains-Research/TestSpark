@@ -92,13 +92,12 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     override fun collectClassesToTest(
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
-        psiHelper: PsiHelper,
         caretOffset: Int,
     ) {
         // check if cut has any none java super class
         val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(0)
 
-        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
+        val cutPsiClass = getSurroundingClass(caretOffset)!!
         var currentPsiClass = cutPsiClass
         for (index in 0 until maxPolymorphismDepth) {
             if (!classesToTest.contains(currentPsiClass)) {
@@ -173,9 +172,9 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         if (javaPsiClassWrapped != null && javaPsiMethodWrapped != null) {
             log.info(
                 "The test can be generated for: \n " +
-                        " 1) Class ${javaPsiClassWrapped.qualifiedName} \n" +
-                        " 2) Method ${javaPsiMethodWrapped.methodDescriptor}" +
-                        " 3) Line $line",
+                    " 1) Class ${javaPsiClassWrapped.qualifiedName} \n" +
+                    " 2) Method ${javaPsiMethodWrapped.methodDescriptor}" +
+                    " 3) Line $line",
             )
         }
 
