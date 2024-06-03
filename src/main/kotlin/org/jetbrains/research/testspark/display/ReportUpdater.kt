@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display.utils
+package org.jetbrains.research.testspark.display
 
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase

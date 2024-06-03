@@ -20,7 +20,6 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabData
-import org.jetbrains.research.testspark.display.utils.GenerateTestsTabHelper
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -149,11 +148,11 @@ class CoverageRenderer(
      * @param name name of the test whose editor should be highlighted
      */
     private fun highlightTestCase(name: String) {
-        val myPanel = generatedTestsTabData.testCasePanels[name] ?: return
+        val myPanel = generatedTestsTabData.testCaseNameToPanel[name] ?: return
         openToolWindowTab()
         scrollToPanel(myPanel)
 
-        val editorTextField = GenerateTestsTabHelper.getEditorTextField(name, generatedTestsTabData) ?: return
+        val editorTextField = generatedTestsTabData.testCaseNameToEditorTextField[name] ?: return
         val settingsProjectState = project.service<PluginSettingsService>().state
         val highlightColor =
             JBColor(

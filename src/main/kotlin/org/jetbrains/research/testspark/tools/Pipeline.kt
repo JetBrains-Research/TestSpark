@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -24,7 +23,6 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.psiHelpers.PsiHelperGetter
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -79,7 +77,8 @@ class Pipeline(
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-        clear(project)
+        testGenerationController.errorMonitor.clear()
+
         val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
 
         var editor: Editor? = null
@@ -143,10 +142,5 @@ class Pipeline(
                         }
                 }
             })
-    }
-
-    private fun clear(project: Project) { // should be removed totally!
-        testGenerationController.errorMonitor.clear()
-        project.service<TestsExecutionResultService>().clear()
     }
 }

@@ -1,8 +1,8 @@
 package org.jetbrains.research.testspark.display.generatedTestsTab
 
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.display.utils.IconButtonCreator
-import org.jetbrains.research.testspark.display.utils.TestSparkIcons
+import org.jetbrains.research.testspark.uiUtils.IconButtonCreator
+import org.jetbrains.research.testspark.uiUtils.TestSparkIcons
 import java.awt.Dimension
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -47,29 +47,34 @@ class TopButtonsPanelBuilder {
     /**
      * Updates the labels.
      */
-    fun update(testCasePanels: HashMap<String, JPanel>, testsSelected: Int, testCasePanelFactories: ArrayList<TestCasePanelBuilder>) {
+    fun update(generatedTestsTabData: GeneratedTestsTabData) {
+        var numberOfTests = 0
         var numberOfPassedTests = 0
-        for (testCasePanelFactory in testCasePanelFactories) {
+        for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
             if (testCasePanelFactory.isRemoved()) continue
-            val error = testCasePanelFactory.getError()
-            if ((error is String) && error.isEmpty()) {
+            numberOfTests++
+            val error = testCasePanelFactory.error ?: continue
+            if (error.isBlank()) {
                 numberOfPassedTests++
             }
         }
+
         testsSelectedLabel.text = String.format(
             testsSelectedText,
-            testsSelected,
-            testCasePanels.size,
+            generatedTestsTabData.testsSelected,
+            numberOfTests,
         )
+
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 numberOfPassedTests,
-                testCasePanels.size,
+                numberOfTests,
             )
+
         runAllButton.isEnabled = false
-        for (testCasePanelFactory in testCasePanelFactories) {
-            runAllButton.isEnabled = runAllButton.isEnabled || testCasePanelFactory.isRunEnabled()
+        for (testCasePanel in generatedTestsTabData.testCasePanelFactories) {
+            runAllButton.isEnabled = runAllButton.isEnabled || testCasePanel.isRunEnabled()
         }
 
         this.numberOfPassedTests = numberOfPassedTests
