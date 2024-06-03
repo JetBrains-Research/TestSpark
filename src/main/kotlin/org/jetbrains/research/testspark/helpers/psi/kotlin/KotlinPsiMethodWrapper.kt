@@ -41,14 +41,14 @@ class KotlinPsiMethodWrapper(val psiFunction: KtNamedFunction) : PsiMethodWrappe
 
     val isMethodDefault: Boolean = psiFunction.run {
         val parentClass = parent as? KtClass
-        name == "<init>" && valueParameters.isEmpty()
-                && parentClass?.secondaryConstructors?.isEmpty() == true
+        name == "<init>" && valueParameters.isEmpty() &&
+            parentClass?.secondaryConstructors?.isEmpty() == true
     }
 
     val isDefaultConstructor: Boolean
         get() =
-            (psiFunction.name == "<init>" || (psiFunction.parent as? KtClass)?.name == psiFunction.name)
-                    && (psiFunction.bodyExpression.isNullExpressionOrEmptyBlock())
+            (psiFunction.name == "<init>" || (psiFunction.parent as? KtClass)?.name == psiFunction.name) &&
+                (psiFunction.bodyExpression.isNullExpressionOrEmptyBlock())
 
     override fun containsLine(lineNumber: Int): Boolean {
         val psiFile = psiFunction.containingFile
