@@ -11,6 +11,7 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 import org.jetbrains.research.testspark.display.generatedTestsTab.GeneratedTestsTabBuilder
+import java.awt.Component
 import javax.swing.JOptionPane
 
 /**
@@ -51,14 +52,17 @@ class TestSparkDisplayBuilder {
 
         toolWindow!!.show()
 
+        // removing all tests
         generatedTestsTabBuilder!!.getRemoveAllButton().addActionListener {
+            // in case of empty list -- just call clear method
             if (generatedTestsTabBuilder!!.getGeneratedTestsTabData().testCaseNameToPanel.isEmpty()) {
                 clear()
                 return@addActionListener
             }
 
+            val parentComponent: Component? = null
             val choice = JOptionPane.showConfirmDialog(
-                null,
+                parentComponent,
                 PluginMessagesBundle.get("removeAllCautionMessage"),
                 PluginMessagesBundle.get("confirmationTitle"),
                 JOptionPane.OK_CANCEL_OPTION,
