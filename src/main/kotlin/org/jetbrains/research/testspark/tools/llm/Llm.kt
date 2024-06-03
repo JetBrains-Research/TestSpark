@@ -32,7 +32,7 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode The test samples code.
      * @return An instance of LLMProcessManager.
      */
-    private fun getLLMProcessManager(project: Project, psiFile: PsiFile, caretOffset: Int, testSamplesCode: String): LLMProcessManager {
+    fun getLLMProcessManager(project: Project, psiFile: PsiFile, caretOffset: Int, testSamplesCode: String): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClass>()
 
         ApplicationManager.getApplication().runReadAction(
