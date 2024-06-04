@@ -86,6 +86,8 @@ class EvoSuiteErrorManager : ErrorManager {
             return false
         }
 
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return false
+
         // non zero exit code error
         if (handler.exitCode != 0) {
             errorProcess(getEvoSuiteNonZeroExitCodeMessage(output), project, errorMonitor)
