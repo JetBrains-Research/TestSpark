@@ -10,10 +10,13 @@ import java.util.zip.ZipInputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
+// Space credentials
 val spaceUsername =
     System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
 val spacePassword =
     System.getProperty("space.pass")?.toString() ?: project.properties["spacePassword"]?.toString() ?: ""
+
+// the test generation module for interacting with Grazie (used when the space credentials are provided)
 val grazieTestGenerationVersion= "1.0.5"
 
 plugins {
