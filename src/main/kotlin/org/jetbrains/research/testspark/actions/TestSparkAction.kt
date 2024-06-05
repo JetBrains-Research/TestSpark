@@ -254,7 +254,7 @@ class TestSparkAction : AnAction() {
 
             nextButton.addActionListener {
                 if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) {
-                     startLLMGeneration()
+                    startLLMGeneration()
                 } else if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected) {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
@@ -265,7 +265,7 @@ class TestSparkAction : AnAction() {
                     cardLayout.next(panel)
                     pack()
                 } else if (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected) {
-                     startEvoSuiteGeneration()
+                    startEvoSuiteGeneration()
                 } else {
                     cardLayout.next(panel)
                     pack()
@@ -288,7 +288,7 @@ class TestSparkAction : AnAction() {
                 if (llmSettingsState.provideTestSamplesCheckBoxSelected) {
                     cardLayout.next(panel)
                 } else {
-                     startLLMGeneration()
+                    startLLMGeneration()
                 }
             }
 
