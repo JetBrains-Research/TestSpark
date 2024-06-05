@@ -323,11 +323,7 @@ class TestSparkAction : AnAction() {
                 val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
                 if (psiHelper != null) {
-                    val classCodeTypeRadioButton = codeTypeButtons[0]
-                    val methodCodeTypeRadioButton = codeTypeButtons[1]
-                    val lineCodeTypeRadioButton = codeTypeButtons[2]
-
-                    if (classCodeTypeRadioButton.isSelected) {
+                    if (codeTypeButtons[0].isSelected) {
                         tool.generateTestsForClass(
                             project,
                             psiHelper,
@@ -336,7 +332,7 @@ class TestSparkAction : AnAction() {
                             testSamplesCode,
                             testGenerationController,
                         )
-                    } else if (methodCodeTypeRadioButton.isSelected) {
+                    } else if (codeTypeButtons[1].isSelected) {
                         tool.generateTestsForMethod(
                             project,
                             psiHelper,
@@ -345,7 +341,7 @@ class TestSparkAction : AnAction() {
                             testSamplesCode,
                             testGenerationController,
                         )
-                    } else if (lineCodeTypeRadioButton.isSelected) {
+                    } else if (codeTypeButtons[2].isSelected) {
                         tool.generateTestsForLine(
                             project,
                             psiHelper,
