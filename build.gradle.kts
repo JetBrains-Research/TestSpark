@@ -10,10 +10,14 @@ import java.util.zip.ZipInputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
+// Space credentials
 val spaceUsername =
     System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
 val spacePassword =
     System.getProperty("space.pass")?.toString() ?: project.properties["spacePassword"]?.toString() ?: ""
+
+// the test generation module for interacting with Grazie (used when the space credentials are provided)
+val grazieTestGenerationVersion = "1.0.5"
 
 plugins {
     // Java support
@@ -64,7 +68,7 @@ if (spaceCredentialsProvided()) {
 
     tasks.register("checkCredentials") {
         configurations.detachedConfiguration(
-            dependencies.create("org.jetbrains.research:grazie-test-generation:1.0.1"),
+            dependencies.create("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion"),
         ).files()
     }
 
@@ -165,7 +169,7 @@ dependencies {
         // Dependencies for hasGrazieAccess variant
         "hasGrazieAccessImplementation"(kotlin("stdlib"))
         "hasGrazieAccessImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:1.0.4")
+        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion")
     }
 }
 
