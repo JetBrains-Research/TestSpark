@@ -26,6 +26,7 @@ import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
+import org.jetbrains.research.testspark.tools.template.Tool
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Dimension
@@ -253,7 +254,7 @@ class TestSparkAction : AnAction() {
 
             nextButton.addActionListener {
                 if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) {
-                    startLLMGeneration()
+                     startLLMGeneration()
                 } else if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected) {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
@@ -264,7 +265,7 @@ class TestSparkAction : AnAction() {
                     cardLayout.next(panel)
                     pack()
                 } else if (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected) {
-                    startEvoSuiteGeneration()
+                     startEvoSuiteGeneration()
                 } else {
                     cardLayout.next(panel)
                     pack()
@@ -287,7 +288,7 @@ class TestSparkAction : AnAction() {
                 if (llmSettingsState.provideTestSamplesCheckBoxSelected) {
                     cardLayout.next(panel)
                 } else {
-                    startLLMGeneration()
+                     startLLMGeneration()
                 }
             }
 
@@ -317,13 +318,13 @@ class TestSparkAction : AnAction() {
             }
         }
 
-        private fun startEvoSuiteGeneration() {
+        private fun startUnitTestGenerationTool(tool: Tool) {
             if (!testGenerationController.isGeneratorRunning(project)) {
                 val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
                 if (psiHelper != null) {
                     if (codeTypeButtons[0].isSelected) {
-                        EvoSuite().generateTestsForClass(
+                        tool.generateTestsForClass(
                             project,
                             psiHelper,
                             caretOffset,
@@ -332,7 +333,7 @@ class TestSparkAction : AnAction() {
                             testGenerationController,
                         )
                     } else if (codeTypeButtons[1].isSelected) {
-                        EvoSuite().generateTestsForMethod(
+                        tool.generateTestsForMethod(
                             project,
                             psiHelper,
                             caretOffset,
@@ -341,7 +342,7 @@ class TestSparkAction : AnAction() {
                             testGenerationController,
                         )
                     } else if (codeTypeButtons[2].isSelected) {
-                        EvoSuite().generateTestsForLine(
+                        tool.generateTestsForLine(
                             project,
                             psiHelper,
                             caretOffset,
@@ -351,53 +352,15 @@ class TestSparkAction : AnAction() {
                         )
                     }
                 } else {
-                    // TODO shouw the warning panel
+                    // TODO: show the warning panel
                 }
             }
             visibilityController.isVisible = false
             dispose()
         }
 
-        private fun startLLMGeneration() {
-            if (!testGenerationController.isGeneratorRunning(project)) {
-                val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
-
-                if (psiHelper != null) {
-                    if (codeTypeButtons[0].isSelected) {
-                        Llm().generateTestsForClass(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    } else if (codeTypeButtons[1].isSelected) {
-                        Llm().generateTestsForMethod(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    } else if (codeTypeButtons[2].isSelected) {
-                        Llm().generateTestsForLine(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    }
-                } else {
-                    // TODO shouw the warning panel
-                }
-            }
-            visibilityController.isVisible = false
-            dispose()
-        }
+        private fun startEvoSuiteGeneration() = startUnitTestGenerationTool(tool = EvoSuite())
+        private fun startLLMGeneration() = startUnitTestGenerationTool(tool = Llm())
 
         /**
          * Updates the state of the "Next" button based on the selected options.
