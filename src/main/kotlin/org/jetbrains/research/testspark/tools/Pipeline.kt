@@ -1,79 +1,131 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.data.DataFilesUtil
+import com.intellij.openapi.util.io.FileUtilRt
+import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.helpers.getSurroundingClass
-import org.jetbrains.research.testspark.services.ClearService
-import org.jetbrains.research.testspark.services.ProjectContextService
-import org.jetbrains.research.testspark.services.TestStorageProcessingService
+import org.jetbrains.research.testspark.data.ProjectContext
+import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.helpers.psi.PsiHelper
+import org.jetbrains.research.testspark.services.CoverageVisualisationService
+import org.jetbrains.research.testspark.services.EditorService
+import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
+import java.util.UUID
 
 /**
- * Pipeline class represents a pipeline for running the test generation process.
+ * Pipeline class represents a pipeline for generating tests in a project.
  *
- * @param e The AnActionEvent instance that triggered the pipeline.
- * @param packageName The name of the package where the target class resides.
+ * @param project the project in which the pipeline is executed.
+ * @param psiHelper The PsiHelper in the context of witch the pipeline is executed.
+ * @param caretOffset the offset of the caret position in the PSI file.
+ * @param fileUrl the URL of the file being processed, if applicable.
+ * @param packageName the package name of the file being processed.
  */
 class Pipeline(
-    e: AnActionEvent,
+    private val project: Project,
+    psiHelper: PsiHelper,
+    caretOffset: Int,
+    fileUrl: String?,
     private val packageName: String,
+    private val testGenerationController: TestGenerationController,
 ) {
-    private val project = e.project!!
+    val projectContext: ProjectContext = ProjectContext()
+    val generatedTestsData = TestGenerationData()
 
     init {
-        project.service<ProjectContextService>().projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
-        project.service<ProjectContextService>().resultPath = project.service<TestStorageProcessingService>().resultPath
-        project.service<ProjectContextService>().baseDir = "${project.service<TestStorageProcessingService>().testResultDirectory}${project.service<TestStorageProcessingService>().testResultName}-validation"
-        project.service<ProjectContextService>().fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
-        project.service<ProjectContextService>().cutPsiClass = getSurroundingClass(
-            e.dataContext.getData(CommonDataKeys.PSI_FILE)!!,
-            e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!,
-        )
-        project.service<ProjectContextService>().cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(project.service<ProjectContextService>().cutPsiClass!!.containingFile.virtualFile)!!
+        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
 
-        project.service<ProjectContextService>().classFQN = project.service<ProjectContextService>().cutPsiClass!!.qualifiedName!!
+        // get generated test path
+        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults${ToolUtils.sep}"
+        val id = UUID.randomUUID().toString()
+        val testResultName = "test_gen_result_$id"
 
-        DataFilesUtil.makeTmp()
-        DataFilesUtil.makeDir(project.service<ProjectContextService>().baseDir!!)
+        ApplicationManager.getApplication().runWriteAction {
+            projectContext.projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
+            projectContext.fileUrlAsString = fileUrl
+            projectContext.classFQN = cutPsiClass.qualifiedName
+            // TODO probably can be made easier
+            projectContext.cutModule =
+                ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.virtualFile)!!
+        }
+
+        generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
+        generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
+        generatedTestsData.testResultName = testResultName
+
+        DataFilesUtil.makeTmp(FileUtilRt.getTempDirectory())
+        DataFilesUtil.makeDir(generatedTestsData.baseDir!!)
     }
 
     /**
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-        project.service<ClearService>().clear(project)
+        clear(project)
+        val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
 
-        val projectBuilder = ProjectBuilder(project)
+        var uiContext: UIContext? = null
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestSparkBundle.message("testGenerationMessage")) {
+            .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
-                    if (processStopped(project, indicator)) return
+                    val ijIndicator = IJProgressIndicator(indicator)
 
-                    if (projectBuilder.runBuild(indicator)) {
-                        if (processStopped(project, indicator)) return
+                    if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
-                        processManager.runTestGenerator(
-                            indicator,
+                    if (projectBuilder.runBuild(ijIndicator)) {
+                        if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
+
+                        uiContext = processManager.runTestGenerator(
+                            ijIndicator,
                             codeType,
                             packageName,
+                            projectContext,
+                            generatedTestsData,
+                            testGenerationController.errorMonitor,
                         )
                     }
 
-                    if (processStopped(project, indicator)) return
+                    if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
-                    indicator.stop()
+                    ijIndicator.stop()
+                }
+
+                override fun onFinished() {
+                    super.onFinished()
+                    testGenerationController.finished()
+                    uiContext?.let {
+                        project.service<TestCaseDisplayService>()
+                            .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
+
+                        if (project.service<EditorService>().editor != null) {
+                            val report = it.testGenerationOutput.testGenerationResultList[0]!!
+                            project.service<TestCaseDisplayService>().displayTestCases(report, it)
+                            project.service<CoverageVisualisationService>().showCoverage(report)
+                        }
+                    }
                 }
             })
+    }
+
+    private fun clear(project: Project) { // should be removed totally!
+        testGenerationController.errorMonitor.clear()
+        project.service<TestCaseDisplayService>().clear()
+        project.service<CoverageVisualisationService>().clear()
+        project.service<TestsExecutionResultService>().clear()
     }
 }

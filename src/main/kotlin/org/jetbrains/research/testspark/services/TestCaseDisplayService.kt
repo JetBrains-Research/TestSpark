@@ -27,10 +27,15 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import com.intellij.util.containers.stream
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
+import org.jetbrains.research.testspark.core.data.Report
+import org.jetbrains.research.testspark.core.data.TestCase
+import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
+import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.ReportHelper
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -47,12 +52,15 @@ import javax.swing.SwingConstants
 
 @Service(Service.Level.PROJECT)
 class TestCaseDisplayService(private val project: Project) {
+    private var report: Report? = null
+
+    private val unselectedTestCases = HashMap<Int, TestCase>()
 
     private var mainPanel: JPanel = JPanel()
 
     private val topButtonsPanelFactory = TopButtonsPanelFactory(project)
 
-    private var applyButton: JButton = JButton(TestSparkLabelsBundle.defaultValue("applyButton"))
+    private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
     private var allTestCasePanel: JPanel = JPanel()
 
@@ -81,6 +89,8 @@ class TestCaseDisplayService(private val project: Project) {
      */
     private var content: Content? = null
 
+    var uiContext: UIContext? = null
+
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
@@ -99,8 +109,10 @@ class TestCaseDisplayService(private val project: Project) {
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
      */
-    fun displayTestCases() {
-        val report = project.service<ReportLockingService>().getReport()
+    fun displayTestCases(report: Report, uiContext: UIContext) {
+        this.report = report
+        this.uiContext = uiContext
+
         val editor = project.service<EditorService>().editor!!
 
         allTestCasePanel.removeAll()
@@ -124,16 +136,16 @@ class TestCaseDisplayService(private val project: Project) {
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
                 if (checkbox.isSelected) {
-                    project.service<ReportLockingService>().selectTestCase(testCase.id)
+                    ReportHelper.selectTestCase(project, report, unselectedTestCases, testCase.id)
                 } else {
-                    project.service<ReportLockingService>().unselectTestCase(testCase.id)
+                    ReportHelper.unselectTestCase(project, report, unselectedTestCases, testCase.id)
                 }
 
                 updateUI()
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox)
+            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext, report)
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
@@ -178,10 +190,10 @@ class TestCaseDisplayService(private val project: Project) {
         scrollToPanel(myPanel)
 
         val editor = getEditor(name) ?: return
-        val settingsProjectState = project.service<SettingsProjectService>().state
+        val settingsProjectState = project.service<PluginSettingsService>().state
         val highlightColor =
             JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
@@ -329,8 +341,8 @@ class TestCaseDisplayService(private val project: Project) {
                 val jOptionPane =
                     JOptionPane.showInputDialog(
                         null,
-                        TestSparkLabelsBundle.defaultValue("optionPaneMessage"),
-                        TestSparkLabelsBundle.defaultValue("optionPaneTitle"),
+                        PluginLabelsBundle.get("optionPaneMessage"),
+                        PluginLabelsBundle.get("optionPaneTitle"),
                         JOptionPane.PLAIN_MESSAGE,
                         null,
                         null,
@@ -349,13 +361,13 @@ class TestCaseDisplayService(private val project: Project) {
 
                 // Check the correctness of a class name
                 if (!Regex("[A-Z][a-zA-Z0-9]*(.java)?").matches(className)) {
-                    showErrorWindow(TestSparkLabelsBundle.defaultValue("incorrectFileNameMessage"))
+                    showErrorWindow(PluginLabelsBundle.get("incorrectFileNameMessage"))
                     continue
                 }
 
                 // Check the existence of a file with this name
                 if (File(filePath).exists()) {
-                    showErrorWindow(TestSparkLabelsBundle.defaultValue("fileAlreadyExistsMessage"))
+                    showErrorWindow(PluginLabelsBundle.get("fileAlreadyExistsMessage"))
                     continue
                 }
                 break
@@ -368,8 +380,8 @@ class TestCaseDisplayService(private val project: Project) {
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
 
-                if (project.service<TestGenerationDataService>().runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${project.service<TestGenerationDataService>().runWith})")
+                if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${uiContext!!.testGenerationOutput.runWith})")
                 }
 
                 psiJavaFile!!.add(psiClass!!)
@@ -403,7 +415,7 @@ class TestCaseDisplayService(private val project: Project) {
         JOptionPane.showMessageDialog(
             null,
             message,
-            TestSparkLabelsBundle.defaultValue("errorWindowTitle"),
+            PluginLabelsBundle.get("errorWindowTitle"),
             JOptionPane.ERROR_MESSAGE,
         )
     }
@@ -435,16 +447,17 @@ class TestCaseDisplayService(private val project: Project) {
 
         // insert tests to a code
         testCaseComponents.reversed().forEach {
-            val testMethodCode = project
-                .service<JavaClassBuilderService>()
-                .getTestMethodCodeFromClassWithTestCase(
-                    project.service<JavaClassBuilderService>().formatJavaCode(
+            val testMethodCode =
+                JavaClassBuilderHelper.getTestMethodCodeFromClassWithTestCase(
+                    JavaClassBuilderHelper.formatJavaCode(
+                        project,
                         it.replace("\r\n", "\n")
                             .replace("verifyException(", "// verifyException("),
+                        uiContext!!.testGenerationOutput,
                     ),
                 )
-                // Fix Windows line separators
-                .replace("\r\n", "\n")
+                    // Fix Windows line separators
+                    .replace("\r\n", "\n")
 
             PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
                 selectedClass.rBrace!!.textRange.startOffset,
@@ -455,23 +468,23 @@ class TestCaseDisplayService(private val project: Project) {
         // insert other info to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             selectedClass.rBrace!!.textRange.startOffset,
-            project.service<TestGenerationDataService>().otherInfo + "\n",
+            uiContext!!.testGenerationOutput.otherInfo + "\n",
         )
 
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            project.service<TestGenerationDataService>().importsCode.joinToString("\n") + "\n\n",
+            uiContext!!.testGenerationOutput.importsCode.joinToString("\n") + "\n\n",
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
             .insertString(
                 0,
-                if (project.service<TestGenerationDataService>().packageLine.isEmpty()) {
+                if (uiContext!!.testGenerationOutput.packageLine.isEmpty()) {
                     ""
                 } else {
-                    "package ${project.service<TestGenerationDataService>().packageLine};\n\n"
+                    "package ${uiContext!!.testGenerationOutput.packageLine};\n\n"
                 },
             )
     }
@@ -508,7 +521,7 @@ class TestCaseDisplayService(private val project: Project) {
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
             mainPanel,
-            TestSparkLabelsBundle.defaultValue("generatedTests"),
+            PluginLabelsBundle.get("generatedTests"),
             true,
         )
         contentManager!!.addContent(content!!)

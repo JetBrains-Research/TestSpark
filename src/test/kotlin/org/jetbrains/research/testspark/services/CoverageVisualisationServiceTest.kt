@@ -12,7 +12,7 @@ import org.evosuite.result.MutationInfo
 import org.evosuite.result.TestGenerationResultImpl
 import org.evosuite.shaded.org.mockito.Mockito
 import org.evosuite.utils.CompactReport
-import org.jetbrains.research.testspark.data.Report
+import org.jetbrains.research.testspark.data.IJReport
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
@@ -24,7 +24,6 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
 
     private lateinit var coverageVisualisationService: CoverageVisualisationService
     private val myEditor = Mockito.mock(Editor::class.java)
-    private lateinit var coverageToolWindowDisplayService: CoverageToolWindowDisplayService
 
     private val branch1 = Mockito.mock(BranchInfo::class.java)
     private val branch2 = Mockito.mock(BranchInfo::class.java)
@@ -43,7 +42,6 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
         super.setUp()
 
         coverageVisualisationService = project.service()
-        coverageToolWindowDisplayService = project.service()
 
         // Initialise the toolWindow TestSpark
         ToolWindowManager.getInstance(project)
@@ -91,7 +89,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
 //    }
 
     fun testCreateToolWindowTabTestSingleContent() {
-        coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())))
+        coverageVisualisationService.showCoverage(IJReport(CompactReport(TestGenerationResultImpl())))
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")!!
 
         // Verify only 1 content is created
@@ -99,7 +97,7 @@ class CoverageVisualisationServiceTest : LightJavaCodeInsightFixtureTestCase() {
     }
 
     fun testCreateToolWindowTabTestContent() {
-        coverageVisualisationService.showCoverage(Report(CompactReport(TestGenerationResultImpl())))
+        coverageVisualisationService.showCoverage(IJReport(CompactReport(TestGenerationResultImpl())))
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")!!
         val content = toolWindow.contentManager.getContent(0)!!
         assertThat(content.displayName).isEqualTo("Coverage")

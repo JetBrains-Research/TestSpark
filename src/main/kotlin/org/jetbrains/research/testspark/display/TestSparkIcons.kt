@@ -64,5 +64,14 @@ object TestSparkIcons {
     val settings = IconLoader.getIcon("/icons/settings.svg", javaClass)
 
     @JvmField
+    val add = IconLoader.getIcon("/icons/add.svg", javaClass)
+
+    @JvmField
+    val setDefault = IconLoader.getIcon("/icons/setDefault.svg", javaClass)
+
+    @JvmField
+    val showCode = IconLoader.getIcon("/icons/showCode.svg", javaClass)
+
+    @JvmField
     val pluginIcon = IconLoader.getIcon("/META-INF/pluginIcon.svg", javaClass)
 }

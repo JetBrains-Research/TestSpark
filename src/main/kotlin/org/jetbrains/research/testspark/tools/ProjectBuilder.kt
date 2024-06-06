@@ -4,29 +4,31 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.task.ProjectTaskManager
 import com.intellij.util.concurrency.Semaphore
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.data.DataFilesUtil
-import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.utils.DataFilesUtil
+import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.plugin.PluginSettingsState
 import java.util.concurrent.CountDownLatch
 
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
  */
-class ProjectBuilder(private val project: Project) {
+class ProjectBuilder(private val project: Project, private val errorMonitor: ErrorMonitor) {
+    private val pluginSettingsState: PluginSettingsState
+        get() = project.getService(PluginSettingsService::class.java).state
+
     private val log = Logger.getInstance(this::class.java)
 
-    private val builderTimeout: Long = 12000000 // TODO: Source from config
+    private val builderTimeout: Long = 12000000
 
     private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
-    private val settingsState = project.service<SettingsProjectService>().state
 
     /**
      * Runs the build process.
@@ -34,15 +36,16 @@ class ProjectBuilder(private val project: Project) {
      * @param indicator The progress indicator to show the build progress.
      * @return True if the build is successful, false otherwise.
      */
-    fun runBuild(indicator: ProgressIndicator): Boolean {
+    fun runBuild(indicator: CustomProgressIndicator): Boolean {
         val handle = CountDownLatch(1)
         log.info("Starting build!")
         var isSuccessful = true
 
         try {
-            indicator.isIndeterminate = true
-            indicator.text = TestSparkBundle.message("buildMessage")
-            if (settingsState.buildCommand.isEmpty()) {
+            indicator.setIndeterminate(true)
+            indicator.setText(PluginMessagesBundle.get("buildMessage"))
+
+            if (pluginSettingsState.buildCommand.isEmpty()) {
                 // User did not put own command line
                 val promise = ProjectTaskManager.getInstance(project).buildAllModules()
                 val finished = Semaphore()
@@ -73,7 +76,7 @@ class ProjectBuilder(private val project: Project) {
                     cmd.add("-c")
                 }
 
-                cmd.add(settingsState.buildCommand)
+                cmd.add(pluginSettingsState.buildCommand)
 
                 val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
                 log.info("Starting build process with arguments: $cmdString")
@@ -88,7 +91,7 @@ class ProjectBuilder(private val project: Project) {
                     isSuccessful = false
                 }
 
-                if (indicator.isCanceled) {
+                if (indicator.isCanceled()) {
                     return false
                 }
 
@@ -110,10 +113,10 @@ class ProjectBuilder(private val project: Project) {
     }
 
     private fun errorProcess() {
-        if (project.service<ErrorService>().errorOccurred()) {
+        if (errorMonitor.notifyErrorOccurrence()) {
             NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-                TestSparkBundle.message("buildErrorTitle"),
-                TestSparkBundle.message("commonBuildErrorMessage"),
+                PluginMessagesBundle.get("buildErrorTitle"),
+                PluginMessagesBundle.get("commonBuildErrorMessage"),
                 NotificationType.ERROR,
             ).notify(project)
         }

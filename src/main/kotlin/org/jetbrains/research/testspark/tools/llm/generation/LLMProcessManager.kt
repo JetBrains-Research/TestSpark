@@ -2,26 +2,32 @@ package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
+import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
+import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.TestsPresenter
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.data.TestCase
-import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.JavaClassBuilderService
-import org.jetbrains.research.testspark.services.LLMChatService
-import org.jetbrains.research.testspark.services.ProjectContextService
-import org.jetbrains.research.testspark.services.SettingsProjectService
-import org.jetbrains.research.testspark.services.TestGenerationDataService
-import org.jetbrains.research.testspark.services.TestStorageProcessingService
-import org.jetbrains.research.testspark.tools.*
+import org.jetbrains.research.testspark.data.IJReport
+import org.jetbrains.research.testspark.data.ProjectContext
+import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
+import org.jetbrains.research.testspark.tools.TestCompilerFactory
+import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testspark.tools.llm.test.TestCaseGeneratedByLLM
-import org.jetbrains.research.testspark.tools.llm.test.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import java.io.File
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -37,12 +43,16 @@ import java.io.File
 class LLMProcessManager(
     private val project: Project,
     private val promptManager: PromptManager,
+    private val testSamplesCode: String,
 ) : ProcessManager {
-    private val settingsProjectState = project.service<SettingsProjectService>().state
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
+
     private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
-    private val maxRequests = SettingsArguments.maxLLMRequest()
+    private val maxRequests = SettingsArguments(project).maxLLMRequest()
+    private val testProcessor = TestProcessor(project)
 
     /**
      * Runs the test generator process.
@@ -52,217 +62,150 @@ class LLMProcessManager(
      * @param packageName The package name of the code being tested.
      */
     override fun runTestGenerator(
-        indicator: ProgressIndicator?,
+        indicator: CustomProgressIndicator,
         codeType: FragmentToTestData,
         packageName: String,
-    ) {
-        ProjectUnderTestFileCreator.log("LLM test generation begins")
-        // println("LLM test generation begins")
+        projectContext: ProjectContext,
+        generatedTestsData: TestGenerationData,
+        errorMonitor: ErrorMonitor,
+    ): UIContext? {
         log.info("LLM test generation begins")
 
-        if (processStopped(project, indicator)) return
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
         // update build path
-        var buildPath = project.service<ProjectContextService>().projectClassPath!!
+        var buildPath = projectContext.projectClassPath!!
         ProjectUnderTestFileCreator.log("buildPath from ProjectContextService: '$buildPath'")
-        // println("buildPath from ProjectContextService: '$buildPath'")
 
-        if (settingsProjectState.buildPath.isEmpty()) {
+        if (project.service<PluginSettingsService>().state.buildPath.isEmpty()) {
             // User did not set own path
-            buildPath = getBuildPath(project)
+            buildPath = ToolUtils.getBuildPath(project)
         }
         ProjectUnderTestFileCreator.log("Final buildPath: '$buildPath'")
         // println("Final buildPath: '$buildPath'")
 
         if (buildPath.isEmpty() || buildPath.isBlank()) {
-            llmErrorManager.errorProcess(TestSparkBundle.message("emptyBuildPath"), project)
-            return
+            llmErrorManager.errorProcess(LLMMessagesBundle.get("emptyBuildPath"), project, errorMonitor)
+            return null
         }
-        indicator?.text = TestSparkBundle.message("searchMessage")
+        indicator.setText(PluginMessagesBundle.get("searchMessage"))
 
-        var generatedTestsArePassing = false
+        val report = IJReport()
 
-        val report = Report()
+        val initialPromptMessage = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
-        var requestsCount = 0
-        var warningMessage = ""
-        var messageToPrompt = promptManager.generatePrompt(codeType)
-        var generatedTestSuite: TestSuiteGeneratedByLLM? = null
+        val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion)
 
-        // notify LLMChatService to restart the chat process.
-        project.service<LLMChatService>().newSession()
+        // initiate a new RequestManager
+        val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
 
-        ProjectUnderTestFileCreator.log("Max requests count is $maxRequests")
-        // println("Max requests count is $maxRequests")
+        // adapter for the existing prompt reduction functionality
+        val promptSizeReductionStrategy = object : PromptSizeReductionStrategy {
+            override fun isReductionPossible(): Boolean = promptManager.isPromptSizeReductionPossible(generatedTestsData)
 
-        // Asking LLM to generate test. Here, we have a loop to make feedback cycle for LLm in case of wrong responses.
-        while (!generatedTestsArePassing) {
-            requestsCount++
-
-            ProjectUnderTestFileCreator.log(
-                "============================== Feedback Cycle Iteration $requestsCount/$maxRequests ==============================")
-            // println("============================== Feedback Cycle Iteration $requestsCount/$maxRequests ==============================")
-            log.info(
-                "============================== Feedback Cycle Iteration $requestsCount/$maxRequests ==============================")
-
-            // Process stopped checking
-            if (processStopped(project, indicator)) return
-
-            // Ending loop checking
-            if (isLastIteration(requestsCount) && project.service<TestGenerationDataService>().compilableTestCases.isEmpty()) {
-                ProjectUnderTestFileCreator.log("No compilable test cases on last feedback cycle iteration")
-
-                if (generatedTestSuite != null) {
-                    ProjectUnderTestFileCreator.log("Remove test cases from test suite")
-                    generatedTestSuite.testCases = mutableListOf()
+            override fun reduceSizeAndGeneratePrompt(): String {
+                if (!isReductionPossible()) {
+                    throw IllegalStateException("Prompt size reduction is not possible yet requested")
                 }
+                val reductionSuccess = promptManager.reducePromptSize(generatedTestsData)
+                assert(reductionSuccess)
 
-                // println("No compilable test cases on the last feedback cycle iteration")
-                llmErrorManager.errorProcess(TestSparkBundle.message("invalidLLMResult"), project)
-                break
-            }
-
-            // Send request to LLM
-            if (warningMessage.isNotEmpty()) {
-                llmErrorManager.warningProcess(warningMessage, project)
-            }
-
-            val requestResult: Pair<String, TestSuiteGeneratedByLLM?> =
-                project.service<LLMChatService>().testGenerationRequest(
-                    messageToPrompt, indicator, packageName, project, llmErrorManager)
-
-            if (requestResult.first == TestSparkBundle.message("tooLongPrompt")) {
-                ProjectUnderTestFileCreator.log("The generated prompt is too long: ${messageToPrompt.length} characters")
-                // println("The generated prompt is too long: ${messageToPrompt.length} characters")
-                if (promptManager.reducePromptSize()) {
-                    ProjectUnderTestFileCreator.log("Prompt size reduction is possible, reducing prompt...")
-                    // println("Prompt size reduction is possible, reducing prompt...")
-                    messageToPrompt = promptManager.generatePrompt(codeType)
-                    requestsCount--
-                    continue
-                } else {
-                    ProjectUnderTestFileCreator.log("Prompt size reduction is not possible, aborting...")
-                    // println("Prompt size reduction is not possible, aborting...")
-                    llmErrorManager.errorProcess(TestSparkBundle.message("tooLongPromptRequest"), project)
-                    return
-                }
-            }
-            generatedTestSuite = requestResult.second
-
-            // Process stopped checking
-            if (processStopped(project, indicator)) return
-
-            // Bad response checking
-            if (generatedTestSuite == null) {
-                messageToPrompt = requestResult.first
-                continue
-            }
-
-            // Empty response checking
-            if (generatedTestSuite.testCases.isEmpty()) {
-                warningMessage = TestSparkBundle.message("emptyResponse")
-                messageToPrompt =
-                    "You have provided an empty answer! Please answer my previous question with the same formats."
-                continue
-            }
-
-            // Save the generated TestSuite into a temp file
-            val generatedTestCasesPaths: MutableList<String> = mutableListOf()
-            if (isLastIteration(requestsCount)) {
-                val cnt = project.service<TestGenerationDataService>().compilableTestCases.size
-                ProjectUnderTestFileCreator.log("Update the test suite with $cnt compilable test cases (last iteration)")
-                // println("Update the test suite with $cnt compilable test cases (last iteration)")
-                generatedTestSuite.updateTestCases(project.service<TestGenerationDataService>().compilableTestCases.toMutableList())
-            } else {
-                for (testCaseIndex in generatedTestSuite.testCases.indices) {
-                    generatedTestCasesPaths.add(
-                        project.service<TestStorageProcessingService>().saveGeneratedTest(
-                            generatedTestSuite.packageString,
-                            generatedTestSuite.toStringSingleTestCaseWithoutExpectedException(testCaseIndex),
-                            project.service<ProjectContextService>().resultPath!!,
-                            "${project.service<JavaClassBuilderService>().getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java",
-                        ),
-                    )
-                }
-            }
-
-            val generatedTestPath: String = project.service<TestStorageProcessingService>().saveGeneratedTest(
-                generatedTestSuite.packageString,
-                generatedTestSuite.toStringWithoutExpectedException(),
-                project.service<ProjectContextService>().resultPath!!,
-                testFileName,
-            )
-
-            // Correct files creating checking
-            var isFilesExists = true
-            for (path in generatedTestCasesPaths) {
-                isFilesExists = isFilesExists && File(path).exists()
-            }
-            if (!isFilesExists || !File(generatedTestPath).exists()) {
-                llmErrorManager.errorProcess(TestSparkBundle.message("savingTestFileIssue"), project)
-                break
-            }
-
-            ProjectUnderTestFileCreator.log("Test suite is saved in: '${generatedTestPath}'")
-            ProjectUnderTestFileCreator.log("Test cases are saved in:\n'${generatedTestCasesPaths}'")
-            // println("Test suite is saved in: '${generatedTestPath}'")
-            // println("Test cases are saved in:\n'${generatedTestCasesPaths}'")
-
-            // Get test cases
-            val testCases: MutableList<TestCaseGeneratedByLLM> =
-                if (!isLastIteration(requestsCount)) {
-                    generatedTestSuite.testCases
-                } else {
-                    project.service<TestGenerationDataService>().compilableTestCases.toMutableList()
-                }
-
-            // Compile the test file
-            indicator?.text = TestSparkBundle.message("compilationTestsChecking")
-            val separateCompilationResult = project.service<TestStorageProcessingService>().compileTestCases(generatedTestCasesPaths, buildPath, testCases)
-            val commonCompilationResult = project.service<TestStorageProcessingService>().compileCode(File(generatedTestPath).absolutePath, buildPath)
-
-            ProjectUnderTestFileCreator.log(
-                "Separate compilation of test cases: $separateCompilationResult, compilation of test suite: ${commonCompilationResult.first}")
-
-            if (!separateCompilationResult && !isLastIteration(requestsCount)) {
-                ProjectUnderTestFileCreator.log("Some test cases were not compilable (iteration $requestsCount/$maxRequests)")
-                ProjectUnderTestFileCreator.log("Test suite compilation failed with an error:\n\"${commonCompilationResult.second}\"")
-                // println("Some test cases were not compilable (iteration $requestsCount/$maxRequests)")
-                // println("Test suite compilation failed with an error:\n\"${commonCompilationResult.second}\"")
-
-                log.info("Incorrect result: \n$generatedTestSuite")
-
-                warningMessage = TestSparkBundle.message("compilationError")
-                messageToPrompt = "I cannot compile the tests that you provided. The error is:\n${commonCompilationResult.second}\n Fix this issue in the provided tests.\n return the fixed tests between ```"
-                continue
-            }
-
-            ProjectUnderTestFileCreator.log("${testCases.size} test cases are compilable. Finishing feedback cycle...")
-            // println("${testCases.size} test cases are compilable. Finishing feedback cycle...")
-            log.info("Result is compilable")
-
-            generatedTestsArePassing = true
-
-            for (index in testCases.indices) {
-                report.testCaseList[index] = TestCase(index, testCases[index].name, testCases[index].toString(), setOf(), setOf(), setOf())
+                return promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
             }
         }
 
-        ProjectUnderTestFileCreator.log("Generation has finished: generatedTestsArePassing: $generatedTestsArePassing, iterations used: $requestsCount/$maxRequests\"")
-        // println("Generation has finished: generatedTestsArePassing: $generatedTestsArePassing, iterations used: $requestsCount/$maxRequests")
+        // adapter for the existing test case/test suite string representing functionality
+        val testsPresenter = object : TestsPresenter {
+            private val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData)
 
-        if (processStopped(project, indicator)) return
+            override fun representTestSuite(testSuite: TestSuiteGeneratedByLLM): String {
+                return testSuitePresenter.toStringWithoutExpectedException(testSuite)
+            }
+
+            override fun representTestCase(testSuite: TestSuiteGeneratedByLLM, testCaseIndex: Int): String {
+                return testSuitePresenter.toStringSingleTestCaseWithoutExpectedException(testSuite, testCaseIndex)
+            }
+        }
+
+        // Asking LLM to generate a test suite. Here we have a feedback cycle for LLM in case of wrong responses
+        val llmFeedbackCycle = LLMWithFeedbackCycle(
+            report = report,
+            initialPromptMessage = initialPromptMessage,
+            promptSizeReductionStrategy = promptSizeReductionStrategy,
+            testSuiteFilename = testFileName,
+            packageName = packageName,
+            resultPath = generatedTestsData.resultPath,
+            buildPath = buildPath,
+            requestManager = requestManager,
+            testsAssembler = JUnitTestsAssembler(project, indicator, generatedTestsData),
+            testCompiler = testCompiler,
+            testStorage = testProcessor,
+            testsPresenter = testsPresenter,
+            indicator = indicator,
+            requestsCountThreshold = maxRequests,
+            errorMonitor = errorMonitor,
+        )
+
+        val feedbackResponse = llmFeedbackCycle.run { warning ->
+            when (warning) {
+                LLMWithFeedbackCycle.WarningType.TEST_SUITE_PARSING_FAILED ->
+                    llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
+                LLMWithFeedbackCycle.WarningType.NO_TEST_CASES_GENERATED ->
+                    llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
+                LLMWithFeedbackCycle.WarningType.COMPILATION_ERROR_OCCURRED ->
+                    llmErrorManager.warningProcess(LLMMessagesBundle.get("compilationError"), project)
+            }
+        }
+
+        // Process stopped checking
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
+        log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
+
+        when (feedbackResponse.executionResult) {
+            FeedbackCycleExecutionResult.OK -> {
+                log.info("Add ${feedbackResponse.compilableTestCases.size} compilable test cases into generatedTestsData")
+                // store compilable test cases
+                generatedTestsData.compilableTestCases.addAll(feedbackResponse.compilableTestCases)
+            }
+            FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED -> {
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project, errorMonitor)
+            }
+            FeedbackCycleExecutionResult.CANCELED -> {
+                log.info("Process stopped")
+                return null
+            }
+            FeedbackCycleExecutionResult.PROVIDED_PROMPT_TOO_LONG -> {
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("tooLongPromptRequest"), project, errorMonitor)
+                return null
+            }
+            FeedbackCycleExecutionResult.SAVING_TEST_FILES_ISSUE -> {
+                llmErrorManager.errorProcess(LLMMessagesBundle.get("savingTestFileIssue"), project, errorMonitor)
+            }
+        }
+
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
         // Error during the collecting
-        if (project.service<ErrorService>().isErrorOccurred()) return
+        if (errorMonitor.hasErrorOccurred()) return null
 
-        saveData(
+        log.info("Save generated test suite and test cases into the project workspace")
+
+        val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData)
+        val generatedTestSuite: TestSuiteGeneratedByLLM? = feedbackResponse.generatedTestSuite
+        val testSuiteRepresentation =
+            if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null
+
+        ToolUtils.transferToIJTestCases(report)
+
+        ToolUtils.saveData(
             project,
             report,
-            getPackageFromTestSuiteCode(generatedTestSuite.toString()),
-            getImportsCodeFromTestSuiteCode(generatedTestSuite.toString(), project.service<ProjectContextService>().classFQN!!),
+            ToolUtils.getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation),
+            ToolUtils.getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
+            projectContext.fileUrlAsString!!,
+            generatedTestsData,
         )
-    }
 
-    private fun isLastIteration(requestsCount: Int) = requestsCount > maxRequests
+        return UIContext(projectContext, generatedTestsData, requestManager, errorMonitor)
+    }
 }

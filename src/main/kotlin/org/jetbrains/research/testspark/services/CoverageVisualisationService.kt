@@ -11,11 +11,16 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.bundles.TestSparkToolTipsBundle
-import org.jetbrains.research.testspark.coverage.CoverageRenderer
-import org.jetbrains.research.testspark.data.Report
+import org.evosuite.result.MutationInfo
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
+import org.jetbrains.research.testspark.core.data.Report
+import org.jetbrains.research.testspark.data.IJReport
+import org.jetbrains.research.testspark.data.IJTestCase
+import org.jetbrains.research.testspark.helpers.CoverageHelper
+import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
 import java.awt.Color
+import javax.swing.JScrollPane
 import kotlin.math.roundToInt
 
 /**
@@ -32,6 +37,8 @@ class CoverageVisualisationService(private val project: Project) {
     private val textAttribute = TextAttributes()
 
     private var currentHighlightedData: HighlightedData? = null
+
+    private var mainScrollPane: JScrollPane? = null
 
     /**
      * Represents highlighted data in the editor.
@@ -99,15 +106,15 @@ class CoverageVisualisationService(private val project: Project) {
             HighlightedData(linesToCover, selectedTests, testReport, project.service<EditorService>().editor!!)
         clear()
 
-        val settingsProjectState = project.service<SettingsProjectService>().state
+        val settingsProjectState = project.service<PluginSettingsService>().state
 
         if (settingsProjectState.showCoverageCheckboxSelected) {
             val color = JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue),
             )
             val colorForLines = JBColor(
-                TestSparkToolTipsBundle.defaultValue("colorName"),
+                PluginSettingsBundle.get("colorName"),
                 Color(
                     settingsProjectState.colorRed,
                     settingsProjectState.colorGreen,
@@ -123,20 +130,23 @@ class CoverageVisualisationService(private val project: Project) {
             val mapMutantsToTests = HashMap<String, MutableList<String>>()
 
             testReport.testCaseList.values.forEach { compactTestCase ->
-                val mutantsCovered = compactTestCase.coveredMutants
-                val testName = compactTestCase.testName
-                mutantsCovered.forEach {
-                    val testCasesCoveringMutant = mapMutantsToTests.getOrPut(it.replacement) { ArrayList() }
-                    testCasesCoveringMutant.add(testName)
+                // Since we are in the IntelliJ plugin's visualizer, all test cases should be an instance of IJTestCase
+                if (compactTestCase is IJTestCase) {
+                    val mutantsCovered = compactTestCase.coveredMutants
+                    val testName = compactTestCase.testName
+                    mutantsCovered.forEach {
+                        val testCasesCoveringMutant = mapMutantsToTests.getOrPut(it.replacement) { ArrayList() }
+                        testCasesCoveringMutant.add(testName)
+                    }
+                } else {
+                    throw IllegalStateException("all test cases passed to the plugin visualizer in IDEA should be an instance of IJTestCase")
                 }
             }
 
-            val mutationCovered =
-                testReport.testCaseList.filter { x -> x.value.id in selectedTests }.map { x -> x.value.coveredMutants }
-                    .flatten().groupBy { x -> x.lineNo }
-            val mutationNotCovered =
-                testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.value.id !in selectedTests }
-                    .map { x -> x.value.coveredMutants }.flatten().groupBy { x -> x.lineNo }
+            // get a list of mutants covered by each test
+            val mutationCovered = getCoveredMutants(testReport, selectedTests)
+            // get uncovered mutants for each test case
+            val mutationNotCovered = getUncoveredMutants(testReport, selectedTests)
 
             for (i in linesToCover) {
                 val line = i - 1
@@ -147,13 +157,13 @@ class CoverageVisualisationService(private val project: Project) {
                     textAttribute,
                 )
 
-                val testsCoveringLine =
-                    testReport.testCaseList.filter { x -> i in x.value.coveredLines && x.value.id in selectedTests }
-                        .map { x -> x.value.testName }
+                // get tests that are covering the current line
+                val testsCoveringLine = getCoveringLines(testReport, selectedTests, i)
+                // get the list of killed and survived mutants in the current line
                 val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
                 val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 
-                hl.lineMarkerRenderer = CoverageRenderer(
+                hl.lineMarkerRenderer = CoverageHelper(
                     color,
                     line,
                     testsCoveringLine,
@@ -164,6 +174,26 @@ class CoverageVisualisationService(private val project: Project) {
                 )
             }
         }
+    }
+
+    private fun getCoveringLines(testReport: Report, selectedTests: HashSet<Int>, lineNumber: Int): List<String> {
+        return testReport.testCaseList.filter { x -> lineNumber in x.value.coveredLines && x.value.id in selectedTests }
+            .map { x -> x.value.testName }
+    }
+
+    private fun getUncoveredMutants(testReport: Report, selectedTests: HashSet<Int>): Map<Int, List<MutationInfo>> {
+        if (testReport is IJReport) {
+            return testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.value.id !in selectedTests }
+                .map { x -> (x.value as IJTestCase).coveredMutants }.flatten().groupBy { x -> x.lineNo }
+        } else {
+            throw IllegalStateException("The report provided to IDEA's UI should be an instance of IJReport")
+        }
+    }
+
+    private fun getCoveredMutants(testReport: Report, selectedTests: HashSet<Int>): Map<Int, List<MutationInfo>> {
+        return testReport.testCaseList.filter { x -> x.value.id in selectedTests }
+            .map { x -> (x.value as IJTestCase).coveredMutants }
+            .flatten().groupBy { x -> x.lineNo }
     }
 
     /**
@@ -181,7 +211,7 @@ class CoverageVisualisationService(private val project: Project) {
         }
 
         // Call branch coverage
-        val coveredBranches = testReport.allCoveredBranches.size
+        val coveredBranches = (testReport as IJReport).allCoveredBranches.size
         val allBranches = testReport.allUncoveredBranches.size + coveredBranches
         var relativeBranch = 100
         if (allBranches != 0) {
@@ -197,19 +227,20 @@ class CoverageVisualisationService(private val project: Project) {
         }
 
         // Change the values in the table
-        val coverageToolWindowDisplayService = project.service<CoverageToolWindowDisplayService>()
-        coverageToolWindowDisplayService.data[0] = testReport.UUT
-        coverageToolWindowDisplayService.data[1] = "$relativeLines% ($coveredLines/$allLines)"
-        coverageToolWindowDisplayService.data[2] = "$relativeBranch% ($coveredBranches/$allBranches)"
-        coverageToolWindowDisplayService.data[3] = "$relativeMutations% ($coveredMutations/$allMutations)"
+        mainScrollPane = CoverageToolWindowDisplayHelper.getPanel(
+            arrayListOf(
+                testReport.UUT,
+                "$relativeLines% ($coveredLines/$allLines)",
+                "$relativeBranch% ($coveredBranches/$allBranches)",
+                "$relativeMutations% ($coveredMutations/$allMutations)",
+            ),
+        )
     }
 
     /**
      * Creates a new toolWindow tab for the coverage visualisation.
      */
     private fun createToolWindowTab() {
-        val visualisationService = project.service<CoverageToolWindowDisplayService>()
-
         // Remove coverage visualisation from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
         contentManager = toolWindowManager!!.contentManager
@@ -220,8 +251,8 @@ class CoverageVisualisationService(private val project: Project) {
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.getInstance()
         content = contentFactory.createContent(
-            visualisationService.mainPanel,
-            TestSparkLabelsBundle.defaultValue("coverageVisualisation"),
+            mainScrollPane,
+            PluginLabelsBundle.get("coverageVisualisation"),
             true,
         )
         contentManager!!.addContent(content!!)

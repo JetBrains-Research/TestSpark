@@ -1,43 +1,40 @@
 package org.jetbrains.research.testspark.tools.llm.generation.openai
 
 import com.google.gson.GsonBuilder
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkDefaultsBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testspark.tools.llm.generation.RequestManager
-import org.jetbrains.research.testspark.tools.llm.generation.TestsAssembler
+import org.jetbrains.research.testspark.tools.llm.generation.IJRequestManager
+import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import java.net.HttpURLConnection
 
 /**
  * This class represents a manager for making requests to the LLM (Large Language Model).
  */
-class OpenAIRequestManager : RequestManager() {
+class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
     private val url = "https://api.openai.com/v1/chat/completions"
 
     private val httpRequest = HttpRequests.post(url, "application/json").tuner {
         it.setRequestProperty("Authorization", "Bearer $token")
     }
 
+    private val llmErrorManager = LLMErrorManager()
+
     override fun send(
         prompt: String,
-        indicator: ProgressIndicator?,
-        project: Project,
-        llmErrorManager: LLMErrorManager,
-    ): Pair<SendResult, TestsAssembler> {
+        indicator: CustomProgressIndicator,
+        testsAssembler: TestsAssembler,
+        errorMonitor: ErrorMonitor,
+    ): SendResult {
         // Prepare the chat
-        var model = ""
-        for (llmPlatform in SettingsArguments.llmPlatforms()) {
-            if (llmPlatform.name == TestSparkDefaultsBundle.defaultValue("openAI")) model = llmPlatform.model
-        }
-        val llmRequestBody = OpenAIRequestBody(model, chatHistory)
+        val llmRequestBody = OpenAIRequestBody(SettingsArguments(project).getModel(), chatHistory)
 
-        // Prepare the test assembler
-        val testsAssembler = TestsAssembler(project, indicator)
         var sendResult = SendResult.OK
 
         try {
@@ -46,27 +43,29 @@ class OpenAIRequestManager : RequestManager() {
 
                 // check response
                 when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
-                    HttpURLConnection.HTTP_OK -> testsAssembler.receiveResponse(it)
+                    HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consume(it)
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         llmErrorManager.errorProcess(
-                            TestSparkBundle.message("serverProblems"),
+                            LLMMessagesBundle.get("serverProblems"),
                             project,
+                            errorMonitor,
                         )
                         sendResult = SendResult.OTHER
                     }
 
                     HttpURLConnection.HTTP_BAD_REQUEST -> {
                         llmErrorManager.warningProcess(
-                            TestSparkBundle.message("tooLongPrompt"),
+                            LLMMessagesBundle.get("tooLongPrompt"),
                             project,
                         )
-                        sendResult = SendResult.TOOLONG
+                        sendResult = SendResult.PROMPT_TOO_LONG
                     }
 
                     HttpURLConnection.HTTP_UNAUTHORIZED -> {
                         llmErrorManager.errorProcess(
-                            TestSparkBundle.message("wrongToken"),
+                            LLMMessagesBundle.get("wrongToken"),
                             project,
+                            errorMonitor,
                         )
                         sendResult = SendResult.OTHER
                     }
@@ -75,15 +74,16 @@ class OpenAIRequestManager : RequestManager() {
                         llmErrorManager.errorProcess(
                             llmErrorManager.createRequestErrorMessage(responseCode),
                             project,
+                            errorMonitor,
                         )
                         sendResult = SendResult.OTHER
                     }
                 }
             }
         } catch (e: HttpStatusException) {
-            log.info("Error in sending request: ${e.message}")
+            log.info { "Error in sending request: ${e.message}" }
         }
 
-        return Pair(sendResult, testsAssembler)
+        return sendResult
     }
 }

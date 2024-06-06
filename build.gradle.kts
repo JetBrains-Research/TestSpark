@@ -10,12 +10,14 @@ import java.util.zip.ZipInputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
-val thunderdomeVersion = "1.0.5"
-
+// Space credentials
 val spaceUsername =
     System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
 val spacePassword =
     System.getProperty("space.pass")?.toString() ?: project.properties["spacePassword"]?.toString() ?: ""
+
+// the test generation module for interacting with Grazie (used when the space credentials are provided)
+val grazieTestGenerationVersion = "1.0.5"
 
 plugins {
     // Java support
@@ -59,6 +61,7 @@ if (spaceCredentialsProvided()) {
     val hasGrazieAccess = sourceSets.create("hasGrazieAccess")
     // add output of main source set to new source set class path
     hasGrazieAccess.compileClasspath += sourceSets.main.get().output
+
     // register feature variant
     java.registerFeature(hasGrazieAccess.name) {
         usingSourceSet(hasGrazieAccess)
@@ -66,7 +69,7 @@ if (spaceCredentialsProvided()) {
 
     tasks.register("checkCredentials") {
         configurations.detachedConfiguration(
-            dependencies.create("org.jetbrains.research:grazie-test-generation:1.0.1"),
+            dependencies.create("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion"),
         ).files()
     }
 
@@ -97,7 +100,7 @@ if (spaceCredentialsProvided()) {
 }
 
 dependencies {
-    implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
+    implementation(files("lib/evosuite-${properties("evosuiteVersion")}.jar"))
     implementation(files("lib/standalone-runtime.jar"))
     implementation(files("lib/jacocoagent.jar"))
     implementation(files("lib/jacococli.jar"))
@@ -107,6 +110,12 @@ dependencies {
     implementation(files("lib/JUnitRunner.jar"))
 
     implementation(project(":core"))
+    if (spaceCredentialsProvided()) {
+        "hasGrazieAccessCompileOnly"(project(":core"))
+    }
+
+    // https://central.sonatype.com/artifact/io.github.oshai/kotlin-logging-jvm/overview
+    implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
 
     // validation dependencies
     // https://mvnrepository.com/artifact/junit/junit
@@ -155,13 +164,13 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test
     implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
 
-//    implementation("org.jetbrains.research:plugin-utilities-core:2.0.6")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     if (spaceCredentialsProvided()) {
         // Dependencies for hasGrazieAccess variant
         "hasGrazieAccessImplementation"(kotlin("stdlib"))
         "hasGrazieAccessImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:1.0.4")
+        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion")
     }
 }
 
@@ -308,7 +317,7 @@ abstract class CopyJUnitRunnerLib : DefaultTask() {
  */
 abstract class UpdateEvoSuite : DefaultTask() {
     @Input
-    var version: String = ""
+    var evoSuiteVersion: String = ""
 
     @TaskAction
     fun execute() {
@@ -317,7 +326,7 @@ abstract class UpdateEvoSuite : DefaultTask() {
             libDir.mkdirs()
         }
 
-        val jarName = "evosuite-$version.jar"
+        val jarName = "evosuite-$evoSuiteVersion.jar"
 
         if (libDir.listFiles()?.any { it.name.matches(Regex(jarName)) } == true) {
             logger.info("Specified evosuite jar found, skipping update")
@@ -326,7 +335,7 @@ abstract class UpdateEvoSuite : DefaultTask() {
 
         logger.info("Specified evosuite jar not found, downloading release $jarName")
         val downloadUrl =
-            "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$version/release.zip"
+            "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$evoSuiteVersion/release.zip"
         val stream =
             try {
                 URL(downloadUrl).openStream()
@@ -354,12 +363,15 @@ abstract class UpdateEvoSuite : DefaultTask() {
 }
 
 tasks.register<UpdateEvoSuite>("updateEvosuite") {
-    version = thunderdomeVersion
+    evoSuiteVersion = properties("evosuiteVersion")
 }
-
+/**
+ * Copies the JUnitRunner.jar file to the lib directory of the project.
+ * This task depends on the "JUnitRunner" module being built beforehand.
+ * JUnitRunner.jar is required for running tests with coverage in the main plugin
+ */
 tasks.register<Copy>("copyJUnitRunnerLib") {
     dependsOn(":JUnitRunner:jar")
-
     val libName = "JUnitRunner.jar"
     val libSrcDir =
         "${project.projectDir}${File.separator}JUnitRunner${File.separator}build${File.separator}libs${File.separator}"
@@ -370,24 +382,37 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
     into(libDestDir)
 }
 
-tasks.create<RunIdeTask>("headless"){
+/**
+ * This code sets up a Gradle task for running the plugin in headless mode
+ *
+ * @param root The root directory of the project under test.
+ * @param file The file containing unit under test.
+ * @param cut The class under test.
+ * @param cp The classpath of the project.
+ * @param llm The model used for the test generation task.
+ * @param token The token for using LLM.
+ * @param prompt a txt file containing the LLM's prompt template
+ * @param out The output directory for the project.
+ */
+tasks.create<RunIdeTask>("headless") {
     val root: String? by project
     val file: String? by project
     val cut: String? by project
     val cp: String? by project
+    val junitv: String? by project
     val llm: String? by project
     val token: String? by project
     val prompt: String? by project
     val out: String? by project
 
-    args = listOfNotNull("testspark", root, file, cut, cp, llm, token, prompt, out)
+    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out)
 
     jvmArgs(
         "-Xmx16G",
         "-Djava.awt.headless=true",
         "--add-exports",
         "java.base/jdk.internal.vm=ALL-UNNAMED",
-        "-Didea.system.path"
+        "-Didea.system.path",
     )
 }
 

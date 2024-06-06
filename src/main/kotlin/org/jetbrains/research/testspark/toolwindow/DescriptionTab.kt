@@ -4,11 +4,11 @@ import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.settings.SettingsPluginConfigurable
-import org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable
-import org.jetbrains.research.testspark.settings.llm.SettingsLLMConfigurable
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsConfigurable
+import org.jetbrains.research.testspark.settings.plugin.PluginSettingsConfigurable
 import java.awt.Desktop
 import java.awt.Font
 import java.net.URI
@@ -24,10 +24,9 @@ import javax.swing.event.HyperlinkEvent
  * This class stores the main panel and the UI of the "Parameters" tool window tab.
  */
 class DescriptionTab(private val project: Project) {
-
     private val panelTitle = JPanel()
     private val iconTitle = JLabel(TestSparkIcons.pluginIcon)
-    private val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("quickAccess"))
+    private val textTitle = JLabel(PluginLabelsBundle.get("quickAccess"))
 
     private val testSparkDescription = JTextPane().apply {
         isEditable = false
@@ -70,16 +69,16 @@ class DescriptionTab(private val project: Project) {
     }
 
     // Link to LLM settings
-    private val llmSettingsButton = JButton(TestSparkLabelsBundle.defaultValue("llmSettingsLink"), TestSparkIcons.settings)
+    private val llmSettingsButton = JButton(PluginLabelsBundle.get("llmSettingsLink"), TestSparkIcons.settings)
 
     // Link to EvoSuite settings
-    private val evoSuiteSettingsButton = JButton(TestSparkLabelsBundle.defaultValue("evoSuiteSettingsLink"), TestSparkIcons.settings)
+    private val evoSuiteSettingsButton = JButton(PluginLabelsBundle.get("evoSuiteSettingsLink"), TestSparkIcons.settings)
 
     // Link to open settings
-    private val settingsButton = JButton(TestSparkLabelsBundle.defaultValue("settingsLink"), TestSparkIcons.settings)
+    private val settingsButton = JButton(PluginLabelsBundle.get("settingsLink"), TestSparkIcons.settings)
 
     // Link to documentation
-    private val documentationButton = JButton(TestSparkLabelsBundle.defaultValue("documentationLink"), TestSparkIcons.documentation)
+    private val documentationButton = JButton(PluginLabelsBundle.get("documentationLink"), TestSparkIcons.documentation)
 
     // Tool Window panel
     private var toolWindowPanel: JPanel = JPanel()
@@ -98,21 +97,21 @@ class DescriptionTab(private val project: Project) {
         llmSettingsButton.isOpaque = false
         llmSettingsButton.isContentAreaFilled = false
         llmSettingsButton.addActionListener {
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsLLMConfigurable::class.java)
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, LLMSettingsConfigurable::class.java)
         }
 
         // EvoSuite settings button setup
         evoSuiteSettingsButton.isOpaque = false
         evoSuiteSettingsButton.isContentAreaFilled = false
         evoSuiteSettingsButton.addActionListener {
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsEvoSuiteConfigurable::class.java)
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, EvoSuiteSettingsConfigurable::class.java)
         }
 
         // Settings button setup
         settingsButton.isOpaque = false
         settingsButton.isContentAreaFilled = false
         settingsButton.addActionListener {
-            ShowSettingsUtil.getInstance().showSettingsDialog(project, SettingsPluginConfigurable::class.java)
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, PluginSettingsConfigurable::class.java)
         }
 
         // Documentation button setup

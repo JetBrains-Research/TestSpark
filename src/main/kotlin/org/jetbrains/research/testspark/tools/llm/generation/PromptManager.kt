@@ -1,33 +1,30 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.search.PsiShortNamesCache
-import com.intellij.psi.search.searches.ClassInheritorsSearch
-import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.core.generation.importPattern
-import org.jetbrains.research.testspark.core.generation.packagePattern
-import org.jetbrains.research.testspark.core.generation.prompt.PromptGenerator
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.ClassRepresentation
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.MethodRepresentation
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptConfiguration
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptGenerationContext
-import org.jetbrains.research.testspark.core.generation.prompt.configuration.PromptTemplates
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptGenerator
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.MethodRepresentation
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptConfiguration
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptGenerationContext
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptTemplates
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.services.TestGenerationDataService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
+import org.jetbrains.research.testspark.helpers.psi.PsiHelper
+import org.jetbrains.research.testspark.helpers.psi.PsiHelperFactory
+import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
@@ -36,36 +33,54 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
  * A class that manages prompts for generating unit tests.
  *
  * @constructor Creates a PromptManager with the given parameters.
- * @param cut The class under test.
- * @param classesToTest The classes to be tested.
+ * @param psiHelper The PsiHelper in the context of witch the pipeline is executed.
+ * @param caret The place of the caret.
  */
 class PromptManager(
     private val project: Project,
-    private val cut: PsiClass,
-    private val classesToTest: MutableList<PsiClass>,
+    private val psiHelper: PsiHelper,
+    private val caret: Int,
 ) {
-    val settingsState: SettingsApplicationState = SettingsArguments.settingsState!!
+    private val classesToTest: List<PsiClassWrapper>
+        get() {
+            val classesToTest = mutableListOf<PsiClassWrapper>()
+
+            ApplicationManager.getApplication().runReadAction(
+                Computable {
+                    psiHelper.collectClassesToTest(project, classesToTest, caret)
+                },
+            )
+            return classesToTest
+        }
+
+    private val cut: PsiClassWrapper = classesToTest[0]
+
+    private val llmSettingsState: LLMSettingsState
+        get() = project.getService(LLMSettingsService::class.java).state
 
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
-    fun generatePrompt(codeType: FragmentToTestData): String {
+    fun generatePrompt(codeType: FragmentToTestData, testSamplesCode: String, polyDepthReducing: Int): String {
         val prompt = ApplicationManager.getApplication().runReadAction(
             Computable {
-                val interestingPsiClasses = getInterestingPsiClasses(classesToTest)
+                val interestingPsiClasses =
+                    psiHelper.getInterestingPsiClassesWithQualifiedNames(project, classesToTest, polyDepthReducing)
 
                 ProjectUnderTestFileCreator.log("interestingPsiClasses: [\n${
                         interestingPsiClasses.joinToString("\n") { "\t${it.qualifiedName}" }
                     }\n]")
 
-                val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation)
+                val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
 
                 ProjectUnderTestFileCreator.log("interestingClasses: [\n${
-                    interestingClasses.joinToString("\n") { "\t${it.qualifiedName}" }
-                }\n]")
+                        interestingClasses.joinToString("\n") { "\t${it.qualifiedName}" }
+                    }\n]")
 
-                val polymorphismRelations = getPolymorphismRelations(project, interestingPsiClasses, cut)
-                    .map(this::createClassRepresentation).toMap()
+                val polymorphismRelations =
+                    getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses, cut)
+                        .map(this::createClassRepresentation)
+                        .toMap()
 
                 for (entry in polymorphismRelations.entries) {
                     val baseClass = entry.key
@@ -76,34 +91,39 @@ class PromptManager(
 
                 val context = PromptGenerationContext(
                     cut = createClassRepresentation(cut),
-                    classesToTest = classesToTest.map(this::createClassRepresentation),
+                    classesToTest = classesToTest.map(this::createClassRepresentation).toList(),
                     polymorphismRelations = polymorphismRelations,
                     promptConfiguration = PromptConfiguration(
-                        desiredLanguage = "Java",
-                        desiredTestingPlatform = settingsState.junitVersion.showName,
+                        desiredLanguage = psiHelper.language.languageName,
+                        desiredTestingPlatform = llmSettingsState.junitVersion.showName,
                         desiredMockingFramework = "Mockito 5",
                     ),
                 )
 
                 val promptTemplates = PromptTemplates(
-                    classPrompt = settingsState.classPrompt,
-                    methodPrompt = settingsState.methodPrompt,
-                    linePrompt = settingsState.linePrompt,
+                    classPrompt = JsonEncoding.decode(llmSettingsState.classPrompts)[llmSettingsState.classCurrentDefaultPromptIndex],
+                    methodPrompt = JsonEncoding.decode(llmSettingsState.methodPrompts)[llmSettingsState.methodCurrentDefaultPromptIndex],
+                    linePrompt = JsonEncoding.decode(llmSettingsState.linePrompts)[llmSettingsState.lineCurrentDefaultPromptIndex],
                 )
 
                 val promptGenerator = PromptGenerator(context, promptTemplates)
 
                 when (codeType.type!!) {
                     CodeType.CLASS -> {
-                        promptGenerator.generatePromptForClass(interestingClasses)
+                        promptGenerator.generatePromptForClass(interestingClasses, testSamplesCode)
                     }
+
                     CodeType.METHOD -> {
                         val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
-                        val method = createMethodRepresentation(psiMethod)
-                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
+                        val method = createMethodRepresentation(psiMethod)!!
+                        val interestingClassesFromMethod =
+                            psiHelper.getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
+                                .map(this::createClassRepresentation)
+                                .toList()
 
-                        promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod)
+                        promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, testSamplesCode)
                     }
+
                     CodeType.LINE -> {
                         val lineNumber = codeType.objectIndex
                         val psiMethod = getPsiMethod(cut, getMethodDescriptor(cut, lineNumber))!!
@@ -114,39 +134,47 @@ class PromptManager(
                         val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
 
                         val lineUnderTest = document.getText(TextRange.create(lineStartOffset, lineEndOffset))
-                        val method = createMethodRepresentation(psiMethod)
-                        val interestingClassesFromMethod = getInterestingPsiClasses(psiMethod).map(this::createClassRepresentation)
+                        val method = createMethodRepresentation(psiMethod)!!
+                        val interestingClassesFromMethod =
+                            psiHelper.getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
+                                .map(this::createClassRepresentation)
+                                .toList()
 
-                        promptGenerator.generatePromptForLine(lineUnderTest, method, interestingClassesFromMethod)
+                        promptGenerator.generatePromptForLine(
+                            lineUnderTest,
+                            method,
+                            interestingClassesFromMethod,
+                            testSamplesCode,
+                        )
                     }
                 }
             },
-        )
+        ) + LLMSettingsBundle.get("commonPromptPart")
         log.info("Prompt is:\n$prompt")
         return prompt
     }
 
-    private fun createMethodRepresentation(psiMethod: PsiMethod): MethodRepresentation {
+    private fun createMethodRepresentation(psiMethod: PsiMethodWrapper): MethodRepresentation? {
+        psiMethod.text ?: return null
         return MethodRepresentation(
-            signature = psiMethod.getSignatureString(),
+            signature = psiMethod.signature,
             name = psiMethod.name,
-            text = psiMethod.text,
-            containingClassQualifiedName = psiMethod.containingClass!!.qualifiedName!!,
+            text = psiMethod.text!!,
+            containingClassQualifiedName = psiMethod.containingClass!!.qualifiedName,
         )
     }
 
-    private fun createClassRepresentation(psiClass: PsiClass): ClassRepresentation {
+    private fun createClassRepresentation(psiClass: PsiClassWrapper): ClassRepresentation {
         return ClassRepresentation(
-            psiClass.qualifiedName!!,
-            getClassFullText(psiClass),
-            psiClass.allMethods
-                /*.filter { it.text != null }*/
-                .map(this::createMethodRepresentation),
+            psiClass.qualifiedName,
+            psiClass.fullText,
+            psiClass.allMethods.map(this::createMethodRepresentation).toList().filterNotNull(),
+            psiClass.classType,
         )
     }
 
     private fun createClassRepresentation(
-        entry: Map.Entry<PsiClass, MutableList<PsiClass>>,
+        entry: Map.Entry<PsiClassWrapper, MutableList<PsiClassWrapper>>,
     ): Pair<ClassRepresentation, List<ClassRepresentation>> {
         val key = createClassRepresentation(entry.key)
         val value = entry.value.map(this::createClassRepresentation)
@@ -154,133 +182,56 @@ class PromptManager(
         return key to value // mapOf(key to value).entries.first()
     }
 
-    fun reducePromptSize(): Boolean {
+    fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
+        return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
+            (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+    }
+
+    fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
         // reducing depth of polymorphism
-        if (SettingsArguments.maxPolyDepth(project) > 1) {
-            project.service<TestGenerationDataService>().polyDepthReducing++
-            log.info("polymorphism depth is: ${SettingsArguments.maxPolyDepth(project)}")
-            showPromptReductionWarning()
+        if (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) {
+            testGenerationData.polyDepthReducing++
+            log.info("polymorphism depth is: ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}")
+            showPromptReductionWarning(testGenerationData)
             return true
         }
 
         // reducing depth of input params
-        if (SettingsArguments.maxInputParamsDepth(project) > 1) {
-            project.service<TestGenerationDataService>().inputParamsDepthReducing++
-            log.info("input params depth is: ${SettingsArguments.maxPolyDepth(project)}")
-            showPromptReductionWarning()
+        if (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1) {
+            testGenerationData.inputParamsDepthReducing++
+            log.info("input params depth is: ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}")
+            showPromptReductionWarning(testGenerationData)
             return true
         }
 
         return false
     }
 
-    private fun showPromptReductionWarning() {
+    private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
-            TestSparkBundle.message("promptReduction") + "\n" +
-                "Maximum depth of polymorphism is ${SettingsArguments.maxPolyDepth(project)}.\n" +
-                "Maximum depth for input parameters is ${SettingsArguments.maxInputParamsDepth(project)}.",
+            LLMMessagesBundle.get("promptReduction") + "\n" +
+                "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                "Maximum depth for input parameters is ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
             project,
         )
-    }
-
-    private fun PsiMethod.getSignatureString(): String {
-        val bodyStart = body?.startOffsetInParent ?: this.textLength
-        if (text == null) {
-            return ""
-        }
-        return text.substring(0, bodyStart).replace('\n', ' ').trim()
-    }
-
-    /**
-     * Returns a set of interesting PsiClasses based on the given PsiMethod.
-     *
-     * @param psiMethod the PsiMethod for which to find interesting PsiClasses
-     * @return a mutable set of interesting PsiClasses
-     */
-    private fun getInterestingPsiClasses(psiMethod: PsiMethod): MutableSet<PsiClass> {
-        val interestingMethods = mutableSetOf(psiMethod)
-        for (currentPsiMethod in cut.allMethods) {
-            if (currentPsiMethod.isConstructor) interestingMethods.add(currentPsiMethod)
-        }
-        val interestingPsiClasses = mutableSetOf(cut)
-        interestingMethods.forEach { methodIt ->
-            methodIt.parameterList.parameters.forEach { paramIt ->
-                PsiTypesUtil.getPsiClass(paramIt.type)?.let {
-                    if (it.qualifiedName != null && !it.qualifiedName!!.startsWith("java.")) {
-                        interestingPsiClasses.add(it)
-                    }
-                }
-            }
-        }
-        return interestingPsiClasses
-//            .filter { (it.qualifiedName != null) && (it.text != null) }
-//            .toMutableSet()
-    }
-
-    /**
-     * Retrieves a set of interesting PsiClasses based on a given cutPsiClass and a list of classesToTest.
-     *
-     * @param classesToTest The list of classes to test for interesting PsiClasses.
-     * @return The set of interesting PsiClasses found during the search.
-     */
-    private fun getInterestingPsiClasses(classesToTest: MutableList<PsiClass>): MutableSet<PsiClass> {
-        ProjectUnderTestFileCreator.log("Select interesting classes:")
-        val interestingPsiClasses: MutableSet<PsiClass> = mutableSetOf()
-
-        var currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(classesToTest) }
-
-        repeat(SettingsArguments.maxInputParamsDepth(project)) {
-            val tempListOfClasses = mutableSetOf<PsiClass>()
-
-            currentLevelClasses.forEach { classIt ->
-                ProjectUnderTestFileCreator.log("\tCurrent class: $classIt, methods:")
-
-                classIt.methods.forEach { methodIt ->
-                    ProjectUnderTestFileCreator.log("\t\tMethod: ${methodIt.getSignatureString()}")
-
-                    methodIt.parameterList.parameters.forEach { paramIt ->
-                        ProjectUnderTestFileCreator.log("\t\t\tParameter: $paramIt")
-
-                        PsiTypesUtil.getPsiClass(paramIt.type)?.let {
-                            ProjectUnderTestFileCreator.log("\t\t\tConsidering: $it")
-                            if (!interestingPsiClasses.contains(it) && it.qualifiedName != null &&
-                                !it.qualifiedName!!.startsWith("java.")
-                            ) {
-                                ProjectUnderTestFileCreator.log("$it added into set of interesting psi classes: [${interestingPsiClasses.joinToString(", ") { cls -> cls.qualifiedName.toString() }}]")
-
-                                tempListOfClasses.add(it)
-                            }
-                        }
-                    }
-                }
-            }
-            currentLevelClasses = mutableListOf<PsiClass>().apply { addAll(tempListOfClasses) }
-            interestingPsiClasses.addAll(tempListOfClasses)
-        }
-
-        return interestingPsiClasses
-//            .filter { (it.qualifiedName != null) && (it.allMethods.all { method -> (method.text != null) }) }
-//            .toMutableSet()
     }
 
     /**
      * Retrieves the polymorphism relations between a given set of interesting PsiClasses and a cut PsiClass.
      *
      * @param project The project context in which the PsiClasses exist.
-     * @param interestingPsiClasses The set of PsiClasses that are considered interesting.
-     * @param cutPsiClass The cut PsiClass to determine polymorphism relations against.
+     * @param interestingPsiClasses The set of PsiClassWrappers that are considered interesting.
+     * @param cutPsiClass The cut PsiClassWrapper to determine polymorphism relations against.
      * @return A mutable map where the key represents an interesting PsiClass and the value is a list of its detected subclasses.
      */
-    private fun getPolymorphismRelations(
+    private fun getPolymorphismRelationsWithQualifiedNames(
         project: Project,
-        interestingPsiClasses: MutableSet<PsiClass>,
-        cutPsiClass: PsiClass,
-    ): MutableMap<PsiClass, MutableList<PsiClass>> {
-        println("isDumb: "+DumbService.isDumb(project).toString())
-        val polymorphismRelations: MutableMap<PsiClass, MutableList<PsiClass>> = mutableMapOf()
+        interestingPsiClasses: MutableSet<PsiClassWrapper>,
+        cutPsiClass: PsiClassWrapper,
+    ): MutableMap<PsiClassWrapper, MutableList<PsiClassWrapper>> {
+        val polymorphismRelations: MutableMap<PsiClassWrapper, MutableList<PsiClassWrapper>> = mutableMapOf()
 
-        val psiClassesToVisit: ArrayDeque<PsiClass> = ArrayDeque(listOf(cutPsiClass))
-        interestingPsiClasses.add(cutPsiClass)
+        interestingPsiClasses.add(cut)
 
 //        ApplicationManager.getApplication().runReadAction {
 //            val projectFileIndex = ProjectRootManager.getInstance(project).fileIndex
@@ -290,45 +241,37 @@ class PromptManager(
 ////            }
 //        }
         interestingPsiClasses.forEach { currentInterestingClass ->
-            var detectedSubClasses: Collection<PsiClass>? = null
-//            while(true){
-                val scope = GlobalSearchScope.projectScope(project)
-                val query = ClassInheritorsSearch.search(currentInterestingClass, false)
-                detectedSubClasses = query.findAll()
-            PsiShortNamesCache.getInstance(project).getClassesByName(currentInterestingClass.name!!, GlobalSearchScope.projectScope(project))
-//                if (detectedSubClasses.size >0)
-//                    break
-//            }
+            val detectedSubClasses = currentInterestingClass.searchSubclasses(project)
 
             detectedSubClasses!!.forEach { detectedSubClass ->
                 if (!polymorphismRelations.contains(currentInterestingClass)) {
                     polymorphismRelations[currentInterestingClass] = ArrayList()
                 }
                 polymorphismRelations[currentInterestingClass]?.add(detectedSubClass)
-                if (!psiClassesToVisit.contains(detectedSubClass)) {
-                    psiClassesToVisit.addLast(detectedSubClass)
-                }
             }
         }
 
-        return polymorphismRelations
-//            .filter { entry -> (entry.key.qualifiedName != null) && (entry.value.all { it.qualifiedName != null }) }
-//            .toMutableMap()
+        interestingPsiClasses.remove(cut)
+
+        return polymorphismRelations.toMutableMap()
     }
 
     /**
      * Retrieves a PsiMethod matching the given method descriptor within the provided PsiClass.
      *
-     * @param psiClass The PsiClass in which to search for the method.
+     * @param psiClass The PsiClassWrapper in which to search for the method.
      * @param methodDescriptor The method descriptor to match against.
      * @return The matching PsiMethod if found, otherwise an empty string.
      */
     private fun getPsiMethod(
-        psiClass: PsiClass,
+        psiClass: PsiClassWrapper,
         methodDescriptor: String,
-    ): PsiMethod? {
+    ): PsiMethodWrapper? {
         for (currentPsiMethod in psiClass.allMethods) {
-            if (generateMethodDescriptor(currentPsiMethod) == methodDescriptor) return currentPsiMethod
+            val psiHelper = PsiHelperFactory.getPsiHelper(psiClass.containingFile) ?: return null
+            if (psiHelper.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) {
+                return currentPsiMethod
+            }
         }
         return null
     }
@@ -336,66 +279,20 @@ class PromptManager(
     /**
      * Returns the method descriptor of the method containing the given line number in the specified PsiClass.
      *
-     * @param psiClass the PsiClass containing the method
+     * @param psiClass the PsiClassWrapper containing the method
      * @param lineNumber the line number within the file where the method is located
      * @return the method descriptor as a String, or an empty string if no method is found
      */
     private fun getMethodDescriptor(
-        psiClass: PsiClass,
+        psiClass: PsiClassWrapper,
         lineNumber: Int,
     ): String {
         for (currentPsiMethod in psiClass.allMethods) {
-            if (isLineInPsiMethod(currentPsiMethod, lineNumber)) return generateMethodDescriptor(currentPsiMethod)
+            if (currentPsiMethod.containsLine(lineNumber)) {
+                val psiHelper = PsiHelperFactory.getPsiHelper(psiClass.containingFile) ?: return ""
+                return psiHelper.generateMethodDescriptor(currentPsiMethod)
+            }
         }
         return ""
-    }
-
-    /**
-     * Checks if the given line number is within the range of the specified PsiMethod.
-     *
-     * @param method The PsiMethod to check.
-     * @param lineNumber The line number to check.
-     * @return `true` if the line number is within the range of the method, `false` otherwise.
-     */
-    private fun isLineInPsiMethod(
-        method: PsiMethod,
-        lineNumber: Int,
-    ): Boolean {
-        val psiFile = method.containingFile ?: return false
-        val document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
-        val textRange = method.textRange
-        val startLine = document.getLineNumber(textRange.startOffset) + 1
-        val endLine = document.getLineNumber(textRange.endOffset) + 1
-        return lineNumber in startLine..endLine
-    }
-
-    /**
-     * Returns the full text of a given class including the package, imports, and class code.
-     *
-     * @param cl The PsiClass object representing the class.
-     * @return The full text of the class.
-     */
-    private fun getClassFullText(cl: PsiClass): String {
-        var fullText = ""
-        val fileText = cl.containingFile.text
-
-        // get package
-        packagePattern.findAll(fileText, 0).map {
-            it.groupValues[0]
-        }.forEach {
-            fullText += "$it\n\n"
-        }
-
-        // get imports
-        importPattern.findAll(fileText, 0).map {
-            it.groupValues[0]
-        }.forEach {
-            fullText += "$it\n"
-        }
-
-        // Add class code
-        fullText += cl.text
-
-        return fullText
     }
 }

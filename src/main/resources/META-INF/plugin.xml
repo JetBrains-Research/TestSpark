@@ -20,7 +20,7 @@
     <ul>
         <li>Supports Java (any version).</li>
         <li>Generates unit tests for capturing failures.</li>
-        <li>Generate tests for Java classes, methods, and single lines.</li>
+        <li>Generate tests (JUnit4 and 5) for Java classes, methods, and single lines.</li>
     </ul>
 
     <h4>Local search-based test generation</h4>
@@ -36,6 +36,23 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.2.1</h4>
+            <ul>
+                <li>Fix several minor bugs related to JUnit5 support and default template.</li>
+            </ul>
+        <h4>0.2.0</h4>
+            <ul>
+                <li>Add JUnit5 test generation for LLM-based approach</li>
+                <li>Users can provide samples to LLM for test generation</li>
+                <li>Add automatic sample detector for suggesting samples to user for LLM-based test generation</li>
+                <li>Users can save multiple prompt templates in settings now and use each of them for test genertion.</li>
+                <li>Supporting default structures for user's feedback to LLM for generated tests </li>
+                <li>Supporting the newer versions of IntelliJ IDEA (242.*)</li>
+                <li>Prompt structure improving</li>
+                <li>EvoSuite's communication port is now changeable in the plugin's settings.</li>
+                <li>Fixed An error with saving settings data between plugin runs</li>
+                <li>Major refactoring of the plugin, including moving majority of LLM-based test generation algorithm into a common module (to be used by other instances of plugin for other IDEs)</li>
+            </ul>
         <h4>0.1.9</h4>
             <ul>
                 <li>Model selection for JetBrains AI Assistant platform</li>
@@ -135,32 +152,35 @@
     <extensions defaultExtensionNs="com.intellij">
         <appStarter
                 implementation="org.jetbrains.research.testspark.appstarter.TestSparkStarter"
-                id="testspark1"
+                id="testspark"
         />
+
         <toolWindow id="TestSpark" secondary="true" anchor="right" icon="org.jetbrains.research.testspark.display.TestSparkIcons.toolWindowIcon"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>
 
         <!-- Application-level services -->
         <applicationService
-                serviceImplementation="org.jetbrains.research.testspark.services.SettingsApplicationService"/>
+                serviceImplementation="org.jetbrains.research.testspark.services.LLMSettingsService"/>
         <applicationService
-                serviceImplementation="org.jetbrains.research.testspark.services.SettingsProjectService"/>
+                serviceImplementation="org.jetbrains.research.testspark.services.PluginSettingsService"/>
+        <applicationService
+                serviceImplementation="org.jetbrains.research.testspark.services.EvoSuiteSettingsService"/>
 
         <!-- Configurables -->
         <projectConfigurable
                 parentId="tools"
-                instance="org.jetbrains.research.testspark.settings.SettingsPluginConfigurable"
-                id="TestSparkSettings"
+                instance="org.jetbrains.research.testspark.settings.plugin.PluginSettingsConfigurable"
+                id="PluginSettings"
                 displayName="TestSpark"/>
-        <applicationConfigurable
-                parentId="TestSparkSettings"
-                instance="org.jetbrains.research.testspark.settings.llm.SettingsLLMConfigurable"
-                id="TestSparkSettings.llm"
+        <projectConfigurable
+                parentId="PluginSettings"
+                instance="org.jetbrains.research.testspark.settings.llm.LLMSettingsConfigurable"
+                id="LLMSettings"
                 displayName="Large Language Models"/>
-        <applicationConfigurable
-                parentId="TestSparkSettings"
-                instance="org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable"
-                id="TestSparkSettings.evosuite"
+        <projectConfigurable
+                parentId="PluginSettings"
+                instance="org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable"
+                id="EvoSuiteSettings"
                 displayName="EvoSuite"/>
 
         <!-- Notifications -->
@@ -172,24 +192,17 @@
                            displayType="BALLOON"/>
         <notificationGroup id="LLM Execution Error"
                            displayType="BALLOON"/>
+        <notificationGroup id="Generation Error"
+                           displayType="BALLOON"/>
         <notificationGroup id="Test case copied"
                            displayType="BALLOON"/>
 
     </extensions>
 
-    <projectListeners>
-        <listener
-                class="org.jetbrains.research.testspark.listener.TelemetrySubmitListenerImpl"
-                topic="com.intellij.openapi.startup.ProjectActivity"/>
-        <listener
-                class="org.jetbrains.research.testspark.listener.ProjectCloseListenerImpl"
-                topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </projectListeners>
-
     <actions>
         <!-- TestSpark actions -->
         <action id="TestSpark.TestSparkActions" text="TestSpark" description="Actions related to TestSpark"
-               class="org.jetbrains.research.testspark.actions.TestSparkAction">
+                class="org.jetbrains.research.testspark.actions.TestSparkAction">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
 
         </action>

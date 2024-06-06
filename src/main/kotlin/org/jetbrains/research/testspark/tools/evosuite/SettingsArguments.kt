@@ -1,8 +1,8 @@
 package org.jetbrains.research.testspark.tools.evosuite
 
-import org.jetbrains.research.testspark.data.ContentDigestAlgorithm
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
+import org.jetbrains.research.testspark.data.evosuite.ContentDigestAlgorithm
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState.DefaultEvoSuiteSettingsState
 
 /**
  * This class is used for constructing the necessary parameters for running evosuite
@@ -20,11 +20,10 @@ class SettingsArguments(
     private val serializeResultPath: String,
     private val classFQN: String,
     baseDir: String,
+    private val evoSuiteSettingsState: EvoSuiteSettingsState,
 ) {
-    private val settingsState = SettingsApplicationService.getInstance().state!!
-
     private var command: MutableList<String> = mutableListOf(
-        algorithmsToGenerateMap[settingsState.algorithm]!!,
+        algorithmsToGenerateMap[evoSuiteSettingsState.algorithm]!!,
         "-serializeResult",
         "-serializeResultPath", serializeResultPath,
         "-base_dir", """"$baseDir"""",
@@ -73,14 +72,29 @@ class SettingsArguments(
      * Finalizes the parameter construction by applying the user runtime settings
      */
     fun build(isLineCoverage: Boolean = false): MutableList<String> {
-        val settingsState = SettingsApplicationService.getInstance().state
-
-        if (settingsState != null) {
-            val params = settingsState.serializeChangesFromDefault()
-            command.addAll(params)
-            command.add(createCriterionString(settingsState, isLineCoverage))
-        }
+        val params = serializeChangesFromDefault()
+        command.addAll(params)
+        command.add(createCriterionString(evoSuiteSettingsState, isLineCoverage))
         return command
+    }
+
+    private fun serializeChangesFromDefault(): List<String> {
+        val params = mutableListOf<String>()
+        // Parameters from settings menu
+        if (evoSuiteSettingsState.sandbox != DefaultEvoSuiteSettingsState.sandbox) {
+            params.add("-Dsandbox=${evoSuiteSettingsState.sandbox}")
+        }
+        if (evoSuiteSettingsState.assertions != DefaultEvoSuiteSettingsState.assertions) {
+            params.add("-Dassertions=${evoSuiteSettingsState.assertions}")
+        }
+        params.add("-Dalgorithm=${evoSuiteSettingsState.algorithm}")
+        if (evoSuiteSettingsState.junitCheck != DefaultEvoSuiteSettingsState.junitCheck) {
+            params.add("-Djunit_check=${evoSuiteSettingsState.junitCheck}")
+        }
+        if (evoSuiteSettingsState.minimize != DefaultEvoSuiteSettingsState.minimize) {
+            params.add("-Dminimize=${evoSuiteSettingsState.minimize}")
+        }
+        return params
     }
 
     companion object {
@@ -120,7 +134,7 @@ class SettingsArguments(
          * @param state the (settings) state that contains all the criteria
          * @return the generated criteria string, in the required format
          */
-        private fun createCriterionString(state: SettingsApplicationState, isLineCoverage: Boolean): String {
+        private fun createCriterionString(evoSuiteSettingsState: EvoSuiteSettingsState, isLineCoverage: Boolean): String {
             val sb = StringBuilder("-Dcriterion=") // e.g "-Dcriterion=BRANCH:WEAKMUTATION",
 
             if (isLineCoverage) {
@@ -129,28 +143,28 @@ class SettingsArguments(
                 return sb.toString()
             }
 
-            if (state.criterionLine) {
+            if (evoSuiteSettingsState.criterionLine) {
                 sb.append("LINE:")
             }
-            if (state.criterionBranch) {
+            if (evoSuiteSettingsState.criterionBranch) {
                 sb.append("BRANCH:")
             }
-            if (state.criterionException) {
+            if (evoSuiteSettingsState.criterionException) {
                 sb.append("EXCEPTION:")
             }
-            if (state.criterionWeakMutation) {
+            if (evoSuiteSettingsState.criterionWeakMutation) {
                 sb.append("WEAKMUTATION:")
             }
-            if (state.criterionOutput) {
+            if (evoSuiteSettingsState.criterionOutput) {
                 sb.append("OUTPUT:")
             }
-            if (state.criterionMethod) {
+            if (evoSuiteSettingsState.criterionMethod) {
                 sb.append("METHOD:")
             }
-            if (state.criterionMethodNoException) {
+            if (evoSuiteSettingsState.criterionMethodNoException) {
                 sb.append("METHODNOEXCEPTION:")
             }
-            if (state.criterionCBranch) {
+            if (evoSuiteSettingsState.criterionCBranch) {
                 sb.append("CBRANCH:")
             }
             if (sb.endsWith(':', true)) {

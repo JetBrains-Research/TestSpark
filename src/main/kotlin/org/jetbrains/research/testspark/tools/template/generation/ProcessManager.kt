@@ -1,7 +1,11 @@
 package org.jetbrains.research.testspark.tools.template.generation
 
-import com.intellij.openapi.progress.ProgressIndicator
+import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.ProjectContext
+import org.jetbrains.research.testspark.data.UIContext
 
 /**
  * An interface representing a process manager.
@@ -15,8 +19,11 @@ interface ProcessManager {
      * @param packageName The package name of the code fragment.
      */
     fun runTestGenerator(
-        indicator: ProgressIndicator?,
+        indicator: CustomProgressIndicator,
         codeType: FragmentToTestData,
         packageName: String,
-    )
+        projectContext: ProjectContext,
+        generatedTestsData: TestGenerationData,
+        errorMonitor: ErrorMonitor,
+    ): UIContext?
 }

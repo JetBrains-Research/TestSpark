@@ -8,27 +8,29 @@ import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteDefaultsBundle
+import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.Report
-import org.jetbrains.research.testspark.services.ProjectContextService
-import org.jetbrains.research.testspark.services.RunCommandLineService
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.services.SettingsProjectService
+import org.jetbrains.research.testspark.data.IJReport
+import org.jetbrains.research.testspark.data.ProjectContext
+import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
+import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
-import org.jetbrains.research.testspark.tools.getBuildPath
-import org.jetbrains.research.testspark.tools.getImportsCodeFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.getPackageFromTestSuiteCode
-import org.jetbrains.research.testspark.tools.processStopped
-import org.jetbrains.research.testspark.tools.saveData
+import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
-import java.io.File
 import java.io.FileReader
 import java.nio.charset.Charset
 import java.util.regex.Pattern
@@ -47,15 +49,16 @@ class EvoSuiteProcessManager(
 ) : ProcessManager {
     private val log = Logger.getInstance(this::class.java)
 
-    private val evoSuiteProcessTimeout: Long = 12000000 // TODO: Source from config
-    private val evosuiteVersion = "1.0.5" // TODO: Figure out a better way to source this
+    private val evoSuiteSettingsState: EvoSuiteSettingsState
+        get() = project.getService(EvoSuiteSettingsService::class.java).state
 
-    private val sep = File.separatorChar
+    private val evoSuiteProcessTimeout: Long = 12000000
+    private val evosuiteVersion = EvoSuiteDefaultsBundle.get("evosuiteVersion")
+
     private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
-    private var evoSuitePath = "$pluginsPath${sep}TestSpark${sep}lib${sep}evosuite-$evosuiteVersion.jar"
+    private var evoSuitePath = "$pluginsPath${ToolUtils.sep}TestSpark${ToolUtils.sep}lib${ToolUtils.sep}evosuite-$evosuiteVersion.jar"
 
-    private val settingsApplicationState = SettingsApplicationService.getInstance().state!!
-    private val settingsProjectState = project.service<SettingsProjectService>().state
+    private val settingsProjectState = project.service<PluginSettingsService>().state
 
     private val evoSuiteErrorManager: EvoSuiteErrorManager = EvoSuiteErrorManager()
 
@@ -65,15 +68,18 @@ class EvoSuiteProcessManager(
      * @param indicator the progress indicator
      */
     override fun runTestGenerator(
-        indicator: ProgressIndicator?,
+        indicator: CustomProgressIndicator,
         codeType: FragmentToTestData,
         packageName: String,
-    ) {
+        projectContext: ProjectContext,
+        generatedTestsData: TestGenerationData,
+        errorMonitor: ErrorMonitor,
+    ): UIContext? {
         try {
-            if (processStopped(project, indicator)) return
+            if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
             val regex = Regex("version \"(.*?)\"")
-            val version = regex.find(project.service<RunCommandLineService>().runCommandLine(arrayListOf(settingsApplicationState.javaPath, "-version")))
+            val version = regex.find(CommandLineRunner.run(arrayListOf(evoSuiteSettingsState.javaPath, "-version")))
                 ?.groupValues
                 ?.get(1)
                 ?.split(".")
@@ -81,42 +87,43 @@ class EvoSuiteProcessManager(
                 ?.toInt()
 
             if (version == null || version > 11) {
-                evoSuiteErrorManager.errorProcess(TestSparkBundle.message("incorrectJavaVersion"), project)
-                return
+                evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("incorrectJavaVersion"), project, errorMonitor)
+                return null
             }
 
-            val projectClassPath = project.service<ProjectContextService>().projectClassPath!!
-            val classFQN = project.service<ProjectContextService>().classFQN!!
-            val baseDir = project.service<ProjectContextService>().baseDir!!
-            val resultName = "${project.service<ProjectContextService>().resultPath}${sep}EvoSuiteResult"
+            val projectClassPath = projectContext.projectClassPath!!
+            val classFQN = projectContext.classFQN!!
+            val baseDir = generatedTestsData.baseDir!!
+            val resultName = "${generatedTestsData.resultPath}${ToolUtils.sep}EvoSuiteResult"
 
-            Path(project.service<ProjectContextService>().resultPath!!).createDirectories()
+            Path(generatedTestsData.resultPath).createDirectories()
 
             // get command
             val command = when (codeType.type!!) {
-                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).build()
+                CodeType.CLASS -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).build()
                 CodeType.METHOD -> {
-                    SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forMethod(codeType.objectDescription).build()
+                    SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).forMethod(codeType.objectDescription).build()
                 }
 
-                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir).forLine(codeType.objectIndex).build(true)
+                CodeType.LINE -> SettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).forLine(codeType.objectIndex).build(true)
             }
 
-            if (settingsApplicationState.seed.isNotBlank()) command.add("-seed=${settingsApplicationState.seed}")
-            if (settingsApplicationState.configurationId.isNotBlank()) command.add("-Dconfiguration_id=${settingsApplicationState.configurationId}")
+            if (evoSuiteSettingsState.seed.isNotBlank()) command.add("-seed=${evoSuiteSettingsState.seed}")
+            if (evoSuiteSettingsState.configurationId.isNotBlank()) command.add("-Dconfiguration_id=${evoSuiteSettingsState.configurationId}")
+            if (evoSuiteSettingsState.evosuitePort.isNotBlank()) command.add("-Dprocess_communication_port=${evoSuiteSettingsState.evosuitePort}")
 
             // update build path
             var buildPath = projectClassPath
             if (settingsProjectState.buildPath.isEmpty()) {
                 // User did not set own path
-                buildPath = getBuildPath(project)
+                buildPath = ToolUtils.getBuildPath(project)
             }
             command[command.indexOf(projectClassPath)] = buildPath
             log.info("Generating tests for project $projectPath with classpath $buildPath inside the project")
 
             // construct command
             val cmd = ArrayList<String>()
-            cmd.add(settingsApplicationState.javaPath)
+            cmd.add(evoSuiteSettingsState.javaPath)
             cmd.add("-Djdk.attach.allowAttachSelf=true")
             cmd.add("-jar")
             cmd.add(evoSuitePath)
@@ -126,7 +133,8 @@ class EvoSuiteProcessManager(
             log.info("Starting EvoSuite with arguments: $cmdString")
 
 //            indicator.isIndeterminate = false
-            indicator?.text = TestSparkBundle.message("searchMessage")
+            indicator.setText(PluginMessagesBundle.get("searchMessage"))
+
             val evoSuiteProcess = GeneralCommandLine(cmd)
             evoSuiteProcess.charset = Charset.forName("UTF-8")
             evoSuiteProcess.setWorkDirectory(projectPath)
@@ -135,7 +143,7 @@ class EvoSuiteProcessManager(
             // attach process listener for output
             handler.addProcessListener(object : ProcessAdapter() {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (processStopped(project, indicator)) {
+                    if (ToolUtils.isProcessStopped(errorMonitor, indicator)) {
                         handler.destroyProcess()
                         return
                     }
@@ -164,40 +172,44 @@ class EvoSuiteProcessManager(
                         }
 
                     if (progress != null && coverage != null) {
-                        indicator?.fraction = if (progress >= coverage) progress else coverage
+                        indicator.setFraction(if (progress >= coverage) progress else coverage)
                     } else if (progress != null) {
-                        indicator?.fraction = progress
+                        indicator.setFraction(progress)
                     } else if (coverage != null) {
-                        indicator?.fraction = coverage
+                        indicator.setFraction(coverage)
                     }
 
-                    if (indicator?.fraction == 1.0 && indicator.text != TestSparkBundle.message("testCasesSaving")) {
-                        indicator?.text = TestSparkBundle.message("testCasesSaving")
+                    if (indicator.getFraction() == 1.0 && indicator.getText() != PluginMessagesBundle.get("testCasesSaving")) {
+                        indicator.setText(PluginMessagesBundle.get("testCasesSaving"))
                     }
                 }
             })
 
             handler.startNotify()
 
-            if (processStopped(project, indicator)) return
+            if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
             // evosuite errors check
-            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator)) return
+            if (!evoSuiteErrorManager.isProcessCorrect(handler, project, evoSuiteProcessTimeout, indicator, errorMonitor)) return null
 
             val gson = Gson()
             val reader = JsonReader(FileReader(resultName))
 
             val testGenerationResult: CompactReport = gson.fromJson(reader, CompactReport::class.java)
 
-            saveData(
+            ToolUtils.saveData(
                 project,
-                Report(testGenerationResult),
-                getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
-                getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
+                IJReport(testGenerationResult),
+                ToolUtils.getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
+                ToolUtils.getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
+                projectContext.fileUrlAsString!!,
+                generatedTestsData,
             )
         } catch (e: Exception) {
-            evoSuiteErrorManager.errorProcess(TestSparkBundle.message("evosuiteErrorMessage").format(e.message), project)
+            evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("evosuiteErrorMessage").format(e.message), project, errorMonitor)
             e.printStackTrace()
         }
+
+        return UIContext(projectContext, generatedTestsData, StandardRequestManagerFactory(project).getRequestManager(project), errorMonitor)
     }
 }
