@@ -118,6 +118,10 @@ internal class PromptBuilder(private var prompt: String) {
                     fullText += "${currentSubClass.qualifiedName} is $subClassTypeName ${entry.key.qualifiedName}.\n"
                 }
             }
+            // If we have some information added for polymorphism relations, we add an instruction
+            if (fullText.isNotBlank()) {
+                fullText = "Use the following information about polymorphic relationship of classes that exist in the project. Don't use mocking for these classes:\n$fullText" // TODO
+            }
             prompt = prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
             throw IllegalStateException("The prompt must contain ${PromptKeyword.POLYMORPHISM.text}")
