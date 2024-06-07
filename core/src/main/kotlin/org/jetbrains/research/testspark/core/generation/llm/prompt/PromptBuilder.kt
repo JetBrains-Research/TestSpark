@@ -106,8 +106,11 @@ internal class PromptBuilder(private var prompt: String) {
     ) = apply {
         val keyword = "\$${PromptKeyword.POLYMORPHISM.text}"
         if (isPromptValid(PromptKeyword.POLYMORPHISM, prompt)) {
-            var fullText = ""
-
+            // If polymorphismRelations is not empty, we add an instruction to avoid mocking classes if an instantiation of a sub-class is applicable
+            var fullText = when{
+                polymorphismRelations.isNotEmpty() -> "Use the following polymorphic relationships of classes present in the project. Use them for instantiation when necessary. Do not mock classes if an instantiation of a sub-class is applicable"
+                else -> ""
+            }
             polymorphismRelations.forEach { entry ->
                 for (currentSubClass in entry.value) {
                     val subClassTypeName = when (currentSubClass.classType) {
@@ -117,10 +120,6 @@ internal class PromptBuilder(private var prompt: String) {
                     }
                     fullText += "${currentSubClass.qualifiedName} is $subClassTypeName ${entry.key.qualifiedName}.\n"
                 }
-            }
-            // If we have some information added for polymorphism relations, we add an instruction
-            if (fullText.isNotBlank()) {
-                fullText = "Use the following information about polymorphic relationship of classes that exist in the project. Don't use mocking for these classes:\n$fullText" // TODO
             }
             prompt = prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
