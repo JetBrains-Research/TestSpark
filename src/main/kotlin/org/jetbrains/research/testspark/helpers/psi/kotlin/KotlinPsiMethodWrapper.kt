@@ -2,53 +2,52 @@ package org.jetbrains.research.testspark.helpers.psi.kotlin
 
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.parentOfType
-import org.jetbrains.kotlin.idea.intentions.branchedTransformations.isNullExpressionOrEmptyBlock
-import org.jetbrains.kotlin.psi.KtClass
-import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.kotlin.psi.KtTypeReference
+import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
+import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
 import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
 
-class KotlinPsiMethodWrapper(val psiFunction: KtNamedFunction) : PsiMethodWrapper {
-    override val name: String
-        get() = psiFunction.name ?: ""
+class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
+
+    override val name: String get() = psiFunction.name ?: ""
 
     override val text: String? = psiFunction.text
 
-    override val containingClass: PsiClassWrapper? =
-        psiFunction.parentOfType<KtClass>()?.let { KotlinPsiClassWrapper(it) }
+    override val containingClass: PsiClassWrapper? = psiFunction.run {
+        parentOfType<KtClass>()?.let { KotlinPsiClassWrapper(it) }
+    }
 
     override val containingFile: PsiFile = psiFunction.containingFile
 
     override val methodDescriptor: String
-        get() {
-            val parameterTypes = psiFunction.valueParameters.joinToString("") { generateFieldType(it.typeReference) }
+        get() = psiFunction.run {
+            val parameterTypes = valueParameters.joinToString("") { generateFieldType(it.typeReference) }
             val returnType = generateReturnDescriptor(psiFunction)
-            return "${psiFunction.name}($parameterTypes)$returnType"
+            return "${name}($parameterTypes)$returnType"
         }
 
     override val signature: String
-        get() {
-            val bodyStart = psiFunction.bodyExpression?.startOffsetInParent ?: psiFunction.textLength
-            return psiFunction.text.substring(0, bodyStart).replace('\n', ' ').trim()
+        get() = psiFunction.run {
+            val bodyStart = bodyExpression?.startOffsetInParent ?: textLength
+            text.substring(0, bodyStart).replace('\n', ' ').trim()
         }
 
     val parameterList = psiFunction.valueParameterList
 
-    val isConstructor: Boolean =
-        psiFunction.name == "<init>" || (psiFunction.parent as? KtClass)?.name == psiFunction.name
+    val isPrimaryConstructor: Boolean = psiFunction is KtPrimaryConstructor
 
-    val isMethodDefault: Boolean = psiFunction.run {
-        val parentClass = parent as? KtClass
-        name == "<init>" && valueParameters.isEmpty() &&
-            parentClass?.secondaryConstructors?.isEmpty() == true
+    val isSecondaryConstructor: Boolean = psiFunction is KtSecondaryConstructor
+
+    val isTopLevelFunction: Boolean = psiFunction.containingClassOrObject == null
+
+    val isDefaultMethod: Boolean = psiFunction.run {
+        val containingClass = PsiTreeUtil.getParentOfType(this, KtClassOrObject::class.java)
+        val containingInterface = containingClass?.isInterfaceClass()
+        name != "<init>" && bodyExpression != null && containingInterface == true
     }
-
-    val isDefaultConstructor: Boolean
-        get() =
-            (psiFunction.name == "<init>" || (psiFunction.parent as? KtClass)?.name == psiFunction.name) &&
-                (psiFunction.bodyExpression.isNullExpressionOrEmptyBlock())
 
     override fun containsLine(lineNumber: Int): Boolean {
         val psiFile = psiFunction.containingFile
@@ -65,7 +64,7 @@ class KotlinPsiMethodWrapper(val psiFunction: KtNamedFunction) : PsiMethodWrappe
      * @param psiFunction the function
      * @return the return descriptor
      */
-    private fun generateReturnDescriptor(psiFunction: KtNamedFunction): String {
+    private fun generateReturnDescriptor(psiFunction: KtFunction): String {
         val returnType = psiFunction.typeReference?.text ?: "Unit"
         return generateFieldType(returnType)
     }

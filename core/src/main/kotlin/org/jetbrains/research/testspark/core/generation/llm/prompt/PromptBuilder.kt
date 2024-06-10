@@ -60,8 +60,8 @@ internal class PromptBuilder(private var prompt: String) {
                 val superClass = classesToTest[i - 1]
 
                 fullText += "${subClass.qualifiedName} extends ${superClass.qualifiedName}. " +
-                    "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
-                    "```\n"
+                        "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
+                        "```\n"
             }
             prompt = prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
@@ -114,6 +114,9 @@ internal class PromptBuilder(private var prompt: String) {
                         ClassType.INTERFACE -> "an interface implementing"
                         ClassType.ABSTRACT_CLASS -> "an abstract sub-class of"
                         ClassType.CLASS -> "a sub-class of"
+                        ClassType.DATA_CLASS -> "a sub data class of"
+                        ClassType.INLINE_VALUE_CLASS -> "a sub inline value class class of"
+                        ClassType.OBJECT -> "a sub object of"
                     }
                     fullText += "${currentSubClass.qualifiedName} is $subClassTypeName ${entry.key.qualifiedName}.\n"
                 }

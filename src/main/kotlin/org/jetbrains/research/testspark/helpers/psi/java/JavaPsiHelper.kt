@@ -25,17 +25,13 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
     private val log = Logger.getInstance(this::class.java)
 
-    override fun generateMethodDescriptor(
-        psiMethod: PsiMethodWrapper,
-    ): String {
+    override fun generateMethodDescriptor(psiMethod: PsiMethodWrapper): String {
         val methodDescriptor = psiMethod.methodDescriptor
         log.info("Method description: $methodDescriptor")
         return methodDescriptor
     }
 
-    override fun getSurroundingClass(
-        caretOffset: Int,
-    ): PsiClassWrapper? {
+    override fun getSurroundingClass(caretOffset: Int): PsiClassWrapper? {
         val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
         for (cls in classElements) {
             if (cls.containsOffset(caretOffset)) {
@@ -50,9 +46,7 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return null
     }
 
-    override fun getSurroundingMethod(
-        caretOffset: Int,
-    ): PsiMethodWrapper? {
+    override fun getSurroundingMethod(caretOffset: Int): PsiMethodWrapper? {
         val methodElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiMethod::class.java)
         for (method in methodElements) {
             if (method.body != null && method.containsOffset(caretOffset)) {
@@ -70,9 +64,7 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return null
     }
 
-    override fun getSurroundingLine(
-        caretOffset: Int,
-    ): Int? {
+    override fun getSurroundingLine(caretOffset: Int): Int? {
         val doc = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
 
         val selectedLine = doc.getLineNumber(caretOffset)
@@ -172,19 +164,19 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         if (javaPsiClassWrapped != null && javaPsiMethodWrapped != null) {
             log.info(
                 "The test can be generated for: \n " +
-                    " 1) Class ${javaPsiClassWrapped.qualifiedName} \n" +
-                    " 2) Method ${javaPsiMethodWrapped.methodDescriptor}" +
-                    " 3) Line $line",
+                        " 1) Class ${javaPsiClassWrapped.qualifiedName} \n" +
+                        " 2) Method ${javaPsiMethodWrapped.name} \n" +
+                        " 3) Line $line",
             )
         }
 
         return result.toArray()
     }
 
-    override fun getLineDisplayName(line: Int): String = "<html><b><font color='orange'>line</font> $line</b></html>"
+    override fun getLineDisplayName(line: Int) = "<html><b><font color='orange'>line</font> $line</b></html>"
 
     override fun getClassDisplayName(psiClass: PsiClassWrapper): String =
-        (psiClass as JavaPsiClassWrapper).getClassDisplayName()
+        "<html><b><font color='orange'>${psiClass.classType.representation}</font> ${psiClass.qualifiedName}</b></html>"
 
     override fun getMethodDisplayName(psiMethod: PsiMethodWrapper): String {
         return if ((psiMethod as JavaPsiMethodWrapper).isDefaultConstructor) {
