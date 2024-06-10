@@ -11,5 +11,5 @@ enum class ClassType(val representation: String) {
     CLASS("class"),
     DATA_CLASS("data class"),
     INLINE_VALUE_CLASS("inline value class"),
-    OBJECT("object")
+    OBJECT("object"),
 }

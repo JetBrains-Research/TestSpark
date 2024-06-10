@@ -5,7 +5,12 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
-import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtFunction
+import org.jetbrains.kotlin.psi.KtPrimaryConstructor
+import org.jetbrains.kotlin.psi.KtSecondaryConstructor
+import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
 import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
@@ -26,7 +31,7 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
         get() = psiFunction.run {
             val parameterTypes = valueParameters.joinToString("") { generateFieldType(it.typeReference) }
             val returnType = generateReturnDescriptor(psiFunction)
-            return "${name}($parameterTypes)$returnType"
+            return "$name($parameterTypes)$returnType"
         }
 
     override val signature: String
