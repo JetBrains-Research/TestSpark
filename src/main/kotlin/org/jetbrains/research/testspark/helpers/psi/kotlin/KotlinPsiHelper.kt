@@ -6,17 +6,13 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
-import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.*
+import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
-import org.jetbrains.kotlin.psi.KtClass
-import org.jetbrains.kotlin.psi.KtNamedFunction
-import org.jetbrains.kotlin.psi.KtTypeReference
+import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
@@ -39,34 +35,32 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     }
 
     override fun getSurroundingClass(caretOffset: Int): PsiClassWrapper? {
-        val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, KtClass::class.java)
-        for (cls in classElements) {
-            if (cls.containsOffset(caretOffset)) {
+        val element = psiFile.findElementAt(caretOffset)
+        val cls = element?.parentOfType<KtClassOrObject>(withSelf = true)
+
+        if (cls != null) {
+            if (cls.name != null) {
                 val kotlinClassWrapper = KotlinPsiClassWrapper(cls)
-                if (kotlinClassWrapper.isTestableClass()) {
-                    log.info("Surrounding class for caret in $caretOffset is ${kotlinClassWrapper.qualifiedName}")
-                    return kotlinClassWrapper
-                }
+                log.info("Surrounding class for caret in $caretOffset is ${kotlinClassWrapper.qualifiedName}")
+                return kotlinClassWrapper
             }
         }
+
         log.info("No surrounding class for caret in $caretOffset")
         return null
     }
 
     override fun getSurroundingMethod(caretOffset: Int): PsiMethodWrapper? {
-        val methodElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, KtNamedFunction::class.java)
-        for (method in methodElements) {
-            if (method.containsOffset(caretOffset)) {
-                val surroundingClass = PsiTreeUtil.getParentOfType(method, KtClass::class.java) ?: continue
-                val surroundingClassWrapper = KotlinPsiClassWrapper(surroundingClass)
-                if (surroundingClassWrapper.isTestableClass()) {
-                    val kotlinMethod = KotlinPsiMethodWrapper(method)
-                    log.info("Surrounding method for caret in $caretOffset is ${kotlinMethod.methodDescriptor}")
-                    return kotlinMethod
-                }
-            }
+        val element = psiFile.findElementAt(caretOffset)
+        val method = element?.parentOfType<KtFunction>(withSelf = true)
+
+        if (method != null) {
+            val wrappedMethod = KotlinPsiMethodWrapper(method)
+            log.info("Surrounding method for caret at $caretOffset is ${wrappedMethod.methodDescriptor}")
+            return wrappedMethod
         }
-        log.info("No surrounding method for caret in $caretOffset")
+
+        log.info("No surrounding method for caret at $caretOffset")
         return null
     }
 
@@ -83,6 +77,29 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         }
         log.info("Surrounding line at caret $caretOffset is $selectedLine")
         return selectedLine
+    }
+
+    override fun collectClassesToTest(
+        project: Project,
+        classesToTest: MutableList<PsiClassWrapper>,
+        caretOffset: Int,
+    ) {
+        val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(0)
+        val cutPsiClass = getSurroundingClass(caretOffset)!!
+        var currentPsiClass = cutPsiClass
+        for (index in 0 until maxPolymorphismDepth) {
+            if (!classesToTest.contains(currentPsiClass)) {
+                classesToTest.add(currentPsiClass)
+            }
+
+            if (currentPsiClass.superClass == null ||
+                currentPsiClass.superClass!!.qualifiedName.startsWith("kotlin.")
+            ) {
+                break
+            }
+            currentPsiClass = currentPsiClass.superClass!!
+        }
+        log.info("There are ${classesToTest.size} classes to test")
     }
 
     override fun getInterestingPsiClassesWithQualifiedNames(
@@ -145,66 +162,29 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         if (ktClass != null && ktFunction != null) {
             log.info(
                 "The test can be generated for: \n " +
-                    " 1) Class ${ktClass.qualifiedName} \n" +
-                    " 2) Method ${ktFunction.name}" +
-                    " 3) Line $line",
+                        " 1) Class ${ktClass.qualifiedName} \n" +
+                        " 2) Method ${ktFunction.name} \n" +
+                        " 3) Line $line",
             )
         }
 
         return result.toArray()
     }
 
-    override fun collectClassesToTest(
-        project: Project,
-        classesToTest: MutableList<PsiClassWrapper>,
-        caretOffset: Int,
-    ) {
-        val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(0)
-        val cutPsiClass = getSurroundingClass(caretOffset)!!
-        var currentPsiClass = cutPsiClass
-        for (index in 0 until maxPolymorphismDepth) {
-            if (!classesToTest.contains(currentPsiClass)) {
-                classesToTest.add(currentPsiClass)
-            }
+    override fun getLineDisplayName(line: Int) = "<html><b><font color='orange'>line</font> $line</b></html>"
 
-            if (currentPsiClass.superClass == null ||
-                currentPsiClass.superClass!!.qualifiedName.startsWith("kotlin.")
-            ) {
-                break
-            }
-            currentPsiClass = currentPsiClass.superClass!!
-        }
-        log.info("There are ${classesToTest.size} classes to test")
-    }
-
-    override fun getLineDisplayName(line: Int): String {
-        return "<html><b><font color='orange'>line</font> $line</b></html>"
-    }
-
-    override fun getClassDisplayName(psiClass: PsiClassWrapper): String {
-        return if ((psiClass as KotlinPsiClassWrapper).isInterface) {
-            "<html><b><font color='orange'>interface</font> ${psiClass.qualifiedName}</b></html>"
-        } else if (psiClass.isAbstractClass) {
-            "<html><b><font color='orange'>abstract class</font> ${psiClass.qualifiedName}</b></html>"
-        } else {
-            "<html><b><font color='orange'>class</font> ${psiClass.qualifiedName}</b></html>"
-        }
-    }
+    override fun getClassDisplayName(psiClass: PsiClassWrapper): String =
+        "<html><b><font color='orange'>${psiClass.classType.representation}</font> ${psiClass.qualifiedName}</b></html>"
 
     override fun getMethodDisplayName(psiMethod: PsiMethodWrapper): String {
-        return if ((psiMethod as KotlinPsiMethodWrapper).isDefaultConstructor) {
-            "<html><b><font color='orange'>default constructor</font></b></html>"
-        } else if (psiMethod.isConstructor) {
-            "<html><b><font color='orange'>constructor</font></b></html>"
-        } else if (psiMethod.isMethodDefault) {
-            "<html><b><font color='orange'>default method</font> ${psiMethod.name}</b></html>"
-        } else {
-            "<html><b><font color='orange'>method</font> ${psiMethod.name}</b></html>"
+        psiMethod as KotlinPsiMethodWrapper
+        return when {
+            psiMethod.isTopLevelFunction -> "<html><b><font color='orange'>top-level function</font></b></html>"
+            psiMethod.isSecondaryConstructor -> "<html><b><font color='orange'>secondary constructor</font></b></html>"
+            psiMethod.isPrimaryConstructor -> "<html><b><font color='orange'>constructor</font></b></html>"
+            psiMethod.isDefaultMethod -> "<html><b><font color='orange'>default method</font> ${psiMethod.name}</b></html>"
+            else -> "<html><b><font color='orange'>method</font> ${psiMethod.name}</b></html>"
         }
-    }
-
-    private fun PsiElement.containsOffset(offset: Int): Boolean {
-        return offset in textRange.startOffset..textRange.endOffset
     }
 
     private fun resolveClassInType(typeReference: KtTypeReference): PsiClass? {
