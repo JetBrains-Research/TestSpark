@@ -6,13 +6,17 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.*
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
-import org.jetbrains.kotlin.psi.*
-import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
+import org.jetbrains.kotlin.psi.KtClass
+import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtFunction
+import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
@@ -162,9 +166,9 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         if (ktClass != null && ktFunction != null) {
             log.info(
                 "The test can be generated for: \n " +
-                        " 1) Class ${ktClass.qualifiedName} \n" +
-                        " 2) Method ${ktFunction.name} \n" +
-                        " 3) Line $line",
+                    " 1) Class ${ktClass.qualifiedName} \n" +
+                    " 2) Method ${ktFunction.name} \n" +
+                    " 3) Line $line",
             )
         }
 

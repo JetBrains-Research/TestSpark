@@ -60,8 +60,8 @@ internal class PromptBuilder(private var prompt: String) {
                 val superClass = classesToTest[i - 1]
 
                 fullText += "${subClass.qualifiedName} extends ${superClass.qualifiedName}. " +
-                        "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
-                        "```\n"
+                    "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
+                    "```\n"
             }
             prompt = prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
