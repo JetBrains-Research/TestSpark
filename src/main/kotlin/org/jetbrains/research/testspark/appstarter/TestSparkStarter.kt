@@ -7,11 +7,16 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.projectRoots.Sdk
+import com.intellij.openapi.projectRoots.SimpleJavaSdkType
+import com.intellij.openapi.projectRoots.impl.MockSdk
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
+import com.intellij.util.containers.MultiMap
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
@@ -65,6 +70,8 @@ class TestSparkStarter : ApplicationStarter {
         val promptTemplateFile = args[8]
         // Output directory
         val output = args[9]
+        // Java directory
+        val javaSDKHomePath: String = args[10]
 
         /**
          * Set output directory in order to save the produced prompts and LLM responses during test generation.
@@ -114,6 +121,8 @@ class TestSparkStarter : ApplicationStarter {
                         "PsiClass '${targetPsiClass.qualifiedName}' is detected! Start the test generation process.")
                     println("PsiClass ${targetPsiClass.qualifiedName} is detected! Start the test generation process.")
 
+                    // Get project SDK
+                    val projectSDK = getProjectSdk(project, javaSDKHomePath)
                     // update settings
                     val settingsState = project.getService(LLMSettingsService::class.java).state
                     settingsState.currentLLMPlatformName = LLMDefaultsBundle.get("grazieName")
@@ -162,6 +171,7 @@ class TestSparkStarter : ApplicationStarter {
                             psiHelper,
                             targetPsiClass.textRange.startOffset,
                             testSamplesCode = "", // we don't provide samples to LLM
+                            projectSDK = projectSDK
                         )
 
                     ProjectUnderTestFileCreator.log("[TestSpark Starter] Starting the test generation process")
@@ -183,7 +193,7 @@ class TestSparkStarter : ApplicationStarter {
                         ProjectUnderTestFileCreator.log("[TestSpark Starter] Test generation completed successfully")
                         println("[TestSpark Starter] Test generation completed successfully")
                         // Run test file
-                        runTestsWithCoverageCollection(project, output, packageList, classPath, projectContext)
+                        runTestsWithCoverageCollection(project, output, packageList, classPath, projectContext, projectSDK)
                     } else {
                         ProjectUnderTestFileCreator.log("[TestSpark Starter] Test generation failed")
                         println("[TestSpark Starter] Test generation failed")
@@ -199,7 +209,44 @@ class TestSparkStarter : ApplicationStarter {
         }
     }
 
-    private fun runTestsWithCoverageCollection(project: Project, out: String, packageList: MutableList<String>, classPath: String, projectContext: ProjectContext) {
+    /**
+     * Retrieves the project SDK based on the provided parameters.
+     *
+     * @param project the project inder test
+     * @param javaSDKHomePath the path to the Java SDK home directory provided by user in headless mode
+     * @return the project SDK for running and compiling tests generated in headless mode
+     */
+    private fun getProjectSdk(project: Project, javaSDKHomePath: String): Sdk {
+        return when {
+            // User provided a java sdk home path
+            javaSDKHomePath.isNotBlank() -> MockSdk(
+                "Provided Mock SDK",
+                javaSDKHomePath,
+                "",
+                MultiMap.create(),
+                SimpleJavaSdkType(),
+            )
+            // IntelliJ did not recognize the SDK and user also did not provide the sdk
+            ProjectRootManager.getInstance(project).projectSdk == null -> MockSdk(
+                "JavaHome Mock SDK",
+                LocalFileSystem.getInstance().findFileByPath(System.getProperty("java.home"))!!.path,
+                "",
+                MultiMap.create(),
+                SimpleJavaSdkType(),
+            )
+            // IntelliJ managed to recognize the sdk
+            else -> ProjectRootManager.getInstance(project).projectSdk!!
+        }
+    }
+
+    private fun runTestsWithCoverageCollection(
+        project: Project,
+        out: String,
+        packageList: MutableList<String>,
+        classPath: String,
+        projectContext: ProjectContext,
+        projectSDK: Sdk
+    ) {
         val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
 
         ProjectUnderTestFileCreator.log("Collecting coverage for tests in '$targetDirectory")
@@ -216,7 +263,7 @@ class TestSparkStarter : ApplicationStarter {
                 var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
                 // The current test is compiled and is ready to run jacoco
-                val testExecutionError = TestProcessor(project).createXmlFromJacoco(
+                val testExecutionError = TestProcessor(project, projectSDK).createXmlFromJacoco(
                     it.nameWithoutExtension,
                     "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
                     testcaseName,

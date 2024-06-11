@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.projectRoots.Sdk
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
@@ -44,6 +45,7 @@ class LLMProcessManager(
     private val project: Project,
     private val promptManager: PromptManager,
     private val testSamplesCode: String,
+    projectSDK: Sdk? = null
 ) : ProcessManager {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -52,8 +54,7 @@ class LLMProcessManager(
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = SettingsArguments(project).maxLLMRequest()
-    private val testProcessor = TestProcessor(project)
-
+    private val testProcessor = TestProcessor(project, projectSDK)
     /**
      * Runs the test generator process.
      *
@@ -94,7 +95,7 @@ class LLMProcessManager(
 
         val initialPromptMessage = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
-        val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion)
+        val testCompiler = testProcessor.testCompiler
 
         // initiate a new RequestManager
         val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
