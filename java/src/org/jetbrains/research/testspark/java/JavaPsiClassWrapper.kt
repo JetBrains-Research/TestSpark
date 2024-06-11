@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psi.java
+package org.jetbrains.research.testspark.kotlin
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
