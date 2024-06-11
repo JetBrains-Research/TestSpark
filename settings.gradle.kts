@@ -4,3 +4,5 @@ plugins {
 rootProject.name = "TestSpark"
 include("JUnitRunner")
 include("core")
+include("kotlin")
+include("java")

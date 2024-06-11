@@ -17,7 +17,7 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.helpers.psi.PsiHelper
+import org.jetbrains.research.testspark.core.psi.PsiHelper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService

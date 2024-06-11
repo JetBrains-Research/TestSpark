@@ -21,7 +21,7 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.helpers.psi.PsiHelperFactory
+import org.jetbrains.research.testspark.core.psi.PsiHelperFactory
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService

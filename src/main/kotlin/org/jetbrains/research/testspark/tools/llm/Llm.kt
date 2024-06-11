@@ -8,8 +8,8 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.LLMHelper
-import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.helpers.psi.PsiHelper
+import org.jetbrains.research.testspark.core.psi.PsiClassWrapper
+import org.jetbrains.research.testspark.core.psi.PsiHelper
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager

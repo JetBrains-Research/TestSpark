@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.tools.template
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
-import org.jetbrains.research.testspark.helpers.psi.PsiHelper
+import org.jetbrains.research.testspark.core.psi.PsiHelper
 
 /**
  * Represents a tool that can generate tests.
