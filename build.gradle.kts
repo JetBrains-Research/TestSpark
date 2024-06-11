@@ -37,7 +37,7 @@ repositories {
     mavenCentral()
     maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
     maven("https://www.jetbrains.com/intellij-repository/snapshots")
-//    maven("https://packages.jetbrains.team/maven/p/big-code/bigcode")
+    maven("https://packages.jetbrains.team/maven/p/big-code/bigcode")
 
     maven {
         url = uri("https://packages.jetbrains.team/maven/p/automatically-generating-unit-tests/maven")
@@ -155,7 +155,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-test
     implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
 
-//    implementation("org.jetbrains.research:plugin-utilities-core:2.0.6")
+    implementation("org.jetbrains.research:plugin-utilities-core:2.0.6")
 
     if (spaceCredentialsProvided()) {
         // Dependencies for hasGrazieAccess variant
