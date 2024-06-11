@@ -4,6 +4,7 @@ import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
@@ -20,16 +21,19 @@ import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
-class TestProcessor(val project: Project) : TestsPersistentStorage {
-
-    private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
+class TestProcessor(
+    val project: Project,
+    givenProjectSDK: Sdk? = null
+) : TestsPersistentStorage {
+    private val projectSDK: Sdk = givenProjectSDK ?: ProjectRootManager.getInstance(project).projectSdk!!
+    private val javaHomeDirectory = projectSDK.homeDirectory!!
 
     private val log = Logger.getInstance(this::class.java)
 
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
-    private val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion)
+    val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion, javaHomeDirectory.path)
 
     override fun saveGeneratedTest(packageString: String, code: String, resultPath: String, testFileName: String): String {
         // Generate the final path for the generated tests

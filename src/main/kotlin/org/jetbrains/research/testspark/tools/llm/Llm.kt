@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.tools.llm
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.projectRoots.Sdk
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.data.CodeType
@@ -36,6 +37,7 @@ class Llm(override val name: String = "LLM") : Tool {
         psiHelper: PsiHelper,
         caretOffset: Int,
         testSamplesCode: String,
+        projectSDK: Sdk? = null
     ): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClassWrapper>()
 
@@ -49,6 +51,7 @@ class Llm(override val name: String = "LLM") : Tool {
             project,
             PromptManager(project, psiHelper, caretOffset),
             testSamplesCode,
+            projectSDK
         )
     }
 
