@@ -28,4 +28,4 @@ if [ $# -ne "12" ]; then
 fi
 
 
-"$DIR/gradlew" -p "$DIR" headless -Proot="$1" -Pfile="$2" -Pcut="$3" -Pcp="$4" -Pjunitv="$5" -Pllm="$6" -Ptoken="$7" -Pprompt="$8" -Pout="$9" javahome=${10} -Dspace.username="${11}" -Dspace.pass="${12}"
+"$DIR/gradlew" -p "$DIR" headless -Proot="$1" -Pfile="$2" -Pcut="$3" -Pcp="$4" -Pjunitv="$5" -Pllm="$6" -Ptoken="$7" -Pprompt="$8" -Pout="$9" -Pjavahome="${10}" -Dspace.username="${11}" -Dspace.pass="${12}"
