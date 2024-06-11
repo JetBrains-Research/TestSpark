@@ -25,7 +25,7 @@ import org.jetbrains.research.testspark.helpers.psi.PsiHelperFactory
 import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 

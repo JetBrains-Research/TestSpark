@@ -8,7 +8,7 @@ import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.IJRequestManager
-import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 
 class GrazieRequestManager(project: Project) : IJRequestManager(project) {
     private val llmErrorManager = LLMErrorManager()

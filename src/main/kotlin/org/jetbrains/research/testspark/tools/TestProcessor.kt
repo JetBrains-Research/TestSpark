@@ -14,7 +14,7 @@ import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -119,7 +119,8 @@ class TestProcessor(
 
         // for classpath containing cut
         command.add("--classfiles")
-        command.add(CompilerModuleExtension.getInstance(projectContext.cutModule!!)?.compilerOutputPath!!.path)
+        command.add("${projectContext.compilationOutputDirectory!!}")
+        // command.add(CompilerModuleExtension.getInstance(projectContext.cutModule!!)?.compilerOutputPath!!.path)
 
         // for each source folder
         sourceRoots.forEach { root ->

@@ -16,6 +16,7 @@ import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 import java.io.File
 
 enum class FeedbackCycleExecutionResult {
@@ -80,6 +81,8 @@ class LLMWithFeedbackCycle(
 
         var generatedTestSuite: TestSuiteGeneratedByLLM? = null
 
+        val llmResponseFilepath = ProjectUnderTestFileCreator.getOrCreateFileInOutputDirectory("llm-response.txt")
+
         while (!generatedTestsArePassing) {
             requestsCount++
 
@@ -106,6 +109,9 @@ class LLMWithFeedbackCycle(
                 isUserFeedback = false,
                 errorMonitor,
             )
+
+            ProjectUnderTestFileCreator.appendToFile(testsAssembler.getContent(), llmResponseFilepath)
+            ProjectUnderTestFileCreator.appendToFile("\n===================================================\n\n", llmResponseFilepath)
 
             when (response.errorCode) {
                 ResponseErrorCode.OK -> {

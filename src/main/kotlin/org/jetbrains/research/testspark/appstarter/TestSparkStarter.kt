@@ -30,7 +30,7 @@ import org.jetbrains.research.testspark.helpers.psi.PsiHelperFactory
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.tools.ProjectUnderTestFileCreator
+import org.jetbrains.research.testspark.core.ProjectUnderTestFileCreator
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.Llm
@@ -59,7 +59,10 @@ class TestSparkStarter : ApplicationStarter {
         val classUnderTestName = args[3]
         // Paths to compilation output of the project under test (seperated by ':')
         val projectClassPath = args[4]
-        val classPath = "$projectPath${ToolUtils.sep}$projectClassPath"
+        val classPath = "$projectPath:$projectClassPath"
+
+        println("======================\nclassPath: ${classPath}\n======================")
+
         // JUnit Version
         val jUnitVersion = args[5]
         // Selected model
@@ -138,6 +141,11 @@ class TestSparkStarter : ApplicationStarter {
                     }
                     project.service<PluginSettingsService>().state.buildPath = classPath
 
+
+                    val packageFilepath = classUnderTestName.split(".").dropLast(1).joinToString("/")
+                    println("==============================\npackageFilepath: $packageFilepath")
+                    println("==============================\ncompilationOutputDirectory: ${"$output/$packageFilepath"}\n==============================")
+
                     // Prepare Project Context
                     // First, get CUT Module
                     val cutModule =
@@ -149,6 +157,7 @@ class TestSparkStarter : ApplicationStarter {
                         output,
                         targetPsiClass.qualifiedName,
                         cutModule,
+                        compilationOutputDirectory = "$output/$packageFilepath"
                     )
                     // Prepare the test generation data
                     val testGenerationData = TestGenerationData(
