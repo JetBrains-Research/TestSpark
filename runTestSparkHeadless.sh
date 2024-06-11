@@ -21,10 +21,11 @@ if [ $# -ne "11" ]; then
         7) Grazie token
         8) Filepath to a txt-file containing prompt template
         9) Output directory
-        10) Space username
-        11) Space password"
+        10) Java home directory
+        11) Space username
+        12) Space password"
   exit 1
 fi
 
 
-"$DIR/gradlew" -p "$DIR" headless -Proot="$1" -Pfile="$2" -Pcut="$3" -Pcp="$4" -Pjunitv="$5" -Pllm="$6" -Ptoken="$7" -Pprompt="$8" -Pout="$9" -Dspace.username="${10}" -Dspace.pass="${11}"
+"$DIR/gradlew" -p "$DIR" headless -Proot="$1" -Pfile="$2" -Pcut="$3" -Pcp="$4" -Pjunitv="$5" -Pllm="$6" -Ptoken="$7" -Pprompt="$8" -Pout="$9" javahome=${10} -Dspace.username="${11}" -Dspace.pass="${12}"
