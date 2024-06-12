@@ -59,6 +59,13 @@ class TestSparkStarter : ApplicationStarter {
 
         println("Test generation requested for $projectPath")
 
+        // remove the `.idea` folder in the $projectPath if exists
+        val ideaFolderPath = "$projectPath${File.separator}.idea"
+        val ideaFolder = File(ideaFolderPath)
+        if (ideaFolder.exists()) {
+            ideaFolder.deleteRecursively()
+        }
+
         // Create a CompletableFuture to hold the result
         val future = CompletableFuture<Project>()
 
