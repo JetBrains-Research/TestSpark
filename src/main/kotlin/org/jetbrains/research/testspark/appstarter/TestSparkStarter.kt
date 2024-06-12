@@ -43,11 +43,11 @@ class TestSparkStarter : ApplicationStarter {
         // Project path
         val projectPath = args[1]
         // Path to the target file (.java file)
-        val filePath = "$projectPath/${args[2]}"
+        val filePath = "$projectPath${File.separator}${args[2]}"
         // CUT name (<package-name>.<class-name>)
         val classUnderTestName = args[3]
         // Paths to compilation output of the project under test (seperated by ':')
-        val classPath = "$projectPath:${args[4]}"
+        val classPath = "$projectPath${File.separator}${args[4]}"
         // Selected mode
         val model = args[5]
         // Token
@@ -149,7 +149,11 @@ class TestSparkStarter : ApplicationStarter {
                     // Run test file
                     runTests(project, output, packageList, classPath)
 
-                    ProjectManager.getInstance().closeAndDispose(project)
+                    try {
+                        ProjectManager.getInstance().closeAndDispose(project)
+                    }catch (e: Exception){
+                        println("[TestSpark Starter] the project is closed with error: ${e.message}")
+                    }
 
                     println("[TestSpark Starter] Exiting the headless mode")
                     exitProcess(0)
