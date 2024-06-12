@@ -130,7 +130,7 @@ class PromptManager(
         entry: Map.Entry<PsiClass, MutableList<PsiClass>>,
     ): Pair<ClassRepresentation, List<ClassRepresentation>> {
         val key = createClassRepresentation(entry.key)
-        val value = entry.value.map(this::createClassRepresentation)
+        val value = entry.value.filter { it.qualifiedName != null }.map(this::createClassRepresentation)
 
         return key to value // mapOf(key to value).entries.first()
     }
