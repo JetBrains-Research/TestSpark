@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers
+package org.jetbrains.research.testspark.java
 
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager

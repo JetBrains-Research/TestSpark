@@ -19,7 +19,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.core.psi.PsiHelper
-import org.jetbrains.research.testspark.core.psi.PsiHelperFactory
+import org.jetbrains.research.testspark.core.psi.PsiHelperLanguageKit
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -71,7 +71,7 @@ class TestSparkAction : AnAction() {
      */
     override fun update(e: AnActionEvent) {
         val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val psiHelper = PsiHelperFactory.getPsiHelper(psiFile)
+        val psiHelper = PsiHelperLanguageKit.getPsiHelper(psiFile)
             ?: // TODO show the warning panel
             return
         e.presentation.isEnabled = psiHelper.getCurrentListOfCodeTypes(e) != null
@@ -100,7 +100,7 @@ class TestSparkAction : AnAction() {
         private val testGeneratorButtonGroup = ButtonGroup()
 
         private val psiHelper: PsiHelper? =
-            PsiHelperFactory.getPsiHelper(e.dataContext.getData(CommonDataKeys.PSI_FILE)!!)
+            PsiHelperLanguageKit.getPsiHelper(e.dataContext.getData(CommonDataKeys.PSI_FILE)!!)
 
         private val codeTypes = psiHelper?.getCurrentListOfCodeTypes(e)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset

@@ -1,5 +1,0 @@
-<idea-plugin package="org.jetbrains.research.testgenie.kotlin">
-    <dependencies>
-        <plugin id="org.jetbrains.kotlin"/>
-    </dependencies>
-</idea-plugin>

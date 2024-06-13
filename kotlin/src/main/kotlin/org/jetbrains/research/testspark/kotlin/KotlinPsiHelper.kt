@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psi.kotlin
+package org.jetbrains.research.testspark.kotlin
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.psi.KtFunction
 import com.intellij.openapi.editor.Caret
 import com.intellij.psi.PsiClass
 import com.intellij.psi.util.parentOfType
+import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.psi.KtClass
@@ -23,7 +24,6 @@ import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import org.jetbrains.research.testspark.core.psi.PsiClassWrapper
 import org.jetbrains.research.testspark.core.psi.PsiMethodWrapper
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 
 class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 

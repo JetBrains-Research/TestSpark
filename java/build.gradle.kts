@@ -1,21 +1,13 @@
 plugins {
-    java
-    kotlin("jvm") version "2.0.0"
-}
-
-repositories {
-    mavenCentral()
+    kotlin("jvm")
 }
 
 dependencies {
-    compileOnly(kotlin("stdlib"))
-
-    implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
+    implementation(project(":core"))
+    // Define Java module specific dependencies here if any
+    implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
 }
 
-sourceSets {
-    main {
-        java.srcDirs("src/org/jetbrains/research/testspark/java")
-//        resources.srcDirs("resources")
-    }
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
 }

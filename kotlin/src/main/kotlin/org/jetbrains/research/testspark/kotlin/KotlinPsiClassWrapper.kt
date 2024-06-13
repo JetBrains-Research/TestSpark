@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psi.kotlin
+package org.jetbrains.research.testspark.kotlin
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
@@ -16,10 +16,10 @@ import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.research.testspark.core.data.ClassType
+import org.jetbrains.research.testspark.core.psi.PsiClassWrapper
+import org.jetbrains.research.testspark.core.psi.PsiMethodWrapper
 import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
-import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
 
 class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
@@ -86,7 +86,7 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
                 psiClass is KtObjectDeclaration -> ClassType.OBJECT
                 psiClass.isInterfaceClass() -> ClassType.INTERFACE
                 psiClass.hasModifier(KtTokens.ABSTRACT_KEYWORD) -> ClassType.ABSTRACT_CLASS
-                psiClass.isData() -> ClassType.DATA_CLASS
+                (psiClass as KtClass).isData() -> ClassType.DATA_CLASS
                 psiClass.annotationEntries.any { it.text == "@JvmInline" } -> ClassType.INLINE_VALUE_CLASS
                 else -> ClassType.CLASS
             }

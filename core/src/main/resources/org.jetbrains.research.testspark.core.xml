@@ -1,0 +1,11 @@
+<idea-plugin package="org.jetbrains.research.testspark.core">
+    <extensionPoints>
+        <extensionPoint
+                qualifiedName="org.jetbrains.research.testspark.psiLanguageKit"
+                beanClass="com.intellij.lang.LanguageExtensionPoint"
+                dynamic="true">
+            <with attribute="implementationClass"
+                  implements="org.jetbrains.research.testspark.core.psi.PsiHelperLanguageKit"/>
+        </extensionPoint>
+    </extensionPoints>
+</idea-plugin>

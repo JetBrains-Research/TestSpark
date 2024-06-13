@@ -20,11 +20,11 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.core.psi.PsiClassWrapper
 import org.jetbrains.research.testspark.core.psi.PsiHelper
-import org.jetbrains.research.testspark.core.psi.PsiHelperFactory
+import org.jetbrains.research.testspark.core.psi.PsiHelperLanguageKit
 import org.jetbrains.research.testspark.core.psi.PsiMethodWrapper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.SettingsArgumentsLlm
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 
 /**
@@ -165,23 +165,23 @@ class PromptManager(
     }
 
     fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
-        return (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
-            (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+        return (SettingsArgumentsLlm(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
+            (SettingsArgumentsLlm(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
     }
 
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
         // reducing depth of polymorphism
-        if (SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) {
+        if (SettingsArgumentsLlm(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) {
             testGenerationData.polyDepthReducing++
-            log.info("polymorphism depth is: ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}")
+            log.info("polymorphism depth is: ${SettingsArgumentsLlm(project).maxPolyDepth(testGenerationData.polyDepthReducing)}")
             showPromptReductionWarning(testGenerationData)
             return true
         }
 
         // reducing depth of input params
-        if (SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1) {
+        if (SettingsArgumentsLlm(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1) {
             testGenerationData.inputParamsDepthReducing++
-            log.info("input params depth is: ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}")
+            log.info("input params depth is: ${SettingsArgumentsLlm(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}")
             showPromptReductionWarning(testGenerationData)
             return true
         }
@@ -192,8 +192,8 @@ class PromptManager(
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
-                "Maximum depth of polymorphism is ${SettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
-                "Maximum depth for input parameters is ${SettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
+                "Maximum depth of polymorphism is ${SettingsArgumentsLlm(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                "Maximum depth for input parameters is ${SettingsArgumentsLlm(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
             project,
         )
     }
@@ -243,7 +243,7 @@ class PromptManager(
         methodDescriptor: String,
     ): PsiMethodWrapper? {
         for (currentPsiMethod in psiClass.allMethods) {
-            val psiHelper = PsiHelperFactory.getPsiHelper(psiClass.containingFile) ?: return null
+            val psiHelper = PsiHelperLanguageKit.getPsiHelper(psiClass.containingFile) ?: return null
             if (psiHelper.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) {
                 return currentPsiMethod
             }
@@ -264,7 +264,7 @@ class PromptManager(
     ): String {
         for (currentPsiMethod in psiClass.allMethods) {
             if (currentPsiMethod.containsLine(lineNumber)) {
-                val psiHelper = PsiHelperFactory.getPsiHelper(psiClass.containingFile) ?: return ""
+                val psiHelper = PsiHelperLanguageKit.getPsiHelper(psiClass.containingFile) ?: return ""
                 return psiHelper.generateMethodDescriptor(currentPsiMethod)
             }
         }

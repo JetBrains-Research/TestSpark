@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark
+package org.jetbrains.research.testspark.java
 
 import com.intellij.psi.PsiClassType
 import com.intellij.psi.PsiDocumentManager
@@ -9,7 +9,6 @@ import com.intellij.psi.PsiType
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.core.psi.PsiClassWrapper
 import org.jetbrains.research.testspark.core.psi.PsiMethodWrapper
-import org.jetbrains.research.testspark.kotlin.JavaPsiClassWrapper
 import java.util.stream.Collectors
 
 class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper {

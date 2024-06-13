@@ -2,6 +2,6 @@ package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.SettingsArgumentsLlm
 
-abstract class IJRequestManager(protected val project: Project) : RequestManager(token = SettingsArguments(project).getToken())
+abstract class IJRequestManager(protected val project: Project) : RequestManager(token = SettingsArgumentsLlm(project).getToken())

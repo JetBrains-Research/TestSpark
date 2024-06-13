@@ -83,7 +83,7 @@ interface PsiClassWrapper {
  * Interface that declares all the methods needed for parsing and
  * handling the PSI (Program Structure Interface) for different languages.
  */
-interface PsiHelper {
+interface PsiHelper : PsiHelperLanguageKit {
     val language: Language
 
     /**

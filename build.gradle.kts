@@ -35,22 +35,24 @@ group = properties("pluginGroup")
 version = properties("pluginVersion")
 
 // Configure project's dependencies
-repositories {
-    mavenCentral()
-    maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
-    maven("https://www.jetbrains.com/intellij-repository/snapshots")
+allprojects {
+    repositories {
+        mavenCentral()
+        maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
+        maven("https://www.jetbrains.com/intellij-repository/snapshots")
 
-    maven {
-        url = uri("https://packages.jetbrains.team/maven/p/automatically-generating-unit-tests/maven")
-        credentials {
-            username = spaceUsername
-            password = spacePassword
-        }
-    }
-
-    if (spaceCredentialsProvided()) {
         maven {
-            url = uri("https://packages.jetbrains.team/maven/p/grazi/grazie-platform-public")
+            url = uri("https://packages.jetbrains.team/maven/p/automatically-generating-unit-tests/maven")
+            credentials {
+                username = spaceUsername
+                password = spacePassword
+            }
+        }
+
+        if (spaceCredentialsProvided()) {
+            maven {
+                url = uri("https://packages.jetbrains.team/maven/p/grazi/grazie-platform-public")
+            }
         }
     }
 }
@@ -170,6 +172,28 @@ dependencies {
         "hasGrazieAccessImplementation"(kotlin("stdlib"))
         "hasGrazieAccessImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
         "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion")
+    }
+}
+
+subprojects {
+    apply(plugin = "org.jetbrains.intellij")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+
+    intellij {
+        pluginName.set(properties("pluginName"))
+        version.set(properties("platformVersion"))
+        type.set(properties("platformType"))
+
+        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
+        plugins.set(properties("platformPlugins").split(',').map(String::trim).filter(String::isNotEmpty))
+    }
+
+    dependencies {
+        implementation(kotlin("stdlib"))
+    }
+
+    tasks.withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
     }
 }
 

@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.SettingsArgumentsLlm
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieRequestManager
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIRequestManager
 
@@ -17,7 +17,7 @@ class StandardRequestManagerFactory(private val project: Project) : RequestManag
         get() = project.getService(LLMSettingsService::class.java).state
 
     override fun getRequestManager(project: Project): RequestManager {
-        return when (val platform = SettingsArguments(project).currentLLMPlatformName()) {
+        return when (val platform = SettingsArgumentsLlm(project).currentLLMPlatformName()) {
             llmSettingsState.openAIName -> OpenAIRequestManager(project)
             llmSettingsState.grazieName -> GrazieRequestManager(project)
             else -> throw IllegalStateException("Unknown selected platform: $platform")

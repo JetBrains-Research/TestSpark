@@ -1,3 +1,4 @@
+package org.jetbrains.research.testspark.java
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -11,9 +12,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.JavaPsiMethodWrapper
 import org.jetbrains.research.testspark.core.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.kotlin.JavaPsiClassWrapper
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 
 
