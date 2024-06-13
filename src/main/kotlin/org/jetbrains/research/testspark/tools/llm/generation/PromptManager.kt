@@ -122,7 +122,7 @@ class PromptManager(
         return ClassRepresentation(
             psiClass.qualifiedName!!,
             getClassFullText(psiClass),
-            psiClass.allMethods.map(this::createMethodRepresentation),
+            psiClass.allMethods.filter { it.text != null }.map(this::createMethodRepresentation),
         )
     }
 
@@ -166,6 +166,9 @@ class PromptManager(
 
     private fun PsiMethod.getSignatureString(): String {
         val bodyStart = body?.startOffsetInParent ?: this.textLength
+        if (text == null) {
+            return ""
+        }
         return text.substring(0, bodyStart).replace('\n', ' ').trim()
     }
 
@@ -191,6 +194,8 @@ class PromptManager(
             }
         }
         return interestingPsiClasses
+            .filter { (it.qualifiedName != null) && (it.text != null) }
+            .toMutableSet()
     }
 
     /**
@@ -225,6 +230,8 @@ class PromptManager(
         }
 
         return interestingPsiClasses
+            .filter { (it.qualifiedName != null) && (it.allMethods.all { method -> (method.text != null) }) }
+            .toMutableSet()
     }
 
     /**
@@ -276,6 +283,8 @@ class PromptManager(
         }
 
         return polymorphismRelations
+            .filter { entry -> (entry.key.qualifiedName != null) && (entry.value.all { it.qualifiedName != null }) }
+            .toMutableMap()
     }
 
     /**
