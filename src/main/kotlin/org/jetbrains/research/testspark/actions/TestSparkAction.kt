@@ -107,7 +107,7 @@ class TestSparkAction : AnAction() {
                 return factory.create(file)
             }
 
-        private val codeTypes = psiHelper?.getCurrentListOfCodeTypes(e)!!
+        private val codeTypes = psiHelper.getCurrentListOfCodeTypes(e)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 

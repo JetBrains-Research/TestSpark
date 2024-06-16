@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
+import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -18,10 +19,10 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.core.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.core.psi.PsiHelper
-import org.jetbrains.research.testspark.core.psi.PsiHelperLanguageKit
-import org.jetbrains.research.testspark.core.psi.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.PsiHelperFactory
+import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.SettingsArgumentsLlm
@@ -243,7 +244,10 @@ class PromptManager(
         methodDescriptor: String,
     ): PsiMethodWrapper? {
         for (currentPsiMethod in psiClass.allMethods) {
-            val psiHelper = PsiHelperLanguageKit.getPsiHelper(psiClass.containingFile) ?: return null
+            val file = psiClass.containingFile
+            val language = file.language
+            val factory = PsiHelperFactory.EP.forLanguage(language)
+            val psiHelper = factory.create(file)
             if (psiHelper.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) {
                 return currentPsiMethod
             }
@@ -264,7 +268,10 @@ class PromptManager(
     ): String {
         for (currentPsiMethod in psiClass.allMethods) {
             if (currentPsiMethod.containsLine(lineNumber)) {
-                val psiHelper = PsiHelperLanguageKit.getPsiHelper(psiClass.containingFile) ?: return ""
+                val file = psiClass.containingFile
+                val language = file.language
+                val factory = PsiHelperFactory.EP.forLanguage(language)
+                val psiHelper = factory.create(file)
                 return psiHelper.generateMethodDescriptor(currentPsiMethod)
             }
         }

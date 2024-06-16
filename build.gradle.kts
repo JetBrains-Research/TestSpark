@@ -108,8 +108,8 @@ dependencies {
     implementation(files("lib/byte-buddy-agent-1.14.6.jar"))
     implementation(files("lib/JUnitRunner.jar"))
 
-    implementation(project(":langwrappers"))
     implementation(project(":core"))
+    implementation(project(":langwrappers"))
     if (spaceCredentialsProvided()) {
         "hasGrazieAccessCompileOnly"(project(":core"))
     }
@@ -174,28 +174,6 @@ dependencies {
     }
 }
 
-subprojects {
-    apply(plugin = "org.jetbrains.intellij")
-    apply(plugin = "org.jetbrains.kotlin.jvm")
-
-    intellij {
-        pluginName.set(properties("pluginName"))
-        version.set(properties("platformVersion"))
-        type.set(properties("platformType"))
-
-        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
-        plugins.set(properties("platformPlugins").split(',').map(String::trim).filter(String::isNotEmpty))
-    }
-
-    dependencies {
-        implementation(kotlin("stdlib"))
-    }
-
-    tasks.withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
-    }
-}
-
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
     pluginName.set(properties("pluginName"))
@@ -226,6 +204,7 @@ tasks {
         dependsOn("updateEvosuite")
         dependsOn("copyJUnitRunnerLib")
         dependsOn(":core:compileKotlin")
+        dependsOn(":langwrappers:compileKotlin")
     }
     // Set the JVM compatibility versions
     properties("javaVersion").let {
