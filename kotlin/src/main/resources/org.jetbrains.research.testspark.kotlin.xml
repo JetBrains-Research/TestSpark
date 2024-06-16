@@ -1,11 +1,10 @@
 <idea-plugin package="org.jetbrains.research.testspark.kotlin">
     <dependencies>
         <plugin id="org.jetbrains.kotlin"/>
-        <module name="org.jetbrains.research.testspark.core"/>
     </dependencies>
 
     <extensions defaultExtensionNs="org.jetbrains.research.testspark">
-        <psiLanguageKit language="kotlin" implementationClass="org.jetbrains.research.testspark.kotlin.KotlinPsiHelper"/>
+        <psiHelperFactory language="kotlin" implementationClass="org.jetbrains.research.testspark.kotlin.KotlinPsiHelperFactory"/>
     </extensions>
 
 </idea-plugin>

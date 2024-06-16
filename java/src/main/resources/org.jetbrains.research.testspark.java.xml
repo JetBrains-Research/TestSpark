@@ -1,11 +1,10 @@
 <idea-plugin package="org.jetbrains.research.testspark.java">
     <dependencies>
-        <plugin id="com.intellij.java"/>
-        <module name="org.jetbrains.research.testspark.core"/>
+        <plugin id="org.jetbrains.kotlin"/>
     </dependencies>
 
     <extensions defaultExtensionNs="org.jetbrains.research.testspark">
-        <psiLanguageKit language="JAVA" implementationClass="org.jetbrains.research.testspark.java.JavaPsiHelper"/>
+        <psiHelperFactory language="JAVA" implementationClass="org.jetbrains.research.testspark.java.JavaPsiHelperFactory"/>
     </extensions>
 
 </idea-plugin>
