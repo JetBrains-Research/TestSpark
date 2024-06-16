@@ -16,10 +16,10 @@ import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.research.testspark.core.data.ClassType
-import org.jetbrains.research.testspark.core.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.core.psi.PsiMethodWrapper
 import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""

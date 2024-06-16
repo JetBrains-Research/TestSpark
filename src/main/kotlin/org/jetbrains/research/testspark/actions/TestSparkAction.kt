@@ -18,8 +18,8 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.core.psi.PsiHelper
-import org.jetbrains.research.testspark.core.psi.PsiHelperLanguageKit
+import org.jetbrains.research.testspark.langwrappers.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.PsiHelperFactory
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -70,10 +70,10 @@ class TestSparkAction : AnAction() {
      * @param e the AnActionEvent object representing the event
      */
     override fun update(e: AnActionEvent) {
-        val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val psiHelper = PsiHelperLanguageKit.getPsiHelper(psiFile)
-            ?: // TODO show the warning panel
-            return
+        val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+        val language = file.language
+        val factory = PsiHelperFactory.EP.forLanguage(language)
+        val psiHelper = factory.create(file)
         e.presentation.isEnabled = psiHelper.getCurrentListOfCodeTypes(e) != null
     }
 
@@ -83,7 +83,7 @@ class TestSparkAction : AnAction() {
      * @property e The AnActionEvent object.
      */
     class TestSparkActionWindow(
-        e: AnActionEvent,
+        private val e: AnActionEvent,
         private val visibilityController: VisibilityController,
         private val testGenerationController: TestGenerationController,
     ) :
@@ -99,8 +99,13 @@ class TestSparkAction : AnAction() {
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
 
-        private val psiHelper: PsiHelper? =
-            PsiHelperLanguageKit.getPsiHelper(e.dataContext.getData(CommonDataKeys.PSI_FILE)!!)
+        private val psiHelper: PsiHelper
+            get() {
+                val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+                val language = file.language
+                val factory = PsiHelperFactory.EP.forLanguage(language)
+                return factory.create(file)
+            }
 
         private val codeTypes = psiHelper?.getCurrentListOfCodeTypes(e)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset

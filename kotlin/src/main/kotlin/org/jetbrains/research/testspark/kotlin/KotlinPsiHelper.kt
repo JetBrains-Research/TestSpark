@@ -2,28 +2,27 @@ package org.jetbrains.research.testspark.kotlin
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.psi.PsiFile
-import org.jetbrains.research.testspark.core.psi.Language
-import org.jetbrains.research.testspark.core.psi.PsiHelper
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiDocumentManager
-import org.jetbrains.kotlin.psi.KtFunction
 import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
-import org.jetbrains.research.testspark.core.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.core.psi.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.Language
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
@@ -71,9 +70,11 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         val doc = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
 
         val selectedLine = doc.getLineNumber(caretOffset)
-        val selectedLineText =
-            doc.getText(TextRange(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine)))
 
+        // get the text for the selected line
+        val selectedLineText =
+            doc.charsSequence.subSequence(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine))
+                .toString()
         if (selectedLineText.isBlank()) {
             log.info("Line $selectedLine at caret $caretOffset is not valid")
             return null
@@ -165,9 +166,9 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         if (ktClass != null && ktFunction != null) {
             log.info(
                 "The test can be generated for: \n " +
-                    " 1) Class ${ktClass.qualifiedName} \n" +
-                    " 2) Method ${ktFunction.name} \n" +
-                    " 3) Line $line",
+                        " 1) Class ${ktClass.qualifiedName} \n" +
+                        " 2) Method ${ktFunction.name} \n" +
+                        " 3) Line $line",
             )
         }
 

@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.core.psi
+package org.jetbrains.research.testspark.langwrappers
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
@@ -83,7 +83,7 @@ interface PsiClassWrapper {
  * Interface that declares all the methods needed for parsing and
  * handling the PSI (Program Structure Interface) for different languages.
  */
-interface PsiHelper : PsiHelperLanguageKit {
+interface PsiHelper {
     val language: Language
 
     /**

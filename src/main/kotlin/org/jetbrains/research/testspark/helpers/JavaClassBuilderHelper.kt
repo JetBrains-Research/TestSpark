@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.java
+package org.jetbrains.research.testspark.helpers
 
 import com.github.javaparser.ParseProblemException
 import com.github.javaparser.StaticJavaParser

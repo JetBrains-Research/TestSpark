@@ -1,11 +1,11 @@
-<idea-plugin package="org.jetbrains.research.testspark.core">
+<idea-plugin package="org.jetbrains.research.testspark.langwrappers">
     <extensionPoints>
         <extensionPoint
-                qualifiedName="org.jetbrains.research.testspark.psiLanguageKit"
+                qualifiedName="org.jetbrains.research.testspark.psiHelperFactory"
                 beanClass="com.intellij.lang.LanguageExtensionPoint"
                 dynamic="true">
             <with attribute="implementationClass"
-                  implements="org.jetbrains.research.testspark.core.psi.PsiHelperLanguageKit"/>
+                  implements="org.jetbrains.research.testspark.langwrappers.PsiHelperFactory"/>
         </extensionPoint>
     </extensionPoints>
 </idea-plugin>

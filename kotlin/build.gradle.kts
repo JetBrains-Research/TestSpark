@@ -1,29 +1,33 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm")
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation(project(":core"))
+    implementation(project(":langwrappers"))
     // Define Kotlin module specific dependencies here if any
     implementation(kotlin("stdlib"))
     // Kotlin PSI and IDE integration dependencies
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.5.21")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable-common:1.5.21")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable-common-27:1.5.21")
 
     // IntelliJ IDEA Kotlin plugin dependencies
-    implementation("org.jetbrains.kotlin:kotlin-psi:1.5.21")
-    implementation("org.jetbrains.kotlin:kotlin-psi-api:1.5.21")
-    implementation("org.jetbrains.kotlin:kotlin-ide-common:1.5.21")
     implementation("org.jetbrains.kotlin:kotlin-compiler:1.5.21")
     implementation("org.jetbrains.kotlin:kotlin-refactoring:1.5.21")
 
     // IntelliJ IDEA dependencies
-    implementation("com.intellij:intellij-annotations:22.1.0")
 
     implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
+    implementation("org.jetbrains.kotlin", "kotlin-compiler")
+    implementation("org.jetbrains.kotlin", "kotlin-compiler-embeddable")
+    implementation("org.jetbrains.kotlin", "kotlin-reflect")
+    implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }

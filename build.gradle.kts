@@ -35,24 +35,22 @@ group = properties("pluginGroup")
 version = properties("pluginVersion")
 
 // Configure project's dependencies
-allprojects {
-    repositories {
-        mavenCentral()
-        maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
-        maven("https://www.jetbrains.com/intellij-repository/snapshots")
+repositories {
+    mavenCentral()
+    maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
+    maven("https://www.jetbrains.com/intellij-repository/snapshots")
 
-        maven {
-            url = uri("https://packages.jetbrains.team/maven/p/automatically-generating-unit-tests/maven")
-            credentials {
-                username = spaceUsername
-                password = spacePassword
-            }
+    maven {
+        url = uri("https://packages.jetbrains.team/maven/p/automatically-generating-unit-tests/maven")
+        credentials {
+            username = spaceUsername
+            password = spacePassword
         }
+    }
 
-        if (spaceCredentialsProvided()) {
-            maven {
-                url = uri("https://packages.jetbrains.team/maven/p/grazi/grazie-platform-public")
-            }
+    if (spaceCredentialsProvided()) {
+        maven {
+            url = uri("https://packages.jetbrains.team/maven/p/grazi/grazie-platform-public")
         }
     }
 }
@@ -110,6 +108,7 @@ dependencies {
     implementation(files("lib/byte-buddy-agent-1.14.6.jar"))
     implementation(files("lib/JUnitRunner.jar"))
 
+    implementation(project(":langwrappers"))
     implementation(project(":core"))
     if (spaceCredentialsProvided()) {
         "hasGrazieAccessCompileOnly"(project(":core"))

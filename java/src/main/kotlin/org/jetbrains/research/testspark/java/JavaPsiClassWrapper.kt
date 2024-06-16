@@ -10,10 +10,10 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
-import org.jetbrains.research.testspark.core.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.core.psi.PsiMethodWrapper
 import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
