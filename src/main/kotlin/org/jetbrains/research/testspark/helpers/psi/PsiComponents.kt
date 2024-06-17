@@ -178,7 +178,7 @@ interface PsiHelper {
      * @param line The line number.
      * @return The display name of the line.
      */
-    fun getLineDisplayName(line: Int): String
+    fun getLineHTMLDisplayName(line: Int): String
 
     /**
      * Gets the display name of a class.
@@ -187,7 +187,7 @@ interface PsiHelper {
      * @param psiClass The PSI class of interest.
      * @return The display name of the PSI class.
      */
-    fun getClassDisplayName(psiClass: PsiClassWrapper): String
+    fun getClassHTMLDisplayName(psiClass: PsiClassWrapper): String
 
     /**
      * Gets the display name of a method, depending on if it is a (default) constructor or a normal method.
@@ -196,5 +196,5 @@ interface PsiHelper {
      * @param psiMethod The PSI method of interest.
      * @return The display name of the PSI method.
      */
-    fun getMethodDisplayName(psiMethod: PsiMethodWrapper): String
+    fun getMethodHTMLDisplayName(psiMethod: PsiMethodWrapper): String
 }

@@ -12,6 +12,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
+import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
@@ -42,12 +43,10 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         val element = psiFile.findElementAt(caretOffset)
         val cls = element?.parentOfType<KtClassOrObject>(withSelf = true)
 
-        if (cls != null) {
-            if (cls.name != null) {
-                val kotlinClassWrapper = KotlinPsiClassWrapper(cls)
-                log.info("Surrounding class for caret in $caretOffset is ${kotlinClassWrapper.qualifiedName}")
-                return kotlinClassWrapper
-            }
+        if (cls != null && cls.name != null && cls.fqName != null) {
+            val kotlinClassWrapper = KotlinPsiClassWrapper(cls)
+            log.info("Surrounding class for caret in $caretOffset is ${kotlinClassWrapper.qualifiedName}")
+            return kotlinClassWrapper
         }
 
         log.info("No surrounding class for caret in $caretOffset")
@@ -58,7 +57,7 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         val element = psiFile.findElementAt(caretOffset)
         val method = element?.parentOfType<KtFunction>(withSelf = true)
 
-        if (method != null) {
+        if (method != null && method.name != null) {
             val wrappedMethod = KotlinPsiMethodWrapper(method)
             log.info("Surrounding method for caret at $caretOffset is ${wrappedMethod.methodDescriptor}")
             return wrappedMethod
@@ -88,7 +87,7 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
     ) {
-        val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(0)
+        val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(polyDepthReducing = 0)
         val cutPsiClass = getSurroundingClass(caretOffset)!!
         var currentPsiClass = cutPsiClass
         for (index in 0 until maxPolymorphismDepth) {
@@ -124,9 +123,11 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
                         val typeRef = paramIt.typeReference
                         if (typeRef != null) {
                             resolveClassInType(typeRef)?.let { psiClass ->
-                                KotlinPsiClassWrapper(psiClass as KtClass).let {
-                                    if (!it.qualifiedName.startsWith("kotlin.")) {
-                                        interestingPsiClasses.add(it)
+                                if (psiClass.kotlinFqName != null) {
+                                    KotlinPsiClassWrapper(psiClass as KtClass).let {
+                                        if (!it.qualifiedName.startsWith("kotlin.")) {
+                                            interestingPsiClasses.add(it)
+                                        }
                                     }
                                 }
                             }
@@ -159,9 +160,9 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         val ktFunction = getSurroundingMethod(caret.offset)
         val line: Int? = getSurroundingLine(caret.offset)?.plus(1)
 
-        ktClass?.let { result.add(getClassDisplayName(it)) }
-        ktFunction?.let { result.add(getMethodDisplayName(it)) }
-        line?.let { result.add(getLineDisplayName(it)) }
+        ktClass?.let { result.add(getClassHTMLDisplayName(it)) }
+        ktFunction?.let { result.add(getMethodHTMLDisplayName(it)) }
+        line?.let { result.add(getLineHTMLDisplayName(it)) }
 
         if (ktClass != null && ktFunction != null) {
             log.info(
@@ -175,12 +176,12 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return result.toArray()
     }
 
-    override fun getLineDisplayName(line: Int) = "<html><b><font color='orange'>line</font> $line</b></html>"
+    override fun getLineHTMLDisplayName(line: Int) = "<html><b><font color='orange'>line</font> $line</b></html>"
 
-    override fun getClassDisplayName(psiClass: PsiClassWrapper): String =
+    override fun getClassHTMLDisplayName(psiClass: PsiClassWrapper): String =
         "<html><b><font color='orange'>${psiClass.classType.representation}</font> ${psiClass.qualifiedName}</b></html>"
 
-    override fun getMethodDisplayName(psiMethod: PsiMethodWrapper): String {
+    override fun getMethodHTMLDisplayName(psiMethod: PsiMethodWrapper): String {
         psiMethod as KotlinPsiMethodWrapper
         return when {
             psiMethod.isTopLevelFunction -> "<html><b><font color='orange'>top-level function</font></b></html>"
