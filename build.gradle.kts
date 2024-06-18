@@ -403,8 +403,9 @@ tasks.create<RunIdeTask>("headless") {
     val token: String? by project
     val prompt: String? by project
     val out: String? by project
+    val enableCoverage: String? by project
 
-    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out)
+    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage)
 
     jvmArgs(
         "-Xmx16G",
