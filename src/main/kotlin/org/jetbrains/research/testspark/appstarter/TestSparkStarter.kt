@@ -64,6 +64,8 @@ class TestSparkStarter : ApplicationStarter {
         val promptTemplateFile = args[8]
         // Output directory
         val output = args[9]
+        // Run coverage
+        val runCoverage = args.getOrNull(10)?.toBoolean() ?: false
 
         println("Test generation requested for $projectPath")
 
@@ -172,7 +174,7 @@ class TestSparkStarter : ApplicationStarter {
                         )
 
                         // Check test Generation Output
-                        if (uiContext != null) {
+                        if (uiContext != null && runCoverage) {
                             println("[TestSpark Starter] Test generation completed successfully")
                             // Run test file
                             runTestsWithCoverageCollection(project, output, packageList, classPath, projectContext)

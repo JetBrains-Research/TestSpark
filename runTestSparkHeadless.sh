@@ -10,8 +10,8 @@ echo $DIR
 
 echo "Provided arguments are $@"
 
-if [ $# -ne "11" ]; then
-  echo "$# arguments provided, expected 11 arguments in the following order:
+if [ $# -ne "12" ]; then
+  echo "$# arguments provided, expected 12 arguments in the following order:
         1) Path to the root directory of the project under test (ProjectPath)
         2) Path to the target file (.java file) (it MUST be relative to the ProjectPath)
         3) Qualified name of the class under test (i.e., <package-name>.<class-name>)
@@ -21,10 +21,11 @@ if [ $# -ne "11" ]; then
         7) Grazie token
         8) Filepath to a txt-file containing prompt template
         9) Output directory
-        10) Space username
-        11) Space password"
+        10) Enable/disable coverage computation
+        11) Space username
+        12) Space password"
   exit 1
 fi
 
-echo -Proot="$1" -Pfile="$2" -Pcut="$3" -Pcp="$4" -Pjunitv="$5" -Pllm="$6" -Ptoken="$7" -Pprompt="$8" -Pout="$9" -Dspace.username="${10}" -Dspace.pass="${11}"
-"$DIR/gradlew" -p "$DIR" headless -Proot="$1" -Pfile="$2" -Pcut="$3" -Pcp="$4" -Pjunitv="$5" -Pllm="$6" -Ptoken="$7" -Pprompt="$8" -Pout="$9" -Dspace.username="${10}" -Dspace.pass="${11}"
+echo -Proot="$1" -Pfile="$2" -Pcut="$3" -Pcp="$4" -Pjunitv="$5" -Pllm="$6" -Ptoken="$7" -Pprompt="$8" -Pout="$9" -PrunCoverage="${10}" -Dspace.username="${11}" -Dspace.pass="${21}"
+"$DIR/gradlew" -p "$DIR" headless -Proot="$1" -Pfile="$2" -Pcut="$3" -Pcp="$4" -Pjunitv="$5" -Pllm="$6" -Ptoken="$7" -Pprompt="$8" -Pout="$9" -PrunCoverage="${10}" -Dspace.username="${11}" -Dspace.pass="${21}"
