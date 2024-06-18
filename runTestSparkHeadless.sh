@@ -26,5 +26,5 @@ if [ $# -ne "11" ]; then
   exit 1
 fi
 
-
+echo -Proot="$1" -Pfile="$2" -Pcut="$3" -Pcp="$4" -Pjunitv="$5" -Pllm="$6" -Ptoken="$7" -Pprompt="$8" -Pout="$9" -Dspace.username="${10}" -Dspace.pass="${11}"
 "$DIR/gradlew" -p "$DIR" headless -Proot="$1" -Pfile="$2" -Pcut="$3" -Pcp="$4" -Pjunitv="$5" -Pllm="$6" -Ptoken="$7" -Pprompt="$8" -Pout="$9" -Dspace.username="${10}" -Dspace.pass="${11}"
