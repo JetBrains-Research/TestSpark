@@ -55,7 +55,7 @@ class TestSparkStarter : ApplicationStarter {
         val classUnderTestName = args[3]
         // Paths to compilation output of the project under test (seperated by ':')
         val projectClassPath = args[4]
-        val classPath = "$projectPath${ToolUtils.sep}$projectClassPath"
+        val classPath = "$projectPath${ToolUtils.pathSep}$projectClassPath"
         // JUnit Version
         val jUnitVersion = args[5]
         // Selected model

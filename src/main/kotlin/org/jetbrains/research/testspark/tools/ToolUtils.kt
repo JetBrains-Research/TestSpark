@@ -19,6 +19,7 @@ import java.io.File
 
 object ToolUtils {
     val sep = File.separatorChar
+    val pathSep = File.pathSeparatorChar
 
     /**
      * Retrieves the imports code from a given test suite code.
