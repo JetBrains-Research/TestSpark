@@ -1,18 +1,20 @@
 package org.jetbrains.research.testspark.langwrappers
 
-import com.intellij.lang.Language
-import com.intellij.lang.LanguageExtension
+import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.psi.PsiFile
 
-interface PsiHelperFactory {
-    fun create(psiFile: PsiFile): PsiHelper
-    companion object {
-        val EP = LanguageExtension<PsiHelperFactory>("org.jetbrains.research.testspark.psiHelperFactory")
+object PsiHelperFactory {
+    private val EP_NAME = ExtensionPointName.create<PsiHelper>("org.jetbrains.research.testspark.langwrappers.psiHelper")
+    private val EP_NAME2 = ExtensionPointName.create<PsiHelperFactory>("org.jetbrains.research.testspark.langwrappers.psiHelper")
 
-        fun get(language: Language): PsiHelperFactory? = EP.forLanguage(language)
-
-        fun all(): List<PsiHelperFactory> {
-            return EP.point?.extensions?.map { it.instance } ?: emptyList()
+    fun getPsiHelper(psiFile: PsiFile): PsiHelper? {
+        val language = psiFile.language.id
+        for (helper in EP_NAME.extensionList) {
+            if (helper.supportsLanguage(language)) {
+                helper.initialize(psiFile)
+                return helper
+            }
         }
+        return null
     }
 }

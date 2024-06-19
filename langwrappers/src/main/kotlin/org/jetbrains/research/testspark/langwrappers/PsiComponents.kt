@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
+import com.jetbrains.rd.generator.nova.PredefinedType
 import org.jetbrains.research.testspark.core.data.ClassType
 
 enum class Language(val languageName: String) {
@@ -85,6 +86,12 @@ interface PsiClassWrapper {
  */
 interface PsiHelper {
     val language: Language
+
+    var psiFile: PsiFile
+
+    fun initialize(psiFile: PsiFile)
+
+    fun supportsLanguage(lang :String): Boolean
 
     /**
      * Returns the surrounding PsiClass object based on the caret position within the specified PsiFile.
