@@ -145,8 +145,15 @@
     </change-notes>
 
     <depends>com.intellij.modules.platform</depends>
-<!--    <depends>com.intellij.modules.java</depends>-->
-<!--    <depends>org.jetbrains.kotlin</depends>-->
+    <!--    <depends>com.intellij.modules.java</depends>-->
+    <!--    <depends>org.jetbrains.kotlin</depends>-->
+
+    <!-- Define the extension point -->
+<!--    <extensionPoints>-->
+<!--        <extensionPoint name="psiHelper"-->
+<!--                        interface="org.jetbrains.research.testspark.langwrappers.PsiHelper"-->
+<!--                        dynamic="true"/>-->
+<!--    </extensionPoints>-->
 
     <extensions defaultExtensionNs="com.intellij">
         <appStarter
@@ -154,7 +161,8 @@
                 id="testspark"
         />
 
-        <toolWindow id="TestSpark" secondary="true" anchor="right" icon="org.jetbrains.research.testspark.display.TestSparkIcons.toolWindowIcon"
+        <toolWindow id="TestSpark" secondary="true" anchor="right"
+                    icon="org.jetbrains.research.testspark.display.TestSparkIcons.toolWindowIcon"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>
 
         <!-- Application-level services -->

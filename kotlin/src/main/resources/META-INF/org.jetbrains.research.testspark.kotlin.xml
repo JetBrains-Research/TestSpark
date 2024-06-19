@@ -1,11 +1,24 @@
-<idea-plugin>
-    <dependencies>
-        <plugin id="org.jetbrains.kotlin"/>
-    </dependencies>
+<!--<idea-plugin>-->
+<!--    <dependencies>-->
+<!--        <plugin id="org.jetbrains.kotlin"/>-->
+<!--    </dependencies>-->
 
-    <extensions defaultExtensionNs="org.jetbrains.research.testspark">
-        <psiHelperFactory
-                implementationClass="org.jetbrains.research.testspark.kotlin.KotlinPsiHelperFactory"
-                language="kotlin" />
+<!--    <extensions defaultExtensionNs="org.jetbrains.research.testspark">-->
+<!--        <psiHelperFactory-->
+<!--                implementationClass="org.jetbrains.research.testspark.kotlin.KotlinPsiHelperFactory"-->
+<!--                language="kotlin" />-->
+<!--    </extensions>-->
+<!--</idea-plugin>-->
+
+<idea-plugin>
+    <id>.org.jetbrains.research.testspark.kotlin</id>
+    <name>TestSpark.Kotlin</name>
+    <vendor>ictl</vendor>
+
+    <depends>org.jetbrains.research.testspark.langwrappers</depends>
+
+    <!-- Register the KotlinPsiHelper implementation -->
+    <extensions defaultExtensionNs="org.jetbrains.research.testspark.langwrappers">
+        <psiHelper implementation="org.jetbrains.research.testspark.kotlin.KotlinPsiHelper"/>
     </extensions>
 </idea-plugin>

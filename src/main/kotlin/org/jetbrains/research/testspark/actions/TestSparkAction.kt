@@ -71,12 +71,11 @@ class TestSparkAction : AnAction() {
      */
     override fun update(e: AnActionEvent) {
         val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val language = file.language
-        val factory = PsiHelperFactory.get(language)
-        val psiHelper = factory?.create(file)
-        if (psiHelper != null) {
-            e.presentation.isEnabled = psiHelper.getCurrentListOfCodeTypes(e) != null
+        val psiHelper = PsiHelperFactory.getPsiHelper(file)
+        if (psiHelper == null){
+            // TODO exception
         }
+        e.presentation.isEnabled = psiHelper!!.getCurrentListOfCodeTypes(e) != null
     }
 
     /**
@@ -104,9 +103,11 @@ class TestSparkAction : AnAction() {
         private val psiHelper: PsiHelper
             get() {
                 val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-                val language = file.language
-                val factory = PsiHelperFactory.EP.forLanguage(language)
-                return factory.create(file)
+                val psiHelper = PsiHelperFactory.getPsiHelper(file)
+                if (psiHelper == null){
+                    // TODO exception
+                }
+                return psiHelper!!
             }
 
         private val codeTypes = psiHelper.getCurrentListOfCodeTypes(e)!!

@@ -247,10 +247,9 @@ class PromptManager(
     ): PsiMethodWrapper? {
         for (currentPsiMethod in psiClass.allMethods) {
             val file = psiClass.containingFile
-            val language = file.language
-            val factory = PsiHelperFactory.EP.forLanguage(language)
-            val psiHelper = factory.create(file)
-            if (psiHelper.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) {
+            val psiHelper = PsiHelperFactory.getPsiHelper(file)
+            // psiHelper will not be null here
+            if (psiHelper!!.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) {
                 return currentPsiMethod
             }
         }
@@ -271,10 +270,9 @@ class PromptManager(
         for (currentPsiMethod in psiClass.allMethods) {
             if (currentPsiMethod.containsLine(lineNumber)) {
                 val file = psiClass.containingFile
-                val language = file.language
-                val factory = PsiHelperFactory.EP.forLanguage(language)
-                val psiHelper = factory.create(file)
-                return psiHelper.generateMethodDescriptor(currentPsiMethod)
+                val psiHelper = PsiHelperFactory.getPsiHelper(file)
+                // psiHelper will not be null here
+                return psiHelper!!.generateMethodDescriptor(currentPsiMethod)
             }
         }
         return ""
