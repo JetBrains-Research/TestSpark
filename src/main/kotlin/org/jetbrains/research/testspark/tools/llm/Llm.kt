@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.tools.llm
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.projectRoots.Sdk
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.data.CodeType
@@ -14,6 +15,7 @@ import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import org.jetbrains.research.testspark.tools.template.Tool
+import java.nio.file.Path
 
 /**
  * The Llm class represents a tool called "Llm" that is used to generate tests for Java code.
@@ -36,6 +38,7 @@ class Llm(override val name: String = "LLM") : Tool {
         psiHelper: PsiHelper,
         caretOffset: Int,
         testSamplesCode: String,
+        projectSDKPath: Path? = null
     ): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClassWrapper>()
 
@@ -49,6 +52,7 @@ class Llm(override val name: String = "LLM") : Tool {
             project,
             PromptManager(project, psiHelper, caretOffset),
             testSamplesCode,
+            projectSDKPath
         )
     }
 

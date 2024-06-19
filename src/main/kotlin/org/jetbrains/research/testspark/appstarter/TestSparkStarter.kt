@@ -6,12 +6,23 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.projectRoots.Sdk
+import com.intellij.openapi.projectRoots.SdkAdditionalData
+import com.intellij.openapi.projectRoots.SdkModificator
+import com.intellij.openapi.projectRoots.SdkTypeId
+import com.intellij.openapi.projectRoots.SimpleJavaSdkType
+import com.intellij.openapi.projectRoots.impl.MockSdk
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.roots.RootProvider
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
+import com.intellij.util.containers.MultiMap
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
@@ -29,6 +40,7 @@ import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.io.File
+import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.system.exitProcess
 
@@ -65,7 +77,7 @@ class TestSparkStarter : ApplicationStarter {
         // Output directory
         val output = args[9]
         // Run coverage
-        val runCoverage = args.getOrNull(10)?.toBoolean() ?: false
+        val runCoverage = args[10].toBoolean()
 
         println("Test generation requested for $projectPath")
 
@@ -111,6 +123,8 @@ class TestSparkStarter : ApplicationStarter {
 
                         println("PsiClass ${targetPsiClass.qualifiedName} is detected! Start the test generation process.")
 
+                        // Get project SDK
+                        val projectSDKPath = getProjectSdkPath(project)
                         // update settings
                         val settingsState = project.getService(LLMSettingsService::class.java).state
                         settingsState.currentLLMPlatformName = LLMDefaultsBundle.get("grazieName")
@@ -130,7 +144,7 @@ class TestSparkStarter : ApplicationStarter {
                         // Prepare Project Context
                         // First, get CUT Module
                         val cutModule = ProjectFileIndex.getInstance(project)
-                                .getModuleForFile(targetPsiClass.containingFile.virtualFile)
+                            .getModuleForFile(targetPsiClass.containingFile.virtualFile)
                         // Then, instantiate the project context
                         val projectContext = ProjectContext(
                             classPath,
@@ -158,6 +172,7 @@ class TestSparkStarter : ApplicationStarter {
                                 psiHelper,
                                 targetPsiClass.textRange.startOffset,
                                 testSamplesCode = "", // we don't provide samples to LLM
+                                projectSDKPath = projectSDKPath
                             )
 
                         println("[TestSpark Starter] Starting the test generation process")
@@ -177,7 +192,14 @@ class TestSparkStarter : ApplicationStarter {
                         if (uiContext != null && runCoverage) {
                             println("[TestSpark Starter] Test generation completed successfully")
                             // Run test file
-                            runTestsWithCoverageCollection(project, output, packageList, classPath, projectContext)
+                            runTestsWithCoverageCollection(
+                                project,
+                                output,
+                                packageList,
+                                classPath,
+                                projectContext,
+                                projectSDKPath
+                            )
                         } else {
                             println("[TestSpark Starter] Test generation failed")
                         }
@@ -198,12 +220,31 @@ class TestSparkStarter : ApplicationStarter {
         }
     }
 
+    /**
+     * Retrieves the project SDK based on the provided parameters.
+     *
+     * @param project the project inder test
+     * @return the project SDK for running and compiling tests generated in headless mode
+     */
+    private fun getProjectSdkPath(project: Project): Path {
+        return when {
+            // IntelliJ did not recognize the SDK and user also did not provide the sdk
+            ProjectRootManager.getInstance(project).projectSdk == null -> {
+                println("Did not resolve the project SDK, using default SDK")
+                Paths.get(System.getProperty("java.home"))
+            }
+            // IntelliJ managed to recognize the sdk
+            else -> Paths.get(ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path)
+        }
+    }
+
     private fun runTestsWithCoverageCollection(
         project: Project,
         out: String,
         packageList: MutableList<String>,
         classPath: String,
-        projectContext: ProjectContext
+        projectContext: ProjectContext,
+        projectSDKPath: Path
     ) {
         val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
         println("Run tests in $targetDirectory")
@@ -213,7 +254,7 @@ class TestSparkStarter : ApplicationStarter {
                 var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
                 // The current test is compiled and is ready to run jacoco
-                val testExecutionError = TestProcessor(project).createXmlFromJacoco(
+                val testExecutionError = TestProcessor(project, projectSDKPath).createXmlFromJacoco(
                     it.nameWithoutExtension,
                     "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
                     testcaseName,
