@@ -185,7 +185,6 @@ object ProjectApplicationUtils {
     }
 }
 
-
 class JvmProjectResolver {
     private val logger = LoggerFactory.getLogger(javaClass)
 
