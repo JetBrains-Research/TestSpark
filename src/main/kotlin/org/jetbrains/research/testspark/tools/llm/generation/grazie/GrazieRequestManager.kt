@@ -63,7 +63,7 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
     private fun getMessages(): List<Pair<String, String>> {
         val result = mutableListOf<Pair<String, String>>()
         chatHistory.forEach {
-            result.add(Pair(it.role, it.content))
+            result.add(Pair(it.role.representation, it.content))
         }
         return result
     }
