@@ -99,7 +99,7 @@ abstract class RequestManager(var token: String) {
 
         log.info { "The full response: \n $response" }
 
-        // check if response is empty
+        // check if the response is empty
         if (response.isEmpty() || response.isBlank()) {
             return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
         }
