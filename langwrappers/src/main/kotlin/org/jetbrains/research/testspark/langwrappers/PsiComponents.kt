@@ -125,6 +125,7 @@ interface PsiHelper {
         project: Project,
         classesToTest: List<PsiClassWrapper>,
         polyDepthReducing: Int,
+        maxInputParamsDepth : Int,
     ): MutableSet<PsiClassWrapper>
 
     /**
@@ -169,6 +170,7 @@ interface PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
+        maxPolymorphismDepth : Int,
     )
 
     /**

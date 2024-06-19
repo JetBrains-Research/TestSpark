@@ -46,7 +46,8 @@ class PromptManager(
 
             ApplicationManager.getApplication().runReadAction(
                 Computable {
-                    psiHelper.collectClassesToTest(project, classesToTest, caret)
+                    val maxPolymorphismDepth = SettingsArgumentsLlm(project).maxPolyDepth(0)
+                    psiHelper.collectClassesToTest(project, classesToTest, caret, maxPolymorphismDepth)
                 },
             )
             return classesToTest
@@ -63,8 +64,9 @@ class PromptManager(
     fun generatePrompt(codeType: FragmentToTestData, testSamplesCode: String, polyDepthReducing: Int): String {
         val prompt = ApplicationManager.getApplication().runReadAction(
             Computable {
+                val maxInputParamsDepth = SettingsArgumentsLlm(project).maxInputParamsDepth(polyDepthReducing)
                 val interestingPsiClasses =
-                    psiHelper.getInterestingPsiClassesWithQualifiedNames(project, classesToTest, polyDepthReducing)
+                    psiHelper.getInterestingPsiClassesWithQualifiedNames(project, classesToTest, polyDepthReducing, maxInputParamsDepth)
 
                 val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
                 val polymorphismRelations =

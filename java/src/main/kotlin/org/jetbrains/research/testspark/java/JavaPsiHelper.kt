@@ -81,10 +81,8 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
+        maxPolymorphismDepth : Int // check if cut has any none java super class
     ) {
-        // check if cut has any none java super class
-        val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(0)
-
         val cutPsiClass = getSurroundingClass(caretOffset)!!
         var currentPsiClass = cutPsiClass
         for (index in 0 until maxPolymorphismDepth) {
@@ -106,13 +104,14 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: List<PsiClassWrapper>,
         polyDepthReducing: Int,
+        maxInputParamsDepth : Int
     ): MutableSet<PsiClassWrapper> {
         val interestingPsiClasses: MutableSet<JavaPsiClassWrapper> = mutableSetOf()
 
         var currentLevelClasses =
             mutableListOf<PsiClassWrapper>().apply { addAll(classesToTest) }
 
-        repeat(SettingsArguments(project).maxInputParamsDepth(polyDepthReducing)) {
+        repeat(maxInputParamsDepth) {
             val tempListOfClasses = mutableSetOf<JavaPsiClassWrapper>()
 
             currentLevelClasses.forEach { classIt ->

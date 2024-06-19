@@ -38,10 +38,11 @@ class Llm(override val name: String = "LLM") : Tool {
         testSamplesCode: String,
     ): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClassWrapper>()
+        val maxPolymorphismDepth = SettingsArgumentsLlm(project).maxPolyDepth(0)
 
         ProgressManager.getInstance().runProcessWithProgressSynchronously({
             ApplicationManager.getApplication().runReadAction {
-                psiHelper.collectClassesToTest(project, classesToTest, caretOffset)
+                psiHelper.collectClassesToTest(project, classesToTest, caretOffset, maxPolymorphismDepth)
             }
         }, PluginMessagesBundle.get("collectingClassesToTest"), false, project)
 

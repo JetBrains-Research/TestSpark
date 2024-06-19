@@ -3,7 +3,7 @@
         <plugin id="org.jetbrains.kotlin"/>
     </dependencies>
 
-    <extensions defaultExtensionNs="org.jetbrains.research.testspark">
+    <extensions defaultExtensionNs="org.jetbrains.research.testspark.langwrappers">
         <psiHelperFactory language="JAVA" implementationClass="org.jetbrains.research.testspark.java.JavaPsiHelperFactory"/>
     </extensions>
 
