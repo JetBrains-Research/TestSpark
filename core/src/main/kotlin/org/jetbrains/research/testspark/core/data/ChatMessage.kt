@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.core.data
 
-
 open class ChatMessage protected constructor(
     val role: ChatRole,
     val content: String,
