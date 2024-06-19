@@ -32,6 +32,7 @@ import kotlin.coroutines.suspendCoroutine
 
 class ProjectConfiguratorException : Exception {
     constructor(message: String) : super(message)
+    @Suppress("unused")
     constructor(message: String, cause: Throwable) : super(message, cause)
 }
 
