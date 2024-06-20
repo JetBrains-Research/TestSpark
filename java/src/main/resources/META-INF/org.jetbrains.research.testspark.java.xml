@@ -4,8 +4,8 @@
     <!-- Register the JavaPsiHelper implementation -->
     <extensions defaultExtensionNs="org.jetbrains.research.testspark">
         <psiHelperProvider
-                language="JAVA"
-                implementationClass="org.jetbrains.research.testspark.java.JavaPsiHelperProvider"
+            language="JAVA"
+            implementationClass="org.jetbrains.research.testspark.java.JavaPsiHelperProvider"
         />
     </extensions>
 </idea-plugin>
