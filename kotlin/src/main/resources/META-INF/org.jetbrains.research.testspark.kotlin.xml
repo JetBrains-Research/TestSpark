@@ -4,7 +4,7 @@
     <!-- Register the JavaPsiHelper implementation -->
     <extensions defaultExtensionNs="org.jetbrains.research.testspark">
         <psiHelperProvider
-                factoryClass="org.jetbrains.research.testspark.kotlin.KotlinPsiHelperProvider"
+                implementationClass="org.jetbrains.research.testspark.kotlin.KotlinPsiHelperProvider"
                 language="kotlin"/>
     </extensions>
 </idea-plugin>
