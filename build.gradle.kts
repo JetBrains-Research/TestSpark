@@ -110,8 +110,6 @@ dependencies {
 
     implementation(project(":core"))
     implementation(project(":langwrappers"))
-    implementation(project(":kotlin"))
-    implementation(project(":java"))
     if (spaceCredentialsProvided()) {
         "hasGrazieAccessCompileOnly"(project(":core"))
     }
@@ -207,8 +205,6 @@ tasks {
         dependsOn("copyJUnitRunnerLib")
         dependsOn(":core:compileKotlin")
         dependsOn(":langwrappers:compileKotlin")
-        dependsOn(":kotlin:compileKotlin")
-        dependsOn(":java:compileKotlin")
     }
     // Set the JVM compatibility versions
     properties("javaVersion").let {
