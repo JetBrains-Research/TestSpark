@@ -24,17 +24,9 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
-class KotlinPsiHelper : PsiHelper {
+class KotlinPsiHelper(var psiFile: PsiFile) : PsiHelper {
 
     override val language: Language get() = Language.Kotlin
-
-    override lateinit var psiFile: PsiFile
-
-    override fun initialize(psiFile: PsiFile) {
-        this.psiFile = psiFile
-    }
-
-    override  fun supportsLanguage(lang :String) = lang == language.languageName
 
     private val log = Logger.getInstance(this::class.java)
 

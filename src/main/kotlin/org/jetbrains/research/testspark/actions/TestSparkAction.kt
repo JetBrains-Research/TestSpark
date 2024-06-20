@@ -19,7 +19,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
-import org.jetbrains.research.testspark.langwrappers.PsiHelperFactory
+import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -71,7 +71,7 @@ class TestSparkAction : AnAction() {
      */
     override fun update(e: AnActionEvent) {
         val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val psiHelper = PsiHelperFactory.getPsiHelper(file)
+        val psiHelper = PsiHelperProvider.getPsiHelper(file)
         if (psiHelper == null){
             // TODO exception
         }
@@ -103,7 +103,7 @@ class TestSparkAction : AnAction() {
         private val psiHelper: PsiHelper
             get() {
                 val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-                val psiHelper = PsiHelperFactory.getPsiHelper(file)
+                val psiHelper = PsiHelperProvider.getPsiHelper(file)
                 if (psiHelper == null){
                     // TODO exception
                 }

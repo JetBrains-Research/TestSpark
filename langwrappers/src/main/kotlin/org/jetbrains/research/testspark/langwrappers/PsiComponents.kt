@@ -87,12 +87,6 @@ interface PsiClassWrapper {
 interface PsiHelper {
     val language: Language
 
-    var psiFile: PsiFile
-
-    fun initialize(psiFile: PsiFile)
-
-    fun supportsLanguage(lang :String): Boolean
-
     /**
      * Returns the surrounding PsiClass object based on the caret position within the specified PsiFile.
      * The surrounding class is determined by finding the PsiClass objects within the PsiFile and checking

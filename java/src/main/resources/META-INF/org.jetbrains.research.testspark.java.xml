@@ -1,23 +1,11 @@
-<!--<idea-plugin package="org.jetbrains.research.testspark.java">-->
-<!--    <dependencies>-->
-<!--        <plugin id="org.jetbrains.kotlin"/>-->
-<!--    </dependencies>-->
-
-<!--    <extensions defaultExtensionNs="org.jetbrains.research.testspark.langwrappers">-->
-<!--        <psiHelperFactory language="JAVA" implementationClass="org.jetbrains.research.testspark.java.JavaPsiHelperFactory"/>-->
-<!--    </extensions>-->
-
-<!--</idea-plugin>-->
-
 <idea-plugin>
-    <id>.org.jetbrains.research.testspark.java</id>
-    <name>TestSpark.Java</name>
-    <vendor>ictl</vendor>
-
-    <depends>org.jetbrains.research.testspark.langwrappers</depends>
+    <depends>org.jetbrains.research.testspark</depends>
 
     <!-- Register the JavaPsiHelper implementation -->
-    <extensions defaultExtensionNs="org.jetbrains.research.testspark.langwrappers">
-        <psiHelper implementation="org.jetbrains.research.testspark.java.JavaPsiHelper"/>
+    <extensions defaultExtensionNs="org.jetbrains.research.testspark">
+        <psiHelperProvider
+                language="JAVA"
+                implementationClass="org.jetbrains.research.testspark.java.JavaPsiHelperProvider"
+        />
     </extensions>
 </idea-plugin>

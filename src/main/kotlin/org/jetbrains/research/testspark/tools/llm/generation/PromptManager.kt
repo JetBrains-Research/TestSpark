@@ -21,7 +21,7 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
-import org.jetbrains.research.testspark.langwrappers.PsiHelperFactory
+import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
@@ -247,7 +247,7 @@ class PromptManager(
     ): PsiMethodWrapper? {
         for (currentPsiMethod in psiClass.allMethods) {
             val file = psiClass.containingFile
-            val psiHelper = PsiHelperFactory.getPsiHelper(file)
+            val psiHelper = PsiHelperProvider.getPsiHelper(file)
             // psiHelper will not be null here
             if (psiHelper!!.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) {
                 return currentPsiMethod
@@ -270,7 +270,7 @@ class PromptManager(
         for (currentPsiMethod in psiClass.allMethods) {
             if (currentPsiMethod.containsLine(lineNumber)) {
                 val file = psiClass.containingFile
-                val psiHelper = PsiHelperFactory.getPsiHelper(file)
+                val psiHelper = PsiHelperProvider.getPsiHelper(file)
                 // psiHelper will not be null here
                 return psiHelper!!.generateMethodDescriptor(currentPsiMethod)
             }

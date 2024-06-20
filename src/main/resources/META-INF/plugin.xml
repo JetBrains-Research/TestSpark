@@ -149,11 +149,21 @@
     <!--    <depends>org.jetbrains.kotlin</depends>-->
 
     <!-- Define the extension point -->
-<!--    <extensionPoints>-->
-<!--        <extensionPoint name="psiHelper"-->
-<!--                        interface="org.jetbrains.research.testspark.langwrappers.PsiHelper"-->
-<!--                        dynamic="true"/>-->
-<!--    </extensionPoints>-->
+    <!--    <extensionPoints>-->
+    <!--        <extensionPoint name="psiHelperProvider"-->
+    <!--                        interface="org.jetbrains.research.testspark.langwrappers.PsiHelperProvider"-->
+    <!--                        dynamic="true"/>-->
+    <!--    </extensionPoints>-->
+
+    <extensionPoints>
+        <extensionPoint
+                name="psiHelperProvider"
+                beanClass="com.intellij.lang.LanguageExtensionPoint"
+                dynamic="true">
+            <with attribute="implementationClass"
+                  implements="org.jetbrains.research.testspark.langwrappers.PsiHelperProvider"/>
+        </extensionPoint>
+    </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
         <appStarter
