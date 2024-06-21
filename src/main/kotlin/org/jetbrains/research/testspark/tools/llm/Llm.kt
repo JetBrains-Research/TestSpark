@@ -37,7 +37,7 @@ class Llm(override val name: String = "LLM") : Tool {
         psiHelper: PsiHelper,
         caretOffset: Int,
         testSamplesCode: String,
-        projectSDKPath: Path? = null
+        projectSDKPath: Path? = null,
     ): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClassWrapper>()
 
@@ -51,7 +51,7 @@ class Llm(override val name: String = "LLM") : Tool {
             project,
             PromptManager(project, psiHelper, caretOffset),
             testSamplesCode,
-            projectSDKPath
+            projectSDKPath,
         )
     }
 

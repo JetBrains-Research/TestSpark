@@ -106,18 +106,4 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     fun isTestableClass(): Boolean {
         return !psiClass.isEnum && psiClass !is PsiAnonymousClass
     }
-
-    /**
-     * Returns the representation of the type of PsiClass instance.
-     *
-     * @return the representation of the type of the PsiClass instance.
-     */
-    private fun getClassTypeName(): String = classType.representation
-
-    /**
-     * Returns the display name of a PsiClass instance.
-     *
-     * @return the display name of the PsiClass instance in HTML format.
-     */
-    fun getClassDisplayName() = "<html><b><font color='orange'>${getClassTypeName()}</font> ${this.qualifiedName}</b></html>"
 }

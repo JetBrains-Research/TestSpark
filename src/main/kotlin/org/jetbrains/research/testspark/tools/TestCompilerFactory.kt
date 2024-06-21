@@ -10,7 +10,7 @@ class TestCompilerFactory {
         fun createJavacTestCompiler(
             project: Project,
             junitVersion: JUnitVersion,
-            javaHomeDirectory: String? = null
+            javaHomeDirectory: String? = null,
         ): TestCompiler {
             val javaHomePath = javaHomeDirectory ?: ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
             val libraryPaths = LibraryPathsProvider.getTestCompilationLibraryPaths()
