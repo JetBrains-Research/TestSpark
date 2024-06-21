@@ -217,14 +217,13 @@ class TestSparkStarter : ApplicationStarter {
      * @return the project SDK for running and compiling tests generated in headless mode
      */
     private fun getProjectSdkPath(project: Project): Path {
-        return when {
-            // IntelliJ did not recognize the SDK and user also did not provide the sdk
-            ProjectRootManager.getInstance(project).projectSdk == null -> {
+        return when (val projectSdk = ProjectRootManager.getInstance(project).projectSdk) {
+            null -> {
                 println("Did not resolve the project SDK, using default SDK")
                 Paths.get(System.getProperty("java.home"))
             }
-            // IntelliJ managed to recognize the sdk
-            else -> Paths.get(ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path)
+
+            else -> Paths.get(projectSdk.homeDirectory!!.path)
         }
     }
 

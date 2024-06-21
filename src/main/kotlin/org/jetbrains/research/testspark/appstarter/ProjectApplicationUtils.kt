@@ -175,7 +175,8 @@ object ProjectApplicationUtils {
 
     /**
      * Magic loop is used to wait all invoke later activities passed.
-     * No loop coses empty analyzer output as some project opening activities are not finished yet.
+     * Without this loop we can run into problems, because some of the project opening activities may not be finished
+     * when we need them.
      */
     private fun waitForInvokeLaterActivities() {
         logger.info("Waiting all invoked later activities...")

@@ -21,7 +21,7 @@ if [ $# -ne "12" ]; then
         7) Grazie token
         8) Filepath to a txt-file containing prompt template
         9) Output directory
-        10) Enable/disable coverage computation
+        10) Enable/disable coverage computation ('true' or 'false')
         11) Space username
         12) Space password"
   exit 1
