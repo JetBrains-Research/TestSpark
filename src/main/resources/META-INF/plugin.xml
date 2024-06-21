@@ -145,15 +145,18 @@
     </change-notes>
 
     <depends>com.intellij.modules.platform</depends>
-    <!--    <depends>com.intellij.modules.java</depends>-->
-    <!--    <depends>org.jetbrains.kotlin</depends>-->
 
-    <!-- Define the extension point -->
-    <!--    <extensionPoints>-->
-    <!--        <extensionPoint name="psiHelperProvider"-->
-    <!--                        interface="org.jetbrains.research.testspark.langwrappers.PsiHelperProvider"-->
-    <!--                        dynamic="true"/>-->
-    <!--    </extensionPoints>-->
+    <depends
+            config-file="testspark-kotlin.xml"
+            optional="true">
+        org.jetbrains.kotlin
+    </depends>
+
+    <depends
+            config-file="testspark-java.xml"
+            optional="true">
+        com.intellij.java
+    </depends>
 
     <extensionPoints>
         <extensionPoint

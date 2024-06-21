@@ -10,12 +10,9 @@ interface PsiHelperProvider {
 
     companion object {
         private val EP = LanguageExtension<PsiHelperProvider>("org.jetbrains.research.testspark.psiHelperProvider")
-
-        private val log = Logger.getInstance(this::class.java)
-
+        
         fun getPsiHelper(file: PsiFile): PsiHelper? {
             val language = file.language ?: return null
-            log.info("There are ${EP.modificationCount} extensions")
             return EP.forLanguage(language)?.getPsiHelper(file)
         }
     }
