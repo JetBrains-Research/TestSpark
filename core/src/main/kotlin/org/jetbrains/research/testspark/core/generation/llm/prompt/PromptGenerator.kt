@@ -28,6 +28,7 @@ class PromptGenerator(
             .insertTestSample(testSamplesCode)
             .build()
 
+        println("Prompt: $prompt")
         return prompt
     }
 
