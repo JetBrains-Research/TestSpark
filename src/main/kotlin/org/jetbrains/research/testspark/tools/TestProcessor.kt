@@ -23,7 +23,7 @@ import kotlin.io.path.createDirectories
 
 class TestProcessor(
     val project: Project,
-    givenProjectSDKPath: Path? = null
+    givenProjectSDKPath: Path? = null,
 ) : TestsPersistentStorage {
     private val javaHomeDirectory = givenProjectSDKPath?.toString() ?: ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
 

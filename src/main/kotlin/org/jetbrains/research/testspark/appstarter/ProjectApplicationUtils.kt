@@ -32,6 +32,7 @@ import kotlin.coroutines.suspendCoroutine
 
 class ProjectConfiguratorException : Exception {
     constructor(message: String) : super(message)
+
     @Suppress("unused")
     constructor(message: String, cause: Throwable) : super(message, cause)
 }
@@ -60,7 +61,7 @@ class ConfiguratorContextImpl(
     private val projectRoot: Path,
     private val indicator: ProgressIndicatorBase = ProgressIndicatorBase(),
     private val filesFilter: Predicate<Path> = Predicate { true },
-    private val virtualFilesFilter: Predicate<VirtualFile> = Predicate { true }
+    private val virtualFilesFilter: Predicate<VirtualFile> = Predicate { true },
 ) : ConfiguratorContext {
     private val logger = LoggerFactory.getLogger(javaClass)
     override fun getProgressIndicator() = indicator
@@ -100,7 +101,7 @@ object ProjectApplicationUtils {
         ApplicationManagerEx.getApplicationEx().isSaveAllowed = false
 
         LocalFileSystem.getInstance().refreshAndFindFileByPath(
-            FileUtil.toSystemIndependentName(projectPath.toString())
+            FileUtil.toSystemIndependentName(projectPath.toString()),
         ) ?: throw ProjectConfiguratorException("Project directory not found.")
 
         convertProject(projectPath)
@@ -148,7 +149,7 @@ object ProjectApplicationUtils {
     fun resolveProject(
         project: Project,
         configurator: CommandLineInspectionProjectConfigurator,
-        context: ConfiguratorContext
+        context: ConfiguratorContext,
     ) {
         logger.info("Resolving project ${project.name}...")
         logger.info("Applying configurator ${configurator.name} to resolve project ${project.name}...")

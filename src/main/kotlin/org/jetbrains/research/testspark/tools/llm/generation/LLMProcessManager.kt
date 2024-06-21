@@ -43,7 +43,7 @@ class LLMProcessManager(
     private val project: Project,
     private val promptManager: PromptManager,
     private val testSamplesCode: String,
-    projectSDKPath: Path? = null
+    projectSDKPath: Path? = null,
 ) : ProcessManager {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -53,6 +53,7 @@ class LLMProcessManager(
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = SettingsArguments(project).maxLLMRequest()
     private val testProcessor = TestProcessor(project, projectSDKPath)
+
     /**
      * Runs the test generator process.
      *

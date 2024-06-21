@@ -83,7 +83,7 @@ class TestSparkStarter : ApplicationStarter {
             JvmProjectConfigurator().openProject(
                 Paths.get(projectPath),
                 fullResolve = true,
-                parentDisposable = Disposer.newDisposable()
+                parentDisposable = Disposer.newDisposable(),
             )
         } catch (e: Throwable) {
             e.printStackTrace(System.err)
@@ -162,7 +162,7 @@ class TestSparkStarter : ApplicationStarter {
                                 psiHelper,
                                 targetPsiClass.textRange.startOffset,
                                 testSamplesCode = "", // we don't provide samples to LLM
-                                projectSDKPath = projectSDKPath
+                                projectSDKPath = projectSDKPath,
                             )
 
                         println("[TestSpark Starter] Starting the test generation process")
@@ -188,7 +188,7 @@ class TestSparkStarter : ApplicationStarter {
                                 packageList,
                                 classPath,
                                 projectContext,
-                                projectSDKPath
+                                projectSDKPath,
                             )
                         } else {
                             println("[TestSpark Starter] Test generation failed")
@@ -233,7 +233,7 @@ class TestSparkStarter : ApplicationStarter {
         packageList: MutableList<String>,
         classPath: String,
         projectContext: ProjectContext,
-        projectSDKPath: Path
+        projectSDKPath: Path,
     ) {
         val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
         println("Run tests in $targetDirectory")
