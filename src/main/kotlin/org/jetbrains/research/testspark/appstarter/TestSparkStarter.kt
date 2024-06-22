@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.appstarter
 
 import com.intellij.ide.impl.ProjectUtil
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ApplicationStarter
 import com.intellij.openapi.components.service

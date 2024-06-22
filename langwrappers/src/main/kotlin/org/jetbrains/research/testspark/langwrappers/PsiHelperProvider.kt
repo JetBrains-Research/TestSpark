@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.langwrappers
 
 import com.intellij.lang.LanguageExtension
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiFile
 
 /**

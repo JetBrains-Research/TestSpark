@@ -2,18 +2,21 @@ package org.jetbrains.research.testspark.java
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import org.jetbrains.research.testspark.langwrappers.Language
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.*
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
+import org.jetbrains.research.testspark.langwrappers.Language
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
-
 
 class JavaPsiHelper(var psiFile: PsiFile) : PsiHelper {
 
@@ -81,7 +84,7 @@ class JavaPsiHelper(var psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
-        maxPolymorphismDepth : Int // check if cut has any none java super class
+        maxPolymorphismDepth: Int, // check if cut has any none java super class
     ) {
         val cutPsiClass = getSurroundingClass(caretOffset)!!
         var currentPsiClass = cutPsiClass
@@ -104,7 +107,7 @@ class JavaPsiHelper(var psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: List<PsiClassWrapper>,
         polyDepthReducing: Int,
-        maxInputParamsDepth : Int
+        maxInputParamsDepth: Int,
     ): MutableSet<PsiClassWrapper> {
         val interestingPsiClasses: MutableSet<JavaPsiClassWrapper> = mutableSetOf()
 

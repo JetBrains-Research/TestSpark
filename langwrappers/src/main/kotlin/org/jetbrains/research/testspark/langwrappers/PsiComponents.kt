@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
-import com.jetbrains.rd.generator.nova.PredefinedType
 import org.jetbrains.research.testspark.core.data.ClassType
 
 enum class Language(val languageName: String) {
@@ -126,7 +125,7 @@ interface PsiHelper {
         project: Project,
         classesToTest: List<PsiClassWrapper>,
         polyDepthReducing: Int,
-        maxInputParamsDepth : Int,
+        maxInputParamsDepth: Int,
     ): MutableSet<PsiClassWrapper>
 
     /**
@@ -171,7 +170,7 @@ interface PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
-        maxPolymorphismDepth : Int,
+        maxPolymorphismDepth: Int,
     )
 
     /**

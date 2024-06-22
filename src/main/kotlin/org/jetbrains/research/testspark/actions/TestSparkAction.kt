@@ -72,7 +72,7 @@ class TestSparkAction : AnAction() {
     override fun update(e: AnActionEvent) {
         val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
         val psiHelper = PsiHelperProvider.getPsiHelper(file)
-        if (psiHelper == null){
+        if (psiHelper == null) {
             // TODO exception
         }
         e.presentation.isEnabled = psiHelper!!.getCurrentListOfCodeTypes(e) != null
@@ -104,7 +104,7 @@ class TestSparkAction : AnAction() {
             get() {
                 val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
                 val psiHelper = PsiHelperProvider.getPsiHelper(file)
-                if (psiHelper == null){
+                if (psiHelper == null) {
                     // TODO exception
                 }
                 return psiHelper!!

@@ -87,7 +87,7 @@ class KotlinPsiHelper(var psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
-        maxPolymorphismDepth : Int // check if cut has any none java super class
+        maxPolymorphismDepth: Int, // check if cut has any none java super class
     ) {
         val cutPsiClass = getSurroundingClass(caretOffset)!!
         var currentPsiClass = cutPsiClass
@@ -110,7 +110,7 @@ class KotlinPsiHelper(var psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: List<PsiClassWrapper>,
         polyDepthReducing: Int,
-        maxInputParamsDepth : Int
+        maxInputParamsDepth: Int,
     ): MutableSet<PsiClassWrapper> {
         val interestingPsiClasses: MutableSet<KotlinPsiClassWrapper> = mutableSetOf()
 
@@ -167,9 +167,9 @@ class KotlinPsiHelper(var psiFile: PsiFile) : PsiHelper {
         if (ktClass != null && ktFunction != null) {
             log.info(
                 "The test can be generated for: \n " +
-                        " 1) Class ${ktClass.qualifiedName} \n" +
-                        " 2) Method ${ktFunction.name} \n" +
-                        " 3) Line $line",
+                    " 1) Class ${ktClass.qualifiedName} \n" +
+                    " 2) Method ${ktFunction.name} \n" +
+                    " 3) Line $line",
             )
         }
 

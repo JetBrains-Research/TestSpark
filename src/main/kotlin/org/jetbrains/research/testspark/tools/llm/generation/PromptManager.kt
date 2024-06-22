@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
-import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
