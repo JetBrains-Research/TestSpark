@@ -19,6 +19,12 @@ intellij {
     plugins.set(listOf("java", "org.jetbrains.kotlin"))
 }
 
+tasks {
+    buildSearchableOptions {
+        enabled = false
+    }
+}
+
 kotlin {
     jvmToolchain(17)
 }

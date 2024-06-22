@@ -207,6 +207,12 @@ tasks {
         dependsOn("copyJUnitRunnerLib")
         dependsOn(":core:compileKotlin")
     }
+
+    verifyPlugin {
+        dependsOn(":copyPluginAssets")
+        onlyIf { this.project == rootProject }
+    }
+
     // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
