@@ -20,6 +20,8 @@ import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.strategies.ClassFullTextExtractionStrategy
+import org.jetbrains.research.testspark.langwrappers.strategies.JavaKotlinFullTextExtractionStrategy
 
 class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
@@ -55,30 +57,9 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
 
     override val containingFile: PsiFile get() = psiClass.containingFile
 
-    override val fullText: String
-        get() {
-            var fullText = ""
-            val fileText = psiClass.containingFile.text
+    private val textExtractor: ClassFullTextExtractionStrategy = JavaKotlinFullTextExtractionStrategy()
 
-            // get package
-            packagePattern.findAll(fileText, 0).map {
-                it.groupValues[0]
-            }.forEach {
-                fullText += "$it\n\n"
-            }
-
-            // get imports
-            importPattern.findAll(fileText, 0).map {
-                it.groupValues[0]
-            }.forEach {
-                fullText += "$it\n"
-            }
-
-            // Add class code
-            fullText += psiClass.text
-
-            return fullText
-        }
+    override val fullText: String get() = textExtractor.extract(psiClass.containingFile, psiClass.text)
 
     override val classType: ClassType
         get() {
