@@ -329,37 +329,33 @@ class TestSparkAction : AnAction() {
             if (!testGenerationController.isGeneratorRunning(project)) {
                 val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
-                if (psiHelper != null) {
-                    if (codeTypeButtons[0].isSelected) {
-                        EvoSuite().generateTestsForClass(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    } else if (codeTypeButtons[1].isSelected) {
-                        EvoSuite().generateTestsForMethod(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    } else if (codeTypeButtons[2].isSelected) {
-                        EvoSuite().generateTestsForLine(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    }
-                } else {
-                    // TODO shouw the warning panel
+                if (codeTypeButtons[0].isSelected) {
+                    EvoSuite().generateTestsForClass(
+                        project,
+                        psiHelper,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        testGenerationController,
+                    )
+                } else if (codeTypeButtons[1].isSelected) {
+                    EvoSuite().generateTestsForMethod(
+                        project,
+                        psiHelper,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        testGenerationController,
+                    )
+                } else if (codeTypeButtons[2].isSelected) {
+                    EvoSuite().generateTestsForLine(
+                        project,
+                        psiHelper,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        testGenerationController,
+                    )
                 }
             }
             visibilityController.isVisible = false
@@ -370,37 +366,33 @@ class TestSparkAction : AnAction() {
             if (!testGenerationController.isGeneratorRunning(project)) {
                 val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
-                if (psiHelper != null) {
-                    if (codeTypeButtons[0].isSelected) {
-                        Llm().generateTestsForClass(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    } else if (codeTypeButtons[1].isSelected) {
-                        Llm().generateTestsForMethod(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    } else if (codeTypeButtons[2].isSelected) {
-                        Llm().generateTestsForLine(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    }
-                } else {
-                    // TODO shouw the warning panel
+                if (codeTypeButtons[0].isSelected) {
+                    Llm().generateTestsForClass(
+                        project,
+                        psiHelper,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        testGenerationController,
+                    )
+                } else if (codeTypeButtons[1].isSelected) {
+                    Llm().generateTestsForMethod(
+                        project,
+                        psiHelper,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        testGenerationController,
+                    )
+                } else if (codeTypeButtons[2].isSelected) {
+                    Llm().generateTestsForLine(
+                        project,
+                        psiHelper,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        testGenerationController,
+                    )
                 }
             }
             visibilityController.isVisible = false

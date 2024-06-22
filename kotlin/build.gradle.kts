@@ -10,14 +10,13 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
-    implementation(project(":langwrappers"))
+    implementation(project(":langwrappers")) // Interfaces that cover language-specific logic
     implementation(project(":core"))
 }
 
 intellij {
-    version.set("2024.1")
+    rootProject.properties["platformVersion"]?.let { version.set(it.toString()) }
     plugins.set(listOf("java", "org.jetbrains.kotlin"))
-    downloadSources.set(true)
 }
 
 kotlin {

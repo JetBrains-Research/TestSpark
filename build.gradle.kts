@@ -109,9 +109,9 @@ dependencies {
     implementation(files("lib/JUnitRunner.jar"))
 
     implementation(project(":core"))
-    implementation(project(":langwrappers"))
-    implementation(project(":kotlin"))
-    implementation(project(":java"))
+    implementation(project(":langwrappers")) // Needed to use Psi related interfaces and load proper implementation
+    implementation(project(":kotlin")) // Needed to load the testspark-kotlin.xml
+    implementation(project(":java")) // Needed to load the testspark-java.xml
     if (spaceCredentialsProvided()) {
         "hasGrazieAccessCompileOnly"(project(":core"))
     }
@@ -206,9 +206,9 @@ tasks {
         dependsOn("updateEvosuite")
         dependsOn("copyJUnitRunnerLib")
         dependsOn(":core:compileKotlin")
-        dependsOn(":langwrappers:compileKotlin")
-        dependsOn(":kotlin:compileKotlin")
-        dependsOn(":java:compileKotlin")
+        dependsOn(":langwrappers:compileKotlin") // Needed to use Psi related interfaces and load proper implementation
+        dependsOn(":kotlin:compileKotlin") // Needed to load the testspark-kotlin.xml
+        dependsOn(":java:compileKotlin") // Needed to load the testspark-java.xml
     }
     // Set the JVM compatibility versions
     properties("javaVersion").let {

@@ -70,7 +70,7 @@ class PromptManager(
 
                 val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
                 val polymorphismRelations =
-                    getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses, cut)
+                    getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses)
                         .map(this::createClassRepresentation)
                         .toMap()
 
@@ -212,7 +212,6 @@ class PromptManager(
     private fun getPolymorphismRelationsWithQualifiedNames(
         project: Project,
         interestingPsiClasses: MutableSet<PsiClassWrapper>,
-        cutPsiClass: PsiClassWrapper,
     ): MutableMap<PsiClassWrapper, MutableList<PsiClassWrapper>> {
         val polymorphismRelations: MutableMap<PsiClassWrapper, MutableList<PsiClassWrapper>> = mutableMapOf()
 
