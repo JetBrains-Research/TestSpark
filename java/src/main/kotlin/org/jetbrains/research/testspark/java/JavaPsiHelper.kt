@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psi.java
+package org.jetbrains.research.testspark.java
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys

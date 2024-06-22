@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.appstarter
 
-import com.intellij.ide.impl.ProjectUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ApplicationStarter
 import com.intellij.openapi.components.service
@@ -8,6 +7,8 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
@@ -21,7 +22,7 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.helpers.psi.PsiHelperFactory
+import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
@@ -152,13 +153,13 @@ class TestSparkStarter : ApplicationStarter {
                         val packageList = targetPsiClass.qualifiedName.toString().split(".").dropLast(1).toMutableList()
                         val packageName = packageList.joinToString(".")
 
-                    // Get PsiHelper
+                        // Get PsiHelper
                         val psiHelper = PsiHelperProvider.getPsiHelper(psiFile)
                         // Create a process Manager
                         val llmProcessManager = Llm()
                             .getLLMProcessManager(
                                 project,
-                                psiHelper,
+                                psiHelper!!,
                                 targetPsiClass.textRange.startOffset,
                                 testSamplesCode = "", // we don't provide samples to LLM
                                 projectSDKPath = projectSDKPath,
