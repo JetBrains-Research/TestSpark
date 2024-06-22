@@ -15,7 +15,7 @@ dependencies {
 }
 
 intellij {
-    version.set("2024.1")
+    rootProject.properties["platformVersion"]?.let { version.set(it.toString()) }
     plugins.set(listOf("java"))
     downloadSources.set(true)
 }
