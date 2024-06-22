@@ -18,6 +18,10 @@ intellij {
     plugins.set(listOf("java"))
 }
 
+tasks.named("verifyPlugin") { enabled = false }
+tasks.named("runIde") { enabled = false }
+tasks.named("runPluginVerifier") { enabled = false }
+
 kotlin {
     jvmToolchain(17)
 }

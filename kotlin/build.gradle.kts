@@ -19,6 +19,16 @@ intellij {
     plugins.set(listOf("java", "org.jetbrains.kotlin"))
 }
 
+tasks.named("verifyPlugin") { enabled = false }
+tasks.named("runIde") { enabled = false }
+tasks.named("runPluginVerifier") { enabled = false }
+
+tasks {
+    buildSearchableOptions {
+        enabled = false
+    }
+}
+
 kotlin {
     jvmToolchain(17)
 }

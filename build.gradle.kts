@@ -206,10 +206,8 @@ tasks {
         dependsOn("updateEvosuite")
         dependsOn("copyJUnitRunnerLib")
         dependsOn(":core:compileKotlin")
-        dependsOn(":langwrappers:compileKotlin") // Needed to use Psi related interfaces and load proper implementation
-        dependsOn(":kotlin:compileKotlin") // Needed to load the testspark-kotlin.xml
-        dependsOn(":java:compileKotlin") // Needed to load the testspark-java.xml
     }
+
     // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
