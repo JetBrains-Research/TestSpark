@@ -1,10 +1,8 @@
 package org.jetbrains.research.testspark.langwrappers.strategies
 
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
-
 
 /**
  * Strategy interface for the extract of a full text of a class
@@ -14,7 +12,7 @@ interface ClassFullTextExtractionStrategy {
 }
 
 /**
-  Direct implementor for the Java and Kotlin PsiWrappers
+ Direct implementor for the Java and Kotlin PsiWrappers
  */
 class JavaKotlinFullTextExtractionStrategy : ClassFullTextExtractionStrategy {
 

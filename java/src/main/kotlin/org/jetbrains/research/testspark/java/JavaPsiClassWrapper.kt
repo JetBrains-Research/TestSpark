@@ -10,8 +10,6 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
-import org.jetbrains.research.testspark.core.utils.importPattern
-import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.langwrappers.strategies.ClassFullTextExtractionStrategy
