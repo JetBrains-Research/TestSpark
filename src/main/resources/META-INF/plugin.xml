@@ -145,6 +145,8 @@
     </change-notes>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.idea.maven</depends>
+    <depends>com.intellij.gradle</depends>
 
     <!--    Plugin depends on the Kotlin support plugin that comes with org.jetbrains.kotlin.
             This dependency is optional, which means plugin can run even if the Java plugin is not available or not enabled.

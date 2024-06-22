@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.java
+package org.jetbrains.research.testspark.helpers.psi.java
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -18,7 +18,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
-class JavaPsiHelper(var psiFile: PsiFile) : PsiHelper {
+class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
     override val language: Language get() = Language.Java
 
@@ -155,9 +155,9 @@ class JavaPsiHelper(var psiFile: PsiFile) : PsiHelper {
         val javaPsiMethodWrapped = getSurroundingMethod(caret.offset) as JavaPsiMethodWrapper?
         val line: Int? = getSurroundingLine(caret.offset)
 
-        javaPsiClassWrapped?.let { result.add(getClassDisplayName(it)) }
-        javaPsiMethodWrapped?.let { result.add(getMethodDisplayName(it)) }
-        line?.let { result.add(getLineDisplayName(it)) }
+        javaPsiClassWrapped?.let { result.add(getClassHTMLDisplayName(it)) }
+        javaPsiMethodWrapped?.let { result.add(getMethodHTMLDisplayName(it)) }
+        line?.let { result.add(getLineHTMLDisplayName(it)) }
 
         if (javaPsiClassWrapped != null && javaPsiMethodWrapped != null) {
             log.info(
@@ -171,12 +171,12 @@ class JavaPsiHelper(var psiFile: PsiFile) : PsiHelper {
         return result.toArray()
     }
 
-    override fun getLineDisplayName(line: Int) = "<html><b><font color='orange'>line</font> $line</b></html>"
+    override fun getLineHTMLDisplayName(line: Int) = "<html><b><font color='orange'>line</font> $line</b></html>"
 
-    override fun getClassDisplayName(psiClass: PsiClassWrapper): String =
+    override fun getClassHTMLDisplayName(psiClass: PsiClassWrapper): String =
         "<html><b><font color='orange'>${psiClass.classType.representation}</font> ${psiClass.qualifiedName}</b></html>"
 
-    override fun getMethodDisplayName(psiMethod: PsiMethodWrapper): String {
+    override fun getMethodHTMLDisplayName(psiMethod: PsiMethodWrapper): String {
         return if ((psiMethod as JavaPsiMethodWrapper).isDefaultConstructor) {
             "<html><b><font color='orange'>default constructor</font></b></html>"
         } else if (psiMethod.isConstructor) {

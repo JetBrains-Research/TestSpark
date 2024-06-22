@@ -388,6 +388,14 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
 }
 
 /**
+ * Returns the original string if it is not null, or the default string if the original string is null.
+ *
+ * @param default the default string to return if the original string is null
+ * @return the original string if it is not null, or the default string if the original string is null
+ */
+fun String?.orDefault(default: String): String = this ?: default
+
+/**
  * This code sets up a Gradle task for running the plugin in headless mode
  *
  * @param root The root directory of the project under test.
@@ -398,6 +406,7 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
  * @param token The token for using LLM.
  * @param prompt a txt file containing the LLM's prompt template
  * @param out The output directory for the project.
+ * @param enableCoverage flag to enable/disable coverage computation
  */
 tasks.create<RunIdeTask>("headless") {
     val root: String? by project
@@ -409,8 +418,9 @@ tasks.create<RunIdeTask>("headless") {
     val token: String? by project
     val prompt: String? by project
     val out: String? by project
+    val enableCoverage: String? by project
 
-    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out)
+    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage.orDefault("false"))
 
     jvmArgs(
         "-Xmx16G",

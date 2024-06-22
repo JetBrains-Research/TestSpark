@@ -37,7 +37,7 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
     override val signature: String
         get() {
             val bodyStart = psiMethod.body?.startOffsetInParent ?: psiMethod.textLength
-            return psiMethod.text.substring(0, bodyStart).replace('\n', ' ').trim()
+            return psiMethod.text.substring(0, bodyStart).replace("\\n", "").trim()
         }
 
     val parameterList = psiMethod.parameterList
@@ -78,6 +78,7 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
 
     /**
      * Generates the field descriptor for a type.
+     * https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.3
      *
      * @param psiType the type to generate the descriptor for
      * @return the field descriptor
