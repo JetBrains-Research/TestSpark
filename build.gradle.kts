@@ -209,7 +209,6 @@ tasks {
     }
 
     verifyPlugin {
-        dependsOn(":copyPluginAssets")
         onlyIf { this.project == rootProject }
     }
 
