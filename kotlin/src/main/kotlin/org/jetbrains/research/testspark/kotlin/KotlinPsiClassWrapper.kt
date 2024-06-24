@@ -25,7 +25,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
 
-    override val qualifiedName: String get() = psiClass.fqName!!.asString() ?: ""
+    override val qualifiedName: String get() = psiClass.fqName!!.asString()
 
     override val text: String? get() = psiClass.text
 
