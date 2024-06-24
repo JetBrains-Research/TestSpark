@@ -17,19 +17,22 @@ import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import java.io.File
+import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
-class TestProcessor(val project: Project) : TestsPersistentStorage {
-
-    private val javaHomeDirectory = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!
+class TestProcessor(
+    val project: Project,
+    givenProjectSDKPath: Path? = null,
+) : TestsPersistentStorage {
+    private val javaHomeDirectory = givenProjectSDKPath?.toString() ?: ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
 
     private val log = Logger.getInstance(this::class.java)
 
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
-    private val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion)
+    val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion, javaHomeDirectory)
 
     override fun saveGeneratedTest(packageString: String, code: String, resultPath: String, testFileName: String): String {
         // Generate the final path for the generated tests
@@ -68,7 +71,7 @@ class TestProcessor(val project: Project) : TestsPersistentStorage {
         projectContext: ProjectContext,
     ): String {
         // find the proper javac
-        val javaRunner = File(javaHomeDirectory.path).walk()
+        val javaRunner = File(javaHomeDirectory).walk()
             .filter {
                 val isJavaName = if (DataFilesUtil.isWindows()) it.name.equals("java.exe") else it.name.equals("java")
                 isJavaName && it.isFile
