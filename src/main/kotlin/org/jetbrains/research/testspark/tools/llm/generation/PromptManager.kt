@@ -200,11 +200,7 @@ class PromptManager(
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
                 "Maximum depth of polymorphism is ${LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
-                "Maximum depth for input parameters is ${
-                    LlmSettingsArguments(project).maxInputParamsDepth(
-                        testGenerationData.inputParamsDepthReducing,
-                    )
-                }.",
+                "Maximum depth for input parameters is ${LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
             project,
         )
     }
