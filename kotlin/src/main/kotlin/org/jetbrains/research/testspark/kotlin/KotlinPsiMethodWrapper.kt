@@ -17,7 +17,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
 
-    override val name: String get() = psiFunction.name ?: ""
+    override val name: String get() = psiFunction.name!!
 
     override val text: String? = psiFunction.text
 
@@ -51,14 +51,19 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
     val isDefaultMethod: Boolean = psiFunction.run {
         val containingClass = PsiTreeUtil.getParentOfType(this, KtClassOrObject::class.java)
         val containingInterface = containingClass?.isInterfaceClass()
-        name != "<init>" && bodyExpression != null && containingInterface == true
+        // ensure that the function is a non-abstract method defined in an interface
+        name != "<init>" && // function is not a constructor
+            bodyExpression != null && // function has an implementation
+            containingInterface == true // function is defined within an interface
     }
 
     override fun containsLine(lineNumber: Int): Boolean {
         val psiFile = psiFunction.containingFile
         val document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
         val textRange = psiFunction.textRange
+        // increase by one is necessary due to different start of numbering
         val startLine = document.getLineNumber(textRange.startOffset) + 1
+        // increase by one is necessary due to different start of numbering
         val endLine = document.getLineNumber(textRange.endOffset) + 1
         return lineNumber in startLine..endLine
     }
@@ -87,6 +92,7 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
 
     /**
      * Generates the field descriptor for a type.
+     * https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.3
      *
      * @param type the type to generate the descriptor for
      * @return the field descriptor

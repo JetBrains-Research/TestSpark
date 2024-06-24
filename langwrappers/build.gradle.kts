@@ -25,5 +25,5 @@ tasks.named("runIde") { enabled = false }
 tasks.named("runPluginVerifier") { enabled = false }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(rootProject.properties["jvmToolchainVersion"].toString().toInt())
 }

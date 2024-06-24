@@ -7,6 +7,7 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.kotlin.asJava.toLightClass
+import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
 import org.jetbrains.kotlin.lexer.KtTokens
@@ -24,12 +25,12 @@ import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
 
-    override val qualifiedName: String get() = psiClass.fqName?.asString() ?: ""
+    override val qualifiedName: String get() = psiClass.fqName!!.asString() ?: ""
 
     override val text: String? get() = psiClass.text
 
     override val methods: List<PsiMethodWrapper>
-        get() = psiClass.body?.functions?.map { KotlinPsiMethodWrapper(it) } ?: emptyList()
+        get() = psiClass.body?.functions?.filter { it.name != null }?.map { KotlinPsiMethodWrapper(it) } ?: emptyList()
 
     override val allMethods: List<PsiMethodWrapper> get() = methods
 
@@ -48,7 +49,11 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
             val superClassPsiClass = superClassDescriptor?.constructor?.declarationDescriptor?.let { descriptor ->
                 DescriptorToSourceUtils.getSourceFromDescriptor(descriptor) as? KtClass
             }
-            return superClassPsiClass?.let { KotlinPsiClassWrapper(it) }
+            return if (psiClass.fqName != null) {
+                superClassPsiClass?.let { KotlinPsiClassWrapper(it) }
+            } else {
+                null
+            }
         }
 
     override val virtualFile: VirtualFile get() = psiClass.containingFile.virtualFile
@@ -86,7 +91,7 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
                 psiClass is KtObjectDeclaration -> ClassType.OBJECT
                 psiClass.isInterfaceClass() -> ClassType.INTERFACE
                 psiClass.hasModifier(KtTokens.ABSTRACT_KEYWORD) -> ClassType.ABSTRACT_CLASS
-                (psiClass as KtClass).isData() -> ClassType.DATA_CLASS
+                psiClass.isData() -> ClassType.DATA_CLASS
                 psiClass.annotationEntries.any { it.text == "@JvmInline" } -> ClassType.INLINE_VALUE_CLASS
                 else -> ClassType.CLASS
             }
@@ -97,7 +102,7 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
         val lightClass = psiClass.toLightClass()
         return if (lightClass != null) {
             val query = ClassInheritorsSearch.search(lightClass, scope, false)
-            query.findAll().map { KotlinPsiClassWrapper(it as KtClass) }
+            query.findAll().filter { it.kotlinFqName != null }.map { KotlinPsiClassWrapper(it as KtClass) }
         } else {
             emptyList()
         }
@@ -113,7 +118,7 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
             val typeReference = parameter.typeReference
             if (typeReference != null) {
                 val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
-                if (psiClass != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
+                if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
                     interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
                 }
             }

@@ -24,7 +24,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.llm.SettingsArgumentsLlm
+import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 
 /**
@@ -45,7 +45,7 @@ class PromptManager(
 
             ApplicationManager.getApplication().runReadAction(
                 Computable {
-                    val maxPolymorphismDepth = SettingsArgumentsLlm(project).maxPolyDepth(0)
+                    val maxPolymorphismDepth = LlmSettingsArguments(project).maxPolyDepth(polyDepthReducing = 0)
                     psiHelper.collectClassesToTest(project, classesToTest, caret, maxPolymorphismDepth)
                 },
             )
@@ -63,9 +63,14 @@ class PromptManager(
     fun generatePrompt(codeType: FragmentToTestData, testSamplesCode: String, polyDepthReducing: Int): String {
         val prompt = ApplicationManager.getApplication().runReadAction(
             Computable {
-                val maxInputParamsDepth = SettingsArgumentsLlm(project).maxInputParamsDepth(polyDepthReducing)
+                val maxInputParamsDepth = LlmSettingsArguments(project).maxInputParamsDepth(polyDepthReducing)
                 val interestingPsiClasses =
-                    psiHelper.getInterestingPsiClassesWithQualifiedNames(project, classesToTest, polyDepthReducing, maxInputParamsDepth)
+                    psiHelper.getInterestingPsiClassesWithQualifiedNames(
+                        project,
+                        classesToTest,
+                        polyDepthReducing,
+                        maxInputParamsDepth,
+                    )
 
                 val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
                 val polymorphismRelations =
@@ -167,23 +172,23 @@ class PromptManager(
     }
 
     fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
-        return (SettingsArgumentsLlm(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
-            (SettingsArgumentsLlm(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+        return (LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
+            (LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
     }
 
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
         // reducing depth of polymorphism
-        if (SettingsArgumentsLlm(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) {
+        if (LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) {
             testGenerationData.polyDepthReducing++
-            log.info("polymorphism depth is: ${SettingsArgumentsLlm(project).maxPolyDepth(testGenerationData.polyDepthReducing)}")
+            log.info("polymorphism depth is: ${LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}")
             showPromptReductionWarning(testGenerationData)
             return true
         }
 
         // reducing depth of input params
-        if (SettingsArgumentsLlm(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1) {
+        if (LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1) {
             testGenerationData.inputParamsDepthReducing++
-            log.info("input params depth is: ${SettingsArgumentsLlm(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}")
+            log.info("input params depth is: ${LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}")
             showPromptReductionWarning(testGenerationData)
             return true
         }
@@ -194,8 +199,12 @@ class PromptManager(
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
-                "Maximum depth of polymorphism is ${SettingsArgumentsLlm(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
-                "Maximum depth for input parameters is ${SettingsArgumentsLlm(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
+                "Maximum depth of polymorphism is ${LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                "Maximum depth for input parameters is ${
+                    LlmSettingsArguments(project).maxInputParamsDepth(
+                        testGenerationData.inputParamsDepthReducing,
+                    )
+                }.",
             project,
         )
     }
@@ -247,6 +256,7 @@ class PromptManager(
             val file = psiClass.containingFile
             val psiHelper = PsiHelperProvider.getPsiHelper(file)
             // psiHelper will not be null here
+            // because if we are here, then we already know that the current language is supported
             if (psiHelper!!.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) {
                 return currentPsiMethod
             }
@@ -270,6 +280,7 @@ class PromptManager(
                 val file = psiClass.containingFile
                 val psiHelper = PsiHelperProvider.getPsiHelper(file)
                 // psiHelper will not be null here
+                // because if we are here, then we already know that the current language is supported
                 return psiHelper!!.generateMethodDescriptor(currentPsiMethod)
             }
         }

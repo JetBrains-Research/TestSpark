@@ -27,7 +27,7 @@ import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.jetbrains.research.testspark.tools.ToolUtils
-import org.jetbrains.research.testspark.tools.evosuite.SettingsArgumentsEvoSuit
+import org.jetbrains.research.testspark.tools.evosuite.EvoSuiteSettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
@@ -100,12 +100,12 @@ class EvoSuiteProcessManager(
 
             // get command
             val command = when (codeType.type!!) {
-                CodeType.CLASS -> SettingsArgumentsEvoSuit(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).build()
+                CodeType.CLASS -> EvoSuiteSettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).build()
                 CodeType.METHOD -> {
-                    SettingsArgumentsEvoSuit(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).forMethod(codeType.objectDescription).build()
+                    EvoSuiteSettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).forMethod(codeType.objectDescription).build()
                 }
 
-                CodeType.LINE -> SettingsArgumentsEvoSuit(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).forLine(codeType.objectIndex).build(true)
+                CodeType.LINE -> EvoSuiteSettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).forLine(codeType.objectIndex).build(true)
             }
 
             if (evoSuiteSettingsState.seed.isNotBlank()) command.add("-seed=${evoSuiteSettingsState.seed}")

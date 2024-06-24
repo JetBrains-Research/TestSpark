@@ -40,7 +40,7 @@ class Llm(override val name: String = "LLM") : Tool {
         projectSDKPath: Path? = null,
     ): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClassWrapper>()
-        val maxPolymorphismDepth = SettingsArgumentsLlm(project).maxPolyDepth(0)
+        val maxPolymorphismDepth = LlmSettingsArguments(project).maxPolyDepth(polyDepthReducing = 0)
 
         ProgressManager.getInstance().runProcessWithProgressSynchronously({
             ApplicationManager.getApplication().runReadAction {

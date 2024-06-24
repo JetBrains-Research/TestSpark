@@ -5,12 +5,14 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
+import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
@@ -24,7 +26,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
-class KotlinPsiHelper(var psiFile: PsiFile) : PsiHelper {
+class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
     override val language: Language get() = Language.Kotlin
 
@@ -40,12 +42,10 @@ class KotlinPsiHelper(var psiFile: PsiFile) : PsiHelper {
         val element = psiFile.findElementAt(caretOffset)
         val cls = element?.parentOfType<KtClassOrObject>(withSelf = true)
 
-        if (cls != null) {
-            if (cls.name != null) {
-                val kotlinClassWrapper = KotlinPsiClassWrapper(cls)
-                log.info("Surrounding class for caret in $caretOffset is ${kotlinClassWrapper.qualifiedName}")
-                return kotlinClassWrapper
-            }
+        if (cls != null && cls.name != null && cls.fqName != null) {
+            val kotlinClassWrapper = KotlinPsiClassWrapper(cls)
+            log.info("Surrounding class for caret in $caretOffset is ${kotlinClassWrapper.qualifiedName}")
+            return kotlinClassWrapper
         }
 
         log.info("No surrounding class for caret in $caretOffset")
@@ -56,7 +56,7 @@ class KotlinPsiHelper(var psiFile: PsiFile) : PsiHelper {
         val element = psiFile.findElementAt(caretOffset)
         val method = element?.parentOfType<KtFunction>(withSelf = true)
 
-        if (method != null) {
+        if (method != null && method.name != null) {
             val wrappedMethod = KotlinPsiMethodWrapper(method)
             log.info("Surrounding method for caret at $caretOffset is ${wrappedMethod.methodDescriptor}")
             return wrappedMethod
@@ -70,11 +70,9 @@ class KotlinPsiHelper(var psiFile: PsiFile) : PsiHelper {
         val doc = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
 
         val selectedLine = doc.getLineNumber(caretOffset)
-
-        // get the text for the selected line
         val selectedLineText =
-            doc.charsSequence.subSequence(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine))
-                .toString()
+            doc.getText(TextRange(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine)))
+
         if (selectedLineText.isBlank()) {
             log.info("Line $selectedLine at caret $caretOffset is not valid")
             return null
@@ -87,7 +85,7 @@ class KotlinPsiHelper(var psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
-        maxPolymorphismDepth: Int, // check if cut has any none java super class
+        maxPolymorphismDepth: Int, // check if cut has any non-java super class
     ) {
         val cutPsiClass = getSurroundingClass(caretOffset)!!
         var currentPsiClass = cutPsiClass
@@ -125,9 +123,11 @@ class KotlinPsiHelper(var psiFile: PsiFile) : PsiHelper {
                         val typeRef = paramIt.typeReference
                         if (typeRef != null) {
                             resolveClassInType(typeRef)?.let { psiClass ->
-                                KotlinPsiClassWrapper(psiClass as KtClass).let {
-                                    if (!it.qualifiedName.startsWith("kotlin.")) {
-                                        interestingPsiClasses.add(it)
+                                if (psiClass.kotlinFqName != null) {
+                                    KotlinPsiClassWrapper(psiClass as KtClass).let {
+                                        if (!it.qualifiedName.startsWith("kotlin.")) {
+                                            interestingPsiClasses.add(it)
+                                        }
                                     }
                                 }
                             }

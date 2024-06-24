@@ -30,5 +30,5 @@ tasks {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(rootProject.properties["jvmToolchainVersion"].toString().toInt())
 }

@@ -155,6 +155,9 @@ class TestSparkStarter : ApplicationStarter {
 
                         // Get PsiHelper
                         val psiHelper = PsiHelperProvider.getPsiHelper(psiFile)
+                        if (psiHelper == null) {
+                            // TODO exception: the support for the current language does not exist
+                        }
                         // Create a process Manager
                         val llmProcessManager = Llm()
                             .getLLMProcessManager(

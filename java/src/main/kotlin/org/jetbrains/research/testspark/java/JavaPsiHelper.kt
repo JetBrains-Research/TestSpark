@@ -84,7 +84,7 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
-        maxPolymorphismDepth: Int, // check if cut has any none java super class
+        maxPolymorphismDepth: Int, // check if cut has any non-java super class
     ) {
         val cutPsiClass = getSurroundingClass(caretOffset)!!
         var currentPsiClass = cutPsiClass

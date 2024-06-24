@@ -7,7 +7,7 @@ import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 /**
  * A class that provides access to various settings arguments.
  */
-class SettingsArgumentsLlm(private val project: Project) {
+class LlmSettingsArguments(private val project: Project) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
