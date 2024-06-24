@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
@@ -63,7 +64,11 @@ class GrazieRequestManager(project: Project) : IJRequestManager(project) {
     private fun getMessages(): List<Pair<String, String>> {
         val result = mutableListOf<Pair<String, String>>()
         chatHistory.forEach {
-            result.add(Pair(it.role.representation, it.content))
+            val role = when(it.role) {
+                ChatMessage.ChatRole.User -> "user"
+                ChatMessage.ChatRole.Assistant -> "assistant"
+            }
+            result.add(Pair(role, it.content))
         }
         return result
     }

@@ -4,9 +4,9 @@ open class ChatMessage protected constructor(
     val role: ChatRole,
     val content: String,
 ) {
-    enum class ChatRole(val representation: String) {
-        User("user"),
-        Assistant("assistant"),
+    enum class ChatRole {
+        User,
+        Assistant,
     }
 }
 
