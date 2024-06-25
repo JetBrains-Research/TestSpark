@@ -20,13 +20,13 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
+import java.nio.file.Path
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -43,6 +43,7 @@ class LLMProcessManager(
     private val project: Project,
     private val promptManager: PromptManager,
     private val testSamplesCode: String,
+    projectSDKPath: Path? = null,
 ) : ProcessManager {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -51,7 +52,7 @@ class LLMProcessManager(
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = SettingsArguments(project).maxLLMRequest()
-    private val testProcessor = TestProcessor(project)
+    private val testProcessor = TestProcessor(project, projectSDKPath)
 
     /**
      * Runs the test generator process.
@@ -89,7 +90,7 @@ class LLMProcessManager(
 
         val initialPromptMessage = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
-        val testCompiler = TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion)
+        val testCompiler = testProcessor.testCompiler
 
         // initiate a new RequestManager
         val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)

@@ -83,7 +83,7 @@ class CoverageVisualisationService(private val project: Project) {
 
         updateCoverage(
             testReport.allCoveredLines,
-            testReport.testCaseList.values.stream().map { it.id }.toList().toHashSet(),
+            testReport.testCaseList.values.map { it.id }.toHashSet(),
             testReport,
         )
     }
