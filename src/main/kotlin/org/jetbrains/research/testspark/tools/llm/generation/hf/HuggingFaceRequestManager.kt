@@ -106,7 +106,7 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
      * Also, it handles the cases where the LLM-generated code does not end with ```
      */
     private fun extractLLMGeneratedCode(text: String): String {
-        val modifiedText = text.replace("```java", "```")
+        val modifiedText = text.replace("```java", "```").replace("````", "```")
         val tripleTickBlockIndex = modifiedText.indexOf("```")
         val codePart = modifiedText.substring(tripleTickBlockIndex + 3)
         val lines = codePart.lines()
