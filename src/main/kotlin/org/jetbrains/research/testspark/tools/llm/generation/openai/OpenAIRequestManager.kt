@@ -14,7 +14,6 @@ import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.IJRequestManager
-import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import java.net.HttpURLConnection
 
 /**
