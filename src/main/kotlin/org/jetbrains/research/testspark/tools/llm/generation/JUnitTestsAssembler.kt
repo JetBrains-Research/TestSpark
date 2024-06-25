@@ -85,33 +85,14 @@ class JUnitTestsAssembler(
         log.debug(super.getContent())
     }
 
+    // TODO: Create one generic consume method that accepts generated tests cases as string
     /**
-     * Receives a response from the HuggingFace API and processes it.
+     * Receives a response from the HuggingFace API and updates the UI.
      */
-    fun consumeHFRequest(httpRequest: HttpRequests.Request) {
-        Thread.sleep(50L)
-        val text = httpRequest.reader.readLine()
-        val generatedTestCases = extractLLMGeneratedCode(
-            JsonParser.parseString(text).asJsonArray[0]
-                .asJsonObject["generated_text"].asString.trim(),
-        )
+    fun consumeHFRequest(generatedTestCases: String) {
         super.consume(generatedTestCases)
         log.debug(super.getContent())
         updateProgressBar()
-    }
-
-    /**
-     * Extracts code blocks in LLMs' response.
-     * Also, it handles the cases where the LLM-generated code does not end with ```
-     */
-    private fun extractLLMGeneratedCode(text: String): String {
-        val modifiedText = text.replace("```java", "```")
-        val tripleTickBlockIndex = modifiedText.indexOf("```")
-        val codePart = modifiedText.substring(tripleTickBlockIndex + 3)
-        val lines = codePart.lines()
-        val filteredLines = lines.filter { line -> line != "```" }
-        val code = filteredLines.joinToString("\n")
-        return "```\n$code\n```"
     }
 
     private fun updateProgressBar() {

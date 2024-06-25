@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.tools.llm.generation.hf
 
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
@@ -53,7 +54,15 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
             httpRequest.connect {
                 it.write(GsonBuilder().disableHtmlEscaping().create().toJson(llmRequestBody))
                 when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
-                    HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consumeHFRequest(it)
+                    HttpURLConnection.HTTP_OK -> {
+                        val text = it.reader.readLine()
+                        val generatedTestCases = extractLLMGeneratedCode(
+                            JsonParser.parseString(text).asJsonArray[0]
+                                .asJsonObject["generated_text"].asString.trim(),
+                        )
+                        (testsAssembler as JUnitTestsAssembler).consumeHFRequest(generatedTestCases)
+                    }
+
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         llmErrorManager.errorProcess(
                             LLMMessagesBundle.get("serverProblems"),
@@ -85,5 +94,19 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
      */
     private fun formatPrompt(systemPrompt: String, userMessage: String): String {
         return "<s>[INST] <<SYS>> $systemPrompt <</SYS>> $userMessage [/INST]"
+    }
+
+    /**
+     * Extracts code blocks in LLMs' response.
+     * Also, it handles the cases where the LLM-generated code does not end with ```
+     */
+    private fun extractLLMGeneratedCode(text: String): String {
+        val modifiedText = text.replace("```java", "```")
+        val tripleTickBlockIndex = modifiedText.indexOf("```")
+        val codePart = modifiedText.substring(tripleTickBlockIndex + 3)
+        val lines = codePart.lines()
+        val filteredLines = lines.filter { line -> line != "```" }
+        val code = filteredLines.joinToString("\n")
+        return "```\n$code\n```"
     }
 }
