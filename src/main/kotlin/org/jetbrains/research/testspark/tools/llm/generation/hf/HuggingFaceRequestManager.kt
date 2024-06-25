@@ -5,6 +5,7 @@ import com.google.gson.JsonParser
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
+import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
@@ -21,8 +22,6 @@ import java.net.HttpURLConnection
  */
 class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
     private val url = "https://api-inference.huggingface.co/models/meta-llama/"
-    private val systemPrompt = "You are a helpful and honest code and programming assistant." +
-        " Please, respond concisely and truthfully."
 
     // TODO: The user should be able to change these numbers in the plugin's settings
     private val topProbability = 0.9
@@ -45,7 +44,12 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
 
         // Add system prompt
         if (chatHistory.size == 1) {
-            chatHistory[0] = ChatMessage(chatHistory[0].role, formatPrompt(systemPrompt, chatHistory[0].content))
+            chatHistory[0] = ChatMessage(
+                chatHistory[0].role,
+                createInstructionPrompt(
+                    chatHistory[0].content,
+                ),
+            )
         }
 
         val llmRequestBody = HuggingFaceRequestBody(chatHistory, Parameters(topProbability, temperature)).toMap()
@@ -92,8 +96,9 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
      * Creates the required prompt for Llama models. For more details see:
      * https://huggingface.co/blog/llama2#how-to-prompt-llama-2
      */
-    private fun formatPrompt(systemPrompt: String, userMessage: String): String {
-        return "<s>[INST] <<SYS>> $systemPrompt <</SYS>> $userMessage [/INST]"
+    private fun createInstructionPrompt(userMessage: String): String {
+        // TODO: This is Llama-specific and should support other LLMs hosted on HF too.
+        return "<s>[INST] <<SYS>> ${LLMDefaultsBundle.get("huggingFaceInitialSystemPrompt")} <</SYS>> $userMessage [/INST]"
     }
 
     /**
