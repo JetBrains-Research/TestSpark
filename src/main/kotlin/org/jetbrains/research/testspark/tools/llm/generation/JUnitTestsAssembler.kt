@@ -85,16 +85,6 @@ class JUnitTestsAssembler(
         log.debug(super.getContent())
     }
 
-    // TODO: Create one generic consume method that accepts generated tests cases as string
-    /**
-     * Receives a response from the HuggingFace API and updates the UI.
-     */
-    fun consumeHFRequest(generatedTestCases: String) {
-        super.consume(generatedTestCases)
-        log.debug(super.getContent())
-        updateProgressBar()
-    }
-
     private fun updateProgressBar() {
         val generatedTestsCount = super.getContent().split("@Test").size - 1
 

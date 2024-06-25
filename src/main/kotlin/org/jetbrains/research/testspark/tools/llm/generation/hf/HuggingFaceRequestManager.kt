@@ -63,7 +63,7 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
                             JsonParser.parseString(text).asJsonArray[0]
                                 .asJsonObject["generated_text"].asString.trim(),
                         )
-                        (testsAssembler as JUnitTestsAssembler).consumeHFRequest(generatedTestCases)
+                        (testsAssembler as JUnitTestsAssembler).consume(generatedTestCases)
                     }
 
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
