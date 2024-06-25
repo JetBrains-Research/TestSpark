@@ -7,7 +7,7 @@ import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
-import org.jetbrains.research.testspark.core.data.ChatMessage
+import org.jetbrains.research.testspark.core.data.ChatUserMessage
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
@@ -44,8 +44,7 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
 
         // Add system prompt
         if (chatHistory.size == 1) {
-            chatHistory[0] = ChatMessage(
-                chatHistory[0].role,
+            chatHistory[0] = ChatUserMessage(
                 createInstructionPrompt(
                     chatHistory[0].content,
                 ),
