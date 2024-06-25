@@ -1,6 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>org.jetbrains.research.testspark</id>
+    <id>org.jetbrains.research.testgenie</id>
     <name>TestSpark</name>
     <vendor>ictl</vendor>
 
@@ -153,7 +153,7 @@
             This dependency will be loaded only when actually needed.
             Moreover, we specify the configuration file to consider when the dependency is needed. -->
     <depends
-            config-file="testspark-kotlin.xml"
+            config-file="testgenie-kotlin.xml"
             optional="true">
         org.jetbrains.kotlin
     </depends>
@@ -163,7 +163,7 @@
             This dependency will be loaded only when actually needed.
             Moreover, we specify the configuration file to consider when the dependency is needed. -->
     <depends
-            config-file="testspark-java.xml"
+            config-file="testgenie-java.xml"
             optional="true">
         com.intellij.java
     </depends>

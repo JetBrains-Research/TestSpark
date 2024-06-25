@@ -19,7 +19,7 @@ interface PsiHelperProvider {
 
     companion object {
         // An extension point that allows for custom PsiHelperProviders to be registered for different languages
-        private val EP = LanguageExtension<PsiHelperProvider>("org.jetbrains.research.testspark.psiHelperProvider")
+        private val EP = LanguageExtension<PsiHelperProvider>("org.jetbrains.research.testgenie.psiHelperProvider")
 
         /**
          * Retrieves a PsiHelper for the given file based on its language.
