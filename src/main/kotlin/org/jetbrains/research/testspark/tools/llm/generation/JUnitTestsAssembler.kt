@@ -51,40 +51,6 @@ class JUnitTestsAssembler(
         updateProgressBar()
     }
 
-    /**
-     * Receives a response text and updates the progress bar accordingly.
-     *
-     * @param httpRequest the httpRequest sent to OpenAI
-     */
-    fun consume(httpRequest: HttpRequests.Request) {
-        while (true) {
-            if (ToolUtils.isProcessCanceled(indicator)) return
-
-            Thread.sleep(50L)
-            var text = httpRequest.reader.readLine()
-
-            if (text.isEmpty()) continue
-
-            text = text.removePrefix("data: ")
-
-            val choices =
-                Gson().fromJson(
-                    JsonParser.parseString(text)
-                        .asJsonObject["choices"]
-                        .asJsonArray[0].asJsonObject,
-                    OpenAIChoice::class.java,
-                )
-
-            if (choices.finishedReason == "stop") break
-
-            // Collect the response and update the progress bar
-            super.consume(choices.delta.content)
-            updateProgressBar()
-        }
-
-        log.debug(super.getContent())
-    }
-
     private fun updateProgressBar() {
         val generatedTestsCount = super.getContent().split("@Test").size - 1
 
