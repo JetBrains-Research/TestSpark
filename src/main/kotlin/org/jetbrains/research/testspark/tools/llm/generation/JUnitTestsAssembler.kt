@@ -91,7 +91,7 @@ class JUnitTestsAssembler(
     fun consumeHFRequest(httpRequest: HttpRequests.Request) {
         Thread.sleep(50L)
         val text = httpRequest.reader.readLine()
-        val generatedTestCases = removeDelimiterLines(
+        val generatedTestCases = extractLLMGeneratedCode(
             JsonParser.parseString(text).asJsonArray[0]
                 .asJsonObject["generated_text"].asString.trim(),
         )
@@ -101,12 +101,17 @@ class JUnitTestsAssembler(
     }
 
     /**
-     * Removes delimiter lines used for code blocks in LLMs' response
+     * Extracts code blocks in LLMs' response.
+     * Also, it handles the cases where the LLM-generated code does not end with ```
      */
-    private fun removeDelimiterLines(text: String): String {
-        return text.lines()
-            .filter { line -> line != "```" && line != "```java" }
-            .joinToString("\n")
+    private fun extractLLMGeneratedCode(text: String): String {
+        val modifiedText = text.replace("```java", "```")
+        val tripleTickBlockIndex = modifiedText.indexOf("```")
+        val codePart = modifiedText.substring(tripleTickBlockIndex + 3)
+        val lines = codePart.lines()
+        val filteredLines = lines.filter { line -> line != "```" }
+        val code = filteredLines.joinToString("\n")
+        return "```\n$code\n```"
     }
 
     private fun updateProgressBar() {
