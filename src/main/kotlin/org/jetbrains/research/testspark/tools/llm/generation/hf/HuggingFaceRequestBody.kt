@@ -12,6 +12,10 @@ data class HuggingFaceRequestBody(
     val parameters: Parameters,
 )
 
+/**
+ * Sets LLM settings required to send inference requests to HF
+ * For more info, see https://huggingface.co/docs/api-inference/en/detailed_parameters
+ */
 fun HuggingFaceRequestBody.toMap(): Map<String, Any> {
     return mapOf(
         "inputs" to this.messages.joinToString(separator = "\n") { it.content },
