@@ -1,6 +1,8 @@
 package org.jetbrains.research.testspark.tools.llm.generation.openai
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonParser
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
@@ -8,10 +10,10 @@ import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
+import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.SettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.IJRequestManager
-import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import java.net.HttpURLConnection
 
 /**
@@ -43,7 +45,13 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
 
                 // check response
                 when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
-                    HttpURLConnection.HTTP_OK -> (testsAssembler as JUnitTestsAssembler).consume(it)
+                    HttpURLConnection.HTTP_OK -> {
+                        assembleLlmResponse(
+                            httpRequest = it,
+                            indicator,
+                            testsAssembler,
+                        )
+                    }
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         llmErrorManager.errorProcess(
                             LLMMessagesBundle.get("serverProblems"),
@@ -85,5 +93,44 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
         }
 
         return sendResult
+    }
+
+    /**
+     * Receives the LLM's response text and feeds it to the provided `TestsAssembler`.
+     *
+     * @param httpRequest the httpRequest sent to OpenAI
+     * @param indicator UI indicator that it checked for cancellation while parsing the LLM's response
+     * @param testsAssembler the test assembler to which the response is fed
+     */
+    private fun assembleLlmResponse(
+        httpRequest: HttpRequests.Request,
+        indicator: CustomProgressIndicator,
+        testsAssembler: TestsAssembler,
+    ) {
+        while (true) {
+            if (ToolUtils.isProcessCanceled(indicator)) return
+
+            Thread.sleep(50L)
+            var text = httpRequest.reader.readLine()
+
+            if (text.isEmpty()) continue
+
+            text = text.removePrefix("data: ")
+
+            val choices =
+                Gson().fromJson(
+                    JsonParser.parseString(text)
+                        .asJsonObject["choices"]
+                        .asJsonArray[0].asJsonObject,
+                    OpenAIChoice::class.java,
+                )
+
+            if (choices.finishedReason == "stop") break
+
+            // Feed the response to the assembler
+            testsAssembler.consume(choices.delta.content)
+        }
+
+        log.debug { testsAssembler.getContent() }
     }
 }
