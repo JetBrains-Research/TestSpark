@@ -12,7 +12,6 @@ import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
-import org.jetbrains.research.testspark.langwrappers.strategies.ClassFullTextExtractionStrategy
 import org.jetbrains.research.testspark.langwrappers.strategies.JavaKotlinFullTextExtractionStrategy
 
 class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
@@ -32,9 +31,11 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
 
     override val containingFile: PsiFile get() = psiClass.containingFile
 
-    private val textExtractor: ClassFullTextExtractionStrategy = JavaKotlinFullTextExtractionStrategy()
-
-    override val fullText: String get() = textExtractor.extract(psiClass.containingFile, psiClass.text)
+    override val fullText: String
+        get() = JavaKotlinFullTextExtractionStrategy.extract(
+            psiClass.containingFile,
+            psiClass.text,
+        )
 
     override val classType: ClassType
         get() {
