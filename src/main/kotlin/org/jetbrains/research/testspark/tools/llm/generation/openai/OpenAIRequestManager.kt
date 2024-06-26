@@ -99,6 +99,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
      * Receives the LLM's response text and feeds it to the provided `TestsAssembler`.
      *
      * @param httpRequest the httpRequest sent to OpenAI
+     * @param indicator UI indicator that it checked for cancellation while parsing the LLM's response
      * @param testsAssembler the test assembler to which the response is fed
      */
     private fun assembleLlmResponse(
