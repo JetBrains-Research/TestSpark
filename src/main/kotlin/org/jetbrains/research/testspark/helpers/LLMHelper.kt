@@ -47,8 +47,8 @@ object LLMHelper {
     /**
      * Updates the model selector based on the selected platform in the platform selector.
      * If the selected platform is "Grazie", the model selector is disabled and set to display only "GPT-4".
-     * If the selected platform is not "Grazie", the model selector is updated with the available modules fetched asynchronously using llmUserTokenField and enables the okLlmButton.
-     * If the modules fetch fails, the model selector is set to display the default modules and is disabled.
+     * If the selected platform is not "Grazie", the model selector is updated with the available models fetched asynchronously using llmUserTokenField and enables the okLlmButton.
+     * If the models fetch fails, the model selector is set to display the default models and is disabled.
      *
      * This method runs on a separate thread using ApplicationManager.getApplication().executeOnPooledThread{}.
      */
@@ -60,17 +60,17 @@ object LLMHelper {
         settingsState: LLMSettingsState,
     ) {
         ApplicationManager.getApplication().executeOnPooledThread {
-            var modules = arrayOf("")
+            var models = arrayOf("")
             if (platformSelector.selectedItem!!.toString() == settingsState.openAIName) {
-                modules = getOpenAIModels(llmUserTokenField.text)
+                models = getOpenAIModels(llmUserTokenField.text)
             }
             if (platformSelector.selectedItem!!.toString() == settingsState.grazieName) {
-                modules = getGrazieModels()
+                models = getGrazieModels()
             }
             if (platformSelector.selectedItem!!.toString() == settingsState.huggingFaceName) {
-                modules = getHuggingFaceModels()
+                models = getHuggingFaceModels()
             }
-            modelSelector.model = DefaultComboBoxModel(modules)
+            modelSelector.model = DefaultComboBoxModel(models)
             for (index in llmPlatforms.indices) {
                 if (llmPlatforms[index].name == settingsState.openAIName &&
                     llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
@@ -92,7 +92,7 @@ object LLMHelper {
                 }
             }
             modelSelector.isEnabled = true
-            if (modules.contentEquals(arrayOf(""))) modelSelector.isEnabled = false
+            if (models.contentEquals(arrayOf(""))) modelSelector.isEnabled = false
         }
     }
 
