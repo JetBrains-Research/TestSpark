@@ -181,7 +181,7 @@ class DescriptionTab(private val project: Project) {
             "Welcome and thank you for using TestSpark!<br>" +
             "This plugin let you to generate tests for Java classes, method, and single lines.<br>" +
             "TestSpark is currently developed and maintained by <a href=https://lp.jetbrains.com/research/ictl/>ICTL at JetBrains Research</a>.<br>" +
-            "We are currently supporting to types of test generation:<br><br></font></body></html>"
+            "We are currently supporting two types of test generation:<br><br></font></body></html>"
     }
 
     /**
