@@ -63,7 +63,7 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
                             JsonParser.parseString(text).asJsonArray[0]
                                 .asJsonObject["generated_text"].asString.trim(),
                         )
-                        (testsAssembler as JUnitTestsAssembler).consume(generatedTestCases)
+                        testsAssembler.consume(generatedTestCases)
                     }
 
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
@@ -105,6 +105,7 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
      * Also, it handles the cases where the LLM-generated code does not end with ```
      */
     private fun extractLLMGeneratedCode(text: String): String {
+        // TODO: This method should support other languages other than Java.
         val modifiedText = text.replace("```java", "```").replace("````", "```")
         val tripleTickBlockIndex = modifiedText.indexOf("```")
         val codePart = modifiedText.substring(tripleTickBlockIndex + 3)
