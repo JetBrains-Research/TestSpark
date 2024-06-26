@@ -9,7 +9,8 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
-import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.test.parsers.java.JavaJUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.utils.javaImportPattern
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 
@@ -79,6 +80,7 @@ class JUnitTestsAssembler(
     }
 
     private fun createTestSuiteParser(packageName: String, jUnitVersion: JUnitVersion): TestSuiteParser {
-        return JUnitTestSuiteParser(packageName, jUnitVersion)
+        // TODO get language and call the relevant parser
+        return JavaJUnitTestSuiteParser(packageName, jUnitVersion, javaImportPattern)
     }
 }

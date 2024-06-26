@@ -7,7 +7,7 @@ import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.core.data.ClassType
 
 enum class Language(val languageName: String) {
-    Java("Java"), Kotlin("Kotlin")
+    Java("JAVA"), Kotlin("Kotlin")
 }
 
 /**

@@ -10,8 +10,8 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
-import org.jetbrains.research.testspark.core.utils.importPattern
-import org.jetbrains.research.testspark.core.utils.packagePattern
+import org.jetbrains.research.testspark.core.utils.javaImportPattern
+import org.jetbrains.research.testspark.core.utils.javaPackagePattern
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
@@ -38,14 +38,14 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
             val fileText = psiClass.containingFile.text
 
             // get package
-            packagePattern.findAll(fileText).map {
+            javaPackagePattern.findAll(fileText).map {
                 it.groupValues[0]
             }.forEach {
                 fullText += "$it\n\n"
             }
 
             // get imports
-            importPattern.findAll(fileText).map {
+            javaImportPattern.findAll(fileText).map {
                 it.groupValues[0]
             }.forEach {
                 fullText += "$it\n"
