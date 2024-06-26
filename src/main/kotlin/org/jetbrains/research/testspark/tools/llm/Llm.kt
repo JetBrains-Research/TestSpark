@@ -50,6 +50,7 @@ class Llm(override val name: String = "LLM") : Tool {
 
         return LLMProcessManager(
             project,
+            psiHelper.language,
             PromptManager(project, psiHelper, caretOffset),
             testSamplesCode,
             projectSDKPath,
@@ -81,6 +82,7 @@ class Llm(override val name: String = "LLM") : Tool {
         createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             LLMProcessManager(
                 project,
+                psiHelper.language,
                 PromptManager(project, psiHelper, caretOffset),
                 testSamplesCode,
             ),
@@ -114,6 +116,7 @@ class Llm(override val name: String = "LLM") : Tool {
         createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             LLMProcessManager(
                 project,
+                psiHelper.language,
                 PromptManager(project, psiHelper, caretOffset),
                 testSamplesCode,
             ),
@@ -147,6 +150,7 @@ class Llm(override val name: String = "LLM") : Tool {
         createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             LLMProcessManager(
                 project,
+                psiHelper.language,
                 PromptManager(project, psiHelper, caretOffset),
                 testSamplesCode,
             ),

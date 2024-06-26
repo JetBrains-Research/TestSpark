@@ -10,6 +10,8 @@ import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.parsers.java.JavaJUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.test.parsers.kotlin.KotlinJUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
@@ -56,10 +58,10 @@ class JUnitTestsAssembler(
         }
     }
 
-    override fun assembleTestSuite(packageName: String): TestSuiteGeneratedByLLM? {
+    override fun assembleTestSuite(packageName: String, language: Language): TestSuiteGeneratedByLLM? {
         val junitVersion = llmSettingsState.junitVersion
 
-        val parser = createTestSuiteParser(packageName, junitVersion)
+        val parser = createTestSuiteParser(packageName, junitVersion, language)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(super.getContent())
 
         // save RunWith
@@ -79,8 +81,14 @@ class JUnitTestsAssembler(
         return testSuite
     }
 
-    private fun createTestSuiteParser(packageName: String, jUnitVersion: JUnitVersion): TestSuiteParser {
-        // TODO get language and call the relevant parser
-        return JavaJUnitTestSuiteParser(packageName, jUnitVersion, javaImportPattern)
+    private fun createTestSuiteParser(
+        packageName: String,
+        jUnitVersion: JUnitVersion,
+        language: Language
+    ): TestSuiteParser {
+        return when (language) {
+            Language.Java -> JavaJUnitTestSuiteParser(packageName, jUnitVersion, javaImportPattern)
+            Language.Kotlin -> KotlinJUnitTestSuiteParser(packageName, jUnitVersion, javaImportPattern)
+        }
     }
 }

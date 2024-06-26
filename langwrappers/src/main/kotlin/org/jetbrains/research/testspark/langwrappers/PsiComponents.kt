@@ -5,10 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.core.data.ClassType
-
-enum class Language(val languageName: String) {
-    Java("JAVA"), Kotlin("Kotlin")
-}
+import org.jetbrains.research.testspark.core.utils.Language
 
 /**
  * Interface representing a wrapper for PSI methods,

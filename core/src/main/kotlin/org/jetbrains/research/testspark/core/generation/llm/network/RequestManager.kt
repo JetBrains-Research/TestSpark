@@ -8,6 +8,7 @@ import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
+import org.jetbrains.research.testspark.core.utils.Language
 
 abstract class RequestManager(var token: String) {
     enum class SendResult {
@@ -30,6 +31,7 @@ abstract class RequestManager(var token: String) {
      * @return the generated TestSuite, or null and prompt message
      */
     open fun request(
+        language: Language,
         prompt: String,
         indicator: CustomProgressIndicator,
         packageName: String,
@@ -55,14 +57,15 @@ abstract class RequestManager(var token: String) {
         }
 
         return when (isUserFeedback) {
-            true -> processUserFeedbackResponse(testsAssembler, packageName)
-            false -> processResponse(testsAssembler, packageName)
+            true -> processUserFeedbackResponse(testsAssembler, packageName, language)
+            false -> processResponse(testsAssembler, packageName, language)
         }
     }
 
     open fun processResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
+        language: Language
     ): LLMResponse {
         // save the full response in the chat history
         val response = testsAssembler.getContent()
@@ -75,7 +78,7 @@ abstract class RequestManager(var token: String) {
             return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
         }
 
-        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite(packageName)
+        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite(packageName, language)
 
         return if (testSuiteGeneratedByLLM == null) {
             LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
@@ -94,6 +97,7 @@ abstract class RequestManager(var token: String) {
     open fun processUserFeedbackResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
+        language: Language,
     ): LLMResponse {
         val response = testsAssembler.getContent()
 
@@ -104,7 +108,7 @@ abstract class RequestManager(var token: String) {
             return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
         }
 
-        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite(packageName)
+        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite(packageName, language)
 
         return if (testSuiteGeneratedByLLM == null) {
             LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
