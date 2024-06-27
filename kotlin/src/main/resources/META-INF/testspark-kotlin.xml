@@ -1,0 +1,8 @@
+<!--Register the extension point, to specify a custom PsiHelperProvider for the Kotlin language.-->
+<idea-plugin>
+    <extensions defaultExtensionNs="org.jetbrains.research.testspark">
+        <psiHelperProvider
+                implementationClass="org.jetbrains.research.testspark.kotlin.KotlinPsiHelperProvider"
+                language="kotlin"/>
+    </extensions>
+</idea-plugin>

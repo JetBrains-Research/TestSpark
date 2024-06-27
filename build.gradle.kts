@@ -1,5 +1,6 @@
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.tasks.RunIdeTask
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
 import java.net.URL
@@ -208,6 +209,15 @@ tasks {
         dependsOn(":core:compileKotlin")
     }
 
+    verifyPlugin {
+        dependsOn(":copyPluginAssets")
+        onlyIf { this.project == rootProject }
+    }
+
+    runIde {
+        onlyIf { this.project == rootProject }
+    }
+
     // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
@@ -285,6 +295,25 @@ tasks {
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
         channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
+    }
+
+    withType<RunPluginVerifierTask> {
+        onlyIf { this.project == rootProject }
+        mustRunAfter("check")
+
+        // 1.365 is broken,
+//         remove this version as soon as https://youtrack.jetbrains.com/issue/MP-6438 is fixed.
+//        verifierVersion.set("1.364")
+        ideVersions.set(properties("ideVersionVerifier").split(","))
+        failureLevel.set(
+            listOf(
+                RunPluginVerifierTask.FailureLevel.INTERNAL_API_USAGES,
+                RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS,
+                RunPluginVerifierTask.FailureLevel.OVERRIDE_ONLY_API_USAGES,
+                RunPluginVerifierTask.FailureLevel.NON_EXTENDABLE_API_USAGES,
+                RunPluginVerifierTask.FailureLevel.PLUGIN_STRUCTURE_WARNINGS,
+            )
+        )
     }
 }
 

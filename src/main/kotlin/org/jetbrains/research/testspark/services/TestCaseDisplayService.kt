@@ -31,6 +31,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
+import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
@@ -109,7 +110,7 @@ class TestCaseDisplayService(private val project: Project) {
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
      */
-    fun displayTestCases(report: Report, uiContext: UIContext) {
+    fun displayTestCases(report: Report, uiContext: UIContext, language: Language) {
         this.report = report
         this.uiContext = uiContext
 
@@ -145,7 +146,7 @@ class TestCaseDisplayService(private val project: Project) {
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory = TestCasePanelFactory(project, testCase, editor, checkbox, uiContext, report)
+            val testCasePanelFactory = TestCasePanelFactory(project, language, testCase, editor, checkbox, uiContext, report)
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)

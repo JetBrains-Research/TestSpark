@@ -1,0 +1,9 @@
+<!--Register the extension point, to specify a custom PsiHelperProvider for the Java language.-->
+<idea-plugin>
+    <extensions defaultExtensionNs="org.jetbrains.research.testspark">
+        <psiHelperProvider
+                language="JAVA"
+                implementationClass="org.jetbrains.research.testspark.java.JavaPsiHelperProvider"
+        />
+    </extensions>
+</idea-plugin>
