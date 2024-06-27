@@ -13,7 +13,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.langwrappers.Language
+import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
