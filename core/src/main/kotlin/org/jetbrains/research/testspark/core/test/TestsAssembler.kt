@@ -38,5 +38,5 @@ abstract class TestsAssembler {
      * @param packageName The package name to be set in the generated TestSuite.
      * @return A TestSuiteGeneratedByLLM object containing the extracted test cases and package name.
      */
-    abstract fun assembleTestSuite(packageName: String, language : Language): TestSuiteGeneratedByLLM?
+    abstract fun assembleTestSuite(packageName: String, language: Language): TestSuiteGeneratedByLLM?
 }

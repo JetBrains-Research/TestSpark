@@ -84,7 +84,7 @@ class JUnitTestsAssembler(
     private fun createTestSuiteParser(
         packageName: String,
         jUnitVersion: JUnitVersion,
-        language: Language
+        language: Language,
     ): TestSuiteParser {
         return when (language) {
             Language.Java -> JavaJUnitTestSuiteParser(packageName, jUnitVersion, javaImportPattern)

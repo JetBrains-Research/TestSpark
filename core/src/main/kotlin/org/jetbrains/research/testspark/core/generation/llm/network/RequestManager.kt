@@ -65,7 +65,7 @@ abstract class RequestManager(var token: String) {
     open fun processResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
-        language: Language
+        language: Language,
     ): LLMResponse {
         // save the full response in the chat history
         val response = testsAssembler.getContent()
