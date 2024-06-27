@@ -1,11 +1,11 @@
-package org.jetbrains.research.testspark.core.test.parsers.strategies
+package org.jetbrains.research.testspark.core.test.strategies
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
+import org.jetbrains.research.testspark.core.test.TestCaseParseResult
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestLine
 import org.jetbrains.research.testspark.core.test.data.TestLineType
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.parsers.TestCaseParseResult
 
 class JUnitTestSuiteParserStrategy {
     companion object {

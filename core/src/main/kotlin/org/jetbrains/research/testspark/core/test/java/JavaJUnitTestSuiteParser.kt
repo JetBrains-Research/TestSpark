@@ -1,9 +1,9 @@
-package org.jetbrains.research.testspark.core.test.parsers.java
+package org.jetbrains.research.testspark.core.test.java
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
+import org.jetbrains.research.testspark.core.test.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
-import org.jetbrains.research.testspark.core.test.parsers.strategies.JUnitTestSuiteParserStrategy
+import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
 
 class JavaJUnitTestSuiteParser(
     private val packageName: String,
