@@ -42,6 +42,10 @@ class LLMSettingsConfigurable(private val project: Project) : SettingsConfigurab
                 settingsComponent!!.llmPlatforms[index].token = llmSettingsState.grazieToken
                 settingsComponent!!.llmPlatforms[index].model = llmSettingsState.grazieModel
             }
+            if (settingsComponent!!.llmPlatforms[index].name == llmSettingsState.huggingFaceName) {
+                settingsComponent!!.llmPlatforms[index].token = llmSettingsState.huggingFaceToken
+                settingsComponent!!.llmPlatforms[index].model = llmSettingsState.huggingFaceModel
+            }
         }
         settingsComponent!!.currentLLMPlatformName = llmSettingsState.currentLLMPlatformName
         settingsComponent!!.maxLLMRequest = llmSettingsState.maxLLMRequest
@@ -80,6 +84,10 @@ class LLMSettingsConfigurable(private val project: Project) : SettingsConfigurab
             if (settingsComponent!!.llmPlatforms[index].name == llmSettingsState.grazieName) {
                 modified = modified or (settingsComponent!!.llmPlatforms[index].token != llmSettingsState.grazieToken)
                 modified = modified or (settingsComponent!!.llmPlatforms[index].model != llmSettingsState.grazieModel)
+            }
+            if (settingsComponent!!.llmPlatforms[index].name == llmSettingsState.huggingFaceName) {
+                modified = modified or (settingsComponent!!.llmPlatforms[index].token != llmSettingsState.huggingFaceToken)
+                modified = modified or (settingsComponent!!.llmPlatforms[index].model != llmSettingsState.huggingFaceModel)
             }
         }
         modified = modified or (settingsComponent!!.currentLLMPlatformName != llmSettingsState.currentLLMPlatformName)
@@ -137,6 +145,10 @@ class LLMSettingsConfigurable(private val project: Project) : SettingsConfigurab
             if (settingsComponent!!.llmPlatforms[index].name == llmSettingsState.grazieName) {
                 llmSettingsState.grazieToken = settingsComponent!!.llmPlatforms[index].token
                 llmSettingsState.grazieModel = settingsComponent!!.llmPlatforms[index].model
+            }
+            if (settingsComponent!!.llmPlatforms[index].name == llmSettingsState.huggingFaceName) {
+                llmSettingsState.huggingFaceToken = settingsComponent!!.llmPlatforms[index].token
+                llmSettingsState.huggingFaceModel = settingsComponent!!.llmPlatforms[index].model
             }
         }
         llmSettingsState.currentLLMPlatformName = settingsComponent!!.currentLLMPlatformName
