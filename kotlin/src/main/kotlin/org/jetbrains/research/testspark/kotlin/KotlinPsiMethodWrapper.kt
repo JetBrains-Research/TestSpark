@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psi.kotlin
+package org.jetbrains.research.testspark.kotlin
 
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
@@ -12,8 +12,8 @@ import org.jetbrains.kotlin.psi.KtPrimaryConstructor
 import org.jetbrains.kotlin.psi.KtSecondaryConstructor
 import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
-import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
 

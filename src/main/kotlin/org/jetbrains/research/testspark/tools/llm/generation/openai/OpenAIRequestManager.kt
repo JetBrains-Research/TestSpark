@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.ToolUtils
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.IJRequestManager
 import java.net.HttpURLConnection
@@ -35,7 +35,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
         errorMonitor: ErrorMonitor,
     ): SendResult {
         // Prepare the chat
-        val llmRequestBody = OpenAIRequestBody(SettingsArguments(project).getModel(), chatHistory)
+        val llmRequestBody = OpenAIRequestBody(LlmSettingsArguments(project).getModel(), chatHistory)
 
         var sendResult = SendResult.OK
 
@@ -52,6 +52,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
                             testsAssembler,
                         )
                     }
+
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
                         llmErrorManager.errorProcess(
                             LLMMessagesBundle.get("serverProblems"),

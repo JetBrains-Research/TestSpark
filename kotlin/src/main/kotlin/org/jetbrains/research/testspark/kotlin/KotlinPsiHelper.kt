@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psi.kotlin
+package org.jetbrains.research.testspark.kotlin
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -21,11 +21,10 @@ import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
-import org.jetbrains.research.testspark.helpers.psi.Language
-import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.helpers.psi.PsiHelper
-import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.langwrappers.Language
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
@@ -86,8 +85,8 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
+        maxPolymorphismDepth: Int, // check if cut has any non-java super class
     ) {
-        val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(polyDepthReducing = 0)
         val cutPsiClass = getSurroundingClass(caretOffset)!!
         var currentPsiClass = cutPsiClass
         for (index in 0 until maxPolymorphismDepth) {
@@ -109,12 +108,13 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: List<PsiClassWrapper>,
         polyDepthReducing: Int,
+        maxInputParamsDepth: Int,
     ): MutableSet<PsiClassWrapper> {
         val interestingPsiClasses: MutableSet<KotlinPsiClassWrapper> = mutableSetOf()
 
         var currentLevelClasses = mutableListOf<PsiClassWrapper>().apply { addAll(classesToTest) }
 
-        repeat(SettingsArguments(project).maxInputParamsDepth(polyDepthReducing)) {
+        repeat(maxInputParamsDepth) {
             val tempListOfClasses = mutableSetOf<KotlinPsiClassWrapper>()
 
             currentLevelClasses.forEach { classIt ->

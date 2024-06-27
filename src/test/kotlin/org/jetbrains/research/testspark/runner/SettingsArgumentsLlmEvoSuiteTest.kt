@@ -9,14 +9,14 @@ import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
-import org.jetbrains.research.testspark.tools.evosuite.SettingsArguments
+import org.jetbrains.research.testspark.tools.evosuite.EvoSuiteSettingsArguments
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class SettingsArgumentsTest {
+class SettingsArgumentsLlmEvoSuiteTest {
     private lateinit var settingsState: EvoSuiteSettingsState
 
     private lateinit var fixture: CodeInsightTestFixture
@@ -42,7 +42,14 @@ class SettingsArgumentsTest {
 
     @Test
     fun testCommandForClass() {
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir", settingsState)
+        val settings = EvoSuiteSettingsArguments(
+            "project/classpath",
+            "project",
+            "serializepath",
+            "lang.java.Dung",
+            "basedir",
+            settingsState,
+        )
         val command = mutableListOf(
             "-generateMOSuite",
             "-serializeResult",
@@ -70,7 +77,7 @@ class SettingsArgumentsTest {
 
     @Test
     fun testCommandForMethod() {
-        val settings = SettingsArguments(
+        val settings = EvoSuiteSettingsArguments(
             "project/classpath",
             "project",
             "serializepath",
@@ -107,7 +114,14 @@ class SettingsArgumentsTest {
     @Test
     fun testCommandForLine() {
         val settings =
-            SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir", settingsState).forLine(419)
+            EvoSuiteSettingsArguments(
+                "project/classpath",
+                "project",
+                "serializepath",
+                "lang.java.Dung",
+                "basedir",
+                settingsState,
+            ).forLine(419)
         val command = mutableListOf(
             "-generateMOSuite",
             "-serializeResult",
@@ -145,7 +159,14 @@ class SettingsArgumentsTest {
         settingsState.criterionMethod = false
         settingsState.criterionOutput = false
 
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir", settingsState)
+        val settings = EvoSuiteSettingsArguments(
+            "project/classpath",
+            "project",
+            "serializepath",
+            "lang.java.Dung",
+            "basedir",
+            settingsState,
+        )
 
         val criterion = settings.build().last()
 
@@ -161,7 +182,14 @@ class SettingsArgumentsTest {
         settingsState.criterionWeakMutation = false
         settingsState.criterionLine = false
 
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir", settingsState)
+        val settings = EvoSuiteSettingsArguments(
+            "project/classpath",
+            "project",
+            "serializepath",
+            "lang.java.Dung",
+            "basedir",
+            settingsState,
+        )
 
         val criterion = settings.build().last()
 
@@ -172,7 +200,14 @@ class SettingsArgumentsTest {
 
     @Test
     fun testCriterionStringAll() {
-        val settings = SettingsArguments("project/classpath", "project", "serializepath", "lang.java.Dung", "basedir", settingsState)
+        val settings = EvoSuiteSettingsArguments(
+            "project/classpath",
+            "project",
+            "serializepath",
+            "lang.java.Dung",
+            "basedir",
+            settingsState,
+        )
 
         val criterion = settings.build().last()
 

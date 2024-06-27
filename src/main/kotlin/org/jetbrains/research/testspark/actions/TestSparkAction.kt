@@ -18,8 +18,8 @@ import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.helpers.psi.PsiHelper
-import org.jetbrains.research.testspark.helpers.psi.PsiHelperFactory
+import org.jetbrains.research.testspark.langwrappers.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -71,11 +71,12 @@ class TestSparkAction : AnAction() {
      * @param e the AnActionEvent object representing the event
      */
     override fun update(e: AnActionEvent) {
-        val psiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
-        val psiHelper = PsiHelperFactory.getPsiHelper(psiFile)
-            ?: // TODO shouw the warning panel
-            return
-        e.presentation.isEnabled = psiHelper.getCurrentListOfCodeTypes(e) != null
+        val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+        val psiHelper = PsiHelperProvider.getPsiHelper(file)
+        if (psiHelper == null) {
+            // TODO exception
+        }
+        e.presentation.isEnabled = psiHelper!!.getCurrentListOfCodeTypes(e) != null
     }
 
     /**
@@ -84,7 +85,7 @@ class TestSparkAction : AnAction() {
      * @property e The AnActionEvent object.
      */
     class TestSparkActionWindow(
-        e: AnActionEvent,
+        private val e: AnActionEvent,
         private val visibilityController: VisibilityController,
         private val testGenerationController: TestGenerationController,
     ) :
@@ -100,10 +101,17 @@ class TestSparkAction : AnAction() {
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
 
-        private val psiHelper: PsiHelper? =
-            PsiHelperFactory.getPsiHelper(e.dataContext.getData(CommonDataKeys.PSI_FILE)!!)
+        private val psiHelper: PsiHelper
+            get() {
+                val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+                val psiHelper = PsiHelperProvider.getPsiHelper(file)
+                if (psiHelper == null) {
+                    // TODO exception
+                }
+                return psiHelper!!
+            }
 
-        private val codeTypes = psiHelper?.getCurrentListOfCodeTypes(e)!!
+        private val codeTypes = psiHelper.getCurrentListOfCodeTypes(e)!!
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
@@ -322,39 +330,36 @@ class TestSparkAction : AnAction() {
             if (!testGenerationController.isGeneratorRunning(project)) {
                 val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
-                if (psiHelper != null) {
-                    if (codeTypeButtons[0].isSelected) {
-                        tool.generateTestsForClass(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    } else if (codeTypeButtons[1].isSelected) {
-                        tool.generateTestsForMethod(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    } else if (codeTypeButtons[2].isSelected) {
-                        tool.generateTestsForLine(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                        )
-                    }
-                } else {
-                    // TODO: show the warning panel
+                if (codeTypeButtons[0].isSelected) {
+                    tool.generateTestsForClass(
+                        project,
+                        psiHelper,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        testGenerationController,
+                    )
+                } else if (codeTypeButtons[1].isSelected) {
+                    tool.generateTestsForMethod(
+                        project,
+                        psiHelper,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        testGenerationController,
+                    )
+                } else if (codeTypeButtons[2].isSelected) {
+                    tool.generateTestsForLine(
+                        project,
+                        psiHelper,
+                        caretOffset,
+                        fileUrl,
+                        testSamplesCode,
+                        testGenerationController,
+                    )
                 }
             }
+
             visibilityController.isVisible = false
             dispose()
         }

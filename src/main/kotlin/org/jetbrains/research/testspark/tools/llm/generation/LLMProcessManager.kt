@@ -22,7 +22,7 @@ import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
@@ -51,7 +51,7 @@ class LLMProcessManager(
     private val testFileName: String = "GeneratedTest.java"
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
-    private val maxRequests = SettingsArguments(project).maxLLMRequest()
+    private val maxRequests = LlmSettingsArguments(project).maxLLMRequest()
     private val testProcessor = TestProcessor(project, projectSDKPath)
 
     /**

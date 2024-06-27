@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psi.java
+package org.jetbrains.research.testspark.java
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -13,11 +13,10 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.helpers.psi.Language
-import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.helpers.psi.PsiHelper
-import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.langwrappers.Language
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
@@ -85,10 +84,8 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
+        maxPolymorphismDepth: Int, // check if cut has any non-java super class
     ) {
-        // check if cut has any none java super class
-        val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(0)
-
         val cutPsiClass = getSurroundingClass(caretOffset)!!
         var currentPsiClass = cutPsiClass
         for (index in 0 until maxPolymorphismDepth) {
@@ -110,13 +107,14 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: List<PsiClassWrapper>,
         polyDepthReducing: Int,
+        maxInputParamsDepth: Int,
     ): MutableSet<PsiClassWrapper> {
         val interestingPsiClasses: MutableSet<JavaPsiClassWrapper> = mutableSetOf()
 
         var currentLevelClasses =
             mutableListOf<PsiClassWrapper>().apply { addAll(classesToTest) }
 
-        repeat(SettingsArguments(project).maxInputParamsDepth(polyDepthReducing)) {
+        repeat(maxInputParamsDepth) {
             val tempListOfClasses = mutableSetOf<JavaPsiClassWrapper>()
 
             currentLevelClasses.forEach { classIt ->

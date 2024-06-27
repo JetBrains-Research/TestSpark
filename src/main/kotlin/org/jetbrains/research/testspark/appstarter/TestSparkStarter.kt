@@ -22,7 +22,7 @@ import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.helpers.psi.PsiHelperFactory
+import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
@@ -154,12 +154,15 @@ class TestSparkStarter : ApplicationStarter {
                         val packageName = packageList.joinToString(".")
 
                         // Get PsiHelper
-                        val psiHelper = PsiHelperFactory.getPsiHelper(psiFile)!!
+                        val psiHelper = PsiHelperProvider.getPsiHelper(psiFile)
+                        if (psiHelper == null) {
+                            // TODO exception: the support for the current language does not exist
+                        }
                         // Create a process Manager
                         val llmProcessManager = Llm()
                             .getLLMProcessManager(
                                 project,
-                                psiHelper,
+                                psiHelper!!,
                                 targetPsiClass.textRange.startOffset,
                                 testSamplesCode = "", // we don't provide samples to LLM
                                 projectSDKPath = projectSDKPath,

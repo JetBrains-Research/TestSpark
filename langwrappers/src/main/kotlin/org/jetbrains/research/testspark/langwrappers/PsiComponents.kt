@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psi
+package org.jetbrains.research.testspark.langwrappers
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
@@ -125,6 +125,7 @@ interface PsiHelper {
         project: Project,
         classesToTest: List<PsiClassWrapper>,
         polyDepthReducing: Int,
+        maxInputParamsDepth: Int,
     ): MutableSet<PsiClassWrapper>
 
     /**
@@ -169,6 +170,7 @@ interface PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
+        maxPolymorphismDepth: Int,
     )
 
     /**

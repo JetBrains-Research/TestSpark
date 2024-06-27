@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psi.java
+package org.jetbrains.research.testspark.java
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
@@ -12,8 +12,8 @@ import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.utils.importPattern
 import org.jetbrains.research.testspark.core.utils.packagePattern
-import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""

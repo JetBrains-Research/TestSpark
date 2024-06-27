@@ -14,7 +14,7 @@ import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
@@ -210,7 +210,7 @@ object LLMHelper {
      * @return True if the token is set, false otherwise.
      */
     fun isCorrectToken(project: Project, errorMonitor: ErrorMonitor): Boolean {
-        if (!SettingsArguments(project).isTokenSet()) {
+        if (!LlmSettingsArguments(project).isTokenSet()) {
             LLMErrorManager().errorProcess(LLMMessagesBundle.get("missingToken"), project, errorMonitor)
             return false
         }
@@ -259,7 +259,7 @@ object LLMHelper {
      * @return True if the token is set, false otherwise.
      */
     private fun updateToken(requestManager: RequestManager, project: Project, errorMonitor: ErrorMonitor): Boolean {
-        requestManager.token = SettingsArguments(project).getToken()
+        requestManager.token = LlmSettingsArguments(project).getToken()
         return isCorrectToken(project, errorMonitor)
     }
 

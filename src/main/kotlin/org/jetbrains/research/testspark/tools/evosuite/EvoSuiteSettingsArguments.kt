@@ -14,7 +14,7 @@ import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState.
  * @param classFQN FQN of the Class-under-test
  *
  */
-class SettingsArguments(
+class EvoSuiteSettingsArguments(
     private val projectClassPath: String,
     private val projectPath: String,
     private val serializeResultPath: String,
@@ -43,7 +43,7 @@ class SettingsArguments(
      * @param method The descriptor of the method we're generating tests for
      * @return the instance object
      */
-    fun forMethod(method: String): SettingsArguments {
+    fun forMethod(method: String): EvoSuiteSettingsArguments {
         command.addAll(
             listOf(
                 "-Dtarget_method=$method",
@@ -59,7 +59,7 @@ class SettingsArguments(
      * @param line the selected line
      * @return the instance object
      */
-    fun forLine(line: Int): SettingsArguments {
+    fun forLine(line: Int): EvoSuiteSettingsArguments {
         command.addAll(
             listOf(
                 "-Dtarget_line=$line",
