@@ -58,6 +58,7 @@ import javax.swing.border.MatteBorder
 
 class TestCasePanelFactory(
     private val project: Project,
+    private val language: org.jetbrains.research.testspark.core.utils.Language,
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
@@ -90,7 +91,7 @@ class TestCasePanelFactory(
 
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
-        Language.findLanguageByID("JAVA"),
+        Language.findLanguageByID(language.languageId),
         editor.project,
         testCase.testCode,
         TestCaseDocumentCreator(
@@ -408,6 +409,7 @@ class TestCasePanelFactory(
                     }
 
                     val modifiedTest = LLMHelper.testModificationRequest(
+                        language,
                         initialCodes[currentRequestNumber - 1],
                         requestComboBox.editor.item.toString(),
                         ijIndicator,
