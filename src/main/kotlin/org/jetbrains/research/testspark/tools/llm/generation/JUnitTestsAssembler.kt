@@ -6,11 +6,11 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
-import org.jetbrains.research.testspark.core.test.parsers.java.JavaJUnitTestSuiteParser
-import org.jetbrains.research.testspark.core.test.parsers.kotlin.KotlinJUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.test.java.JavaJUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.test.kotlin.KotlinJUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
 import org.jetbrains.research.testspark.services.LLMSettingsService
