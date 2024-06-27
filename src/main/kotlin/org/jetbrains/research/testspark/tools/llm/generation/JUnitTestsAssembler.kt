@@ -1,10 +1,7 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
-import com.google.gson.Gson
-import com.google.gson.JsonParser
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
@@ -15,8 +12,6 @@ import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.parsers.java.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.ToolUtils
-import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIChoice
 
 /**
  * Assembler class for generating and organizing test cases.
@@ -49,40 +44,6 @@ class JUnitTestsAssembler(
         // Collect the response and update the progress bar
         super.consume(text)
         updateProgressBar()
-    }
-
-    /**
-     * Receives a response text and updates the progress bar accordingly.
-     *
-     * @param httpRequest the httpRequest sent to OpenAI
-     */
-    fun consume(httpRequest: HttpRequests.Request) {
-        while (true) {
-            if (ToolUtils.isProcessCanceled(indicator)) return
-
-            Thread.sleep(50L)
-            var text = httpRequest.reader.readLine()
-
-            if (text.isEmpty()) continue
-
-            text = text.removePrefix("data: ")
-
-            val choices =
-                Gson().fromJson(
-                    JsonParser.parseString(text)
-                        .asJsonObject["choices"]
-                        .asJsonArray[0].asJsonObject,
-                    OpenAIChoice::class.java,
-                )
-
-            if (choices.finishedReason == "stop") break
-
-            // Collect the response and update the progress bar
-            super.consume(choices.delta.content)
-            updateProgressBar()
-        }
-
-        log.debug(super.getContent())
     }
 
     private fun updateProgressBar() {
