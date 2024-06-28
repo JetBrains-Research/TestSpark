@@ -7,7 +7,7 @@ import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 /**
  * A class that provides access to various settings arguments.
  */
-class SettingsArguments(private val project: Project) {
+class LlmSettingsArguments(private val project: Project) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
@@ -57,6 +57,7 @@ class SettingsArguments(private val project: Project) {
     fun getToken(): String = when (currentLLMPlatformName()) {
         llmSettingsState.openAIName -> llmSettingsState.openAIToken
         llmSettingsState.grazieName -> llmSettingsState.grazieToken
+        llmSettingsState.huggingFaceName -> llmSettingsState.huggingFaceToken
         else -> ""
     }
 
@@ -68,6 +69,7 @@ class SettingsArguments(private val project: Project) {
     fun getModel(): String = when (currentLLMPlatformName()) {
         llmSettingsState.openAIName -> llmSettingsState.openAIModel
         llmSettingsState.grazieName -> llmSettingsState.grazieModel
+        llmSettingsState.huggingFaceName -> llmSettingsState.huggingFaceModel
         else -> ""
     }
 }

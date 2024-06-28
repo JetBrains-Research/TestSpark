@@ -8,12 +8,13 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.LLMHelper
-import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.helpers.psi.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import org.jetbrains.research.testspark.tools.template.Tool
+import java.nio.file.Path
 
 /**
  * The Llm class represents a tool called "Llm" that is used to generate tests for Java code.
@@ -36,12 +37,14 @@ class Llm(override val name: String = "LLM") : Tool {
         psiHelper: PsiHelper,
         caretOffset: Int,
         testSamplesCode: String,
+        projectSDKPath: Path? = null,
     ): LLMProcessManager {
         val classesToTest = mutableListOf<PsiClassWrapper>()
+        val maxPolymorphismDepth = LlmSettingsArguments(project).maxPolyDepth(polyDepthReducing = 0)
 
         ProgressManager.getInstance().runProcessWithProgressSynchronously({
             ApplicationManager.getApplication().runReadAction {
-                psiHelper.collectClassesToTest(project, classesToTest, caretOffset)
+                psiHelper.collectClassesToTest(project, classesToTest, caretOffset, maxPolymorphismDepth)
             }
         }, PluginMessagesBundle.get("collectingClassesToTest"), false, project)
 
@@ -49,6 +52,7 @@ class Llm(override val name: String = "LLM") : Tool {
             project,
             PromptManager(project, psiHelper, caretOffset),
             testSamplesCode,
+            projectSDKPath,
         )
     }
 

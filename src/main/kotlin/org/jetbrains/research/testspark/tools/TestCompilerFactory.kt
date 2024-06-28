@@ -7,8 +7,12 @@ import org.jetbrains.research.testspark.core.test.TestCompiler
 
 class TestCompilerFactory {
     companion object {
-        fun createJavacTestCompiler(project: Project, junitVersion: JUnitVersion): TestCompiler {
-            val javaHomePath = ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
+        fun createJavacTestCompiler(
+            project: Project,
+            junitVersion: JUnitVersion,
+            javaHomeDirectory: String? = null,
+        ): TestCompiler {
+            val javaHomePath = javaHomeDirectory ?: ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
             val libraryPaths = LibraryPathsProvider.getTestCompilationLibraryPaths()
             val junitLibraryPaths = LibraryPathsProvider.getJUnitLibraryPaths(junitVersion)
 

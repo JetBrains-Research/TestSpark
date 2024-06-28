@@ -14,12 +14,13 @@ import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.llm.SettingsArguments
+import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
+import org.jetbrains.research.testspark.tools.llm.generation.hf.HuggingFacePlatform
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIPlatform
 import java.net.HttpURLConnection
 import javax.swing.DefaultComboBoxModel
@@ -46,8 +47,8 @@ object LLMHelper {
     /**
      * Updates the model selector based on the selected platform in the platform selector.
      * If the selected platform is "Grazie", the model selector is disabled and set to display only "GPT-4".
-     * If the selected platform is not "Grazie", the model selector is updated with the available modules fetched asynchronously using llmUserTokenField and enables the okLlmButton.
-     * If the modules fetch fails, the model selector is set to display the default modules and is disabled.
+     * If the selected platform is not "Grazie", the model selector is updated with the available models fetched asynchronously using llmUserTokenField and enables the okLlmButton.
+     * If the models fetch fails, the model selector is set to display the default models and is disabled.
      *
      * This method runs on a separate thread using ApplicationManager.getApplication().executeOnPooledThread{}.
      */
@@ -59,14 +60,17 @@ object LLMHelper {
         settingsState: LLMSettingsState,
     ) {
         ApplicationManager.getApplication().executeOnPooledThread {
-            var modules = arrayOf("")
+            var models = arrayOf("")
             if (platformSelector.selectedItem!!.toString() == settingsState.openAIName) {
-                modules = getOpenAIModels(llmUserTokenField.text)
+                models = getOpenAIModels(llmUserTokenField.text)
             }
             if (platformSelector.selectedItem!!.toString() == settingsState.grazieName) {
-                modules = getGrazieModels()
+                models = getGrazieModels()
             }
-            modelSelector.model = DefaultComboBoxModel(modules)
+            if (platformSelector.selectedItem!!.toString() == settingsState.huggingFaceName) {
+                models = getHuggingFaceModels()
+            }
+            modelSelector.model = DefaultComboBoxModel(models)
             for (index in llmPlatforms.indices) {
                 if (llmPlatforms[index].name == settingsState.openAIName &&
                     llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
@@ -80,9 +84,15 @@ object LLMHelper {
                     modelSelector.selectedItem = settingsState.grazieModel
                     llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
                 }
+                if (llmPlatforms[index].name == settingsState.huggingFaceName &&
+                    llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+                ) {
+                    modelSelector.selectedItem = settingsState.huggingFaceModel
+                    llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
+                }
             }
             modelSelector.isEnabled = true
-            if (modules.contentEquals(arrayOf(""))) modelSelector.isEnabled = false
+            if (models.contentEquals(arrayOf(""))) modelSelector.isEnabled = false
         }
     }
 
@@ -110,6 +120,12 @@ object LLMHelper {
             ) {
                 llmUserTokenField.text = settingsState.grazieToken
                 llmPlatforms[index].token = settingsState.grazieToken
+            }
+            if (llmPlatforms[index].name == settingsState.huggingFaceName &&
+                llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+            ) {
+                llmUserTokenField.text = settingsState.huggingFaceToken
+                llmPlatforms[index].token = settingsState.huggingFaceToken
             }
         }
     }
@@ -184,8 +200,6 @@ object LLMHelper {
         if (isGrazieClassLoaded()) {
             platformSelector.model = DefaultComboBoxModel(llmPlatforms.map { it.name }.toTypedArray())
             platformSelector.selectedItem = settingsState.currentLLMPlatformName
-        } else {
-            platformSelector.isEnabled = false
         }
 
         llmUserTokenField.toolTipText = LLMSettingsBundle.get("llmToken")
@@ -201,7 +215,7 @@ object LLMHelper {
      * @return The list of LLMPlatforms.
      */
     fun getLLLMPlatforms(): List<LLMPlatform> {
-        return listOf(OpenAIPlatform(), GraziePlatform())
+        return listOf(OpenAIPlatform(), GraziePlatform(), HuggingFacePlatform())
     }
 
     /**
@@ -210,7 +224,7 @@ object LLMHelper {
      * @return True if the token is set, false otherwise.
      */
     fun isCorrectToken(project: Project, errorMonitor: ErrorMonitor): Boolean {
-        if (!SettingsArguments(project).isTokenSet()) {
+        if (!LlmSettingsArguments(project).isTokenSet()) {
             LLMErrorManager().errorProcess(LLMMessagesBundle.get("missingToken"), project, errorMonitor)
             return false
         }
@@ -259,7 +273,7 @@ object LLMHelper {
      * @return True if the token is set, false otherwise.
      */
     private fun updateToken(requestManager: RequestManager, project: Project, errorMonitor: ErrorMonitor): Boolean {
-        requestManager.token = SettingsArguments(project).getToken()
+        requestManager.token = LlmSettingsArguments(project).getToken()
         return isCorrectToken(project, errorMonitor)
     }
 
@@ -324,5 +338,14 @@ object LLMHelper {
         } catch (e: ClassNotFoundException) {
             arrayOf("")
         }
+    }
+
+    /**
+     * Retrieves the available HuggingFace models.
+     *
+     * @return an array of string representing the available HuggingFace models
+     */
+    private fun getHuggingFaceModels(): Array<String> {
+        return arrayOf("Meta-Llama-3-8B-Instruct", "Meta-Llama-3-70B-Instruct")
     }
 }

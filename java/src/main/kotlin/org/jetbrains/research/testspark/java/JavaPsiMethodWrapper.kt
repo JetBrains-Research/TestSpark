@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.psi.java
+package org.jetbrains.research.testspark.java
 
 import com.intellij.psi.PsiClassType
 import com.intellij.psi.PsiDocumentManager
@@ -7,8 +7,8 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiSubstitutor
 import com.intellij.psi.PsiType
 import com.intellij.util.containers.stream
-import org.jetbrains.research.testspark.helpers.psi.PsiClassWrapper
-import org.jetbrains.research.testspark.helpers.psi.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import java.util.stream.Collectors
 
 class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper {
@@ -37,7 +37,7 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
     override val signature: String
         get() {
             val bodyStart = psiMethod.body?.startOffsetInParent ?: psiMethod.textLength
-            return psiMethod.text.substring(0, bodyStart).replace('\n', ' ').trim()
+            return psiMethod.text.substring(0, bodyStart).replace("\\n", "").trim()
         }
 
     val parameterList = psiMethod.parameterList
@@ -78,6 +78,7 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
 
     /**
      * Generates the field descriptor for a type.
+     * https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.3
      *
      * @param psiType the type to generate the descriptor for
      * @return the field descriptor
