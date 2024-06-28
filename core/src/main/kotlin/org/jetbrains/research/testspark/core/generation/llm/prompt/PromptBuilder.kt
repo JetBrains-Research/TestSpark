@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.core.generation.llm.prompt
 
+import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
 
 internal class PromptBuilder(private var prompt: String) {
@@ -109,7 +110,15 @@ internal class PromptBuilder(private var prompt: String) {
 
             polymorphismRelations.forEach { entry ->
                 for (currentSubClass in entry.value) {
-                    fullText += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
+                    val subClassTypeName = when (currentSubClass.classType) {
+                        ClassType.INTERFACE -> "an interface implementing"
+                        ClassType.ABSTRACT_CLASS -> "an abstract sub-class of"
+                        ClassType.CLASS -> "a sub-class of"
+                        ClassType.DATA_CLASS -> "a sub data class of"
+                        ClassType.INLINE_VALUE_CLASS -> "a sub inline value class class of"
+                        ClassType.OBJECT -> "a sub object of"
+                    }
+                    fullText += "${currentSubClass.qualifiedName} is $subClassTypeName ${entry.key.qualifiedName}.\n"
                 }
             }
             prompt = prompt.replace(keyword, fullText, ignoreCase = false)

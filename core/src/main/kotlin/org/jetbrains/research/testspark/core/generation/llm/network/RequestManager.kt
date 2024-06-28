@@ -1,7 +1,9 @@
 package org.jetbrains.research.testspark.core.generation.llm.network
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.data.ChatAssistantMessage
 import org.jetbrains.research.testspark.core.data.ChatMessage
+import org.jetbrains.research.testspark.core.data.ChatUserMessage
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -36,8 +38,7 @@ abstract class RequestManager(var token: String) {
         errorMonitor: ErrorMonitor = DefaultErrorMonitor(), // The plugin for other IDEs can send LLM requests without passing an errorMonitor
     ): LLMResponse {
         // save the prompt in chat history
-        // TODO: make role to be an enum class
-        chatHistory.add(ChatMessage("user", prompt))
+        chatHistory.add(ChatUserMessage(prompt))
 
         // Send Request to LLM
         log.info { "Sending Request..." }
@@ -67,9 +68,9 @@ abstract class RequestManager(var token: String) {
         val response = testsAssembler.getContent()
 
         log.info { "The full response: \n $response" }
-        chatHistory.add(ChatMessage("assistant", response))
+        chatHistory.add(ChatAssistantMessage(response))
 
-        // check if response is empty
+        // check if the response is empty
         if (response.isEmpty() || response.isBlank()) {
             return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
         }
@@ -98,7 +99,7 @@ abstract class RequestManager(var token: String) {
 
         log.info { "The full response: \n $response" }
 
-        // check if response is empty
+        // check if the response is empty
         if (response.isEmpty() || response.isBlank()) {
             return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
         }

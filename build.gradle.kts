@@ -10,10 +10,14 @@ import java.util.zip.ZipInputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
+// Space credentials
 val spaceUsername =
     System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
 val spacePassword =
     System.getProperty("space.pass")?.toString() ?: project.properties["spacePassword"]?.toString() ?: ""
+
+// the test generation module for interacting with Grazie (used when the space credentials are provided)
+val grazieTestGenerationVersion = "1.0.5"
 
 plugins {
     // Java support
@@ -64,7 +68,7 @@ if (spaceCredentialsProvided()) {
 
     tasks.register("checkCredentials") {
         configurations.detachedConfiguration(
-            dependencies.create("org.jetbrains.research:grazie-test-generation:1.0.1"),
+            dependencies.create("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion"),
         ).files()
     }
 
@@ -105,6 +109,9 @@ dependencies {
     implementation(files("lib/JUnitRunner.jar"))
 
     implementation(project(":core"))
+    implementation(project(":langwrappers")) // Needed to use Psi related interfaces and load proper implementation
+    implementation(project(":kotlin")) // Needed to load the testspark-kotlin.xml
+    implementation(project(":java")) // Needed to load the testspark-java.xml
     if (spaceCredentialsProvided()) {
         "hasGrazieAccessCompileOnly"(project(":core"))
     }
@@ -165,7 +172,7 @@ dependencies {
         // Dependencies for hasGrazieAccess variant
         "hasGrazieAccessImplementation"(kotlin("stdlib"))
         "hasGrazieAccessImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:1.0.4")
+        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion")
     }
 }
 
@@ -200,6 +207,7 @@ tasks {
         dependsOn("copyJUnitRunnerLib")
         dependsOn(":core:compileKotlin")
     }
+
     // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
@@ -378,6 +386,14 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
 }
 
 /**
+ * Returns the original string if it is not null, or the default string if the original string is null.
+ *
+ * @param default the default string to return if the original string is null
+ * @return the original string if it is not null, or the default string if the original string is null
+ */
+fun String?.orDefault(default: String): String = this ?: default
+
+/**
  * This code sets up a Gradle task for running the plugin in headless mode
  *
  * @param root The root directory of the project under test.
@@ -388,6 +404,7 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
  * @param token The token for using LLM.
  * @param prompt a txt file containing the LLM's prompt template
  * @param out The output directory for the project.
+ * @param enableCoverage flag to enable/disable coverage computation
  */
 tasks.create<RunIdeTask>("headless") {
     val root: String? by project
@@ -399,8 +416,9 @@ tasks.create<RunIdeTask>("headless") {
     val token: String? by project
     val prompt: String? by project
     val out: String? by project
+    val enableCoverage: String? by project
 
-    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out)
+    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage.orDefault("false"))
 
     jvmArgs(
         "-Xmx16G",
