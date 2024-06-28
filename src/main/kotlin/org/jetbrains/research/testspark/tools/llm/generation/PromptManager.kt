@@ -83,7 +83,7 @@ class PromptManager(
                     classesToTest = classesToTest.map(this::createClassRepresentation).toList(),
                     polymorphismRelations = polymorphismRelations,
                     promptConfiguration = PromptConfiguration(
-                        desiredLanguage = psiHelper.language.languageName,
+                        desiredLanguage = psiHelper.language.languageId,
                         desiredTestingPlatform = llmSettingsState.junitVersion.showName,
                         desiredMockingFramework = "Mockito 5",
                     ),

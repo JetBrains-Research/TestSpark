@@ -6,6 +6,7 @@ import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.utils.Language
 import java.util.Locale
 
 // TODO: find a better place for the below functions
@@ -38,6 +39,7 @@ fun getClassWithTestCaseName(testCaseName: String): String {
  * @return instance of TestSuiteGeneratedByLLM if the generated test cases are parsable, otherwise null.
  */
 fun executeTestCaseModificationRequest(
+    language: Language,
     testCase: String,
     task: String,
     indicator: CustomProgressIndicator,
@@ -59,6 +61,7 @@ fun executeTestCaseModificationRequest(
     }
 
     val response = requestManager.request(
+        language,
         prompt,
         indicator,
         packageName,

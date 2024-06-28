@@ -36,9 +36,9 @@ import java.util.UUID
  */
 class Pipeline(
     private val project: Project,
-    psiHelper: PsiHelper,
-    caretOffset: Int,
-    fileUrl: String?,
+    private val psiHelper: PsiHelper,
+    private val caretOffset: Int,
+    private val fileUrl: String?,
     private val packageName: String,
     private val testGenerationController: TestGenerationController,
 ) {
@@ -114,7 +114,7 @@ class Pipeline(
 
                         if (project.service<EditorService>().editor != null) {
                             val report = it.testGenerationOutput.testGenerationResultList[0]!!
-                            project.service<TestCaseDisplayService>().displayTestCases(report, it)
+                            project.service<TestCaseDisplayService>().displayTestCases(report, it, psiHelper.language)
                             project.service<CoverageVisualisationService>().showCoverage(report)
                         }
                     }
