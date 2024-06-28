@@ -5,7 +5,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    // Add any other repositories you need
 }
 
 dependencies {
@@ -17,7 +16,6 @@ dependencies {
 intellij {
     rootProject.properties["platformVersion"]?.let { version.set(it.toString()) }
     plugins.set(listOf("java"))
-    downloadSources.set(true)
 }
 
 tasks.named("verifyPlugin") { enabled = false }
