@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.java
 
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
@@ -28,15 +28,19 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.display.IconButtonCreator
+import org.jetbrains.research.testspark.display.ModifiedLinesGetter
+import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper
+import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.java.JavaTestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import java.awt.Dimension
@@ -56,7 +60,7 @@ import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
-class TestCasePanelFactory(
+class JavaTestCasePanelFactory(
     private val project: Project,
     private val language: org.jetbrains.research.testspark.core.utils.Language,
     private val testCase: TestCase,
@@ -193,7 +197,7 @@ class TestCasePanelFactory(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    project.service<TestCaseDisplayService>().getEditor(testCase.testName)!!.document.text,
+                    project.service<JavaTestCaseDisplayService>().getEditor(testCase.testName)!!.document.text,
                 ),
                 null,
             )
@@ -386,7 +390,7 @@ class TestCasePanelFactory(
         }
 
         ReportHelper.updateTestCase(project, report, testCase)
-        project.service<TestCaseDisplayService>().updateUI()
+        project.service<JavaTestCaseDisplayService>().updateUI()
     }
 
     /**
@@ -517,7 +521,7 @@ class TestCasePanelFactory(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
-        val newTestCase = TestProcessor(project)
+        val newTestCase = JavaTestProcessor(project)
             .processNewTestCase(
                 "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java",
                 testCase.id,
@@ -585,13 +589,13 @@ class TestCasePanelFactory(
      */
     private fun remove() {
         // Remove the test case from the cache
-        project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
+        project.service<JavaTestCaseDisplayService>().removeTestCase(testCase.testName)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
         ReportHelper.removeTestCase(project, report, testCase)
-        project.service<TestCaseDisplayService>().updateUI()
+        project.service<JavaTestCaseDisplayService>().updateUI()
     }
 
     /**

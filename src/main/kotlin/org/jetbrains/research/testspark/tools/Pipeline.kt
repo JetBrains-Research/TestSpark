@@ -13,6 +13,7 @@ import org.jetbrains.research.testspark.actions.controllers.TestGenerationContro
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
+import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
@@ -20,8 +21,9 @@ import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
+import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -108,14 +110,29 @@ class Pipeline(
                 override fun onFinished() {
                     super.onFinished()
                     testGenerationController.finished()
-                    uiContext?.let {
-                        project.service<TestCaseDisplayService>()
-                            .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
+                    when (psiHelper.language) {
+                        Language.Java -> uiContext?.let {
+                            project.service<JavaTestCaseDisplayService>()
+                                .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
 
-                        if (project.service<EditorService>().editor != null) {
-                            val report = it.testGenerationOutput.testGenerationResultList[0]!!
-                            project.service<TestCaseDisplayService>().displayTestCases(report, it, psiHelper.language)
-                            project.service<CoverageVisualisationService>().showCoverage(report)
+                            if (project.service<EditorService>().editor != null) {
+                                val report = it.testGenerationOutput.testGenerationResultList[0]!!
+                                project.service<JavaTestCaseDisplayService>()
+                                    .displayTestCases(report, it, psiHelper.language)
+                                project.service<CoverageVisualisationService>().showCoverage(report)
+                            }
+                        }
+
+                        Language.Kotlin -> uiContext?.let {
+                            project.service<KotlinTestCaseDisplayService>()
+                                .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
+
+                            if (project.service<EditorService>().editor != null) {
+                                val report = it.testGenerationOutput.testGenerationResultList[0]!!
+                                project.service<KotlinTestCaseDisplayService>()
+                                    .displayTestCases(report, it, psiHelper.language)
+                                project.service<CoverageVisualisationService>().showCoverage(report)
+                            }
                         }
                     }
                 }
@@ -124,7 +141,11 @@ class Pipeline(
 
     private fun clear(project: Project) { // should be removed totally!
         testGenerationController.errorMonitor.clear()
-        project.service<TestCaseDisplayService>().clear()
+        when (psiHelper.language) {
+            Language.Java -> project.service<JavaTestCaseDisplayService>().clear()
+            Language.Kotlin -> project.service<KotlinTestCaseDisplayService>().clear()
+        }
+
         project.service<CoverageVisualisationService>().clear()
         project.service<TestsExecutionResultService>().clear()
     }

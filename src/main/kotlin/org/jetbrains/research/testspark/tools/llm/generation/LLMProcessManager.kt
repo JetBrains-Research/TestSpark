@@ -11,6 +11,7 @@ import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.Language
@@ -21,8 +22,9 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.java.JavaTestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
+import org.jetbrains.research.testspark.tools.kotlin.KotlinTestProcessor
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
@@ -50,11 +52,18 @@ class LLMProcessManager(
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
-    private val testFileName: String = "GeneratedTest.java"
+    private val testFileName: String =
+        when (language) {
+            Language.Java -> "GeneratedTest.java"
+            Language.Kotlin -> "GeneratedTest.kt"
+        }
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = LlmSettingsArguments(project).maxLLMRequest()
-    private val testProcessor = TestProcessor(project, projectSDKPath)
+    private val testProcessor: TestsPersistentStorage = when (language) {
+        Language.Java -> JavaTestProcessor(project, projectSDKPath)
+        Language.Kotlin -> KotlinTestProcessor(project, projectSDKPath)
+    }
 
     /**
      * Runs the test generator process.
@@ -91,7 +100,8 @@ class LLMProcessManager(
         val report = IJReport()
 
         // PROMPT GENERATION
-        val initialPromptMessage = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
+        val initialPromptMessage =
+            promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
         val testCompiler = testProcessor.testCompiler
 
@@ -100,7 +110,8 @@ class LLMProcessManager(
 
         // adapter for the existing prompt reduction functionality
         val promptSizeReductionStrategy = object : PromptSizeReductionStrategy {
-            override fun isReductionPossible(): Boolean = promptManager.isPromptSizeReductionPossible(generatedTestsData)
+            override fun isReductionPossible(): Boolean =
+                promptManager.isPromptSizeReductionPossible(generatedTestsData)
 
             override fun reduceSizeAndGeneratePrompt(): String {
                 if (!isReductionPossible()) {
@@ -150,8 +161,10 @@ class LLMProcessManager(
             when (warning) {
                 LLMWithFeedbackCycle.WarningType.TEST_SUITE_PARSING_FAILED ->
                     llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
+
                 LLMWithFeedbackCycle.WarningType.NO_TEST_CASES_GENERATED ->
                     llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
+
                 LLMWithFeedbackCycle.WarningType.COMPILATION_ERROR_OCCURRED ->
                     llmErrorManager.warningProcess(LLMMessagesBundle.get("compilationError"), project)
             }
@@ -167,17 +180,21 @@ class LLMProcessManager(
                 // store compilable test cases
                 generatedTestsData.compilableTestCases.addAll(feedbackResponse.compilableTestCases)
             }
+
             FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED -> {
                 llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project, errorMonitor)
             }
+
             FeedbackCycleExecutionResult.CANCELED -> {
                 log.info("Process stopped")
                 return null
             }
+
             FeedbackCycleExecutionResult.PROVIDED_PROMPT_TOO_LONG -> {
                 llmErrorManager.errorProcess(LLMMessagesBundle.get("tooLongPromptRequest"), project, errorMonitor)
                 return null
             }
+
             FeedbackCycleExecutionResult.SAVING_TEST_FILES_ISSUE -> {
                 llmErrorManager.errorProcess(LLMMessagesBundle.get("savingTestFileIssue"), project, errorMonitor)
             }
@@ -204,6 +221,7 @@ class LLMProcessManager(
             ToolUtils.getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
             projectContext.fileUrlAsString!!,
             generatedTestsData,
+            language,
         )
 
         return UIContext(projectContext, generatedTestsData, requestManager, errorMonitor)

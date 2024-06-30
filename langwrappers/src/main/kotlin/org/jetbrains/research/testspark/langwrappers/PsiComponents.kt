@@ -58,6 +58,7 @@ interface PsiClassWrapper {
     val containingFile: PsiFile
     val fullText: String
     val classType: ClassType
+    val rBrace: Int?
 
     /**
      * Searches for subclasses of the current class within the given project.
