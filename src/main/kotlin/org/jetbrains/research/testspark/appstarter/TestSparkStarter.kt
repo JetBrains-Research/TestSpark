@@ -18,6 +18,7 @@ import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
+import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -26,8 +27,9 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.java.JavaTestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
+import org.jetbrains.research.testspark.tools.kotlin.KotlinTestProcessor
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.io.File
 import java.nio.file.Path
@@ -192,6 +194,7 @@ class TestSparkStarter : ApplicationStarter {
                                 classPath,
                                 projectContext,
                                 projectSDKPath,
+                                psiHelper.language,
                             )
                         } else {
                             println("[TestSpark Starter] Test generation failed")
@@ -237,6 +240,7 @@ class TestSparkStarter : ApplicationStarter {
         classPath: String,
         projectContext: ProjectContext,
         projectSDKPath: Path,
+        language: Language,
     ) {
         val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
         println("Run tests in $targetDirectory")
@@ -246,15 +250,27 @@ class TestSparkStarter : ApplicationStarter {
                 var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
                 // The current test is compiled and is ready to run jacoco
-                val testExecutionError = TestProcessor(project, projectSDKPath).createXmlFromJacoco(
-                    it.nameWithoutExtension,
-                    "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
-                    testcaseName,
-                    classPath,
-                    packageList.joinToString("."),
-                    out,
-                    projectContext,
-                )
+
+                val testExecutionError = when (language) {
+                    Language.Java -> JavaTestProcessor(project, projectSDKPath).createXmlFromJacoco(
+                        it.nameWithoutExtension,
+                        "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
+                        testcaseName,
+                        classPath,
+                        packageList.joinToString("."),
+                        out,
+                        projectContext,
+                    )
+                    Language.Kotlin -> KotlinTestProcessor(project, projectSDKPath).createXmlFromJacoco(
+                        it.nameWithoutExtension,
+                        "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
+                        testcaseName,
+                        classPath,
+                        packageList.joinToString("."),
+                        out,
+                        projectContext,
+                    )
+                }
                 // Saving exception (if exists) thrown during the test execution
                 saveException(testcaseName, targetDirectory, testExecutionError)
             }

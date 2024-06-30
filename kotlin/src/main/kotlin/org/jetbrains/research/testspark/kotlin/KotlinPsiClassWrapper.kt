@@ -17,8 +17,8 @@ import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.research.testspark.core.data.ClassType
-import org.jetbrains.research.testspark.core.utils.importPattern
-import org.jetbrains.research.testspark.core.utils.packagePattern
+import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
+import org.jetbrains.research.testspark.core.utils.kotlinPackagePattern
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
@@ -66,14 +66,14 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
             val fileText = psiClass.containingFile.text
 
             // get package
-            packagePattern.findAll(fileText, 0).map {
+            kotlinPackagePattern.findAll(fileText, 0).map {
                 it.groupValues[0]
             }.forEach {
                 fullText += "$it\n\n"
             }
 
             // get imports
-            importPattern.findAll(fileText, 0).map {
+            kotlinImportPattern.findAll(fileText, 0).map {
                 it.groupValues[0]
             }.forEach {
                 fullText += "$it\n"
@@ -96,6 +96,8 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
                 else -> ClassType.CLASS
             }
         }
+
+    override val rBrace: Int? = psiClass.body?.rBrace?.textRange?.startOffset
 
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
         val scope = GlobalSearchScope.projectScope(project)

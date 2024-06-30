@@ -2,16 +2,13 @@ package org.jetbrains.research.testspark.java
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.PsiAnonymousClass
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiModifier
+import com.intellij.psi.*
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
-import org.jetbrains.research.testspark.core.utils.importPattern
-import org.jetbrains.research.testspark.core.utils.packagePattern
+import org.jetbrains.research.testspark.core.utils.javaImportPattern
+import org.jetbrains.research.testspark.core.utils.javaPackagePattern
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
@@ -38,14 +35,14 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
             val fileText = psiClass.containingFile.text
 
             // get package
-            packagePattern.findAll(fileText).map {
+            javaPackagePattern.findAll(fileText).map {
                 it.groupValues[0]
             }.forEach {
                 fullText += "$it\n\n"
             }
 
             // get imports
-            importPattern.findAll(fileText).map {
+            javaImportPattern.findAll(fileText).map {
                 it.groupValues[0]
             }.forEach {
                 fullText += "$it\n"
@@ -67,6 +64,8 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
             }
             return ClassType.CLASS
         }
+
+    override val rBrace: Int? = psiClass.rBrace?.textRange?.startOffset
 
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
         val scope = GlobalSearchScope.projectScope(project)

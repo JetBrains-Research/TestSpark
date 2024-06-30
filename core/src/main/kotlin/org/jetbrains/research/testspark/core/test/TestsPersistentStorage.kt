@@ -4,6 +4,8 @@ package org.jetbrains.research.testspark.core.test
  * The TestPersistentStorage interface represents a contract for saving generated tests to a specified file system location.
  */
 interface TestsPersistentStorage {
+
+    val testCompiler : TestCompiler
     /**
      * Save the generated tests to a specified directory.
      *

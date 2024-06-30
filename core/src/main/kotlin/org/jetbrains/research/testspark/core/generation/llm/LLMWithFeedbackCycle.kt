@@ -16,6 +16,7 @@ import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.utils.Language
 import java.io.File
 
 enum class FeedbackCycleExecutionResult {
@@ -44,6 +45,7 @@ data class FeedbackResponse(
 
 class LLMWithFeedbackCycle(
     private val report: Report,
+    private val language: Language,
     private val initialPromptMessage: String,
     private val promptSizeReductionStrategy: PromptSizeReductionStrategy,
     // filename in which the test suite is saved in result path
@@ -99,6 +101,7 @@ class LLMWithFeedbackCycle(
             // clearing test assembler's collected text on the previous attempts
             testsAssembler.clear()
             val response: LLMResponse = requestManager.request(
+                language = language,
                 prompt = nextPromptMessage,
                 indicator = indicator,
                 packageName = packageName,
@@ -119,6 +122,7 @@ class LLMWithFeedbackCycle(
                         continue
                     }
                 }
+
                 ResponseErrorCode.PROMPT_TOO_LONG -> {
                     if (promptSizeReductionStrategy.isReductionPossible()) {
                         nextPromptMessage = promptSizeReductionStrategy.reduceSizeAndGeneratePrompt()
@@ -132,11 +136,13 @@ class LLMWithFeedbackCycle(
                         break
                     }
                 }
+
                 ResponseErrorCode.EMPTY_LLM_RESPONSE -> {
                     nextPromptMessage =
                         "You have provided an empty answer! Please, answer my previous question with the same formats"
                     continue
                 }
+
                 ResponseErrorCode.TEST_SUITE_PARSING_FAILURE -> {
                     onWarningCallback?.invoke(WarningType.TEST_SUITE_PARSING_FAILED)
                     log.info { "Cannot parse a test suite from the LLM response. LLM response: '$response'" }
@@ -161,7 +167,8 @@ class LLMWithFeedbackCycle(
                 generatedTestSuite.updateTestCases(compilableTestCases.toMutableList())
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
-                    val testCaseFilename = "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
+                    val testCaseFilename =
+                        "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
 
                     val testCaseRepresentation = testsPresenter.representTestCase(generatedTestSuite, testCaseIndex)
 
@@ -205,8 +212,10 @@ class LLMWithFeedbackCycle(
             // Compile the test file
             indicator.setText("Compilation tests checking")
 
-            val testCasesCompilationResult = testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases)
-            val testSuiteCompilationResult = testCompiler.compileCode(File(generatedTestSuitePath).absolutePath, buildPath)
+            val testCasesCompilationResult =
+                testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases)
+            val testSuiteCompilationResult =
+                testCompiler.compileCode(File(generatedTestSuitePath).absolutePath, buildPath)
 
             // saving the compilable test cases
             compilableTestCases.addAll(testCasesCompilationResult.compilableTestCases)
@@ -216,7 +225,8 @@ class LLMWithFeedbackCycle(
 
                 onWarningCallback?.invoke(WarningType.COMPILATION_ERROR_OCCURRED)
 
-                nextPromptMessage = "I cannot compile the tests that you provided. The error is:\n${testSuiteCompilationResult.second}\n Fix this issue in the provided tests.\nGenerate public classes and public methods. Response only a code with tests between ```, do not provide any other text."
+                nextPromptMessage =
+                    "I cannot compile the tests that you provided. The error is:\n${testSuiteCompilationResult.second}\n Fix this issue in the provided tests.\nGenerate public classes and public methods. Response only a code with tests between ```, do not provide any other text."
                 log.info { nextPromptMessage }
                 continue
             }
@@ -226,7 +236,8 @@ class LLMWithFeedbackCycle(
             generatedTestsArePassing = true
 
             for (index in testCases.indices) {
-                report.testCaseList[index] = TestCase(index, testCases[index].name, testCases[index].toString(), setOf())
+                report.testCaseList[index] =
+                    TestCase(index, testCases[index].name, testCases[index].toString(), setOf())
             }
         }
 

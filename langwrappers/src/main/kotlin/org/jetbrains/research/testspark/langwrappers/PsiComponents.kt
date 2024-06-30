@@ -5,10 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.core.data.ClassType
-
-enum class Language(val languageName: String) {
-    Java("Java"), Kotlin("Kotlin")
-}
+import org.jetbrains.research.testspark.core.utils.Language
 
 /**
  * Interface representing a wrapper for PSI methods,
@@ -61,6 +58,7 @@ interface PsiClassWrapper {
     val containingFile: PsiFile
     val fullText: String
     val classType: ClassType
+    val rBrace: Int?
 
     /**
      * Searches for subclasses of the current class within the given project.

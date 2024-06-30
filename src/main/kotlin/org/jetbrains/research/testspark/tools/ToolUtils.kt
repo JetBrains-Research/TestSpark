@@ -12,8 +12,10 @@ import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCase
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
+import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.data.IJTestCase
-import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
 
@@ -68,6 +70,7 @@ object ToolUtils {
         importsCode: MutableSet<String>,
         fileUrl: String,
         generatedTestData: TestGenerationData,
+        language: Language = Language.Java
     ) {
         generatedTestData.fileUrl = fileUrl
         generatedTestData.packageLine = packageLine
@@ -77,16 +80,29 @@ object ToolUtils {
 
         for (testCase in report.testCaseList.values) {
             val code = testCase.testCode
-            testCase.testCode = JavaClassBuilderHelper.generateCode(
-                project,
-                getClassWithTestCaseName(testCase.testName),
-                code,
-                generatedTestData.importsCode,
-                generatedTestData.packageLine,
-                generatedTestData.runWith,
-                generatedTestData.otherInfo,
-                generatedTestData,
-            )
+            testCase.testCode = when (language) {
+                Language.Java -> JavaClassBuilderHelper.generateCode(
+                    project,
+                    getClassWithTestCaseName(testCase.testName),
+                    code,
+                    generatedTestData.importsCode,
+                    generatedTestData.packageLine,
+                    generatedTestData.runWith,
+                    generatedTestData.otherInfo,
+                    generatedTestData,
+                )
+
+                Language.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                    project,
+                    getClassWithTestCaseName(testCase.testName),
+                    code,
+                    generatedTestData.importsCode,
+                    generatedTestData.packageLine,
+                    generatedTestData.runWith,
+                    generatedTestData.otherInfo,
+                    generatedTestData,
+                )
+            }
         }
 
         generatedTestData.testGenerationResultList.add(report)
