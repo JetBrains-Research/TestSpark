@@ -37,7 +37,7 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
     ): SendResult {
         // Prepare the chat
         val messages = chatHistory.map {
-            val role = when(it.role) {
+            val role = when (it.role) {
                 ChatMessage.ChatRole.User -> "user"
                 ChatMessage.ChatRole.Assistant -> "assistant"
             }

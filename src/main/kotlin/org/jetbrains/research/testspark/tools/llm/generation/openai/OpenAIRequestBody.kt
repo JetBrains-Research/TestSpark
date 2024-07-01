@@ -1,8 +1,5 @@
 package org.jetbrains.research.testspark.tools.llm.generation.openai
 
-import org.jetbrains.research.testspark.core.data.ChatMessage
-
-
 /**
  * Adheres the naming of fields for OpenAI chat completion API and checks the correctness of a `role`.
  * <br/>
