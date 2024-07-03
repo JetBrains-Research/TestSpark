@@ -27,9 +27,8 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.tools.java.JavaTestProcessor
+import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
-import org.jetbrains.research.testspark.tools.kotlin.KotlinTestProcessor
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.io.File
 import java.nio.file.Path
@@ -251,26 +250,16 @@ class TestSparkStarter : ApplicationStarter {
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
                 // The current test is compiled and is ready to run jacoco
 
-                val testExecutionError = when (language) {
-                    Language.Java -> JavaTestProcessor(project, projectSDKPath).createXmlFromJacoco(
-                        it.nameWithoutExtension,
-                        "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
-                        testcaseName,
-                        classPath,
-                        packageList.joinToString("."),
-                        out,
-                        projectContext,
-                    )
-                    Language.Kotlin -> KotlinTestProcessor(project, projectSDKPath).createXmlFromJacoco(
-                        it.nameWithoutExtension,
-                        "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
-                        testcaseName,
-                        classPath,
-                        packageList.joinToString("."),
-                        out,
-                        projectContext,
-                    )
-                }
+                val testExecutionError = TestProcessor(project, projectSDKPath).createXmlFromJacoco(
+                    it.nameWithoutExtension,
+                    "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
+                    testcaseName,
+                    classPath,
+                    packageList.joinToString("."),
+                    out,
+                    projectContext,
+                    language
+                )
                 // Saving exception (if exists) thrown during the test execution
                 saveException(testcaseName, targetDirectory, testExecutionError)
             }

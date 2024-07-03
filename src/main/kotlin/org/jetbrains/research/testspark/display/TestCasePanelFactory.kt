@@ -1,4 +1,5 @@
-package org.jetbrains.research.testspark.display.java
+package org.jetbrains.research.testspark.display
+
 
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
@@ -36,11 +37,12 @@ import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper
 import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
+import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.java.JavaTestProcessor
+import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import java.awt.Dimension
@@ -60,7 +62,7 @@ import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 
-class JavaTestCasePanelFactory(
+class TestCasePanelFactory(
     private val project: Project,
     private val language: org.jetbrains.research.testspark.core.utils.Language,
     private val testCase: TestCase,
@@ -197,7 +199,7 @@ class JavaTestCasePanelFactory(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    project.service<JavaTestCaseDisplayService>().getEditor(testCase.testName)!!.document.text,
+                    project.service<KotlinTestCaseDisplayService>().getEditor(testCase.testName)!!.document.text,
                 ),
                 null,
             )
@@ -390,7 +392,7 @@ class JavaTestCasePanelFactory(
         }
 
         ReportHelper.updateTestCase(project, report, testCase)
-        project.service<JavaTestCaseDisplayService>().updateUI()
+        project.service<KotlinTestCaseDisplayService>().updateUI()
     }
 
     /**
@@ -463,7 +465,17 @@ class JavaTestCasePanelFactory(
         WriteCommandAction.runWriteCommandAction(project) {
             uiContext.errorMonitor.clear()
             val code = testSuitePresenter.toString(testSuite)
-            testCase.testName = JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, code)
+            testCase.testName = when (language) {
+                org.jetbrains.research.testspark.core.utils.Language.Kotlin -> KotlinClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+                    testCase.testName,
+                    code
+                )
+
+                org.jetbrains.research.testspark.core.utils.Language.Java -> JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+                    testCase.testName,
+                    code
+                )
+            }
             testCase.testCode = code
 
             // update numbers
@@ -521,15 +533,16 @@ class JavaTestCasePanelFactory(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
-        val newTestCase = JavaTestProcessor(project)
+        val newTestCase = TestProcessor(project)
             .processNewTestCase(
-                "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java",
+                "${KotlinClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.kt",
                 testCase.id,
                 testCase.testName,
                 testCase.testCode,
                 uiContext!!.testGenerationOutput.packageLine,
                 uiContext.testGenerationOutput.resultPath,
                 uiContext.projectContext,
+                language
             )
 
         testCase.coveredLines = newTestCase.coveredLines
@@ -589,13 +602,13 @@ class JavaTestCasePanelFactory(
      */
     private fun remove() {
         // Remove the test case from the cache
-        project.service<JavaTestCaseDisplayService>().removeTestCase(testCase.testName)
+        project.service<KotlinTestCaseDisplayService>().removeTestCase(testCase.testName)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
         ReportHelper.removeTestCase(project, report, testCase)
-        project.service<JavaTestCaseDisplayService>().updateUI()
+        project.service<KotlinTestCaseDisplayService>().updateUI()
     }
 
     /**
@@ -667,8 +680,17 @@ class JavaTestCasePanelFactory(
      * Updates the current test case with the specified test name and test code.
      */
     private fun updateTestCaseInformation() {
-        testCase.testName =
-            JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
+        testCase.testName = when (language) {
+            org.jetbrains.research.testspark.core.utils.Language.Kotlin -> KotlinClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+                testCase.testName,
+                languageTextField.document.text
+            )
+
+            org.jetbrains.research.testspark.core.utils.Language.Java -> JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+                testCase.testName,
+                languageTextField.document.text
+            )
+        }
         testCase.testCode = languageTextField.document.text
     }
 }

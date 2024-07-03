@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.tools.kotlin
+package org.jetbrains.research.testspark.tools
 
 import com.gitlab.mvysny.konsumexml.konsumeXml
 import com.intellij.openapi.components.service
@@ -17,19 +17,17 @@ import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.LibraryPathsProvider
-import org.jetbrains.research.testspark.tools.TestCompilerFactory
-import org.jetbrains.research.testspark.tools.ToolUtils
+import org.jetbrains.research.testspark.tools.strategies.TestProcessorStrategies
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
-class KotlinTestProcessor(
+class TestProcessor(
     val project: Project,
-    givenProjectSDKPath: Path? = null
+    givenProjectSDKPath: Path? = null,
 ) : TestsPersistentStorage {
-    private val kotlinHomeDirectory =
+    private val homeDirectory =
         givenProjectSDKPath?.toString() ?: ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
 
     private val log = Logger.getInstance(this::class.java)
@@ -38,7 +36,7 @@ class KotlinTestProcessor(
         get() = project.getService(LLMSettingsService::class.java).state
 
     override val testCompiler =
-        TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion, kotlinHomeDirectory, Language.Kotlin)
+        TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion, homeDirectory)
 
     override fun saveGeneratedTest(
         packageString: String,
@@ -62,6 +60,16 @@ class KotlinTestProcessor(
         return "$generatedTestPath$testFileName"
     }
 
+    /**
+     * Creates an XML report from the JaCoCo coverage data for a specific test case.
+     *
+     * @param className The name of the class under test.
+     * @param dataFileName The name of the coverage data file.
+     * @param testCaseName The name of the test case.
+     * @param projectBuildPath The build path of the project.
+     * @param generatedTestPackage The package where the generated test class is located.
+     * @return An empty string if the test execution is successful, otherwise an error message.
+     */
     fun createXmlFromJacoco(
         className: String,
         dataFileName: String,
@@ -69,24 +77,24 @@ class KotlinTestProcessor(
         projectBuildPath: String,
         generatedTestPackage: String,
         resultPath: String,
-        projectContext: ProjectContext
+        projectContext: ProjectContext,
+        language: Language,
     ): String {
-        val javaRunner = File(kotlinHomeDirectory).walk()
-            .filter {
-                val isKotlinName = if (DataFilesUtil.isWindows()) it.name.equals("kotlin.exe") else it.name.equals("kotlin")
-                isKotlinName && it.isFile
-            }
-            .first()
-
+        // find the proper javac
+        val javaRunner = TestProcessorStrategies.getRunner(language, homeDirectory)
+        // JaCoCo libs
         val jacocoAgentLibraryPath = "\"${LibraryPathsProvider.getJacocoAgentLibraryPath()}\""
         val jacocoCLILibraryPath = "\"${LibraryPathsProvider.getJacocoCliLibraryPath()}\""
+
         val sourceRoots = ModuleRootManager.getInstance(projectContext.cutModule!!).getSourceRoots(false)
 
+        // unique name
         var name = if (generatedTestPackage.isEmpty()) "" else "$generatedTestPackage."
         name += "$className#$testCaseName"
 
         val junitVersion = llmSettingsState.junitVersion.version
 
+        // run the test method with jacoco agent
         val junitRunnerLibraryPath = LibraryPathsProvider.getJUnitRunnerLibraryPath()
         val testExecutionError = CommandLineRunner.run(
             arrayListOf(
@@ -96,27 +104,32 @@ class KotlinTestProcessor(
                 "\"${testCompiler.getPath(projectBuildPath)}${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
                 "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
-            )
+            ),
         )
 
         log.info("Test execution error message: $testExecutionError")
 
+        // Prepare the command for generating the Jacoco report
         val command = mutableListOf(
             javaRunner.absolutePath,
             "-jar",
+            // jacocoCLIDir,
             jacocoCLILibraryPath,
             "report",
             "$dataFileName.exec",
         )
 
+        // for classpath containing cut
         command.add("--classfiles")
         command.add(CompilerModuleExtension.getInstance(projectContext.cutModule!!)?.compilerOutputPath!!.path)
 
+        // for each source folder
         sourceRoots.forEach { root ->
             command.add("--sourcefiles")
             command.add(root.path)
         }
 
+        // generate XML report
         command.add("--xml")
         command.add("$dataFileName.xml")
 
@@ -127,6 +140,14 @@ class KotlinTestProcessor(
         return testExecutionError
     }
 
+    /**
+     * Update the code of the test.
+     *
+     * @param fileName new tmp filename
+     * @param testId new id of test
+     * @param testCode new code of test
+     * @param testName the name of the test
+     */
     fun processNewTestCase(
         fileName: String,
         testId: Int,
@@ -134,13 +155,17 @@ class KotlinTestProcessor(
         testCode: String,
         packageLine: String,
         resultPath: String,
-        projectContext: ProjectContext
+        projectContext: ProjectContext,
+        language: Language
     ): TestCase {
+        // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         if (project.service<PluginSettingsService>().state.buildPath.isEmpty()) {
+            // User did not set own path
             buildPath = ToolUtils.getBuildPath(project)
         }
 
+        // save new test to file
         val generatedTestPath: String = saveGeneratedTest(
             packageLine,
             testCode,
@@ -148,6 +173,7 @@ class KotlinTestProcessor(
             fileName,
         )
 
+        // compilation checking
         val compilationResult = testCompiler.compileCode(generatedTestPath, buildPath)
         if (!compilationResult.first) {
             project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, compilationResult.second)
@@ -162,6 +188,7 @@ class KotlinTestProcessor(
                 packageLine,
                 resultPath,
                 projectContext,
+                language
             )
 
             if (!File("$dataFileName.xml").exists()) {
@@ -192,12 +219,20 @@ class KotlinTestProcessor(
         return TestCase(testId, testName, testCode, setOf())
     }
 
+    /**
+     * Check for exception and collect lines covered during the exception happening.
+     *
+     * @param testExecutionError error output (including the thrown stack trace) during the test execution.
+     * @return a set of lines that are covered in CUT during the exception happening.
+     */
     private fun getExceptionData(testExecutionError: String, projectContext: ProjectContext): Pair<Boolean, Set<Int>> {
         if (testExecutionError.isBlank()) {
             return Pair(false, emptySet())
         }
 
         val result = mutableSetOf<Int>()
+
+        // get frames
         val frames = testExecutionError.split("\n\tat ").toMutableList()
         frames.removeFirst()
 
@@ -218,6 +253,13 @@ class KotlinTestProcessor(
         )
     }
 
+    /**
+     * Saves data of a given test case to a report.
+     *
+     * @param testCaseName The test case name.
+     * @param testCaseCode The test case code.
+     * @param xmlFileName The XML file name to read data from.
+     */
     private fun getTestCaseFromXml(
         testCaseId: Int,
         testCaseName: String,
@@ -257,6 +299,7 @@ class KotlinTestProcessor(
 
         log.info("Test case saved:\n$testCaseName")
 
+        // Add lines that Jacoco might have missed because of its limitation during the exception
         setOfLines.addAll(linesCoveredDuringTheException)
 
         return TestCase(testCaseId, testCaseName, testCaseCode, setOfLines)

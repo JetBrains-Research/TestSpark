@@ -6,6 +6,7 @@ import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestLine
 import org.jetbrains.research.testspark.core.test.data.TestLineType
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.utils.Language
 
 class JUnitTestSuiteParserStrategy {
     companion object {
@@ -15,6 +16,7 @@ class JUnitTestSuiteParserStrategy {
             importPattern: Regex,
             packageName: String,
             testNamePattern: String,
+            language: Language,
         ): TestSuiteGeneratedByLLM? {
             if (rawText.isBlank()) {
                 return null
@@ -54,7 +56,7 @@ class JUnitTestSuiteParserStrategy {
 
                     val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
                     val result: TestCaseParseResult =
-                        testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern) // ///
+                        testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, language) // ///
 
                     if (result.errorOccurred) {
                         println("WARNING: ${result.errorMessage}")
@@ -87,7 +89,12 @@ class JUnitTestSuiteParserStrategy {
 }
 
 private class JUnitTestCaseParser {
-    fun parse(rawTest: String, isLastTestCaseInTestSuite: Boolean, testNamePattern: String): TestCaseParseResult {
+    fun parse(
+        rawTest: String,
+        isLastTestCaseInTestSuite: Boolean,
+        testNamePattern: String,
+        language: Language
+    ): TestCaseParseResult {
         var expectedException = ""
         var throwsException = ""
         val testLines: MutableList<TestLine> = mutableListOf()
@@ -162,7 +169,9 @@ private class JUnitTestCaseParser {
             expectedException = expectedException,
             throwsException = throwsException,
             lines = testLines,
+            language = language
         )
+
 
         return TestCaseParseResult(
             testCase = currentTest,

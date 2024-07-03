@@ -4,6 +4,7 @@ import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
+import org.jetbrains.research.testspark.core.utils.Language
 
 class JavaJUnitTestSuiteParser(
     private val packageName: String,
@@ -17,6 +18,7 @@ class JavaJUnitTestSuiteParser(
             importPattern,
             packageName,
             testNamePattern = "void",
+            Language.Java
         )
     }
 }

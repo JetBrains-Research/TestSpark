@@ -29,8 +29,8 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.java.JavaTestCasePanelFactory
-import org.jetbrains.research.testspark.display.java.JavaTopButtonsPanelFactory
+import org.jetbrains.research.testspark.display.TestCasePanelFactory
+import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.helpers.ReportHelper
 import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.java.JavaPsiClassWrapper
@@ -61,7 +61,7 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
 
     private var mainPanel: JPanel = JPanel()
 
-    private val topButtonsPanelFactory = JavaTopButtonsPanelFactory(project)
+    private val topButtonsPanelFactory = TopButtonsPanelFactory(project, Language.Java)
 
     private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
@@ -120,7 +120,7 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
         addSeparator()
 
         // TestCasePanelFactories array
-        val testCasePanelFactories = arrayListOf<JavaTestCasePanelFactory>()
+        val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
 
         report.testCaseList.values.forEach {
             val testCase = it
@@ -145,7 +145,7 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
             val testCasePanelFactory =
-                JavaTestCasePanelFactory(project, language, testCase, editor, checkbox, uiContext, report)
+                TestCasePanelFactory(project, language, testCase, editor, checkbox, uiContext, report)
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)

@@ -1,6 +1,5 @@
-package org.jetbrains.research.testspark.display.kotlin
+package org.jetbrains.research.testspark.display
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -8,22 +7,20 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.display.IconButtonCreator
-import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
+import org.jetbrains.research.testspark.display.strategies.TopButtonsPanelStrategy
 import java.awt.Dimension
 import java.util.LinkedList
 import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
-import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 
-class KotlinTopButtonsPanelFactory(private val project: Project) {
+class TopButtonsPanelFactory(private val project: Project, private val language: Language) {
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
         IconButtonCreator.getButton(TestSparkIcons.selectAll, PluginLabelsBundle.get("selectAllTip"))
@@ -38,7 +35,7 @@ class KotlinTopButtonsPanelFactory(private val project: Project) {
     private val testsPassedText: String = "${PluginLabelsBundle.get("testsPassed")}: %d/%d"
     private var testsPassedLabel: JLabel = JLabel(testsPassedText)
 
-    private val testCasePanelFactories = arrayListOf<KotlinTestCasePanelFactory>()
+    private val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
 
     fun getPanel(): JPanel {
         val panel = JPanel()
@@ -66,28 +63,26 @@ class KotlinTopButtonsPanelFactory(private val project: Project) {
      * Updates the labels.
      */
     fun updateTopLabels() {
-        var numberOfPassedTests = 0
-        for (testCasePanelFactory in testCasePanelFactories) {
-            if (testCasePanelFactory.isRemoved()) continue
-            val error = testCasePanelFactory.getError()
-            if ((error is String) && error.isEmpty()) {
-                numberOfPassedTests++
-            }
-        }
-        testsSelectedLabel.text = String.format(
-            testsSelectedText,
-            project.service<KotlinTestCaseDisplayService>().getTestsSelected(),
-            project.service<KotlinTestCaseDisplayService>().getTestCasePanels().size,
-        )
-        testsPassedLabel.text =
-            String.format(
+        when (language) {
+            Language.Java -> TopButtonsPanelStrategy.updateTopJavaLabels(
+                testCasePanelFactories,
+                testsSelectedLabel,
+                testsSelectedText,
+                project,
+                testsPassedLabel,
                 testsPassedText,
-                numberOfPassedTests,
-                project.service<KotlinTestCaseDisplayService>().getTestCasePanels().size,
+                runAllButton
             )
-        runAllButton.isEnabled = false
-        for (testCasePanelFactory in testCasePanelFactories) {
-            runAllButton.isEnabled = runAllButton.isEnabled || testCasePanelFactory.isRunEnabled()
+
+            Language.Kotlin -> TopButtonsPanelStrategy.updateTopKotlinLabels(
+                testCasePanelFactories,
+                testsSelectedLabel,
+                testsSelectedText,
+                project,
+                testsPassedLabel,
+                testsPassedText,
+                runAllButton
+            )
         }
     }
 
@@ -96,7 +91,7 @@ class KotlinTopButtonsPanelFactory(private val project: Project) {
      *
      * @param testCasePanelFactories The ArrayList containing the TestCasePanelFactory objects to be set.
      */
-    fun setTestCasePanelFactoriesArray(testCasePanelFactories: ArrayList<KotlinTestCasePanelFactory>) {
+    fun setTestCasePanelFactoriesArray(testCasePanelFactories: ArrayList<TestCasePanelFactory>) {
         this.testCasePanelFactories.addAll(testCasePanelFactories)
     }
 
@@ -107,31 +102,20 @@ class KotlinTopButtonsPanelFactory(private val project: Project) {
      *  @param selected whether the checkboxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean) {
-        project.service<KotlinTestCaseDisplayService>().getTestCasePanels().forEach { (_, jPanel) ->
-            val checkBox = jPanel.getComponent(0) as JCheckBox
-            checkBox.isSelected = selected
+        when (language) {
+            Language.Java -> TopButtonsPanelStrategy.toggleAllJavaCheckboxes(selected, project)
+            Language.Kotlin -> TopButtonsPanelStrategy.toggleAllKotlinCheckboxes(selected, project)
         }
-        project.service<KotlinTestCaseDisplayService>()
-            .setTestsSelected(if (selected) project.service<KotlinTestCaseDisplayService>().getTestCasePanels().size else 0)
     }
 
     /**
      * Removes all test cases from the cache and tool window UI.
      */
     private fun removeAllTestCases() {
-        // Ask the user for the confirmation
-        val choice = JOptionPane.showConfirmDialog(
-            null,
-            PluginMessagesBundle.get("removeAllMessage"),
-            PluginMessagesBundle.get("confirmationTitle"),
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE,
-        )
-
-        // Cancel the operation if the user did not press "Yes"
-        if (choice == JOptionPane.NO_OPTION) return
-
-        project.service<KotlinTestCaseDisplayService>().clear()
+        when (language) {
+            Language.Java -> TopButtonsPanelStrategy.removeAllJavaTestCases(project)
+            Language.Kotlin -> TopButtonsPanelStrategy.removeAllKotlinTestCases(project)
+        }
     }
 
     /**

@@ -22,9 +22,8 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.java.JavaTestProcessor
+import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
-import org.jetbrains.research.testspark.tools.kotlin.KotlinTestProcessor
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
@@ -60,10 +59,7 @@ class LLMProcessManager(
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = LlmSettingsArguments(project).maxLLMRequest()
-    private val testProcessor: TestsPersistentStorage = when (language) {
-        Language.Java -> JavaTestProcessor(project, projectSDKPath)
-        Language.Kotlin -> KotlinTestProcessor(project, projectSDKPath)
-    }
+    private val testProcessor: TestsPersistentStorage = TestProcessor(project, projectSDKPath)
 
     /**
      * Runs the test generator process.

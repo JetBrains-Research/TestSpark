@@ -27,7 +27,7 @@ data class TestGenerationData(
     // list of correct test cases during the incorrect compilation
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf(),
 
-) {
+    ) {
 
     /**
      * Cleaning all old data before new test generation.
