@@ -122,7 +122,7 @@ class LLMProcessManager(
 
         // adapter for the existing test case/test suite string representing functionality
         val testsPresenter = object : TestsPresenter {
-            private val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData)
+            private val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
 
             override fun representTestSuite(testSuite: TestSuiteGeneratedByLLM): String {
                 return testSuitePresenter.toStringWithoutExpectedException(testSuite)
@@ -203,7 +203,7 @@ class LLMProcessManager(
 
         log.info("Save generated test suite and test cases into the project workspace")
 
-        val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData)
+        val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
         val generatedTestSuite: TestSuiteGeneratedByLLM? = feedbackResponse.generatedTestSuite
         val testSuiteRepresentation =
             if (generatedTestSuite != null) testSuitePresenter.toString(generatedTestSuite) else null

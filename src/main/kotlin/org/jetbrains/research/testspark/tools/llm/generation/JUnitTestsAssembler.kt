@@ -13,6 +13,7 @@ import org.jetbrains.research.testspark.core.test.java.JavaJUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.kotlin.KotlinJUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
+import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 
@@ -88,7 +89,7 @@ class JUnitTestsAssembler(
     ): TestSuiteParser {
         return when (language) {
             Language.Java -> JavaJUnitTestSuiteParser(packageName, jUnitVersion, javaImportPattern)
-            Language.Kotlin -> KotlinJUnitTestSuiteParser(packageName, jUnitVersion, javaImportPattern)
+            Language.Kotlin -> KotlinJUnitTestSuiteParser(packageName, jUnitVersion, kotlinImportPattern)
         }
     }
 }

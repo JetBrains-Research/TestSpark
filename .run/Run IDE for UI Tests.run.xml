@@ -5,7 +5,7 @@
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="" />
+      <option name="scriptParameters" value="-Dspace.username=Ekaterina.Braun -Dspace.pass=eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiIySjJEY1YxYm13bVIiLCJhdWQiOiJjaXJjbGV0LXdlYi11aSIsIm9yZ0RvbWFpbiI6ImpldGJyYWlucyIsIm5hbWUiOiJFa2F0ZXJpbmEuQnJhdW4iLCJpc3MiOiJodHRwczpcL1wvamV0YnJhaW5zLnRlYW0iLCJwZXJtX3Rva2VuIjoiM3Jsd1N4NFllczlhIiwicHJpbmNpcGFsX3R5cGUiOiJVU0VSIiwiaWF0IjoxNzE5NTcxMjY3fQ.AMFXtV2WDOmEdv896-O96Gt6YEdo3hJGagw4FctA1Lb5y0Fzduk3uyetXDH9KP3HFuQYQNQ8W_cdLkd3tD7r0iZ7nA1LcFnpPM7bO_Xu_qh8GTsfkc5eyttRy4ogv3kv2Zw8nkfpqXcm93NqWBtYLfaErMyJ9y0EBxW9ipuJ2QY" />
       <option name="taskDescriptions">
         <list />
       </option>

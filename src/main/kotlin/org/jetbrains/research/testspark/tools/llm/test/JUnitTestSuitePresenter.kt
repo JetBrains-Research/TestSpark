@@ -4,11 +4,14 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
 
 class JUnitTestSuitePresenter(
     private val project: Project,
     private val generatedTestsData: TestGenerationData,
+    private val language: Language,
 ) {
     /**
      * Returns a string representation of this object.
@@ -34,16 +37,29 @@ class JUnitTestSuitePresenter(
             // Add each test
             testCases.forEach { testCase -> testBody += "$testCase\n" }
 
-            JavaClassBuilderHelper.generateCode(
-                project,
-                testFileName,
-                testBody,
-                imports,
-                packageString,
-                runWith,
-                otherInfo,
-                generatedTestsData,
-            )
+            when (language) {
+                Language.Java -> JavaClassBuilderHelper.generateCode(
+                    project,
+                    testFileName,
+                    testBody,
+                    imports,
+                    packageString,
+                    runWith,
+                    otherInfo,
+                    generatedTestsData,
+                )
+
+                Language.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                    project,
+                    testFileName,
+                    testBody,
+                    imports,
+                    packageString,
+                    runWith,
+                    otherInfo,
+                    generatedTestsData,
+                )
+            }
         }
     }
 
@@ -57,16 +73,29 @@ class JUnitTestSuitePresenter(
         testCaseIndex: Int,
     ): String =
         testSuite.run {
-            JavaClassBuilderHelper.generateCode(
-                project,
-                getClassWithTestCaseName(testCases[testCaseIndex].name),
-                testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
-                imports,
-                packageString,
-                runWith,
-                otherInfo,
-                generatedTestsData,
-            )
+            when (language) {
+                Language.Java -> JavaClassBuilderHelper.generateCode(
+                    project,
+                    getClassWithTestCaseName(testCases[testCaseIndex].name),
+                    testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
+                    imports,
+                    packageString,
+                    runWith,
+                    otherInfo,
+                    generatedTestsData,
+                )
+
+                Language.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                    project,
+                    getClassWithTestCaseName(testCases[testCaseIndex].name),
+                    testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
+                    imports,
+                    packageString,
+                    runWith,
+                    otherInfo,
+                    generatedTestsData,
+                )
+            }
         }
 
     /**
@@ -81,16 +110,30 @@ class JUnitTestSuitePresenter(
             // Add each test (exclude expected exception)
             testCases.forEach { testCase -> testBody += "${testCase.toStringWithoutExpectedException()}\n" }
 
-            JavaClassBuilderHelper.generateCode(
-                project,
-                testFileName,
-                testBody,
-                imports,
-                packageString,
-                runWith,
-                otherInfo,
-                generatedTestsData,
-            )
+            when (language) {
+                Language.Java ->
+                    JavaClassBuilderHelper.generateCode(
+                        project,
+                        testFileName,
+                        testBody,
+                        imports,
+                        packageString,
+                        runWith,
+                        otherInfo,
+                        generatedTestsData,
+                    )
+
+                Language.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                    project,
+                    testFileName,
+                    testBody,
+                    imports,
+                    packageString,
+                    runWith,
+                    otherInfo,
+                    generatedTestsData,
+                )
+            }
         }
     }
 

@@ -460,7 +460,7 @@ class TestCasePanelFactory(
     }
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
-        val testSuitePresenter = JUnitTestSuitePresenter(project, uiContext!!.testGenerationOutput)
+        val testSuitePresenter = JUnitTestSuitePresenter(project, uiContext!!.testGenerationOutput, language)
 
         WriteCommandAction.runWriteCommandAction(project) {
             uiContext.errorMonitor.clear()
