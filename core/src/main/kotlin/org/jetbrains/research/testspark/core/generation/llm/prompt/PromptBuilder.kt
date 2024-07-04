@@ -60,8 +60,8 @@ internal class PromptBuilder(private var prompt: String) {
                 val superClass = classesToTest[i - 1]
 
                 fullText += "${subClass.qualifiedName} extends ${superClass.qualifiedName}. " +
-                    "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
-                    "```\n"
+                        "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
+                        "```\n"
             }
             prompt = prompt.replace(keyword, fullText, ignoreCase = false)
         } else {
@@ -78,7 +78,7 @@ internal class PromptBuilder(private var prompt: String) {
                 fullText += "Here are some information about other methods and classes used by the class under test. Only use them for creating objects, not your own ideas.\n"
             }
             for (interestingClass in interestingClasses) {
-                if (interestingClass.qualifiedName.startsWith("java")) {
+                if (interestingClass.qualifiedName.startsWith("java") || interestingClass.qualifiedName.startsWith("kotlin")) {
                     continue
                 }
 
@@ -88,7 +88,9 @@ internal class PromptBuilder(private var prompt: String) {
                     // Skip java methods
                     // TODO: checks for java methods should be done by a caller to make
                     //       this class as abstract and language agnostic as possible.
-                    if (method.containingClassQualifiedName.startsWith("java")) {
+                    if (method.containingClassQualifiedName.startsWith("java") ||
+                        method.containingClassQualifiedName.startsWith("kotlin")
+                    ) {
                         continue
                     }
 
