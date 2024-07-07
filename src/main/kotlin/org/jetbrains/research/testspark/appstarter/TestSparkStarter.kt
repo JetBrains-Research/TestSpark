@@ -250,7 +250,7 @@ class TestSparkStarter : ApplicationStarter {
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
                 // The current test is compiled and is ready to run jacoco
 
-                val testExecutionError = TestProcessor(project, projectSDKPath).createXmlFromJacoco(
+                val testExecutionError = TestProcessor(project, language, projectSDKPath).createXmlFromJacoco(
                     it.nameWithoutExtension,
                     "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
                     testcaseName,

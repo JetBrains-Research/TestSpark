@@ -533,7 +533,7 @@ class TestCasePanelFactory(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
-        val newTestCase = TestProcessor(project)
+        val newTestCase = TestProcessor(project, language)
             .processNewTestCase(
                 "${KotlinClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.kt",
                 testCase.id,

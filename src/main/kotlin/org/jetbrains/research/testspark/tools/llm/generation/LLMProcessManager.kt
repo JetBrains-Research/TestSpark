@@ -59,7 +59,7 @@ class LLMProcessManager(
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = LlmSettingsArguments(project).maxLLMRequest()
-    private val testProcessor: TestsPersistentStorage = TestProcessor(project, projectSDKPath)
+    private val testProcessor: TestsPersistentStorage = TestProcessor(project, language, projectSDKPath)
 
     /**
      * Runs the test generator process.

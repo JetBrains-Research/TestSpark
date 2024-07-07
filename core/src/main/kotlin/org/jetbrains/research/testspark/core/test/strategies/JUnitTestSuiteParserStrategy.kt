@@ -67,7 +67,6 @@ class JUnitTestSuiteParserStrategy {
 
                     // TODO: make logging work
                     // log.info("New test case: $currentTest")
-                    println("New test case: $currentTest")
 
                     testCases.add(currentTest)
                 }

@@ -25,6 +25,7 @@ import kotlin.io.path.createDirectories
 
 class TestProcessor(
     val project: Project,
+    language : Language,
     givenProjectSDKPath: Path? = null,
 ) : TestsPersistentStorage {
     private val homeDirectory =
@@ -36,7 +37,7 @@ class TestProcessor(
         get() = project.getService(LLMSettingsService::class.java).state
 
     override val testCompiler =
-        TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion, homeDirectory)
+        TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion, homeDirectory, language)
 
     override fun saveGeneratedTest(
         packageString: String,

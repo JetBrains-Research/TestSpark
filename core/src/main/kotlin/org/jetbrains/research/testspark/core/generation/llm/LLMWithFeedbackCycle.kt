@@ -167,8 +167,10 @@ class LLMWithFeedbackCycle(
                 generatedTestSuite.updateTestCases(compilableTestCases.toMutableList())
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
-                    val testCaseFilename =
-                        "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
+                    val testCaseFilename = when (language) {
+                        Language.Java -> "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
+                        Language.Kotlin -> "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.kt"
+                    }
 
                     val testCaseRepresentation = testsPresenter.representTestCase(generatedTestSuite, testCaseIndex)
 
