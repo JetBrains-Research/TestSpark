@@ -37,7 +37,7 @@ class TestProcessor(
         get() = project.getService(LLMSettingsService::class.java).state
 
     override val testCompiler =
-        TestCompilerFactory.createJavacTestCompiler(project, llmSettingsState.junitVersion, homeDirectory, language)
+        TestCompilerFactory.createTestCompiler(project, llmSettingsState.junitVersion, homeDirectory, language)
 
     override fun saveGeneratedTest(
         packageString: String,

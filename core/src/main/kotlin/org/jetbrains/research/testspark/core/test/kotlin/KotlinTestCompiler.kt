@@ -34,39 +34,37 @@ class KotlinTestCompiler(
     }
 
     override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
-        // find the proper kotlinc
-        val kotlinCompile = File(kotlinHomeDirectoryPath).walk()
+
+        // Find the kotlinc compiler
+        val kotlinc = File(kotlinHomeDirectoryPath).walk()
             .filter {
-                val isCompilerName = if (DataFilesUtil.isWindows()) it.name.equals("kotlinc.bat") else it.name.equals("kotlinc")
+                val isCompilerName = if (System.getProperty("os.name").toLowerCase().contains("win")) it.name.equals("kotlinc.bat") else it.name.equals("kotlinc")
                 isCompilerName && it.isFile
             }
             .firstOrNull()
 
-        if (kotlinCompile == null) {
+        if (kotlinc == null) {
             val msg = "Cannot find Kotlin compiler 'kotlinc' at '$kotlinHomeDirectoryPath'"
-            log.error { msg }
             throw RuntimeException(msg)
         }
 
-        println("kotlinc found at '${kotlinCompile.absolutePath}'")
+        println("kotlinc found at '${kotlinc.absolutePath}'")
 
-        // compile file
-        val errorMsg = CommandLineRunner.run(
-            arrayListOf(
-                kotlinCompile.absolutePath,
-                "-cp",
-                getPath(projectBuildPath),
-                path,
-            ),
+        // Compile file
+        val processBuilder = ProcessBuilder(
+            kotlinc.absolutePath,
+            "-d", "\"${getPath(projectBuildPath)}\"",
+            path
         )
+        val process = processBuilder.start()
+        val errorMsg = process.errorStream.bufferedReader().readText()
 
-        log.info { "Error message: '$errorMsg'" }
+        process.waitFor()
 
-        // create .class file path
-        val classFilePath = path.replace(".kt", ".class")
+        val compiledClassFilePath = path.replace(".kt", ".class")
 
-        // check if .class file exists
-        return Pair(File(classFilePath).exists(), errorMsg)
+        // Check if the .class file exists
+        return Pair(File(compiledClassFilePath).exists(), errorMsg)
     }
 
     override fun getPath(buildPath: String): String {
