@@ -1,6 +1,8 @@
-package org.jetbrains.research.testspark.core.test
+package org.jetbrains.research.testspark.core.test.kotlin
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.test.TestCasesCompilationResult
+import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -35,36 +37,19 @@ class KotlinTestCompiler(
 
     override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
 
-        // Find the kotlinc compiler
-        val kotlinc = File(kotlinHomeDirectoryPath).walk()
-            .filter {
-                val isCompilerName = if (System.getProperty("os.name").toLowerCase().contains("win")) it.name.equals("kotlinc.bat") else it.name.equals("kotlinc")
-                isCompilerName && it.isFile
-            }
-            .firstOrNull()
-
-        if (kotlinc == null) {
-            val msg = "Cannot find Kotlin compiler 'kotlinc' at '$kotlinHomeDirectoryPath'"
-            throw RuntimeException(msg)
-        }
-
-        println("kotlinc found at '${kotlinc.absolutePath}'")
-
         // Compile file
-        val processBuilder = ProcessBuilder(
-            kotlinc.absolutePath,
-            "-d", "\"${getPath(projectBuildPath)}\"",
-            path
+        val errorMsg = CommandLineRunner.run(
+            arrayListOf(
+                "kotlinc",
+                "-cp",
+                "\"${getPath(projectBuildPath)}\"",
+                path,
+            )
         )
-        val process = processBuilder.start()
-        val errorMsg = process.errorStream.bufferedReader().readText()
 
-        process.waitFor()
+        log.info { "Error message: '$errorMsg'" }
 
-        val compiledClassFilePath = path.replace(".kt", ".class")
-
-        // Check if the .class file exists
-        return Pair(File(compiledClassFilePath).exists(), errorMsg)
+        return Pair(File(path).exists(), errorMsg)
     }
 
     override fun getPath(buildPath: String): String {

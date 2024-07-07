@@ -73,7 +73,6 @@ open class JavaTestCompiler(
         )
 
         log.info { "Error message: '$errorMsg'" }
-
         // create .class file path
         val classFilePath = path.replace(".java", ".class")
 

@@ -8,7 +8,7 @@ val javaImportPattern =
 
 val kotlinImportPattern =
     Regex(
-        pattern = "^import\\s+((?:[a-zA-Z_]\\w*\\.)*(?:\\w*\\.?)*)?(\\*)?( as \\w*)?",
+        pattern = "^import\\s+((?:[a-zA-Z_]\\w*\\.)*(?:\\w*\\.?)*)?(\\*)?( as \\w*)?(`\\w*`)?",
         options = setOf(RegexOption.MULTILINE),
     )
 
