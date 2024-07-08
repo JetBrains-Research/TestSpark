@@ -9,8 +9,7 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.java.JavaJUnitTestSuiteParser
-import org.jetbrains.research.testspark.core.test.kotlin.KotlinJUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
 import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
 import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
@@ -62,8 +61,25 @@ class JUnitTestsAssembler(
     override fun assembleTestSuite(packageName: String, language: Language): TestSuiteGeneratedByLLM? {
         val junitVersion = llmSettingsState.junitVersion
 
-        val parser = createTestSuiteParser(packageName, junitVersion, language)
-        val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(super.getContent())
+        val testSuite: TestSuiteGeneratedByLLM? = when (language) {
+            Language.Java -> JUnitTestSuiteParserStrategy.parseTestSuite(
+                super.getContent(),
+                junitVersion,
+                javaImportPattern,
+                packageName,
+                testNamePattern = "void",
+                Language.Java,
+            )
+
+            Language.Kotlin -> JUnitTestSuiteParserStrategy.parseTestSuite(
+                super.getContent(),
+                junitVersion,
+                kotlinImportPattern,
+                packageName,
+                testNamePattern = "fun",
+                Language.Kotlin,
+            )
+        }
 
         // save RunWith
         if (testSuite?.runWith?.isNotBlank() == true) {
@@ -82,14 +98,14 @@ class JUnitTestsAssembler(
         return testSuite
     }
 
-    private fun createTestSuiteParser(
-        packageName: String,
-        jUnitVersion: JUnitVersion,
-        language: Language,
-    ): TestSuiteParser {
-        return when (language) {
-            Language.Java -> JavaJUnitTestSuiteParser(packageName, jUnitVersion, javaImportPattern)
-            Language.Kotlin -> KotlinJUnitTestSuiteParser(packageName, jUnitVersion, kotlinImportPattern)
-        }
-    }
+//    private fun createTestSuiteParser(
+//        packageName: String,
+//        jUnitVersion: JUnitVersion,
+//        language: Language,
+//    ): TestSuiteParser {
+//        return when (language) {
+//            Language.Java -> JavaJUnitTestSuiteParser(packageName, jUnitVersion, javaImportPattern)
+//            Language.Kotlin -> KotlinJUnitTestSuiteParser(packageName, jUnitVersion, kotlinImportPattern)
+//        }
+//    }
 }

@@ -537,7 +537,6 @@ class TestCasePanelFactory(
                 uiContext!!.testGenerationOutput.packageLine,
                 uiContext.testGenerationOutput.resultPath,
                 uiContext.projectContext,
-                language,
             )
 
         testCase.coveredLines = newTestCase.coveredLines

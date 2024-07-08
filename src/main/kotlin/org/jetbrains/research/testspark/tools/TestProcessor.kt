@@ -105,7 +105,7 @@ class TestProcessor(
                 javaRunner.absolutePath,
                 "-javaagent:$jacocoAgentLibraryPath=destfile=$dataFileName.exec,append=false,includes=${projectContext.classFQN}",
                 "-cp",
-                "\"${testCompiler.getPath(projectBuildPath)}${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
+                "\"${testCompiler.getClassPaths(projectBuildPath)}${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
                 "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
                 name,
             ),
@@ -160,7 +160,6 @@ class TestProcessor(
         packageLine: String,
         resultPath: String,
         projectContext: ProjectContext,
-        language: Language,
     ): TestCase {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
