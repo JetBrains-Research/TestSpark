@@ -14,7 +14,7 @@ data class TestCaseGeneratedByLLM(
     var expectedException: String = "",
     var throwsException: String = "",
     var lines: MutableList<TestLine> = mutableListOf(),
-    val language: Language
+    val language: Language,
 ) {
 
     /**
@@ -108,10 +108,10 @@ data class TestCaseGeneratedByLLM(
      * @return a string containing the body of test case
      */
     private fun printTestBody(testInitiatedText: String): String {
-       return when (language) {
-           Language.Kotlin -> PrintTestBodyStrategy.printKotlinTestBody(testInitiatedText, lines, throwsException, name)
-           Language.Java -> PrintTestBodyStrategy.printJavaTestBody(testInitiatedText, lines, throwsException, name)
-       }
+        return when (language) {
+            Language.Kotlin -> PrintTestBodyStrategy.printKotlinTestBody(testInitiatedText, lines, throwsException, name)
+            Language.Java -> PrintTestBodyStrategy.printJavaTestBody(testInitiatedText, lines, throwsException, name)
+        }
     }
 
     /**

@@ -18,7 +18,7 @@ class JavaJUnitTestSuiteParser(
             importPattern,
             packageName,
             testNamePattern = "void",
-            Language.Java
+            Language.Java,
         )
     }
 }

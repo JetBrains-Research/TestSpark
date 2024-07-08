@@ -92,7 +92,7 @@ private class JUnitTestCaseParser {
         rawTest: String,
         isLastTestCaseInTestSuite: Boolean,
         testNamePattern: String,
-        language: Language
+        language: Language,
     ): TestCaseParseResult {
         var expectedException = ""
         var throwsException = ""
@@ -168,9 +168,8 @@ private class JUnitTestCaseParser {
             expectedException = expectedException,
             throwsException = throwsException,
             lines = testLines,
-            language = language
+            language = language,
         )
-
 
         return TestCaseParseResult(
             testCase = currentTest,

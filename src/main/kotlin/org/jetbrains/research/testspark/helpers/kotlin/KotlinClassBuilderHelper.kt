@@ -1,7 +1,5 @@
 package org.jetbrains.research.testspark.helpers.kotlin
 
-import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.helpers.TestClassBuilderHelper
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -10,6 +8,8 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.kotlin.idea.KotlinLanguage
+import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.helpers.TestClassBuilderHelper
 import java.io.File
 
 object KotlinClassBuilderHelper : TestClassBuilderHelper {
@@ -24,7 +24,7 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
         packageString: String,
         runWith: String,
         otherInfo: String,
-        testGenerationData: TestGenerationData
+        testGenerationData: TestGenerationData,
     ): String {
         var testFullText = printUpperPart(className, imports, packageString, runWith, otherInfo)
 
@@ -45,7 +45,7 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
         imports: Set<String>,
         packageString: String,
         runWith: String,
-        otherInfo: String
+        otherInfo: String,
     ): String {
         var testText = ""
 

@@ -14,7 +14,12 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.*
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElementFactory
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiManager
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
@@ -255,17 +260,17 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
                 file.isDirectory || (
-                        file.extension?.lowercase(Locale.getDefault()) == "java" && (
-                                PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
-                                ).classes.stream().map { it.name }
-                            .toArray()
-                            .contains(
-                                (
-                                        PsiManager.getInstance(project)
-                                            .findFile(file) as PsiJavaFile
-                                        ).name.removeSuffix(".java"),
-                            )
+                    file.extension?.lowercase(Locale.getDefault()) == "java" && (
+                        PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                        ).classes.stream().map { it.name }
+                        .toArray()
+                        .contains(
+                            (
+                                PsiManager.getInstance(project)
+                                    .findFile(file) as PsiJavaFile
+                                ).name.removeSuffix(".java"),
                         )
+                    )
             }
         }
 
@@ -398,7 +403,7 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
     override fun appendTestsToClass(
         testCaseComponents: List<String>,
         selectedClass: PsiClassWrapper,
-        outputFile: PsiFile
+        outputFile: PsiFile,
     ) {
         // block document
         PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(

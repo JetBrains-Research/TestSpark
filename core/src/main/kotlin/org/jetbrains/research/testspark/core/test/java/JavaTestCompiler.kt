@@ -13,7 +13,6 @@ class JavaTestCompiler(
 ) : TestCompiler {
     private val log = KotlinLogging.logger { this::class.java }
 
-
     override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
         // find the proper javac
         val javaCompile = File(javaHomeDirectoryPath).walk()
@@ -49,7 +48,6 @@ class JavaTestCompiler(
         // check is .class file exists
         return Pair(File(classFilePath).exists(), errorMsg)
     }
-
 
     override fun getPath(buildPath: String): String {
         // create the path for the command

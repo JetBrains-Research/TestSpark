@@ -5,7 +5,8 @@ package org.jetbrains.research.testspark.core.test
  */
 interface TestsPersistentStorage {
 
-    val testCompiler : TestCompiler
+    val testCompiler: TestCompiler
+
     /**
      * Save the generated tests to a specified directory.
      *

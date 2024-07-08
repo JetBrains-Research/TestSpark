@@ -9,7 +9,7 @@ class PrintTestBodyStrategy {
             testInitiatedText: String,
             lines: MutableList<TestLine>,
             throwsException: String,
-            name: String
+            name: String,
         ): String {
             var testFullText = testInitiatedText
 
@@ -42,7 +42,7 @@ class PrintTestBodyStrategy {
             testInitiatedText: String,
             lines: MutableList<TestLine>,
             throwsException: String,
-            name: String
+            name: String,
         ): String {
             var testFullText = testInitiatedText
 

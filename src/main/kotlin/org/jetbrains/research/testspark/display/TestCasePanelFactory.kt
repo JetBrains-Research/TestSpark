@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.display
 
-
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -29,10 +28,6 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
-import org.jetbrains.research.testspark.display.IconButtonCreator
-import org.jetbrains.research.testspark.display.ModifiedLinesGetter
-import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
-import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper
@@ -468,12 +463,12 @@ class TestCasePanelFactory(
             testCase.testName = when (language) {
                 org.jetbrains.research.testspark.core.utils.Language.Kotlin -> KotlinClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
                     testCase.testName,
-                    code
+                    code,
                 )
 
                 org.jetbrains.research.testspark.core.utils.Language.Java -> JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
                     testCase.testName,
-                    code
+                    code,
                 )
             }
             testCase.testCode = code
@@ -542,7 +537,7 @@ class TestCasePanelFactory(
                 uiContext!!.testGenerationOutput.packageLine,
                 uiContext.testGenerationOutput.resultPath,
                 uiContext.projectContext,
-                language
+                language,
             )
 
         testCase.coveredLines = newTestCase.coveredLines
@@ -683,12 +678,12 @@ class TestCasePanelFactory(
         testCase.testName = when (language) {
             org.jetbrains.research.testspark.core.utils.Language.Kotlin -> KotlinClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
                 testCase.testName,
-                languageTextField.document.text
+                languageTextField.document.text,
             )
 
             org.jetbrains.research.testspark.core.utils.Language.Java -> JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
                 testCase.testName,
-                languageTextField.document.text
+                languageTextField.document.text,
             )
         }
         testCase.testCode = languageTextField.document.text

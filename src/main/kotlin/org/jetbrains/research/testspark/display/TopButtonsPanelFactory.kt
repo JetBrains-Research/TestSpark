@@ -71,7 +71,7 @@ class TopButtonsPanelFactory(private val project: Project, private val language:
                 project,
                 testsPassedLabel,
                 testsPassedText,
-                runAllButton
+                runAllButton,
             )
 
             Language.Kotlin -> TopButtonsPanelStrategy.updateTopKotlinLabels(
@@ -81,7 +81,7 @@ class TopButtonsPanelFactory(private val project: Project, private val language:
                 project,
                 testsPassedLabel,
                 testsPassedText,
-                runAllButton
+                runAllButton,
             )
         }
     }

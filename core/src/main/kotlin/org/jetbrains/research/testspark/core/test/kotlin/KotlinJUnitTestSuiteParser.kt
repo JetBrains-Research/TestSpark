@@ -18,7 +18,7 @@ class KotlinJUnitTestSuiteParser(
             importPattern,
             packageName,
             testNamePattern = "fun",
-            Language.Kotlin
+            Language.Kotlin,
         )
     }
 }

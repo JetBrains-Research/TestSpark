@@ -2,7 +2,6 @@ package org.jetbrains.research.testspark.core.test.parsers.kotlin
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.kotlin.KotlinJUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
 import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
@@ -118,7 +117,7 @@ class KotlinJUnitTestSuiteParserTest {
             kotlinImportPattern,
             "org.my.package",
             testNamePattern = "fun",
-            Language.Kotlin
+            Language.Kotlin,
         )
         assertNotNull(testSuite)
         assert(testSuite.imports.contains("import org.mockito.Mockito.*"))

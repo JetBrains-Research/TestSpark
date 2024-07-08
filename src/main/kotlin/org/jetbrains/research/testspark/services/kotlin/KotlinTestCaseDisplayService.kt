@@ -14,7 +14,10 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.*
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiManager
 import com.intellij.refactoring.suggested.endOffset
 import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
@@ -259,17 +262,17 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
                 file.isDirectory || (
-                        file.extension?.lowercase(Locale.getDefault()) == "kotlin" && (
-                                PsiManager.getInstance(project).findFile(file!!) as KtFile
-                                ).classes.stream().map { it.name }
-                            .toArray()
-                            .contains(
-                                (
-                                        PsiManager.getInstance(project)
-                                            .findFile(file) as PsiJavaFile
-                                        ).name.removeSuffix(".kt"),
-                            )
+                    file.extension?.lowercase(Locale.getDefault()) == "kotlin" && (
+                        PsiManager.getInstance(project).findFile(file!!) as KtFile
+                        ).classes.stream().map { it.name }
+                        .toArray()
+                        .contains(
+                            (
+                                PsiManager.getInstance(project)
+                                    .findFile(file) as PsiJavaFile
+                                ).name.removeSuffix(".kt"),
                         )
+                    )
             }
         }
 
@@ -297,7 +300,7 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
         /**
          * PsiClass of a final java file
          */
-        var psiClass: PsiClass? = null
+        var ktClass: KtClass? = null
 
         /**
          * PsiJavaFile of a final java file
@@ -351,27 +354,29 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
                 chosenFile.createChildData(null, fileName)
                 virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$filePath")!!
                 psiKotlinFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as KtFile)
-                psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
+
+                val ktPsiFactory = KtPsiFactory(project)
+                ktClass = ktPsiFactory.createClass("class ${className.split(".")[0]} {}")
 
                 if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${uiContext!!.testGenerationOutput.runWith})")
+                    val annotationEntry =
+                        ktPsiFactory.createAnnotationEntry("@RunWith(${uiContext!!.testGenerationOutput.runWith})")
+                    ktClass!!.addBefore(annotationEntry, ktClass!!.body)
                 }
 
-                psiKotlinFile!!.add(psiClass!!)
+                psiKotlinFile!!.add(ktClass!!)
             }
         } else {
             // Set services of the chosen file
             virtualFile = chosenFile
             psiKotlinFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as KtFile)
-            psiClass = psiKotlinFile!!.classes[
-                psiKotlinFile!!.classes.stream().map { it.name }.toArray()
-                    .indexOf(psiKotlinFile!!.name.removeSuffix(".kt")),
-            ]
+            val classNameNoSuffix = psiKotlinFile!!.name.removeSuffix(".kt")
+            ktClass = psiKotlinFile?.declarations?.filterIsInstance<KtClass>()?.find { it.name == classNameNoSuffix }
         }
 
         // Add tests to the file
         WriteCommandAction.runWriteCommandAction(project) {
-            appendTestsToClass(testCaseComponents, KotlinPsiClassWrapper(psiClass as KtClass), psiKotlinFile!!)
+            appendTestsToClass(testCaseComponents, KotlinPsiClassWrapper(ktClass as KtClass), psiKotlinFile!!)
         }
 
         // Remove the selected test cases from the cache and the tool window UI
@@ -456,13 +461,10 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
             "package $packageLine\n\n"
         }
 
-        // Check if the package statement already exists
-        if (outputFile.packageDirective == null) {
-            // Insert the package statement at the beginning of the document
-            PsiDocumentManager.getInstance(project).getDocument(outputFile)?.let { document ->
-                document.insertString(0, packageStatement)
-                PsiDocumentManager.getInstance(project).commitDocument(document)
-            }
+        // Insert the package statement at the beginning of the document
+        PsiDocumentManager.getInstance(project).getDocument(outputFile)?.let { document ->
+            document.insertString(0, packageStatement)
+            PsiDocumentManager.getInstance(project).commitDocument(document)
         }
     }
 

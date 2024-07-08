@@ -1,14 +1,13 @@
 package org.jetbrains.research.testspark.display.strategies
 
 import com.intellij.openapi.components.service
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import javax.swing.JCheckBox
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
 import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import javax.swing.JButton
+import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 
@@ -21,7 +20,7 @@ class TopButtonsPanelStrategy {
             }
             project.service<JavaTestCaseDisplayService>()
                 .setTestsSelected(
-                    if (selected) project.service<JavaTestCaseDisplayService>().getTestCasePanels().size else 0
+                    if (selected) project.service<JavaTestCaseDisplayService>().getTestCasePanels().size else 0,
                 )
         }
 
@@ -32,7 +31,7 @@ class TopButtonsPanelStrategy {
             }
             project.service<KotlinTestCaseDisplayService>()
                 .setTestsSelected(
-                    if (selected) project.service<KotlinTestCaseDisplayService>().getTestCasePanels().size else 0
+                    if (selected) project.service<KotlinTestCaseDisplayService>().getTestCasePanels().size else 0,
                 )
         }
 
@@ -43,7 +42,7 @@ class TopButtonsPanelStrategy {
             project: Project,
             testsPassedLabel: JLabel,
             testsPassedText: String,
-            runAllButton: JButton
+            runAllButton: JButton,
         ) {
             var numberOfPassedTests = 0
             for (testCasePanelFactory in testCasePanelFactories) {
@@ -77,7 +76,7 @@ class TopButtonsPanelStrategy {
             project: Project,
             testsPassedLabel: JLabel,
             testsPassedText: String,
-            runAllButton: JButton
+            runAllButton: JButton,
         ) {
             var numberOfPassedTests = 0
             for (testCasePanelFactory in testCasePanelFactories) {

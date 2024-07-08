@@ -25,7 +25,7 @@ import kotlin.io.path.createDirectories
 
 class TestProcessor(
     val project: Project,
-    language : Language,
+    language: Language,
     givenProjectSDKPath: Path? = null,
 ) : TestsPersistentStorage {
     private val homeDirectory =
@@ -43,7 +43,7 @@ class TestProcessor(
         packageString: String,
         code: String,
         resultPath: String,
-        testFileName: String
+        testFileName: String,
     ): String {
         // Generate the final path for the generated tests
         var generatedTestPath = "$resultPath${File.separatorChar}"
@@ -156,7 +156,7 @@ class TestProcessor(
         packageLine: String,
         resultPath: String,
         projectContext: ProjectContext,
-        language: Language
+        language: Language,
     ): TestCase {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path

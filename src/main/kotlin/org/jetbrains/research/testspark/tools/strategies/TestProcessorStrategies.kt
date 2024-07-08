@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.tools.strategies
 
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
-import org.jetbrains.research.testspark.core.utils.Language
 import java.io.File
 
 class TestProcessorStrategies {

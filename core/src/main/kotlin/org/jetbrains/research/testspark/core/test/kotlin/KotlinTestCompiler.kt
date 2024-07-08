@@ -14,7 +14,6 @@ class KotlinTestCompiler(
     private val log = KotlinLogging.logger { this::class.java }
 
     override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
-
         // Compile file
         val errorMsg = CommandLineRunner.run(
             arrayListOf(
@@ -22,7 +21,7 @@ class KotlinTestCompiler(
                 "-cp",
                 "\"${getPath(projectBuildPath)}\"",
                 path,
-            )
+            ),
         )
 
         log.info { "Error message: '$errorMsg'" }

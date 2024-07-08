@@ -7,12 +7,11 @@ data class TestCasesCompilationResult(
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM>,
 )
 
-
 interface TestCompiler {
     fun compileTestCases(
         generatedTestCasesPaths: List<String>,
         buildPath: String,
-        testCases: MutableList<TestCaseGeneratedByLLM>
+        testCases: MutableList<TestCaseGeneratedByLLM>,
     ): TestCasesCompilationResult {
         var allTestCasesCompilable = true
         val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
