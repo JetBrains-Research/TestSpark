@@ -36,8 +36,12 @@ class TestProcessor(
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
-    override val testCompiler =
-        TestCompilerFactory.createTestCompiler(project, llmSettingsState.junitVersion, homeDirectory, language)
+    override val testCompiler = TestCompilerFactory.createTestCompiler(
+        project,
+        llmSettingsState.junitVersion,
+        homeDirectory,
+        language,
+    )
 
     override fun saveGeneratedTest(
         packageString: String,
