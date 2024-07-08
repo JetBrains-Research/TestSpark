@@ -29,4 +29,11 @@ enum class PromptKeyword(val text: String, val description: String, val mandator
         val endOffset = startOffset + textToHighlight.length
         return Pair(startOffset, endOffset)
     }
+
+    // TODO: replace all "\$$" with use of this `PromptKeyword.variable`
+    /**
+     * Provides variables from the underlying keyword.
+     */
+    val variable: String
+        get() = "\$${this.text}"
 }

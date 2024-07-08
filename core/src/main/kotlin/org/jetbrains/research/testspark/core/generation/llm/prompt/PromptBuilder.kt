@@ -6,15 +6,8 @@ import java.util.EnumMap
 
 
 /**
- * Provides variables from the underlying keyword.
- */
-private val PromptKeyword.variable: String
-    get() = "\$${this.text}"
-
-
-/**
  * Populates variables within the prompt template with the provided values.
- * Adheres to the Builder Pattern.
+ * Adheres to the **Builder Pattern**.
  */
 class PromptBuilder(private val promptTemplate: String) {
     private val insertedKeywordValues: EnumMap<PromptKeyword, String> = EnumMap(PromptKeyword::class.java)
@@ -31,14 +24,19 @@ class PromptBuilder(private val promptTemplate: String) {
         }
     }
 
-    private fun containsPromptKeyword(keyword: PromptKeyword): Boolean = promptTemplate.contains(keyword.variable)
+    private fun containsPromptKeyword(keyword: PromptKeyword): Boolean =
+        promptTemplate.contains(keyword.variable)
 
     private fun validatePromptKeyword(keyword: PromptKeyword) {
         if (!insertedKeywordValues.contains(keyword) && keyword.mandatory) {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.LANGUAGE.text}")
+            throw IllegalStateException("The prompt must contain ${keyword.text}")
         }
     }
 
+    /**
+     * Populates the `promptTemplate` with the values for keywords present in `insertedKeywordValues`.
+     * Validates that all mandatory fields are filled.
+     */
     fun build(): String {
         var populatedPrompt = promptTemplate
 
@@ -61,42 +59,18 @@ class PromptBuilder(private val promptTemplate: String) {
 
     fun insertLanguage(language: String) = apply {
         insert(PromptKeyword.LANGUAGE, language)
-        /*if (requiresPromptKeyword(PromptKeyword.LANGUAGE, promptTemplate)) {
-            val keyword = "\$${PromptKeyword.LANGUAGE.text}"
-            promptTemplate = promptTemplate.replace(keyword, language, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.LANGUAGE.text}")
-        }*/
     }
 
     fun insertName(classDisplayName: String) = apply {
         insert(PromptKeyword.NAME, classDisplayName)
-        /*if (requiresPromptKeyword(PromptKeyword.NAME, promptTemplate)) {
-            val keyword = "\$${PromptKeyword.NAME.text}"
-            promptTemplate = promptTemplate.replace(keyword, classDisplayName, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.NAME.text}")
-        }*/
     }
 
     fun insertTestingPlatform(testingPlatformName: String) = apply {
         insert(PromptKeyword.TESTING_PLATFORM, testingPlatformName)
-        /*if (requiresPromptKeyword(PromptKeyword.TESTING_PLATFORM, promptTemplate)) {
-            val keyword = "\$${PromptKeyword.TESTING_PLATFORM.text}"
-            promptTemplate = promptTemplate.replace(keyword, testingPlatformName, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.TESTING_PLATFORM.text}")
-        }*/
     }
 
     fun insertMockingFramework(mockingFrameworkName: String) = apply {
         insert(PromptKeyword.MOCKING_FRAMEWORK, mockingFrameworkName)
-        /*if (requiresPromptKeyword(PromptKeyword.MOCKING_FRAMEWORK, promptTemplate)) {
-            val keyword = "\$${PromptKeyword.MOCKING_FRAMEWORK.text}"
-            promptTemplate = promptTemplate.replace(keyword, mockingFrameworkName, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.MOCKING_FRAMEWORK.text}")
-        }*/
     }
 
     fun insertCodeUnderTest(classFullText: String, classesToTest: List<ClassRepresentation>) = apply {
@@ -111,22 +85,6 @@ class PromptBuilder(private val promptTemplate: String) {
         }
 
         insert(PromptKeyword.CODE, fullText)
-        /*if (requiresPromptKeyword(PromptKeyword.CODE, promptTemplate)) {
-            val keyword = "\$${PromptKeyword.CODE.text}"
-            var fullText = "```\n${classFullText}\n```\n"
-
-            for (i in 2..classesToTest.size) {
-                val subClass = classesToTest[i - 2]
-                val superClass = classesToTest[i - 1]
-
-                fullText += "${subClass.qualifiedName} extends ${superClass.qualifiedName}. " +
-                    "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
-                    "```\n"
-            }
-            promptTemplate = promptTemplate.replace(keyword, fullText, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.CODE.text}")
-        }*/
     }
 
     fun insertMethodsSignatures(interestingClasses: List<ClassRepresentation>) = apply {
@@ -251,18 +209,5 @@ class PromptBuilder(private val promptTemplate: String) {
         }
 
         insert(PromptKeyword.TEST_SAMPLE, fullText)
-
-        /*
-        val keyword = "\$${PromptKeyword.TEST_SAMPLE.text}"
-
-        if (requiresPromptKeyword(PromptKeyword.TEST_SAMPLE, promptTemplate)) {
-            var fullText = testSamplesCode
-            if (fullText.isNotBlank()) {
-                fullText = "Use this test samples:\n$fullText\n"
-            }
-            promptTemplate = promptTemplate.replace(keyword, fullText, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.TEST_SAMPLE.text}")
-        }*/
     }
 }
