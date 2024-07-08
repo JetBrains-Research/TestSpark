@@ -258,7 +258,6 @@ class TestSparkStarter : ApplicationStarter {
                     packageList.joinToString("."),
                     out,
                     projectContext,
-                    language
                 )
                 // Saving exception (if exists) thrown during the test execution
                 saveException(testcaseName, targetDirectory, testExecutionError)

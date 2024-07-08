@@ -16,15 +16,16 @@ class TestCompilerFactory {
             javaHomeDirectory: String? = null,
             language: Language
         ): TestCompiler {
-            val javaSDKHomePath = javaHomeDirectory ?: ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path
-            ?: throw RuntimeException("Java SDK not configured for the project.")
+            val javaSDKHomePath =
+                javaHomeDirectory ?: ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path
+                ?: throw RuntimeException("Java SDK not configured for the project.")
 
             val libraryPaths = LibraryPathsProvider.getTestCompilationLibraryPaths()
             val junitLibraryPaths = LibraryPathsProvider.getJUnitLibraryPaths(junitVersion)
 
             return when (language) {
                 Language.Java -> JavaTestCompiler(javaSDKHomePath, libraryPaths, junitLibraryPaths)
-                Language.Kotlin -> KotlinTestCompiler(javaSDKHomePath, libraryPaths, junitLibraryPaths)
+                Language.Kotlin -> KotlinTestCompiler(libraryPaths, junitLibraryPaths)
             }
         }
     }

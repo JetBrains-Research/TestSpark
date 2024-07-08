@@ -3,6 +3,8 @@ package org.jetbrains.research.testspark.core.test.parsers.kotlin
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.kotlin.KotlinJUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
+import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
 import org.junit.jupiter.api.Test
 import kotlin.test.assertNotNull
@@ -110,8 +112,14 @@ class KotlinJUnitTestSuiteParserTest {
             }
             ```
         """.trimIndent()
-        val parser = KotlinJUnitTestSuiteParser("org.my.package", JUnitVersion.JUnit5, kotlinImportPattern)
-        val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
+        val testSuite: TestSuiteGeneratedByLLM? = JUnitTestSuiteParserStrategy.parseTestSuite(
+            text,
+            JUnitVersion.JUnit5,
+            kotlinImportPattern,
+            "org.my.package",
+            testNamePattern = "fun",
+            Language.Kotlin
+        )
         assertNotNull(testSuite)
         assert(testSuite.imports.contains("import org.mockito.Mockito.*"))
         assert(testSuite.imports.contains("import org.test.Message as TestMessage"))

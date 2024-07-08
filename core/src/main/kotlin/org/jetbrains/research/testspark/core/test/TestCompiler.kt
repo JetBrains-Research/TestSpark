@@ -13,7 +13,20 @@ interface TestCompiler {
         generatedTestCasesPaths: List<String>,
         buildPath: String,
         testCases: MutableList<TestCaseGeneratedByLLM>
-    ): TestCasesCompilationResult
+    ): TestCasesCompilationResult {
+        var allTestCasesCompilable = true
+        val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
+
+        for (index in generatedTestCasesPaths.indices) {
+            val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
+            allTestCasesCompilable = allTestCasesCompilable && compilable
+            if (compilable) {
+                compilableTestCases.add(testCases[index])
+            }
+        }
+
+        return TestCasesCompilationResult(allTestCasesCompilable, compilableTestCases)
+    }
 
     /**
      * Compiles the code at the specified path using the provided project build path.

@@ -79,10 +79,9 @@ class TestProcessor(
         generatedTestPackage: String,
         resultPath: String,
         projectContext: ProjectContext,
-        language: Language,
     ): String {
         // find the proper javac
-        val javaRunner = TestProcessorStrategies.getRunner(language, homeDirectory)
+        val javaRunner = TestProcessorStrategies.getRunner(homeDirectory)
         // JaCoCo libs
         val jacocoAgentLibraryPath = "\"${LibraryPathsProvider.getJacocoAgentLibraryPath()}\""
         val jacocoCLILibraryPath = "\"${LibraryPathsProvider.getJacocoCliLibraryPath()}\""
@@ -189,7 +188,6 @@ class TestProcessor(
                 packageLine,
                 resultPath,
                 projectContext,
-                language
             )
 
             if (!File("$dataFileName.xml").exists()) {
