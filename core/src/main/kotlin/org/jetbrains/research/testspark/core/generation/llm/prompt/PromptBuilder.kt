@@ -54,6 +54,9 @@ class PromptBuilder(private val promptTemplate: String) {
     }
 
     private fun insert(keyword: PromptKeyword, value: String) {
+        if (!templateKeywords.contains(keyword)) {
+            throw IllegalArgumentException("Prompt template does not contain ${keyword.text}")
+        }
         insertedKeywordValues[keyword] = value
     }
 

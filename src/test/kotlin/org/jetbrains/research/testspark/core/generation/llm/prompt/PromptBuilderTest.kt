@@ -149,6 +149,15 @@ class PromptBuilderTest {
     }
 
     @Test
+    fun throwsOnNonExistentKeywordInsertion() {
+        val template = "Language: ${PromptKeyword.LANGUAGE.variable}"
+        val exception = assertThrows<IllegalArgumentException> {
+            PromptBuilder(template).insertName("Name")
+        }
+        assertEquals("Prompt template does not contain ${PromptKeyword.NAME.text}", exception.message)
+    }
+
+    @Test
     fun insertMethodsSignatures() {
         // TODO: finish
     }
