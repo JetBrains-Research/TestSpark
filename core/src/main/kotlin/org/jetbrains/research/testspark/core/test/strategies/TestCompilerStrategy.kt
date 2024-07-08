@@ -13,7 +13,7 @@ class TestCompilerStrategy {
         fun compileJavaCode(
             path: String,
             javaHomeDirectoryPath: String,
-            classPaths: String
+            classPaths: String,
         ): Pair<Boolean, String> {
             // find the proper javac
             val javaCompile = File(javaHomeDirectoryPath).walk()

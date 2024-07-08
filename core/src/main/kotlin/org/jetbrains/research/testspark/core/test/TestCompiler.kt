@@ -48,12 +48,12 @@ class TestCompiler(
             Language.Java -> TestCompilerStrategy.compileJavaCode(
                 path,
                 "\"${getClassPaths(projectBuildPath)}\"",
-                javaHomeDirectoryPath
+                javaHomeDirectoryPath,
             )
 
             Language.Kotlin -> TestCompilerStrategy.compileKotlinCode(
                 path,
-                "\"${getClassPaths(projectBuildPath)}\""
+                "\"${getClassPaths(projectBuildPath)}\"",
             )
         }
     }
