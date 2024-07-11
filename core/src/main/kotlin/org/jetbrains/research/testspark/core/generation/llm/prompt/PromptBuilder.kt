@@ -54,8 +54,8 @@ class PromptBuilder(private val promptTemplate: String) {
     }
 
     private fun insert(keyword: PromptKeyword, value: String) {
-        if (!templateKeywords.contains(keyword)) {
-            throw IllegalArgumentException("Prompt template does not contain ${keyword.text}")
+        if (!templateKeywords.contains(keyword) && keyword.mandatory) {
+            throw IllegalArgumentException("Prompt template does not contain mandatory ${keyword.text}")
         }
         insertedKeywordValues[keyword] = value
     }
@@ -76,6 +76,7 @@ class PromptBuilder(private val promptTemplate: String) {
         insert(PromptKeyword.MOCKING_FRAMEWORK, mockingFrameworkName)
     }
 
+    // TODO: rename variables (not class but code construct)
     fun insertCodeUnderTest(classFullText: String, classesToTest: List<ClassRepresentation>) = apply {
         var fullText = "```\n${classFullText}\n```\n"
         for (i in 2..classesToTest.size) {

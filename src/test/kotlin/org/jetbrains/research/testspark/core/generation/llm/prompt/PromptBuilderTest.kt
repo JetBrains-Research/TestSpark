@@ -154,7 +154,7 @@ class PromptBuilderTest {
         val exception = assertThrows<IllegalArgumentException> {
             PromptBuilder(template).insertName("Name")
         }
-        assertEquals("Prompt template does not contain ${PromptKeyword.NAME.text}", exception.message)
+        assertEquals("Prompt template does not contain mandatory ${PromptKeyword.NAME.text}", exception.message)
     }
 
     @Test
