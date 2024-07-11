@@ -21,6 +21,7 @@ import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
+import org.jetbrains.research.testspark.tools.llm.generation.hf.HuggingFacePlatform
 import org.jetbrains.research.testspark.tools.llm.generation.openai.OpenAIPlatform
 import java.net.HttpURLConnection
 import javax.swing.DefaultComboBoxModel
@@ -67,6 +68,9 @@ object LLMHelper {
             if (platformSelector.selectedItem!!.toString() == settingsState.grazieName) {
                 models = getGrazieModels()
             }
+            if (platformSelector.selectedItem!!.toString() == settingsState.huggingFaceName) {
+                models = getHuggingFaceModels()
+            }
             modelSelector.model = DefaultComboBoxModel(models)
             for (index in llmPlatforms.indices) {
                 if (llmPlatforms[index].name == settingsState.openAIName &&
@@ -79,6 +83,12 @@ object LLMHelper {
                     llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
                 ) {
                     modelSelector.selectedItem = settingsState.grazieModel
+                    llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
+                }
+                if (llmPlatforms[index].name == settingsState.huggingFaceName &&
+                    llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+                ) {
+                    modelSelector.selectedItem = settingsState.huggingFaceModel
                     llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
                 }
             }
@@ -111,6 +121,12 @@ object LLMHelper {
             ) {
                 llmUserTokenField.text = settingsState.grazieToken
                 llmPlatforms[index].token = settingsState.grazieToken
+            }
+            if (llmPlatforms[index].name == settingsState.huggingFaceName &&
+                llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+            ) {
+                llmUserTokenField.text = settingsState.huggingFaceToken
+                llmPlatforms[index].token = settingsState.huggingFaceToken
             }
         }
     }
@@ -185,8 +201,6 @@ object LLMHelper {
         if (isGrazieClassLoaded()) {
             platformSelector.model = DefaultComboBoxModel(llmPlatforms.map { it.name }.toTypedArray())
             platformSelector.selectedItem = settingsState.currentLLMPlatformName
-        } else {
-            platformSelector.isEnabled = false
         }
 
         llmUserTokenField.toolTipText = LLMSettingsBundle.get("llmToken")
@@ -202,7 +216,7 @@ object LLMHelper {
      * @return The list of LLMPlatforms.
      */
     fun getLLLMPlatforms(): List<LLMPlatform> {
-        return listOf(OpenAIPlatform(), GraziePlatform())
+        return listOf(OpenAIPlatform(), GraziePlatform(), HuggingFacePlatform())
     }
 
     /**
@@ -327,5 +341,14 @@ object LLMHelper {
         } catch (e: ClassNotFoundException) {
             arrayOf("")
         }
+    }
+
+    /**
+     * Retrieves the available HuggingFace models.
+     *
+     * @return an array of string representing the available HuggingFace models
+     */
+    private fun getHuggingFaceModels(): Array<String> {
+        return arrayOf("Meta-Llama-3-8B-Instruct", "Meta-Llama-3-70B-Instruct")
     }
 }
