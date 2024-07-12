@@ -119,8 +119,6 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
         while (true) {
             if (ToolUtils.isProcessCanceled(indicator)) return
 
-            // TODO: try to remove the sleep
-            Thread.sleep(50L)
             var text = httpRequest.reader.readLine()
 
             if (text.isEmpty()) continue
