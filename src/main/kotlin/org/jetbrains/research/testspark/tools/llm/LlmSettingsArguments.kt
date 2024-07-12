@@ -57,6 +57,7 @@ class LlmSettingsArguments(private val project: Project) {
     fun getToken(): String = when (currentLLMPlatformName()) {
         llmSettingsState.openAIName -> llmSettingsState.openAIToken
         llmSettingsState.grazieName -> llmSettingsState.grazieToken
+        llmSettingsState.huggingFaceName -> llmSettingsState.huggingFaceToken
         else -> ""
     }
 
@@ -68,6 +69,7 @@ class LlmSettingsArguments(private val project: Project) {
     fun getModel(): String = when (currentLLMPlatformName()) {
         llmSettingsState.openAIName -> llmSettingsState.openAIModel
         llmSettingsState.grazieName -> llmSettingsState.grazieModel
+        llmSettingsState.huggingFaceName -> llmSettingsState.huggingFaceModel
         else -> ""
     }
 }
