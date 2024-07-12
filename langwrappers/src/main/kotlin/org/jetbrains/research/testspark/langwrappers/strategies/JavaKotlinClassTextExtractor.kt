@@ -1,8 +1,6 @@
 package org.jetbrains.research.testspark.langwrappers.strategies
 
 import com.intellij.psi.PsiFile
-import org.jetbrains.research.testspark.core.utils.importPattern
-import org.jetbrains.research.testspark.core.utils.packagePattern
 import org.jetbrains.research.testspark.langwrappers.LanguageClassTextExtractor
 
 /**
@@ -10,7 +8,7 @@ Direct implementor for the Java and Kotlin PsiWrappers
  */
 class JavaKotlinClassTextExtractor : LanguageClassTextExtractor {
 
-    override fun extract(file: PsiFile, classText: String): String {
+    override fun extract(file: PsiFile, classText: String, packagePattern: Regex, importPattern: Regex): String {
         var fullText = ""
         val fileText = file.text
 

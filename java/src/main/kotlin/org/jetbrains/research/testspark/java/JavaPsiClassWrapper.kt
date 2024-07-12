@@ -10,6 +10,8 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
+import org.jetbrains.research.testspark.core.utils.javaImportPattern
+import org.jetbrains.research.testspark.core.utils.javaPackagePattern
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.langwrappers.strategies.JavaKotlinClassTextExtractor
@@ -35,6 +37,8 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
         get() = JavaKotlinClassTextExtractor().extract(
             psiClass.containingFile,
             psiClass.text,
+            javaPackagePattern,
+            javaImportPattern,
         )
 
     override val classType: ClassType
@@ -47,6 +51,8 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
             }
             return ClassType.CLASS
         }
+
+    override val rBrace: Int? = psiClass.rBrace?.textRange?.startOffset
 
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
         val scope = GlobalSearchScope.projectScope(project)
