@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.core.test.parsers.kotlin
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.data.strategies.KotlinPrintTestBodyStrategy
 import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
 import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
@@ -111,13 +112,14 @@ class KotlinJUnitTestSuiteParserTest {
             }
             ```
         """.trimIndent()
+        val printStrategy = KotlinPrintTestBodyStrategy()
         val testSuite: TestSuiteGeneratedByLLM? = JUnitTestSuiteParserStrategy.parseTestSuite(
             text,
             JUnitVersion.JUnit5,
             kotlinImportPattern,
             "org.my.package",
             testNamePattern = "fun",
-            Language.Kotlin,
+            printStrategy,
         )
         assertNotNull(testSuite)
         assert(testSuite.imports.contains("import org.mockito.Mockito.*"))

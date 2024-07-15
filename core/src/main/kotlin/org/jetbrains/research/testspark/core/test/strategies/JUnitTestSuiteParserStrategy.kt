@@ -2,10 +2,7 @@ package org.jetbrains.research.testspark.core.test.strategies
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.TestCaseParseResult
-import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.data.TestLine
-import org.jetbrains.research.testspark.core.test.data.TestLineType
-import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.data.*
 import org.jetbrains.research.testspark.core.utils.Language
 
 class JUnitTestSuiteParserStrategy {
@@ -16,7 +13,7 @@ class JUnitTestSuiteParserStrategy {
             importPattern: Regex,
             packageName: String,
             testNamePattern: String,
-            language: Language,
+            printTestBodyStrategy: PrintTestBodyStrategy,
         ): TestSuiteGeneratedByLLM? {
             if (rawText.isBlank()) {
                 return null
@@ -56,7 +53,7 @@ class JUnitTestSuiteParserStrategy {
 
                     val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
                     val result: TestCaseParseResult =
-                        testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, language) // ///
+                        testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, printTestBodyStrategy)
 
                     if (result.errorOccurred) {
                         println("WARNING: ${result.errorMessage}")
@@ -92,7 +89,7 @@ private class JUnitTestCaseParser {
         rawTest: String,
         isLastTestCaseInTestSuite: Boolean,
         testNamePattern: String,
-        language: Language,
+        printTestBodyStrategy: PrintTestBodyStrategy,
     ): TestCaseParseResult {
         var expectedException = ""
         var throwsException = ""
@@ -168,7 +165,7 @@ private class JUnitTestCaseParser {
             expectedException = expectedException,
             throwsException = throwsException,
             lines = testLines,
-            language = language,
+            printTestBodyStrategy = printTestBodyStrategy,
         )
 
         return TestCaseParseResult(

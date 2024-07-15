@@ -7,6 +7,8 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.data.strategies.JavaPrintTestBodyStrategy
+import org.jetbrains.research.testspark.core.test.data.strategies.KotlinPrintTestBodyStrategy
 import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
 import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
@@ -66,7 +68,7 @@ class JUnitTestsAssembler(
                 javaImportPattern,
                 packageName,
                 testNamePattern = "void",
-                Language.Java,
+                JavaPrintTestBodyStrategy(),
             )
 
             Language.Kotlin -> JUnitTestSuiteParserStrategy.parseTestSuite(
@@ -75,7 +77,7 @@ class JUnitTestsAssembler(
                 kotlinImportPattern,
                 packageName,
                 testNamePattern = "fun",
-                Language.Kotlin,
+                KotlinPrintTestBodyStrategy(),
             )
         }
 
@@ -95,15 +97,4 @@ class JUnitTestsAssembler(
         testSuite?.testCases?.forEach { testCase -> log.info("Generated test case: $testCase") }
         return testSuite
     }
-
-//    private fun createTestSuiteParser(
-//        packageName: String,
-//        jUnitVersion: JUnitVersion,
-//        language: Language,
-//    ): TestSuiteParser {
-//        return when (language) {
-//            Language.Java -> JavaJUnitTestSuiteParser(packageName, jUnitVersion, javaImportPattern)
-//            Language.Kotlin -> KotlinJUnitTestSuiteParser(packageName, jUnitVersion, kotlinImportPattern)
-//        }
-//    }
 }
