@@ -3,7 +3,11 @@ package org.jetbrains.research.testspark.core.test.strategies
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.TestCaseParseResult
 import org.jetbrains.research.testspark.core.test.TestSuiteParserStrategy
-import org.jetbrains.research.testspark.core.test.data.*
+import org.jetbrains.research.testspark.core.test.data.PrintTestBodyStrategy
+import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.data.TestLine
+import org.jetbrains.research.testspark.core.test.data.TestLineType
+import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
 class JUnitTestSuiteParserStrategy : TestSuiteParserStrategy {
     override fun parseTestSuite(
@@ -83,7 +87,7 @@ private class JUnitTestCaseParser {
         rawTest: String,
         isLastTestCaseInTestSuite: Boolean,
         testNamePattern: String,
-        printTestBodyStrategy: PrintTestBodyStrategy
+        printTestBodyStrategy: PrintTestBodyStrategy,
     ): TestCaseParseResult {
         var expectedException = ""
         var throwsException = ""

@@ -18,7 +18,7 @@ class JavaJUnitTestSuiteParser(
             importPattern,
             packageName,
             testNamePattern = "void",
-            JavaPrintTestBodyStrategy()
+            JavaPrintTestBodyStrategy(),
         )
     }
 }

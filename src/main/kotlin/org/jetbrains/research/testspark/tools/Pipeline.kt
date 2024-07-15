@@ -12,8 +12,8 @@ import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext

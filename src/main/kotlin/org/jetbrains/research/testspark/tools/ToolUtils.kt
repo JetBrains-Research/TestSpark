@@ -11,8 +11,8 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper

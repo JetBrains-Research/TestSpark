@@ -11,7 +11,7 @@ data class TestCaseGeneratedByLLM(
     var expectedException: String = "",
     var throwsException: String = "",
     var lines: MutableList<TestLine> = mutableListOf(),
-    val printTestBodyStrategy: PrintTestBodyStrategy
+    val printTestBodyStrategy: PrintTestBodyStrategy,
 ) {
 
     /**

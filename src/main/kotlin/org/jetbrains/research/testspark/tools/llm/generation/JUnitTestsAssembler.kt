@@ -3,18 +3,13 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
-import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParserFactory
 import org.jetbrains.research.testspark.core.test.Language
-import org.jetbrains.research.testspark.core.test.TestSuiteParserStrategy
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.java.JavaPrintTestBodyStrategy
-import org.jetbrains.research.testspark.core.test.kotlin.KotlinPrintTestBodyStrategy
 import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
-import org.jetbrains.research.testspark.core.utils.javaImportPattern
-import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 
@@ -64,7 +59,13 @@ class JUnitTestsAssembler(
         val junitVersion = llmSettingsState.junitVersion
 
         val parsingStrategy = JUnitTestSuiteParserStrategy()
-        val testSuite = createTestSuiteParser(packageName, junitVersion, language, parsingStrategy)
+        val parser = JUnitTestSuiteParserFactory.generateJUnitTestSuiteParser(
+            packageName,
+            junitVersion,
+            language,
+            parsingStrategy,
+        )
+        val testSuite = parser.parseTestSuite(super.getContent())
 
         // save RunWith
         if (testSuite?.runWith?.isNotBlank() == true) {
@@ -81,32 +82,5 @@ class JUnitTestsAssembler(
         // logging generated test cases if any
         testSuite?.testCases?.forEach { testCase -> log.info("Generated test case: $testCase") }
         return testSuite
-    }
-
-    private fun createTestSuiteParser(
-        packageName: String,
-        jUnitVersion: JUnitVersion,
-        language: Language,
-        parsingStrategy : TestSuiteParserStrategy
-    ): TestSuiteGeneratedByLLM? {
-        return when (language) {
-            Language.Java -> parsingStrategy.parseTestSuite(
-                super.getContent(),
-                jUnitVersion,
-                javaImportPattern,
-                packageName,
-                testNamePattern = "void",
-                JavaPrintTestBodyStrategy(),
-            )
-
-            Language.Kotlin -> parsingStrategy.parseTestSuite(
-                super.getContent(),
-                jUnitVersion,
-                kotlinImportPattern,
-                packageName,
-                testNamePattern = "fun",
-                KotlinPrintTestBodyStrategy(),
-            )
-        }
     }
 }
