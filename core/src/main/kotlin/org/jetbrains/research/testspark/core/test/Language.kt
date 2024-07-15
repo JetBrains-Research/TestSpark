@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.core.utils
+package org.jetbrains.research.testspark.core.test
 
 /**
  * Language ID string should be the same as the language name in com.intellij.lang.Language

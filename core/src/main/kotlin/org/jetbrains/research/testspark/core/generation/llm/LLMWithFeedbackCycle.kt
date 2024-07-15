@@ -10,13 +10,13 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeRed
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.Language
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.utils.Language
 import java.io.File
 
 enum class FeedbackCycleExecutionResult {

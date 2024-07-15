@@ -8,7 +8,12 @@ Direct implementor for the Java and Kotlin PsiWrappers
  */
 class JavaKotlinClassTextExtractor : LanguageClassTextExtractor {
 
-    override fun extract(file: PsiFile, classText: String, packagePattern: Regex, importPattern: Regex): String {
+    override fun extract(
+        file: PsiFile,
+        classText: String,
+        packagePattern: Regex,
+        importPattern: Regex,
+    ): String {
         var fullText = ""
         val fileText = file.text
 

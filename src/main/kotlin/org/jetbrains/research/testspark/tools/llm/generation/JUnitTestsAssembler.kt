@@ -3,16 +3,16 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.data.strategies.JavaPrintTestBodyStrategy
-import org.jetbrains.research.testspark.core.test.data.strategies.KotlinPrintTestBodyStrategy
-import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
+import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
+import org.jetbrains.research.testspark.core.test.parsers.java.JavaJUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.test.parsers.kotlin.KotlinJUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
-import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 
@@ -61,7 +61,34 @@ class JUnitTestsAssembler(
     override fun assembleTestSuite(packageName: String, language: Language): TestSuiteGeneratedByLLM? {
         val junitVersion = llmSettingsState.junitVersion
 
-        val testSuite: TestSuiteGeneratedByLLM? = when (language) {
+        val parsingStrategy = JUnitTestSuiteParserStrategy()
+        val parser = createTestSuiteParser(packageName, junitVersion, language)
+        val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(super.getContent())
+
+        // save RunWith
+        if (testSuite?.runWith?.isNotBlank() == true) {
+            generationData.runWith = testSuite.runWith
+            generationData.importsCode.add(junitVersion.runWithAnnotationMeta.import)
+        } else {
+            generationData.runWith = ""
+            generationData.importsCode.remove(junitVersion.runWithAnnotationMeta.import)
+        }
+
+        // save annotations and pre-set methods
+        generationData.otherInfo = testSuite?.otherInfo ?: ""
+
+        // logging generated test cases if any
+        testSuite?.testCases?.forEach { testCase -> log.info("Generated test case: $testCase") }
+        return testSuite
+    }
+
+    private fun createTestSuiteParser(
+        packageName: String,
+        jUnitVersion: JUnitVersion,
+        language: Language,
+        parsingStrategy : KLNKLLDLDL
+    ): TestSuiteParser {
+        return when (language) {
             Language.Java -> JUnitTestSuiteParserStrategy.parseTestSuite(
                 super.getContent(),
                 junitVersion,
@@ -80,21 +107,5 @@ class JUnitTestsAssembler(
                 KotlinPrintTestBodyStrategy(),
             )
         }
-
-        // save RunWith
-        if (testSuite?.runWith?.isNotBlank() == true) {
-            generationData.runWith = testSuite.runWith
-            generationData.importsCode.add(junitVersion.runWithAnnotationMeta.import)
-        } else {
-            generationData.runWith = ""
-            generationData.importsCode.remove(junitVersion.runWithAnnotationMeta.import)
-        }
-
-        // save annotations and pre-set methods
-        generationData.otherInfo = testSuite?.otherInfo ?: ""
-
-        // logging generated test cases if any
-        testSuite?.testCases?.forEach { testCase -> log.info("Generated test case: $testCase") }
-        return testSuite
     }
 }

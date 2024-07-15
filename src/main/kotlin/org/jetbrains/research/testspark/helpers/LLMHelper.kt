@@ -12,8 +12,8 @@ import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModif
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.Language
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.utils.Language
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
