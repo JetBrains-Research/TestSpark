@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.core.data.ClassType
-import org.jetbrains.research.testspark.core.utils.Language
+import org.jetbrains.research.testspark.core.test.Language
 
 /**
  * Interface representing a wrapper for PSI methods,

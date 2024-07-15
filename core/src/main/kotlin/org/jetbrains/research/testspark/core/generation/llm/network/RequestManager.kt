@@ -7,8 +7,8 @@ import org.jetbrains.research.testspark.core.data.ChatUserMessage
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.Language
 import org.jetbrains.research.testspark.core.test.TestsAssembler
-import org.jetbrains.research.testspark.core.utils.Language
 
 abstract class RequestManager(var token: String) {
     enum class SendResult {

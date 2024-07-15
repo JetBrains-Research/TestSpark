@@ -58,7 +58,7 @@ import javax.swing.border.MatteBorder
 
 class TestCasePanelFactory(
     private val project: Project,
-    private val language: org.jetbrains.research.testspark.core.utils.Language,
+    private val language: org.jetbrains.research.testspark.core.test.Language,
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
