@@ -3,7 +3,6 @@ package org.jetbrains.research.testspark.core.test
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.strategies.TestCompilerStrategy
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
-import org.jetbrains.research.testspark.core.utils.Language
 
 data class TestCasesCompilationResult(
     val allTestCasesCompilable: Boolean,

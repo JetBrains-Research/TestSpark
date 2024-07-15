@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.TestCompiler
-import org.jetbrains.research.testspark.core.utils.Language
+import org.jetbrains.research.testspark.core.test.Language
 
 class TestCompilerFactory {
     companion object {

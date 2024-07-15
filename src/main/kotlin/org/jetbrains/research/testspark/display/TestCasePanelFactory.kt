@@ -461,12 +461,12 @@ class TestCasePanelFactory(
             uiContext.errorMonitor.clear()
             val code = testSuitePresenter.toString(testSuite)
             testCase.testName = when (language) {
-                org.jetbrains.research.testspark.core.utils.Language.Kotlin -> KotlinClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+                org.jetbrains.research.testspark.core.test.Language.Kotlin -> KotlinClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
                     testCase.testName,
                     code,
                 )
 
-                org.jetbrains.research.testspark.core.utils.Language.Java -> JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+                org.jetbrains.research.testspark.core.test.Language.Java -> JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
                     testCase.testName,
                     code,
                 )
@@ -675,12 +675,12 @@ class TestCasePanelFactory(
      */
     private fun updateTestCaseInformation() {
         testCase.testName = when (language) {
-            org.jetbrains.research.testspark.core.utils.Language.Kotlin -> KotlinClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+            org.jetbrains.research.testspark.core.test.Language.Kotlin -> KotlinClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
                 testCase.testName,
                 languageTextField.document.text,
             )
 
-            org.jetbrains.research.testspark.core.utils.Language.Java -> JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+            org.jetbrains.research.testspark.core.test.Language.Java -> JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
                 testCase.testName,
                 languageTextField.document.text,
             )

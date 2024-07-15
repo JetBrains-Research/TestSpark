@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.core.test.data.strategies
+package org.jetbrains.research.testspark.core.test.java
 
 import org.jetbrains.research.testspark.core.test.data.PrintTestBodyStrategy
 import org.jetbrains.research.testspark.core.test.data.TestLine

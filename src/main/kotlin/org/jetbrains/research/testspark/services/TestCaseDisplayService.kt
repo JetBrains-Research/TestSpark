@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.services
 import com.intellij.psi.PsiFile
 import com.intellij.ui.EditorTextField
 import org.jetbrains.research.testspark.core.data.Report
-import org.jetbrains.research.testspark.core.utils.Language
+import org.jetbrains.research.testspark.core.test.Language
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import javax.swing.JPanel

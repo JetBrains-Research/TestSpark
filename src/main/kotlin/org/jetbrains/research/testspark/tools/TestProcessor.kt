@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
-import org.jetbrains.research.testspark.core.utils.Language
+import org.jetbrains.research.testspark.core.test.Language
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService

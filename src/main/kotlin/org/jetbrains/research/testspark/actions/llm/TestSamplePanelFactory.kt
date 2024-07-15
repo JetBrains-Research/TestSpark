@@ -25,7 +25,7 @@ class TestSamplePanelFactory(
     private val middlePanel: JPanel,
     private val testNames: MutableList<String>,
     private val initialTestCodes: MutableList<String>,
-    private val language: org.jetbrains.research.testspark.core.utils.Language,
+    private val language: org.jetbrains.research.testspark.core.test.Language,
 ) {
     // init components
     private val currentTestCodes = initialTestCodes.toMutableList()

@@ -18,6 +18,7 @@ class KotlinJUnitTestSuiteParser(
             importPattern,
             packageName,
             testNamePattern = "fun",
+            KotlinPrintTestBodyStrategy()
         )
     }
 }

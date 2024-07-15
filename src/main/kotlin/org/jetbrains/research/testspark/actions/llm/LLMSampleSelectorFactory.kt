@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.core.utils.Language
+import org.jetbrains.research.testspark.core.test.Language
 import org.jetbrains.research.testspark.helpers.LLMTestSampleHelper
 import java.awt.Font
 import javax.swing.ButtonGroup

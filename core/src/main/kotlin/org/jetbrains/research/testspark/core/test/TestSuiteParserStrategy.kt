@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.core.test
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
+import org.jetbrains.research.testspark.core.test.data.PrintTestBodyStrategy
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
 interface TestSuiteParserStrategy {
@@ -10,5 +11,6 @@ interface TestSuiteParserStrategy {
         importPattern: Regex,
         packageName: String,
         testNamePattern: String,
+        printTestBodyStrategy: PrintTestBodyStrategy,
     ): TestSuiteGeneratedByLLM?
 }

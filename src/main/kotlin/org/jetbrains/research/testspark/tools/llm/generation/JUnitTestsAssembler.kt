@@ -6,13 +6,15 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.TestSuiteParserStrategy
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
-import org.jetbrains.research.testspark.core.test.parsers.java.JavaJUnitTestSuiteParser
-import org.jetbrains.research.testspark.core.test.parsers.kotlin.KotlinJUnitTestSuiteParser
-import org.jetbrains.research.testspark.core.utils.Language
+import org.jetbrains.research.testspark.core.test.java.JavaPrintTestBodyStrategy
+import org.jetbrains.research.testspark.core.test.kotlin.KotlinPrintTestBodyStrategy
+import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
+import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 
@@ -62,8 +64,7 @@ class JUnitTestsAssembler(
         val junitVersion = llmSettingsState.junitVersion
 
         val parsingStrategy = JUnitTestSuiteParserStrategy()
-        val parser = createTestSuiteParser(packageName, junitVersion, language)
-        val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(super.getContent())
+        val testSuite = createTestSuiteParser(packageName, junitVersion, language, parsingStrategy)
 
         // save RunWith
         if (testSuite?.runWith?.isNotBlank() == true) {
@@ -86,21 +87,21 @@ class JUnitTestsAssembler(
         packageName: String,
         jUnitVersion: JUnitVersion,
         language: Language,
-        parsingStrategy : KLNKLLDLDL
-    ): TestSuiteParser {
+        parsingStrategy : TestSuiteParserStrategy
+    ): TestSuiteGeneratedByLLM? {
         return when (language) {
-            Language.Java -> JUnitTestSuiteParserStrategy.parseTestSuite(
+            Language.Java -> parsingStrategy.parseTestSuite(
                 super.getContent(),
-                junitVersion,
+                jUnitVersion,
                 javaImportPattern,
                 packageName,
                 testNamePattern = "void",
                 JavaPrintTestBodyStrategy(),
             )
 
-            Language.Kotlin -> JUnitTestSuiteParserStrategy.parseTestSuite(
+            Language.Kotlin -> parsingStrategy.parseTestSuite(
                 super.getContent(),
-                junitVersion,
+                jUnitVersion,
                 kotlinImportPattern,
                 packageName,
                 testNamePattern = "fun",

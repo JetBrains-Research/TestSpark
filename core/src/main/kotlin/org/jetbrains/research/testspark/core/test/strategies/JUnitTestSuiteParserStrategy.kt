@@ -1,12 +1,9 @@
-package org.jetbrains.research.testspark.core.test.parsers.strategies
+package org.jetbrains.research.testspark.core.test.strategies
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.TestCaseParseResult
 import org.jetbrains.research.testspark.core.test.TestSuiteParserStrategy
-import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.data.TestLine
-import org.jetbrains.research.testspark.core.test.data.TestLineType
-import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.core.test.data.*
 
 class JUnitTestSuiteParserStrategy : TestSuiteParserStrategy {
     override fun parseTestSuite(
@@ -15,6 +12,7 @@ class JUnitTestSuiteParserStrategy : TestSuiteParserStrategy {
         importPattern: Regex,
         packageName: String,
         testNamePattern: String,
+        printTestBodyStrategy: PrintTestBodyStrategy,
     ): TestSuiteGeneratedByLLM? {
         if (rawText.isBlank()) {
             return null
@@ -48,9 +46,9 @@ class JUnitTestSuiteParserStrategy : TestSuiteParserStrategy {
             testSet.forEach ca@{
                 val rawTest = "@Test$it"
 
-                    val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
-                    val result: TestCaseParseResult =
-                        testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, printTestBodyStrategy)
+                val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
+                val result: TestCaseParseResult =
+                    testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, printTestBodyStrategy)
 
                 if (result.errorOccurred) {
                     println("WARNING: ${result.errorMessage}")
@@ -59,8 +57,8 @@ class JUnitTestSuiteParserStrategy : TestSuiteParserStrategy {
 
                 val currentTest = result.testCase!!
 
-                    // TODO: make logging work
-                    // log.info("New test case: $currentTest")
+                // TODO: make logging work
+                // log.info("New test case: $currentTest")
 
                 testCases.add(currentTest)
             }
@@ -81,7 +79,12 @@ class JUnitTestSuiteParserStrategy : TestSuiteParserStrategy {
 }
 
 private class JUnitTestCaseParser {
-    fun parse(rawTest: String, isLastTestCaseInTestSuite: Boolean, testNamePattern: String): TestCaseParseResult {
+    fun parse(
+        rawTest: String,
+        isLastTestCaseInTestSuite: Boolean,
+        testNamePattern: String,
+        printTestBodyStrategy: PrintTestBodyStrategy
+    ): TestCaseParseResult {
         var expectedException = ""
         var throwsException = ""
         val testLines: MutableList<TestLine> = mutableListOf()
