@@ -1,10 +1,10 @@
 package org.jetbrains.research.testspark.core.test.kotlin
 
-import org.jetbrains.research.testspark.core.test.PrintTestBody
+import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.data.TestLine
 import org.jetbrains.research.testspark.core.test.data.TestLineType
 
-class KotlinPrintTestBodyStrategy : PrintTestBody {
+class KotlinTestBodyPrinter : TestBodyPrinter {
     override fun printTestBody(
         testInitiatedText: String,
         lines: MutableList<TestLine>,

@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.core.test.strategies
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.test.PrintTestBody
+import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.TestCaseParseResult
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestLine
@@ -15,7 +15,7 @@ class JUnitTestSuiteParserStrategy : TestSuiteParserStrategy {
         importPattern: Regex,
         packageName: String,
         testNamePattern: String,
-        printTestBodyStrategy: PrintTestBody,
+        printTestBodyStrategy: TestBodyPrinter,
     ): TestSuiteGeneratedByLLM? {
         if (rawText.isBlank()) {
             return null
@@ -86,7 +86,7 @@ private class JUnitTestCaseParser {
         rawTest: String,
         isLastTestCaseInTestSuite: Boolean,
         testNamePattern: String,
-        printTestBodyStrategy: PrintTestBody,
+        printTestBodyStrategy: TestBodyPrinter,
     ): TestCaseParseResult {
         var expectedException = ""
         var throwsException = ""

@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.core.test.data
 
-import org.jetbrains.research.testspark.core.test.PrintTestBody
+import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 
 /**
  *
@@ -13,7 +13,7 @@ data class TestCaseGeneratedByLLM(
     var expectedException: String = "",
     var throwsException: String = "",
     var lines: MutableList<TestLine> = mutableListOf(),
-    val printTestBodyStrategy: PrintTestBody,
+    val printTestBodyStrategy: TestBodyPrinter,
 ) {
 
     /**
