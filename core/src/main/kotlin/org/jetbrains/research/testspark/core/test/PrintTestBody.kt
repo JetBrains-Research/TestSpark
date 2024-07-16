@@ -1,6 +1,8 @@
-package org.jetbrains.research.testspark.core.test.data
+package org.jetbrains.research.testspark.core.test
 
-interface PrintTestBodyStrategy {
+import org.jetbrains.research.testspark.core.test.data.TestLine
+
+interface PrintTestBody {
     fun printTestBody(
         testInitiatedText: String,
         lines: MutableList<TestLine>,

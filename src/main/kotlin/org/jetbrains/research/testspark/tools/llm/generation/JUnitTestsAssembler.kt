@@ -5,13 +5,13 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParserFactory
 import org.jetbrains.research.testspark.core.test.Language
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.JUnitTestSuiteParserFactory
 
 /**
  * Assembler class for generating and organizing test cases.
@@ -59,7 +59,7 @@ class JUnitTestsAssembler(
         val junitVersion = llmSettingsState.junitVersion
 
         val parsingStrategy = JUnitTestSuiteParserStrategy()
-        val parser = JUnitTestSuiteParserFactory.generateJUnitTestSuiteParser(
+        val parser = JUnitTestSuiteParserFactory.createJUnitTestSuiteParser(
             packageName,
             junitVersion,
             language,
