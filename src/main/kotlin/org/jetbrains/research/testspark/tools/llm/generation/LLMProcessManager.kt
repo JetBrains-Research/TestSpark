@@ -22,7 +22,10 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.TestBodyPrinterFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.TestSuiteParserFactory
+import org.jetbrains.research.testspark.tools.TestsAssemblerFactory
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
@@ -132,6 +135,21 @@ class LLMProcessManager(
             }
         }
 
+        // Creation of JUnit specific parser, printer and assembler
+        val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
+        val testBodyPrinter = TestBodyPrinterFactory.createTestBodyPrinter(language)
+        val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
+            jUnitVersion,
+            language,
+            testBodyPrinter,
+        )
+        val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
+            indicator,
+            generatedTestsData,
+            testSuiteParser,
+            jUnitVersion,
+        )
+
         // Asking LLM to generate a test suite. Here we have a feedback cycle for LLM in case of wrong responses
         val llmFeedbackCycle = LLMWithFeedbackCycle(
             language = language,
@@ -143,7 +161,7 @@ class LLMProcessManager(
             resultPath = generatedTestsData.resultPath,
             buildPath = buildPath,
             requestManager = requestManager,
-            testsAssembler = JUnitTestsAssembler(project, indicator, generatedTestsData),
+            testsAssembler = testsAssembler,
             testCompiler = testCompiler,
             testStorage = testProcessor,
             testsPresenter = testsPresenter,

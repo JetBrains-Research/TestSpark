@@ -3,8 +3,7 @@ package org.jetbrains.research.testspark.core.test.parsers.kotlin
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.kotlin.KotlinJUnitTestSuiteParser
-import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
-import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
+import org.jetbrains.research.testspark.core.test.kotlin.KotlinTestBodyPrinter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -114,9 +113,9 @@ class KotlinJUnitTestSuiteParserTest {
             ```
         """.trimIndent()
 
-        val parsingStrategy = JUnitTestSuiteParserStrategy()
+        val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
-            KotlinJUnitTestSuiteParser("org.my.package", JUnitVersion.JUnit5, kotlinImportPattern, parsingStrategy)
+            KotlinJUnitTestSuiteParser(JUnitVersion.JUnit5, testBodyPrinter)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
         assertNotNull(testSuite)
         assertTrue(testSuite!!.imports.contains("import org.mockito.Mockito.*"))
@@ -148,9 +147,9 @@ class KotlinJUnitTestSuiteParserTest {
             ```
         """.trimIndent()
 
-        val parsingStrategy = JUnitTestSuiteParserStrategy()
+        val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
-            KotlinJUnitTestSuiteParser("org.my.package", JUnitVersion.JUnit5, kotlinImportPattern, parsingStrategy)
+            KotlinJUnitTestSuiteParser(JUnitVersion.JUnit5, testBodyPrinter)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
         assertNotNull(testSuite)
         assertTrue(testSuite!!.testCases.isEmpty())
@@ -171,9 +170,9 @@ class KotlinJUnitTestSuiteParserTest {
             ```
         """.trimIndent()
 
-        val parsingStrategy = JUnitTestSuiteParserStrategy()
+        val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
-            KotlinJUnitTestSuiteParser("org.my.package", JUnitVersion.JUnit5, kotlinImportPattern, parsingStrategy)
+            KotlinJUnitTestSuiteParser(JUnitVersion.JUnit5, testBodyPrinter)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
         assertNotNull(testSuite)
         assertEquals(1, testSuite!!.testCases.size)
@@ -200,9 +199,9 @@ class KotlinJUnitTestSuiteParserTest {
             ```
         """.trimIndent()
 
-        val parsingStrategy = JUnitTestSuiteParserStrategy()
+        val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
-            KotlinJUnitTestSuiteParser("org.my.package", JUnitVersion.JUnit5, kotlinImportPattern, parsingStrategy)
+            KotlinJUnitTestSuiteParser(JUnitVersion.JUnit5, testBodyPrinter)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
         assertNotNull(testSuite)
         assertEquals(2, testSuite!!.testCases.size)

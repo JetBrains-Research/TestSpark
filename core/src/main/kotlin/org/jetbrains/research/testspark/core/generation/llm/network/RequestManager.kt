@@ -78,7 +78,7 @@ abstract class RequestManager(var token: String) {
             return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
         }
 
-        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite(packageName, language)
+        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite()
 
         return if (testSuiteGeneratedByLLM == null) {
             LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
@@ -108,7 +108,7 @@ abstract class RequestManager(var token: String) {
             return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
         }
 
-        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite(packageName, language)
+        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite()
 
         return if (testSuiteGeneratedByLLM == null) {
             LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)

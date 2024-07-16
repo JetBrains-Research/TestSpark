@@ -14,10 +14,13 @@ import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.Language
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.TestBodyPrinterFactory
+import org.jetbrains.research.testspark.tools.TestSuiteParserFactory
+import org.jetbrains.research.testspark.tools.TestsAssemblerFactory
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
@@ -258,13 +261,28 @@ object LLMHelper {
             return null
         }
 
+        val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
+        val testBodyPrinter = TestBodyPrinterFactory.createTestBodyPrinter(language)
+        val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
+            jUnitVersion,
+            language,
+            testBodyPrinter,
+        )
+        // TODO create TestsAssemblerFactory when the TestSpark will be language agnostic
+        val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
+            indicator,
+            testGenerationOutput,
+            testSuiteParser,
+            jUnitVersion,
+        )
+
         val testSuite = executeTestCaseModificationRequest(
             language,
             testCase,
             task,
             indicator,
             requestManager,
-            testsAssembler = JUnitTestsAssembler(project, indicator, testGenerationOutput),
+            testsAssembler = testsAssembler,
             errorMonitor,
         )
         return testSuite

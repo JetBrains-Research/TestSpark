@@ -1,17 +1,13 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParserStrategy
-import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.JUnitTestSuiteParserFactory
 
 /**
  * Assembler class for generating and organizing test cases.
@@ -22,12 +18,11 @@ import org.jetbrains.research.testspark.tools.JUnitTestSuiteParserFactory
  * @property lastTestCount The count of the last generated tests.
  */
 class JUnitTestsAssembler(
-    val project: Project,
     val indicator: CustomProgressIndicator,
     val generationData: TestGenerationData,
+    val testSuiteParser: TestSuiteParser,
+    val junitVersion: JUnitVersion,
 ) : TestsAssembler() {
-    private val llmSettingsState: LLMSettingsState
-        get() = project.getService(LLMSettingsService::class.java).state
 
     private val log: Logger = Logger.getInstance(this.javaClass)
 
@@ -55,17 +50,8 @@ class JUnitTestsAssembler(
         }
     }
 
-    override fun assembleTestSuite(packageName: String, language: Language): TestSuiteGeneratedByLLM? {
-        val junitVersion = llmSettingsState.junitVersion
-
-        val parsingStrategy = JUnitTestSuiteParserStrategy()
-        val parser = JUnitTestSuiteParserFactory.createJUnitTestSuiteParser(
-            packageName,
-            junitVersion,
-            language,
-            parsingStrategy,
-        )
-        val testSuite = parser.parseTestSuite(super.getContent())
+    override fun assembleTestSuite(): TestSuiteGeneratedByLLM? {
+        val testSuite = testSuiteParser.parseTestSuite(super.getContent())
 
         // save RunWith
         if (testSuite?.runWith?.isNotBlank() == true) {
