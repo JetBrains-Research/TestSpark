@@ -282,7 +282,7 @@ object LLMHelper {
             task,
             indicator,
             requestManager,
-            testsAssembler = testsAssembler,
+            testsAssembler,
             errorMonitor,
         )
         return testSuite
