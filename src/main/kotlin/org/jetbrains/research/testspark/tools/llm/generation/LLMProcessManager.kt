@@ -106,8 +106,7 @@ class LLMProcessManager(
 
         // adapter for the existing prompt reduction functionality
         val promptSizeReductionStrategy = object : PromptSizeReductionStrategy {
-            override fun isReductionPossible(): Boolean =
-                promptManager.isPromptSizeReductionPossible(generatedTestsData)
+            override fun isReductionPossible(): Boolean = promptManager.isPromptSizeReductionPossible(generatedTestsData)
 
             override fun reduceSizeAndGeneratePrompt(): String {
                 if (!isReductionPossible()) {
