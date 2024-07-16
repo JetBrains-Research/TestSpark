@@ -11,6 +11,7 @@ import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.Language
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -41,6 +42,7 @@ import java.nio.file.Path
  */
 class LLMProcessManager(
     private val project: Project,
+    private val language: Language,
     private val promptManager: PromptManager,
     private val testSamplesCode: String,
     projectSDKPath: Path? = null,
@@ -88,6 +90,7 @@ class LLMProcessManager(
 
         val report = IJReport()
 
+        // PROMPT GENERATION
         val initialPromptMessage = promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
 
         val testCompiler = testProcessor.testCompiler
@@ -125,6 +128,7 @@ class LLMProcessManager(
 
         // Asking LLM to generate a test suite. Here we have a feedback cycle for LLM in case of wrong responses
         val llmFeedbackCycle = LLMWithFeedbackCycle(
+            language = language,
             report = report,
             initialPromptMessage = initialPromptMessage,
             promptSizeReductionStrategy = promptSizeReductionStrategy,

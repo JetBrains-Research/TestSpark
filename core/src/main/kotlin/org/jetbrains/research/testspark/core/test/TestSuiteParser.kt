@@ -1,6 +1,13 @@
-package org.jetbrains.research.testspark.core.test.parsers
+package org.jetbrains.research.testspark.core.test
 
+import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+
+data class TestCaseParseResult(
+    val testCase: TestCaseGeneratedByLLM?,
+    val errorMessage: String,
+    val errorOccurred: Boolean,
+)
 
 interface TestSuiteParser {
     /**

@@ -12,6 +12,7 @@ import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModif
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.Language
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
@@ -243,6 +244,7 @@ object LLMHelper {
      * @return instance of TestSuiteGeneratedByLLM if the generated test cases are parsable, otherwise null.
      */
     fun testModificationRequest(
+        language: Language,
         testCase: String,
         task: String,
         indicator: CustomProgressIndicator,
@@ -257,6 +259,7 @@ object LLMHelper {
         }
 
         val testSuite = executeTestCaseModificationRequest(
+            language,
             testCase,
             task,
             indicator,

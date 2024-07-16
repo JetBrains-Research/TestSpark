@@ -1,31 +1,30 @@
-package org.jetbrains.research.testspark.core.test.parsers.java
+package org.jetbrains.research.testspark.core.test.strategies
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
+import org.jetbrains.research.testspark.core.test.TestCaseParseResult
+import org.jetbrains.research.testspark.core.test.TestSuiteParserStrategy
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestLine
 import org.jetbrains.research.testspark.core.test.data.TestLineType
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.test.parsers.TestSuiteParser
-import org.jetbrains.research.testspark.core.utils.importPattern
 
-class JUnitTestSuiteParser(
-    private val packageName: String,
-    private val junitVersion: JUnitVersion,
-) : TestSuiteParser {
-    override fun parseTestSuite(rawText: String): TestSuiteGeneratedByLLM? {
+class JUnitTestSuiteParserStrategy : TestSuiteParserStrategy {
+    override fun parseTestSuite(
+        rawText: String,
+        junitVersion: JUnitVersion,
+        importPattern: Regex,
+        packageName: String,
+        testNamePattern: String,
+    ): TestSuiteGeneratedByLLM? {
         if (rawText.isBlank()) {
             return null
         }
 
         try {
-            var rawCode = rawText
-
-            if (rawText.contains("```")) {
-                rawCode = rawText.split("```")[1]
-            }
+            val rawCode = if (rawText.contains("```")) rawText.split("```")[1] else rawText
 
             // save imports
-            val imports = importPattern.findAll(rawCode, 0)
+            val imports = importPattern.findAll(rawCode)
                 .map { it.groupValues[0] }
                 .toSet()
 
@@ -50,7 +49,8 @@ class JUnitTestSuiteParser(
                 val rawTest = "@Test$it"
 
                 val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
-                val result: TestCaseParseResult = testCaseParser.parse(rawTest, isLastTestCaseInTestSuite)
+                val result: TestCaseParseResult =
+                    testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern)
 
                 if (result.errorOccurred) {
                     println("WARNING: ${result.errorMessage}")
@@ -81,14 +81,8 @@ class JUnitTestSuiteParser(
     }
 }
 
-private data class TestCaseParseResult(
-    val testCase: TestCaseGeneratedByLLM?,
-    val errorMessage: String,
-    val errorOccurred: Boolean,
-)
-
 private class JUnitTestCaseParser {
-    fun parse(rawTest: String, isLastTestCaseInTestSuite: Boolean): TestCaseParseResult {
+    fun parse(rawTest: String, isLastTestCaseInTestSuite: Boolean, testNamePattern: String): TestCaseParseResult {
         var expectedException = ""
         var throwsException = ""
         val testLines: MutableList<TestLine> = mutableListOf()
@@ -99,18 +93,17 @@ private class JUnitTestCaseParser {
         }
 
         // Get unexpected exceptions
-        /* Each test case should follow [public] void <testcase name> {...}
+        /* Each test case should follow fun <testcase name> {...}
             Tests do not return anything so it is safe to consider that void always appears before test case name
          */
-        val voidString = "void"
-        if (!rawTest.contains(voidString)) {
+        if (!rawTest.contains(testNamePattern)) {
             return TestCaseParseResult(
                 testCase = null,
-                errorMessage = "The raw Test does not contain $voidString:\n $rawTest",
+                errorMessage = "The raw Test does not contain $testNamePattern:\n $rawTest",
                 errorOccurred = true,
             )
         }
-        val interestingPartOfSignature = rawTest.split(voidString)[1]
+        val interestingPartOfSignature = rawTest.split(testNamePattern)[1]
             .split("{")[0]
             .split("()")[1]
             .trim()
@@ -120,7 +113,7 @@ private class JUnitTestCaseParser {
         }
 
         // Get test name
-        val testName: String = rawTest.split(voidString)[1]
+        val testName: String = rawTest.split(testNamePattern)[1]
             .split("()")[0]
             .trim()
 

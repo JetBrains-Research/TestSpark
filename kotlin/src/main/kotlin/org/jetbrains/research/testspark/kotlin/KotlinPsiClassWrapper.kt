@@ -17,6 +17,8 @@ import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.research.testspark.core.data.ClassType
+import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
+import org.jetbrains.research.testspark.core.utils.kotlinPackagePattern
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.langwrappers.strategies.JavaKotlinClassTextExtractor
@@ -63,6 +65,8 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
         get() = JavaKotlinClassTextExtractor().extract(
             psiClass.containingFile,
             psiClass.text,
+            kotlinPackagePattern,
+            kotlinImportPattern,
         )
 
     override val classType: ClassType
