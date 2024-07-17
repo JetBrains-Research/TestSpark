@@ -528,9 +528,14 @@ class TestCasePanelFactory(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
+        val fileName = when (language) {
+            org.jetbrains.research.testspark.core.test.Language.Kotlin -> "${KotlinClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.kt"
+            org.jetbrains.research.testspark.core.test.Language.Java -> "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java"
+        }
+
         val newTestCase = TestProcessor(project, language)
             .processNewTestCase(
-                "${KotlinClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.kt",
+                fileName,
                 testCase.id,
                 testCase.testName,
                 testCase.testCode,

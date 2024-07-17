@@ -3,7 +3,6 @@ package org.jetbrains.research.testspark.core.test.kotlin
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
-import java.io.File
 
 class KotlinTestCompiler(libPaths: List<String>, junitLibPaths: List<String>) :
     TestCompiler(libPaths, junitLibPaths) {
@@ -24,6 +23,7 @@ class KotlinTestCompiler(libPaths: List<String>, junitLibPaths: List<String>) :
 
         log.info { "Error message: '$errorMsg'" }
 
-        return Pair(File(path).exists(), errorMsg)
+        // No need to save the .class file for kotlin, so checking the error message is enough
+        return Pair(errorMsg.isBlank(), errorMsg)
     }
 }
