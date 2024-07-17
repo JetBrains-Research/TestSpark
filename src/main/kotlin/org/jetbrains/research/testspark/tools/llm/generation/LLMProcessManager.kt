@@ -142,6 +142,7 @@ class LLMProcessManager(
             jUnitVersion,
             language,
             testBodyPrinter,
+            packageName,
         )
         val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
             indicator,
