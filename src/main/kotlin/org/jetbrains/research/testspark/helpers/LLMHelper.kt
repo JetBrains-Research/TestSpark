@@ -268,7 +268,7 @@ object LLMHelper {
             language,
             testBodyPrinter,
         )
-        // TODO create TestsAssemblerFactory when the TestSpark will be language agnostic
+
         val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
             indicator,
             testGenerationOutput,
