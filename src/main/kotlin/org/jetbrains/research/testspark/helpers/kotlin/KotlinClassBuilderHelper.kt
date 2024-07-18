@@ -26,6 +26,8 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
         otherInfo: String,
         testGenerationData: TestGenerationData,
     ): String {
+        log.debug("[KotlinClassBuilderHelper] Generate code for $className")
+
         var testFullText = printUpperPart(className, imports, packageString, runWith, otherInfo)
 
         // Add each test (exclude expected exception)
@@ -34,66 +36,39 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
         // close the test class
         testFullText += "}"
 
-        testFullText = testFullText.replace("\r\n", "\n")
+        testFullText.replace("\r\n", "\n")
 
         // Reduce number of line breaks for better readability
         return formatCode(project, Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"), testGenerationData)
     }
 
-    private fun printUpperPart(
-        className: String,
-        imports: Set<String>,
-        packageString: String,
-        runWith: String,
-        otherInfo: String,
-    ): String {
-        var testText = ""
-
-        // Add package
-        if (packageString.isNotBlank()) {
-            testText += "package $packageString\n"
-        }
-
-        // Add imports
-        imports.forEach { importedElement ->
-            testText += "$importedElement\n"
-        }
-
-        testText += "\n"
-
-        // Add runWith if exists
-        if (runWith.isNotBlank()) {
-            testText += "@RunWith($runWith::class)\n"
-        }
-
-        // Open the test class
-        testText += "class $className {\n\n"
-
-        // Add other presets (annotations, non-test functions)
-        if (otherInfo.isNotBlank()) {
-            testText += otherInfo
-        }
-
-        return testText
-    }
-
     override fun getTestMethodCodeFromClassWithTestCase(code: String): String {
         val testMethods = StringBuilder()
         val lines = code.lines()
-        var isInTestMethod = false
+
+        var methodStarted = false
+        var balanceOfBrackets = 0
 
         for (line in lines) {
-            if (line.contains("@Test")) {
-                isInTestMethod = true
-            }
-            if (isInTestMethod) {
+            if (!methodStarted && line.contains("@Test")) {
+                methodStarted = true
                 testMethods.append(line).append("\n")
-            }
-            if (isInTestMethod && line.contains("}")) {
-                testMethods.append("\n")
-                isInTestMethod = false
+            } else if (methodStarted) {
+                testMethods.append(line).append("\n")
+                for (char in line) {
+                    if (char == '{') {
+                        balanceOfBrackets++
+                    } else if (char == '}') {
+                        balanceOfBrackets--
+                    }
+                }
+                if (balanceOfBrackets == 0) {
+                    methodStarted = false
+                    testMethods.append("\n")
+                }
             }
         }
+
         return testMethods.toString().replace("\n", "\n\t")
     }
 
@@ -139,5 +114,42 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
         }
         log.info("Formatted result class: $result")
         return result
+    }
+
+    private fun printUpperPart(
+        className: String,
+        imports: Set<String>,
+        packageString: String,
+        runWith: String,
+        otherInfo: String,
+    ): String {
+        var testText = ""
+
+        // Add package
+        if (packageString.isNotBlank()) {
+            testText += "package $packageString\n"
+        }
+
+        // Add imports
+        imports.forEach { importedElement ->
+            testText += "$importedElement\n"
+        }
+
+        testText += "\n"
+
+        // Add runWith if exists
+        if (runWith.isNotBlank()) {
+            testText += "@RunWith($runWith::class)\n"
+        }
+
+        // Open the test class
+        testText += "class $className {\n\n"
+
+        // Add other presets (annotations, non-test functions)
+        if (otherInfo.isNotBlank()) {
+            testText += otherInfo
+        }
+
+        return testText
     }
 }
