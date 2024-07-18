@@ -99,6 +99,7 @@ class TestProcessor(
         val junitVersion = llmSettingsState.junitVersion.version
 
         // run the test method with jacoco agent
+        log.info("[TestProcessor] Executing $name")
         val junitRunnerLibraryPath = LibraryPathsProvider.getJUnitRunnerLibraryPath()
         val testExecutionError = CommandLineRunner.run(
             arrayListOf(
