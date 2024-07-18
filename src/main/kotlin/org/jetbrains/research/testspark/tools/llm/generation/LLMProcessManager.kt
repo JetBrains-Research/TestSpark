@@ -8,6 +8,8 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
+import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
+import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -231,8 +233,8 @@ class LLMProcessManager(
         ToolUtils.saveData(
             project,
             report,
-            ToolUtils.getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation),
-            ToolUtils.getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
+            getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation, language),
+            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
             projectContext.fileUrlAsString!!,
             generatedTestsData,
             language,

@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.core.test
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 

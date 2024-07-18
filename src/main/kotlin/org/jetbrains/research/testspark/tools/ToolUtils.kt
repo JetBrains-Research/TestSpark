@@ -24,38 +24,6 @@ object ToolUtils {
     val pathSep = File.pathSeparatorChar
 
     /**
-     * Retrieves the imports code from a given test suite code.
-     *
-     * @param testSuiteCode The test suite code from which to extract the imports code. If null, an empty string is returned.
-     * @param classFQN The fully qualified name of the class to be excluded from the imports code. It will not be included in the result.
-     * @return The imports code extracted from the test suite code. If no imports are found or the result is empty after filtering, an empty string is returned.
-     */
-    fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String): MutableSet<String> {
-        testSuiteCode ?: return mutableSetOf()
-        return testSuiteCode.replace("\r\n", "\n").split("\n").asSequence()
-            .filter { it.contains("^import".toRegex()) }
-            .filterNot { it.contains("evosuite".toRegex()) }
-            .filterNot { it.contains("RunWith".toRegex()) }
-            .filterNot { it.contains(classFQN.toRegex()) }.toMutableSet()
-    }
-
-    /**
-     * Retrieves the package declaration from the given test suite code.
-     *
-     * @param testSuiteCode The generated code of the test suite.
-     * @return The package declaration extracted from the test suite code, or an empty string if no package declaration was found.
-     */
-// get package from a generated code
-    fun getPackageFromTestSuiteCode(testSuiteCode: String?): String {
-        testSuiteCode ?: return ""
-        if (!testSuiteCode.contains("package")) return ""
-        val result = testSuiteCode.replace("\r\n", "\n").split("\n")
-            .filter { it.contains("^package".toRegex()) }.joinToString("").split("package ")[1].split(";")[0]
-        if (result.isBlank()) return ""
-        return result
-    }
-
-    /**
      * Saves the data related to test generation in the specified project's workspace.
      *
      * @param project The project in which the test generation data will be saved.

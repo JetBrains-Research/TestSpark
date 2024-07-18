@@ -10,7 +10,6 @@ class KotlinTestCompiler(libPaths: List<String>, junitLibPaths: List<String>) :
     private val log = KotlinLogging.logger { this::class.java }
 
     override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
-
         log.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
