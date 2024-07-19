@@ -35,6 +35,7 @@ import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
 import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestProcessor
@@ -194,7 +195,10 @@ class TestCasePanelFactory(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    project.service<KotlinTestCaseDisplayService>().getEditor(testCase.testName)!!.document.text,
+                    when (language) {
+                        org.jetbrains.research.testspark.core.test.Language.Kotlin -> project.service<KotlinTestCaseDisplayService>().getEditor(testCase.testName)!!.document.text
+                        org.jetbrains.research.testspark.core.test.Language.Java -> project.service<JavaTestCaseDisplayService>().getEditor(testCase.testName)!!.document.text
+                    },
                 ),
                 null,
             )
@@ -387,7 +391,10 @@ class TestCasePanelFactory(
         }
 
         ReportHelper.updateTestCase(project, report, testCase)
-        project.service<KotlinTestCaseDisplayService>().updateUI()
+        when (language) {
+            org.jetbrains.research.testspark.core.test.Language.Kotlin -> project.service<KotlinTestCaseDisplayService>().updateUI()
+            org.jetbrains.research.testspark.core.test.Language.Java -> project.service<JavaTestCaseDisplayService>().updateUI()
+        }
     }
 
     /**
@@ -529,8 +536,19 @@ class TestCasePanelFactory(
         indicator.setText("Executing ${testCase.testName}")
 
         val fileName = when (language) {
-            org.jetbrains.research.testspark.core.test.Language.Kotlin -> "${KotlinClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.kt"
-            org.jetbrains.research.testspark.core.test.Language.Java -> "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java"
+            org.jetbrains.research.testspark.core.test.Language.Kotlin ->
+                "${
+                    KotlinClassBuilderHelper.getClassFromTestCaseCode(
+                        testCase.testCode,
+                    )
+                }.kt"
+
+            org.jetbrains.research.testspark.core.test.Language.Java ->
+                "${
+                    JavaClassBuilderHelper.getClassFromTestCaseCode(
+                        testCase.testCode,
+                    )
+                }.java"
         }
 
         val newTestCase = TestProcessor(project, language)
@@ -601,13 +619,23 @@ class TestCasePanelFactory(
      */
     private fun remove() {
         // Remove the test case from the cache
-        project.service<KotlinTestCaseDisplayService>().removeTestCase(testCase.testName)
+        when (language) {
+            org.jetbrains.research.testspark.core.test.Language.Kotlin -> project.service<KotlinTestCaseDisplayService>().removeTestCase(testCase.testName)
+
+            org.jetbrains.research.testspark.core.test.Language.Java -> project.service<JavaTestCaseDisplayService>().removeTestCase(testCase.testName)
+        }
 
         runTestButton.isEnabled = false
         isRemoved = true
 
         ReportHelper.removeTestCase(project, report, testCase)
-        project.service<KotlinTestCaseDisplayService>().updateUI()
+        when (language) {
+            org.jetbrains.research.testspark.core.test.Language.Kotlin -> project.service<KotlinTestCaseDisplayService>()
+                .updateUI()
+
+            org.jetbrains.research.testspark.core.test.Language.Java -> project.service<JavaTestCaseDisplayService>()
+                .updateUI()
+        }
     }
 
     /**
