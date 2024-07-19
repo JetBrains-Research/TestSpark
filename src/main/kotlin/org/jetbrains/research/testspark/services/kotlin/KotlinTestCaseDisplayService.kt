@@ -262,17 +262,17 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
                 file.isDirectory || (
-                    file.extension?.lowercase(Locale.getDefault()) == "kotlin" && (
-                        PsiManager.getInstance(project).findFile(file!!) as KtFile
-                        ).classes.stream().map { it.name }
-                        .toArray()
-                        .contains(
-                            (
-                                PsiManager.getInstance(project)
-                                    .findFile(file) as PsiJavaFile
-                                ).name.removeSuffix(".kt"),
+                        file.extension?.lowercase(Locale.getDefault()) == "kotlin" && (
+                                PsiManager.getInstance(project).findFile(file!!) as KtFile
+                                ).classes.stream().map { it.name }
+                            .toArray()
+                            .contains(
+                                (
+                                        PsiManager.getInstance(project)
+                                            .findFile(file) as PsiJavaFile
+                                        ).name.removeSuffix(".kt"),
+                            )
                         )
-                    )
             }
         }
 
@@ -454,12 +454,8 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
             PsiDocumentManager.getInstance(project).commitDocument(document)
         }
 
-        val packageLine = uiContext!!.testGenerationOutput.packageLine
-        val packageStatement = if (packageLine.isEmpty()) {
-            ""
-        } else {
-            "package $packageLine\n\n"
-        }
+        val packageName = uiContext!!.testGenerationOutput.packageName
+        val packageStatement = if (packageName.isEmpty()) "" else "package $packageName\n\n"
 
         // Insert the package statement at the beginning of the document
         PsiDocumentManager.getInstance(project).getDocument(outputFile)?.let { document ->

@@ -69,7 +69,7 @@ class JUnitTestSuiteParserStrategy {
 
                 val testSuite = TestSuiteGeneratedByLLM(
                     imports = imports,
-                    packageString = packageName,
+                    packageName = packageName,
                     runWith = runWith,
                     otherInfo = otherInfo,
                     testCases = testCases,

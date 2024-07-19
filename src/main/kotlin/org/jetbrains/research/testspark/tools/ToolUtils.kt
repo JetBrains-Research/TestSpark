@@ -28,20 +28,20 @@ object ToolUtils {
      *
      * @param project The project in which the test generation data will be saved.
      * @param report The report object to be added to the test generation result list.
-     * @param packageLine The package declaration line of the test generation data.
+     * @param packageName The package declaration line of the test generation data.
      * @param importsCode The import statements code of the test generation data.
      */
     fun saveData(
         project: Project,
         report: Report,
-        packageLine: String,
+        packageName: String,
         importsCode: MutableSet<String>,
         fileUrl: String,
         generatedTestData: TestGenerationData,
         language: Language = Language.Java,
     ) {
         generatedTestData.fileUrl = fileUrl
-        generatedTestData.packageLine = packageLine
+        generatedTestData.packageName = packageName
         generatedTestData.importsCode.addAll(importsCode)
 
         project.service<TestsExecutionResultService>().initExecutionResult(report.testCaseList.values.map { it.id })
@@ -54,7 +54,7 @@ object ToolUtils {
                     getClassWithTestCaseName(testCase.testName),
                     code,
                     generatedTestData.importsCode,
-                    generatedTestData.packageLine,
+                    generatedTestData.packageName,
                     generatedTestData.runWith,
                     generatedTestData.otherInfo,
                     generatedTestData,
@@ -65,7 +65,7 @@ object ToolUtils {
                     getClassWithTestCaseName(testCase.testName),
                     code,
                     generatedTestData.importsCode,
-                    generatedTestData.packageLine,
+                    generatedTestData.packageName,
                     generatedTestData.runWith,
                     generatedTestData.otherInfo,
                     generatedTestData,

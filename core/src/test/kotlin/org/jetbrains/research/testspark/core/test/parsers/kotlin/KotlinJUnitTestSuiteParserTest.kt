@@ -154,7 +154,7 @@ class KotlinJUnitTestSuiteParserTest {
             KotlinJUnitTestSuiteParser("", JUnitVersion.JUnit5, testBodyPrinter)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
         assertNotNull(testSuite)
-        assertEquals(testSuite!!.packageString, "com.example.testsuite")
+        assertEquals(testSuite!!.packageName, "com.example.testsuite")
         assertTrue(testSuite.testCases.isEmpty())
     }
 

@@ -12,15 +12,14 @@ import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 /**
  * Assembler class for generating and organizing test cases.
  *
- * @property project The project to which the tests belong.
  * @property indicator The progress indicator to display the progress of test generation.
  * @property log The logger for logging debug information.
  * @property lastTestCount The count of the last generated tests.
  */
 class JUnitTestsAssembler(
     val indicator: CustomProgressIndicator,
-    val generationData: TestGenerationData,
-    val testSuiteParser: TestSuiteParser,
+    private val generationData: TestGenerationData,
+    private val testSuiteParser: TestSuiteParser,
     val junitVersion: JUnitVersion,
 ) : TestsAssembler() {
 

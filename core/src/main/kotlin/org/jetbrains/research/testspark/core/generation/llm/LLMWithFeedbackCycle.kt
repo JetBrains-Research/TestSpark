@@ -175,7 +175,7 @@ class LLMWithFeedbackCycle(
                     val testCaseRepresentation = testsPresenter.representTestCase(generatedTestSuite, testCaseIndex)
 
                     val saveFilepath = testStorage.saveGeneratedTest(
-                        generatedTestSuite.packageString,
+                        generatedTestSuite.packageName,
                         testCaseRepresentation,
                         resultPath,
                         testCaseFilename,
@@ -186,7 +186,7 @@ class LLMWithFeedbackCycle(
             }
 
             val generatedTestSuitePath: String = testStorage.saveGeneratedTest(
-                generatedTestSuite.packageString,
+                generatedTestSuite.packageName,
                 testsPresenter.representTestSuite(generatedTestSuite),
                 resultPath,
                 testSuiteFilename,

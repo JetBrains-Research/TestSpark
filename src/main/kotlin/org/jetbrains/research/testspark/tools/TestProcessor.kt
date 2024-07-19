@@ -158,7 +158,7 @@ class TestProcessor(
         testId: Int,
         testName: String,
         testCode: String,
-        packageLine: String,
+        packageName: String,
         resultPath: String,
         projectContext: ProjectContext,
     ): TestCase {
@@ -171,7 +171,7 @@ class TestProcessor(
 
         // save new test to file
         val generatedTestPath: String = saveGeneratedTest(
-            packageLine,
+            packageName,
             testCode,
             resultPath,
             fileName,
@@ -189,7 +189,7 @@ class TestProcessor(
                 dataFileName,
                 testName,
                 buildPath,
-                packageLine,
+                packageName,
                 resultPath,
                 projectContext,
             )

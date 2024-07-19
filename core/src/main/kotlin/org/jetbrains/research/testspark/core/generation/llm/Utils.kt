@@ -14,12 +14,11 @@ import java.util.Locale
 // TODO: find a better place for the below functions
 
 /**
- * Retrieves the package declaration from the given test suite code.
+ * Retrieves the package declaration from the given test suite code for any language.
  *
  * @param testSuiteCode The generated code of the test suite.
- * @return The package declaration extracted from the test suite code, or an empty string if no package declaration was found.
+ * @return The package name extracted from the test suite code, or an empty string if no package declaration was found.
  */
-// get package from a generated code
 fun getPackageFromTestSuiteCode(testSuiteCode: String?, language: Language): String {
     testSuiteCode ?: return ""
     return when (language) {

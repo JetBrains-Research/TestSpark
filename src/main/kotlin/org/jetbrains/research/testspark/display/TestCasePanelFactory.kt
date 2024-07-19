@@ -539,7 +539,7 @@ class TestCasePanelFactory(
                 testCase.id,
                 testCase.testName,
                 testCase.testCode,
-                uiContext!!.testGenerationOutput.packageLine,
+                uiContext!!.testGenerationOutput.packageName,
                 uiContext.testGenerationOutput.resultPath,
                 uiContext.projectContext,
             )

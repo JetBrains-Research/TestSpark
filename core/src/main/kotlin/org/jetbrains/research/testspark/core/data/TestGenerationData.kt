@@ -16,7 +16,7 @@ data class TestGenerationData(
 
     // Code required of imports and package for generated tests
     var importsCode: MutableSet<String> = mutableSetOf(),
-    var packageLine: String = "",
+    var packageName: String = "",
     var runWith: String = "",
     var otherInfo: String = "",
 
@@ -27,7 +27,7 @@ data class TestGenerationData(
     // list of correct test cases during the incorrect compilation
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf(),
 
-) {
+    ) {
 
     /**
      * Cleaning all old data before new test generation.
@@ -37,7 +37,7 @@ data class TestGenerationData(
         resultName = ""
         fileUrl = ""
         importsCode = mutableSetOf()
-        packageLine = ""
+        packageName = ""
         runWith = ""
         otherInfo = ""
         polyDepthReducing = 0

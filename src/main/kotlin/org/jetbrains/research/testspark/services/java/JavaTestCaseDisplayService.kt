@@ -446,10 +446,10 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
             .insertString(
                 0,
-                if (uiContext!!.testGenerationOutput.packageLine.isEmpty()) {
+                if (uiContext!!.testGenerationOutput.packageName.isEmpty()) {
                     ""
                 } else {
-                    "package ${uiContext!!.testGenerationOutput.packageLine};\n\n"
+                    "package ${uiContext!!.testGenerationOutput.packageName};\n\n"
                 },
             )
     }

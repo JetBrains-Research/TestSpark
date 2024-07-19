@@ -12,6 +12,14 @@ abstract class TestCompiler(
     private val libPaths: List<String>,
     private val junitLibPaths: List<String>,
 ) {
+    /**
+     * Compiles a list of test cases and returns the compilation result.
+     *
+     * @param generatedTestCasesPaths A list of file paths where the generated test cases are located.
+     * @param buildPath All the directories where the compiled code of the project under test is saved. This path is used as a classpath to run each test case.
+     * @param testCases A mutable list of `TestCaseGeneratedByLLM` objects representing the test cases to be compiled.
+     * @return A `TestCasesCompilationResult` object containing the overall compilation success status and a set of compilable test cases.
+     */
     fun compileTestCases(
         generatedTestCasesPaths: List<String>,
         buildPath: String,
@@ -35,7 +43,7 @@ abstract class TestCompiler(
      * Compiles the code at the specified path using the provided project build path.
      *
      * @param path The path of the code file to compile.
-     * @param projectBuildPath The project build path to use during compilation.
+     * @param projectBuildPath All the directories where the compiled code of the project under test is saved. This path is used as a classpath to run each test case.
      * @return A pair containing a boolean value indicating whether the compilation was successful (true) or not (false),
      *         and a string message describing any error encountered during compilation.
      */

@@ -43,7 +43,7 @@ class JUnitTestSuitePresenter(
                     testFileName,
                     testBody,
                     imports,
-                    packageString,
+                    packageName,
                     runWith,
                     otherInfo,
                     generatedTestsData,
@@ -54,7 +54,7 @@ class JUnitTestSuitePresenter(
                     testFileName,
                     testBody,
                     imports,
-                    packageString,
+                    packageName,
                     runWith,
                     otherInfo,
                     generatedTestsData,
@@ -79,7 +79,7 @@ class JUnitTestSuitePresenter(
                     getClassWithTestCaseName(testCases[testCaseIndex].name),
                     testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
                     imports,
-                    packageString,
+                    packageName,
                     runWith,
                     otherInfo,
                     generatedTestsData,
@@ -90,7 +90,7 @@ class JUnitTestSuitePresenter(
                     getClassWithTestCaseName(testCases[testCaseIndex].name),
                     testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
                     imports,
-                    packageString,
+                    packageName,
                     runWith,
                     otherInfo,
                     generatedTestsData,
@@ -117,7 +117,7 @@ class JUnitTestSuitePresenter(
                         testFileName,
                         testBody,
                         imports,
-                        packageString,
+                        packageName,
                         runWith,
                         otherInfo,
                         generatedTestsData,
@@ -128,7 +128,7 @@ class JUnitTestSuitePresenter(
                     testFileName,
                     testBody,
                     imports,
-                    packageString,
+                    packageName,
                     runWith,
                     otherInfo,
                     generatedTestsData,
@@ -148,8 +148,8 @@ class JUnitTestSuitePresenter(
     fun getPrintablePackageString(testSuite: TestSuiteGeneratedByLLM): String {
         return testSuite.run {
             when {
-                packageString.isEmpty() || packageString.isBlank() -> ""
-                else -> packageString
+                packageName.isEmpty() || packageName.isBlank() -> ""
+                else -> packageName
             }
         }
     }
