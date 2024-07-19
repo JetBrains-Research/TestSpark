@@ -537,18 +537,10 @@ class TestCasePanelFactory(
 
         val fileName = when (language) {
             org.jetbrains.research.testspark.core.test.Language.Kotlin ->
-                "${
-                    KotlinClassBuilderHelper.getClassFromTestCaseCode(
-                        testCase.testCode,
-                    )
-                }.kt"
+                "${KotlinClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.kt"
 
             org.jetbrains.research.testspark.core.test.Language.Java ->
-                "${
-                    JavaClassBuilderHelper.getClassFromTestCaseCode(
-                        testCase.testCode,
-                    )
-                }.java"
+                "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java"
         }
 
         val newTestCase = TestProcessor(project, language)
