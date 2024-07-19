@@ -262,17 +262,17 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
                 file.isDirectory || (
-                        file.extension?.lowercase(Locale.getDefault()) == "kotlin" && (
-                                PsiManager.getInstance(project).findFile(file!!) as KtFile
-                                ).classes.stream().map { it.name }
-                            .toArray()
-                            .contains(
-                                (
-                                        PsiManager.getInstance(project)
-                                            .findFile(file) as PsiJavaFile
-                                        ).name.removeSuffix(".kt"),
-                            )
+                    file.extension?.lowercase(Locale.getDefault()) == "kotlin" && (
+                        PsiManager.getInstance(project).findFile(file!!) as KtFile
+                        ).classes.stream().map { it.name }
+                        .toArray()
+                        .contains(
+                            (
+                                PsiManager.getInstance(project)
+                                    .findFile(file) as PsiJavaFile
+                                ).name.removeSuffix(".kt"),
                         )
+                    )
             }
         }
 
