@@ -13,8 +13,8 @@ class TestCompilerFactory {
         fun createTestCompiler(
             project: Project,
             junitVersion: JUnitVersion,
-            javaHomeDirectory: String? = null,
             language: SupportedLanguage,
+            javaHomeDirectory: String? = null,
         ): TestCompiler {
             val javaSDKHomePath =
                 javaHomeDirectory ?: ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path

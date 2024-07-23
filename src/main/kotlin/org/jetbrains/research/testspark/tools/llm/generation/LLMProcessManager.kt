@@ -24,6 +24,7 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.tools.TestBodyPrinterFactory
+import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.TestSuiteParserFactory
 import org.jetbrains.research.testspark.tools.TestsAssemblerFactory
@@ -50,7 +51,7 @@ class LLMProcessManager(
     private val language: SupportedLanguage,
     private val promptManager: PromptManager,
     private val testSamplesCode: String,
-    projectSDKPath: Path? = null,
+    private val projectSDKPath: Path? = null,
 ) : ProcessManager {
 
     private val testFileName: String = when (language) {
@@ -60,7 +61,7 @@ class LLMProcessManager(
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = LlmSettingsArguments(project).maxLLMRequest()
-    private val testProcessor: TestsPersistentStorage = TestProcessor(project, language, projectSDKPath)
+    private val testProcessor: TestsPersistentStorage = TestProcessor(project, projectSDKPath)
 
     /**
      * Runs the test generator process.
@@ -99,8 +100,6 @@ class LLMProcessManager(
         // PROMPT GENERATION
         val initialPromptMessage =
             promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
-
-        val testCompiler = testProcessor.testCompiler
 
         // initiate a new RequestManager
         val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
@@ -147,6 +146,13 @@ class LLMProcessManager(
             generatedTestsData,
             testSuiteParser,
             jUnitVersion,
+        )
+
+        val testCompiler = TestCompilerFactory.createTestCompiler(
+            project,
+            jUnitVersion,
+            language,
+            projectSDKPath.toString(),
         )
 
         // Asking LLM to generate a test suite. Here we have a feedback cycle for LLM in case of wrong responses

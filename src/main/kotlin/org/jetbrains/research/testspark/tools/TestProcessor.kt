@@ -8,7 +8,7 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.data.TestCase
-import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -24,7 +24,6 @@ import kotlin.io.path.createDirectories
 
 class TestProcessor(
     val project: Project,
-    language: SupportedLanguage,
     givenProjectSDKPath: Path? = null,
 ) : TestsPersistentStorage {
     private val homeDirectory =
@@ -34,13 +33,6 @@ class TestProcessor(
 
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
-
-    override val testCompiler = TestCompilerFactory.createTestCompiler(
-        project,
-        llmSettingsState.junitVersion,
-        homeDirectory,
-        language,
-    )
 
     override fun saveGeneratedTest(
         packageString: String,
@@ -82,6 +74,7 @@ class TestProcessor(
         generatedTestPackage: String,
         resultPath: String,
         projectContext: ProjectContext,
+        testCompiler: TestCompiler,
     ): String {
         // find the proper javac
         val javaRunner = findJavaCompilerInDirectory(homeDirectory)
@@ -160,6 +153,7 @@ class TestProcessor(
         packageName: String,
         resultPath: String,
         projectContext: ProjectContext,
+        testCompiler: TestCompiler,
     ): TestCase {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
@@ -191,6 +185,7 @@ class TestProcessor(
                 packageName,
                 resultPath,
                 projectContext,
+                testCompiler,
             )
 
             if (!File("$dataFileName.xml").exists()) {
@@ -310,7 +305,7 @@ class TestProcessor(
      * Finds 'javac' compiler (both on Unix & Windows)
      * starting from the provided directory.
      */
-    fun findJavaCompilerInDirectory(homeDirectory: String): File {
+    private fun findJavaCompilerInDirectory(homeDirectory: String): File {
         return File(homeDirectory).walk()
             .filter {
                 val isJavaName =

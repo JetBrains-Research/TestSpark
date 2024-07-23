@@ -39,6 +39,7 @@ import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
 import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
@@ -544,7 +545,13 @@ class TestCasePanelFactory(
                 "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java"
         }
 
-        val newTestCase = TestProcessor(project, language)
+        val testCompiler = TestCompilerFactory.createTestCompiler(
+            project,
+            llmSettingsState.junitVersion,
+            language,
+        )
+
+        val newTestCase = TestProcessor(project)
             .processNewTestCase(
                 fileName,
                 testCase.id,
@@ -553,6 +560,7 @@ class TestCasePanelFactory(
                 uiContext!!.testGenerationOutput.packageName,
                 uiContext.testGenerationOutput.resultPath,
                 uiContext.projectContext,
+                testCompiler,
             )
 
         testCase.coveredLines = newTestCase.coveredLines
