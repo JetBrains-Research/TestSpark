@@ -469,12 +469,12 @@ class TestCasePanelFactory(
             uiContext.errorMonitor.clear()
             val code = testSuitePresenter.toString(testSuite)
             testCase.testName = when (language) {
-                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.extractFirstTestMethodName(
                     testCase.testName,
                     code,
                 )
 
-                SupportedLanguage.Java -> JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+                SupportedLanguage.Java -> JavaClassBuilderHelper.extractFirstTestMethodName(
                     testCase.testName,
                     code,
                 )
@@ -701,12 +701,12 @@ class TestCasePanelFactory(
      */
     private fun updateTestCaseInformation() {
         testCase.testName = when (language) {
-            SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+            SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.extractFirstTestMethodName(
                 testCase.testName,
                 languageTextField.document.text,
             )
 
-            SupportedLanguage.Java -> JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(
+            SupportedLanguage.Java -> JavaClassBuilderHelper.extractFirstTestMethodName(
                 testCase.testName,
                 languageTextField.document.text,
             )

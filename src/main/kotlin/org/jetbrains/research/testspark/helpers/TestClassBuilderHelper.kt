@@ -37,7 +37,7 @@ interface TestClassBuilderHelper {
      * @param classCode The source code of the class containing test methods.
      * @return The name of the first test method. If no test method is found, an empty string is returned.
      */
-    fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, classCode: String): String
+    fun extractFirstTestMethodName(oldTestCaseName: String, classCode: String): String
 
     /**
      * Retrieves the class name from the given test case code.

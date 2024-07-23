@@ -38,8 +38,8 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
 
         testFullText.replace("\r\n", "\n")
 
-        // Reduce number of line breaks for better readability
-        return formatCode(project, Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"), testGenerationData)
+        // Reduce the number of line breaks for better readability
+        return formatCode(project, Regex("\n\n\n(?:\n)*").replace(testFullText, "\n\n"), testGenerationData)
     }
 
     override fun extractFirstTestMethodCode(classCode: String): String {
@@ -69,10 +69,10 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
             }
         }
 
-        return testMethods.toString().replace("\n", "\n\t")
+        return testMethods.toString()
     }
 
-    override fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, classCode: String): String {
+    override fun extractFirstTestMethodName(oldTestCaseName: String, classCode: String): String {
         val lines = classCode.lines()
         var testMethodName = oldTestCaseName
 

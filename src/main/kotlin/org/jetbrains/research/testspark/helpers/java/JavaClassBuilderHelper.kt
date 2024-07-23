@@ -80,7 +80,7 @@ object JavaClassBuilderHelper : TestClassBuilderHelper {
         }
     }
 
-    override fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, classCode: String): String {
+    override fun extractFirstTestMethodName(oldTestCaseName: String, classCode: String): String {
         var result = ""
         try {
             val componentUnit: CompilationUnit = StaticJavaParser.parse(classCode)

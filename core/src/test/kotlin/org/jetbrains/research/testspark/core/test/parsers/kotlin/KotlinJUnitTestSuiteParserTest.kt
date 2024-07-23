@@ -115,7 +115,7 @@ class KotlinJUnitTestSuiteParserTest {
 
         val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
-            KotlinJUnitTestSuiteParser(JUnitVersion.JUnit5, testBodyPrinter)
+            KotlinJUnitTestSuiteParser("org.example", JUnitVersion.JUnit5, testBodyPrinter)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
         assertNotNull(testSuite)
         assertTrue(testSuite!!.imports.contains("import org.mockito.Mockito.*"))
@@ -151,7 +151,7 @@ class KotlinJUnitTestSuiteParserTest {
 
         val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
-            KotlinJUnitTestSuiteParser(JUnitVersion.JUnit5, testBodyPrinter)
+            KotlinJUnitTestSuiteParser("", JUnitVersion.JUnit5, testBodyPrinter)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
         assertNotNull(testSuite)
         assertEquals(testSuite!!.packageName, "com.example.testsuite")
@@ -175,7 +175,7 @@ class KotlinJUnitTestSuiteParserTest {
 
         val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
-            KotlinJUnitTestSuiteParser(JUnitVersion.JUnit5, testBodyPrinter)
+            KotlinJUnitTestSuiteParser("org.example", JUnitVersion.JUnit5, testBodyPrinter)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
         assertNotNull(testSuite)
         assertEquals(1, testSuite!!.testCases.size)
@@ -204,7 +204,7 @@ class KotlinJUnitTestSuiteParserTest {
 
         val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
-            KotlinJUnitTestSuiteParser(JUnitVersion.JUnit5, testBodyPrinter)
+            KotlinJUnitTestSuiteParser("org.example", JUnitVersion.JUnit5, testBodyPrinter)
         val testSuite: TestSuiteGeneratedByLLM? = parser.parseTestSuite(text)
         assertNotNull(testSuite)
         assertEquals(2, testSuite!!.testCases.size)
@@ -245,7 +245,7 @@ class KotlinJUnitTestSuiteParserTest {
         """.trimIndent()
 
         val testBodyPrinter = KotlinTestBodyPrinter()
-        val parser = KotlinJUnitTestSuiteParser(JUnitVersion.JUnit5, testBodyPrinter)
+        val parser = KotlinJUnitTestSuiteParser("", JUnitVersion.JUnit5, testBodyPrinter)
 
         // packageName will be set to 'org.pkg1'
         val testSuite1 = parser.parseTestSuite(code1)
