@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
@@ -38,7 +38,7 @@ object ToolUtils {
         importsCode: MutableSet<String>,
         fileUrl: String,
         generatedTestData: TestGenerationData,
-        language: Language = Language.Java,
+        language: SupportedLanguage = SupportedLanguage.Java,
     ) {
         generatedTestData.fileUrl = fileUrl
         generatedTestData.packageName = packageName
@@ -49,7 +49,7 @@ object ToolUtils {
         for (testCase in report.testCaseList.values) {
             val code = testCase.testCode
             testCase.testCode = when (language) {
-                Language.Java -> JavaClassBuilderHelper.generateCode(
+                SupportedLanguage.Java -> JavaClassBuilderHelper.generateCode(
                     project,
                     getClassWithTestCaseName(testCase.testName),
                     code,
@@ -60,7 +60,7 @@ object ToolUtils {
                     generatedTestData,
                 )
 
-                Language.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.generateCode(
                     project,
                     getClassWithTestCaseName(testCase.testName),
                     code,

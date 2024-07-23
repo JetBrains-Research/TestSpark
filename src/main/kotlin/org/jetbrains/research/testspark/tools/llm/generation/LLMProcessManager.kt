@@ -13,7 +13,7 @@ import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSu
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
@@ -47,15 +47,15 @@ import java.nio.file.Path
  */
 class LLMProcessManager(
     private val project: Project,
-    private val language: Language,
+    private val language: SupportedLanguage,
     private val promptManager: PromptManager,
     private val testSamplesCode: String,
     projectSDKPath: Path? = null,
 ) : ProcessManager {
 
     private val testFileName: String = when (language) {
-        Language.Java -> "GeneratedTest.java"
-        Language.Kotlin -> "GeneratedTest.kt"
+        SupportedLanguage.Java -> "GeneratedTest.java"
+        SupportedLanguage.Kotlin -> "GeneratedTest.kt"
     }
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()

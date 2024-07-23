@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.tools.llm.test
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
@@ -11,7 +11,7 @@ import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
 class JUnitTestSuitePresenter(
     private val project: Project,
     private val generatedTestsData: TestGenerationData,
-    private val language: Language,
+    private val language: SupportedLanguage,
 ) {
     /**
      * Returns a string representation of this object.
@@ -38,7 +38,7 @@ class JUnitTestSuitePresenter(
             testCases.forEach { testCase -> testBody += "$testCase\n" }
 
             when (language) {
-                Language.Java -> JavaClassBuilderHelper.generateCode(
+                SupportedLanguage.Java -> JavaClassBuilderHelper.generateCode(
                     project,
                     testFileName,
                     testBody,
@@ -49,7 +49,7 @@ class JUnitTestSuitePresenter(
                     generatedTestsData,
                 )
 
-                Language.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.generateCode(
                     project,
                     testFileName,
                     testBody,
@@ -74,7 +74,7 @@ class JUnitTestSuitePresenter(
     ): String =
         testSuite.run {
             when (language) {
-                Language.Java -> JavaClassBuilderHelper.generateCode(
+                SupportedLanguage.Java -> JavaClassBuilderHelper.generateCode(
                     project,
                     getClassWithTestCaseName(testCases[testCaseIndex].name),
                     testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
@@ -85,7 +85,7 @@ class JUnitTestSuitePresenter(
                     generatedTestsData,
                 )
 
-                Language.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.generateCode(
                     project,
                     getClassWithTestCaseName(testCases[testCaseIndex].name),
                     testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
@@ -111,7 +111,7 @@ class JUnitTestSuitePresenter(
             testCases.forEach { testCase -> testBody += "${testCase.toStringWithoutExpectedException()}\n" }
 
             when (language) {
-                Language.Java ->
+                SupportedLanguage.Java ->
                     JavaClassBuilderHelper.generateCode(
                         project,
                         testFileName,
@@ -123,7 +123,7 @@ class JUnitTestSuitePresenter(
                         generatedTestsData,
                     )
 
-                Language.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.generateCode(
                     project,
                     testFileName,
                     testBody,

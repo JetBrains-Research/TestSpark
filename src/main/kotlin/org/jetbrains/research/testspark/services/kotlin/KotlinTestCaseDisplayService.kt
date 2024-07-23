@@ -34,7 +34,7 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
@@ -68,7 +68,7 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
 
     private var mainPanel: JPanel = JPanel()
 
-    private val topButtonsPanelFactory = TopButtonsPanelFactory(project, Language.Kotlin)
+    private val topButtonsPanelFactory = TopButtonsPanelFactory(project, SupportedLanguage.Kotlin)
 
     private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
@@ -115,7 +115,7 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
         applyButton.addActionListener { applyTests() }
     }
 
-    override fun displayTestCases(report: Report, uiContext: UIContext, language: Language) {
+    override fun displayTestCases(report: Report, uiContext: UIContext, language: SupportedLanguage) {
         this.report = report
         this.uiContext = uiContext
 

@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.helpers.LLMTestSampleHelper
 import java.awt.Font
 import javax.swing.ButtonGroup
@@ -13,7 +13,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
 
-class LLMSampleSelectorFactory(private val project: Project, private val language: Language) : PanelFactory {
+class LLMSampleSelectorFactory(private val project: Project, private val language: SupportedLanguage) : PanelFactory {
     // init components
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
         JRadioButton(PluginLabelsBundle.get("provideTestSample")),

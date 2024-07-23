@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.tools
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.java.JavaJUnitTestSuiteParser
@@ -11,15 +11,15 @@ class TestSuiteParserFactory {
     companion object {
         fun createJUnitTestSuiteParser(
             jUnitVersion: JUnitVersion,
-            language: Language,
+            language: SupportedLanguage,
             testBodyPrinter: TestBodyPrinter,
         ): TestSuiteParser = when (language) {
-            Language.Java -> JavaJUnitTestSuiteParser(
+            SupportedLanguage.Java -> JavaJUnitTestSuiteParser(
                 jUnitVersion,
                 testBodyPrinter,
             )
 
-            Language.Kotlin -> KotlinJUnitTestSuiteParser(
+            SupportedLanguage.Kotlin -> KotlinJUnitTestSuiteParser(
                 jUnitVersion,
                 testBodyPrinter,
             )

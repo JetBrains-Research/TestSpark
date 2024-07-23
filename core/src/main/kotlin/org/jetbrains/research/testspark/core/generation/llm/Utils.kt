@@ -4,7 +4,7 @@ import org.jetbrains.research.testspark.core.generation.llm.network.RequestManag
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.core.utils.javaPackagePattern
@@ -19,11 +19,11 @@ import java.util.Locale
  * @param testSuiteCode The generated code of the test suite.
  * @return The package name extracted from the test suite code, or an empty string if no package declaration was found.
  */
-fun getPackageFromTestSuiteCode(testSuiteCode: String?, language: Language): String {
+fun getPackageFromTestSuiteCode(testSuiteCode: String?, language: SupportedLanguage): String {
     testSuiteCode ?: return ""
     return when (language) {
-        Language.Kotlin -> kotlinPackagePattern.find(testSuiteCode)?.groups?.get(1)?.value.orEmpty()
-        Language.Java -> javaPackagePattern.find(testSuiteCode)?.groups?.get(1)?.value.orEmpty()
+        SupportedLanguage.Kotlin -> kotlinPackagePattern.find(testSuiteCode)?.groups?.get(1)?.value.orEmpty()
+        SupportedLanguage.Java -> javaPackagePattern.find(testSuiteCode)?.groups?.get(1)?.value.orEmpty()
     }
 }
 
@@ -71,7 +71,7 @@ fun getClassWithTestCaseName(testCaseName: String): String {
  * @return instance of TestSuiteGeneratedByLLM if the generated test cases are parsable, otherwise null.
  */
 fun executeTestCaseModificationRequest(
-    language: Language,
+    language: SupportedLanguage,
     testCase: String,
     task: String,
     indicator: CustomProgressIndicator,

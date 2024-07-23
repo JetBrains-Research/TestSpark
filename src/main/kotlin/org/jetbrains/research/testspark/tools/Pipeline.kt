@@ -12,7 +12,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -113,7 +113,7 @@ class Pipeline(
                     super.onFinished()
                     testGenerationController.finished()
                     when (psiHelper.language) {
-                        Language.Java -> uiContext?.let {
+                        SupportedLanguage.Java -> uiContext?.let {
                             project.service<JavaTestCaseDisplayService>()
                                 .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
 
@@ -125,7 +125,7 @@ class Pipeline(
                             }
                         }
 
-                        Language.Kotlin -> uiContext?.let {
+                        SupportedLanguage.Kotlin -> uiContext?.let {
                             project.service<KotlinTestCaseDisplayService>()
                                 .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
 
@@ -144,8 +144,8 @@ class Pipeline(
     private fun clear(project: Project) { // should be removed totally!
         testGenerationController.errorMonitor.clear()
         when (psiHelper.language) {
-            Language.Java -> project.service<JavaTestCaseDisplayService>().clear()
-            Language.Kotlin -> project.service<KotlinTestCaseDisplayService>().clear()
+            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().clear()
+            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().clear()
         }
 
         project.service<CoverageVisualisationService>().clear()

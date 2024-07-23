@@ -19,7 +19,7 @@ import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTe
 import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -203,7 +203,7 @@ class EvoSuiteProcessManager(
             ToolUtils.saveData(
                 project,
                 IJReport(testGenerationResult),
-                getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode, Language.Java),
+                getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode, SupportedLanguage.Java),
                 getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
                 projectContext.fileUrlAsString!!,
                 generatedTestsData,

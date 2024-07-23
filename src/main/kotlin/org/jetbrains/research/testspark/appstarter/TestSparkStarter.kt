@@ -18,7 +18,7 @@ import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -239,7 +239,7 @@ class TestSparkStarter : ApplicationStarter {
         classPath: String,
         projectContext: ProjectContext,
         projectSDKPath: Path,
-        language: Language,
+        language: SupportedLanguage,
     ) {
         val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
         println("Run tests in $targetDirectory")

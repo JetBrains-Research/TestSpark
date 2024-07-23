@@ -8,7 +8,7 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.data.TestCase
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -25,7 +25,7 @@ import kotlin.io.path.createDirectories
 
 class TestProcessor(
     val project: Project,
-    language: Language,
+    language: SupportedLanguage,
     givenProjectSDKPath: Path? = null,
 ) : TestsPersistentStorage {
     private val homeDirectory =

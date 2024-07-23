@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.tools
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.java.JavaTestCompiler
 import org.jetbrains.research.testspark.core.test.kotlin.KotlinTestCompiler
@@ -14,7 +14,7 @@ class TestCompilerFactory {
             project: Project,
             junitVersion: JUnitVersion,
             javaHomeDirectory: String? = null,
-            language: Language,
+            language: SupportedLanguage,
         ): TestCompiler {
             val javaSDKHomePath =
                 javaHomeDirectory ?: ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path
@@ -25,8 +25,8 @@ class TestCompilerFactory {
 
             // TODO add the warning window that for Java we always need the javaHomeDirectoryPath
             return when (language) {
-                Language.Java -> JavaTestCompiler(libraryPaths, junitLibraryPaths, javaSDKHomePath)
-                Language.Kotlin -> KotlinTestCompiler(libraryPaths, junitLibraryPaths)
+                SupportedLanguage.Java -> JavaTestCompiler(libraryPaths, junitLibraryPaths, javaSDKHomePath)
+                SupportedLanguage.Kotlin -> KotlinTestCompiler(libraryPaths, junitLibraryPaths)
             }
         }
     }

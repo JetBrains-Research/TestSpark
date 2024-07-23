@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.services
 import com.intellij.psi.PsiFile
 import com.intellij.ui.EditorTextField
 import org.jetbrains.research.testspark.core.data.Report
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import javax.swing.JPanel
@@ -14,7 +14,7 @@ interface TestCaseDisplayService {
      * Fill the panel with the generated test cases. Remove all previously shown test cases.
      * Add Tests and their names to a List of pairs (used for highlighting)
      */
-    fun displayTestCases(report: Report, uiContext: UIContext, language: Language)
+    fun displayTestCases(report: Report, uiContext: UIContext, language: SupportedLanguage)
 
     /**
      * Adds a separator to the allTestCasePanel.

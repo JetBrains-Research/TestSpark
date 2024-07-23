@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.strategies.TopButtonsPanelStrategy
 import java.awt.Dimension
@@ -20,7 +20,7 @@ import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 
-class TopButtonsPanelFactory(private val project: Project, private val language: Language) {
+class TopButtonsPanelFactory(private val project: Project, private val language: SupportedLanguage) {
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
         IconButtonCreator.getButton(TestSparkIcons.selectAll, PluginLabelsBundle.get("selectAllTip"))
@@ -64,7 +64,7 @@ class TopButtonsPanelFactory(private val project: Project, private val language:
      */
     fun updateTopLabels() {
         when (language) {
-            Language.Java -> TopButtonsPanelStrategy.updateTopJavaLabels(
+            SupportedLanguage.Java -> TopButtonsPanelStrategy.updateTopJavaLabels(
                 testCasePanelFactories,
                 testsSelectedLabel,
                 testsSelectedText,
@@ -74,7 +74,7 @@ class TopButtonsPanelFactory(private val project: Project, private val language:
                 runAllButton,
             )
 
-            Language.Kotlin -> TopButtonsPanelStrategy.updateTopKotlinLabels(
+            SupportedLanguage.Kotlin -> TopButtonsPanelStrategy.updateTopKotlinLabels(
                 testCasePanelFactories,
                 testsSelectedLabel,
                 testsSelectedText,
@@ -103,8 +103,8 @@ class TopButtonsPanelFactory(private val project: Project, private val language:
      */
     private fun toggleAllCheckboxes(selected: Boolean) {
         when (language) {
-            Language.Java -> TopButtonsPanelStrategy.toggleAllJavaCheckboxes(selected, project)
-            Language.Kotlin -> TopButtonsPanelStrategy.toggleAllKotlinCheckboxes(selected, project)
+            SupportedLanguage.Java -> TopButtonsPanelStrategy.toggleAllJavaCheckboxes(selected, project)
+            SupportedLanguage.Kotlin -> TopButtonsPanelStrategy.toggleAllKotlinCheckboxes(selected, project)
         }
     }
 
@@ -113,8 +113,8 @@ class TopButtonsPanelFactory(private val project: Project, private val language:
      */
     private fun removeAllTestCases() {
         when (language) {
-            Language.Java -> TopButtonsPanelStrategy.removeAllJavaTestCases(project)
-            Language.Kotlin -> TopButtonsPanelStrategy.removeAllKotlinTestCases(project)
+            SupportedLanguage.Java -> TopButtonsPanelStrategy.removeAllJavaTestCases(project)
+            SupportedLanguage.Kotlin -> TopButtonsPanelStrategy.removeAllKotlinTestCases(project)
         }
     }
 
