@@ -13,7 +13,6 @@ import org.jetbrains.research.testspark.actions.controllers.TestGenerationContro
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
-import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -22,6 +21,7 @@ import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
+import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
 import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
@@ -32,7 +32,7 @@ import java.util.UUID
  * Pipeline class represents a pipeline for generating tests in a project.
  *
  * @param project the project in which the pipeline is executed.
- * @param psiHelper The PsiHelper in the context of witch the pipeline is executed.
+ * @param psiHelper The PsiHelper in the context of which the pipeline is executed.
  * @param caretOffset the offset of the caret position in the PSI file.
  * @param fileUrl the URL of the file being processed, if applicable.
  * @param packageName the package name of the file being processed.
@@ -49,7 +49,6 @@ class Pipeline(
     val generatedTestsData = TestGenerationData()
 
     init {
-
         val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
 
         // get generated test path
@@ -77,7 +76,7 @@ class Pipeline(
     /**
      * Builds the project and launches generation on a separate thread.
      */
-    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData, testCompiler: TestCompiler) {
+    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
         clear(project)
         val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
 
@@ -100,7 +99,6 @@ class Pipeline(
                             projectContext,
                             generatedTestsData,
                             testGenerationController.errorMonitor,
-                            testCompiler
                         )
                     }
 
@@ -114,27 +112,11 @@ class Pipeline(
                     testGenerationController.finished()
                     when (psiHelper.language) {
                         SupportedLanguage.Java -> uiContext?.let {
-                            project.service<JavaTestCaseDisplayService>()
-                                .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
-
-                            if (project.service<EditorService>().editor != null) {
-                                val report = it.testGenerationOutput.testGenerationResultList[0]!!
-                                project.service<JavaTestCaseDisplayService>()
-                                    .displayTestCases(report, it, psiHelper.language)
-                                project.service<CoverageVisualisationService>().showCoverage(report)
-                            }
+                            displayTestCase<JavaTestCaseDisplayService>(it)
                         }
 
                         SupportedLanguage.Kotlin -> uiContext?.let {
-                            project.service<KotlinTestCaseDisplayService>()
-                                .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
-
-                            if (project.service<EditorService>().editor != null) {
-                                val report = it.testGenerationOutput.testGenerationResultList[0]!!
-                                project.service<KotlinTestCaseDisplayService>()
-                                    .displayTestCases(report, it, psiHelper.language)
-                                project.service<CoverageVisualisationService>().showCoverage(report)
-                            }
+                            displayTestCase<KotlinTestCaseDisplayService>(it)
                         }
                     }
                 }
@@ -150,5 +132,15 @@ class Pipeline(
 
         project.service<CoverageVisualisationService>().clear()
         project.service<TestsExecutionResultService>().clear()
+    }
+
+    private inline fun <reified Service : TestCaseDisplayService> displayTestCase(ctx: UIContext) {
+        project.service<Service>().updateEditorForFileUrl(ctx.testGenerationOutput.fileUrl)
+
+        if (project.service<EditorService>().editor != null) {
+            val report = ctx.testGenerationOutput.testGenerationResultList[0]!!
+            project.service<Service>().displayTestCases(report, ctx, psiHelper.language)
+            project.service<CoverageVisualisationService>().showCoverage(report)
+        }
     }
 }
