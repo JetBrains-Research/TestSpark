@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
@@ -53,6 +54,9 @@ class LLMProcessManager(
     private val testSamplesCode: String,
     private val projectSDKPath: Path? = null,
 ) : ProcessManager {
+
+    private val homeDirectory =
+        projectSDKPath?.toString() ?: ProjectRootManager.getInstance(project).projectSdk!!.homeDirectory!!.path
 
     private val testFileName: String = when (language) {
         SupportedLanguage.Java -> "GeneratedTest.java"
@@ -152,7 +156,7 @@ class LLMProcessManager(
             project,
             jUnitVersion,
             language,
-            projectSDKPath.toString(),
+            homeDirectory,
         )
 
         // Asking LLM to generate a test suite. Here we have a feedback cycle for LLM in case of wrong responses
