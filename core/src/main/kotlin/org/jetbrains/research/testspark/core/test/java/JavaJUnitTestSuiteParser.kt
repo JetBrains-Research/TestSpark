@@ -10,14 +10,11 @@ import org.jetbrains.research.testspark.core.test.strategies.JUnitTestSuiteParse
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
 
 class JavaJUnitTestSuiteParser(
-    private var packageName: String,
     private val junitVersion: JUnitVersion,
     private val testBodyPrinter: TestBodyPrinter,
 ) : TestSuiteParser {
     override fun parseTestSuite(rawText: String): TestSuiteGeneratedByLLM? {
-        if (packageName.isBlank()) {
-            packageName = getPackageFromTestSuiteCode(rawText, Language.Java)
-        }
+        val packageName = getPackageFromTestSuiteCode(rawText, Language.Java)
 
         return JUnitTestSuiteParserStrategy.parseJUnitTestSuite(
             rawText,

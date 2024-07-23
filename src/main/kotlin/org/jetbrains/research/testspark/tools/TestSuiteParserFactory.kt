@@ -13,16 +13,13 @@ class TestSuiteParserFactory {
             jUnitVersion: JUnitVersion,
             language: Language,
             testBodyPrinter: TestBodyPrinter,
-            packageName: String = "",
         ): TestSuiteParser = when (language) {
             Language.Java -> JavaJUnitTestSuiteParser(
-                packageName,
                 jUnitVersion,
                 testBodyPrinter,
             )
 
             Language.Kotlin -> KotlinJUnitTestSuiteParser(
-                packageName,
                 jUnitVersion,
                 testBodyPrinter,
             )

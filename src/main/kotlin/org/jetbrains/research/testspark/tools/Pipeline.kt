@@ -13,6 +13,7 @@ import org.jetbrains.research.testspark.actions.controllers.TestGenerationContro
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -76,7 +77,7 @@ class Pipeline(
     /**
      * Builds the project and launches generation on a separate thread.
      */
-    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
+    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData, testCompiler: TestCompiler) {
         clear(project)
         val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
 
@@ -99,6 +100,7 @@ class Pipeline(
                             projectContext,
                             generatedTestsData,
                             testGenerationController.errorMonitor,
+                            testCompiler
                         )
                     }
 
