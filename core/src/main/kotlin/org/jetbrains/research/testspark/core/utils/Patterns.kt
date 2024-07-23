@@ -6,6 +6,14 @@ val javaImportPattern =
         options = setOf(RegexOption.MULTILINE),
     )
 
+/**
+ * Parse all the possible Kotlin import patterns
+ *
+ * import org.mockito.Mockito.`when`
+ * import kotlin.math.cos
+ * import kotlin.math.*
+ * import kotlin.math.PI as piValue
+ */
 val kotlinImportPattern =
     Regex(
         pattern = "^import\\s+((?:[a-zA-Z_]\\w*\\.)*(?:\\w*\\.?)*)?(\\*)?( as \\w*)?(`\\w*`)?",
