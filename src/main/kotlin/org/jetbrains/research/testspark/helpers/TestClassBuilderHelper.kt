@@ -23,21 +23,21 @@ interface TestClassBuilderHelper {
     ): String
 
     /**
-     * Finds the test method from a given class with the specified test case name.
+     * Extracts the code of the first test method found in the given class code.
      *
-     * @param code The code of the class containing test methods.
-     * @return The test method as a string, including the "@Test" annotation.
+     * @param classCode The code of the class containing test methods.
+     * @return The code of the first test method as a string, including the "@Test" annotation.
      */
-    fun getTestMethodCodeFromClassWithTestCase(code: String): String
+    fun extractFirstTestMethodCode(classCode: String): String
 
     /**
-     * Retrieves the name of the test method from a given Java class with test cases.
+     * Retrieves the name of the first test method found in the given class code.
      *
      * @param oldTestCaseName The old name of test case
-     * @param code The source code of the Java class with test cases.
-     * @return The name of the test method. If no test method is found, an empty string is returned.
+     * @param classCode The source code of the class containing test methods.
+     * @return The name of the first test method. If no test method is found, an empty string is returned.
      */
-    fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, code: String): String
+    fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, classCode: String): String
 
     /**
      * Retrieves the class name from the given test case code.

@@ -42,13 +42,13 @@ object JavaClassBuilderHelper : TestClassBuilderHelper {
          * for better readability and make the tests shorter, we reduce the number of line breaks:
          *  when we have three or more sequential \n, reduce it to two.
          */
-        return formatCode(project, Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"), testGenerationData)
+        return formatCode(project, Regex("\n\n\n(?:\n)*").replace(testFullText, "\n\n"), testGenerationData)
     }
 
-    override fun getTestMethodCodeFromClassWithTestCase(code: String): String {
+    override fun extractFirstTestMethodCode(classCode: String): String {
         var result = ""
         try {
-            val componentUnit: CompilationUnit = StaticJavaParser.parse(code)
+            val componentUnit: CompilationUnit = StaticJavaParser.parse(classCode)
             object : VoidVisitorAdapter<Any?>() {
                 override fun visit(method: MethodDeclaration, arg: Any?) {
                     super.visit(method, arg)
@@ -60,7 +60,7 @@ object JavaClassBuilderHelper : TestClassBuilderHelper {
 
             return result
         } catch (e: ParseProblemException) {
-            val upperCutCode = "\t@Test" + code.split("@Test").last()
+            val upperCutCode = "\t@Test" + classCode.split("@Test").last()
             var methodStarted = false
             var balanceOfBrackets = 0
             for (symbol in upperCutCode) {
@@ -80,10 +80,10 @@ object JavaClassBuilderHelper : TestClassBuilderHelper {
         }
     }
 
-    override fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, code: String): String {
+    override fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, classCode: String): String {
         var result = ""
         try {
-            val componentUnit: CompilationUnit = StaticJavaParser.parse(code)
+            val componentUnit: CompilationUnit = StaticJavaParser.parse(classCode)
 
             object : VoidVisitorAdapter<Any?>() {
                 override fun visit(method: MethodDeclaration, arg: Any?) {

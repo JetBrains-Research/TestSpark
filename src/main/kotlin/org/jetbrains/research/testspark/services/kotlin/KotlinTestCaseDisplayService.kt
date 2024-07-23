@@ -417,7 +417,7 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
         // insert tests to a code
         testCaseComponents.reversed().forEach {
             val testMethodCode =
-                KotlinClassBuilderHelper.getTestMethodCodeFromClassWithTestCase(
+                KotlinClassBuilderHelper.extractFirstTestMethodCode(
                     KotlinClassBuilderHelper.formatCode(
                         project,
                         it.replace("\r\n", "\n")

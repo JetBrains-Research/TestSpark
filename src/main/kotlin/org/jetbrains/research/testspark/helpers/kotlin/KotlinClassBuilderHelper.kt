@@ -42,9 +42,9 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
         return formatCode(project, Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"), testGenerationData)
     }
 
-    override fun getTestMethodCodeFromClassWithTestCase(code: String): String {
+    override fun extractFirstTestMethodCode(classCode: String): String {
         val testMethods = StringBuilder()
-        val lines = code.lines()
+        val lines = classCode.lines()
 
         var methodStarted = false
         var balanceOfBrackets = 0
@@ -72,8 +72,8 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
         return testMethods.toString().replace("\n", "\n\t")
     }
 
-    override fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, code: String): String {
-        val lines = code.lines()
+    override fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, classCode: String): String {
+        val lines = classCode.lines()
         var testMethodName = oldTestCaseName
 
         for (line in lines) {
