@@ -17,7 +17,6 @@ import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.strategies.TestProcessorStrategies
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -85,7 +84,7 @@ class TestProcessor(
         projectContext: ProjectContext,
     ): String {
         // find the proper javac
-        val javaRunner = TestProcessorStrategies.getRunner(homeDirectory)
+        val javaRunner = findJavaCompilerInDirectory(homeDirectory)
         // JaCoCo libs
         val jacocoAgentLibraryPath = "\"${LibraryPathsProvider.getJacocoAgentLibraryPath()}\""
         val jacocoCLILibraryPath = "\"${LibraryPathsProvider.getJacocoCliLibraryPath()}\""
@@ -305,5 +304,19 @@ class TestProcessor(
         setOfLines.addAll(linesCoveredDuringTheException)
 
         return TestCase(testCaseId, testCaseName, testCaseCode, setOfLines)
+    }
+
+    /**
+     * Finds 'javac' compiler (both on Unix & Windows)
+     * starting from the provided directory.
+     */
+    fun findJavaCompilerInDirectory(homeDirectory: String): File {
+        return File(homeDirectory).walk()
+            .filter {
+                val isJavaName =
+                    if (DataFilesUtil.isWindows()) it.name.equals("java.exe") else it.name.equals("java")
+                isJavaName && it.isFile
+            }
+            .first()
     }
 }
