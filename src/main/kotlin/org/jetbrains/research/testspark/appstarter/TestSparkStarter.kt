@@ -18,6 +18,7 @@ import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
+import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -26,6 +27,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
+import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.Llm
@@ -172,6 +174,12 @@ class TestSparkStarter : ApplicationStarter {
                         // Start test generation
                         val indicator = HeadlessProgressIndicator()
                         val errorMonitor = DefaultErrorMonitor()
+                        val testCompiler = TestCompilerFactory.createTestCompiler(
+                            project,
+                            settingsState.junitVersion,
+                            psiHelper.language,
+                            projectSDKPath.toString(),
+                        )
                         val uiContext = llmProcessManager.runTestGenerator(
                             indicator,
                             FragmentToTestData(CodeType.CLASS),
@@ -192,6 +200,7 @@ class TestSparkStarter : ApplicationStarter {
                                 classPath,
                                 projectContext,
                                 projectSDKPath,
+                                testCompiler,
                             )
                         } else {
                             println("[TestSpark Starter] Test generation failed")
@@ -237,6 +246,7 @@ class TestSparkStarter : ApplicationStarter {
         classPath: String,
         projectContext: ProjectContext,
         projectSDKPath: Path,
+        testCompiler: TestCompiler,
     ) {
         val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
         println("Run tests in $targetDirectory")
@@ -246,6 +256,7 @@ class TestSparkStarter : ApplicationStarter {
                 var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
                 testcaseName = testcaseName[0].lowercaseChar() + testcaseName.substring(1)
                 // The current test is compiled and is ready to run jacoco
+
                 val testExecutionError = TestProcessor(project, projectSDKPath).createXmlFromJacoco(
                     it.nameWithoutExtension,
                     "$targetDirectory${File.separator}jacoco-${it.nameWithoutExtension}",
@@ -254,6 +265,7 @@ class TestSparkStarter : ApplicationStarter {
                     packageList.joinToString("."),
                     out,
                     projectContext,
+                    testCompiler,
                 )
                 // Saving exception (if exists) thrown during the test execution
                 saveException(testcaseName, targetDirectory, testExecutionError)

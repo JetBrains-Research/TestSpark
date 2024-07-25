@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.core.data.ClassType
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 
 /**
  * Interface representing a wrapper for PSI methods,
@@ -40,12 +40,14 @@ interface PsiMethodWrapper {
  * @property name The name of a class
  * @property qualifiedName The qualified name of the class.
  * @property text The text of the class.
- * @property fullText The source code of the class (with package and imports).
- * @property virtualFile
- * @property containingFile File where the method is located
- * @property superClass The super class of the class
  * @property methods All methods in the class
  * @property allMethods All methods in the class and all its superclasses
+ * @property superClass The super class of the class
+ * @property virtualFile Virtual file where the class is located
+ * @property containingFile File where the method is located
+ * @property fullText The source code of the class (with package and imports).
+ * @property classType The type of the class
+ * @property rBrace The offset of the closing brace
  * */
 interface PsiClassWrapper {
     val name: String
@@ -58,6 +60,7 @@ interface PsiClassWrapper {
     val containingFile: PsiFile
     val fullText: String
     val classType: ClassType
+    val rBrace: Int?
 
     /**
      * Searches for subclasses of the current class within the given project.
@@ -81,7 +84,7 @@ interface PsiClassWrapper {
  * handling the PSI (Program Structure Interface) for different languages.
  */
 interface PsiHelper {
-    val language: Language
+    val language: SupportedLanguage
 
     /**
      * Returns the surrounding PsiClass object based on the caret position within the specified PsiFile.

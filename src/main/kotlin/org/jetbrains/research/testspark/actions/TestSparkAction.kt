@@ -122,7 +122,7 @@ class TestSparkAction : AnAction() {
 
         private val cardLayout = CardLayout()
         private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
-        private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project)
+        private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project, psiHelper.language)
         private val evoSuitePanelFactory = EvoSuitePanelFactory(project)
 
         init {

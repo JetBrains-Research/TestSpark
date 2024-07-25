@@ -3,12 +3,15 @@ package org.jetbrains.research.testspark.tools.llm.test
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
 
 class JUnitTestSuitePresenter(
     private val project: Project,
     private val generatedTestsData: TestGenerationData,
+    private val language: SupportedLanguage,
 ) {
     /**
      * Returns a string representation of this object.
@@ -34,16 +37,29 @@ class JUnitTestSuitePresenter(
             // Add each test
             testCases.forEach { testCase -> testBody += "$testCase\n" }
 
-            JavaClassBuilderHelper.generateCode(
-                project,
-                testFileName,
-                testBody,
-                imports,
-                packageString,
-                runWith,
-                otherInfo,
-                generatedTestsData,
-            )
+            when (language) {
+                SupportedLanguage.Java -> JavaClassBuilderHelper.generateCode(
+                    project,
+                    testFileName,
+                    testBody,
+                    imports,
+                    packageName,
+                    runWith,
+                    otherInfo,
+                    generatedTestsData,
+                )
+
+                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                    project,
+                    testFileName,
+                    testBody,
+                    imports,
+                    packageName,
+                    runWith,
+                    otherInfo,
+                    generatedTestsData,
+                )
+            }
         }
     }
 
@@ -57,16 +73,29 @@ class JUnitTestSuitePresenter(
         testCaseIndex: Int,
     ): String =
         testSuite.run {
-            JavaClassBuilderHelper.generateCode(
-                project,
-                getClassWithTestCaseName(testCases[testCaseIndex].name),
-                testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
-                imports,
-                packageString,
-                runWith,
-                otherInfo,
-                generatedTestsData,
-            )
+            when (language) {
+                SupportedLanguage.Java -> JavaClassBuilderHelper.generateCode(
+                    project,
+                    getClassWithTestCaseName(testCases[testCaseIndex].name),
+                    testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
+                    imports,
+                    packageName,
+                    runWith,
+                    otherInfo,
+                    generatedTestsData,
+                )
+
+                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                    project,
+                    getClassWithTestCaseName(testCases[testCaseIndex].name),
+                    testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
+                    imports,
+                    packageName,
+                    runWith,
+                    otherInfo,
+                    generatedTestsData,
+                )
+            }
         }
 
     /**
@@ -81,16 +110,30 @@ class JUnitTestSuitePresenter(
             // Add each test (exclude expected exception)
             testCases.forEach { testCase -> testBody += "${testCase.toStringWithoutExpectedException()}\n" }
 
-            JavaClassBuilderHelper.generateCode(
-                project,
-                testFileName,
-                testBody,
-                imports,
-                packageString,
-                runWith,
-                otherInfo,
-                generatedTestsData,
-            )
+            when (language) {
+                SupportedLanguage.Java ->
+                    JavaClassBuilderHelper.generateCode(
+                        project,
+                        testFileName,
+                        testBody,
+                        imports,
+                        packageName,
+                        runWith,
+                        otherInfo,
+                        generatedTestsData,
+                    )
+
+                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                    project,
+                    testFileName,
+                    testBody,
+                    imports,
+                    packageName,
+                    runWith,
+                    otherInfo,
+                    generatedTestsData,
+                )
+            }
         }
     }
 
@@ -105,8 +148,8 @@ class JUnitTestSuitePresenter(
     fun getPrintablePackageString(testSuite: TestSuiteGeneratedByLLM): String {
         return testSuite.run {
             when {
-                packageString.isEmpty() || packageString.isBlank() -> ""
-                else -> packageString
+                packageName.isEmpty() || packageName.isBlank() -> ""
+                else -> packageName
             }
         }
     }
