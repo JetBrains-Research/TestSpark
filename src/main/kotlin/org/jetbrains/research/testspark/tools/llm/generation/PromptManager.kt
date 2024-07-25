@@ -31,7 +31,7 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
  * A class that manages prompts for generating unit tests.
  *
  * @constructor Creates a PromptManager with the given parameters.
- * @param psiHelper The PsiHelper in the context of witch the pipeline is executed.
+ * @param psiHelper The PsiHelper in the context of which the pipeline is executed.
  * @param caret The place of the caret.
  */
 class PromptManager(
