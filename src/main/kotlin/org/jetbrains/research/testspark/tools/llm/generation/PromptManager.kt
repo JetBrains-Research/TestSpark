@@ -119,7 +119,7 @@ class PromptManager(
                             method,
                             interestingClassesFromMethod,
                             testSamplesCode,
-                            psiHelper.getPackageName()
+                            psiHelper.getPackageName(),
                         )
                     }
 

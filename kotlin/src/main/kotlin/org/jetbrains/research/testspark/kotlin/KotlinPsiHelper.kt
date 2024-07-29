@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
-import com.intellij.openapi.editor.Document
 import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
@@ -182,7 +181,7 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return result
     }
 
-    override fun getPackageName()= (psiFile as KtFile).packageFqName.asString()
+    override fun getPackageName() = (psiFile as KtFile).packageFqName.asString()
 
     override fun getModuleFromPsiFile() = ModuleUtilCore.findModuleForFile(psiFile.virtualFile, psiFile.project)!!
 
