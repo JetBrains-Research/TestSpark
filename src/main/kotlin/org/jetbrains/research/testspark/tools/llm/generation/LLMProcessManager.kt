@@ -138,21 +138,21 @@ class LLMProcessManager(
 
         // Creation of JUnit specific parser, printer and assembler
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
-        val testBodyPrinter = TestBodyPrinterFactory.createTestBodyPrinter(language)
+        val testBodyPrinter = TestBodyPrinterFactory.create(language)
         val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
             jUnitVersion,
             language,
             testBodyPrinter,
-            packageName
+            packageName,
         )
-        val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
+        val testsAssembler = TestsAssemblerFactory.create(
             indicator,
             generatedTestsData,
             testSuiteParser,
             jUnitVersion,
         )
 
-        val testCompiler = TestCompilerFactory.createTestCompiler(
+        val testCompiler = TestCompilerFactory.create(
             project,
             jUnitVersion,
             language,

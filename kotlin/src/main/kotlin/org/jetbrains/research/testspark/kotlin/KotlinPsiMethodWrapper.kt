@@ -68,22 +68,6 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
         return lineNumber in startLine..endLine
     }
 
-    fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper> {
-        val interestingPsiClasses = mutableSetOf<PsiClassWrapper>()
-
-        psiFunction.valueParameters.forEach { parameter ->
-            val typeReference = parameter.typeReference
-            if (typeReference != null) {
-                val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
-                if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
-                    interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
-                }
-            }
-        }
-
-        return interestingPsiClasses
-    }
-
     /**
      * Returns a set of `PsiClassWrapper` instances for non-standard Kotlin classes referenced by the
      * parameters of the current function.

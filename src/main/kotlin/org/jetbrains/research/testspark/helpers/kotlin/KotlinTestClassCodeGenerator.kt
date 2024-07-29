@@ -9,10 +9,10 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.helpers.TestClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.TestClassCodeGenerator
 import java.io.File
 
-object KotlinClassBuilderHelper : TestClassBuilderHelper {
+object KotlinTestClassCodeGenerator : TestClassCodeGenerator {
 
     private val log = Logger.getInstance(this::class.java)
 
@@ -28,7 +28,8 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
     ): String {
         log.debug("[KotlinClassBuilderHelper] Generate code for $className")
 
-        var testFullText = printUpperPart(className, imports, packageString, runWith, otherInfo)
+        var testFullText =
+            printUpperPart(className, imports, packageString, runWith, otherInfo)
 
         // Add each test (exclude expected exception)
         testFullText += body
@@ -40,61 +41,6 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
 
         // Reduce the number of line breaks for better readability
         return formatCode(project, Regex("\n\n\n(?:\n)*").replace(testFullText, "\n\n"), testGenerationData)
-    }
-
-    override fun extractFirstTestMethodCode(classCode: String): String {
-        val testMethods = StringBuilder()
-        val lines = classCode.lines()
-
-        var methodStarted = false
-        var balanceOfBrackets = 0
-
-        for (line in lines) {
-            if (!methodStarted && line.contains("@Test")) {
-                methodStarted = true
-                testMethods.append(line).append("\n")
-            } else if (methodStarted) {
-                testMethods.append(line).append("\n")
-                for (char in line) {
-                    if (char == '{') {
-                        balanceOfBrackets++
-                    } else if (char == '}') {
-                        balanceOfBrackets--
-                    }
-                }
-                if (balanceOfBrackets == 0) {
-                    methodStarted = false
-                    testMethods.append("\n")
-                }
-            }
-        }
-
-        return testMethods.toString()
-    }
-
-    override fun extractFirstTestMethodName(oldTestCaseName: String, classCode: String): String {
-        val lines = classCode.lines()
-        var testMethodName = oldTestCaseName
-
-        for (line in lines) {
-            if (line.contains("@Test")) {
-                val methodDeclarationLine = lines[lines.indexOf(line) + 1]
-                val matchResult = Regex("fun\\s+(\\w+)\\s*\\(").find(methodDeclarationLine)
-                if (matchResult != null) {
-                    testMethodName = matchResult.groupValues[1]
-                }
-                break
-            }
-        }
-        return testMethodName
-    }
-
-    override fun getClassFromTestCaseCode(code: String): String {
-        val pattern = Regex("class\\s+(\\S+)\\s*\\{")
-        val matchResult = pattern.find(code)
-        matchResult ?: return "GeneratedTest"
-        val (className) = matchResult.destructured
-        return className
     }
 
     override fun formatCode(project: Project, code: String, generatedTestData: TestGenerationData): String {
