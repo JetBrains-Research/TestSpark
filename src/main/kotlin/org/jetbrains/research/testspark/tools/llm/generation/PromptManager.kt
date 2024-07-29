@@ -30,7 +30,7 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
  * A class that manages prompts for generating unit tests.
  *
  * @constructor Creates a PromptManager with the given parameters.
- * @param psiHelper The PsiHelper in the context of witch the pipeline is executed.
+ * @param psiHelper The PsiHelper in the context of which the pipeline is executed.
  * @param caret The place of the caret.
  */
 class PromptManager(
@@ -183,7 +183,7 @@ class PromptManager(
 
     fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
         return (LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
-                (LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
+            (LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
     }
 
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
@@ -209,12 +209,8 @@ class PromptManager(
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
-                    "Maximum depth of polymorphism is ${LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
-                    "Maximum depth for input parameters is ${
-                        LlmSettingsArguments(project).maxInputParamsDepth(
-                            testGenerationData.inputParamsDepthReducing
-                        )
-                    }.",
+                "Maximum depth of polymorphism is ${LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                "Maximum depth for input parameters is ${LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
             project,
         )
     }

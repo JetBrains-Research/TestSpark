@@ -167,9 +167,9 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
         log.info(
             "The test can be generated for: \n " +
-                    " 1) Class ${javaPsiClassWrapped?.qualifiedName ?: "no class"} \n" +
-                    " 2) Method ${javaPsiMethodWrapped?.name ?: "no method"} \n" +
-                    " 3) Line $line",
+                " 1) Class ${javaPsiClassWrapped?.qualifiedName ?: "no class"} \n" +
+                " 2) Method ${javaPsiMethodWrapped?.name ?: "no method"} \n" +
+                " 3) Line $line",
         )
 
         return result
