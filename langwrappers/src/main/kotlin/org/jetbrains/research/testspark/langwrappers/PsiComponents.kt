@@ -9,6 +9,8 @@ import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 
+typealias CodeTypeDisplayName = Pair<CodeType, String>
+
 /**
  * Interface representing a wrapper for PSI methods,
  * providing common API to handle method-related data for different languages.
@@ -150,7 +152,7 @@ interface PsiHelper {
      *         The array contains the class display name, method display name (if present), and the line number (if present).
      *         The line number is prefixed with "Line".
      */
-    fun getCurrentListOfCodeTypes(e: AnActionEvent): List<Pair<CodeType, String>>?
+    fun getCurrentListOfCodeTypes(e: AnActionEvent): List<CodeTypeDisplayName>
 
     /**
      * Helper for generating method descriptors for methods.
@@ -165,8 +167,8 @@ interface PsiHelper {
      *
      * @param project The project in which to collect classes to test.
      * @param classesToTest The list of classes to test.
-     * @param psiHelper The PSI helper instance to use for collecting classes.
      * @param caretOffset The caret offset in the file.
+     * @param maxPolymorphismDepth Check if cut has any user-defined superclass
      */
     fun collectClassesToTest(
         project: Project,

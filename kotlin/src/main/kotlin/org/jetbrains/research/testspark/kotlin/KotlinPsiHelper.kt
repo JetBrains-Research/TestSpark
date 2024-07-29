@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
-import com.intellij.openapi.editor.Document
 import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
@@ -26,6 +25,7 @@ import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
+import org.jetbrains.research.testspark.langwrappers.CodeTypeDisplayName
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
@@ -89,7 +89,7 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         project: Project,
         classesToTest: MutableList<PsiClassWrapper>,
         caretOffset: Int,
-        maxPolymorphismDepth: Int, // check if cut has any non-java superclass
+        maxPolymorphismDepth: Int,
     ) {
         val cutPsiClass = getSurroundingClass(caretOffset) ?: return
         // will be null for the top level function
@@ -158,8 +158,8 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return interestingPsiClasses
     }
 
-    override fun getCurrentListOfCodeTypes(e: AnActionEvent): List<Pair<CodeType, String>> {
-        val result: ArrayList<Pair<CodeType, String>> = arrayListOf()
+    override fun getCurrentListOfCodeTypes(e: AnActionEvent): List<CodeTypeDisplayName> {
+        val result: ArrayList<CodeTypeDisplayName> = arrayListOf()
         val caret: Caret =
             e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return result
 
@@ -181,17 +181,11 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return result
     }
 
-    override fun getPackageName(): String {
-        return (psiFile as KtFile).packageFqName.asString()
-    }
+    override fun getPackageName() = (psiFile as KtFile).packageFqName.asString()
 
-    override fun getModuleFromPsiFile(): com.intellij.openapi.module.Module {
-        return ModuleUtilCore.findModuleForFile(psiFile.virtualFile, psiFile.project)!!
-    }
+    override fun getModuleFromPsiFile() = ModuleUtilCore.findModuleForFile(psiFile.virtualFile, psiFile.project)!!
 
-    override fun getDocumentFromPsiFile(): Document {
-        return psiFile.fileDocument
-    }
+    override fun getDocumentFromPsiFile() = psiFile.fileDocument
 
     override fun getLineHTMLDisplayName(line: Int) = "<html><b><font color='orange'>line</font> $line</b></html>"
 
@@ -201,7 +195,7 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     override fun getMethodHTMLDisplayName(psiMethod: PsiMethodWrapper): String {
         psiMethod as KotlinPsiMethodWrapper
         return when {
-            psiMethod.isTopLevelFunction -> "<html><b><font color='orange'>top-level function</font></b></html>"
+            psiMethod.isTopLevelFunction -> "<html><b><font color='orange'>top-level function</font> ${psiMethod.name}</b></html>"
             psiMethod.isSecondaryConstructor -> "<html><b><font color='orange'>secondary constructor</font></b></html>"
             psiMethod.isPrimaryConstructor -> "<html><b><font color='orange'>constructor</font></b></html>"
             psiMethod.isDefaultMethod -> "<html><b><font color='orange'>default method</font> ${psiMethod.name}</b></html>"

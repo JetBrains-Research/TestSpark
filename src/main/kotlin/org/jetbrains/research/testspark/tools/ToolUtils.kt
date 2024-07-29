@@ -14,6 +14,8 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
+import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
 
@@ -46,16 +48,29 @@ object ToolUtils {
 
         for (testCase in report.testCaseList.values) {
             val code = testCase.testCode
-            testCase.testCode = TestClassCodeGeneratorFactory.create(language).generateCode(
-                project,
-                getClassWithTestCaseName(testCase.testName),
-                code,
-                generatedTestData.importsCode,
-                generatedTestData.packageName,
-                generatedTestData.runWith,
-                generatedTestData.otherInfo,
-                generatedTestData,
-            )
+            testCase.testCode = when (language) {
+                SupportedLanguage.Java -> JavaClassBuilderHelper.generateCode(
+                    project,
+                    getClassWithTestCaseName(testCase.testName),
+                    code,
+                    generatedTestData.importsCode,
+                    generatedTestData.packageName,
+                    generatedTestData.runWith,
+                    generatedTestData.otherInfo,
+                    generatedTestData,
+                )
+
+                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.generateCode(
+                    project,
+                    getClassWithTestCaseName(testCase.testName),
+                    code,
+                    generatedTestData.importsCode,
+                    generatedTestData.packageName,
+                    generatedTestData.runWith,
+                    generatedTestData.otherInfo,
+                    generatedTestData,
+                )
+            }
         }
 
         generatedTestData.testGenerationResultList.add(report)

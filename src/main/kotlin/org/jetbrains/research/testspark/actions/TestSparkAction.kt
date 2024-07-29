@@ -77,7 +77,6 @@ class TestSparkAction : AnAction() {
         if (psiHelper == null) {
             // TODO exception
         }
-        e.presentation.isEnabled = psiHelper!!.getCurrentListOfCodeTypes(e) != null
     }
 
     /**
@@ -112,7 +111,7 @@ class TestSparkAction : AnAction() {
                 return psiHelper!!
             }
 
-        private val codeTypes = psiHelper.getCurrentListOfCodeTypes(e)!!
+        private val codeTypes = psiHelper.getCurrentListOfCodeTypes(e)
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
@@ -207,7 +206,10 @@ class TestSparkAction : AnAction() {
 
             val codesToTestPanel = JPanel()
             codesToTestPanel.add(JLabel("Select the code type:"))
-            if (codeTypeButtons.size == 1) codeTypeButtons[0].second.isSelected = true
+            if (codeTypeButtons.size == 1) {
+                // A single button is selected by default
+                codeTypeButtons[0].second.isSelected = true
+            }
             for ((_, button) in codeTypeButtons) codesToTestPanel.add(button)
 
             val middlePanel = FormBuilder.createFormBuilder()

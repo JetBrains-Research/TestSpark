@@ -30,7 +30,7 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
  * A class that manages prompts for generating unit tests.
  *
  * @constructor Creates a PromptManager with the given parameters.
- * @param psiHelper The PsiHelper in the context of witch the pipeline is executed.
+ * @param psiHelper The PsiHelper in the context of which the pipeline is executed.
  * @param caret The place of the caret.
  */
 class PromptManager(
@@ -38,7 +38,9 @@ class PromptManager(
     private val psiHelper: PsiHelper,
     private val caret: Int,
 ) {
-    // The classesToTest is empty when we work with the function outside the class
+    /**
+     * The `classesToTest` is empty when we work with the function outside the class
+     */
     private val classesToTest: List<PsiClassWrapper>
         get() {
             val classesToTest = mutableListOf<PsiClassWrapper>()
@@ -52,7 +54,9 @@ class PromptManager(
             return classesToTest
         }
 
-    // The cut is null when we work with the function outside the class
+    /**
+     * The `cut` is null when we work with the function outside the class.
+     */
     private val cut: PsiClassWrapper? = if (classesToTest.isNotEmpty()) classesToTest[0] else null
 
     private val llmSettingsState: LLMSettingsState
@@ -111,7 +115,12 @@ class PromptManager(
                                 .map(this::createClassRepresentation)
                                 .toList()
 
-                        promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, testSamplesCode, psiHelper.getPackageName())
+                        promptGenerator.generatePromptForMethod(
+                            method,
+                            interestingClassesFromMethod,
+                            testSamplesCode,
+                            psiHelper.getPackageName(),
+                        )
                     }
 
                     CodeType.LINE -> {
@@ -254,8 +263,7 @@ class PromptManager(
         // Processing function outside the class
         if (psiClass == null) {
             val currentPsiMethod = psiHelper.getSurroundingMethod(caret)!!
-            if (psiHelper.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) return currentPsiMethod
-            return null
+            return currentPsiMethod
         }
         for (currentPsiMethod in psiClass.allMethods) {
             val file = psiClass.containingFile

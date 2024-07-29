@@ -262,14 +262,14 @@ object LLMHelper {
         }
 
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
-        val testBodyPrinter = TestBodyPrinterFactory.create(language)
+        val testBodyPrinter = TestBodyPrinterFactory.createTestBodyPrinter(language)
         val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
             jUnitVersion,
             language,
             testBodyPrinter,
         )
 
-        val testsAssembler = TestsAssemblerFactory.create(
+        val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
             indicator,
             testGenerationOutput,
             testSuiteParser,

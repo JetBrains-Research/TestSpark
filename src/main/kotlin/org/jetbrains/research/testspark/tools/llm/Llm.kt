@@ -77,7 +77,7 @@ class Llm(override val name: String = "LLM") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
     ) {
-        log.info("Generation of tests fo CLASS was selected")
+        log.info("Generation of tests for CLASS was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
             testGenerationController.finished()
             return
@@ -111,7 +111,7 @@ class Llm(override val name: String = "LLM") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
     ) {
-        log.info("Generation of tests fo METHOD was selected")
+        log.info("Generation of tests for METHOD was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
             testGenerationController.finished()
             return
@@ -146,7 +146,7 @@ class Llm(override val name: String = "LLM") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
     ) {
-        log.info("Generation of tests fo LINE was selected")
+        log.info("Generation of tests for LINE was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
             testGenerationController.finished()
             return
@@ -180,9 +180,6 @@ class Llm(override val name: String = "LLM") : Tool {
         fileUrl: String?,
         testGenerationController: TestGenerationController,
     ): Pipeline {
-//        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
-//        val packageList = cutPsiClass.qualifiedName.split(".").dropLast(1)
-//        val packageName = packageList.joinToString(".")
         val packageName = psiHelper.getPackageName()
         return Pipeline(project, psiHelper, caretOffset, fileUrl, packageName, testGenerationController)
     }

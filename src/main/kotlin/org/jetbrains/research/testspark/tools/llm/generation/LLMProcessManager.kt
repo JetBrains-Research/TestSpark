@@ -41,7 +41,6 @@ import java.nio.file.Path
  * and is responsible for generating tests using the LLM tool.
  *
  * @property project The project in which the test generation is being performed.
- * @property prompt The prompt to be sent to the LLM tool.
  * @property testFileName The name of the generated test file.
  * @property log An instance of the logger class for logging purposes.
  * @property llmErrorManager An instance of the LLMErrorManager class.
@@ -139,21 +138,21 @@ class LLMProcessManager(
 
         // Creation of JUnit specific parser, printer and assembler
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
-        val testBodyPrinter = TestBodyPrinterFactory.create(language)
+        val testBodyPrinter = TestBodyPrinterFactory.createTestBodyPrinter(language)
         val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
             jUnitVersion,
             language,
             testBodyPrinter,
-            packageName,
+            packageName
         )
-        val testsAssembler = TestsAssemblerFactory.create(
+        val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
             indicator,
             generatedTestsData,
             testSuiteParser,
             jUnitVersion,
         )
 
-        val testCompiler = TestCompilerFactory.create(
+        val testCompiler = TestCompilerFactory.createTestCompiler(
             project,
             jUnitVersion,
             language,
