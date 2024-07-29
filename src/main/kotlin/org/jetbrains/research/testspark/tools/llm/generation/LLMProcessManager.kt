@@ -41,7 +41,6 @@ import java.nio.file.Path
  * and is responsible for generating tests using the LLM tool.
  *
  * @property project The project in which the test generation is being performed.
- * @property prompt The prompt to be sent to the LLM tool.
  * @property testFileName The name of the generated test file.
  * @property log An instance of the logger class for logging purposes.
  * @property llmErrorManager An instance of the LLMErrorManager class.
@@ -144,7 +143,6 @@ class LLMProcessManager(
             jUnitVersion,
             language,
             testBodyPrinter,
-            packageName,
         )
         val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
             indicator,
@@ -241,7 +239,7 @@ class LLMProcessManager(
             project,
             report,
             getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation, language),
-            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN),
+            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
             projectContext.fileUrlAsString!!,
             generatedTestsData,
             language,
