@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.core.test
 
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.utils.Language
 
 abstract class TestsAssembler {
     private var rawText = ""
@@ -33,10 +32,9 @@ abstract class TestsAssembler {
     }
 
     /**
-     * Extracts test cases from raw text and generates a TestSuite using the given package name.
+     * Extracts test cases from raw text and generates a TestSuite.
      *
-     * @param packageName The package name to be set in the generated TestSuite.
-     * @return A TestSuiteGeneratedByLLM object containing the extracted test cases and package name.
+     * @return A TestSuiteGeneratedByLLM object containing information about the extracted test cases.
      */
-    abstract fun assembleTestSuite(packageName: String, language: Language): TestSuiteGeneratedByLLM?
+    abstract fun assembleTestSuite(): TestSuiteGeneratedByLLM?
 }

@@ -5,7 +5,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
-import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
@@ -88,7 +88,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      */
     override fun generateTestsForLine(project: Project, psiHelper: PsiHelper, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController) {
         log.info("Starting tests generation for line by EvoSuite")
-        val selectedLine: Int = psiHelper.getSurroundingLine(caretOffset)!!
+        val selectedLine: Int = psiHelper.getSurroundingLineNumber(caretOffset)!!
         createPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(
