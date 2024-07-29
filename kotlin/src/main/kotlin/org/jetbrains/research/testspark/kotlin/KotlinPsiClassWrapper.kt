@@ -21,6 +21,7 @@ import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
 import org.jetbrains.research.testspark.core.utils.kotlinPackagePattern
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.strategies.JavaKotlinClassTextExtractor
 
 class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
@@ -61,29 +62,12 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
     override val containingFile: PsiFile get() = psiClass.containingFile
 
     override val fullText: String
-        get() {
-            var fullText = ""
-            val fileText = psiClass.containingFile.text
-
-            // get package
-            kotlinPackagePattern.findAll(fileText, 0).map {
-                it.groupValues[0]
-            }.forEach {
-                fullText += "$it\n\n"
-            }
-
-            // get imports
-            kotlinImportPattern.findAll(fileText, 0).map {
-                it.groupValues[0]
-            }.forEach {
-                fullText += "$it\n"
-            }
-
-            // Add class code
-            fullText += psiClass.text
-
-            return fullText
-        }
+        get() = JavaKotlinClassTextExtractor().extract(
+            psiClass.containingFile,
+            psiClass.text,
+            kotlinPackagePattern,
+            kotlinImportPattern,
+        )
 
     override val classType: ClassType
         get() {
@@ -96,6 +80,8 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
                 else -> ClassType.CLASS
             }
         }
+
+    override val rBrace: Int? = psiClass.body?.rBrace?.textRange?.startOffset
 
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
         val scope = GlobalSearchScope.projectScope(project)
@@ -116,11 +102,9 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
 
         method.psiFunction.valueParameters.forEach { parameter ->
             val typeReference = parameter.typeReference
-            if (typeReference != null) {
-                val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
-                if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
-                    interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
-                }
+            val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
+            if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
+                interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
             }
         }
 

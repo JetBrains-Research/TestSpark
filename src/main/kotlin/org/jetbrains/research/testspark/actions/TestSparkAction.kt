@@ -17,6 +17,7 @@ import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
 import org.jetbrains.research.testspark.actions.template.PanelFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
@@ -76,7 +77,6 @@ class TestSparkAction : AnAction() {
         if (psiHelper == null) {
             // TODO exception
         }
-        e.presentation.isEnabled = psiHelper!!.getCurrentListOfCodeTypes(e) != null
     }
 
     /**
@@ -111,18 +111,18 @@ class TestSparkAction : AnAction() {
                 return psiHelper!!
             }
 
-        private val codeTypes = psiHelper.getCurrentListOfCodeTypes(e)!!
+        private val codeTypes = psiHelper.getCurrentListOfCodeTypes(e)
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
-        private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
+        private val codeTypeButtons: MutableList<Pair<CodeType, JRadioButton>> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
         private val nextButton = JButton(PluginLabelsBundle.get("next"))
 
         private val cardLayout = CardLayout()
         private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
-        private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project)
+        private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project, psiHelper.language)
         private val evoSuitePanelFactory = EvoSuitePanelFactory(project)
 
         init {
@@ -198,16 +198,19 @@ class TestSparkAction : AnAction() {
             testGeneratorPanel.add(llmButton)
             testGeneratorPanel.add(evoSuiteButton)
 
-            for (codeType in codeTypes) {
-                val button = JRadioButton(codeType as String)
-                codeTypeButtons.add(button)
+            for ((codeType, codeTypeName) in codeTypes) {
+                val button = JRadioButton(codeTypeName)
+                codeTypeButtons.add(codeType to button)
                 codeTypeButtonGroup.add(button)
             }
 
             val codesToTestPanel = JPanel()
             codesToTestPanel.add(JLabel("Select the code type:"))
-            if (codeTypeButtons.size == 1) codeTypeButtons[0].isSelected = true
-            for (button in codeTypeButtons) codesToTestPanel.add(button)
+            if (codeTypeButtons.size == 1) {
+                // A single button is selected by default
+                codeTypeButtons[0].second.isSelected = true
+            }
+            for ((_, button) in codeTypeButtons) codesToTestPanel.add(button)
 
             val middlePanel = FormBuilder.createFormBuilder()
                 .setFormLeftIndent(10)
@@ -253,7 +256,7 @@ class TestSparkAction : AnAction() {
                 updateNextButton()
             }
 
-            for (button in codeTypeButtons) {
+            for ((_, button) in codeTypeButtons) {
                 button.addActionListener {
                     llmSetupPanelFactory.setPromptEditorType(button.text)
                     updateNextButton()
@@ -330,33 +333,36 @@ class TestSparkAction : AnAction() {
             if (!testGenerationController.isGeneratorRunning(project)) {
                 val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
-                if (codeTypeButtons[0].isSelected) {
-                    tool.generateTestsForClass(
-                        project,
-                        psiHelper,
-                        caretOffset,
-                        fileUrl,
-                        testSamplesCode,
-                        testGenerationController,
-                    )
-                } else if (codeTypeButtons[1].isSelected) {
-                    tool.generateTestsForMethod(
-                        project,
-                        psiHelper,
-                        caretOffset,
-                        fileUrl,
-                        testSamplesCode,
-                        testGenerationController,
-                    )
-                } else if (codeTypeButtons[2].isSelected) {
-                    tool.generateTestsForLine(
-                        project,
-                        psiHelper,
-                        caretOffset,
-                        fileUrl,
-                        testSamplesCode,
-                        testGenerationController,
-                    )
+                for ((codeType, button) in codeTypeButtons) {
+                    if (button.isSelected) {
+                        when (codeType) {
+                            CodeType.CLASS -> tool.generateTestsForClass(
+                                project,
+                                psiHelper,
+                                caretOffset,
+                                fileUrl,
+                                testSamplesCode,
+                                testGenerationController,
+                            )
+                            CodeType.METHOD -> tool.generateTestsForMethod(
+                                project,
+                                psiHelper,
+                                caretOffset,
+                                fileUrl,
+                                testSamplesCode,
+                                testGenerationController,
+                            )
+                            CodeType.LINE -> tool.generateTestsForLine(
+                                project,
+                                psiHelper,
+                                caretOffset,
+                                fileUrl,
+                                testSamplesCode,
+                                testGenerationController,
+                            )
+                        }
+                        break
+                    }
                 }
             }
 
@@ -376,10 +382,7 @@ class TestSparkAction : AnAction() {
          */
         private fun updateNextButton() {
             val isTestGeneratorButtonGroupSelected = llmButton.isSelected || evoSuiteButton.isSelected
-            var isCodeTypeButtonGroupSelected = false
-            for (button in codeTypeButtons) {
-                isCodeTypeButtonGroupSelected = isCodeTypeButtonGroupSelected || button.isSelected
-            }
+            val isCodeTypeButtonGroupSelected = codeTypeButtons.any { it.second.isSelected }
             nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
 
             if ((llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) ||

@@ -10,13 +10,13 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeRed
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.core.utils.Language
 import java.io.File
 
 enum class FeedbackCycleExecutionResult {
@@ -45,7 +45,7 @@ data class FeedbackResponse(
 
 class LLMWithFeedbackCycle(
     private val report: Report,
-    private val language: Language,
+    private val language: SupportedLanguage,
     private val initialPromptMessage: String,
     private val promptSizeReductionStrategy: PromptSizeReductionStrategy,
     // filename in which the test suite is saved in result path
@@ -167,13 +167,15 @@ class LLMWithFeedbackCycle(
                 generatedTestSuite.updateTestCases(compilableTestCases.toMutableList())
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
-                    val testCaseFilename =
-                        "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
+                    val testCaseFilename = when (language) {
+                        SupportedLanguage.Java -> "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
+                        SupportedLanguage.Kotlin -> "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.kt"
+                    }
 
                     val testCaseRepresentation = testsPresenter.representTestCase(generatedTestSuite, testCaseIndex)
 
                     val saveFilepath = testStorage.saveGeneratedTest(
-                        generatedTestSuite.packageString,
+                        generatedTestSuite.packageName,
                         testCaseRepresentation,
                         resultPath,
                         testCaseFilename,
@@ -184,7 +186,7 @@ class LLMWithFeedbackCycle(
             }
 
             val generatedTestSuitePath: String = testStorage.saveGeneratedTest(
-                generatedTestSuite.packageString,
+                generatedTestSuite.packageName,
                 testsPresenter.representTestSuite(generatedTestSuite),
                 resultPath,
                 testSuiteFilename,

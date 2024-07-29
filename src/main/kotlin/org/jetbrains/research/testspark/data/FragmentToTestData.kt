@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.data
 
+import org.jetbrains.research.testspark.core.test.data.CodeType
+
 /**
  * Data about test objects that require test generators.
  */

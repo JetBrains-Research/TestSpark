@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
@@ -35,22 +36,29 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
         errorMonitor: ErrorMonitor,
     ): SendResult {
         // Prepare the chat
-        val llmRequestBody = OpenAIRequestBody(LlmSettingsArguments(project).getModel(), chatHistory)
+        val messages = chatHistory.map {
+            val role = when (it.role) {
+                ChatMessage.ChatRole.User -> "user"
+                ChatMessage.ChatRole.Assistant -> "assistant"
+            }
+            OpenAIChatMessage(role, it.content)
+        }
+
+        val llmRequestBody = OpenAIRequestBody(LlmSettingsArguments(project).getModel(), messages)
 
         var sendResult = SendResult.OK
 
         try {
-            httpRequest.connect {
-                it.write(GsonBuilder().create().toJson(llmRequestBody))
+            httpRequest.connect { request ->
+                // send request to OpenAI API
+                request.write(GsonBuilder().create().toJson(llmRequestBody))
+
+                val connection = request.connection as HttpURLConnection
 
                 // check response
-                when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
+                when (val responseCode = connection.responseCode) {
                     HttpURLConnection.HTTP_OK -> {
-                        assembleLlmResponse(
-                            httpRequest = it,
-                            indicator,
-                            testsAssembler,
-                        )
+                        assembleLlmResponse(request, testsAssembler, indicator)
                     }
 
                     HttpURLConnection.HTTP_INTERNAL_ERROR -> {
@@ -105,13 +113,12 @@ class OpenAIRequestManager(project: Project) : IJRequestManager(project) {
      */
     private fun assembleLlmResponse(
         httpRequest: HttpRequests.Request,
-        indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
+        indicator: CustomProgressIndicator,
     ) {
         while (true) {
             if (ToolUtils.isProcessCanceled(indicator)) return
 
-            Thread.sleep(50L)
             var text = httpRequest.reader.readLine()
 
             if (text.isEmpty()) continue
