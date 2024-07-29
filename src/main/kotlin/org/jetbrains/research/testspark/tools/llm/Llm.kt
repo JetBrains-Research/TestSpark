@@ -151,7 +151,7 @@ class Llm(override val name: String = "LLM") : Tool {
             testGenerationController.finished()
             return
         }
-        val selectedLine: Int = psiHelper.getSurroundingLine(caretOffset)!!
+        val selectedLine: Int = psiHelper.getSurroundingLineNumber(caretOffset)!!
         val codeType = FragmentToTestData(CodeType.LINE, selectedLine)
         createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             LLMProcessManager(

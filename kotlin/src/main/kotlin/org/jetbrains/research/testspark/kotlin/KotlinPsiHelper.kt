@@ -70,7 +70,7 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return null
     }
 
-    override fun getSurroundingLine(caretOffset: Int): Int? {
+    override fun getSurroundingLineNumber(caretOffset: Int): Int? {
         val doc = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
 
         val selectedLine = doc.getLineNumber(caretOffset)
@@ -165,7 +165,7 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
         val ktClass = getSurroundingClass(caret.offset)
         val ktFunction = getSurroundingMethod(caret.offset)
-        val line: Int? = getSurroundingLine(caret.offset)?.plus(1)
+        val line: Int? = getSurroundingLineNumber(caret.offset)?.plus(1)
 
         ktClass?.let { result.add(CodeType.CLASS to getClassHTMLDisplayName(it)) }
         ktFunction?.let { result.add(CodeType.METHOD to getMethodHTMLDisplayName(it)) }
