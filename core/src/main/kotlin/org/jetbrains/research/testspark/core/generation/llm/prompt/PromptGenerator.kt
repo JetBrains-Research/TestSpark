@@ -19,7 +19,7 @@ class PromptGenerator(
     fun generatePromptForClass(interestingClasses: List<ClassRepresentation>, testSamplesCode: String): String {
         val prompt = PromptBuilder(promptTemplates.classPrompt)
             .insertLanguage(context.promptConfiguration.desiredLanguage)
-            .insertName(context.cut.qualifiedName)
+            .insertName(context.cut!!.qualifiedName)
             .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
             .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
             .insertCodeUnderTest(context.cut.fullText, context.classesToTest)
@@ -44,10 +44,12 @@ class PromptGenerator(
         method: MethodRepresentation,
         interestingClassesFromMethod: List<ClassRepresentation>,
         testSamplesCode: String,
+        packageName: String,
     ): String {
+        val name = context.cut?.let { "${it.qualifiedName}.${method.name}" } ?: "$packageName.${method.name}"
         val prompt = PromptBuilder(promptTemplates.methodPrompt)
             .insertLanguage(context.promptConfiguration.desiredLanguage)
-            .insertName("${context.cut.qualifiedName}.${method.name}")
+            .insertName(name)
             .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
             .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
             .insertCodeUnderTest(method.text, context.classesToTest)

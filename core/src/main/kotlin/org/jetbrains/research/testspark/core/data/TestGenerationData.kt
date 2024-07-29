@@ -16,7 +16,7 @@ data class TestGenerationData(
 
     // Code required of imports and package for generated tests
     var importsCode: MutableSet<String> = mutableSetOf(),
-    var packageLine: String = "",
+    var packageName: String = "",
     var runWith: String = "",
     var otherInfo: String = "",
 
@@ -37,7 +37,7 @@ data class TestGenerationData(
         resultName = ""
         fileUrl = ""
         importsCode = mutableSetOf()
-        packageLine = ""
+        packageName = ""
         runWith = ""
         otherInfo = ""
         polyDepthReducing = 0

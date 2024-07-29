@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.application.PathManager
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.test.data.dependencies.JavaTestCompilationDependencies
+import org.jetbrains.research.testspark.core.test.data.dependencies.TestCompilationDependencies
 import java.io.File
 
 /**
@@ -16,7 +16,7 @@ class LibraryPathsProvider {
         private val sep = File.separatorChar
         private val libPrefix = "${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib$sep"
 
-        fun getTestCompilationLibraryPaths() = JavaTestCompilationDependencies.getJarDescriptors().map { descriptor ->
+        fun getTestCompilationLibraryPaths() = TestCompilationDependencies.getJarDescriptors().map { descriptor ->
             "$libPrefix${sep}${descriptor.name}"
         }
 

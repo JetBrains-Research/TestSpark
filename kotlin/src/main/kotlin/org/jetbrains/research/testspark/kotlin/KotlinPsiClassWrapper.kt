@@ -81,6 +81,8 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
             }
         }
 
+    override val rBrace: Int? = psiClass.body?.rBrace?.textRange?.startOffset
+
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
         val scope = GlobalSearchScope.projectScope(project)
         val lightClass = psiClass.toLightClass()

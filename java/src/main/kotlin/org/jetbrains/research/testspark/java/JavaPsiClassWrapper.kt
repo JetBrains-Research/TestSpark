@@ -52,6 +52,8 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
             return ClassType.CLASS
         }
 
+    override val rBrace: Int? = psiClass.rBrace?.textRange?.startOffset
+
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
         val scope = GlobalSearchScope.projectScope(project)
         val query = ClassInheritorsSearch.search(psiClass, scope, false)

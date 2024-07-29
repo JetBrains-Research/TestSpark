@@ -3,12 +3,14 @@ package org.jetbrains.research.testspark.tools.llm.test
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.tools.TestClassCodeGeneratorFactory
 
 class JUnitTestSuitePresenter(
     private val project: Project,
     private val generatedTestsData: TestGenerationData,
+    private val language: SupportedLanguage,
 ) {
     /**
      * Returns a string representation of this object.
@@ -34,12 +36,12 @@ class JUnitTestSuitePresenter(
             // Add each test
             testCases.forEach { testCase -> testBody += "$testCase\n" }
 
-            JavaClassBuilderHelper.generateCode(
+            TestClassCodeGeneratorFactory.create(language).generateCode(
                 project,
                 testFileName,
                 testBody,
                 imports,
-                packageString,
+                packageName,
                 runWith,
                 otherInfo,
                 generatedTestsData,
@@ -57,12 +59,12 @@ class JUnitTestSuitePresenter(
         testCaseIndex: Int,
     ): String =
         testSuite.run {
-            JavaClassBuilderHelper.generateCode(
+            TestClassCodeGeneratorFactory.create(language).generateCode(
                 project,
                 getClassWithTestCaseName(testCases[testCaseIndex].name),
                 testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
                 imports,
-                packageString,
+                packageName,
                 runWith,
                 otherInfo,
                 generatedTestsData,
@@ -81,12 +83,12 @@ class JUnitTestSuitePresenter(
             // Add each test (exclude expected exception)
             testCases.forEach { testCase -> testBody += "${testCase.toStringWithoutExpectedException()}\n" }
 
-            JavaClassBuilderHelper.generateCode(
+            TestClassCodeGeneratorFactory.create(language).generateCode(
                 project,
                 testFileName,
                 testBody,
                 imports,
-                packageString,
+                packageName,
                 runWith,
                 otherInfo,
                 generatedTestsData,
@@ -105,8 +107,8 @@ class JUnitTestSuitePresenter(
     fun getPrintablePackageString(testSuite: TestSuiteGeneratedByLLM): String {
         return testSuite.run {
             when {
-                packageString.isEmpty() || packageString.isBlank() -> ""
-                else -> packageString
+                packageName.isEmpty() || packageName.isBlank() -> ""
+                else -> packageName
             }
         }
     }

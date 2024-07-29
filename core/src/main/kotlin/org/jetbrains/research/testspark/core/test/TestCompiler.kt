@@ -1,32 +1,24 @@
 package org.jetbrains.research.testspark.core.test
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
-import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
-import java.io.File
 
 data class TestCasesCompilationResult(
     val allTestCasesCompilable: Boolean,
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM>,
 )
 
-/**
- * TestCompiler is a class that is responsible for compiling generated test cases using the proper javac.
- * It provides methods for compiling test cases and code files.
- */
-open class TestCompiler(
-    private val javaHomeDirectoryPath: String,
+abstract class TestCompiler(
     private val libPaths: List<String>,
     private val junitLibPaths: List<String>,
 ) {
-    private val log = KotlinLogging.logger { this::class.java }
-
     /**
-     * Compiles the generated files with test cases using the proper javac.
+     * Compiles a list of test cases and returns the compilation result.
      *
-     * @return true if all the provided test cases are successfully compiled,
-     *         otherwise returns false.
+     * @param generatedTestCasesPaths A list of file paths where the generated test cases are located.
+     * @param buildPath All the directories where the compiled code of the project under test is saved. This path is used as a classpath to run each test case.
+     * @param testCases A mutable list of `TestCaseGeneratedByLLM` objects representing the test cases to be compiled.
+     * @return A `TestCasesCompilationResult` object containing the overall compilation success status and a set of compilable test cases.
      */
     fun compileTestCases(
         generatedTestCasesPaths: List<String>,
@@ -51,45 +43,11 @@ open class TestCompiler(
      * Compiles the code at the specified path using the provided project build path.
      *
      * @param path The path of the code file to compile.
-     * @param projectBuildPath The project build path to use during compilation.
+     * @param projectBuildPath All the directories where the compiled code of the project under test is saved. This path is used as a classpath to run each test case.
      * @return A pair containing a boolean value indicating whether the compilation was successful (true) or not (false),
      *         and a string message describing any error encountered during compilation.
      */
-    fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
-        // find the proper javac
-        val javaCompile = File(javaHomeDirectoryPath).walk()
-            .filter {
-                val isCompilerName = if (DataFilesUtil.isWindows()) it.name.equals("javac.exe") else it.name.equals("javac")
-                isCompilerName && it.isFile
-            }
-            .firstOrNull()
-
-        if (javaCompile == null) {
-            val msg = "Cannot find java compiler 'javac' at '$javaHomeDirectoryPath'"
-            log.error { msg }
-            throw RuntimeException(msg)
-        }
-
-        println("javac found at '${javaCompile.absolutePath}'")
-
-        // compile file
-        val errorMsg = CommandLineRunner.run(
-            arrayListOf(
-                javaCompile.absolutePath,
-                "-cp",
-                "\"${getPath(projectBuildPath)}\"",
-                path,
-            ),
-        )
-
-        log.info { "Error message: '$errorMsg'" }
-
-        // create .class file path
-        val classFilePath = path.replace(".java", ".class")
-
-        // check is .class file exists
-        return Pair(File(classFilePath).exists(), errorMsg)
-    }
+    abstract fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String>
 
     /**
      * Generates the path for the command by concatenating the necessary paths.
@@ -97,7 +55,7 @@ open class TestCompiler(
      * @param buildPath The path of the build file.
      * @return The generated path as a string.
      */
-    fun getPath(buildPath: String): String {
+    fun getClassPaths(buildPath: String): String {
         // create the path for the command
         val separator = DataFilesUtil.classpathSeparator
         val dependencyLibPath = libPaths.joinToString(separator.toString())

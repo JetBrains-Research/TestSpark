@@ -4,23 +4,27 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.core.test.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
-    override val language: Language get() = Language.Java
+    override val language: SupportedLanguage get() = SupportedLanguage.Java
 
     private val log = Logger.getInstance(this::class.java)
 
@@ -138,37 +142,48 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     }
 
     override fun getInterestingPsiClassesWithQualifiedNames(
-        cut: PsiClassWrapper,
+        cut: PsiClassWrapper?,
         psiMethod: PsiMethodWrapper,
     ): MutableSet<PsiClassWrapper> {
-        val interestingPsiClasses = cut.getInterestingPsiClassesWithQualifiedNames(psiMethod)
+        // The cut is always not null for Java, because all functions are always inside the class
+        val interestingPsiClasses = cut!!.getInterestingPsiClassesWithQualifiedNames(psiMethod)
         log.info("There are ${interestingPsiClasses.size} interesting psi classes from method ${psiMethod.methodDescriptor}")
         return interestingPsiClasses
     }
 
-    override fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*>? {
-        val result: ArrayList<String> = arrayListOf()
+    override fun getCurrentListOfCodeTypes(e: AnActionEvent): List<Pair<CodeType, String>> {
+        val result: ArrayList<Pair<CodeType, String>> = arrayListOf()
         val caret: Caret =
-            e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return result.toArray()
+            e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return result
 
         val javaPsiClassWrapped = getSurroundingClass(caret.offset) as JavaPsiClassWrapper?
         val javaPsiMethodWrapped = getSurroundingMethod(caret.offset) as JavaPsiMethodWrapper?
         val line: Int? = getSurroundingLine(caret.offset)
 
-        javaPsiClassWrapped?.let { result.add(getClassHTMLDisplayName(it)) }
-        javaPsiMethodWrapped?.let { result.add(getMethodHTMLDisplayName(it)) }
-        line?.let { result.add(getLineHTMLDisplayName(it)) }
+        javaPsiClassWrapped?.let { result.add(CodeType.CLASS to getClassHTMLDisplayName(it)) }
+        javaPsiMethodWrapped?.let { result.add(CodeType.METHOD to getMethodHTMLDisplayName(it)) }
+        line?.let { result.add(CodeType.LINE to getLineHTMLDisplayName(it)) }
 
-        if (javaPsiClassWrapped != null && javaPsiMethodWrapped != null) {
-            log.info(
-                "The test can be generated for: \n " +
-                    " 1) Class ${javaPsiClassWrapped.qualifiedName} \n" +
-                    " 2) Method ${javaPsiMethodWrapped.name} \n" +
-                    " 3) Line $line",
-            )
-        }
+        log.info(
+            "The test can be generated for: \n " +
+                " 1) Class ${javaPsiClassWrapped?.qualifiedName ?: "no class"} \n" +
+                " 2) Method ${javaPsiMethodWrapped?.name ?: "no method"} \n" +
+                " 3) Line $line",
+        )
 
-        return result.toArray()
+        return result
+    }
+
+    override fun getPackageName(): String {
+        return (psiFile as PsiJavaFile).packageName
+    }
+
+    override fun getModuleFromPsiFile(): com.intellij.openapi.module.Module {
+        return ModuleUtilCore.findModuleForFile(psiFile.virtualFile, psiFile.project)!!
+    }
+
+    override fun getDocumentFromPsiFile(): Document {
+        return psiFile.fileDocument
     }
 
     override fun getLineHTMLDisplayName(line: Int) = "<html><b><font color='orange'>line</font> $line</b></html>"

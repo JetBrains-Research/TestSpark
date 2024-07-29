@@ -25,17 +25,20 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.helpers.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
+import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.TestClassCodeAnalyzerFactory
+import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
@@ -58,7 +61,7 @@ import javax.swing.border.MatteBorder
 
 class TestCasePanelFactory(
     private val project: Project,
-    private val language: org.jetbrains.research.testspark.core.test.Language,
+    private val language: SupportedLanguage,
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
@@ -193,7 +196,10 @@ class TestCasePanelFactory(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    project.service<TestCaseDisplayService>().getEditor(testCase.testName)!!.document.text,
+                    when (language) {
+                        SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().getEditor(testCase.testName)!!.document.text
+                        SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().getEditor(testCase.testName)!!.document.text
+                    },
                 ),
                 null,
             )
@@ -386,7 +392,10 @@ class TestCasePanelFactory(
         }
 
         ReportHelper.updateTestCase(project, report, testCase)
-        project.service<TestCaseDisplayService>().updateUI()
+        when (language) {
+            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().updateUI()
+            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().updateUI()
+        }
     }
 
     /**
@@ -454,12 +463,12 @@ class TestCasePanelFactory(
     }
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
-        val testSuitePresenter = JUnitTestSuitePresenter(project, uiContext!!.testGenerationOutput)
+        val testSuitePresenter = JUnitTestSuitePresenter(project, uiContext!!.testGenerationOutput, language)
 
         WriteCommandAction.runWriteCommandAction(project) {
             uiContext.errorMonitor.clear()
             val code = testSuitePresenter.toString(testSuite)
-            testCase.testName = JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, code)
+            testCase.testName = TestClassCodeAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, code)
             testCase.testCode = code
 
             // update numbers
@@ -517,15 +526,24 @@ class TestCasePanelFactory(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
+        val fileName = TestClassCodeAnalyzerFactory.create(language).getFileNameFromTestCaseCode(testCase.testName)
+
+        val testCompiler = TestCompilerFactory.create(
+            project,
+            llmSettingsState.junitVersion,
+            language,
+        )
+
         val newTestCase = TestProcessor(project)
             .processNewTestCase(
-                "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java",
+                fileName,
                 testCase.id,
                 testCase.testName,
                 testCase.testCode,
-                uiContext!!.testGenerationOutput.packageLine,
+                uiContext!!.testGenerationOutput.packageName,
                 uiContext.testGenerationOutput.resultPath,
                 uiContext.projectContext,
+                testCompiler,
             )
 
         testCase.coveredLines = newTestCase.coveredLines
@@ -585,13 +603,23 @@ class TestCasePanelFactory(
      */
     private fun remove() {
         // Remove the test case from the cache
-        project.service<TestCaseDisplayService>().removeTestCase(testCase.testName)
+        when (language) {
+            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().removeTestCase(testCase.testName)
+
+            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().removeTestCase(testCase.testName)
+        }
 
         runTestButton.isEnabled = false
         isRemoved = true
 
         ReportHelper.removeTestCase(project, report, testCase)
-        project.service<TestCaseDisplayService>().updateUI()
+        when (language) {
+            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>()
+                .updateUI()
+
+            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>()
+                .updateUI()
+        }
     }
 
     /**
@@ -663,8 +691,7 @@ class TestCasePanelFactory(
      * Updates the current test case with the specified test name and test code.
      */
     private fun updateTestCaseInformation() {
-        testCase.testName =
-            JavaClassBuilderHelper.getTestMethodNameFromClassWithTestCase(testCase.testName, languageTextField.document.text)
+        testCase.testName = TestClassCodeAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 }
