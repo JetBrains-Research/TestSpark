@@ -143,6 +143,7 @@ class LLMProcessManager(
             jUnitVersion,
             language,
             testBodyPrinter,
+            packageName
         )
         val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
             indicator,
@@ -239,7 +240,7 @@ class LLMProcessManager(
             project,
             report,
             getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation, language),
-            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
+            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN),
             projectContext.fileUrlAsString!!,
             generatedTestsData,
             language,
