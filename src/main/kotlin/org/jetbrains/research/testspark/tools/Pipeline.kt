@@ -6,12 +6,12 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -22,6 +22,8 @@ import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
+import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -29,7 +31,7 @@ import java.util.UUID
  * Pipeline class represents a pipeline for generating tests in a project.
  *
  * @param project the project in which the pipeline is executed.
- * @param psiHelper The PsiHelper in the context of witch the pipeline is executed.
+ * @param psiHelper The PsiHelper in the context of which the pipeline is executed.
  * @param caretOffset the offset of the caret position in the PSI file.
  * @param fileUrl the URL of the file being processed, if applicable.
  * @param packageName the package name of the file being processed.
@@ -47,7 +49,7 @@ class Pipeline(
 
     init {
 
-        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
+        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)
 
         // get generated test path
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults${ToolUtils.sep}"
@@ -57,10 +59,8 @@ class Pipeline(
         ApplicationManager.getApplication().runWriteAction {
             projectContext.projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
             projectContext.fileUrlAsString = fileUrl
-            projectContext.classFQN = cutPsiClass.qualifiedName
-            // TODO probably can be made easier
-            projectContext.cutModule =
-                ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.virtualFile)!!
+            cutPsiClass?.let { projectContext.classFQN = it.qualifiedName }
+            projectContext.cutModule = psiHelper.getModuleFromPsiFile()
         }
 
         generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
@@ -108,14 +108,13 @@ class Pipeline(
                 override fun onFinished() {
                     super.onFinished()
                     testGenerationController.finished()
-                    uiContext?.let {
-                        project.service<TestCaseDisplayService>()
-                            .updateEditorForFileUrl(it.testGenerationOutput.fileUrl)
+                    when (psiHelper.language) {
+                        SupportedLanguage.Java -> uiContext?.let {
+                            displayTestCase<JavaTestCaseDisplayService>(it)
+                        }
 
-                        if (project.service<EditorService>().editor != null) {
-                            val report = it.testGenerationOutput.testGenerationResultList[0]!!
-                            project.service<TestCaseDisplayService>().displayTestCases(report, it, psiHelper.language)
-                            project.service<CoverageVisualisationService>().showCoverage(report)
+                        SupportedLanguage.Kotlin -> uiContext?.let {
+                            displayTestCase<KotlinTestCaseDisplayService>(it)
                         }
                     }
                 }
@@ -124,8 +123,22 @@ class Pipeline(
 
     private fun clear(project: Project) { // should be removed totally!
         testGenerationController.errorMonitor.clear()
-        project.service<TestCaseDisplayService>().clear()
+        when (psiHelper.language) {
+            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().clear()
+            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().clear()
+        }
+
         project.service<CoverageVisualisationService>().clear()
         project.service<TestsExecutionResultService>().clear()
+    }
+
+    private inline fun <reified Service : TestCaseDisplayService> displayTestCase(ctx: UIContext) {
+        project.service<Service>().updateEditorForFileUrl(ctx.testGenerationOutput.fileUrl)
+
+        if (project.service<EditorService>().editor != null) {
+            val report = ctx.testGenerationOutput.testGenerationResultList[0]!!
+            project.service<Service>().displayTestCases(report, ctx, psiHelper.language)
+            project.service<CoverageVisualisationService>().showCoverage(report)
+        }
     }
 }

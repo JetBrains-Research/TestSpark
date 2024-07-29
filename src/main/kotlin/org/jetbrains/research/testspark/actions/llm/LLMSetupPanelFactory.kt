@@ -34,7 +34,7 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
-    private var platformSelector = ComboBox(arrayOf(llmSettingsState.openAIName))
+    private var platformSelector = ComboBox(arrayOf(llmSettingsState.openAIName, llmSettingsState.huggingFaceName))
     private val backLlmButton = JButton(PluginLabelsBundle.get("back"))
     private val okLlmButton = JButton(PluginLabelsBundle.get("next"))
     private val junitSelector = JUnitCombobox(e)
@@ -141,6 +141,10 @@ class LLMSetupPanelFactory(e: AnActionEvent, private val project: Project) : Pan
             if (llmPlatforms[index].name == llmSettingsState.grazieName) {
                 llmSettingsState.grazieToken = llmPlatforms[index].token
                 llmSettingsState.grazieModel = llmPlatforms[index].model
+            }
+            if (llmPlatforms[index].name == llmSettingsState.huggingFaceName) {
+                llmSettingsState.huggingFaceToken = llmPlatforms[index].token
+                llmSettingsState.huggingFaceModel = llmPlatforms[index].model
             }
         }
         llmSettingsState.junitVersion = junitSelector.selectedItem!! as JUnitVersion
