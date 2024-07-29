@@ -1,11 +1,12 @@
 package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
-import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
@@ -22,6 +23,8 @@ import java.nio.file.Path
  * @param name The name of the tool. Default value is "Llm".
  */
 class Llm(override val name: String = "LLM") : Tool {
+
+    private val log = Logger.getInstance(this::class.java)
 
     /**
      * Returns an instance of the LLMProcessManager.
@@ -50,6 +53,7 @@ class Llm(override val name: String = "LLM") : Tool {
 
         return LLMProcessManager(
             project,
+            psiHelper.language,
             PromptManager(project, psiHelper, caretOffset),
             testSamplesCode,
             projectSDKPath,
@@ -73,6 +77,7 @@ class Llm(override val name: String = "LLM") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
     ) {
+        log.info("Generation of tests for CLASS was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
             testGenerationController.finished()
             return
@@ -81,6 +86,7 @@ class Llm(override val name: String = "LLM") : Tool {
         createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             LLMProcessManager(
                 project,
+                psiHelper.language,
                 PromptManager(project, psiHelper, caretOffset),
                 testSamplesCode,
             ),
@@ -105,6 +111,7 @@ class Llm(override val name: String = "LLM") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
     ) {
+        log.info("Generation of tests for METHOD was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
             testGenerationController.finished()
             return
@@ -114,6 +121,7 @@ class Llm(override val name: String = "LLM") : Tool {
         createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             LLMProcessManager(
                 project,
+                psiHelper.language,
                 PromptManager(project, psiHelper, caretOffset),
                 testSamplesCode,
             ),
@@ -138,6 +146,7 @@ class Llm(override val name: String = "LLM") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
     ) {
+        log.info("Generation of tests for LINE was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
             testGenerationController.finished()
             return
@@ -147,6 +156,7 @@ class Llm(override val name: String = "LLM") : Tool {
         createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
             LLMProcessManager(
                 project,
+                psiHelper.language,
                 PromptManager(project, psiHelper, caretOffset),
                 testSamplesCode,
             ),
@@ -170,9 +180,7 @@ class Llm(override val name: String = "LLM") : Tool {
         fileUrl: String?,
         testGenerationController: TestGenerationController,
     ): Pipeline {
-        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
-        val packageList = cutPsiClass.qualifiedName.split(".").dropLast(1)
-        val packageName = packageList.joinToString(".")
+        val packageName = psiHelper.getPackageName()
         return Pipeline(project, psiHelper, caretOffset, fileUrl, packageName, testGenerationController)
     }
 }

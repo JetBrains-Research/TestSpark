@@ -10,6 +10,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.display.IconButtonCreator
 import org.jetbrains.research.testspark.display.ModifiedLinesGetter
 import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
@@ -25,11 +26,12 @@ class TestSamplePanelFactory(
     private val middlePanel: JPanel,
     private val testNames: MutableList<String>,
     private val initialTestCodes: MutableList<String>,
+    private val language: SupportedLanguage,
 ) {
     // init components
     private val currentTestCodes = initialTestCodes.toMutableList()
     private val languageTextField = LanguageTextField(
-        Language.findLanguageByID("JAVA"),
+        Language.findLanguageByID(language.languageId),
         project,
         initialTestCodes[0],
         TestCaseDocumentCreator("TestSample"),

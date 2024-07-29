@@ -15,10 +15,13 @@ import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteDefaultsBundle
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
+import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
-import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -200,8 +203,8 @@ class EvoSuiteProcessManager(
             ToolUtils.saveData(
                 project,
                 IJReport(testGenerationResult),
-                ToolUtils.getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode),
-                ToolUtils.getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
+                getPackageFromTestSuiteCode(testGenerationResult.testSuiteCode, SupportedLanguage.Java),
+                getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
                 projectContext.fileUrlAsString!!,
                 generatedTestsData,
             )

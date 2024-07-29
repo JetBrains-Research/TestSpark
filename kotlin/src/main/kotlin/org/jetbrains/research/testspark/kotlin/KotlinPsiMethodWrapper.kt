@@ -53,8 +53,8 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
         val containingInterface = containingClass?.isInterfaceClass()
         // ensure that the function is a non-abstract method defined in an interface
         name != "<init>" && // function is not a constructor
-            bodyExpression != null && // function has an implementation
-            containingInterface == true // function is defined within an interface
+                bodyExpression != null && // function has an implementation
+                containingInterface == true // function is defined within an interface
     }
 
     override fun containsLine(lineNumber: Int): Boolean {
@@ -66,6 +66,26 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
         // increase by one is necessary due to different start of numbering
         val endLine = document.getLineNumber(textRange.endOffset) + 1
         return lineNumber in startLine..endLine
+    }
+
+    /**
+     * Returns a set of `PsiClassWrapper` instances for non-standard Kotlin classes referenced by the
+     * parameters of the current function.
+     *
+     * @return A mutable set of `PsiClassWrapper` instances representing non-standard Kotlin classes.
+     */
+    fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper> {
+        val interestingPsiClasses = mutableSetOf<PsiClassWrapper>()
+
+        psiFunction.valueParameters.forEach { parameter ->
+            val typeReference = parameter.typeReference
+            val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
+            if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
+                interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
+            }
+        }
+
+        return interestingPsiClasses
     }
 
     /**
