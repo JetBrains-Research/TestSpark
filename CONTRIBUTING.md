@@ -43,6 +43,12 @@ and aims to support even more programming languages in the future.
 This document provides an overview of the existing implementation of Kotlin and Java support and guidelines for adding
 more programming languages.
 
+>How can I add support for a new programming language? 
+In brief, you need to extend all the necessary interfaces with implementations specific to the new language.
+Below, you will find a detailed guide divided into six key components of the entire pipeline with the most 
+important interfaces addressing this goal. 
+
+
 ## Key Components
 
 ### 1. PSI Parsers
