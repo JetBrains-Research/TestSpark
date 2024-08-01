@@ -21,11 +21,7 @@ import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
-import org.jetbrains.research.testspark.data.CodeType
-import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.IJReport
-import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.data.*
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
@@ -75,9 +71,12 @@ class EvoSuiteProcessManager(
         codeType: FragmentToTestData,
         packageName: String,
         projectContext: ProjectContext,
+        project: Project,
         generatedTestsData: TestGenerationData,
         errorMonitor: ErrorMonitor,
     ): UIContext? {
+        //TODO remove var usage after the planned separation of the IR and metadata (file names and paths) in IJTestGenerationData
+        var psiGeneratedTestsData: IJTestGenerationData = IJTestGenerationData(null, listOf(), listOf(), listOf(), listOf(), generatedTestsData)
         try {
             if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
@@ -208,11 +207,13 @@ class EvoSuiteProcessManager(
                 projectContext.fileUrlAsString!!,
                 generatedTestsData,
             )
+            // Now additionally create a new IJTestGenerationData object which initializing additional Psi stuff
+            psiGeneratedTestsData = IJTestGenerationData.buildFromCodeString(testGenerationResult.testSuiteCode, generatedTestsData, project)
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("evosuiteErrorMessage").format(e.message), project, errorMonitor)
             e.printStackTrace()
         }
 
-        return UIContext(projectContext, generatedTestsData, StandardRequestManagerFactory(project).getRequestManager(project), errorMonitor)
+        return UIContext(projectContext, psiGeneratedTestsData, StandardRequestManagerFactory(project).getRequestManager(project), errorMonitor)
     }
 }

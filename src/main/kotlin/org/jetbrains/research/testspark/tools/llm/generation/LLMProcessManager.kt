@@ -18,10 +18,7 @@ import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.data.IJReport
-import org.jetbrains.research.testspark.data.ProjectContext
-import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.data.*
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.tools.TestBodyPrinterFactory
@@ -78,6 +75,7 @@ class LLMProcessManager(
         codeType: FragmentToTestData,
         packageName: String,
         projectContext: ProjectContext,
+        project: Project,
         generatedTestsData: TestGenerationData,
         errorMonitor: ErrorMonitor,
     ): UIContext? {
@@ -245,6 +243,9 @@ class LLMProcessManager(
             language,
         )
 
-        return UIContext(projectContext, generatedTestsData, requestManager, errorMonitor)
+
+        val psiGeneratedTestsData = IJTestGenerationData.buildFromCodeString(testSuiteRepresentation!!, generatedTestsData, project)
+
+        return UIContext(projectContext, psiGeneratedTestsData, requestManager, errorMonitor)
     }
 }

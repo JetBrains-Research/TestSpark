@@ -97,6 +97,7 @@ class Pipeline(
                             codeType,
                             packageName,
                             projectContext,
+                            project,
                             generatedTestsData,
                             testGenerationController.errorMonitor,
                         )

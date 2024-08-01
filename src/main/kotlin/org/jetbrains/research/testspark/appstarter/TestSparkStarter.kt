@@ -185,6 +185,7 @@ class TestSparkStarter : ApplicationStarter {
                             FragmentToTestData(CodeType.CLASS),
                             packageName,
                             projectContext,
+                            project,
                             testGenerationData,
                             errorMonitor,
                         )

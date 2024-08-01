@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.core.data
 
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 
-data class TestGenerationData(
+open class TestGenerationData(
     // Result processing
     // Report object for each test case
     var testGenerationResultList: MutableList<Report?> = mutableListOf(),
