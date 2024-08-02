@@ -1,16 +1,16 @@
 package org.jetbrains.research.testspark.tools.llm.test
 
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
 
 class JUnitTestSuitePresenter(
     private val project: Project,
-    private val generatedTestsData: TestGenerationData,
+    private val generatedTestsData: IJTestGenerationData,
     private val language: SupportedLanguage,
 ) {
     /**

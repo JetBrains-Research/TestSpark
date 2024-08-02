@@ -430,27 +430,29 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
             )
         }
 
-        // insert other info to a code
+        // insert helper methods
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             selectedClass.rBrace!!,
-            uiContext!!.testGenerationOutput.otherInfo + "\n",
+            uiContext!!.testGenerationOutput.helperMethods.joinToString(separator = "\n", postfix = "\n") { it.text },
+        )
+
+        // insert fields
+        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+            selectedClass.rBrace!!,
+            uiContext!!.testGenerationOutput.helperFields.joinToString(separator = "\n", postfix = "\n") { it.text },
         )
 
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            uiContext!!.testGenerationOutput.importsCode.joinToString("\n") + "\n\n",
+            uiContext!!.testGenerationOutput.imports.joinToString("\n", postfix = "\n\n") {it.text},
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
             .insertString(
                 0,
-                if (uiContext!!.testGenerationOutput.packageName.isEmpty()) {
-                    ""
-                } else {
-                    "package ${uiContext!!.testGenerationOutput.packageName};\n\n"
-                },
+                uiContext!!.testGenerationOutput.packageStatement?.text ?: ""
             )
     }
 

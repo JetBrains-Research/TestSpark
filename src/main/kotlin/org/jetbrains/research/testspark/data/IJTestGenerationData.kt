@@ -98,5 +98,10 @@ class IJTestGenerationData(
             }
             return psiFile
         }
+
+        //TODO remove after the planned separation of the IR and metadata (file names and paths) in IJTestGenerationData
+        fun nullInitializer(): IJTestGenerationData {
+            return IJTestGenerationData(null, listOf(), listOf(), listOf(), listOf(), TestGenerationData())
+        }
     }
 }

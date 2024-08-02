@@ -14,7 +14,6 @@ import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteDefaultsBundle
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
@@ -72,11 +71,10 @@ class EvoSuiteProcessManager(
         packageName: String,
         projectContext: ProjectContext,
         project: Project,
-        generatedTestsData: TestGenerationData,
+        generatedTestsData: IJTestGenerationData,
         errorMonitor: ErrorMonitor,
     ): UIContext? {
-        //TODO remove var usage after the planned separation of the IR and metadata (file names and paths) in IJTestGenerationData
-        var psiGeneratedTestsData: IJTestGenerationData = IJTestGenerationData(null, listOf(), listOf(), listOf(), listOf(), generatedTestsData)
+        var generatedTestsData = generatedTestsData
         try {
             if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
@@ -208,12 +206,12 @@ class EvoSuiteProcessManager(
                 generatedTestsData,
             )
             // Now additionally create a new IJTestGenerationData object which initializing additional Psi stuff
-            psiGeneratedTestsData = IJTestGenerationData.buildFromCodeString(testGenerationResult.testSuiteCode, generatedTestsData, project)
+            generatedTestsData = IJTestGenerationData.buildFromCodeString(testGenerationResult.testSuiteCode, generatedTestsData, project)
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("evosuiteErrorMessage").format(e.message), project, errorMonitor)
             e.printStackTrace()
         }
 
-        return UIContext(projectContext, psiGeneratedTestsData, StandardRequestManagerFactory(project).getRequestManager(project), errorMonitor)
+        return UIContext(projectContext, generatedTestsData, StandardRequestManagerFactory(project).getRequestManager(project), errorMonitor)
     }
 }

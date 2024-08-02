@@ -434,14 +434,20 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
             )
         }
 
-        // insert other info to a code
+        // insert helper methods
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             selectedClass.rBrace!!,
-            uiContext!!.testGenerationOutput.otherInfo + "\n",
+            uiContext!!.testGenerationOutput.helperMethods.joinToString(separator = "\n", postfix = "\n") { it.text },
+        )
+
+        // insert fields
+        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+            selectedClass.rBrace!!,
+            uiContext!!.testGenerationOutput.helperFields.joinToString(separator = "\n", postfix = "\n") { it.text },
         )
 
         // Create the imports string
-        val importsString = uiContext!!.testGenerationOutput.importsCode.joinToString("\n") + "\n\n"
+        val importsString = uiContext!!.testGenerationOutput.imports.joinToString("\n", postfix = "\n\n") {it.text}
 
         // Find the insertion offset
         val insertionOffset = outputFile.importList?.startOffset
@@ -454,8 +460,7 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
             PsiDocumentManager.getInstance(project).commitDocument(document)
         }
 
-        val packageName = uiContext!!.testGenerationOutput.packageName
-        val packageStatement = if (packageName.isEmpty()) "" else "package $packageName\n\n"
+        val packageStatement = uiContext!!.testGenerationOutput.packageStatement?.text ?: ""
 
         // Insert the package statement at the beginning of the document
         PsiDocumentManager.getInstance(project).getDocument(outputFile)?.let { document ->

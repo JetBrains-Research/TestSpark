@@ -7,13 +7,13 @@ import com.intellij.openapi.roots.CompilerModuleExtension
 import com.intellij.openapi.roots.ModuleRootManager
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
 import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -37,7 +37,7 @@ object ToolUtils {
         packageName: String,
         importsCode: MutableSet<String>,
         fileUrl: String,
-        generatedTestData: TestGenerationData,
+        generatedTestData: IJTestGenerationData,
         language: SupportedLanguage = SupportedLanguage.Java,
     ) {
         generatedTestData.fileUrl = fileUrl

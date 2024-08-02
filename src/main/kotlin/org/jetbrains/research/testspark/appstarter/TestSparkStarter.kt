@@ -16,11 +16,11 @@ import com.intellij.psi.PsiManager
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
@@ -145,10 +145,9 @@ class TestSparkStarter : ApplicationStarter {
                             cutModule,
                         )
                         // Prepare the test generation data
-                        val testGenerationData = TestGenerationData(
-                            resultPath = output,
-                            testResultName = "HeadlessGeneratedTests",
-                        )
+                        val testGenerationData = IJTestGenerationData.nullInitializer()
+                        testGenerationData.resultPath = output
+                        testGenerationData.testResultName = "HeadlessGeneratedTests"
                         println("[TestSpark Starter] Indexing is done")
 
                         // get package name

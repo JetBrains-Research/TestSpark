@@ -557,7 +557,7 @@ class TestCasePanelFactory(
                 testCase.id,
                 testCase.testName,
                 testCase.testCode,
-                uiContext!!.testGenerationOutput.packageName,
+                uiContext!!.testGenerationOutput.packageStatement!!.packageName,
                 uiContext.testGenerationOutput.resultPath,
                 uiContext.projectContext,
                 testCompiler,

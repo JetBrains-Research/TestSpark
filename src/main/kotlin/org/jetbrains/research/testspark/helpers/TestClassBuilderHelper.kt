@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.helpers
 
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 
 interface TestClassBuilderHelper {
     /**
@@ -19,7 +19,7 @@ interface TestClassBuilderHelper {
         packageString: String,
         runWith: String,
         otherInfo: String,
-        testGenerationData: TestGenerationData,
+        testGenerationData: IJTestGenerationData,
     ): String
 
     /**
@@ -53,5 +53,5 @@ interface TestClassBuilderHelper {
      * @param code The Java code to be formatted.
      * @return The formatted Java code.
      */
-    fun formatCode(project: Project, code: String, generatedTestData: TestGenerationData): String
+    fun formatCode(project: Project, code: String, generatedTestData: IJTestGenerationData): String
 }
