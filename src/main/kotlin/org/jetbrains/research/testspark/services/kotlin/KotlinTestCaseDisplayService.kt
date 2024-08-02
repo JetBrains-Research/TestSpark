@@ -447,7 +447,7 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
         )
 
         // Create the imports string
-        val importsString = uiContext!!.testGenerationOutput.imports.joinToString("\n", postfix = "\n\n") {it.text}
+        val importsString = uiContext!!.testGenerationOutput.imports.joinToString("\n", postfix = "\n\n") { it.text }
 
         // Find the insertion offset
         val insertionOffset = outputFile.importList?.startOffset

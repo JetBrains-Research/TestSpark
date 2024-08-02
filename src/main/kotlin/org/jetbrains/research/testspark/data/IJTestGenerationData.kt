@@ -1,14 +1,17 @@
 package org.jetbrains.research.testspark.data
 
-import com.intellij.lang.Language
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.psi.*
+import com.intellij.psi.PsiField
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiImportStatement
+import com.intellij.psi.PsiManager
+import com.intellij.psi.PsiMethod
+import com.intellij.psi.PsiPackageStatement
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.testFramework.LightVirtualFile
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import java.io.File
 
@@ -22,10 +25,10 @@ class IJTestGenerationData(
     val testMethods: List<PsiMethod>,
     val helperMethods: List<PsiMethod>,
     val helperFields: List<PsiField>,
-    //TODO may need to add static initializers for kex
+    // TODO may need to add static initializers for kex
     testGenerationData: TestGenerationData,
 
-    ) : TestGenerationData(
+) : TestGenerationData(
     testGenerationData.testGenerationResultList,
     testGenerationData.resultName,
     testGenerationData.fileUrl,
@@ -38,7 +41,7 @@ class IJTestGenerationData(
     testGenerationData.otherInfo,
     testGenerationData.polyDepthReducing,
     testGenerationData.inputParamsDepthReducing,
-    testGenerationData.compilableTestCases
+    testGenerationData.compilableTestCases,
 ) {
     companion object {
         /**
@@ -50,9 +53,9 @@ class IJTestGenerationData(
         fun buildFromCodeString(
             code: String,
             testGenerationData: TestGenerationData,
-            project: Project
+            project: Project,
         ): IJTestGenerationData {
-            //TODO set filetype according to the language
+            // TODO set filetype according to the language
             val psiFile = project.createPsiFile(code, "GeneratedTests.java")
             return ApplicationManager.getApplication().runReadAction<IJTestGenerationData> {
                 val (testMethods, helperMethods) = psiFile.partitionMethods()
@@ -75,6 +78,7 @@ class IJTestGenerationData(
             return PsiTreeUtil.findChildrenOfType(this, PsiMethod::class.java)
                 .partition { method -> method.annotations.any { it.text.contains("Test") } }
         }
+
         /**
          * Creates a PsiFile from a given string content.
          *
@@ -91,7 +95,7 @@ class IJTestGenerationData(
             val virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(tempFile)!!
             val (document, psiFile) = ApplicationManager.getApplication().runReadAction<Pair<Document, PsiFile>> {
                 FileDocumentManager.getInstance().getDocument(virtualFile)!! to
-                        PsiManager.getInstance(this).findFile(virtualFile)!!
+                    PsiManager.getInstance(this).findFile(virtualFile)!!
             }
             ApplicationManager.getApplication().invokeAndWait {
                 FileDocumentManager.getInstance().saveDocument(document)
@@ -99,7 +103,7 @@ class IJTestGenerationData(
             return psiFile
         }
 
-        //TODO remove after the planned separation of the IR and metadata (file names and paths) in IJTestGenerationData
+        // TODO remove after the planned separation of the IR and metadata (file names and paths) in IJTestGenerationData
         fun nullInitializer(): IJTestGenerationData {
             return IJTestGenerationData(null, listOf(), listOf(), listOf(), listOf(), TestGenerationData())
         }

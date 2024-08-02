@@ -445,14 +445,14 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            uiContext!!.testGenerationOutput.imports.joinToString("\n", postfix = "\n\n") {it.text},
+            uiContext!!.testGenerationOutput.imports.joinToString("\n", postfix = "\n\n") { it.text },
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
             .insertString(
                 0,
-                uiContext!!.testGenerationOutput.packageStatement?.text ?: ""
+                uiContext!!.testGenerationOutput.packageStatement?.text ?: "",
             )
     }
 
