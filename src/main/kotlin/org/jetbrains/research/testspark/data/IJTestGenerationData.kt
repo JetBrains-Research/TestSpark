@@ -1,12 +1,16 @@
 package org.jetbrains.research.testspark.data
 
 import com.intellij.lang.Language
-import com.intellij.lang.java.JavaLanguage
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.testFramework.LightVirtualFile
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import java.io.File
 
 /**
  * This will be the PSI based IR eventually. For now make it extend TestGenerationData for small behaviour-preserving refactors
@@ -48,18 +52,19 @@ class IJTestGenerationData(
             testGenerationData: TestGenerationData,
             project: Project
         ): IJTestGenerationData {
-            val psiFile = createPsiFileFromString(code, "GeneratedTests.java", project, Language.findInstance(
-                JavaLanguage::class.java))
-            val (testMethods, helperMethods) = psiFile.partitionMethods()
-            return IJTestGenerationData(
-                PsiTreeUtil.findChildOfType(psiFile, PsiPackageStatement::class.java),
-//                PsiTreeUtil.findChildOfType(psiFile, PsiClass::class.java)!!,
-                PsiTreeUtil.findChildrenOfType(psiFile, PsiImportStatement::class.java).toList(),
-                testMethods,
-                helperMethods,
-                PsiTreeUtil.findChildrenOfType(psiFile, PsiField::class.java).toList(),
-                testGenerationData,
-            )
+            //TODO set filetype according to the language
+            val psiFile = project.createPsiFile(code, "GeneratedTests.java")
+            return ApplicationManager.getApplication().runReadAction<IJTestGenerationData> {
+                val (testMethods, helperMethods) = psiFile.partitionMethods()
+                IJTestGenerationData(
+                    PsiTreeUtil.findChildOfType(psiFile, PsiPackageStatement::class.java),
+                    PsiTreeUtil.findChildrenOfType(psiFile, PsiImportStatement::class.java).toList(),
+                    testMethods,
+                    helperMethods,
+                    PsiTreeUtil.findChildrenOfType(psiFile, PsiField::class.java).toList(),
+                    testGenerationData,
+                )
+            }
         }
 
         /**
@@ -75,16 +80,23 @@ class IJTestGenerationData(
          *
          * @param content The content to write to the PsiFile.
          * @param fileName The name of the file (used to determine the file type).
-         * @param project The IntelliJ project context.
-         * @param language The language of the file.
          * @return The PsiFile with the given content.
          */
-        private fun createPsiFileFromString(content: String, fileName: String, project: Project, language: Language): PsiFile {
-            // Create a LightVirtualFile with the given content
-            val lightFile = LightVirtualFile(fileName, language, content)
+        private fun Project.createPsiFile(content: String, fileName: String): PsiFile {
+            // Create a temporary file
+            val tempFile = File.createTempFile(fileName, null)
+            tempFile.writeText(content)
 
-            // Create a PsiFile from the LightVirtualFile
-            return PsiManager.getInstance(project).findFile(lightFile)!!
+            // Refresh the local file system to make IntelliJ aware of the new file
+            val virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(tempFile)!!
+            val (document, psiFile) = ApplicationManager.getApplication().runReadAction<Pair<Document, PsiFile>> {
+                FileDocumentManager.getInstance().getDocument(virtualFile)!! to
+                        PsiManager.getInstance(this).findFile(virtualFile)!!
+            }
+            ApplicationManager.getApplication().invokeAndWait {
+                FileDocumentManager.getInstance().saveDocument(document)
+            }
+            return psiFile
         }
     }
 }
