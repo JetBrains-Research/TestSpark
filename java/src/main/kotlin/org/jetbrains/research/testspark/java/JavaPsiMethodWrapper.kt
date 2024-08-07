@@ -41,7 +41,7 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
         }
 
     override val parameterNames: List<String>
-        get() = psiMethod.parameterList.parameters.map { it.name}
+        get() = psiMethod.parameterList.parameters.map { it.name }
 
     override val parameterTypes: List<String>
         get() = psiMethod.parameterList.parameters.map { it.type.presentableText }
