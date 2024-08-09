@@ -83,14 +83,7 @@ class EvoSuiteProcessManager(
         try {
             if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
-            val regex = Regex("version \"(.*?)\"")
-            val version = regex.find(CommandLineRunner.run(arrayListOf(evoSuiteSettingsState.javaPath, "-version")))
-                ?.groupValues
-                ?.get(1)
-                ?.split(".")
-                ?.get(0)
-                ?.toInt()
-
+            val version = ToolUtils.getJavaVersion(evoSuiteSettingsState.javaPath)
             if (version == null || version > 11) {
                 evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("incorrectJavaVersion"), project, errorMonitor)
                 return null
