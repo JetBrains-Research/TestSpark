@@ -7,22 +7,13 @@ import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.parentOfType
-import org.jetbrains.kotlin.asJava.toLightClass
-import org.jetbrains.kotlin.descriptors.ClassDescriptor
-import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
-import org.jetbrains.kotlin.idea.caches.resolve.analyze
-import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.kotlin.psi.KtTypeReference
-import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
-import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
+import org.jetbrains.kotlin.psi.KtPsiUtil
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.langwrappers.CodeTypeDisplayName
@@ -70,7 +61,7 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return null
     }
 
-    override fun getSurroundingLine(caretOffset: Int): Int? {
+    override fun getSurroundingLineNumber(caretOffset: Int): Int? {
         val doc = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
 
         val selectedLine = doc.getLineNumber(caretOffset)
@@ -121,19 +112,13 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
         repeat(maxInputParamsDepth) {
             val tempListOfClasses = mutableSetOf<KotlinPsiClassWrapper>()
-
             currentLevelClasses.forEach { classIt ->
                 classIt.methods.forEach { methodIt ->
                     (methodIt as KotlinPsiMethodWrapper).parameterList?.parameters?.forEach { paramIt ->
-                        val typeRef = paramIt.typeReference
-                        if (typeRef != null) {
-                            resolveClassInType(typeRef)?.let { psiClass ->
-                                if (psiClass.kotlinFqName != null) {
-                                    KotlinPsiClassWrapper(psiClass as KtClass).let {
-                                        if (!it.qualifiedName.startsWith("kotlin.")) {
-                                            interestingPsiClasses.add(it)
-                                        }
-                                    }
+                        KtPsiUtil.getClassIfParameterIsProperty(paramIt)?.let { typeIt ->
+                            KotlinPsiClassWrapper(typeIt).let {
+                                if (!it.qualifiedName.startsWith("kotlin.")) {
+                                    interestingPsiClasses.add(it)
                                 }
                             }
                         }
@@ -165,7 +150,7 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
         val ktClass = getSurroundingClass(caret.offset)
         val ktFunction = getSurroundingMethod(caret.offset)
-        val line: Int? = getSurroundingLine(caret.offset)?.plus(1)
+        val line: Int? = getSurroundingLineNumber(caret.offset)?.plus(1)
 
         ktClass?.let { result.add(CodeType.CLASS to getClassHTMLDisplayName(it)) }
         ktFunction?.let { result.add(CodeType.METHOD to getMethodHTMLDisplayName(it)) }
@@ -201,12 +186,5 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
             psiMethod.isDefaultMethod -> "<html><b><font color='orange'>default method</font> ${psiMethod.name}</b></html>"
             else -> "<html><b><font color='orange'>method</font> ${psiMethod.name}</b></html>"
         }
-    }
-
-    private fun resolveClassInType(typeReference: KtTypeReference): PsiClass? {
-        val context = typeReference.analyze(BodyResolveMode.PARTIAL)
-        val type = context[BindingContext.TYPE, typeReference] ?: return null
-        val classDescriptor = type.constructor.declarationDescriptor as? ClassDescriptor ?: return null
-        return (DescriptorToSourceUtils.getSourceFromDescriptor(classDescriptor) as? KtClass)?.toLightClass()
     }
 }

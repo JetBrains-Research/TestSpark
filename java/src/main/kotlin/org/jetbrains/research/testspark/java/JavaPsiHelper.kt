@@ -67,7 +67,7 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         return null
     }
 
-    override fun getSurroundingLine(caretOffset: Int): Int? {
+    override fun getSurroundingLineNumber(caretOffset: Int): Int? {
         val doc = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return null
 
         val selectedLine = doc.getLineNumber(caretOffset)
@@ -158,7 +158,7 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
         val javaPsiClassWrapped = getSurroundingClass(caret.offset) as JavaPsiClassWrapper?
         val javaPsiMethodWrapped = getSurroundingMethod(caret.offset) as JavaPsiMethodWrapper?
-        val line: Int? = getSurroundingLine(caret.offset)
+        val line: Int? = getSurroundingLineNumber(caret.offset)
 
         javaPsiClassWrapped?.let { result.add(CodeType.CLASS to getClassHTMLDisplayName(it)) }
         javaPsiMethodWrapped?.let { result.add(CodeType.METHOD to getMethodHTMLDisplayName(it)) }
