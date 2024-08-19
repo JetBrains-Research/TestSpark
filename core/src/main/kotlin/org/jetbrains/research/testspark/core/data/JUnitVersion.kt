@@ -35,7 +35,7 @@ enum class JUnitVersion(
         RunWithAnnotationMeta("ExtendWith", "import org.junit.jupiter.api.extension.ExtendWith;"),
     ),
     JUnit4(
-        "junit",
+        "junit:junit",
         4,
         setOf(
             JarLibraryDescriptor(

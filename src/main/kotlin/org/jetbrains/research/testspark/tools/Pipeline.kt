@@ -9,60 +9,63 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
-import com.intellij.psi.PsiFile
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
+import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.IJProgressIndicator
-import org.jetbrains.research.testspark.helpers.getSurroundingClass
+import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
-import org.jetbrains.research.testspark.services.ErrorService
-import org.jetbrains.research.testspark.services.ReportLockingService
-import org.jetbrains.research.testspark.services.RunnerService
+import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
+import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
  *
- * @param project the project in which the pipeline is executed
- * @param psiFile the PSI file in which the pipeline is executed
- * @param caretOffset the offset of the caret position in the PSI file
- * @param fileUrl the URL of the file being processed, if applicable
- * @param packageName the package name of the file being processed
+ * @param project the project in which the pipeline is executed.
+ * @param psiHelper The PsiHelper in the context of which the pipeline is executed.
+ * @param caretOffset the offset of the caret position in the PSI file.
+ * @param fileUrl the URL of the file being processed, if applicable.
+ * @param packageName the package name of the file being processed.
  */
 class Pipeline(
     private val project: Project,
-    psiFile: PsiFile,
-    caretOffset: Int,
-    fileUrl: String?,
+    private val psiHelper: PsiHelper,
+    private val caretOffset: Int,
+    private val fileUrl: String?,
     private val packageName: String,
+    private val testGenerationController: TestGenerationController,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
 
     init {
-        val cutPsiClass = getSurroundingClass(psiFile, caretOffset)!!
+        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
 
         // get generated test path
-        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}testSparkResults$sep"
+        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults${ToolUtils.sep}"
         val id = UUID.randomUUID().toString()
         val testResultName = "test_gen_result_$id"
 
         ApplicationManager.getApplication().runWriteAction {
             projectContext.projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
             projectContext.fileUrlAsString = fileUrl
-            projectContext.cutPsiClass = cutPsiClass
-            projectContext.classFQN = cutPsiClass.qualifiedName!!
-            projectContext.cutModule = ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.containingFile.virtualFile)!!
+            projectContext.classFQN = cutPsiClass.qualifiedName
+            // TODO probably can be made easier
+            projectContext.cutModule =
+                ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.virtualFile)!!
         }
 
-        generatedTestsData.resultPath = getResultPath(id, testResultDirectory)
+        generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
         generatedTestsData.baseDir = "${testResultDirectory}$testResultName-validation"
         generatedTestsData.testResultName = testResultName
 
@@ -75,48 +78,69 @@ class Pipeline(
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
         clear(project)
-        val projectBuilder = ProjectBuilder(project)
+        val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
 
-        var result: UIContext? = null
+        var uiContext: UIContext? = null
 
         ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, TestSparkBundle.message("testGenerationMessage")) {
+            .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
                     val ijIndicator = IJProgressIndicator(indicator)
 
-                    if (isProcessStopped(project, ijIndicator)) return
+                    if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
                     if (projectBuilder.runBuild(ijIndicator)) {
-                        if (isProcessStopped(project, ijIndicator)) return
+                        if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
-                        result = processManager.runTestGenerator(
+                        uiContext = processManager.runTestGenerator(
                             ijIndicator,
                             codeType,
                             packageName,
                             projectContext,
                             generatedTestsData,
+                            testGenerationController.errorMonitor,
                         )
                     }
 
-                    if (isProcessStopped(project, ijIndicator)) return
+                    if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
                     ijIndicator.stop()
                 }
 
                 override fun onFinished() {
                     super.onFinished()
-                    project.service<RunnerService>().clear()
-                    result?.let {
-                        project.service<ReportLockingService>().receiveReport(it)
+                    testGenerationController.finished()
+                    when (psiHelper.language) {
+                        SupportedLanguage.Java -> uiContext?.let {
+                            displayTestCase<JavaTestCaseDisplayService>(it)
+                        }
+
+                        SupportedLanguage.Kotlin -> uiContext?.let {
+                            displayTestCase<KotlinTestCaseDisplayService>(it)
+                        }
                     }
                 }
             })
     }
 
-    fun clear(project: Project) { // should be removed totally!
-        project.service<TestCaseDisplayService>().clear()
-        project.service<ErrorService>().clear()
+    private fun clear(project: Project) { // should be removed totally!
+        testGenerationController.errorMonitor.clear()
+        when (psiHelper.language) {
+            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().clear()
+            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().clear()
+        }
+
         project.service<CoverageVisualisationService>().clear()
         project.service<TestsExecutionResultService>().clear()
+    }
+
+    private inline fun <reified Service : TestCaseDisplayService> displayTestCase(ctx: UIContext) {
+        project.service<Service>().updateEditorForFileUrl(ctx.testGenerationOutput.fileUrl)
+
+        if (project.service<EditorService>().editor != null) {
+            val report = ctx.testGenerationOutput.testGenerationResultList[0]!!
+            project.service<Service>().displayTestCases(report, ctx, psiHelper.language)
+            project.service<CoverageVisualisationService>().showCoverage(report)
+        }
     }
 }

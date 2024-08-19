@@ -1,11 +1,11 @@
 package org.jetbrains.research.testspark.actions.llm
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.template.PanelFactory
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
-import org.jetbrains.research.testspark.services.LLMTestSampleService
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.helpers.LLMTestSampleHelper
 import java.awt.Font
 import javax.swing.ButtonGroup
 import javax.swing.JButton
@@ -13,30 +13,27 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
 
-class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
+class LLMSampleSelectorFactory(private val project: Project, private val language: SupportedLanguage) : PanelFactory {
+    // init components
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
-        JRadioButton(TestSparkLabelsBundle.defaultValue("provideTestSample")),
-        JRadioButton(TestSparkLabelsBundle.defaultValue("noTestSample")),
+        JRadioButton(PluginLabelsBundle.get("provideTestSample")),
+        JRadioButton(PluginLabelsBundle.get("noTestSample")),
     )
     private val selectionTypeButtonGroup = ButtonGroup()
     private val radioButtonsPanel = JPanel()
 
-    private val addButtonPanel = JPanel()
-    private val addButton = JButton(TestSparkLabelsBundle.defaultValue("addTestSample"))
-
-    private val backLlmButton = JButton(TestSparkLabelsBundle.defaultValue("back"))
-    private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("ok"))
-
     private val defaultTestName = "<html>provide manually</html>"
     private val defaultTestCode = "// provide test method code here"
-
     private val testNames = mutableListOf(defaultTestName)
-    private val initialTestCodes =
-        mutableListOf(project.service<LLMTestSampleService>().createTestSampleClass("", defaultTestCode))
-
+    private val initialTestCodes = mutableListOf(LLMTestSampleHelper.createTestSampleClass("", defaultTestCode))
     private val testSamplePanelFactories: MutableList<TestSamplePanelFactory> = mutableListOf()
-
     private var testSamplesCode: String = ""
+
+    private val addButtonPanel = JPanel()
+    private val addButton = JButton(PluginLabelsBundle.get("addTestSample"))
+
+    private val nextButton = JButton(PluginLabelsBundle.get("ok"))
+    private val backLlmButton = JButton(PluginLabelsBundle.get("back"))
 
     private var formBuilder = FormBuilder.createFormBuilder()
         .setFormLeftIndent(10)
@@ -49,8 +46,73 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     init {
         addListeners()
 
-        project.service<LLMTestSampleService>().collectTestSamples(project, testNames, initialTestCodes)
+        LLMTestSampleHelper.collectTestSamples(project, testNames, initialTestCodes)
     }
+
+    override fun getTitlePanel(): JPanel {
+        val textTitle = JLabel(PluginLabelsBundle.get("llmSampleSelectorFactory"))
+        textTitle.font = Font("Monochrome", Font.BOLD, 20)
+
+        val titlePanel = JPanel()
+        titlePanel.add(textTitle)
+
+        return titlePanel
+    }
+
+    override fun getMiddlePanel(): JPanel {
+        for (button in selectionTypeButtons) {
+            selectionTypeButtonGroup.add(button)
+            radioButtonsPanel.add(button)
+        }
+
+        selectionTypeButtons[1].isSelected = true
+
+        addButtonPanel.add(addButton)
+
+        enabledComponents(false)
+
+        middlePanel.revalidate()
+
+        return middlePanel
+    }
+
+    override fun getBottomPanel(): JPanel {
+        val bottomPanel = JPanel()
+        backLlmButton.isOpaque = false
+        backLlmButton.isContentAreaFilled = false
+        bottomPanel.add(backLlmButton)
+        nextButton.isOpaque = false
+        nextButton.isContentAreaFilled = false
+        bottomPanel.add(nextButton)
+
+        return bottomPanel
+    }
+
+    override fun getBackButton() = backLlmButton
+
+    override fun getFinishedButton() = nextButton
+
+    override fun applyUpdates() {
+        if (selectionTypeButtons[0].isSelected) {
+            for (index in testSamplePanelFactories.indices) {
+                testSamplesCode += "Test sample number ${index + 1}\n```\n${testSamplePanelFactories[index].getCode()}\n```\n"
+            }
+        }
+    }
+
+    /**
+     * Retrieves the add button.
+     *
+     * @return The add button.
+     */
+    fun getAddButton(): JButton = addButton
+
+    /**
+     * Retrieves the test samples code.
+     *
+     * @return The test samples code.
+     */
+    fun getTestSamplesCode(): String = testSamplesCode
 
     /**
      * Adds action listeners to the selectionTypeButtons array to enable the nextButton if any button is selected.
@@ -67,7 +129,7 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
         }
 
         addButton.addActionListener {
-            val testSamplePanelFactory = TestSamplePanelFactory(project, middlePanel, testNames, initialTestCodes)
+            val testSamplePanelFactory = TestSamplePanelFactory(project, middlePanel, testNames, initialTestCodes, language)
             testSamplePanelFactories.add(testSamplePanelFactory)
             val testSamplePanel = testSamplePanelFactory.getTestSamplePanel()
             val codeScrollPanel = testSamplePanelFactory.getCodeScrollPanel()
@@ -90,6 +152,9 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
         }
     }
 
+    /**
+     * Updates next button.
+     */
     private fun updateNextButton() {
         if (selectionTypeButtons[0].isSelected) {
             nextButton.isEnabled = testSamplePanelFactories.isNotEmpty()
@@ -99,90 +164,8 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
     }
 
     /**
-     * Returns a JPanel object representing the title panel.
-     * The panel contains a JLabel with the text "llmSampleSelectorFactory",
-     * rendered in a bold 20pt Monochrome font.
-     *
-     * @return a JPanel object representing the title panel
+     * Enables and disables the components in the panel in case of type button selection.
      */
-    override fun getTitlePanel(): JPanel {
-        val textTitle = JLabel(TestSparkLabelsBundle.defaultValue("llmSampleSelectorFactory"))
-        textTitle.font = Font("Monochrome", Font.BOLD, 20)
-
-        val titlePanel = JPanel()
-        titlePanel.add(textTitle)
-
-        return titlePanel
-    }
-
-    /**
-     * Returns the middle panel containing radio buttons, a test samples selector, and a language text field scroll pane.
-     *
-     * @return the middle panel as a JPanel
-     */
-    override fun getMiddlePanel(): JPanel {
-        for (button in selectionTypeButtons) {
-            selectionTypeButtonGroup.add(button)
-            radioButtonsPanel.add(button)
-        }
-
-        selectionTypeButtons[1].isSelected = true
-
-        addButtonPanel.add(addButton)
-
-        enabledComponents(false)
-
-        middlePanel.revalidate()
-
-        return middlePanel
-    }
-
-    /**
-     * Retrieves the bottom panel containing the back and next buttons.
-     *
-     * @return The JPanel containing the back and next buttons.
-     */
-    override fun getBottomPanel(): JPanel {
-        val bottomPanel = JPanel()
-        backLlmButton.isOpaque = false
-        backLlmButton.isContentAreaFilled = false
-        bottomPanel.add(backLlmButton)
-        nextButton.isOpaque = false
-        nextButton.isContentAreaFilled = false
-        bottomPanel.add(nextButton)
-
-        return bottomPanel
-    }
-
-    /**
-     * Retrieves the back button.
-     *
-     * @return The back button.
-     */
-    override fun getBackButton() = backLlmButton
-
-    /**
-     * Retrieves the add button.
-     *
-     * @return The add button.
-     */
-    fun getAddButton() = addButton
-
-    /**
-     * Retrieves the reference to the "OK" button.
-     *
-     * @return The reference to the "OK" button.
-     */
-    override fun getFinishedButton() = nextButton
-
-    override fun applyUpdates() {
-        if (selectionTypeButtons[0].isSelected) {
-            for (index in testSamplePanelFactories.indices) {
-                testSamplesCode += "Test sample number ${index + 1}\n```\n${testSamplePanelFactories[index].getCode()}\n```\n"
-            }
-        }
-    }
-
     private fun enabledComponents(isEnabled: Boolean) {
         addButton.isEnabled = isEnabled
 
@@ -190,6 +173,4 @@ class LLMSampleSelectorFactory(private val project: Project) : PanelFactory {
             testSamplePanelFactory.enabledComponents(isEnabled)
         }
     }
-
-    fun getTestSamplesCode(): String = testSamplesCode
 }

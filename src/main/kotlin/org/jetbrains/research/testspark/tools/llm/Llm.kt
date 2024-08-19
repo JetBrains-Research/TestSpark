@@ -1,21 +1,20 @@
 package org.jetbrains.research.testspark.tools.llm
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Computable
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiMethod
+import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
-import org.jetbrains.research.testspark.helpers.generateMethodDescriptor
-import org.jetbrains.research.testspark.helpers.getSurroundingClass
-import org.jetbrains.research.testspark.helpers.getSurroundingLine
-import org.jetbrains.research.testspark.helpers.getSurroundingMethod
+import org.jetbrains.research.testspark.helpers.LLMHelper
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import org.jetbrains.research.testspark.tools.template.Tool
+import java.nio.file.Path
 
 /**
  * The Llm class represents a tool called "Llm" that is used to generate tests for Java code.
@@ -33,83 +32,96 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param testSamplesCode The test samples code.
      * @return An instance of LLMProcessManager.
      */
-    private fun getLLMProcessManager(project: Project, psiFile: PsiFile, caretOffset: Int, testSamplesCode: String): LLMProcessManager {
-        val classesToTest = mutableListOf<PsiClass>()
+    fun getLLMProcessManager(
+        project: Project,
+        psiHelper: PsiHelper,
+        caretOffset: Int,
+        testSamplesCode: String,
+        projectSDKPath: Path? = null,
+    ): LLMProcessManager {
+        val classesToTest = mutableListOf<PsiClassWrapper>()
+        val maxPolymorphismDepth = LlmSettingsArguments(project).maxPolyDepth(polyDepthReducing = 0)
 
-        ApplicationManager.getApplication().runReadAction(
-            Computable {
-                collectClassesToTest(project, classesToTest, psiFile, caretOffset)
-            },
-        )
+        ProgressManager.getInstance().runProcessWithProgressSynchronously({
+            ApplicationManager.getApplication().runReadAction {
+                psiHelper.collectClassesToTest(project, classesToTest, caretOffset, maxPolymorphismDepth)
+            }
+        }, PluginMessagesBundle.get("collectingClassesToTest"), false, project)
 
         return LLMProcessManager(
             project,
-            PromptManager(project, classesToTest[0], classesToTest),
+            psiHelper.language,
+            PromptManager(project, psiHelper, caretOffset),
             testSamplesCode,
+            projectSDKPath,
         )
-    }
-
-    /**
-     * Fills the classesToTest variable with the data about the classes to test
-     *
-     * @param classesToTest The list of classes to test
-     * @param psiFile The PSI file.
-     * @param caretOffset The caret offset in the file.
-     */
-    private fun collectClassesToTest(project: Project, classesToTest: MutableList<PsiClass>, psiFile: PsiFile, caretOffset: Int) {
-        // check if cut has any none java super class
-        val maxPolymorphismDepth = SettingsArguments(project).maxPolyDepth(0)
-
-        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caretOffset)!!
-        var currentPsiClass = cutPsiClass
-        for (index in 0 until maxPolymorphismDepth) {
-            if (!classesToTest.contains(currentPsiClass)) {
-                classesToTest.add(currentPsiClass)
-            }
-
-            if (currentPsiClass.superClass == null ||
-                currentPsiClass.superClass!!.qualifiedName == null ||
-                currentPsiClass.superClass!!.qualifiedName!!.startsWith("java.")
-            ) {
-                break
-            }
-            currentPsiClass = currentPsiClass.superClass!!
-        }
     }
 
     /**
      * Generates test cases for a class in the specified project.
      *
      * @param project The project containing the class.
-     * @param psiFile The PSI file representation of the class.
+     * @param psiHelper the PsiHelper associated with the pipeline.
      * @param caretOffset The caret offset in the class.
      * @param fileUrl The URL of the class file. It can be null.
      * @param testSamplesCode The code of the test samples.
      */
-    override fun generateTestsForClass(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
-        if (!isCorrectToken(project)) {
+    override fun generateTestsForClass(
+        project: Project,
+        psiHelper: PsiHelper,
+        caretOffset: Int,
+        fileUrl: String?,
+        testSamplesCode: String,
+        testGenerationController: TestGenerationController,
+    ) {
+        if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
+            testGenerationController.finished()
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
-        createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
+        createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
+            LLMProcessManager(
+                project,
+                psiHelper.language,
+                PromptManager(project, psiHelper, caretOffset),
+                testSamplesCode,
+            ),
+            codeType,
+        )
     }
 
     /**
      * Generates tests for a given method.
      *
-     * @param project the project in which the method is located
-     * @param psiFile the PSI file in which the method is located
-     * @param caretOffset the offset of the caret position in the PSI file
-     * @param fileUrl the URL of the file to generate tests for (optional)
-     * @param testSamplesCode the code of the test samples to use for test generation
+     * @param project the project in which the method is located.
+     * @param psiHelper the PsiHelper associated with the pipeline.
+     * @param caretOffset the offset of the caret position in the PSI file.
+     * @param fileUrl the URL of the file to generate tests for (optional).
+     * @param testSamplesCode the code of the test samples to use for test generation.
      */
-    override fun generateTestsForMethod(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
-        if (!isCorrectToken(project)) {
+    override fun generateTestsForMethod(
+        project: Project,
+        psiHelper: PsiHelper,
+        caretOffset: Int,
+        fileUrl: String?,
+        testSamplesCode: String,
+        testGenerationController: TestGenerationController,
+    ) {
+        if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
+            testGenerationController.finished()
             return
         }
-        val psiMethod: PsiMethod = getSurroundingMethod(psiFile, caretOffset)!!
-        val codeType = FragmentToTestData(CodeType.METHOD, generateMethodDescriptor(psiMethod))
-        createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
+        val psiMethod = psiHelper.getSurroundingMethod(caretOffset)!!
+        val codeType = FragmentToTestData(CodeType.METHOD, psiHelper.generateMethodDescriptor(psiMethod))
+        createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
+            LLMProcessManager(
+                project,
+                psiHelper.language,
+                PromptManager(project, psiHelper, caretOffset),
+                testSamplesCode,
+            ),
+            codeType,
+        )
     }
 
     /**
@@ -121,32 +133,50 @@ class Llm(override val name: String = "LLM") : Tool {
      * @param fileUrl The URL of the file.
      * @param testSamplesCode The code for the test samples.
      */
-    override fun generateTestsForLine(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?, testSamplesCode: String) {
-        if (!isCorrectToken(project)) {
+    override fun generateTestsForLine(
+        project: Project,
+        psiHelper: PsiHelper,
+        caretOffset: Int,
+        fileUrl: String?,
+        testSamplesCode: String,
+        testGenerationController: TestGenerationController,
+    ) {
+        if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
+            testGenerationController.finished()
             return
         }
-        val selectedLine: Int = getSurroundingLine(psiFile, caretOffset)?.plus(1)!!
+        val selectedLine: Int = psiHelper.getSurroundingLine(caretOffset)!!
         val codeType = FragmentToTestData(CodeType.LINE, selectedLine)
-        createLLMPipeline(project, psiFile, caretOffset, fileUrl).runTestGeneration(getLLMProcessManager(project, psiFile, caretOffset, testSamplesCode), codeType)
+        createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
+            LLMProcessManager(
+                project,
+                psiHelper.language,
+                PromptManager(project, psiHelper, caretOffset),
+                testSamplesCode,
+            ),
+            codeType,
+        )
     }
 
     /**
      * Creates a LLMPipeline instance.
      *
-     * @param project the project of the pipeline
-     * @param psiFile the PSI file associated with the pipeline
-     * @param caretOffset the offset of the caret position within the PSI file
-     * @param fileUrl the URL of the file to be processed by the pipeline
-     * @return a LLMPipeline instance
+     * @param project the project of the pipeline.
+     * @param psiHelper the PsiHelper associated with the pipeline.
+     * @param caretOffset the offset of the caret position within the PSI file.
+     * @param fileUrl the URL of the file to be processed by the pipeline.
+     * @return a LLMPipeline instance.
      */
-    private fun createLLMPipeline(project: Project, psiFile: PsiFile, caretOffset: Int, fileUrl: String?): Pipeline {
-        val cutPsiClass: PsiClass = getSurroundingClass(psiFile, caretOffset)!!
-
-        val packageList = cutPsiClass.qualifiedName.toString().split(".").toMutableList()
-        packageList.removeLast()
-
+    private fun createLLMPipeline(
+        project: Project,
+        psiHelper: PsiHelper,
+        caretOffset: Int,
+        fileUrl: String?,
+        testGenerationController: TestGenerationController,
+    ): Pipeline {
+        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
+        val packageList = cutPsiClass.qualifiedName.split(".").dropLast(1)
         val packageName = packageList.joinToString(".")
-
-        return Pipeline(project, psiFile, caretOffset, fileUrl, packageName)
+        return Pipeline(project, psiHelper, caretOffset, fileUrl, packageName, testGenerationController)
     }
 }

@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.core.generation.llm.prompt
 
+import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
 
 internal class PromptBuilder(private var prompt: String) {
@@ -77,7 +78,7 @@ internal class PromptBuilder(private var prompt: String) {
                 fullText += "Here are some information about other methods and classes used by the class under test. Only use them for creating objects, not your own ideas.\n"
             }
             for (interestingClass in interestingClasses) {
-                if (interestingClass.qualifiedName.startsWith("java")) {
+                if (interestingClass.qualifiedName.startsWith("java") || interestingClass.qualifiedName.startsWith("kotlin")) {
                     continue
                 }
 
@@ -87,7 +88,9 @@ internal class PromptBuilder(private var prompt: String) {
                     // Skip java methods
                     // TODO: checks for java methods should be done by a caller to make
                     //       this class as abstract and language agnostic as possible.
-                    if (method.containingClassQualifiedName.startsWith("java")) {
+                    if (method.containingClassQualifiedName.startsWith("java") ||
+                        method.containingClassQualifiedName.startsWith("kotlin")
+                    ) {
                         continue
                     }
 
@@ -105,11 +108,22 @@ internal class PromptBuilder(private var prompt: String) {
     ) = apply {
         val keyword = "\$${PromptKeyword.POLYMORPHISM.text}"
         if (isPromptValid(PromptKeyword.POLYMORPHISM, prompt)) {
-            var fullText = ""
-
+            // If polymorphismRelations is not empty, we add an instruction to avoid mocking classes if an instantiation of a sub-class is applicable
+            var fullText = when {
+                polymorphismRelations.isNotEmpty() -> "Use the following polymorphic relationships of classes present in the project. Use them for instantiation when necessary. Do not mock classes if an instantiation of a sub-class is applicable"
+                else -> ""
+            }
             polymorphismRelations.forEach { entry ->
                 for (currentSubClass in entry.value) {
-                    fullText += "${currentSubClass.qualifiedName} is a sub-class of ${entry.key.qualifiedName}.\n"
+                    val subClassTypeName = when (currentSubClass.classType) {
+                        ClassType.INTERFACE -> "an interface implementing"
+                        ClassType.ABSTRACT_CLASS -> "an abstract sub-class of"
+                        ClassType.CLASS -> "a sub-class of"
+                        ClassType.DATA_CLASS -> "a sub data class of"
+                        ClassType.INLINE_VALUE_CLASS -> "a sub inline value class class of"
+                        ClassType.OBJECT -> "a sub object of"
+                    }
+                    fullText += "${currentSubClass.qualifiedName} is $subClassTypeName ${entry.key.qualifiedName}.\n"
                 }
             }
             prompt = prompt.replace(keyword, fullText, ignoreCase = false)

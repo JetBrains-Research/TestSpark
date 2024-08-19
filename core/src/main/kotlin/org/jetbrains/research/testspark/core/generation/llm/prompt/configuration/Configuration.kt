@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 
+import org.jetbrains.research.testspark.core.data.ClassType
+
 /**
  * Represents the context for generating prompts for generating unit tests.
  *
@@ -39,6 +41,7 @@ data class ClassRepresentation(
     val qualifiedName: String,
     val fullText: String,
     val allMethods: List<MethodRepresentation>,
+    val classType: ClassType,
 )
 
 /**
