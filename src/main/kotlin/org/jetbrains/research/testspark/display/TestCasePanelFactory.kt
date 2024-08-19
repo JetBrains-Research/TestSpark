@@ -36,7 +36,7 @@ import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
 import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.TestClassCodeAnalyzerFactory
+import org.jetbrains.research.testspark.tools.TestAnalyzerFactory
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
@@ -471,7 +471,7 @@ class TestCasePanelFactory(
         WriteCommandAction.runWriteCommandAction(project) {
             uiContext.errorMonitor.clear()
             val code = testSuitePresenter.toString(testSuite)
-            testCase.testName = TestClassCodeAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, code)
+            testCase.testName = TestAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, code)
             testCase.testCode = code
 
             // update numbers
@@ -529,7 +529,7 @@ class TestCasePanelFactory(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
-        val fileName = TestClassCodeAnalyzerFactory.create(language).getFileNameFromTestCaseCode(testCase.testName)
+        val fileName = TestAnalyzerFactory.create(language).getFileNameFromTestCaseCode(testCase.testName)
 
         val testCompiler = TestCompilerFactory.create(
             project,
@@ -694,7 +694,7 @@ class TestCasePanelFactory(
      * Updates the current test case with the specified test name and test code.
      */
     private fun updateTestCaseInformation() {
-        testCase.testName = TestClassCodeAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
+        testCase.testName = TestAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 }

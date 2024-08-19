@@ -37,8 +37,8 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.display.utils.ReportUpdater
-import org.jetbrains.research.testspark.helpers.java.JavaTestClassCodeAnalyzer
-import org.jetbrains.research.testspark.helpers.java.JavaTestClassCodeGenerator
+import org.jetbrains.research.testspark.helpers.java.JavaTestAnalyzer
+import org.jetbrains.research.testspark.helpers.java.JavaTestGenerator
 import org.jetbrains.research.testspark.java.JavaPsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
@@ -414,8 +414,8 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
         // insert tests to a code
         testCaseComponents.reversed().forEach {
             val testMethodCode =
-                JavaTestClassCodeAnalyzer.extractFirstTestMethodCode(
-                    JavaTestClassCodeGenerator.formatCode(
+                JavaTestAnalyzer.extractFirstTestMethodCode(
+                    JavaTestGenerator.formatCode(
                         project,
                         it.replace("\r\n", "\n")
                             .replace("verifyException(", "// verifyException("),

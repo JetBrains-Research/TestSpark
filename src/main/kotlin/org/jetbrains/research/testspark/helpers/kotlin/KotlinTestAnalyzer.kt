@@ -1,8 +1,8 @@
 package org.jetbrains.research.testspark.helpers.kotlin
 
-import org.jetbrains.research.testspark.helpers.TestClassCodeAnalyzer
+import org.jetbrains.research.testspark.helpers.TestAnalyzer
 
-object KotlinTestClassCodeAnalyzer : TestClassCodeAnalyzer {
+object KotlinTestAnalyzer : TestAnalyzer {
 
     override fun extractFirstTestMethodCode(classCode: String): String {
         val testMethods = StringBuilder()

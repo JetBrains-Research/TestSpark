@@ -6,7 +6,7 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 /**
  * Interface for generating and formatting test class code.
  */
-interface TestClassCodeGenerator {
+interface TestGenerator {
     /**
      * Generates the code for a test class.
      *

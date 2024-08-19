@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.helpers
 /**
  * Interface for retrieving information from test class code.
  */
-interface TestClassCodeAnalyzer {
+interface TestAnalyzer {
     /**
      * Extracts the code of the first test method found in the given class code.
      *

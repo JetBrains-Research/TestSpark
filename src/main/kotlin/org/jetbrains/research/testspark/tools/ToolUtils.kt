@@ -46,7 +46,7 @@ object ToolUtils {
 
         for (testCase in report.testCaseList.values) {
             val code = testCase.testCode
-            testCase.testCode = TestClassCodeGeneratorFactory.create(language).generateCode(
+            testCase.testCode = TestGeneratorFactory.create(language).generateCode(
                 project,
                 getClassWithTestCaseName(testCase.testName),
                 code,
