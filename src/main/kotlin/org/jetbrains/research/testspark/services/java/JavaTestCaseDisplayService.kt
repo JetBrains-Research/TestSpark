@@ -37,7 +37,8 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.helpers.ReportHelper
-import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
+import org.jetbrains.research.testspark.helpers.java.JavaTestClassCodeAnalyzer
+import org.jetbrains.research.testspark.helpers.java.JavaTestClassCodeGenerator
 import org.jetbrains.research.testspark.java.JavaPsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
@@ -66,7 +67,7 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
 
     private var mainPanel: JPanel = JPanel()
 
-    private val topButtonsPanelFactory = TopButtonsPanelFactory(project, SupportedLanguage.Java)
+    private val topButtonsPanelFactory = TopButtonsPanelFactory(project).create(SupportedLanguage.Java)
 
     private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
@@ -413,8 +414,8 @@ class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplay
         // insert tests to a code
         testCaseComponents.reversed().forEach {
             val testMethodCode =
-                JavaClassBuilderHelper.extractFirstTestMethodCode(
-                    JavaClassBuilderHelper.formatCode(
+                JavaTestClassCodeAnalyzer.extractFirstTestMethodCode(
+                    JavaTestClassCodeGenerator.formatCode(
                         project,
                         it.replace("\r\n", "\n")
                             .replace("verifyException(", "// verifyException("),

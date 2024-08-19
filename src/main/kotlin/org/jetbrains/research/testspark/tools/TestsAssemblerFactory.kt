@@ -8,7 +8,7 @@ import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 
 class TestsAssemblerFactory {
     companion object {
-        fun createTestsAssembler(
+        fun create(
             indicator: CustomProgressIndicator,
             generationData: TestGenerationData,
             testSuiteParser: TestSuiteParser,

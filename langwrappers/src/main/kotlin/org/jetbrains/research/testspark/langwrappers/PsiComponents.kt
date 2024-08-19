@@ -114,7 +114,7 @@ interface PsiHelper {
      * @param caretOffset The caret offset within the PSI file.
      * @return The line number of the selected line, otherwise null.
      */
-    fun getSurroundingLine(caretOffset: Int): Int?
+    fun getSurroundingLineNumber(caretOffset: Int): Int?
 
     /**
      * Retrieves a set of interesting PsiClasses based on a given project,

@@ -174,7 +174,7 @@ class TestSparkStarter : ApplicationStarter {
                         // Start test generation
                         val indicator = HeadlessProgressIndicator()
                         val errorMonitor = DefaultErrorMonitor()
-                        val testCompiler = TestCompilerFactory.createTestCompiler(
+                        val testCompiler = TestCompilerFactory.create(
                             project,
                             settingsState.junitVersion,
                             psiHelper.language,

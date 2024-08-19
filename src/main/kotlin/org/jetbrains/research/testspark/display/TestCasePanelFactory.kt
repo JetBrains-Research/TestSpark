@@ -32,13 +32,12 @@ import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.helpers.ReportHelper
-import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
-import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
 import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.TestClassCodeAnalyzerFactory
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils
@@ -469,17 +468,7 @@ class TestCasePanelFactory(
         WriteCommandAction.runWriteCommandAction(project) {
             uiContext.errorMonitor.clear()
             val code = testSuitePresenter.toString(testSuite)
-            testCase.testName = when (language) {
-                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.extractFirstTestMethodName(
-                    testCase.testName,
-                    code,
-                )
-
-                SupportedLanguage.Java -> JavaClassBuilderHelper.extractFirstTestMethodName(
-                    testCase.testName,
-                    code,
-                )
-            }
+            testCase.testName = TestClassCodeAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, code)
             testCase.testCode = code
 
             // update numbers
@@ -537,15 +526,9 @@ class TestCasePanelFactory(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
-        val fileName = when (language) {
-            SupportedLanguage.Kotlin ->
-                "${KotlinClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.kt"
+        val fileName = TestClassCodeAnalyzerFactory.create(language).getFileNameFromTestCaseCode(testCase.testName)
 
-            SupportedLanguage.Java ->
-                "${JavaClassBuilderHelper.getClassFromTestCaseCode(testCase.testCode)}.java"
-        }
-
-        val testCompiler = TestCompilerFactory.createTestCompiler(
+        val testCompiler = TestCompilerFactory.create(
             project,
             llmSettingsState.junitVersion,
             language,
@@ -708,17 +691,7 @@ class TestCasePanelFactory(
      * Updates the current test case with the specified test name and test code.
      */
     private fun updateTestCaseInformation() {
-        testCase.testName = when (language) {
-            SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.extractFirstTestMethodName(
-                testCase.testName,
-                languageTextField.document.text,
-            )
-
-            SupportedLanguage.Java -> JavaClassBuilderHelper.extractFirstTestMethodName(
-                testCase.testName,
-                languageTextField.document.text,
-            )
-        }
+        testCase.testName = TestClassCodeAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 }

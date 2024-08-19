@@ -10,7 +10,7 @@ import org.jetbrains.research.testspark.core.test.kotlin.KotlinTestCompiler
 
 class TestCompilerFactory {
     companion object {
-        fun createTestCompiler(
+        fun create(
             project: Project,
             junitVersion: JUnitVersion,
             language: SupportedLanguage,
