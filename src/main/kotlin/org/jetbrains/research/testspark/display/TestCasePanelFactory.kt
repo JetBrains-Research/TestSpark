@@ -326,7 +326,7 @@ class TestCasePanelFactory(
             errorLabel.isVisible = false
         } else {
             errorLabel.isVisible = true
-            errorLabel.toolTipText = error
+            errorLabel.toolTipText = ErrorMessageNormalizer.normalize(error)
         }
     }
 
