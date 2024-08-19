@@ -21,7 +21,7 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.ScrollPaneConstants
 
-class TestSamplePanelFactory(
+class TestSamplePanelBuilder(
     project: Project,
     private val middlePanel: JPanel,
     private val testNames: MutableList<String>,

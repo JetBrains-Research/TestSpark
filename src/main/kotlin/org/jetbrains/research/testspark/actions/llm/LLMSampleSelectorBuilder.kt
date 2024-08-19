@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.actions.llm
 
 import com.intellij.openapi.project.Project
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.actions.template.PanelFactory
+import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.helpers.LLMTestSampleHelper
@@ -13,7 +13,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
 
-class LLMSampleSelectorFactory(private val project: Project, private val language: SupportedLanguage) : PanelFactory {
+class LLMSampleSelectorBuilder(private val project: Project, private val language: SupportedLanguage) : PanelBuilder {
     // init components
     private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
         JRadioButton(PluginLabelsBundle.get("provideTestSample")),
@@ -26,7 +26,7 @@ class LLMSampleSelectorFactory(private val project: Project, private val languag
     private val defaultTestCode = "// provide test method code here"
     private val testNames = mutableListOf(defaultTestName)
     private val initialTestCodes = mutableListOf(LLMTestSampleHelper.createTestSampleClass("", defaultTestCode))
-    private val testSamplePanelFactories: MutableList<TestSamplePanelFactory> = mutableListOf()
+    private val testSamplePanelFactories: MutableList<TestSamplePanelBuilder> = mutableListOf()
     private var testSamplesCode: String = ""
 
     private val addButtonPanel = JPanel()
@@ -129,18 +129,18 @@ class LLMSampleSelectorFactory(private val project: Project, private val languag
         }
 
         addButton.addActionListener {
-            val testSamplePanelFactory = TestSamplePanelFactory(project, middlePanel, testNames, initialTestCodes, language)
-            testSamplePanelFactories.add(testSamplePanelFactory)
-            val testSamplePanel = testSamplePanelFactory.getTestSamplePanel()
-            val codeScrollPanel = testSamplePanelFactory.getCodeScrollPanel()
+            val testSamplePanelBuilder = TestSamplePanelBuilder(project, middlePanel, testNames, initialTestCodes, language)
+            testSamplePanelFactories.add(testSamplePanelBuilder)
+            val testSamplePanel = testSamplePanelBuilder.getTestSamplePanel()
+            val codeScrollPanel = testSamplePanelBuilder.getCodeScrollPanel()
             formBuilder = formBuilder
                 .addComponent(testSamplePanel, 10)
                 .addComponent(codeScrollPanel, 10)
             middlePanel = formBuilder.panel
             middlePanel.revalidate()
 
-            testSamplePanelFactory.getRemoveButton().addActionListener {
-                testSamplePanelFactories.remove(testSamplePanelFactory)
+            testSamplePanelBuilder.getRemoveButton().addActionListener {
+                testSamplePanelFactories.remove(testSamplePanelBuilder)
                 middlePanel.remove(testSamplePanel)
                 middlePanel.remove(codeScrollPanel)
                 middlePanel.revalidate()
