@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.display
 
+import org.jetbrains.research.testspark.display.utils.ErrorMessageNormalizer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

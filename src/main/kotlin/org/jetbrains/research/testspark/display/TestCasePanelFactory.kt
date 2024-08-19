@@ -31,7 +31,6 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.LLMHelper
-import org.jetbrains.research.testspark.helpers.ReportHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
@@ -58,6 +57,10 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+import org.jetbrains.research.testspark.display.utils.ErrorMessageNormalizer
+import org.jetbrains.research.testspark.display.utils.IconButtonCreator
+import org.jetbrains.research.testspark.display.utils.ModifiedLinesGetter
+import org.jetbrains.research.testspark.display.utils.ReportUpdater
 
 class TestCasePanelFactory(
     private val project: Project,
@@ -391,7 +394,7 @@ class TestCasePanelFactory(
             testCase.coveredLines = setOf()
         }
 
-        ReportHelper.updateTestCase(project, report, testCase)
+        ReportUpdater.updateTestCase(project, report, testCase)
         when (language) {
             SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().updateUI()
             SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().updateUI()
@@ -612,7 +615,7 @@ class TestCasePanelFactory(
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportHelper.removeTestCase(project, report, testCase)
+        ReportUpdater.removeTestCase(project, report, testCase)
         when (language) {
             SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>()
                 .updateUI()
