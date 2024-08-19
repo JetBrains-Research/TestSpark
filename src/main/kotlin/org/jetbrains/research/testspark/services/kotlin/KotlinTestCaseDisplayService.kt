@@ -69,7 +69,7 @@ class KotlinTestCaseDisplayService(private val project: Project) : TestCaseDispl
 
     private var mainPanel: JPanel = JPanel()
 
-    private val topButtonsPanelFactory = TopButtonsPanelFactory(project, SupportedLanguage.Kotlin)
+    private val topButtonsPanelFactory = TopButtonsPanelFactory(project).create(SupportedLanguage.Kotlin)
 
     private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
