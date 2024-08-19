@@ -6,7 +6,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.FeedbackCycleExecutionResult
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
@@ -20,6 +19,7 @@ import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.IJReport
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.LLMSettingsService
@@ -78,7 +78,8 @@ class LLMProcessManager(
         codeType: FragmentToTestData,
         packageName: String,
         projectContext: ProjectContext,
-        generatedTestsData: TestGenerationData,
+        project: Project,
+        generatedTestsData: IJTestGenerationData,
         errorMonitor: ErrorMonitor,
     ): UIContext? {
         log.info("LLM test generation begins")
@@ -245,6 +246,8 @@ class LLMProcessManager(
             language,
         )
 
-        return UIContext(projectContext, generatedTestsData, requestManager, errorMonitor)
+        val psiGeneratedTestsData = IJTestGenerationData.buildFromCodeString(testSuiteRepresentation!!, generatedTestsData, project)
+
+        return UIContext(projectContext, psiGeneratedTestsData, requestManager, errorMonitor)
     }
 }

@@ -8,7 +8,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.kotlin.idea.KotlinLanguage
-import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 import org.jetbrains.research.testspark.helpers.TestClassBuilderHelper
 import java.io.File
 
@@ -24,7 +24,7 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
         packageString: String,
         runWith: String,
         otherInfo: String,
-        testGenerationData: TestGenerationData,
+        testGenerationData: IJTestGenerationData,
     ): String {
         log.debug("[KotlinClassBuilderHelper] Generate code for $className")
 
@@ -97,7 +97,7 @@ object KotlinClassBuilderHelper : TestClassBuilderHelper {
         return className
     }
 
-    override fun formatCode(project: Project, code: String, generatedTestData: TestGenerationData): String {
+    override fun formatCode(project: Project, code: String, generatedTestData: IJTestGenerationData): String {
         var result = ""
         WriteCommandAction.runWriteCommandAction(project) {
             val fileName = generatedTestData.resultPath + File.separatorChar + "Formatted.kt"

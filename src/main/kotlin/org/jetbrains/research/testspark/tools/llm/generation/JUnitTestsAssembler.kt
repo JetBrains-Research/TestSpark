@@ -3,11 +3,11 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestSuiteParser
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 
 /**
  * Assembler class for generating and organizing test cases.
@@ -18,7 +18,7 @@ import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
  */
 class JUnitTestsAssembler(
     val indicator: CustomProgressIndicator,
-    private val generationData: TestGenerationData,
+    private val generationData: IJTestGenerationData,
     private val testSuiteParser: TestSuiteParser,
     val junitVersion: JUnitVersion,
 ) : TestsAssembler() {

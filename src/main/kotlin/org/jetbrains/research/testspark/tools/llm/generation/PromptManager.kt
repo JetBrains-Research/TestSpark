@@ -8,7 +8,6 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptGenerator
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.MethodRepresentation
@@ -17,6 +16,7 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptTemplates
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
@@ -171,12 +171,12 @@ class PromptManager(
         return key to value // mapOf(key to value).entries.first()
     }
 
-    fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
+    fun isPromptSizeReductionPossible(testGenerationData: IJTestGenerationData): Boolean {
         return (LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
             (LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
     }
 
-    fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
+    fun reducePromptSize(testGenerationData: IJTestGenerationData): Boolean {
         // reducing depth of polymorphism
         if (LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) {
             testGenerationData.polyDepthReducing++
@@ -196,7 +196,7 @@ class PromptManager(
         return false
     }
 
-    private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
+    private fun showPromptReductionWarning(testGenerationData: IJTestGenerationData) {
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
                 "Maximum depth of polymorphism is ${LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +

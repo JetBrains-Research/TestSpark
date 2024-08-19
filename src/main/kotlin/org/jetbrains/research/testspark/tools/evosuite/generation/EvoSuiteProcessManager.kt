@@ -14,7 +14,6 @@ import org.evosuite.utils.CompactReport
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteDefaultsBundle
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
@@ -24,6 +23,7 @@ import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.IJReport
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
@@ -75,9 +75,11 @@ class EvoSuiteProcessManager(
         codeType: FragmentToTestData,
         packageName: String,
         projectContext: ProjectContext,
-        generatedTestsData: TestGenerationData,
+        project: Project,
+        generatedTestsData: IJTestGenerationData,
         errorMonitor: ErrorMonitor,
     ): UIContext? {
+        var generatedTestsData = generatedTestsData
         try {
             if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
@@ -208,6 +210,8 @@ class EvoSuiteProcessManager(
                 projectContext.fileUrlAsString!!,
                 generatedTestsData,
             )
+            // Now additionally create a new IJTestGenerationData object which initializing additional Psi stuff
+            generatedTestsData = IJTestGenerationData.buildFromCodeString(testGenerationResult.testSuiteCode, generatedTestsData, project)
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("evosuiteErrorMessage").format(e.message), project, errorMonitor)
             e.printStackTrace()

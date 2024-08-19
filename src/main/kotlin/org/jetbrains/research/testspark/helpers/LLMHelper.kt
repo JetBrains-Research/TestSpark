@@ -7,13 +7,13 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
-import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModificationRequest
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.TestBodyPrinterFactory
@@ -253,7 +253,7 @@ object LLMHelper {
         indicator: CustomProgressIndicator,
         requestManager: RequestManager,
         project: Project,
-        testGenerationOutput: TestGenerationData,
+        testGenerationOutput: IJTestGenerationData,
         errorMonitor: ErrorMonitor,
     ): TestSuiteGeneratedByLLM? {
         // Update Token information

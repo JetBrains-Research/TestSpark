@@ -12,7 +12,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
-import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.data.IJTestGenerationData
 import org.jetbrains.research.testspark.helpers.TestClassBuilderHelper
 import java.io.File
 
@@ -26,7 +26,7 @@ object JavaClassBuilderHelper : TestClassBuilderHelper {
         packageString: String,
         runWith: String,
         otherInfo: String,
-        testGenerationData: TestGenerationData,
+        testGenerationData: IJTestGenerationData,
     ): String {
         var testFullText = printUpperPart(className, imports, packageString, runWith, otherInfo)
 
@@ -108,7 +108,7 @@ object JavaClassBuilderHelper : TestClassBuilderHelper {
         return className
     }
 
-    override fun formatCode(project: Project, code: String, generatedTestData: TestGenerationData): String {
+    override fun formatCode(project: Project, code: String, generatedTestData: IJTestGenerationData): String {
         var result = ""
         WriteCommandAction.runWriteCommandAction(project) {
             val fileName = generatedTestData.resultPath + File.separatorChar + "Formatted.java"
