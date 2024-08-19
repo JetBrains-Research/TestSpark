@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers
+package org.jetbrains.research.testspark.helpers.java
 
 import com.github.javaparser.ParseProblemException
 import com.github.javaparser.StaticJavaParser
@@ -13,17 +13,12 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.helpers.TestClassBuilderHelper
 import java.io.File
 
-object JavaClassBuilderHelper {
-    /**
-     * Generates the code for a test class.
-     *
-     * @param className the name of the test class
-     * @param body the body of the test class
-     * @return the generated code as a string
-     */
-    fun generateCode(
+object JavaClassBuilderHelper : TestClassBuilderHelper {
+
+    override fun generateCode(
         project: Project,
         className: String,
         body: String,
@@ -47,7 +42,93 @@ object JavaClassBuilderHelper {
          * for better readability and make the tests shorter, we reduce the number of line breaks:
          *  when we have three or more sequential \n, reduce it to two.
          */
-        return formatJavaCode(project, Regex("\n\n\n(\n)*").replace(testFullText, "\n\n"), testGenerationData)
+        return formatCode(project, Regex("\n\n\n(?:\n)*").replace(testFullText, "\n\n"), testGenerationData)
+    }
+
+    override fun extractFirstTestMethodCode(classCode: String): String {
+        var result = ""
+        try {
+            val componentUnit: CompilationUnit = StaticJavaParser.parse(classCode)
+            object : VoidVisitorAdapter<Any?>() {
+                override fun visit(method: MethodDeclaration, arg: Any?) {
+                    super.visit(method, arg)
+                    if (method.getAnnotationByName("Test").isPresent) {
+                        result += "\t" + method.toString().replace("\n", "\n\t") + "\n\n"
+                    }
+                }
+            }.visit(componentUnit, null)
+
+            return result
+        } catch (e: ParseProblemException) {
+            val upperCutCode = "\t@Test" + classCode.split("@Test").last()
+            var methodStarted = false
+            var balanceOfBrackets = 0
+            for (symbol in upperCutCode) {
+                result += symbol
+                if (symbol == '{') {
+                    methodStarted = true
+                    balanceOfBrackets++
+                }
+                if (symbol == '}') {
+                    balanceOfBrackets--
+                }
+                if (methodStarted && balanceOfBrackets == 0) {
+                    break
+                }
+            }
+            return result + "\n"
+        }
+    }
+
+    override fun extractFirstTestMethodName(oldTestCaseName: String, classCode: String): String {
+        var result = ""
+        try {
+            val componentUnit: CompilationUnit = StaticJavaParser.parse(classCode)
+
+            object : VoidVisitorAdapter<Any?>() {
+                override fun visit(method: MethodDeclaration, arg: Any?) {
+                    super.visit(method, arg)
+                    if (method.getAnnotationByName("Test").isPresent) {
+                        result = method.nameAsString
+                    }
+                }
+            }.visit(componentUnit, null)
+
+            return result
+        } catch (e: ParseProblemException) {
+            return oldTestCaseName
+        }
+    }
+
+    override fun getClassFromTestCaseCode(code: String): String {
+        val pattern = Regex("public\\s+class\\s+(\\S+)\\s*\\{")
+        val matchResult = pattern.find(code)
+        matchResult ?: return "GeneratedTest"
+        val (className) = matchResult.destructured
+        return className
+    }
+
+    override fun formatCode(project: Project, code: String, generatedTestData: TestGenerationData): String {
+        var result = ""
+        WriteCommandAction.runWriteCommandAction(project) {
+            val fileName = generatedTestData.resultPath + File.separatorChar + "Formatted.java"
+            // create a temporary PsiFile
+            val psiFile: PsiFile = PsiFileFactory.getInstance(project)
+                .createFileFromText(
+                    fileName,
+                    JavaLanguage.INSTANCE,
+                    code,
+                )
+
+            CodeStyleManager.getInstance(project).reformat(psiFile)
+
+            val document = PsiDocumentManager.getInstance(project).getDocument(psiFile)
+            result = document?.text ?: code
+
+            File(fileName).delete()
+        }
+
+        return result
     }
 
     /**
@@ -89,116 +170,5 @@ object JavaClassBuilderHelper {
         }
 
         return testText
-    }
-
-    /**
-     * Finds the test method from a given class with the specified test case name.
-     *
-     * @param code The code of the class containing test methods.
-     * @return The test method as a string, including the "@Test" annotation.
-     */
-    fun getTestMethodCodeFromClassWithTestCase(code: String): String {
-        var result = ""
-        try {
-            val componentUnit: CompilationUnit = StaticJavaParser.parse(code)
-            object : VoidVisitorAdapter<Any?>() {
-                override fun visit(method: MethodDeclaration, arg: Any?) {
-                    super.visit(method, arg)
-                    if (method.getAnnotationByName("Test").isPresent) {
-                        result += "\t" + method.toString().replace("\n", "\n\t") + "\n\n"
-                    }
-                }
-            }.visit(componentUnit, null)
-
-            return result
-        } catch (e: ParseProblemException) {
-            val upperCutCode = "\t@Test" + code.split("@Test").last()
-            var methodStarted = false
-            var balanceOfBrackets = 0
-            for (symbol in upperCutCode) {
-                result += symbol
-                if (symbol == '{') {
-                    methodStarted = true
-                    balanceOfBrackets++
-                }
-                if (symbol == '}') {
-                    balanceOfBrackets--
-                }
-                if (methodStarted && balanceOfBrackets == 0) {
-                    break
-                }
-            }
-            return result + "\n"
-        }
-    }
-
-    /**
-     * Retrieves the name of the test method from a given Java class with test cases.
-     *
-     * @param oldTestCaseName The old name of test case
-     * @param code The source code of the Java class with test cases.
-     * @return The name of the test method. If no test method is found, an empty string is returned.
-     */
-    fun getTestMethodNameFromClassWithTestCase(oldTestCaseName: String, code: String): String {
-        var result = ""
-        try {
-            val componentUnit: CompilationUnit = StaticJavaParser.parse(code)
-
-            object : VoidVisitorAdapter<Any?>() {
-                override fun visit(method: MethodDeclaration, arg: Any?) {
-                    super.visit(method, arg)
-                    if (method.getAnnotationByName("Test").isPresent) {
-                        result = method.nameAsString
-                    }
-                }
-            }.visit(componentUnit, null)
-
-            return result
-        } catch (e: ParseProblemException) {
-            return oldTestCaseName
-        }
-    }
-
-    /**
-     * Retrieves the class name from the given test case code.
-     *
-     * @param code The test case code to extract the class name from.
-     * @return The class name extracted from the test case code.
-     */
-    fun getClassFromTestCaseCode(code: String): String {
-        val pattern = Regex("public\\s+class\\s+(\\S+)\\s*\\{")
-        val matchResult = pattern.find(code)
-        matchResult ?: return "GeneratedTest"
-        val (className) = matchResult.destructured
-        return className
-    }
-
-    /**
-     * Formats the given Java code using IntelliJ IDEA's code formatting rules.
-     *
-     * @param code The Java code to be formatted.
-     * @return The formatted Java code.
-     */
-    fun formatJavaCode(project: Project, code: String, generatedTestData: TestGenerationData): String {
-        var result = ""
-        WriteCommandAction.runWriteCommandAction(project) {
-            val fileName = generatedTestData.resultPath + File.separatorChar + "Formatted.java"
-            // create a temporary PsiFile
-            val psiFile: PsiFile = PsiFileFactory.getInstance(project)
-                .createFileFromText(
-                    fileName,
-                    JavaLanguage.INSTANCE,
-                    code,
-                )
-
-            CodeStyleManager.getInstance(project).reformat(psiFile)
-
-            val document = PsiDocumentManager.getInstance(project).getDocument(psiFile)
-            result = document?.text ?: code
-
-            File(fileName).delete()
-        }
-
-        return result
     }
 }

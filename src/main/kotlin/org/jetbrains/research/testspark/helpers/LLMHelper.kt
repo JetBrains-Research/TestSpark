@@ -12,11 +12,15 @@ import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModif
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.TestBodyPrinterFactory
+import org.jetbrains.research.testspark.tools.TestSuiteParserFactory
+import org.jetbrains.research.testspark.tools.TestsAssemblerFactory
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
@@ -243,6 +247,7 @@ object LLMHelper {
      * @return instance of TestSuiteGeneratedByLLM if the generated test cases are parsable, otherwise null.
      */
     fun testModificationRequest(
+        language: SupportedLanguage,
         testCase: String,
         task: String,
         indicator: CustomProgressIndicator,
@@ -256,12 +261,28 @@ object LLMHelper {
             return null
         }
 
+        val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
+        val testBodyPrinter = TestBodyPrinterFactory.createTestBodyPrinter(language)
+        val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
+            jUnitVersion,
+            language,
+            testBodyPrinter,
+        )
+
+        val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
+            indicator,
+            testGenerationOutput,
+            testSuiteParser,
+            jUnitVersion,
+        )
+
         val testSuite = executeTestCaseModificationRequest(
+            language,
             testCase,
             task,
             indicator,
             requestManager,
-            testsAssembler = JUnitTestsAssembler(project, indicator, testGenerationOutput),
+            testsAssembler,
             errorMonitor,
         )
         return testSuite

@@ -13,14 +13,14 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
-import org.jetbrains.research.testspark.langwrappers.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
-    override val language: Language get() = Language.Java
+    override val language: SupportedLanguage get() = SupportedLanguage.Java
 
     private val log = Logger.getInstance(this::class.java)
 

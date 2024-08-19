@@ -10,10 +10,11 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
-import org.jetbrains.research.testspark.core.utils.importPattern
-import org.jetbrains.research.testspark.core.utils.packagePattern
+import org.jetbrains.research.testspark.core.utils.javaImportPattern
+import org.jetbrains.research.testspark.core.utils.javaPackagePattern
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.strategies.JavaKotlinClassTextExtractor
 
 class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
@@ -33,29 +34,12 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     override val containingFile: PsiFile get() = psiClass.containingFile
 
     override val fullText: String
-        get() {
-            var fullText = ""
-            val fileText = psiClass.containingFile.text
-
-            // get package
-            packagePattern.findAll(fileText).map {
-                it.groupValues[0]
-            }.forEach {
-                fullText += "$it\n\n"
-            }
-
-            // get imports
-            importPattern.findAll(fileText).map {
-                it.groupValues[0]
-            }.forEach {
-                fullText += "$it\n"
-            }
-
-            // Add class code
-            fullText += psiClass.text
-
-            return fullText
-        }
+        get() = JavaKotlinClassTextExtractor().extract(
+            psiClass.containingFile,
+            psiClass.text,
+            javaPackagePattern,
+            javaImportPattern,
+        )
 
     override val classType: ClassType
         get() {
@@ -67,6 +51,8 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
             }
             return ClassType.CLASS
         }
+
+    override val rBrace: Int? = psiClass.rBrace?.textRange?.startOffset
 
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
         val scope = GlobalSearchScope.projectScope(project)

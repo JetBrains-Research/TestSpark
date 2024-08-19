@@ -157,6 +157,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.mockito/mockito-all
     testImplementation("org.mockito:mockito-all:1.10.19")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
 
     // https://mvnrepository.com/artifact/net.jqwik/jqwik
     testImplementation("net.jqwik:jqwik:1.6.5")

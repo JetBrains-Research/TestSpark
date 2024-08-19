@@ -21,14 +21,14 @@ import org.jetbrains.kotlin.psi.KtTypeReference
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
-import org.jetbrains.research.testspark.langwrappers.Language
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
 class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
-    override val language: Language get() = Language.Kotlin
+    override val language: SupportedLanguage get() = SupportedLanguage.Kotlin
 
     private val log = Logger.getInstance(this::class.java)
 
