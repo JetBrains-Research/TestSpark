@@ -8,26 +8,24 @@ import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.java.JavaTestCompiler
 import org.jetbrains.research.testspark.core.test.kotlin.KotlinTestCompiler
 
-class TestCompilerFactory {
-    companion object {
-        fun create(
-            project: Project,
-            junitVersion: JUnitVersion,
-            language: SupportedLanguage,
-            javaHomeDirectory: String? = null,
-        ): TestCompiler {
-            val javaSDKHomePath =
-                javaHomeDirectory ?: ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path
-                    ?: throw RuntimeException("Java SDK not configured for the project.")
+object TestCompilerFactory {
+    fun create(
+        project: Project,
+        junitVersion: JUnitVersion,
+        language: SupportedLanguage,
+        javaHomeDirectory: String? = null,
+    ): TestCompiler {
+        val javaSDKHomePath =
+            javaHomeDirectory ?: ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path
+            ?: throw RuntimeException("Java SDK not configured for the project.")
 
-            val libraryPaths = LibraryPathsProvider.getTestCompilationLibraryPaths()
-            val junitLibraryPaths = LibraryPathsProvider.getJUnitLibraryPaths(junitVersion)
+        val libraryPaths = LibraryPathsProvider.getTestCompilationLibraryPaths()
+        val junitLibraryPaths = LibraryPathsProvider.getJUnitLibraryPaths(junitVersion)
 
-            // TODO add the warning window that for Java we always need the javaHomeDirectoryPath
-            return when (language) {
-                SupportedLanguage.Java -> JavaTestCompiler(libraryPaths, junitLibraryPaths, javaSDKHomePath)
-                SupportedLanguage.Kotlin -> KotlinTestCompiler(libraryPaths, junitLibraryPaths)
-            }
+        // TODO add the warning window that for Java we always need the javaHomeDirectoryPath
+        return when (language) {
+            SupportedLanguage.Java -> JavaTestCompiler(libraryPaths, junitLibraryPaths, javaSDKHomePath)
+            SupportedLanguage.Kotlin -> KotlinTestCompiler(libraryPaths, junitLibraryPaths)
         }
     }
 }

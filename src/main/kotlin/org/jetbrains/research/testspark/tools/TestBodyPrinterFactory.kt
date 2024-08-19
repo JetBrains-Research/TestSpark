@@ -5,13 +5,11 @@ import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.java.JavaTestBodyPrinter
 import org.jetbrains.research.testspark.core.test.kotlin.KotlinTestBodyPrinter
 
-class TestBodyPrinterFactory {
-    companion object {
-        fun create(language: SupportedLanguage): TestBodyPrinter {
-            return when (language) {
-                SupportedLanguage.Kotlin -> KotlinTestBodyPrinter()
-                SupportedLanguage.Java -> JavaTestBodyPrinter()
-            }
+object TestBodyPrinterFactory {
+    fun create(language: SupportedLanguage): TestBodyPrinter {
+        return when (language) {
+            SupportedLanguage.Kotlin -> KotlinTestBodyPrinter()
+            SupportedLanguage.Java -> JavaTestBodyPrinter()
         }
     }
 }

@@ -6,13 +6,11 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestSuiteParser
 import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 
-class TestsAssemblerFactory {
-    companion object {
-        fun create(
-            indicator: CustomProgressIndicator,
-            generationData: TestGenerationData,
-            testSuiteParser: TestSuiteParser,
-            junitVersion: JUnitVersion,
-        ) = JUnitTestsAssembler(indicator, generationData, testSuiteParser, junitVersion)
-    }
+object TestsAssemblerFactory {
+    fun create(
+        indicator: CustomProgressIndicator,
+        generationData: TestGenerationData,
+        testSuiteParser: TestSuiteParser,
+        junitVersion: JUnitVersion,
+    ) = JUnitTestsAssembler(indicator, generationData, testSuiteParser, junitVersion)
 }
