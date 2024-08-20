@@ -44,7 +44,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.services.TestCaseDisplayBuilder
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -60,7 +60,7 @@ import javax.swing.JSeparator
 import javax.swing.SwingConstants
 
 @Service(Service.Level.PROJECT)
-class JavaTestCaseDisplayService(private val project: Project) : TestCaseDisplayService {
+class JavaTestCaseDisplayBuilder(private val project: Project) : TestCaseDisplayBuilder {
     private var report: Report? = null
 
     private val unselectedTestCases = HashMap<Int, TestCase>()

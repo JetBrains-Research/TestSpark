@@ -20,10 +20,10 @@ import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
+import org.jetbrains.research.testspark.services.TestCaseDisplayBuilder
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
-import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
+import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayBuilder
+import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayBuilder
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -110,11 +110,11 @@ class Pipeline(
                     testGenerationController.finished()
                     when (psiHelper.language) {
                         SupportedLanguage.Java -> uiContext?.let {
-                            displayTestCase<JavaTestCaseDisplayService>(it)
+                            displayTestCase<JavaTestCaseDisplayBuilder>(it)
                         }
 
                         SupportedLanguage.Kotlin -> uiContext?.let {
-                            displayTestCase<KotlinTestCaseDisplayService>(it)
+                            displayTestCase<KotlinTestCaseDisplayBuilder>(it)
                         }
                     }
                 }
@@ -124,15 +124,15 @@ class Pipeline(
     private fun clear(project: Project) { // should be removed totally!
         testGenerationController.errorMonitor.clear()
         when (psiHelper.language) {
-            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().clear()
-            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().clear()
+            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayBuilder>().clear()
+            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayBuilder>().clear()
         }
 
         project.service<CoverageVisualisationService>().clear()
         project.service<TestsExecutionResultService>().clear()
     }
 
-    private inline fun <reified Service : TestCaseDisplayService> displayTestCase(ctx: UIContext) {
+    private inline fun <reified Service : TestCaseDisplayBuilder> displayTestCase(ctx: UIContext) {
         project.service<Service>().updateEditorForFileUrl(ctx.testGenerationOutput.fileUrl)
 
         if (project.service<EditorService>().editor != null) {

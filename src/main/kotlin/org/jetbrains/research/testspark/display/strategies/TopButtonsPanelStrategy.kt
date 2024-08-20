@@ -4,8 +4,8 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
-import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
-import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
+import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayBuilder
+import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayBuilder
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JLabel
@@ -13,24 +13,24 @@ import javax.swing.JOptionPane
 
 object TopButtonsPanelStrategy {
     fun toggleAllJavaCheckboxes(selected: Boolean, project: Project) {
-        project.service<JavaTestCaseDisplayService>().getTestCasePanels().forEach { (_, jPanel) ->
+        project.service<JavaTestCaseDisplayBuilder>().getTestCasePanels().forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
-        project.service<JavaTestCaseDisplayService>()
+        project.service<JavaTestCaseDisplayBuilder>()
             .setTestsSelected(
-                if (selected) project.service<JavaTestCaseDisplayService>().getTestCasePanels().size else 0,
+                if (selected) project.service<JavaTestCaseDisplayBuilder>().getTestCasePanels().size else 0,
             )
     }
 
     fun toggleAllKotlinCheckboxes(selected: Boolean, project: Project) {
-        project.service<KotlinTestCaseDisplayService>().getTestCasePanels().forEach { (_, jPanel) ->
+        project.service<KotlinTestCaseDisplayBuilder>().getTestCasePanels().forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
-        project.service<KotlinTestCaseDisplayService>()
+        project.service<KotlinTestCaseDisplayBuilder>()
             .setTestsSelected(
-                if (selected) project.service<KotlinTestCaseDisplayService>().getTestCasePanels().size else 0,
+                if (selected) project.service<KotlinTestCaseDisplayBuilder>().getTestCasePanels().size else 0,
             )
     }
 
@@ -53,14 +53,14 @@ object TopButtonsPanelStrategy {
         }
         testsSelectedLabel.text = String.format(
             testsSelectedText,
-            project.service<JavaTestCaseDisplayService>().getTestsSelected(),
-            project.service<JavaTestCaseDisplayService>().getTestCasePanels().size,
+            project.service<JavaTestCaseDisplayBuilder>().getTestsSelected(),
+            project.service<JavaTestCaseDisplayBuilder>().getTestCasePanels().size,
         )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 numberOfPassedTests,
-                project.service<JavaTestCaseDisplayService>().getTestCasePanels().size,
+                project.service<JavaTestCaseDisplayBuilder>().getTestCasePanels().size,
             )
         runAllButton.isEnabled = false
         for (testCasePanelFactory in testCasePanelFactories) {
@@ -87,14 +87,14 @@ object TopButtonsPanelStrategy {
         }
         testsSelectedLabel.text = String.format(
             testsSelectedText,
-            project.service<KotlinTestCaseDisplayService>().getTestsSelected(),
-            project.service<KotlinTestCaseDisplayService>().getTestCasePanels().size,
+            project.service<KotlinTestCaseDisplayBuilder>().getTestsSelected(),
+            project.service<KotlinTestCaseDisplayBuilder>().getTestCasePanels().size,
         )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 numberOfPassedTests,
-                project.service<KotlinTestCaseDisplayService>().getTestCasePanels().size,
+                project.service<KotlinTestCaseDisplayBuilder>().getTestCasePanels().size,
             )
         runAllButton.isEnabled = false
         for (testCasePanelFactory in testCasePanelFactories) {
@@ -115,7 +115,7 @@ object TopButtonsPanelStrategy {
         // Cancel the operation if the user did not press "Yes"
         if (choice == JOptionPane.NO_OPTION) return
 
-        project.service<JavaTestCaseDisplayService>().clear()
+        project.service<JavaTestCaseDisplayBuilder>().clear()
     }
 
     fun removeAllKotlinTestCases(project: Project) {
@@ -131,6 +131,6 @@ object TopButtonsPanelStrategy {
         // Cancel the operation if the user did not press "Yes"
         if (choice == JOptionPane.NO_OPTION) return
 
-        project.service<KotlinTestCaseDisplayService>().clear()
+        project.service<KotlinTestCaseDisplayBuilder>().clear()
     }
 }

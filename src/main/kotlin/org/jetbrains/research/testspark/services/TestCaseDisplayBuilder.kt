@@ -8,7 +8,7 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import javax.swing.JPanel
 
-interface TestCaseDisplayService {
+interface TestCaseDisplayBuilder {
 
     /**
      * Fill the panel with the generated test cases. Remove all previously shown test cases.

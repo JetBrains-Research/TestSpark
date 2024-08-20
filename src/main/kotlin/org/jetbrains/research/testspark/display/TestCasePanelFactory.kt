@@ -33,8 +33,8 @@ import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
-import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
+import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayBuilder
+import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayBuilder
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.testmanager.TestAnalyzerFactory
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
@@ -200,8 +200,8 @@ class TestCasePanelFactory(
             clipboard.setContents(
                 StringSelection(
                     when (language) {
-                        SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().getEditor(testCase.testName)!!.document.text
-                        SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().getEditor(testCase.testName)!!.document.text
+                        SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayBuilder>().getEditor(testCase.testName)!!.document.text
+                        SupportedLanguage.Java -> project.service<JavaTestCaseDisplayBuilder>().getEditor(testCase.testName)!!.document.text
                     },
                 ),
                 null,
@@ -396,8 +396,8 @@ class TestCasePanelFactory(
 
         ReportUpdater.updateTestCase(project, report, testCase)
         when (language) {
-            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().updateUI()
-            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().updateUI()
+            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayBuilder>().updateUI()
+            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayBuilder>().updateUI()
         }
     }
 
@@ -607,9 +607,9 @@ class TestCasePanelFactory(
     private fun remove() {
         // Remove the test case from the cache
         when (language) {
-            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().removeTestCase(testCase.testName)
+            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayBuilder>().removeTestCase(testCase.testName)
 
-            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().removeTestCase(testCase.testName)
+            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayBuilder>().removeTestCase(testCase.testName)
         }
 
         runTestButton.isEnabled = false
@@ -617,10 +617,10 @@ class TestCasePanelFactory(
 
         ReportUpdater.removeTestCase(project, report, testCase)
         when (language) {
-            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>()
+            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayBuilder>()
                 .updateUI()
 
-            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>()
+            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayBuilder>()
                 .updateUI()
         }
     }
