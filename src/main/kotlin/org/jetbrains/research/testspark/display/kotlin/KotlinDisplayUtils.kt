@@ -137,7 +137,7 @@ class KotlinDisplayUtils : DisplayUtils {
 
                 if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
                     val annotationEntry =
-                        ktPsiFactory.createAnnotationEntry("@RunWith(${uiContext!!.testGenerationOutput.runWith})")
+                        ktPsiFactory.createAnnotationEntry("@RunWith(${uiContext.testGenerationOutput.runWith})")
                     ktClass!!.addBefore(annotationEntry, ktClass!!.body)
                 }
 
@@ -208,7 +208,7 @@ class KotlinDisplayUtils : DisplayUtils {
         )
 
         // Create the imports string
-        val importsString = uiContext!!.testGenerationOutput.importsCode.joinToString("\n") + "\n\n"
+        val importsString = uiContext.testGenerationOutput.importsCode.joinToString("\n") + "\n\n"
 
         // Find the insertion offset
         val insertionOffset = outputFile.importList?.startOffset
@@ -221,7 +221,7 @@ class KotlinDisplayUtils : DisplayUtils {
             PsiDocumentManager.getInstance(project).commitDocument(document)
         }
 
-        val packageName = uiContext!!.testGenerationOutput.packageName
+        val packageName = uiContext.testGenerationOutput.packageName
         val packageStatement = if (packageName.isEmpty()) "" else "package $packageName\n\n"
 
         // Insert the package statement at the beginning of the document

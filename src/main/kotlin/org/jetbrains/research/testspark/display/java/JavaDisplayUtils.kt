@@ -133,7 +133,7 @@ class JavaDisplayUtils : DisplayUtils {
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
 
                 if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${uiContext!!.testGenerationOutput.runWith})")
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${uiContext.testGenerationOutput.runWith})")
                 }
 
                 psiJavaFile!!.add(psiClass!!)
@@ -201,17 +201,17 @@ class JavaDisplayUtils : DisplayUtils {
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
             outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            uiContext!!.testGenerationOutput.importsCode.joinToString("\n") + "\n\n",
+            uiContext.testGenerationOutput.importsCode.joinToString("\n") + "\n\n",
         )
 
         // insert package to a code
         outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
             .insertString(
                 0,
-                if (uiContext!!.testGenerationOutput.packageName.isEmpty()) {
+                if (uiContext.testGenerationOutput.packageName.isEmpty()) {
                     ""
                 } else {
-                    "package ${uiContext!!.testGenerationOutput.packageName};\n\n"
+                    "package ${uiContext.testGenerationOutput.packageName};\n\n"
                 },
             )
     }

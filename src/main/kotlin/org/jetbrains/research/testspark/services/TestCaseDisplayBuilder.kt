@@ -7,10 +7,6 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiJavaFile
-import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBScrollPane
@@ -29,9 +25,6 @@ import org.jetbrains.research.testspark.display.java.JavaDisplayUtils
 import org.jetbrains.research.testspark.display.kotlin.KotlinDisplayUtils
 import org.jetbrains.research.testspark.display.template.DisplayUtils
 import org.jetbrains.research.testspark.display.utils.ReportUpdater
-import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
-import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
-import org.jetbrains.research.testspark.testmanager.java.JavaTestGenerator
 import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
@@ -39,7 +32,6 @@ import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JCheckBox
-import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
@@ -53,7 +45,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
 
-    private val topButtonsPanelFactory = TopButtonsPanelFactory(project).create(SupportedLanguage.Java)
+    private val topButtonsPanelFactory = TopButtonsPanelFactory(project)
 
     private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
@@ -84,9 +76,9 @@ class TestCaseDisplayBuilder(private val project: Project) {
      */
     private var content: Content? = null
 
-    var uiContext: UIContext? = null
+    private var uiContext: UIContext? = null
 
-    var displayUtils: DisplayUtils? = null
+    private var displayUtils: DisplayUtils? = null
 
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
@@ -174,7 +166,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
         createToolWindowTab()
     }
 
-    fun addSeparator() {
+    private fun addSeparator() {
         allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
         allTestCasePanel.add(JSeparator(SwingConstants.HORIZONTAL))
         allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
@@ -203,7 +195,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
         returnOriginalEditorBackground(editor)
     }
 
-    fun openToolWindowTab() {
+    private fun openToolWindowTab() {
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
         contentManager = toolWindowManager!!.contentManager
         if (content != null) {
@@ -212,7 +204,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
         }
     }
 
-    fun scrollToPanel(myPanel: JPanel) {
+    private fun scrollToPanel(myPanel: JPanel) {
         var sum = 0
         for (component in allTestCasePanel.components) {
             if (component == myPanel) {
@@ -225,11 +217,11 @@ class TestCaseDisplayBuilder(private val project: Project) {
         scroll.value = (scroll.minimum + scroll.maximum) * sum / allTestCasePanel.height
     }
 
-    fun removeAllHighlights() {
+    private fun removeAllHighlights() {
         project.service<EditorService>().editor?.markupModel?.removeAllHighlighters()
     }
 
-    fun returnOriginalEditorBackground(editor: EditorTextField) {
+    private fun returnOriginalEditorBackground(editor: EditorTextField) {
         Thread {
             Thread.sleep(10000)
             editor.background = defaultEditorColor
@@ -242,7 +234,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
         }
     }
 
-    fun applyTests() {
+    private fun applyTests() {
         // Filter the selected test cases
         val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
@@ -258,73 +250,10 @@ class TestCaseDisplayBuilder(private val project: Project) {
         removeSelectedTestCases(selectedTestCasePanels)
     }
 
-    fun showErrorWindow(message: String) {
-        JOptionPane.showMessageDialog(
-            null,
-            message,
-            PluginLabelsBundle.get("errorWindowTitle"),
-            JOptionPane.ERROR_MESSAGE,
-        )
-    }
-
     fun getEditor(testCaseName: String): EditorTextField? {
         val middlePanelComponent = testCasePanels[testCaseName]?.getComponent(2) ?: return null
         val middlePanel = middlePanelComponent as JPanel
         return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
-    }
-
-    fun appendTestsToClass(
-        testCaseComponents: List<String>,
-        selectedClass: PsiClassWrapper,
-        outputFile: PsiFile,
-    ) {
-        // block document
-        PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(
-            PsiDocumentManager.getInstance(project).getDocument(outputFile as PsiJavaFile)!!,
-        )
-
-        // insert tests to a code
-        testCaseComponents.reversed().forEach {
-            val testMethodCode =
-                JavaTestAnalyzer.extractFirstTestMethodCode(
-                    JavaTestGenerator.formatCode(
-                        project,
-                        it.replace("\r\n", "\n")
-                            .replace("verifyException(", "// verifyException("),
-                        uiContext!!.testGenerationOutput,
-                    ),
-                )
-                    // Fix Windows line separators
-                    .replace("\r\n", "\n")
-
-            PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
-                selectedClass.rBrace!!,
-                testMethodCode,
-            )
-        }
-
-        // insert other info to a code
-        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
-            selectedClass.rBrace!!,
-            uiContext!!.testGenerationOutput.otherInfo + "\n",
-        )
-
-        // insert imports to a code
-        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
-            outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
-            uiContext!!.testGenerationOutput.importsCode.joinToString("\n") + "\n\n",
-        )
-
-        // insert package to a code
-        outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
-            .insertString(
-                0,
-                if (uiContext!!.testGenerationOutput.packageName.isEmpty()) {
-                    ""
-                } else {
-                    "package ${uiContext!!.testGenerationOutput.packageName};\n\n"
-                },
-            )
     }
 
     fun updateEditorForFileUrl(fileUrl: String) {
@@ -340,7 +269,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
         }
     }
 
-    fun createToolWindowTab() {
+    private fun createToolWindowTab() {
         // Remove generated tests tab from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
         contentManager = toolWindowManager!!.contentManager
@@ -362,14 +291,14 @@ class TestCaseDisplayBuilder(private val project: Project) {
         toolWindowManager.show()
     }
 
-    fun closeToolWindow() {
+    private fun closeToolWindow() {
         contentManager?.removeContent(content!!, true)
         ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
         val coverageVisualisationService = project.service<CoverageVisualisationService>()
         coverageVisualisationService.closeToolWindowTab()
     }
 
-    fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
         selectedTestCasePanels.forEach { removeTestCase(it.key) }
         removeAllHighlights()
         closeToolWindow()
