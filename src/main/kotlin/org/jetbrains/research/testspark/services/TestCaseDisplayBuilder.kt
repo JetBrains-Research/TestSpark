@@ -1,149 +1,416 @@
 package org.jetbrains.research.testspark.services
 
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.TextEditor
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiJavaFile
+import com.intellij.refactoring.suggested.startOffset
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.JBColor
+import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.content.Content
+import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManager
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
+import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.TestCasePanelFactory
+import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
+import org.jetbrains.research.testspark.display.java.JavaDisplayUtils
+import org.jetbrains.research.testspark.display.kotlin.KotlinDisplayUtils
+import org.jetbrains.research.testspark.display.template.DisplayUtils
+import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
+import org.jetbrains.research.testspark.testmanager.java.JavaTestGenerator
+import java.awt.BorderLayout
+import java.awt.Color
+import java.awt.Dimension
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JOptionPane
 import javax.swing.JPanel
+import javax.swing.JSeparator
+import javax.swing.SwingConstants
+import kotlin.collections.HashMap
 
-interface TestCaseDisplayBuilder {
+@Service(Service.Level.PROJECT)
+class TestCaseDisplayBuilder(private val project: Project) {
+    private var report: Report? = null
 
-    /**
-     * Fill the panel with the generated test cases. Remove all previously shown test cases.
-     * Add Tests and their names to a List of pairs (used for highlighting)
-     */
-    fun displayTestCases(report: Report, uiContext: UIContext, language: SupportedLanguage)
+    private val unselectedTestCases = HashMap<Int, TestCase>()
 
-    /**
-     * Adds a separator to the allTestCasePanel.
-     */
-    fun addSeparator()
+    private var mainPanel: JPanel = JPanel()
 
-    /**
-     * Highlight the mini-editor in the tool window whose name corresponds with the name of the test provided
-     *
-     * @param name name of the test whose editor should be highlighted
-     */
-    fun highlightTestCase(name: String)
+    private val topButtonsPanelFactory = TopButtonsPanelFactory(project).create(SupportedLanguage.Java)
 
-    /**
-     * Method to open the toolwindow tab with generated tests if not already open.
-     */
-    fun openToolWindowTab()
+    private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
-    /**
-     * Scrolls to the highlighted panel.
-     *
-     * @param myPanel the panel to scroll to
-     */
-    fun scrollToPanel(myPanel: JPanel)
+    private var allTestCasePanel: JPanel = JPanel()
+
+    private var scrollPane: JBScrollPane = JBScrollPane(
+        allTestCasePanel,
+        JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
+    )
+
+    private var testCasePanels: HashMap<String, JPanel> = HashMap()
+
+    private var testsSelected: Int = 0
 
     /**
-     * Removes all coverage highlighting from the editor.
+     * Default color for the editors in the tool window
      */
-    fun removeAllHighlights()
+    private var defaultEditorColor: Color? = null
 
     /**
-     * Reset the provided editors color to the default (initial) one after 10 seconds
-     * @param editor the editor whose color to change
+     * Content Manager to be able to add / remove tabs from tool window
      */
-    fun returnOriginalEditorBackground(editor: EditorTextField)
+    private var contentManager: ContentManager? = null
 
     /**
-     * Highlight a range of editors
-     * @param names list of test names to pass to highlight function
+     * Variable to keep reference to the coverage visualisation content
      */
-    fun highlightCoveredMutants(names: List<String>)
+    private var content: Content? = null
 
-    /**
-     * Show a dialog where the user can select what test class the tests should be applied to,
-     * and apply the selected tests to the test class.
-     */
-    fun applyTests()
+    var uiContext: UIContext? = null
 
-    fun showErrorWindow(message: String)
+    var displayUtils: DisplayUtils? = null
 
-    /**
-     * Retrieve the editor corresponding to a particular test case
-     *
-     * @param testCaseName the name of the test case
-     * @return the editor corresponding to the test case, or null if it does not exist
-     */
-    fun getEditor(testCaseName: String): EditorTextField?
+    init {
+        allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
+        mainPanel.layout = BorderLayout()
 
-    /**
-     * Append the provided test cases to the provided class.
-     *
-     * @param testCaseComponents the test cases to be appended
-     * @param selectedClass the class which the test cases should be appended to
-     * @param outputFile the output file for tests
-     */
-    fun appendTestsToClass(testCaseComponents: List<String>, selectedClass: PsiClassWrapper, outputFile: PsiFile)
+        mainPanel.add(topButtonsPanelFactory.getPanel(), BorderLayout.NORTH)
+        mainPanel.add(scrollPane, BorderLayout.CENTER)
 
-    /**
-     * Utility function that returns the editor for a specific file url,
-     * in case it is opened in the IDE
-     */
-    fun updateEditorForFileUrl(fileUrl: String)
+        applyButton.isOpaque = false
+        applyButton.isContentAreaFilled = false
+        mainPanel.add(applyButton, BorderLayout.SOUTH)
 
-    /**
-     * Creates a new toolWindow tab for the coverage visualisation.
-     */
-    fun createToolWindowTab()
+        applyButton.addActionListener { applyTests() }
+    }
 
-    /**
-     * Closes the tool window and destroys the content of the tab.
-     */
-    fun closeToolWindow()
+    fun displayTestCases(report: Report, uiContext: UIContext, language: SupportedLanguage) {
+        this.report = report
+        this.uiContext = uiContext
 
-    /**
-     * Removes the selected tests from the cache, removes all the highlights from the editor and closes the tool window.
-     * This function is called when the user clicks "Apply to test suite" button,
-     *  and it is also called with all test cases as selected when the user clicks "Remove All" button.
-     *
-     * @param selectedTestCasePanels the panels of the selected tests
-     */
-    fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>)
+        displayUtils = when (language) {
+            SupportedLanguage.Java -> {
+                JavaDisplayUtils()
+            }
 
-    fun clear()
+            SupportedLanguage.Kotlin -> {
+                KotlinDisplayUtils()
+            }
+        }
 
-    /**
-     * A helper method to remove a test case from the cache and from the UI.
-     *
-     * @param testCaseName the name of the test
-     */
-    fun removeTestCase(testCaseName: String)
+        val editor = project.service<EditorService>().editor!!
 
-    /**
-     * Updates the user interface of the tool window.
-     *
-     * This method updates the UI of the tool window tab by calling the updateUI
-     * method of the allTestCasePanel object and the updateTopLabels method
-     * of the topButtonsPanel object. It also checks if there are no more tests remaining
-     * and closes the tool window if that is the case.
-     */
-    fun updateUI()
+        allTestCasePanel.removeAll()
+        testCasePanels.clear()
 
-    /**
-     * Retrieves the list of test case panels.
-     *
-     * @return The list of test case panels.
-     */
-    fun getTestCasePanels(): HashMap<String, JPanel>
+        addSeparator()
 
-    /**
-     * Retrieves the currently selected tests.
-     *
-     * @return The list of tests currently selected.
-     */
-    fun getTestsSelected(): Int
+        // TestCasePanelFactories array
+        val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
 
-    /**
-     * Sets the number of tests selected.
-     *
-     * @param testsSelected The number of tests selected.
-     */
-    fun setTestsSelected(testsSelected: Int)
+        report.testCaseList.values.forEach {
+            val testCase = it
+            val testCasePanel = JPanel()
+            testCasePanel.layout = BorderLayout()
+
+            // Add a checkbox to select the test
+            val checkbox = JCheckBox()
+            checkbox.isSelected = true
+            checkbox.addItemListener {
+                // Update the number of selected tests
+                testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
+
+                if (checkbox.isSelected) {
+                    ReportUpdater.selectTestCase(project, report, unselectedTestCases, testCase.id)
+                } else {
+                    ReportUpdater.unselectTestCase(project, report, unselectedTestCases, testCase.id)
+                }
+
+                updateUI()
+            }
+            testCasePanel.add(checkbox, BorderLayout.WEST)
+
+            val testCasePanelFactory =
+                TestCasePanelFactory(project, language, testCase, editor, checkbox, uiContext, report)
+            testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
+            testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
+            testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+
+            testCasePanelFactories.add(testCasePanelFactory)
+
+            testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
+
+            // Add panel to parent panel
+            testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
+            allTestCasePanel.add(testCasePanel)
+            addSeparator()
+            testCasePanels[testCase.testName] = testCasePanel
+        }
+
+        // Update the number of selected tests (all tests are selected by default)
+        testsSelected = testCasePanels.size
+
+        topButtonsPanelFactory.setTestCasePanelFactoriesArray(testCasePanelFactories)
+        topButtonsPanelFactory.updateTopLabels()
+
+        createToolWindowTab()
+    }
+
+    fun addSeparator() {
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
+        allTestCasePanel.add(JSeparator(SwingConstants.HORIZONTAL))
+        allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
+    }
+
+    fun highlightTestCase(name: String) {
+        val myPanel = testCasePanels[name] ?: return
+        openToolWindowTab()
+        scrollToPanel(myPanel)
+
+        val editor = getEditor(name) ?: return
+        val settingsProjectState = project.service<PluginSettingsService>().state
+        val highlightColor =
+            JBColor(
+                PluginSettingsBundle.get("colorName"),
+                Color(
+                    settingsProjectState.colorRed,
+                    settingsProjectState.colorGreen,
+                    settingsProjectState.colorBlue,
+                    30,
+                ),
+            )
+        if (editor.background.equals(highlightColor)) return
+        defaultEditorColor = editor.background
+        editor.background = highlightColor
+        returnOriginalEditorBackground(editor)
+    }
+
+    fun openToolWindowTab() {
+        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
+        contentManager = toolWindowManager!!.contentManager
+        if (content != null) {
+            toolWindowManager.show()
+            toolWindowManager.contentManager.setSelectedContent(content!!)
+        }
+    }
+
+    fun scrollToPanel(myPanel: JPanel) {
+        var sum = 0
+        for (component in allTestCasePanel.components) {
+            if (component == myPanel) {
+                break
+            } else {
+                sum += component.height
+            }
+        }
+        val scroll = scrollPane.verticalScrollBar
+        scroll.value = (scroll.minimum + scroll.maximum) * sum / allTestCasePanel.height
+    }
+
+    fun removeAllHighlights() {
+        project.service<EditorService>().editor?.markupModel?.removeAllHighlighters()
+    }
+
+    fun returnOriginalEditorBackground(editor: EditorTextField) {
+        Thread {
+            Thread.sleep(10000)
+            editor.background = defaultEditorColor
+        }.start()
+    }
+
+    fun highlightCoveredMutants(names: List<String>) {
+        names.forEach {
+            highlightTestCase(it)
+        }
+    }
+
+    fun applyTests() {
+        // Filter the selected test cases
+        val selectedTestCasePanels = testCasePanels.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+        val selectedTestCases = selectedTestCasePanels.map { it.key }
+
+        // Get the test case components (source code of the tests)
+        val testCaseComponents = selectedTestCases
+            .map { getEditor(it)!! }
+            .map { it.document.text }
+
+        displayUtils!!.applyTests(project, uiContext, testCaseComponents)
+
+        // Remove the selected test cases from the cache and the tool window UI
+        removeSelectedTestCases(selectedTestCasePanels)
+    }
+
+    fun showErrorWindow(message: String) {
+        JOptionPane.showMessageDialog(
+            null,
+            message,
+            PluginLabelsBundle.get("errorWindowTitle"),
+            JOptionPane.ERROR_MESSAGE,
+        )
+    }
+
+    fun getEditor(testCaseName: String): EditorTextField? {
+        val middlePanelComponent = testCasePanels[testCaseName]?.getComponent(2) ?: return null
+        val middlePanel = middlePanelComponent as JPanel
+        return (middlePanel.getComponent(1) as JBScrollPane).viewport.view as EditorTextField
+    }
+
+    fun appendTestsToClass(
+        testCaseComponents: List<String>,
+        selectedClass: PsiClassWrapper,
+        outputFile: PsiFile,
+    ) {
+        // block document
+        PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(
+            PsiDocumentManager.getInstance(project).getDocument(outputFile as PsiJavaFile)!!,
+        )
+
+        // insert tests to a code
+        testCaseComponents.reversed().forEach {
+            val testMethodCode =
+                JavaTestAnalyzer.extractFirstTestMethodCode(
+                    JavaTestGenerator.formatCode(
+                        project,
+                        it.replace("\r\n", "\n")
+                            .replace("verifyException(", "// verifyException("),
+                        uiContext!!.testGenerationOutput,
+                    ),
+                )
+                    // Fix Windows line separators
+                    .replace("\r\n", "\n")
+
+            PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+                selectedClass.rBrace!!,
+                testMethodCode,
+            )
+        }
+
+        // insert other info to a code
+        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+            selectedClass.rBrace!!,
+            uiContext!!.testGenerationOutput.otherInfo + "\n",
+        )
+
+        // insert imports to a code
+        PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
+            outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
+            uiContext!!.testGenerationOutput.importsCode.joinToString("\n") + "\n\n",
+        )
+
+        // insert package to a code
+        outputFile.packageStatement ?: PsiDocumentManager.getInstance(project).getDocument(outputFile)!!
+            .insertString(
+                0,
+                if (uiContext!!.testGenerationOutput.packageName.isEmpty()) {
+                    ""
+                } else {
+                    "package ${uiContext!!.testGenerationOutput.packageName};\n\n"
+                },
+            )
+    }
+
+    fun updateEditorForFileUrl(fileUrl: String) {
+        val documentManager = FileDocumentManager.getInstance()
+        // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
+        FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
+            val currentFile = documentManager.getFile(it.document)
+            if (currentFile != null) {
+                if (currentFile.presentableUrl == fileUrl) {
+                    project.service<EditorService>().editor = it
+                }
+            }
+        }
+    }
+
+    fun createToolWindowTab() {
+        // Remove generated tests tab from content manager if necessary
+        val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
+        contentManager = toolWindowManager!!.contentManager
+        if (content != null) {
+            contentManager!!.removeContent(content!!, true)
+        }
+
+        // If there is no generated tests tab, make it
+        val contentFactory: ContentFactory = ContentFactory.getInstance()
+        content = contentFactory.createContent(
+            mainPanel,
+            PluginLabelsBundle.get("generatedTests"),
+            true,
+        )
+        contentManager!!.addContent(content!!)
+
+        // Focus on generated tests tab and open toolWindow if not opened already
+        contentManager!!.setSelectedContent(content!!)
+        toolWindowManager.show()
+    }
+
+    fun closeToolWindow() {
+        contentManager?.removeContent(content!!, true)
+        ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
+        val coverageVisualisationService = project.service<CoverageVisualisationService>()
+        coverageVisualisationService.closeToolWindowTab()
+    }
+
+    fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
+        selectedTestCasePanels.forEach { removeTestCase(it.key) }
+        removeAllHighlights()
+        closeToolWindow()
+    }
+
+    fun clear() {
+        // Remove the tests
+        val testCasePanelsToRemove = testCasePanels.toMap()
+        removeSelectedTestCases(testCasePanelsToRemove)
+
+        topButtonsPanelFactory.clear()
+    }
+
+    fun removeTestCase(testCaseName: String) {
+        // Update the number of selected test cases if necessary
+        if ((testCasePanels[testCaseName]!!.getComponent(0) as JCheckBox).isSelected) {
+            testsSelected--
+        }
+
+        // Remove the test panel from the UI
+        allTestCasePanel.remove(testCasePanels[testCaseName])
+
+        // Remove the test panel
+        testCasePanels.remove(testCaseName)
+    }
+
+    fun updateUI() {
+        // Update the UI of the tool window tab
+        allTestCasePanel.updateUI()
+
+        topButtonsPanelFactory.updateTopLabels()
+
+        // If no more tests are remaining, close the tool window
+        if (testCasePanels.size == 0) closeToolWindow()
+    }
+
+    fun getTestCasePanels() = testCasePanels
+
+    fun getTestsSelected() = testsSelected
+
+    fun setTestsSelected(testsSelected: Int) {
+        this.testsSelected = testsSelected
+    }
 }

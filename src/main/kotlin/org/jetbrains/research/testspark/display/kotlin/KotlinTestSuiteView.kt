@@ -9,6 +9,8 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.strategies.TopButtonsPanelStrategy
+import org.jetbrains.research.testspark.display.template.TestSuiteView
+import org.jetbrains.research.testspark.display.utils.IconButtonCreator
 import java.awt.Dimension
 import java.util.LinkedList
 import java.util.Queue
@@ -18,8 +20,6 @@ import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
-import org.jetbrains.research.testspark.display.template.TestSuiteView
-import org.jetbrains.research.testspark.display.utils.IconButtonCreator
 
 class KotlinTestSuiteView(private val project: Project) : TestSuiteView {
     private val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
@@ -39,7 +39,7 @@ class KotlinTestSuiteView(private val project: Project) : TestSuiteView {
     private var testsPassedLabel: JLabel = JLabel(testsPassedText)
 
     override fun updateTopLabels() {
-        TopButtonsPanelStrategy.updateTopKotlinLabels(
+        TopButtonsPanelStrategy.updateTopLabels(
             testCasePanelFactories,
             testsSelectedLabel,
             testsSelectedText,
@@ -51,11 +51,11 @@ class KotlinTestSuiteView(private val project: Project) : TestSuiteView {
     }
 
     override fun toggleAllCheckboxes(selected: Boolean) {
-        TopButtonsPanelStrategy.toggleAllKotlinCheckboxes(selected, project)
+        TopButtonsPanelStrategy.toggleAllCheckboxes(selected, project)
     }
 
     override fun removeAllTestCases() {
-        TopButtonsPanelStrategy.removeAllKotlinTestCases(project)
+        TopButtonsPanelStrategy.removeAllTestCases(project)
     }
 
     override fun runAllTestCases() {

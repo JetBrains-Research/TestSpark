@@ -11,7 +11,6 @@ import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -22,8 +21,6 @@ import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayBuilder
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayBuilder
-import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayBuilder
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -108,14 +105,13 @@ class Pipeline(
                 override fun onFinished() {
                     super.onFinished()
                     testGenerationController.finished()
-                    when (psiHelper.language) {
-                        SupportedLanguage.Java -> uiContext?.let {
-                            displayTestCase<JavaTestCaseDisplayBuilder>(it)
-                        }
 
-                        SupportedLanguage.Kotlin -> uiContext?.let {
-                            displayTestCase<KotlinTestCaseDisplayBuilder>(it)
-                        }
+                    project.service<TestCaseDisplayBuilder>().updateEditorForFileUrl(uiContext!!.testGenerationOutput.fileUrl)
+
+                    if (project.service<EditorService>().editor != null) {
+                        val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
+                        project.service<TestCaseDisplayBuilder>().displayTestCases(report, uiContext!!, psiHelper.language)
+                        project.service<CoverageVisualisationService>().showCoverage(report)
                     }
                 }
             })
@@ -123,22 +119,10 @@ class Pipeline(
 
     private fun clear(project: Project) { // should be removed totally!
         testGenerationController.errorMonitor.clear()
-        when (psiHelper.language) {
-            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayBuilder>().clear()
-            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayBuilder>().clear()
-        }
+
+        project.service<TestCaseDisplayBuilder>().clear()
 
         project.service<CoverageVisualisationService>().clear()
         project.service<TestsExecutionResultService>().clear()
-    }
-
-    private inline fun <reified Service : TestCaseDisplayBuilder> displayTestCase(ctx: UIContext) {
-        project.service<Service>().updateEditorForFileUrl(ctx.testGenerationOutput.fileUrl)
-
-        if (project.service<EditorService>().editor != null) {
-            val report = ctx.testGenerationOutput.testGenerationResultList[0]!!
-            project.service<Service>().displayTestCases(report, ctx, psiHelper.language)
-            project.service<CoverageVisualisationService>().showCoverage(report)
-        }
     }
 }

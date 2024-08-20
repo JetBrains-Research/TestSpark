@@ -17,7 +17,7 @@ object TestCompilerFactory {
     ): TestCompiler {
         val javaSDKHomePath =
             javaHomeDirectory ?: ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path
-            ?: throw RuntimeException("Java SDK not configured for the project.")
+                ?: throw RuntimeException("Java SDK not configured for the project.")
 
         val libraryPaths = LibraryPathsProvider.getTestCompilationLibraryPaths()
         val junitLibraryPaths = LibraryPathsProvider.getJUnitLibraryPaths(junitVersion)

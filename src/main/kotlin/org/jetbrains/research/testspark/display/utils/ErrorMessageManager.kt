@@ -1,9 +1,12 @@
 package org.jetbrains.research.testspark.display.utils
 
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import javax.swing.JOptionPane
+
 /**
  * The ErrorMessageNormalizer class is responsible for normalizing error messages by inserting "<br/>" tags after every block size characters.
  */
-object ErrorMessageNormalizer {
+object ErrorMessageManager {
     const val BLOCK_SIZE = 100
 
     const val SEPARATOR = "<br/>"
@@ -42,5 +45,14 @@ object ErrorMessageNormalizer {
         }
 
         return builder.toString()
+    }
+
+    fun showErrorWindow(message: String) {
+        JOptionPane.showMessageDialog(
+            null,
+            message,
+            PluginLabelsBundle.get("errorWindowTitle"),
+            JOptionPane.ERROR_MESSAGE,
+        )
     }
 }

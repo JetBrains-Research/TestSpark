@@ -1,9 +1,9 @@
 package org.jetbrains.research.testspark.testmanager
 
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
-import org.jetbrains.research.testspark.testmanager.template.TestAnalyzer
 import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
 import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer
+import org.jetbrains.research.testspark.testmanager.template.TestAnalyzer
 
 object TestAnalyzerFactory {
     /**

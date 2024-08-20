@@ -30,11 +30,14 @@ import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
+import org.jetbrains.research.testspark.display.utils.IconButtonCreator
+import org.jetbrains.research.testspark.display.utils.ModifiedLinesGetter
+import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.services.TestCaseDisplayBuilder
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayBuilder
-import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayBuilder
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.testmanager.TestAnalyzerFactory
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
@@ -57,10 +60,6 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import org.jetbrains.research.testspark.display.utils.ErrorMessageNormalizer
-import org.jetbrains.research.testspark.display.utils.IconButtonCreator
-import org.jetbrains.research.testspark.display.utils.ModifiedLinesGetter
-import org.jetbrains.research.testspark.display.utils.ReportUpdater
 
 class TestCasePanelFactory(
     private val project: Project,
@@ -199,10 +198,7 @@ class TestCasePanelFactory(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    when (language) {
-                        SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayBuilder>().getEditor(testCase.testName)!!.document.text
-                        SupportedLanguage.Java -> project.service<JavaTestCaseDisplayBuilder>().getEditor(testCase.testName)!!.document.text
-                    },
+                    project.service<TestCaseDisplayBuilder>().getEditor(testCase.testName)!!.document.text,
                 ),
                 null,
             )
@@ -329,7 +325,7 @@ class TestCasePanelFactory(
             errorLabel.isVisible = false
         } else {
             errorLabel.isVisible = true
-            errorLabel.toolTipText = ErrorMessageNormalizer.normalize(error)
+            errorLabel.toolTipText = ErrorMessageManager.normalize(error)
         }
     }
 
@@ -395,10 +391,7 @@ class TestCasePanelFactory(
         }
 
         ReportUpdater.updateTestCase(project, report, testCase)
-        when (language) {
-            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayBuilder>().updateUI()
-            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayBuilder>().updateUI()
-        }
+        project.service<TestCaseDisplayBuilder>().updateUI()
     }
 
     /**
@@ -606,23 +599,14 @@ class TestCasePanelFactory(
      */
     private fun remove() {
         // Remove the test case from the cache
-        when (language) {
-            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayBuilder>().removeTestCase(testCase.testName)
-
-            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayBuilder>().removeTestCase(testCase.testName)
-        }
+        project.service<TestCaseDisplayBuilder>().removeTestCase(testCase.testName)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
         ReportUpdater.removeTestCase(project, report, testCase)
-        when (language) {
-            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayBuilder>()
-                .updateUI()
 
-            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayBuilder>()
-                .updateUI()
-        }
+        project.service<TestCaseDisplayBuilder>().updateUI()
     }
 
     /**
