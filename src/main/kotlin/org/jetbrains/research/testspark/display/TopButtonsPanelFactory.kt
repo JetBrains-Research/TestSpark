@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.display
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -9,6 +10,7 @@ import java.util.*
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
+import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
@@ -17,8 +19,8 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.display.strategies.TopButtonsPanelStrategy
 import org.jetbrains.research.testspark.display.utils.IconButtonCreator
+import org.jetbrains.research.testspark.services.TestCaseDisplayBuilder
 
 class TopButtonsPanelFactory(private val project: Project) {
     private val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
@@ -41,15 +43,29 @@ class TopButtonsPanelFactory(private val project: Project) {
      * Updates the labels.
      */
     fun updateTopLabels() {
-        TopButtonsPanelStrategy.updateTopLabels(
-            testCasePanelFactories,
-            testsSelectedLabel,
+        var numberOfPassedTests = 0
+        for (testCasePanelFactory in testCasePanelFactories) {
+            if (testCasePanelFactory.isRemoved()) continue
+            val error = testCasePanelFactory.getError()
+            if ((error is String) && error.isEmpty()) {
+                numberOfPassedTests++
+            }
+        }
+        testsSelectedLabel.text = String.format(
             testsSelectedText,
-            project,
-            testsPassedLabel,
-            testsPassedText,
-            runAllButton,
+            project.service<TestCaseDisplayBuilder>().getTestsSelected(),
+            project.service<TestCaseDisplayBuilder>().getTestCasePanels().size,
         )
+        testsPassedLabel.text =
+            String.format(
+                testsPassedText,
+                numberOfPassedTests,
+                project.service<TestCaseDisplayBuilder>().getTestCasePanels().size,
+            )
+        runAllButton.isEnabled = false
+        for (testCasePanelFactory in testCasePanelFactories) {
+            runAllButton.isEnabled = runAllButton.isEnabled || testCasePanelFactory.isRunEnabled()
+        }
     }
 
     /**
@@ -58,15 +74,34 @@ class TopButtonsPanelFactory(private val project: Project) {
      *
      *  @param selected whether the checkboxes have to be selected or not
      */
-    fun toggleAllCheckboxes(selected: Boolean) {
-        TopButtonsPanelStrategy.toggleAllCheckboxes(selected, project)
+    private fun toggleAllCheckboxes(selected: Boolean) {
+        project.service<TestCaseDisplayBuilder>().getTestCasePanels().forEach { (_, jPanel) ->
+            val checkBox = jPanel.getComponent(0) as JCheckBox
+            checkBox.isSelected = selected
+        }
+        project.service<TestCaseDisplayBuilder>()
+            .setTestsSelected(
+                if (selected) project.service<TestCaseDisplayBuilder>().getTestCasePanels().size else 0,
+            )
     }
 
     /**
      * Removes all test cases from the cache and tool window UI.
      */
-    fun removeAllTestCases() {
-        TopButtonsPanelStrategy.removeAllTestCases(project)
+    private fun removeAllTestCases() {
+        // Ask the user for the confirmation
+        val choice = JOptionPane.showConfirmDialog(
+            null,
+            PluginMessagesBundle.get("removeAllMessage"),
+            PluginMessagesBundle.get("confirmationTitle"),
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+        )
+
+        // Cancel the operation if the user did not press "Yes"
+        if (choice == JOptionPane.NO_OPTION) return
+
+        project.service<TestCaseDisplayBuilder>().clear()
     }
 
     /**
@@ -75,7 +110,7 @@ class TopButtonsPanelFactory(private val project: Project) {
      * This method presents a caution message to the user and asks for confirmation before executing the test cases.
      * If the user confirms, it iterates through each test case panel factory and runs the corresponding test.
      */
-    fun runAllTestCases() {
+    private fun runAllTestCases() {
         val choice = JOptionPane.showConfirmDialog(
             null,
             PluginMessagesBundle.get("runCautionMessage"),
