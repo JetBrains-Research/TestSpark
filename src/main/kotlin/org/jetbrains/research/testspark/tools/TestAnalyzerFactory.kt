@@ -1,7 +1,7 @@
 package org.jetbrains.research.testspark.tools
 
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
-import org.jetbrains.research.testspark.helpers.TestAnalyzer
+import org.jetbrains.research.testspark.helpers.template.TestAnalyzer
 import org.jetbrains.research.testspark.helpers.java.JavaTestAnalyzer
 import org.jetbrains.research.testspark.helpers.kotlin.KotlinTestAnalyzer
 

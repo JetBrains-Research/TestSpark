@@ -18,6 +18,7 @@ import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
+import org.jetbrains.research.testspark.display.template.TestSuiteView
 import org.jetbrains.research.testspark.display.utils.IconButtonCreator
 
 class KotlinTestSuiteView(private val project: Project) : TestSuiteView {

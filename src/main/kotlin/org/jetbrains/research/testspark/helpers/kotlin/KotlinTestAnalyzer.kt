@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.helpers.kotlin
 
-import org.jetbrains.research.testspark.helpers.TestAnalyzer
+import org.jetbrains.research.testspark.helpers.template.TestAnalyzer
 
 object KotlinTestAnalyzer : TestAnalyzer {
 

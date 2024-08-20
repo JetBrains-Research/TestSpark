@@ -9,7 +9,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.helpers.TestGenerator
+import org.jetbrains.research.testspark.helpers.template.TestGenerator
 import java.io.File
 
 object JavaTestGenerator : TestGenerator {

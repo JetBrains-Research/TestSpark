@@ -5,7 +5,7 @@ import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
-import org.jetbrains.research.testspark.helpers.TestAnalyzer
+import org.jetbrains.research.testspark.helpers.template.TestAnalyzer
 
 object JavaTestAnalyzer : TestAnalyzer {
 

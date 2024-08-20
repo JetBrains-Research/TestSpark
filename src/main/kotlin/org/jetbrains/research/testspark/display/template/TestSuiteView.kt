@@ -1,6 +1,7 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.template
 
 import javax.swing.JPanel
+import org.jetbrains.research.testspark.display.TestCasePanelFactory
 
 interface TestSuiteView {
     /**
