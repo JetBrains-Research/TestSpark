@@ -36,7 +36,7 @@ import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
 import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.TestAnalyzerFactory
+import org.jetbrains.research.testspark.testmanager.TestAnalyzerFactory
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.ToolUtils

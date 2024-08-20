@@ -1,11 +1,11 @@
-package org.jetbrains.research.testspark.helpers.java
+package org.jetbrains.research.testspark.testmanager.java
 
 import com.github.javaparser.ParseProblemException
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
-import org.jetbrains.research.testspark.helpers.template.TestAnalyzer
+import org.jetbrains.research.testspark.testmanager.template.TestAnalyzer
 
 object JavaTestAnalyzer : TestAnalyzer {
 

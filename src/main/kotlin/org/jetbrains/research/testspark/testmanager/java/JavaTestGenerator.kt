@@ -1,5 +1,6 @@
-package org.jetbrains.research.testspark.helpers.kotlin
+package org.jetbrains.research.testspark.testmanager.java
 
+import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -7,12 +8,11 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
-import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.helpers.template.TestGenerator
+import org.jetbrains.research.testspark.testmanager.template.TestGenerator
 import java.io.File
 
-object KotlinTestGenerator : TestGenerator {
+object JavaTestGenerator : TestGenerator {
 
     private val log = Logger.getInstance(this::class.java)
 
@@ -26,10 +26,7 @@ object KotlinTestGenerator : TestGenerator {
         otherInfo: String,
         testGenerationData: TestGenerationData,
     ): String {
-        log.debug("[KotlinClassBuilderHelper] Generate code for $className")
-
-        var testFullText =
-            printUpperPart(className, imports, packageString, runWith, otherInfo)
+        var testFullText = printUpperPart(className, imports, packageString, runWith, otherInfo)
 
         // Add each test (exclude expected exception)
         testFullText += body
@@ -39,17 +36,24 @@ object KotlinTestGenerator : TestGenerator {
 
         testFullText.replace("\r\n", "\n")
 
-        // Reduce the number of line breaks for better readability
+        /**
+         * for better readability and make the tests shorter, we reduce the number of line breaks:
+         *  when we have three or more sequential \n, reduce it to two.
+         */
         return formatCode(project, Regex("\n\n\n(?:\n)*").replace(testFullText, "\n\n"), testGenerationData)
     }
 
     override fun formatCode(project: Project, code: String, generatedTestData: TestGenerationData): String {
         var result = ""
         WriteCommandAction.runWriteCommandAction(project) {
-            val fileName = generatedTestData.resultPath + File.separatorChar + "Formatted.kt"
-            // Create a temporary PsiFile
+            val fileName = generatedTestData.resultPath + File.separatorChar + "Formatted.java"
+            // create a temporary PsiFile
             val psiFile: PsiFile = PsiFileFactory.getInstance(project)
-                .createFileFromText(fileName, KotlinLanguage.INSTANCE, code)
+                .createFileFromText(
+                    fileName,
+                    JavaLanguage.INSTANCE,
+                    code,
+                )
 
             CodeStyleManager.getInstance(project).reformat(psiFile)
 
@@ -58,7 +62,7 @@ object KotlinTestGenerator : TestGenerator {
 
             File(fileName).delete()
         }
-        log.info("Formatted result class: $result")
+
         return result
     }
 
@@ -73,23 +77,22 @@ object KotlinTestGenerator : TestGenerator {
 
         // Add package
         if (packageString.isNotBlank()) {
-            testText += "package $packageString\n"
+            testText += "package $packageString;\n"
         }
 
-        // Add imports
+        // add imports
         imports.forEach { importedElement ->
             testText += "$importedElement\n"
         }
 
         testText += "\n"
 
-        // Add runWith if exists
+        // add runWith if exists
         if (runWith.isNotBlank()) {
-            testText += "@RunWith($runWith::class)\n"
+            testText += "@RunWith($runWith)\n"
         }
-
-        // Open the test class
-        testText += "class $className {\n\n"
+        // open the test class
+        testText += "public class $className {\n\n"
 
         // Add other presets (annotations, non-test functions)
         if (otherInfo.isNotBlank()) {

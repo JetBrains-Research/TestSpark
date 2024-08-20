@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.template
+package org.jetbrains.research.testspark.testmanager.template
 
 /**
  * Interface for retrieving information from test class code.

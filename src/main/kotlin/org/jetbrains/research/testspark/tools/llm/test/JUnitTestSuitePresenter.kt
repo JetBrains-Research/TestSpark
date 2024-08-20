@@ -5,7 +5,7 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.tools.TestGeneratorFactory
+import org.jetbrains.research.testspark.testmanager.TestGeneratorFactory
 
 class JUnitTestSuitePresenter(
     private val project: Project,

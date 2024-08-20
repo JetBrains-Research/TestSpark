@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.helpers.template
+package org.jetbrains.research.testspark.testmanager.template
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.data.TestGenerationData

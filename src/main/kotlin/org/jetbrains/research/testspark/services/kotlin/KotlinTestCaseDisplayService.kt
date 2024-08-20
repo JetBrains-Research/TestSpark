@@ -39,8 +39,8 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestCasePanelFactory
 import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.display.utils.ReportUpdater
-import org.jetbrains.research.testspark.helpers.kotlin.KotlinTestAnalyzer
-import org.jetbrains.research.testspark.helpers.kotlin.KotlinTestGenerator
+import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer
+import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestGenerator
 import org.jetbrains.research.testspark.kotlin.KotlinPsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.services.CoverageVisualisationService

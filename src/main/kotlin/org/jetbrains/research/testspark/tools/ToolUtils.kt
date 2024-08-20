@@ -16,6 +16,7 @@ import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import java.io.File
+import org.jetbrains.research.testspark.testmanager.TestGeneratorFactory
 
 object ToolUtils {
     val sep = File.separatorChar

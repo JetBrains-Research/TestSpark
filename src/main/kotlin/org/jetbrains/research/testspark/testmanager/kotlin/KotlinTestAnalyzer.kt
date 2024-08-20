@@ -1,6 +1,6 @@
-package org.jetbrains.research.testspark.helpers.kotlin
+package org.jetbrains.research.testspark.testmanager.kotlin
 
-import org.jetbrains.research.testspark.helpers.template.TestAnalyzer
+import org.jetbrains.research.testspark.testmanager.template.TestAnalyzer
 
 object KotlinTestAnalyzer : TestAnalyzer {
 
