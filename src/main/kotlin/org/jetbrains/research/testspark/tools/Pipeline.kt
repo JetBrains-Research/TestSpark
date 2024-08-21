@@ -2,6 +2,9 @@ package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -15,10 +18,10 @@ import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.services.EditorService
-import org.jetbrains.research.testspark.services.TestCaseDisplayBuilder
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
@@ -42,6 +45,8 @@ class Pipeline(
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
+
+    val testSparkDisplayBuilder = TestSparkDisplayBuilder()
 
     init {
 
@@ -105,20 +110,39 @@ class Pipeline(
                     super.onFinished()
                     testGenerationController.finished()
 
-                    project.service<TestCaseDisplayBuilder>().updateEditorForFileUrl(uiContext!!.testGenerationOutput.fileUrl)
+                    updateEditorForFileUrl(uiContext!!.testGenerationOutput.fileUrl)
 
                     if (project.service<EditorService>().editor != null) {
                         val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
-                        project.service<TestCaseDisplayBuilder>().displayTestCases(report, uiContext!!, psiHelper.language)
+                        testSparkDisplayBuilder.display(
+                            report,
+                            project.service<EditorService>().editor!!,
+                            uiContext!!,
+                            psiHelper.language,
+                            project,
+                        )
                     }
                 }
             })
     }
 
+    private fun updateEditorForFileUrl(fileUrl: String) {
+        val documentManager = FileDocumentManager.getInstance()
+        // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
+        FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
+            val currentFile = documentManager.getFile(it.document)
+            if (currentFile != null) {
+                if (currentFile.presentableUrl == fileUrl) {
+                    project.service<EditorService>().editor = it
+                }
+            }
+        }
+    }
+
     private fun clear(project: Project) { // should be removed totally!
         testGenerationController.errorMonitor.clear()
 
-        project.service<TestCaseDisplayBuilder>().clear()
+        testSparkDisplayBuilder.clear()
 
         project.service<TestsExecutionResultService>().clear()
     }

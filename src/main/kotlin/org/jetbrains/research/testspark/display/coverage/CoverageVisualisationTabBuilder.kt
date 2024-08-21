@@ -18,15 +18,19 @@ import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
+import org.jetbrains.research.testspark.display.generatedTests.GeneratedTestsTabData
+import org.jetbrains.research.testspark.services.EditorService
+import org.jetbrains.research.testspark.services.PluginSettingsService
 import java.awt.Color
 import java.awt.Dimension
 import javax.swing.JScrollPane
 import javax.swing.table.AbstractTableModel
 import kotlin.math.roundToInt
-import org.jetbrains.research.testspark.services.EditorService
-import org.jetbrains.research.testspark.services.PluginSettingsService
 
-class CoverageVisualisationTabBuilder(private val project: Project) {
+class CoverageVisualisationTabBuilder(
+    private val project: Project,
+    editor: Editor,
+) {
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -71,7 +75,7 @@ class CoverageVisualisationTabBuilder(private val project: Project) {
      *
      * @param testReport the generated tests summary
      */
-    fun showCoverage(testReport: Report) {
+    fun show(testReport: Report, generatedTestsTabData: GeneratedTestsTabData) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
         createToolWindowTab()
@@ -80,6 +84,7 @@ class CoverageVisualisationTabBuilder(private val project: Project) {
             testReport.allCoveredLines,
             testReport.testCaseList.values.map { it.id }.toHashSet(),
             testReport,
+            generatedTestsTabData,
         )
     }
 
@@ -91,10 +96,11 @@ class CoverageVisualisationTabBuilder(private val project: Project) {
      * @param testReport report used for gutter information
      * @param selectedTests hash set of selected test names
      */
-    fun updateCoverage(
+    private fun updateCoverage(
         linesToCover: Set<Int>,
         selectedTests: HashSet<Int>,
         testReport: Report,
+        generatedTestsTabData: GeneratedTestsTabData,
     ) {
         currentHighlightedData =
             HighlightedData(linesToCover, selectedTests, testReport, project.service<EditorService>().editor!!)
@@ -165,6 +171,7 @@ class CoverageVisualisationTabBuilder(private val project: Project) {
                     mutationNotCoveredLine,
                     mapMutantsToTests,
                     project,
+                    generatedTestsTabData,
                 )
             }
         }

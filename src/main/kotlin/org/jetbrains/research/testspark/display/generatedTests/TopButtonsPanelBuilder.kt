@@ -1,10 +1,15 @@
 package org.jetbrains.research.testspark.display.generatedTests
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
+import org.jetbrains.research.testspark.display.utils.IconButtonCreator
 import java.awt.Dimension
 import java.util.*
 import javax.swing.Box
@@ -14,18 +19,8 @@ import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
-import kotlin.collections.ArrayList
-import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
-import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
-import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
-import org.jetbrains.research.testspark.display.utils.IconButtonCreator
-import org.jetbrains.research.testspark.services.TestCaseDisplayBuilder
 
-class TopButtonsPanelBuilder(private val project: Project) {
-    private val testCasePanelFactories = arrayListOf<TestCasePanelBuilder>()
-
+class TopButtonsPanelBuilder {
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
         IconButtonCreator.getButton(TestSparkIcons.selectAll, PluginLabelsBundle.get("selectAllTip"))
@@ -43,9 +38,9 @@ class TopButtonsPanelBuilder(private val project: Project) {
     /**
      * Updates the labels.
      */
-    fun updateTopLabels() {
+    fun update(generatedTestsTabData: GeneratedTestsTabData) {
         var numberOfPassedTests = 0
-        for (testCasePanelFactory in testCasePanelFactories) {
+        for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
             if (testCasePanelFactory.isRemoved()) continue
             val error = testCasePanelFactory.getError()
             if ((error is String) && error.isEmpty()) {
@@ -54,20 +49,22 @@ class TopButtonsPanelBuilder(private val project: Project) {
         }
         testsSelectedLabel.text = String.format(
             testsSelectedText,
-            project.service<TestCaseDisplayBuilder>().getTestsSelected(),
-            project.service<TestCaseDisplayBuilder>().getTestCasePanels().size,
+            generatedTestsTabData.testsSelected,
+            generatedTestsTabData.testCaseNameToPanel.size,
         )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 numberOfPassedTests,
-                project.service<TestCaseDisplayBuilder>().getTestCasePanels().size,
+                generatedTestsTabData.testCaseNameToPanel.size,
             )
         runAllButton.isEnabled = false
-        for (testCasePanelFactory in testCasePanelFactories) {
+        for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
             runAllButton.isEnabled = runAllButton.isEnabled || testCasePanelFactory.isRunEnabled()
         }
     }
+
+    fun getRemoveAllButton() = removeAllButton
 
     /**
      * Toggles check boxes so that they are either all selected or all not selected,
@@ -75,34 +72,12 @@ class TopButtonsPanelBuilder(private val project: Project) {
      *
      *  @param selected whether the checkboxes have to be selected or not
      */
-    private fun toggleAllCheckboxes(selected: Boolean) {
-        project.service<TestCaseDisplayBuilder>().getTestCasePanels().forEach { (_, jPanel) ->
+    private fun toggleAllCheckboxes(selected: Boolean, generatedTestsTabData: GeneratedTestsTabData) {
+        generatedTestsTabData.testCaseNameToPanel.forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
-        project.service<TestCaseDisplayBuilder>()
-            .setTestsSelected(
-                if (selected) project.service<TestCaseDisplayBuilder>().getTestCasePanels().size else 0,
-            )
-    }
-
-    /**
-     * Removes all test cases from the cache and tool window UI.
-     */
-    private fun removeAllTestCases() {
-        // Ask the user for the confirmation
-        val choice = JOptionPane.showConfirmDialog(
-            null,
-            PluginMessagesBundle.get("removeAllMessage"),
-            PluginMessagesBundle.get("confirmationTitle"),
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE,
-        )
-
-        // Cancel the operation if the user did not press "Yes"
-        if (choice == JOptionPane.NO_OPTION) return
-
-        project.service<TestCaseDisplayBuilder>().clear()
+        generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseNameToPanel.size else 0
     }
 
     /**
@@ -111,7 +86,7 @@ class TopButtonsPanelBuilder(private val project: Project) {
      * This method presents a caution message to the user and asks for confirmation before executing the test cases.
      * If the user confirms, it iterates through each test case panel factory and runs the corresponding test.
      */
-    private fun runAllTestCases() {
+    private fun runAllTestCases(project: Project, generatedTestsTabData: GeneratedTestsTabData) {
         val choice = JOptionPane.showConfirmDialog(
             null,
             PluginMessagesBundle.get("runCautionMessage"),
@@ -127,14 +102,14 @@ class TopButtonsPanelBuilder(private val project: Project) {
         // add each test generation task to queue
         val tasks: Queue<(CustomProgressIndicator) -> Unit> = LinkedList()
 
-        for (testCasePanelFactory in testCasePanelFactories) {
+        for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
             testCasePanelFactory.addTask(tasks)
         }
         // run tasks one after each other
-        executeTasks(tasks)
+        executeTasks(project, tasks)
     }
 
-    private fun executeTasks(tasks: Queue<(CustomProgressIndicator) -> Unit>) {
+    private fun executeTasks(project: Project, tasks: Queue<(CustomProgressIndicator) -> Unit>) {
         val nextTask = tasks.poll()
 
         nextTask?.let { task ->
@@ -145,22 +120,13 @@ class TopButtonsPanelBuilder(private val project: Project) {
 
                 override fun onFinished() {
                     super.onFinished()
-                    executeTasks(tasks)
+                    executeTasks(project, tasks)
                 }
             })
         }
     }
 
-    /**
-     * Sets the array of TestCasePanelFactory objects.
-     *
-     * @param testCasePanelFactories The ArrayList containing the TestCasePanelFactory objects to be set.
-     */
-    fun setTestCasePanelFactoriesArray(testCasePanelFactories: ArrayList<TestCasePanelBuilder>) {
-        this.testCasePanelFactories.addAll(testCasePanelFactories)
-    }
-
-    fun getPanel(): JPanel {
+    fun getPanel(project: Project, generatedTestsTabData: GeneratedTestsTabData): JPanel {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
         panel.preferredSize = Dimension(0, 30)
@@ -174,16 +140,15 @@ class TopButtonsPanelBuilder(private val project: Project) {
         panel.add(unselectAllButton)
         panel.add(removeAllButton)
 
-        selectAllButton.addActionListener { toggleAllCheckboxes(true) }
-        unselectAllButton.addActionListener { toggleAllCheckboxes(false) }
-        removeAllButton.addActionListener { removeAllTestCases() }
-        runAllButton.addActionListener { runAllTestCases() }
+        selectAllButton.addActionListener { toggleAllCheckboxes(true, generatedTestsTabData) }
+        unselectAllButton.addActionListener { toggleAllCheckboxes(false, generatedTestsTabData) }
+        runAllButton.addActionListener { runAllTestCases(project, generatedTestsTabData) }
 
         return panel
     }
 
-    fun clear() {
-        testCasePanelFactories.clear()
+    fun clear(generatedTestsTabData: GeneratedTestsTabData) {
+        generatedTestsTabData.testCasePanelFactories.clear()
     }
 
     private fun createRunAllTestButton(): JButton {

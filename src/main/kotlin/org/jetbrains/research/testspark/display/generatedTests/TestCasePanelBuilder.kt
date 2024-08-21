@@ -15,6 +15,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
@@ -29,6 +30,9 @@ import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
 import org.jetbrains.research.testspark.display.utils.IconButtonCreator
@@ -36,7 +40,6 @@ import org.jetbrains.research.testspark.display.utils.ModifiedLinesGetter
 import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.TestCaseDisplayBuilder
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.testmanager.TestAnalyzerFactory
@@ -60,9 +63,6 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
-import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 
 class TestCasePanelBuilder(
     private val project: Project,
@@ -73,6 +73,7 @@ class TestCasePanelBuilder(
     val uiContext: UIContext?,
     val report: Report,
     private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
+    private val generatedTestsTabData: GeneratedTestsTabData,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -202,7 +203,7 @@ class TestCasePanelBuilder(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    project.service<TestCaseDisplayBuilder>().getEditor(testCase.testName)!!.document.text,
+                    generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName]!!.document.text,
                 ),
                 null,
             )
@@ -342,7 +343,7 @@ class TestCasePanelBuilder(
     private fun addLanguageTextFieldListener(languageTextField: LanguageTextField) {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                updateUI()
+                update()
             }
         })
     }
@@ -350,7 +351,7 @@ class TestCasePanelBuilder(
     /**
      * Updates the user interface based on the provided code.
      */
-    private fun updateUI() {
+    private fun update() {
         updateTestCaseInformation()
 
         val lastRunCode = lastRunCodes[currentRequestNumber - 1]
@@ -394,8 +395,8 @@ class TestCasePanelBuilder(
             testCase.coveredLines = setOf()
         }
 
-        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabBuilder)
-        project.service<TestCaseDisplayBuilder>().updateUI()
+        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+        GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
     /**
@@ -553,7 +554,7 @@ class TestCasePanelBuilder(
         lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
         SwingUtilities.invokeLater {
-            updateUI()
+            update()
         }
 
         finishProcess()
@@ -577,7 +578,7 @@ class TestCasePanelBuilder(
             currentCodes[currentRequestNumber - 1] = testCase.testCode
             lastRunCodes[currentRequestNumber - 1] = testCase.testCode
 
-            updateUI()
+            update()
         }
     }
 
@@ -589,7 +590,7 @@ class TestCasePanelBuilder(
             languageTextField.document.setText(lastRunCodes[currentRequestNumber - 1])
             currentCodes[currentRequestNumber - 1] = testCase.testCode
 
-            updateUI()
+            update()
         }
     }
 
@@ -603,14 +604,14 @@ class TestCasePanelBuilder(
      */
     private fun remove() {
         // Remove the test case from the cache
-        project.service<TestCaseDisplayBuilder>().removeTestCase(testCase.testName)
+        GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder)
+        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
 
-        project.service<TestCaseDisplayBuilder>().updateUI()
+        GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
     /**
@@ -668,7 +669,7 @@ class TestCasePanelBuilder(
      */
     private fun switchToAnotherCode() {
         languageTextField.document.setText(currentCodes[currentRequestNumber - 1])
-        updateUI()
+        update()
     }
 
     /**
@@ -685,4 +686,11 @@ class TestCasePanelBuilder(
         testCase.testName = TestAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
+
+    /**
+     * Retrieves the editor text field from the current UI context.
+     *
+     * @return the editor text field
+     */
+    fun getEditorTextField(): EditorTextField = languageTextField
 }
