@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display
+package org.jetbrains.research.testspark.display.generatedTests
 
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
@@ -60,6 +60,8 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
+import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 
 class TestCasePanelFactory(

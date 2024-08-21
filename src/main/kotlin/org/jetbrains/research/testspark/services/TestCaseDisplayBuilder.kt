@@ -19,8 +19,8 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.TestCasePanelFactory
-import org.jetbrains.research.testspark.display.TopButtonsPanelFactory
+import org.jetbrains.research.testspark.display.generatedTests.TestCasePanelFactory
+import org.jetbrains.research.testspark.display.generatedTests.TopButtonsPanelFactory
 import org.jetbrains.research.testspark.display.java.JavaDisplayUtils
 import org.jetbrains.research.testspark.display.kotlin.KotlinDisplayUtils
 import org.jetbrains.research.testspark.display.template.DisplayUtils
