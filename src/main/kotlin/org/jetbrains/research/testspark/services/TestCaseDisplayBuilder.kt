@@ -36,6 +36,7 @@ import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
 import kotlin.collections.HashMap
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 
 @Service(Service.Level.PROJECT)
 class TestCaseDisplayBuilder(private val project: Project) {
@@ -80,6 +81,8 @@ class TestCaseDisplayBuilder(private val project: Project) {
 
     private var displayUtils: DisplayUtils? = null
 
+    private var coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder? = null
+
     init {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
@@ -97,6 +100,10 @@ class TestCaseDisplayBuilder(private val project: Project) {
     fun displayTestCases(report: Report, uiContext: UIContext, language: SupportedLanguage) {
         this.report = report
         this.uiContext = uiContext
+
+        coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project)
+
+        coverageVisualisationTabBuilder!!.showCoverage(report)
 
         displayUtils = when (language) {
             SupportedLanguage.Java -> {
@@ -131,9 +138,13 @@ class TestCaseDisplayBuilder(private val project: Project) {
                 testsSelected -= (1 - 2 * checkbox.isSelected.compareTo(false))
 
                 if (checkbox.isSelected) {
-                    ReportUpdater.selectTestCase(project, report, unselectedTestCases, testCase.id)
+                    ReportUpdater.selectTestCase(report, unselectedTestCases, testCase.id,
+                        coverageVisualisationTabBuilder!!
+                    )
                 } else {
-                    ReportUpdater.unselectTestCase(project, report, unselectedTestCases, testCase.id)
+                    ReportUpdater.unselectTestCase(report, unselectedTestCases, testCase.id,
+                        coverageVisualisationTabBuilder!!
+                    )
                 }
 
                 updateUI()
@@ -141,7 +152,9 @@ class TestCaseDisplayBuilder(private val project: Project) {
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
             val testCasePanelFactory =
-                TestCasePanelFactory(project, language, testCase, editor, checkbox, uiContext, report)
+                TestCasePanelFactory(project, language, testCase, editor, checkbox, uiContext, report,
+                    coverageVisualisationTabBuilder!!
+                )
             testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
@@ -294,8 +307,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
     private fun closeToolWindow() {
         contentManager?.removeContent(content!!, true)
         ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
-        val coverageVisualisationService = project.service<CoverageVisualisationService>()
-        coverageVisualisationService.closeToolWindowTab()
+        coverageVisualisationTabBuilder?.closeToolWindowTab()
     }
 
     private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
@@ -310,6 +322,8 @@ class TestCaseDisplayBuilder(private val project: Project) {
         removeSelectedTestCases(testCasePanelsToRemove)
 
         topButtonsPanelFactory.clear()
+
+        coverageVisualisationTabBuilder?.clear()
     }
 
     fun removeTestCase(testCaseName: String) {

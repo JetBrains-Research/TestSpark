@@ -1,6 +1,5 @@
-package org.jetbrains.research.testspark.services
+package org.jetbrains.research.testspark.display.coverage
 
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.HighlighterLayer
@@ -22,14 +21,10 @@ import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
 import java.awt.Color
 import javax.swing.JScrollPane
 import kotlin.math.roundToInt
+import org.jetbrains.research.testspark.services.EditorService
+import org.jetbrains.research.testspark.services.PluginSettingsService
 
-/**
- * Service used to visualise the coverage and inject data in the toolWindow tab.
- *
- * @param project the project
- */
-@Service(Service.Level.PROJECT)
-class CoverageVisualisationService(private val project: Project) {
+class CoverageVisualisationTabBuilder(private val project: Project) {
 
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
@@ -59,9 +54,7 @@ class CoverageVisualisationService(private val project: Project) {
      * Clears all highlighters from the list of editors.
      */
     fun clear() {
-        currentHighlightedData ?: return
-        currentHighlightedData!!.editor.markupModel
-        currentHighlightedData!!.editor.markupModel.removeAllHighlighters()
+        currentHighlightedData?.editor?.markupModel?.removeAllHighlighters()
     }
 
     /**

@@ -60,6 +60,7 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 
 class TestCasePanelFactory(
     private val project: Project,
@@ -69,6 +70,7 @@ class TestCasePanelFactory(
     private val checkbox: JCheckBox,
     val uiContext: UIContext?,
     val report: Report,
+    private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -390,7 +392,7 @@ class TestCasePanelFactory(
             testCase.coveredLines = setOf()
         }
 
-        ReportUpdater.updateTestCase(project, report, testCase)
+        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabBuilder)
         project.service<TestCaseDisplayBuilder>().updateUI()
     }
 
@@ -604,7 +606,7 @@ class TestCasePanelFactory(
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportUpdater.removeTestCase(project, report, testCase)
+        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder)
 
         project.service<TestCaseDisplayBuilder>().updateUI()
     }

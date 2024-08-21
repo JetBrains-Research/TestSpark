@@ -17,7 +17,6 @@ import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
-import org.jetbrains.research.testspark.services.CoverageVisualisationService
 import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.TestCaseDisplayBuilder
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -111,7 +110,6 @@ class Pipeline(
                     if (project.service<EditorService>().editor != null) {
                         val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
                         project.service<TestCaseDisplayBuilder>().displayTestCases(report, uiContext!!, psiHelper.language)
-                        project.service<CoverageVisualisationService>().showCoverage(report)
                     }
                 }
             })
@@ -122,7 +120,6 @@ class Pipeline(
 
         project.service<TestCaseDisplayBuilder>().clear()
 
-        project.service<CoverageVisualisationService>().clear()
         project.service<TestsExecutionResultService>().clear()
     }
 }
