@@ -7,19 +7,21 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.JBColor
+import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
+import com.intellij.ui.table.JBTable
 import org.evosuite.result.MutationInfo
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
-import org.jetbrains.research.testspark.helpers.CoverageHelper
-import org.jetbrains.research.testspark.helpers.CoverageToolWindowDisplayHelper
 import java.awt.Color
+import java.awt.Dimension
 import javax.swing.JScrollPane
+import javax.swing.table.AbstractTableModel
 import kotlin.math.roundToInt
 import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.PluginSettingsService
@@ -155,7 +157,7 @@ class CoverageVisualisationTabBuilder(private val project: Project) {
                 val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
                 val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 
-                hl.lineMarkerRenderer = CoverageHelper(
+                hl.lineMarkerRenderer = CoverageRenderer(
                     color,
                     line,
                     testsCoveringLine,
@@ -219,7 +221,7 @@ class CoverageVisualisationTabBuilder(private val project: Project) {
         }
 
         // Change the values in the table
-        mainScrollPane = CoverageToolWindowDisplayHelper.getPanel(
+        mainScrollPane = getPanel(
             arrayListOf(
                 testReport.UUT,
                 "$relativeLines% ($coveredLines/$allLines)",
@@ -248,6 +250,55 @@ class CoverageVisualisationTabBuilder(private val project: Project) {
             true,
         )
         contentManager!!.addContent(content!!)
+    }
+
+    private fun getPanel(data: ArrayList<String>): JScrollPane {
+        // Implementation of abstract table model
+        val tableModel = object : AbstractTableModel() {
+            /**
+             * Returns the number of rows.
+             *
+             * @return row count
+             */
+            override fun getRowCount(): Int {
+                return 1
+            }
+
+            /**
+             * Returns the number of columns.
+             *
+             * @return column count
+             */
+            override fun getColumnCount(): Int {
+                return 4
+            }
+
+            /**
+             * Returns the value at index.
+             *
+             * @param rowIndex index of row
+             * @param columnIndex index of column
+             * @return value at row
+             */
+            override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
+                return data[rowIndex * 4 + columnIndex]
+            }
+        }
+
+        val table = JBTable(tableModel)
+
+        val mainPanel = ScrollPaneFactory.createScrollPane(table)
+
+        val tableColumnModel = table.columnModel
+        tableColumnModel.getColumn(0).headerValue = PluginLabelsBundle.get("unitsUndertest")
+        tableColumnModel.getColumn(1).headerValue = PluginLabelsBundle.get("lineCoverage")
+        tableColumnModel.getColumn(2).headerValue = PluginLabelsBundle.get("branchCoverage")
+        tableColumnModel.getColumn(3).headerValue = PluginLabelsBundle.get("weakMutationCoverage")
+
+        table.columnModel = tableColumnModel
+        table.minimumSize = Dimension(700, 100)
+
+        return mainPanel
     }
 
     /**
