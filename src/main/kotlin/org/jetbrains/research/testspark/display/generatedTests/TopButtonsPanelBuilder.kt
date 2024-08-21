@@ -23,8 +23,8 @@ import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.utils.IconButtonCreator
 import org.jetbrains.research.testspark.services.TestCaseDisplayBuilder
 
-class TopButtonsPanelFactory(private val project: Project) {
-    private val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
+class TopButtonsPanelBuilder(private val project: Project) {
+    private val testCasePanelFactories = arrayListOf<TestCasePanelBuilder>()
 
     private var runAllButton: JButton = createRunAllTestButton()
     private var selectAllButton: JButton =
@@ -156,7 +156,7 @@ class TopButtonsPanelFactory(private val project: Project) {
      *
      * @param testCasePanelFactories The ArrayList containing the TestCasePanelFactory objects to be set.
      */
-    fun setTestCasePanelFactoriesArray(testCasePanelFactories: ArrayList<TestCasePanelFactory>) {
+    fun setTestCasePanelFactoriesArray(testCasePanelFactories: ArrayList<TestCasePanelBuilder>) {
         this.testCasePanelFactories.addAll(testCasePanelFactories)
     }
 

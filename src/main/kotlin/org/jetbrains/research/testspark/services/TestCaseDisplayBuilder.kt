@@ -19,8 +19,8 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.generatedTests.TestCasePanelFactory
-import org.jetbrains.research.testspark.display.generatedTests.TopButtonsPanelFactory
+import org.jetbrains.research.testspark.display.generatedTests.TestCasePanelBuilder
+import org.jetbrains.research.testspark.display.generatedTests.TopButtonsPanelBuilder
 import org.jetbrains.research.testspark.display.java.JavaDisplayUtils
 import org.jetbrains.research.testspark.display.kotlin.KotlinDisplayUtils
 import org.jetbrains.research.testspark.display.template.DisplayUtils
@@ -46,7 +46,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
 
     private var mainPanel: JPanel = JPanel()
 
-    private val topButtonsPanelFactory = TopButtonsPanelFactory(project)
+    private val topButtonsPanelBuilder = TopButtonsPanelBuilder(project)
 
     private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
 
@@ -87,7 +87,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
         allTestCasePanel.layout = BoxLayout(allTestCasePanel, BoxLayout.Y_AXIS)
         mainPanel.layout = BorderLayout()
 
-        mainPanel.add(topButtonsPanelFactory.getPanel(), BorderLayout.NORTH)
+        mainPanel.add(topButtonsPanelBuilder.getPanel(), BorderLayout.NORTH)
         mainPanel.add(scrollPane, BorderLayout.CENTER)
 
         applyButton.isOpaque = false
@@ -123,7 +123,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
         addSeparator()
 
         // TestCasePanelFactories array
-        val testCasePanelFactories = arrayListOf<TestCasePanelFactory>()
+        val testCasePanelFactories = arrayListOf<TestCasePanelBuilder>()
 
         report.testCaseList.values.forEach {
             val testCase = it
@@ -151,15 +151,15 @@ class TestCaseDisplayBuilder(private val project: Project) {
             }
             testCasePanel.add(checkbox, BorderLayout.WEST)
 
-            val testCasePanelFactory =
-                TestCasePanelFactory(project, language, testCase, editor, checkbox, uiContext, report,
+            val testCasePanelBuilder =
+                TestCasePanelBuilder(project, language, testCase, editor, checkbox, uiContext, report,
                     coverageVisualisationTabBuilder!!
                 )
-            testCasePanel.add(testCasePanelFactory.getUpperPanel(), BorderLayout.NORTH)
-            testCasePanel.add(testCasePanelFactory.getMiddlePanel(), BorderLayout.CENTER)
-            testCasePanel.add(testCasePanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+            testCasePanel.add(testCasePanelBuilder.getUpperPanel(), BorderLayout.NORTH)
+            testCasePanel.add(testCasePanelBuilder.getMiddlePanel(), BorderLayout.CENTER)
+            testCasePanel.add(testCasePanelBuilder.getBottomPanel(), BorderLayout.SOUTH)
 
-            testCasePanelFactories.add(testCasePanelFactory)
+            testCasePanelFactories.add(testCasePanelBuilder)
 
             testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
@@ -173,8 +173,8 @@ class TestCaseDisplayBuilder(private val project: Project) {
         // Update the number of selected tests (all tests are selected by default)
         testsSelected = testCasePanels.size
 
-        topButtonsPanelFactory.setTestCasePanelFactoriesArray(testCasePanelFactories)
-        topButtonsPanelFactory.updateTopLabels()
+        topButtonsPanelBuilder.setTestCasePanelFactoriesArray(testCasePanelFactories)
+        topButtonsPanelBuilder.updateTopLabels()
 
         createToolWindowTab()
     }
@@ -321,7 +321,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
         val testCasePanelsToRemove = testCasePanels.toMap()
         removeSelectedTestCases(testCasePanelsToRemove)
 
-        topButtonsPanelFactory.clear()
+        topButtonsPanelBuilder.clear()
 
         coverageVisualisationTabBuilder?.clear()
     }
@@ -343,7 +343,7 @@ class TestCaseDisplayBuilder(private val project: Project) {
         // Update the UI of the tool window tab
         allTestCasePanel.updateUI()
 
-        topButtonsPanelFactory.updateTopLabels()
+        topButtonsPanelBuilder.updateTopLabels()
 
         // If no more tests are remaining, close the tool window
         if (testCasePanels.size == 0) closeToolWindow()

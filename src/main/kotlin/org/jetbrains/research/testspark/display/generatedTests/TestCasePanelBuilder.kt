@@ -64,7 +64,7 @@ import org.jetbrains.research.testspark.display.TestCaseDocumentCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 
-class TestCasePanelFactory(
+class TestCasePanelBuilder(
     private val project: Project,
     private val language: SupportedLanguage,
     private val testCase: TestCase,
