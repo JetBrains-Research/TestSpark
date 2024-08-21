@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display.kotlin
+package org.jetbrains.research.testspark.display.utils.kotlin
 
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.fileChooser.FileChooser
@@ -21,8 +21,8 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtPsiFactory
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.template.DisplayUtils
 import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
+import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
 import org.jetbrains.research.testspark.kotlin.KotlinPsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer

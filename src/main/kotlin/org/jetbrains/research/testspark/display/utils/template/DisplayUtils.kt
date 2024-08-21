@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display.template
+package org.jetbrains.research.testspark.display.utils.template
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile

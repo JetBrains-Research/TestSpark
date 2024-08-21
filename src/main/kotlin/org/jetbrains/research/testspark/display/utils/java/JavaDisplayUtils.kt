@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.display.java
+package org.jetbrains.research.testspark.display.utils.java
 
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.fileChooser.FileChooser
@@ -19,8 +19,8 @@ import com.intellij.refactoring.suggested.startOffset
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.template.DisplayUtils
 import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
+import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
 import org.jetbrains.research.testspark.java.JavaPsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer

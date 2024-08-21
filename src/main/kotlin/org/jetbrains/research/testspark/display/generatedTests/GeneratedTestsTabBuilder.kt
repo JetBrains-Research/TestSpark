@@ -11,10 +11,10 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
-import org.jetbrains.research.testspark.display.java.JavaDisplayUtils
-import org.jetbrains.research.testspark.display.kotlin.KotlinDisplayUtils
-import org.jetbrains.research.testspark.display.template.DisplayUtils
 import org.jetbrains.research.testspark.display.utils.ReportUpdater
+import org.jetbrains.research.testspark.display.utils.java.JavaDisplayUtils
+import org.jetbrains.research.testspark.display.utils.kotlin.KotlinDisplayUtils
+import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
 import org.jetbrains.research.testspark.services.EditorService
 import java.awt.BorderLayout
 import java.awt.Dimension
