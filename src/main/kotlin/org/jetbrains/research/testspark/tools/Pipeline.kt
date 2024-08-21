@@ -42,11 +42,10 @@ class Pipeline(
     private val fileUrl: String?,
     private val packageName: String,
     private val testGenerationController: TestGenerationController,
+    private val testSparkDisplayBuilder: TestSparkDisplayBuilder,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
-
-    val testSparkDisplayBuilder = TestSparkDisplayBuilder()
 
     init {
 

@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.tools.template
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 
 /**
@@ -23,7 +24,15 @@ interface Tool {
      * @see Project
      * @see PsiFile
      */
-    fun generateTestsForClass(project: Project, psiHelper: PsiHelper, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController)
+    fun generateTestsForClass(
+        project: Project,
+        psiHelper: PsiHelper,
+        caretOffset: Int,
+        fileUrl: String?,
+        testSamplesCode: String,
+        testGenerationController: TestGenerationController,
+        testSparkDisplayBuilder: TestSparkDisplayBuilder,
+    )
 
     /**
      * Generates test cases for a given method.
@@ -34,7 +43,15 @@ interface Tool {
      * @param fileUrl The URL of the file where the method is defined (optional).
      * @param testSamplesCode The code snippets for test samples (optional).
      */
-    fun generateTestsForMethod(project: Project, psiHelper: PsiHelper, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController)
+    fun generateTestsForMethod(
+        project: Project,
+        psiHelper: PsiHelper,
+        caretOffset: Int,
+        fileUrl: String?,
+        testSamplesCode: String,
+        testGenerationController: TestGenerationController,
+        testSparkDisplayBuilder: TestSparkDisplayBuilder,
+    )
 
     /**
      * Generates tests for a specific line in a project.
@@ -48,5 +65,13 @@ interface Tool {
      * @see Project
      * @see PsiFile
      */
-    fun generateTestsForLine(project: Project, psiHelper: PsiHelper, caretOffset: Int, fileUrl: String?, testSamplesCode: String, testGenerationController: TestGenerationController)
+    fun generateTestsForLine(
+        project: Project,
+        psiHelper: PsiHelper,
+        caretOffset: Int,
+        fileUrl: String?,
+        testSamplesCode: String,
+        testGenerationController: TestGenerationController,
+        testSparkDisplayBuilder: TestSparkDisplayBuilder,
+    )
 }

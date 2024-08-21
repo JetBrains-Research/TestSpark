@@ -8,6 +8,7 @@ import org.jetbrains.research.testspark.actions.controllers.TestGenerationContro
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
+import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
@@ -76,6 +77,7 @@ class Llm(override val name: String = "LLM") : Tool {
         fileUrl: String?,
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
+        testSparkDisplayBuilder: TestSparkDisplayBuilder,
     ) {
         log.info("Generation of tests for CLASS was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
@@ -83,7 +85,14 @@ class Llm(override val name: String = "LLM") : Tool {
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
-        createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
+        createLLMPipeline(
+            project,
+            psiHelper,
+            caretOffset,
+            fileUrl,
+            testGenerationController,
+            testSparkDisplayBuilder,
+        ).runTestGeneration(
             LLMProcessManager(
                 project,
                 psiHelper.language,
@@ -110,6 +119,7 @@ class Llm(override val name: String = "LLM") : Tool {
         fileUrl: String?,
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
+        testSparkDisplayBuilder: TestSparkDisplayBuilder,
     ) {
         log.info("Generation of tests for METHOD was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
@@ -118,7 +128,14 @@ class Llm(override val name: String = "LLM") : Tool {
         }
         val psiMethod = psiHelper.getSurroundingMethod(caretOffset)!!
         val codeType = FragmentToTestData(CodeType.METHOD, psiHelper.generateMethodDescriptor(psiMethod))
-        createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
+        createLLMPipeline(
+            project,
+            psiHelper,
+            caretOffset,
+            fileUrl,
+            testGenerationController,
+            testSparkDisplayBuilder,
+        ).runTestGeneration(
             LLMProcessManager(
                 project,
                 psiHelper.language,
@@ -145,6 +162,7 @@ class Llm(override val name: String = "LLM") : Tool {
         fileUrl: String?,
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
+        testSparkDisplayBuilder: TestSparkDisplayBuilder,
     ) {
         log.info("Generation of tests for LINE was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
@@ -153,7 +171,14 @@ class Llm(override val name: String = "LLM") : Tool {
         }
         val selectedLine: Int = psiHelper.getSurroundingLineNumber(caretOffset)!!
         val codeType = FragmentToTestData(CodeType.LINE, selectedLine)
-        createLLMPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController).runTestGeneration(
+        createLLMPipeline(
+            project,
+            psiHelper,
+            caretOffset,
+            fileUrl,
+            testGenerationController,
+            testSparkDisplayBuilder,
+        ).runTestGeneration(
             LLMProcessManager(
                 project,
                 psiHelper.language,
@@ -179,8 +204,17 @@ class Llm(override val name: String = "LLM") : Tool {
         caretOffset: Int,
         fileUrl: String?,
         testGenerationController: TestGenerationController,
+        testSparkDisplayBuilder: TestSparkDisplayBuilder,
     ): Pipeline {
         val packageName = psiHelper.getPackageName()
-        return Pipeline(project, psiHelper, caretOffset, fileUrl, packageName, testGenerationController)
+        return Pipeline(
+            project,
+            psiHelper,
+            caretOffset,
+            fileUrl,
+            packageName,
+            testGenerationController,
+            testSparkDisplayBuilder,
+        )
     }
 }

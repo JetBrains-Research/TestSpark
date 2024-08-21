@@ -56,7 +56,7 @@ class TestSparkDisplayBuilder {
         // removing all tests
         generatedTestsTabBuilder!!.getRemoveAllButton().addActionListener {
             // in case of empty list -- just call clear method
-            if (generatedTestsTabBuilder!!.getTestCaseNameToPanel().isEmpty()) {
+            if (generatedTestsTabBuilder!!.generatedTestsTabData().testCaseNameToPanel.isEmpty()) {
                 clear()
                 return@addActionListener
             }

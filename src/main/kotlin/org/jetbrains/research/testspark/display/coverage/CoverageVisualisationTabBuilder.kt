@@ -64,13 +64,6 @@ class CoverageVisualisationTabBuilder(
     }
 
     /**
-     * Retrieves the current highlighted data.
-     *
-     * @return The current highlighted data, or null if there is no highlighted data.
-     */
-    fun getCurrentHighlightedData(): HighlightedData? = currentHighlightedData
-
-    /**
      * Instantiates tab for coverage table and calls function to update coverage.
      *
      * @param testReport the generated tests summary

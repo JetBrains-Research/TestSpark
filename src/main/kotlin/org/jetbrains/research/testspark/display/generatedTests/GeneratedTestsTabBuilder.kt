@@ -61,11 +61,11 @@ class GeneratedTestsTabBuilder(
 
     fun generatedTestsTabData() = generatedTestsTabData
 
-    fun getTestCaseNameToPanel() = generatedTestsTabData.testCaseNameToPanel
-
     fun getRemoveAllButton() = generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton()
 
     fun show(contentManager: ContentManager, language: SupportedLanguage) {
+        clear()
+
         generatedTestsTabData.allTestCasePanel.removeAll()
         generatedTestsTabData.testCaseNameToPanel.clear()
 
@@ -160,10 +160,6 @@ class GeneratedTestsTabBuilder(
         generatedTestsTabData.allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
     }
 
-    private fun removeAllHighlights() {
-        project.service<EditorService>().editor?.markupModel?.removeAllHighlighters()
-    }
-
     private fun applyTests() {
         // Filter the selected test cases
         val selectedTestCasePanels =
@@ -178,7 +174,7 @@ class GeneratedTestsTabBuilder(
         displayUtils!!.applyTests(project, uiContext, testCaseComponents)
 
         // Remove the selected test cases from the cache and the tool window UI
-        removeSelectedTestCases(selectedTestCasePanels)
+        clear()
     }
 
     private fun createToolWindowTab() {
@@ -209,19 +205,12 @@ class GeneratedTestsTabBuilder(
         coverageVisualisationTabBuilder.closeToolWindowTab()
     }
 
-    private fun removeSelectedTestCases(selectedTestCasePanels: Map<String, JPanel>) {
-        selectedTestCasePanels.forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
-        removeAllHighlights()
-        closeToolWindow()
-    }
-
     fun clear() {
-        // Remove the tests
-        val testCasePanelsToRemove = generatedTestsTabData.testCaseNameToPanel.toMap()
-        removeSelectedTestCases(testCasePanelsToRemove)
-
+        generatedTestsTabData.testCaseNameToPanel.toMap()
+            .forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
+        generatedTestsTabData.testCasePanelFactories.clear()
         generatedTestsTabData.topButtonsPanelBuilder.clear(generatedTestsTabData)
 
-        coverageVisualisationTabBuilder.clear()
+        closeToolWindow()
     }
 }
