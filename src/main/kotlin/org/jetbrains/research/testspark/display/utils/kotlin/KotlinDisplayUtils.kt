@@ -28,7 +28,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer
 import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestGenerator
 import java.io.File
-import java.util.*
+import java.util.Locale
 import javax.swing.JOptionPane
 
 class KotlinDisplayUtils : DisplayUtils {

@@ -11,7 +11,8 @@ import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.utils.IconButtonCreator
 import java.awt.Dimension
-import java.util.*
+import java.util.LinkedList
+import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton

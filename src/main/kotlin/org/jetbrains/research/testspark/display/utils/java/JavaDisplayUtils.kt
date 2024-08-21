@@ -26,7 +26,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
 import org.jetbrains.research.testspark.testmanager.java.JavaTestGenerator
 import java.io.File
-import java.util.*
+import java.util.Locale
 import javax.swing.JOptionPane
 
 class JavaDisplayUtils : DisplayUtils {
