@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.display.generatedTests
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
@@ -15,7 +14,6 @@ import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.display.utils.java.JavaDisplayUtils
 import org.jetbrains.research.testspark.display.utils.kotlin.KotlinDisplayUtils
 import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
-import org.jetbrains.research.testspark.services.EditorService
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.Box
@@ -37,38 +35,32 @@ class GeneratedTestsTabBuilder(
 
     private var mainPanel: JPanel = JPanel()
 
-    private var applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
-
     private var displayUtils: DisplayUtils? = null
-
-    init {
-        generatedTestsTabData.allTestCasePanel.layout =
-            BoxLayout(generatedTestsTabData.allTestCasePanel, BoxLayout.Y_AXIS)
-        mainPanel.layout = BorderLayout()
-
-        mainPanel.add(
-            generatedTestsTabData.topButtonsPanelBuilder.getPanel(project, generatedTestsTabData),
-            BorderLayout.NORTH,
-        )
-        mainPanel.add(generatedTestsTabData.scrollPane, BorderLayout.CENTER)
-
-        applyButton.isOpaque = false
-        applyButton.isContentAreaFilled = false
-        mainPanel.add(applyButton, BorderLayout.SOUTH)
-
-        applyButton.addActionListener { applyTests() }
-    }
 
     fun generatedTestsTabData() = generatedTestsTabData
 
     fun getRemoveAllButton() = generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton()
 
     fun show(contentManager: ContentManager, language: SupportedLanguage) {
-        clear()
-
         generatedTestsTabData.allTestCasePanel.removeAll()
+        generatedTestsTabData.allTestCasePanel.layout =
+            BoxLayout(generatedTestsTabData.allTestCasePanel, BoxLayout.Y_AXIS)
         generatedTestsTabData.testCaseNameToPanel.clear()
 
+        generatedTestsTabData.contentManager = contentManager
+
+        setDisplayUtils(language)
+
+        fillMainPanel()
+
+        fillAllTestCasePanel(language)
+
+        addSeparator()
+
+        createToolWindowTab()
+    }
+
+    private fun setDisplayUtils(language: SupportedLanguage) {
         displayUtils = when (language) {
             SupportedLanguage.Java -> {
                 JavaDisplayUtils()
@@ -78,13 +70,26 @@ class GeneratedTestsTabBuilder(
                 KotlinDisplayUtils()
             }
         }
+    }
 
-        val editor = project.service<EditorService>().editor!!
+    private fun fillMainPanel() {
+        val applyButton = JButton(PluginLabelsBundle.get("applyButton"))
 
-        generatedTestsTabData.contentManager = contentManager
+        mainPanel.layout = BorderLayout()
 
-        addSeparator()
+        mainPanel.add(
+            generatedTestsTabData.topButtonsPanelBuilder.getPanel(project, generatedTestsTabData),
+            BorderLayout.NORTH,
+        )
+        mainPanel.add(generatedTestsTabData.scrollPane, BorderLayout.CENTER)
+        mainPanel.add(applyButton, BorderLayout.SOUTH)
 
+        applyButton.isOpaque = false
+        applyButton.isContentAreaFilled = false
+        applyButton.addActionListener { applyTests() }
+    }
+
+    private fun fillAllTestCasePanel(language: SupportedLanguage) {
         // TestCasePanelFactories array
         val testCasePanelFactories = arrayListOf<TestCasePanelBuilder>()
 
@@ -142,16 +147,12 @@ class GeneratedTestsTabBuilder(
 
             generatedTestsTabData.testCaseNameToPanel[testCase.testName] = testCasePanel
             generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName] = checkbox
-            generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName] = testCasePanelBuilder.getEditorTextField()
+            generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName] =
+                testCasePanelBuilder.getEditorTextField()
         }
-
-        // Update the number of selected tests (all tests are selected by default)
         generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanel.size
-
         generatedTestsTabData.testCasePanelFactories.addAll(testCasePanelFactories)
         generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
-
-        createToolWindowTab()
     }
 
     private fun addSeparator() {
@@ -193,9 +194,8 @@ class GeneratedTestsTabBuilder(
             true,
         )
         generatedTestsTabData.contentManager!!.addContent(generatedTestsTabData.content!!)
-
-        // Focus on generated tests tab and open toolWindow if not opened already
         generatedTestsTabData.contentManager!!.setSelectedContent(generatedTestsTabData.content!!)
+
         toolWindowManager.show()
     }
 

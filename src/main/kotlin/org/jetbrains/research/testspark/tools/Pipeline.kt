@@ -48,7 +48,6 @@ class Pipeline(
     val generatedTestsData = TestGenerationData()
 
     init {
-
         val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)
 
         // get generated test path
@@ -138,7 +137,7 @@ class Pipeline(
         }
     }
 
-    private fun clear(project: Project) { // should be removed totally!
+    private fun clear(project: Project) {
         testGenerationController.errorMonitor.clear()
 
         testSparkDisplayBuilder.clear()
