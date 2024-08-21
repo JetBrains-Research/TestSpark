@@ -19,7 +19,6 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.display.generatedTests.GeneratedTestsTabData
-import org.jetbrains.research.testspark.services.EditorService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import java.awt.Color
 import java.awt.Dimension
@@ -29,7 +28,7 @@ import kotlin.math.roundToInt
 
 class CoverageVisualisationTabBuilder(
     private val project: Project,
-    editor: Editor,
+    private val editor: Editor,
 ) {
 
     // Variable to keep reference to the coverage visualisation content
@@ -96,7 +95,7 @@ class CoverageVisualisationTabBuilder(
         generatedTestsTabData: GeneratedTestsTabData,
     ) {
         currentHighlightedData =
-            HighlightedData(linesToCover, selectedTests, testReport, project.service<EditorService>().editor!!)
+            HighlightedData(linesToCover, selectedTests, testReport, editor)
         clear()
 
         val settingsProjectState = project.service<PluginSettingsService>().state
@@ -144,7 +143,7 @@ class CoverageVisualisationTabBuilder(
             for (i in linesToCover) {
                 val line = i - 1
 
-                val hl = project.service<EditorService>().editor!!.markupModel.addLineHighlighter(
+                val hl = editor.markupModel.addLineHighlighter(
                     line,
                     HighlighterLayer.ADDITIONAL_SYNTAX,
                     textAttribute,
