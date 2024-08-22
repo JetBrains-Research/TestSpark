@@ -27,10 +27,10 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
+import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.io.File
 import java.nio.file.Path
