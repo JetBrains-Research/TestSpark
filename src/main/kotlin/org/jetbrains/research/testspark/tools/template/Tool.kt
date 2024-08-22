@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.tools.template
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
-import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
+import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 
 /**
@@ -31,7 +31,7 @@ interface Tool {
         fileUrl: String?,
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
-        testSparkDisplayBuilder: TestSparkDisplayBuilder,
+        testSparkDisplayManager: TestSparkDisplayManager,
     )
 
     /**
@@ -50,7 +50,7 @@ interface Tool {
         fileUrl: String?,
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
-        testSparkDisplayBuilder: TestSparkDisplayBuilder,
+        testSparkDisplayManager: TestSparkDisplayManager,
     )
 
     /**
@@ -72,6 +72,6 @@ interface Tool {
         fileUrl: String?,
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
-        testSparkDisplayBuilder: TestSparkDisplayBuilder,
+        testSparkDisplayManager: TestSparkDisplayManager,
     )
 }

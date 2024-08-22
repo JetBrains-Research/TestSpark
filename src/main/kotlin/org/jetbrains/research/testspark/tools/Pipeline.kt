@@ -19,7 +19,7 @@ import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
+import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.services.TestsExecutionResultService
@@ -42,7 +42,7 @@ class Pipeline(
     private val fileUrl: String?,
     private val packageName: String,
     private val testGenerationController: TestGenerationController,
-    private val testSparkDisplayBuilder: TestSparkDisplayBuilder,
+    private val testSparkDisplayManager: TestSparkDisplayManager,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
@@ -75,7 +75,7 @@ class Pipeline(
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
         testGenerationController.errorMonitor.clear()
-        testSparkDisplayBuilder.clear()
+        testSparkDisplayManager.clear()
         project.service<TestsExecutionResultService>().clear()
 
         val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
@@ -117,7 +117,7 @@ class Pipeline(
 
                     if (editor != null) {
                         val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
-                        testSparkDisplayBuilder.display(
+                        testSparkDisplayManager.display(
                             report,
                             editor!!,
                             uiContext!!,

@@ -26,7 +26,7 @@ import javax.swing.JOptionPane
  * @property coverageVisualisationTabBuilder The CoverageVisualisationTabBuilder object used to build and show the coverage visualisation tab.
  * @property generatedTestsTabBuilder The GeneratedTestsTabBuilder object used to build and show the generated tests tab.
  */
-class TestSparkDisplayBuilder {
+class TestSparkDisplayManager {
     private var toolWindow: ToolWindow? = null
 
     private var contentManager: ContentManager? = null

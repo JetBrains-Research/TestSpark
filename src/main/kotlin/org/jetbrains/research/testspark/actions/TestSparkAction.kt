@@ -18,7 +18,7 @@ import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.test.data.CodeType
-import org.jetbrains.research.testspark.display.TestSparkDisplayBuilder
+import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
@@ -54,7 +54,7 @@ class TestSparkAction : AnAction() {
     private val visibilityController = VisibilityController()
     private val testGenerationController = TestGenerationController()
 
-    private val testSparkDisplayBuilder = TestSparkDisplayBuilder()
+    private val testSparkDisplayManager = TestSparkDisplayManager()
 
     /**
      * Handles the action performed event.
@@ -66,7 +66,7 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(e, visibilityController, testGenerationController, testSparkDisplayBuilder)
+        TestSparkActionWindow(e, visibilityController, testGenerationController, testSparkDisplayManager)
     }
 
     /**
@@ -91,7 +91,7 @@ class TestSparkAction : AnAction() {
         private val e: AnActionEvent,
         private val visibilityController: VisibilityController,
         private val testGenerationController: TestGenerationController,
-        private val testSparkDisplayBuilder: TestSparkDisplayBuilder,
+        private val testSparkDisplayManager: TestSparkDisplayManager,
     ) :
         JFrame("TestSpark") {
         private val project: Project = e.project!!
@@ -347,7 +347,7 @@ class TestSparkAction : AnAction() {
                                 fileUrl,
                                 testSamplesCode,
                                 testGenerationController,
-                                testSparkDisplayBuilder,
+                                testSparkDisplayManager,
                             )
                             CodeType.METHOD -> tool.generateTestsForMethod(
                                 project,
@@ -356,7 +356,7 @@ class TestSparkAction : AnAction() {
                                 fileUrl,
                                 testSamplesCode,
                                 testGenerationController,
-                                testSparkDisplayBuilder,
+                                testSparkDisplayManager,
                             )
                             CodeType.LINE -> tool.generateTestsForLine(
                                 project,
@@ -365,7 +365,7 @@ class TestSparkAction : AnAction() {
                                 fileUrl,
                                 testSamplesCode,
                                 testGenerationController,
-                                testSparkDisplayBuilder,
+                                testSparkDisplayManager,
                             )
                         }
                         break
