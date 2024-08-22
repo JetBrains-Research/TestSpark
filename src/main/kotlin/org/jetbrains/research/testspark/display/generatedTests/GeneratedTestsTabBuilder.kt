@@ -14,6 +14,7 @@ import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.display.utils.java.JavaDisplayUtils
 import org.jetbrains.research.testspark.display.utils.kotlin.KotlinDisplayUtils
 import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.Box
@@ -30,6 +31,7 @@ class GeneratedTestsTabBuilder(
     private val editor: Editor,
     private val uiContext: UIContext,
     private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
+    private val testsExecutionResultManager: TestsExecutionResultManager,
 ) {
     private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData()
 
@@ -130,7 +132,7 @@ class GeneratedTestsTabBuilder(
             val testCasePanelBuilder =
                 TestCasePanelBuilder(
                     project, language, testCase, editor, checkbox, uiContext, report,
-                    coverageVisualisationTabBuilder, generatedTestsTabData,
+                    coverageVisualisationTabBuilder, generatedTestsTabData, testsExecutionResultManager,
                 )
             testCasePanel.add(testCasePanelBuilder.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelBuilder.getMiddlePanel(), BorderLayout.CENTER)

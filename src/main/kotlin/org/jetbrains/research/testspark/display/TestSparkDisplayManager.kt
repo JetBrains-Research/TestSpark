@@ -12,6 +12,7 @@ import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.coverage.CoverageVisualisationTabBuilder
 import org.jetbrains.research.testspark.display.generatedTests.GeneratedTestsTabBuilder
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import java.awt.Component
 import javax.swing.JOptionPane
 
@@ -39,14 +40,14 @@ class TestSparkDisplayManager {
     /**
      * Fill the panel with the generated test cases.
      */
-    fun display(report: Report, editor: Editor, uiContext: UIContext, language: SupportedLanguage, project: Project) {
+    fun display(report: Report, editor: Editor, uiContext: UIContext, language: SupportedLanguage, project: Project, testsExecutionResultManager: TestsExecutionResultManager) {
         this.toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
         this.contentManager = toolWindow!!.contentManager
 
         this.editor = editor
 
         coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project, editor)
-        generatedTestsTabBuilder = GeneratedTestsTabBuilder(project, report, editor, uiContext, coverageVisualisationTabBuilder!!)
+        generatedTestsTabBuilder = GeneratedTestsTabBuilder(project, report, editor, uiContext, coverageVisualisationTabBuilder!!, testsExecutionResultManager)
 
         generatedTestsTabBuilder!!.show(contentManager!!, language)
         coverageVisualisationTabBuilder!!.show(report, generatedTestsTabBuilder!!.generatedTestsTabData())

@@ -29,6 +29,7 @@ import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.io.File
@@ -70,6 +71,8 @@ class TestSparkStarter : ApplicationStarter {
         val output = args[9]
         // Run coverage
         val runCoverage = args[10].toBoolean()
+
+        val testsExecutionResultManager = TestsExecutionResultManager()
 
         println("Test generation requested for $projectPath")
 
@@ -187,6 +190,7 @@ class TestSparkStarter : ApplicationStarter {
                             projectContext,
                             testGenerationData,
                             errorMonitor,
+                            testsExecutionResultManager,
                         )
 
                         // Check test Generation Output

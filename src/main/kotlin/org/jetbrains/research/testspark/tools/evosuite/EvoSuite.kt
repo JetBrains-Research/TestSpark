@@ -12,6 +12,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.tools.Pipeline
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.evosuite.generation.EvoSuiteProcessManager
 import org.jetbrains.research.testspark.tools.template.Tool
 import java.io.File
@@ -55,9 +56,18 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Starting tests generation for class by EvoSuite")
-        createPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController, testSparkDisplayManager).runTestGeneration(
+        createPipeline(
+            project,
+            psiHelper,
+            caretOffset,
+            fileUrl,
+            testGenerationController,
+            testSparkDisplayManager,
+            testsExecutionResultManager,
+        ).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(
                 CodeType.CLASS,
@@ -82,10 +92,19 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Starting tests generation for method by EvoSuite")
         val psiMethod: PsiMethodWrapper = psiHelper.getSurroundingMethod(caretOffset)!!
-        createPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController, testSparkDisplayManager).runTestGeneration(
+        createPipeline(
+            project,
+            psiHelper,
+            caretOffset,
+            fileUrl,
+            testGenerationController,
+            testSparkDisplayManager,
+            testsExecutionResultManager,
+        ).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(
                 CodeType.METHOD,
@@ -111,10 +130,19 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Starting tests generation for line by EvoSuite")
         val selectedLine: Int = psiHelper.getSurroundingLineNumber(caretOffset)!!
-        createPipeline(project, psiHelper, caretOffset, fileUrl, testGenerationController, testSparkDisplayManager).runTestGeneration(
+        createPipeline(
+            project,
+            psiHelper,
+            caretOffset,
+            fileUrl,
+            testGenerationController,
+            testSparkDisplayManager,
+            testsExecutionResultManager,
+        ).runTestGeneration(
             getEvoSuiteProcessManager(project),
             FragmentToTestData(
                 CodeType.LINE,
@@ -140,6 +168,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         fileUrl: String?,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ): Pipeline {
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
 
@@ -154,6 +183,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             packageName,
             testGenerationController,
             testSparkDisplayManager,
+            testsExecutionResultManager,
         )
     }
 }

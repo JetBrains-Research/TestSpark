@@ -4,7 +4,6 @@ import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diff.DiffColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.DocumentEvent
@@ -40,11 +39,11 @@ import org.jetbrains.research.testspark.display.utils.ModifiedLinesGetter
 import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.testmanager.TestAnalyzerFactory
 import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import java.awt.Dimension
@@ -74,6 +73,7 @@ class TestCasePanelBuilder(
     val report: Report,
     private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
     private val generatedTestsTabData: GeneratedTestsTabData,
+    private val testsExecutionResultManager: TestsExecutionResultManager,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -325,7 +325,7 @@ class TestCasePanelBuilder(
      * Updates the error label with a new message.
      */
     private fun updateErrorLabel() {
-        val error = project.service<TestsExecutionResultService>().getCurrentError(testCase.id)
+        val error = testsExecutionResultManager.getCurrentError(testCase.id)
         if (error.isBlank()) {
             errorLabel.isVisible = false
         } else {
@@ -362,9 +362,9 @@ class TestCasePanelBuilder(
 
         val error = getError()
         if (error.isNullOrBlank()) {
-            project.service<TestsExecutionResultService>().addCurrentPassedTest(testCase.id)
+            testsExecutionResultManager.addCurrentPassedTest(testCase.id)
         } else {
-            project.service<TestsExecutionResultService>().addCurrentFailedTest(testCase.id, error)
+            testsExecutionResultManager.addCurrentFailedTest(testCase.id, error)
         }
         updateErrorLabel()
         runTestButton.isEnabled = (error == null)
@@ -545,6 +545,7 @@ class TestCasePanelBuilder(
                 uiContext.testGenerationOutput.resultPath,
                 uiContext.projectContext,
                 testCompiler,
+                testsExecutionResultManager,
             )
 
         testCase.coveredLines = newTestCase.coveredLines
@@ -633,7 +634,7 @@ class TestCasePanelBuilder(
      *
      * @return the error message for the test case
      */
-    fun getError() = project.service<TestsExecutionResultService>().getError(testCase.id, testCase.testCode)
+    fun getError() = testsExecutionResultManager.getError(testCase.id, testCase.testCode)
 
     /**
      * Returns the border for a given test case.

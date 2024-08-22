@@ -29,6 +29,7 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuiteSettingsArguments
 import org.jetbrains.research.testspark.tools.evosuite.error.EvoSuiteErrorManager
@@ -77,6 +78,7 @@ class EvoSuiteProcessManager(
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
         errorMonitor: ErrorMonitor,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ): UIContext? {
         try {
             if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
@@ -207,6 +209,7 @@ class EvoSuiteProcessManager(
                 getImportsCodeFromTestSuiteCode(testGenerationResult.testSuiteCode, classFQN),
                 projectContext.fileUrlAsString!!,
                 generatedTestsData,
+                testsExecutionResultManager,
             )
         } catch (e: Exception) {
             evoSuiteErrorManager.errorProcess(EvoSuiteMessagesBundle.get("evosuiteErrorMessage").format(e.message), project, errorMonitor)

@@ -5,6 +5,7 @@ import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 
 /**
  * Represents a tool that can generate tests.
@@ -32,6 +33,7 @@ interface Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     )
 
     /**
@@ -51,6 +53,7 @@ interface Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     )
 
     /**
@@ -73,5 +76,6 @@ interface Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     )
 }

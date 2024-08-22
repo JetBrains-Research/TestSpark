@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -22,7 +21,6 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -43,6 +41,7 @@ class Pipeline(
     private val packageName: String,
     private val testGenerationController: TestGenerationController,
     private val testSparkDisplayManager: TestSparkDisplayManager,
+    private val testsExecutionResultManager: TestsExecutionResultManager,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
@@ -76,7 +75,7 @@ class Pipeline(
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
         testGenerationController.errorMonitor.clear()
         testSparkDisplayManager.clear()
-        project.service<TestsExecutionResultService>().clear()
+        testsExecutionResultManager.clear()
 
         val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
 
@@ -101,6 +100,7 @@ class Pipeline(
                             projectContext,
                             generatedTestsData,
                             testGenerationController.errorMonitor,
+                            testsExecutionResultManager,
                         )
                     }
 
@@ -123,6 +123,7 @@ class Pipeline(
                             uiContext!!,
                             psiHelper.language,
                             project,
+                            testsExecutionResultManager,
                         )
                     }
                 }

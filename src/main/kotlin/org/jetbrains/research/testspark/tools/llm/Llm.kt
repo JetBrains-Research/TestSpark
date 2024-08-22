@@ -13,6 +13,7 @@ import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.tools.Pipeline
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import org.jetbrains.research.testspark.tools.template.Tool
@@ -78,6 +79,7 @@ class Llm(override val name: String = "LLM") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Generation of tests for CLASS was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
@@ -92,6 +94,7 @@ class Llm(override val name: String = "LLM") : Tool {
             fileUrl,
             testGenerationController,
             testSparkDisplayManager,
+            testsExecutionResultManager,
         ).runTestGeneration(
             LLMProcessManager(
                 project,
@@ -120,6 +123,7 @@ class Llm(override val name: String = "LLM") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Generation of tests for METHOD was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
@@ -135,6 +139,7 @@ class Llm(override val name: String = "LLM") : Tool {
             fileUrl,
             testGenerationController,
             testSparkDisplayManager,
+            testsExecutionResultManager,
         ).runTestGeneration(
             LLMProcessManager(
                 project,
@@ -163,6 +168,7 @@ class Llm(override val name: String = "LLM") : Tool {
         testSamplesCode: String,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Generation of tests for LINE was selected")
         if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
@@ -178,6 +184,7 @@ class Llm(override val name: String = "LLM") : Tool {
             fileUrl,
             testGenerationController,
             testSparkDisplayManager,
+            testsExecutionResultManager,
         ).runTestGeneration(
             LLMProcessManager(
                 project,
@@ -205,6 +212,7 @@ class Llm(override val name: String = "LLM") : Tool {
         fileUrl: String?,
         testGenerationController: TestGenerationController,
         testSparkDisplayManager: TestSparkDisplayManager,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ): Pipeline {
         val packageName = psiHelper.getPackageName()
         return Pipeline(
@@ -215,6 +223,7 @@ class Llm(override val name: String = "LLM") : Tool {
             packageName,
             testGenerationController,
             testSparkDisplayManager,
+            testsExecutionResultManager,
         )
     }
 }

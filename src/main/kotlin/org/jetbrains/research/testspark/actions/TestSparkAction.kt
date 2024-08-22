@@ -26,6 +26,7 @@ import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.template.Tool
@@ -55,6 +56,7 @@ class TestSparkAction : AnAction() {
     private val testGenerationController = TestGenerationController()
 
     private val testSparkDisplayManager = TestSparkDisplayManager()
+    private val testsExecutionResultManager = TestsExecutionResultManager()
 
     /**
      * Handles the action performed event.
@@ -66,7 +68,7 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(e, visibilityController, testGenerationController, testSparkDisplayManager)
+        TestSparkActionWindow(e, visibilityController, testGenerationController, testSparkDisplayManager, testsExecutionResultManager)
     }
 
     /**
@@ -92,6 +94,7 @@ class TestSparkAction : AnAction() {
         private val visibilityController: VisibilityController,
         private val testGenerationController: TestGenerationController,
         private val testSparkDisplayManager: TestSparkDisplayManager,
+        private val testsExecutionResultManager: TestsExecutionResultManager,
     ) :
         JFrame("TestSpark") {
         private val project: Project = e.project!!
@@ -348,6 +351,7 @@ class TestSparkAction : AnAction() {
                                 testSamplesCode,
                                 testGenerationController,
                                 testSparkDisplayManager,
+                                testsExecutionResultManager,
                             )
                             CodeType.METHOD -> tool.generateTestsForMethod(
                                 project,
@@ -357,6 +361,7 @@ class TestSparkAction : AnAction() {
                                 testSamplesCode,
                                 testGenerationController,
                                 testSparkDisplayManager,
+                                testsExecutionResultManager,
                             )
                             CodeType.LINE -> tool.generateTestsForLine(
                                 project,
@@ -366,6 +371,7 @@ class TestSparkAction : AnAction() {
                                 testSamplesCode,
                                 testGenerationController,
                                 testSparkDisplayManager,
+                                testsExecutionResultManager,
                             )
                         }
                         break

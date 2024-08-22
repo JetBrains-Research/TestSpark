@@ -15,7 +15,6 @@ import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import java.io.File
 import java.nio.file.Path
@@ -161,6 +160,7 @@ class TestProcessor(
         resultPath: String,
         projectContext: ProjectContext,
         testCompiler: TestCompiler,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ): TestCase {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
@@ -180,7 +180,7 @@ class TestProcessor(
         // compilation checking
         val compilationResult = testCompiler.compileCode(generatedTestPath, buildPath)
         if (!compilationResult.first) {
-            project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, compilationResult.second)
+            testsExecutionResultManager.addFailedTest(testId, testCode, compilationResult.second)
         } else {
             val dataFileName = "$resultPath/jacoco-${fileName.split(".")[0]}"
 
@@ -196,7 +196,7 @@ class TestProcessor(
             )
 
             if (!File("$dataFileName.xml").exists()) {
-                project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, testExecutionError)
+                testsExecutionResultManager.addFailedTest(testId, testCode, testExecutionError)
             } else {
                 val testCase = getTestCaseFromXml(
                     testId,
@@ -208,9 +208,9 @@ class TestProcessor(
                 )
 
                 if (getExceptionData(testExecutionError, projectContext).first) {
-                    project.service<TestsExecutionResultService>().addFailedTest(testId, testCode, testExecutionError)
+                    testsExecutionResultManager.addFailedTest(testId, testCode, testExecutionError)
                 } else {
-                    project.service<TestsExecutionResultService>().addPassedTest(testId, testCode)
+                    testsExecutionResultManager.addPassedTest(testId, testCode)
                 }
 
                 DataFilesUtil.cleanFolder(resultPath)
