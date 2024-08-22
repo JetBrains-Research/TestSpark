@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.tools
+package org.jetbrains.research.testspark.tools.factories
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
@@ -7,6 +7,7 @@ import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.java.JavaTestCompiler
 import org.jetbrains.research.testspark.core.test.kotlin.KotlinTestCompiler
+import org.jetbrains.research.testspark.tools.LibraryPathsProvider
 
 object TestCompilerFactory {
     fun create(

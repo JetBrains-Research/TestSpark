@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.tools
+package org.jetbrains.research.testspark.tools.factories
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
