@@ -527,7 +527,7 @@ class TestCasePanelBuilder(
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
-        val fileName = TestAnalyzerFactory.create(language).getFileNameFromTestCaseCode(testCase.testName)
+        val fileName = TestAnalyzerFactory.create(language).getFileNameFromTestCaseCode(testCase.testCode)
 
         val testCompiler = TestCompilerFactory.create(
             project,
