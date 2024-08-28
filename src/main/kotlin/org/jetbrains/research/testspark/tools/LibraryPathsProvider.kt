@@ -11,21 +11,19 @@ import java.io.File
  * 2. Paths related to test compilation
  * 3. Paths related to coverage
  */
-class LibraryPathsProvider {
-    companion object {
-        private val sep = File.separatorChar
-        private val libPrefix = "${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib$sep"
+object LibraryPathsProvider {
+    private val sep = File.separatorChar
+    private val libPrefix = "${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib$sep"
 
-        fun getTestCompilationLibraryPaths() = TestCompilationDependencies.getJarDescriptors().map { descriptor ->
-            "$libPrefix${sep}${descriptor.name}"
-        }
-
-        fun getJUnitLibraryPaths(junitVersion: JUnitVersion): List<String> = junitVersion.libJar.map { descriptor ->
-            "$libPrefix${sep}${descriptor.name}"
-        }
-
-        fun getJacocoCliLibraryPath() = "$libPrefix${sep}jacococli.jar"
-        fun getJacocoAgentLibraryPath() = "$libPrefix${sep}jacocoagent.jar"
-        fun getJUnitRunnerLibraryPath() = "$libPrefix${sep}JUnitRunner.jar"
+    fun getTestCompilationLibraryPaths() = TestCompilationDependencies.getJarDescriptors().map { descriptor ->
+        "$libPrefix${descriptor.name}"
     }
+
+    fun getJUnitLibraryPaths(junitVersion: JUnitVersion): List<String> = junitVersion.libJar.map { descriptor ->
+        "$libPrefix${descriptor.name}"
+    }
+
+    fun getJacocoCliLibraryPath() = "${libPrefix}jacococli.jar"
+    fun getJacocoAgentLibraryPath() = "${libPrefix}jacocoagent.jar"
+    fun getJUnitRunnerLibraryPath() = "${libPrefix}JUnitRunner.jar"
 }

@@ -11,13 +11,14 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.actions.controllers.VisibilityController
-import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
-import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
-import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
-import org.jetbrains.research.testspark.actions.template.PanelFactory
+import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelBuilder
+import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorBuilder
+import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelBuilder
+import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.test.data.CodeType
+import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.TestSparkIcons
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
@@ -25,6 +26,7 @@ import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.template.Tool
@@ -53,6 +55,9 @@ class TestSparkAction : AnAction() {
     private val visibilityController = VisibilityController()
     private val testGenerationController = TestGenerationController()
 
+    private val testSparkDisplayManager = TestSparkDisplayManager()
+    private val testsExecutionResultManager = TestsExecutionResultManager()
+
     /**
      * Handles the action performed event.
      *
@@ -63,7 +68,7 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(e, visibilityController, testGenerationController)
+        TestSparkActionWindow(e, visibilityController, testGenerationController, testSparkDisplayManager, testsExecutionResultManager)
     }
 
     /**
@@ -88,6 +93,8 @@ class TestSparkAction : AnAction() {
         private val e: AnActionEvent,
         private val visibilityController: VisibilityController,
         private val testGenerationController: TestGenerationController,
+        private val testSparkDisplayManager: TestSparkDisplayManager,
+        private val testsExecutionResultManager: TestsExecutionResultManager,
     ) :
         JFrame("TestSpark") {
         private val project: Project = e.project!!
@@ -121,9 +128,9 @@ class TestSparkAction : AnAction() {
         private val nextButton = JButton(PluginLabelsBundle.get("next"))
 
         private val cardLayout = CardLayout()
-        private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
-        private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project, psiHelper.language)
-        private val evoSuitePanelFactory = EvoSuitePanelFactory(project)
+        private val llmSetupPanelFactory = LLMSetupPanelBuilder(e, project)
+        private val llmSampleSelectorFactory = LLMSampleSelectorBuilder(project, psiHelper.language)
+        private val evoSuitePanelFactory = EvoSuitePanelBuilder(project)
 
         init {
             if (!visibilityController.isVisible) {
@@ -167,11 +174,11 @@ class TestSparkAction : AnAction() {
             }
         }
 
-        private fun createCardPanel(toolPanelFactory: PanelFactory): JPanel {
+        private fun createCardPanel(toolPanelBuilder: PanelBuilder): JPanel {
             val cardPanel = JPanel(BorderLayout())
-            cardPanel.add(toolPanelFactory.getTitlePanel(), BorderLayout.NORTH)
-            cardPanel.add(toolPanelFactory.getMiddlePanel(), BorderLayout.CENTER)
-            cardPanel.add(toolPanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+            cardPanel.add(toolPanelBuilder.getTitlePanel(), BorderLayout.NORTH)
+            cardPanel.add(toolPanelBuilder.getMiddlePanel(), BorderLayout.CENTER)
+            cardPanel.add(toolPanelBuilder.getBottomPanel(), BorderLayout.SOUTH)
 
             return cardPanel
         }
@@ -343,6 +350,8 @@ class TestSparkAction : AnAction() {
                                 fileUrl,
                                 testSamplesCode,
                                 testGenerationController,
+                                testSparkDisplayManager,
+                                testsExecutionResultManager,
                             )
                             CodeType.METHOD -> tool.generateTestsForMethod(
                                 project,
@@ -351,6 +360,8 @@ class TestSparkAction : AnAction() {
                                 fileUrl,
                                 testSamplesCode,
                                 testGenerationController,
+                                testSparkDisplayManager,
+                                testsExecutionResultManager,
                             )
                             CodeType.LINE -> tool.generateTestsForLine(
                                 project,
@@ -359,6 +370,8 @@ class TestSparkAction : AnAction() {
                                 fileUrl,
                                 testSamplesCode,
                                 testGenerationController,
+                                testSparkDisplayManager,
+                                testsExecutionResultManager,
                             )
                         }
                         break
