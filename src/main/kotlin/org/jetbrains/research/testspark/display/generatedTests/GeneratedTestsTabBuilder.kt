@@ -25,7 +25,6 @@ import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
 
-
 /**
  * This class is responsible for building and managing the "Generated Tests" tab in TestSpark.
  * It handles the GUI components, their interactions, and the application of test cases.
