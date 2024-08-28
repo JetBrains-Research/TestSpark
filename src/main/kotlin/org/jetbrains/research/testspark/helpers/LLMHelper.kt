@@ -16,8 +16,8 @@ import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.factories.TestBodyPrinterFactory
-import org.jetbrains.research.testspark.tools.factories.TestSuiteParserFactory
+import org.jetbrains.research.testspark.tools.llm.generation.TestBodyPrinterFactory
+import org.jetbrains.research.testspark.tools.llm.generation.TestSuiteParserFactory
 import org.jetbrains.research.testspark.tools.factories.TestsAssemblerFactory
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
