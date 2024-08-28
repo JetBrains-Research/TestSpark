@@ -25,6 +25,10 @@ import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
 
+/**
+ * This class is responsible for building and managing the "Generated Tests" tab in TestSpark.
+ * It handles the GUI components, their interactions, and the application of test cases.
+ */
 class GeneratedTestsTabBuilder(
     private val project: Project,
     private val report: Report,
@@ -43,6 +47,10 @@ class GeneratedTestsTabBuilder(
 
     fun getRemoveAllButton() = generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton()
 
+    /**
+     * Displays the generated tests tab in the tool window.
+     * This method initializes necessary components based on the selected language and shows the tab.
+     */
     fun show(contentManager: ContentManager, language: SupportedLanguage) {
         generatedTestsTabData.allTestCasePanel.removeAll()
         generatedTestsTabData.allTestCasePanel.layout =
@@ -62,6 +70,11 @@ class GeneratedTestsTabBuilder(
         createToolWindowTab()
     }
 
+    /**
+     * Sets the display utility object based on the supported language.
+     *
+     * @param language The programming language.
+     */
     private fun setDisplayUtils(language: SupportedLanguage) {
         displayUtils = when (language) {
             SupportedLanguage.Java -> {
@@ -74,6 +87,9 @@ class GeneratedTestsTabBuilder(
         }
     }
 
+    /**
+     * Initializes and fills the main panel with subcomponents.
+     */
     private fun fillMainPanel() {
         val applyButton = JButton(PluginLabelsBundle.get("applyButton"))
 
@@ -91,6 +107,9 @@ class GeneratedTestsTabBuilder(
         applyButton.addActionListener { applyTests() }
     }
 
+    /**
+     * Initializes and fills the main panel with subcomponents.
+     */
     private fun fillAllTestCasePanel(language: SupportedLanguage) {
         // TestCasePanelFactories array
         val testCasePanelFactories = arrayListOf<TestCasePanelBuilder>()
@@ -157,12 +176,18 @@ class GeneratedTestsTabBuilder(
         generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
     }
 
+    /**
+     * Adds a visual separator component to the panel to distinguish sections.
+     */
     private fun addSeparator() {
         generatedTestsTabData.allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
         generatedTestsTabData.allTestCasePanel.add(JSeparator(SwingConstants.HORIZONTAL))
         generatedTestsTabData.allTestCasePanel.add(Box.createRigidArea(Dimension(0, 10)))
     }
 
+    /**
+     * Applies the selected test cases by passing them to the display utility for execution.
+     */
     private fun applyTests() {
         // Filter the selected test cases
         val selectedTestCasePanels =
@@ -180,6 +205,9 @@ class GeneratedTestsTabBuilder(
         clear()
     }
 
+    /**
+     * Creates a new tab in the tool window for displaying the generated tests.
+     */
     private fun createToolWindowTab() {
         // Remove generated tests tab from content manager if necessary
         val toolWindowManager = ToolWindowManager.getInstance(project).getToolWindow("TestSpark")
@@ -201,12 +229,18 @@ class GeneratedTestsTabBuilder(
         toolWindowManager.show()
     }
 
+    /**
+     * Closes the tool window by removing the content and hiding the window.
+     */
     private fun closeToolWindow() {
         generatedTestsTabData.contentManager?.removeContent(generatedTestsTabData.content!!, true)
         ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
         coverageVisualisationTabBuilder.closeToolWindowTab()
     }
 
+    /**
+     * Clears all the generated test cases from the UI and the internal cache.
+     */
     fun clear() {
         generatedTestsTabData.testCaseNameToPanel.toMap()
             .forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }

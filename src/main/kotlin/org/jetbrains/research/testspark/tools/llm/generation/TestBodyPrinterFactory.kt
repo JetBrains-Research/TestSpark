@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.tools.factories
+package org.jetbrains.research.testspark.tools.llm.generation
 
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestBodyPrinter

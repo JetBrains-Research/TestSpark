@@ -16,14 +16,14 @@ object LibraryPathsProvider {
     private val libPrefix = "${PathManager.getPluginsPath()}${sep}TestSpark${sep}lib$sep"
 
     fun getTestCompilationLibraryPaths() = TestCompilationDependencies.getJarDescriptors().map { descriptor ->
-        "$libPrefix${sep}${descriptor.name}"
+        "$libPrefix${descriptor.name}"
     }
 
     fun getJUnitLibraryPaths(junitVersion: JUnitVersion): List<String> = junitVersion.libJar.map { descriptor ->
-        "$libPrefix${sep}${descriptor.name}"
+        "$libPrefix${descriptor.name}"
     }
 
-    fun getJacocoCliLibraryPath() = "$libPrefix${sep}jacococli.jar"
-    fun getJacocoAgentLibraryPath() = "$libPrefix${sep}jacocoagent.jar"
-    fun getJUnitRunnerLibraryPath() = "$libPrefix${sep}JUnitRunner.jar"
+    fun getJacocoCliLibraryPath() = "${libPrefix}jacococli.jar"
+    fun getJacocoAgentLibraryPath() = "${libPrefix}jacocoagent.jar"
+    fun getJUnitRunnerLibraryPath() = "${libPrefix}JUnitRunner.jar"
 }

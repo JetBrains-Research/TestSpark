@@ -34,4 +34,6 @@ class KotlinTestCompiler(libPaths: List<String>, junitLibPaths: List<String>) :
         // No need to save the .class file for kotlin, so checking the error message is enough
         return Pair(errorMsg.isBlank(), errorMsg)
     }
+
+    override fun getClassPaths(buildPath: String): String = commonPath.plus(buildPath)
 }

@@ -8,10 +8,12 @@ data class TestCasesCompilationResult(
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM>,
 )
 
-abstract class TestCompiler(
-    private val libPaths: List<String>,
-    private val junitLibPaths: List<String>,
-) {
+abstract class TestCompiler(libPaths: List<String>, junitLibPaths: List<String>) {
+    val separator = DataFilesUtil.classpathSeparator
+    val dependencyLibPath = libPaths.joinToString(separator.toString())
+    val junitPath = junitLibPaths.joinToString(separator.toString())
+    val commonPath = "$junitPath${separator}$dependencyLibPath$separator"
+
     /**
      * Compiles a list of test cases and returns the compilation result.
      *
@@ -55,15 +57,5 @@ abstract class TestCompiler(
      * @param buildPath The path of the build file.
      * @return The generated path as a string.
      */
-    fun getClassPaths(buildPath: String): String {
-        // create the path for the command
-        val separator = DataFilesUtil.classpathSeparator
-        val dependencyLibPath = libPaths.joinToString(separator.toString())
-        val junitPath = junitLibPaths.joinToString(separator.toString())
-
-        val path = "$junitPath${separator}$dependencyLibPath${separator}$buildPath"
-        println("[TestCompiler]: the path is: $path")
-
-        return path
-    }
+    abstract fun getClassPaths(buildPath: String): String
 }
