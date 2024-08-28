@@ -24,12 +24,11 @@ import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.tools.TestBodyPrinterFactory
-import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
-import org.jetbrains.research.testspark.tools.TestSuiteParserFactory
-import org.jetbrains.research.testspark.tools.TestsAssemblerFactory
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
+import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
+import org.jetbrains.research.testspark.tools.factories.TestsAssemblerFactory
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
@@ -51,7 +50,7 @@ class LLMProcessManager(
     private val language: SupportedLanguage,
     private val promptManager: PromptManager,
     private val testSamplesCode: String,
-    projectSDKPath: Path? = null,
+    private val projectSDKPath: Path? = null,
 ) : ProcessManager {
 
     private val homeDirectory =
@@ -80,6 +79,7 @@ class LLMProcessManager(
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
         errorMonitor: ErrorMonitor,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ): UIContext? {
         log.info("LLM test generation begins")
 
@@ -138,20 +138,21 @@ class LLMProcessManager(
 
         // Creation of JUnit specific parser, printer and assembler
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
-        val testBodyPrinter = TestBodyPrinterFactory.createTestBodyPrinter(language)
+        val testBodyPrinter = TestBodyPrinterFactory.create(language)
         val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
             jUnitVersion,
             language,
             testBodyPrinter,
+            packageName,
         )
-        val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
+        val testsAssembler = TestsAssemblerFactory.create(
             indicator,
             generatedTestsData,
             testSuiteParser,
             jUnitVersion,
         )
 
-        val testCompiler = TestCompilerFactory.createTestCompiler(
+        val testCompiler = TestCompilerFactory.create(
             project,
             jUnitVersion,
             language,
@@ -239,9 +240,10 @@ class LLMProcessManager(
             project,
             report,
             getPackageFromTestSuiteCode(testSuiteCode = testSuiteRepresentation, language),
-            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN!!),
+            getImportsCodeFromTestSuiteCode(testSuiteRepresentation, projectContext.classFQN),
             projectContext.fileUrlAsString!!,
             generatedTestsData,
+            testsExecutionResultManager,
             language,
         )
 

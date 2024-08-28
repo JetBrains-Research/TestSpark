@@ -5,7 +5,6 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiDocumentManager
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
@@ -15,7 +14,7 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptConfiguration
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptGenerationContext
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptTemplates
-import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
@@ -39,6 +38,9 @@ class PromptManager(
     private val psiHelper: PsiHelper,
     private val caret: Int,
 ) {
+    /**
+     * The `classesToTest` is empty when we work with the function outside the class
+     */
     private val classesToTest: List<PsiClassWrapper>
         get() {
             val classesToTest = mutableListOf<PsiClassWrapper>()
@@ -52,7 +54,10 @@ class PromptManager(
             return classesToTest
         }
 
-    private val cut: PsiClassWrapper = classesToTest[0]
+    /**
+     * The `cut` is null when we work with the function outside the class.
+     */
+    private val cut: PsiClassWrapper? = if (classesToTest.isNotEmpty()) classesToTest[0] else null
 
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -79,7 +84,7 @@ class PromptManager(
                         .toMap()
 
                 val context = PromptGenerationContext(
-                    cut = createClassRepresentation(cut),
+                    cut = cut?.let { createClassRepresentation(it) },
                     classesToTest = classesToTest.map(this::createClassRepresentation).toList(),
                     polymorphismRelations = polymorphismRelations,
                     promptConfiguration = PromptConfiguration(
@@ -110,7 +115,12 @@ class PromptManager(
                                 .map(this::createClassRepresentation)
                                 .toList()
 
-                        promptGenerator.generatePromptForMethod(method, interestingClassesFromMethod, testSamplesCode)
+                        promptGenerator.generatePromptForMethod(
+                            method,
+                            interestingClassesFromMethod,
+                            testSamplesCode,
+                            psiHelper.getPackageName(),
+                        )
                     }
 
                     CodeType.LINE -> {
@@ -118,7 +128,7 @@ class PromptManager(
                         val psiMethod = getPsiMethod(cut, getMethodDescriptor(cut, lineNumber))!!
 
                         // get code of line under test
-                        val document = PsiDocumentManager.getInstance(project).getDocument(cut.containingFile)
+                        val document = psiHelper.getDocumentFromPsiFile()
                         val lineStartOffset = document!!.getLineStartOffset(lineNumber - 1)
                         val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
 
@@ -149,7 +159,7 @@ class PromptManager(
             signature = psiMethod.signature,
             name = psiMethod.name,
             text = psiMethod.text!!,
-            containingClassQualifiedName = psiMethod.containingClass!!.qualifiedName,
+            containingClassQualifiedName = psiMethod.containingClass?.qualifiedName ?: "",
         )
     }
 
@@ -210,7 +220,6 @@ class PromptManager(
      *
      * @param project The project context in which the PsiClasses exist.
      * @param interestingPsiClasses The set of PsiClassWrappers that are considered interesting.
-     * @param cutPsiClass The cut PsiClassWrapper to determine polymorphism relations against.
      * @return A mutable map where the key represents an interesting PsiClass and the value is a list of its detected subclasses.
      */
     private fun getPolymorphismRelationsWithQualifiedNames(
@@ -218,6 +227,9 @@ class PromptManager(
         interestingPsiClasses: MutableSet<PsiClassWrapper>,
     ): MutableMap<PsiClassWrapper, MutableList<PsiClassWrapper>> {
         val polymorphismRelations: MutableMap<PsiClassWrapper, MutableList<PsiClassWrapper>> = mutableMapOf()
+
+        // assert(interestingPsiClasses.isEmpty())
+        if (cut == null) return polymorphismRelations
 
         interestingPsiClasses.add(cut)
 
@@ -245,9 +257,14 @@ class PromptManager(
      * @return The matching PsiMethod if found, otherwise an empty string.
      */
     private fun getPsiMethod(
-        psiClass: PsiClassWrapper,
+        psiClass: PsiClassWrapper?,
         methodDescriptor: String,
     ): PsiMethodWrapper? {
+        // Processing function outside the class
+        if (psiClass == null) {
+            val currentPsiMethod = psiHelper.getSurroundingMethod(caret)!!
+            return currentPsiMethod
+        }
         for (currentPsiMethod in psiClass.allMethods) {
             val file = psiClass.containingFile
             val psiHelper = PsiHelperProvider.getPsiHelper(file)
@@ -268,9 +285,14 @@ class PromptManager(
      * @return the method descriptor as a String, or an empty string if no method is found
      */
     private fun getMethodDescriptor(
-        psiClass: PsiClassWrapper,
+        psiClass: PsiClassWrapper?,
         lineNumber: Int,
     ): String {
+        // Processing function outside the class
+        if (psiClass == null) {
+            val currentPsiMethod = psiHelper.getSurroundingMethod(caret)!!
+            return psiHelper.generateMethodDescriptor(currentPsiMethod)
+        }
         for (currentPsiMethod in psiClass.allMethods) {
             if (currentPsiMethod.containsLine(lineNumber)) {
                 val file = psiClass.containingFile

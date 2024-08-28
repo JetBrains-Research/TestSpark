@@ -8,8 +8,8 @@ import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.data.llm.PromptEditorType
-import org.jetbrains.research.testspark.display.IconButtonCreator
 import org.jetbrains.research.testspark.display.TestSparkIcons
+import org.jetbrains.research.testspark.display.utils.IconButtonCreator
 import org.jetbrains.research.testspark.helpers.PromptParserHelper
 import java.awt.FlowLayout
 import javax.swing.BorderFactory

@@ -16,12 +16,12 @@ import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.tools.TestBodyPrinterFactory
-import org.jetbrains.research.testspark.tools.TestSuiteParserFactory
-import org.jetbrains.research.testspark.tools.TestsAssemblerFactory
+import org.jetbrains.research.testspark.tools.factories.TestsAssemblerFactory
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
+import org.jetbrains.research.testspark.tools.llm.generation.TestBodyPrinterFactory
+import org.jetbrains.research.testspark.tools.llm.generation.TestSuiteParserFactory
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GraziePlatform
 import org.jetbrains.research.testspark.tools.llm.generation.hf.HuggingFacePlatform
@@ -262,14 +262,14 @@ object LLMHelper {
         }
 
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
-        val testBodyPrinter = TestBodyPrinterFactory.createTestBodyPrinter(language)
+        val testBodyPrinter = TestBodyPrinterFactory.create(language)
         val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
             jUnitVersion,
             language,
             testBodyPrinter,
         )
 
-        val testsAssembler = TestsAssemblerFactory.createTestsAssembler(
+        val testsAssembler = TestsAssemblerFactory.create(
             indicator,
             testGenerationOutput,
             testSuiteParser,
