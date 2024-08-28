@@ -26,6 +26,10 @@ import javax.swing.JScrollPane
 import javax.swing.table.AbstractTableModel
 import kotlin.math.roundToInt
 
+/**
+ * This class is responsible for building and managing the "Coverage" tab in TestSpark.
+ * It handles the GUI components, their interactions, and the application of test cases.
+ */
 class CoverageVisualisationTabBuilder(
     private val project: Project,
     private val editor: Editor,
