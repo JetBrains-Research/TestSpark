@@ -50,4 +50,12 @@ class JavaTestCompiler(
         // check is .class file exists
         return Pair(File(classFilePath).exists(), errorMsg)
     }
+
+    override fun getClassPaths(buildPath: String): String {
+        var path = commonPath.plus(buildPath)
+
+        if (path.endsWith(separator)) path = path.removeSuffix(separator.toString())
+
+        return path
+    }
 }

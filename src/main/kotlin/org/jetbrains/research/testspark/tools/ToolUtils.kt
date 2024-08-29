@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.tools
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.CompilerModuleExtension
@@ -15,9 +14,7 @@ import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.IJTestCase
-import org.jetbrains.research.testspark.helpers.java.JavaClassBuilderHelper
-import org.jetbrains.research.testspark.helpers.kotlin.KotlinClassBuilderHelper
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
+import org.jetbrains.research.testspark.testmanager.TestGeneratorFactory
 import java.io.File
 
 object ToolUtils {
@@ -46,39 +43,27 @@ object ToolUtils {
         importsCode: MutableSet<String>,
         fileUrl: String,
         generatedTestData: TestGenerationData,
+        testsExecutionResultManager: TestsExecutionResultManager,
         language: SupportedLanguage = SupportedLanguage.Java,
     ) {
         generatedTestData.fileUrl = fileUrl
         generatedTestData.packageName = packageName
         generatedTestData.importsCode.addAll(importsCode)
 
-        project.service<TestsExecutionResultService>().initExecutionResult(report.testCaseList.values.map { it.id })
+        testsExecutionResultManager.initExecutionResult(report.testCaseList.values.map { it.id })
 
         for (testCase in report.testCaseList.values) {
             val code = testCase.testCode
-            testCase.testCode = when (language) {
-                SupportedLanguage.Java -> JavaClassBuilderHelper.generateCode(
-                    project,
-                    getClassWithTestCaseName(testCase.testName),
-                    code,
-                    generatedTestData.importsCode,
-                    generatedTestData.packageName,
-                    generatedTestData.runWith,
-                    generatedTestData.otherInfo,
-                    generatedTestData,
-                )
-
-                SupportedLanguage.Kotlin -> KotlinClassBuilderHelper.generateCode(
-                    project,
-                    getClassWithTestCaseName(testCase.testName),
-                    code,
-                    generatedTestData.importsCode,
-                    generatedTestData.packageName,
-                    generatedTestData.runWith,
-                    generatedTestData.otherInfo,
-                    generatedTestData,
-                )
-            }
+            testCase.testCode = TestGeneratorFactory.create(language).generateCode(
+                project,
+                getClassWithTestCaseName(testCase.testName),
+                code,
+                generatedTestData.importsCode,
+                generatedTestData.packageName,
+                generatedTestData.runWith,
+                generatedTestData.otherInfo,
+                generatedTestData,
+            )
         }
 
         generatedTestData.testGenerationResultList.add(report)

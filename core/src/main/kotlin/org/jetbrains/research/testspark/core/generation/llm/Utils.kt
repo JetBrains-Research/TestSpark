@@ -34,13 +34,15 @@ fun getPackageFromTestSuiteCode(testSuiteCode: String?, language: SupportedLangu
  * @param classFQN The fully qualified name of the class to be excluded from the imports code. It will not be included in the result.
  * @return The imports code extracted from the test suite code. If no imports are found or the result is empty after filtering, an empty string is returned.
  */
-fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String): MutableSet<String> {
+fun getImportsCodeFromTestSuiteCode(testSuiteCode: String?, classFQN: String?): MutableSet<String> {
     testSuiteCode ?: return mutableSetOf()
     return testSuiteCode.replace("\r\n", "\n").split("\n").asSequence()
         .filter { it.contains("^import".toRegex()) }
         .filterNot { it.contains("evosuite".toRegex()) }
         .filterNot { it.contains("RunWith".toRegex()) }
-        .filterNot { it.contains(classFQN.toRegex()) }.toMutableSet()
+        // classFQN will be null for the top level function
+        .filterNot { classFQN != null && it.contains(classFQN.toRegex()) }
+        .toMutableSet()
 }
 
 /**

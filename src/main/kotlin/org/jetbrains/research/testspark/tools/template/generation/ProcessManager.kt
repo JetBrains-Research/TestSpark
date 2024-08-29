@@ -6,6 +6,7 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 
 /**
  * An interface representing a process manager.
@@ -25,5 +26,6 @@ interface ProcessManager {
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
         errorMonitor: ErrorMonitor,
+        testsExecutionResultManager: TestsExecutionResultManager,
     ): UIContext?
 }

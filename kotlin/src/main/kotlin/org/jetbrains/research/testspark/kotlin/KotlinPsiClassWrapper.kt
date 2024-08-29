@@ -102,11 +102,9 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
 
         method.psiFunction.valueParameters.forEach { parameter ->
             val typeReference = parameter.typeReference
-            if (typeReference != null) {
-                val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
-                if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
-                    interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
-                }
+            val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
+            if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
+                interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
             }
         }
 

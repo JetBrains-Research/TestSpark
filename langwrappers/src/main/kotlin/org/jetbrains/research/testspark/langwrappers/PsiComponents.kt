@@ -1,11 +1,15 @@
 package org.jetbrains.research.testspark.langwrappers
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.core.test.data.CodeType
+
+typealias CodeTypeDisplayName = Pair<CodeType, String>
 
 /**
  * Interface representing a wrapper for PSI methods,
@@ -113,7 +117,7 @@ interface PsiHelper {
      * @param caretOffset The caret offset within the PSI file.
      * @return The line number of the selected line, otherwise null.
      */
-    fun getSurroundingLine(caretOffset: Int): Int?
+    fun getSurroundingLineNumber(caretOffset: Int): Int?
 
     /**
      * Retrieves a set of interesting PsiClasses based on a given project,
@@ -139,7 +143,7 @@ interface PsiHelper {
      * @return A mutable set of interesting PsiClasses.
      */
     fun getInterestingPsiClassesWithQualifiedNames(
-        cut: PsiClassWrapper,
+        cut: PsiClassWrapper?,
         psiMethod: PsiMethodWrapper,
     ): MutableSet<PsiClassWrapper>
 
@@ -151,7 +155,7 @@ interface PsiHelper {
      *         The array contains the class display name, method display name (if present), and the line number (if present).
      *         The line number is prefixed with "Line".
      */
-    fun getCurrentListOfCodeTypes(e: AnActionEvent): Array<*>?
+    fun getCurrentListOfCodeTypes(e: AnActionEvent): List<CodeTypeDisplayName>
 
     /**
      * Helper for generating method descriptors for methods.
@@ -166,8 +170,8 @@ interface PsiHelper {
      *
      * @param project The project in which to collect classes to test.
      * @param classesToTest The list of classes to test.
-     * @param psiHelper The PSI helper instance to use for collecting classes.
      * @param caretOffset The caret offset in the file.
+     * @param maxPolymorphismDepth Check if cut has any user-defined superclass
      */
     fun collectClassesToTest(
         project: Project,
@@ -175,6 +179,21 @@ interface PsiHelper {
         caretOffset: Int,
         maxPolymorphismDepth: Int,
     )
+
+    /**
+     * Get the package name of the file.
+     */
+    fun getPackageName(): String
+
+    /**
+     * Get the module of the file.
+     */
+    fun getModuleFromPsiFile(): com.intellij.openapi.module.Module
+
+    /**
+     * Get the module of the file.
+     */
+    fun getDocumentFromPsiFile(): Document?
 
     /**
      * Gets the display line number.

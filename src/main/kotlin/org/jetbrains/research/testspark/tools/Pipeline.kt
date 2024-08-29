@@ -1,30 +1,26 @@
 package org.jetbrains.research.testspark.tools
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.UIContext
+import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
-import org.jetbrains.research.testspark.services.CoverageVisualisationService
-import org.jetbrains.research.testspark.services.EditorService
-import org.jetbrains.research.testspark.services.TestCaseDisplayService
-import org.jetbrains.research.testspark.services.TestsExecutionResultService
-import org.jetbrains.research.testspark.services.java.JavaTestCaseDisplayService
-import org.jetbrains.research.testspark.services.kotlin.KotlinTestCaseDisplayService
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -44,12 +40,14 @@ class Pipeline(
     private val fileUrl: String?,
     private val packageName: String,
     private val testGenerationController: TestGenerationController,
+    private val testSparkDisplayManager: TestSparkDisplayManager,
+    private val testsExecutionResultManager: TestsExecutionResultManager,
 ) {
     val projectContext: ProjectContext = ProjectContext()
     val generatedTestsData = TestGenerationData()
 
     init {
-        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)!!
+        val cutPsiClass = psiHelper.getSurroundingClass(caretOffset)
 
         // get generated test path
         val testResultDirectory = "${FileUtilRt.getTempDirectory()}${ToolUtils.sep}testSparkResults${ToolUtils.sep}"
@@ -59,10 +57,8 @@ class Pipeline(
         ApplicationManager.getApplication().runWriteAction {
             projectContext.projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
             projectContext.fileUrlAsString = fileUrl
-            projectContext.classFQN = cutPsiClass.qualifiedName
-            // TODO probably can be made easier
-            projectContext.cutModule =
-                ProjectFileIndex.getInstance(project).getModuleForFile(cutPsiClass.virtualFile)!!
+            cutPsiClass?.let { projectContext.classFQN = it.qualifiedName }
+            projectContext.cutModule = psiHelper.getModuleFromPsiFile()
         }
 
         generatedTestsData.resultPath = ToolUtils.getResultPath(id, testResultDirectory)
@@ -77,8 +73,13 @@ class Pipeline(
      * Builds the project and launches generation on a separate thread.
      */
     fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
-        clear(project)
+        testGenerationController.errorMonitor.clear()
+        testSparkDisplayManager.clear()
+        testsExecutionResultManager.clear()
+
         val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
+
+        var editor: Editor? = null
 
         var uiContext: UIContext? = null
 
@@ -99,6 +100,7 @@ class Pipeline(
                             projectContext,
                             generatedTestsData,
                             testGenerationController.errorMonitor,
+                            testsExecutionResultManager,
                         )
                     }
 
@@ -110,37 +112,34 @@ class Pipeline(
                 override fun onFinished() {
                     super.onFinished()
                     testGenerationController.finished()
-                    when (psiHelper.language) {
-                        SupportedLanguage.Java -> uiContext?.let {
-                            displayTestCase<JavaTestCaseDisplayService>(it)
-                        }
 
-                        SupportedLanguage.Kotlin -> uiContext?.let {
-                            displayTestCase<KotlinTestCaseDisplayService>(it)
+                    updateEditor(uiContext!!.testGenerationOutput.fileUrl)
+
+                    if (editor != null) {
+                        val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
+                        testSparkDisplayManager.display(
+                            report,
+                            editor!!,
+                            uiContext!!,
+                            psiHelper.language,
+                            project,
+                            testsExecutionResultManager,
+                        )
+                    }
+                }
+
+                private fun updateEditor(fileUrl: String) {
+                    val documentManager = FileDocumentManager.getInstance()
+                    // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
+                    FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }.map {
+                        val currentFile = documentManager.getFile(it.document)
+                        if (currentFile != null) {
+                            if (currentFile.presentableUrl == fileUrl) {
+                                editor = it
+                            }
                         }
                     }
                 }
             })
-    }
-
-    private fun clear(project: Project) { // should be removed totally!
-        testGenerationController.errorMonitor.clear()
-        when (psiHelper.language) {
-            SupportedLanguage.Java -> project.service<JavaTestCaseDisplayService>().clear()
-            SupportedLanguage.Kotlin -> project.service<KotlinTestCaseDisplayService>().clear()
-        }
-
-        project.service<CoverageVisualisationService>().clear()
-        project.service<TestsExecutionResultService>().clear()
-    }
-
-    private inline fun <reified Service : TestCaseDisplayService> displayTestCase(ctx: UIContext) {
-        project.service<Service>().updateEditorForFileUrl(ctx.testGenerationOutput.fileUrl)
-
-        if (project.service<EditorService>().editor != null) {
-            val report = ctx.testGenerationOutput.testGenerationResultList[0]!!
-            project.service<Service>().displayTestCases(report, ctx, psiHelper.language)
-            project.service<CoverageVisualisationService>().showCoverage(report)
-        }
     }
 }

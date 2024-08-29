@@ -10,7 +10,10 @@ import org.jetbrains.research.testspark.core.data.ClassType
  * @property polymorphismRelations A map where the key represents a ClassRepresentation object and the value is a list of its detected subclasses.
  */
 data class PromptGenerationContext(
-    val cut: ClassRepresentation,
+    /**
+     * The cut is null when we want to generate tests for top-level function
+     */
+    val cut: ClassRepresentation?,
     val classesToTest: List<ClassRepresentation>,
     val polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
     val promptConfiguration: PromptConfiguration,

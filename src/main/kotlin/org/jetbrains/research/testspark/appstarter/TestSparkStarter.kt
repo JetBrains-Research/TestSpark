@@ -19,7 +19,7 @@ import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.test.TestCompiler
-import org.jetbrains.research.testspark.data.CodeType
+import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
@@ -27,9 +27,10 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
-import org.jetbrains.research.testspark.tools.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.TestProcessor
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
+import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.llm.Llm
 import java.io.File
 import java.nio.file.Path
@@ -70,6 +71,8 @@ class TestSparkStarter : ApplicationStarter {
         val output = args[9]
         // Run coverage
         val runCoverage = args[10].toBoolean()
+
+        val testsExecutionResultManager = TestsExecutionResultManager()
 
         println("Test generation requested for $projectPath")
 
@@ -174,7 +177,7 @@ class TestSparkStarter : ApplicationStarter {
                         // Start test generation
                         val indicator = HeadlessProgressIndicator()
                         val errorMonitor = DefaultErrorMonitor()
-                        val testCompiler = TestCompilerFactory.createTestCompiler(
+                        val testCompiler = TestCompilerFactory.create(
                             project,
                             settingsState.junitVersion,
                             psiHelper.language,
@@ -187,6 +190,7 @@ class TestSparkStarter : ApplicationStarter {
                             projectContext,
                             testGenerationData,
                             errorMonitor,
+                            testsExecutionResultManager,
                         )
 
                         // Check test Generation Output
