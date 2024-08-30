@@ -13,7 +13,7 @@ interface DisplayUtils {
     /**
      * Applies specified tests to a given project.
      */
-    fun applyTests(project: Project, uiContext: UIContext?, testCaseComponents: List<String>)
+    fun applyTests(project: Project, uiContext: UIContext?, testCaseComponents: List<String>): Boolean
 
     /**
      * Appends specified tests to a class within the given project.
