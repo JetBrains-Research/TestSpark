@@ -41,12 +41,20 @@ class TopButtonsPanelBuilder {
      */
     fun update(generatedTestsTabData: GeneratedTestsTabData) {
         var numberOfPassedTests = 0
+        var numberOfRemovedTests = 0
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
-            if (testCasePanelFactory.isRemoved()) continue
+            if (testCasePanelFactory.isRemoved()) {
+                numberOfRemovedTests++
+                continue
+            }
             val error = testCasePanelFactory.getError()
             if ((error is String) && error.isEmpty()) {
                 numberOfPassedTests++
             }
+        }
+        if (generatedTestsTabData.testCasePanelFactories.size == numberOfRemovedTests) {
+            removeAllButton.doClick()
+            return
         }
         testsSelectedLabel.text = String.format(
             testsSelectedText,
