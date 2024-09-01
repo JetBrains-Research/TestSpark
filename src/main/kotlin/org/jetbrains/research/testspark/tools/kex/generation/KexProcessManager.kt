@@ -78,7 +78,7 @@ class KexProcessManager(
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
         errorMonitor: ErrorMonitor,
-        testsExecutionResultManager: TestsExecutionResultManager
+        testsExecutionResultManager: TestsExecutionResultManager,
     ): UIContext? {
         try {
             if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
@@ -132,7 +132,7 @@ class KexProcessManager(
                 resultName,
                 classFQN,
                 generatedTestsData,
-                projectContext
+                projectContext,
             )
         } catch (e: Exception) {
             kexErrorManager.errorProcess(
