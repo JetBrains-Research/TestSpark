@@ -41,11 +41,15 @@ class GeneratedTestsTabBuilder(
 
     private var mainPanel: JPanel = JPanel()
 
+    private val applyButton = JButton(PluginLabelsBundle.get("applyButton"))
+
     private var displayUtils: DisplayUtils? = null
 
     fun generatedTestsTabData() = generatedTestsTabData
 
     fun getRemoveAllButton() = generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton()
+
+    fun getApplyButton() = applyButton
 
     /**
      * Displays the generated tests tab in the tool window.
@@ -91,8 +95,6 @@ class GeneratedTestsTabBuilder(
      * Initializes and fills the main panel with subcomponents.
      */
     private fun fillMainPanel() {
-        val applyButton = JButton(PluginLabelsBundle.get("applyButton"))
-
         mainPanel.layout = BorderLayout()
 
         mainPanel.add(
@@ -104,7 +106,6 @@ class GeneratedTestsTabBuilder(
 
         applyButton.isOpaque = false
         applyButton.isContentAreaFilled = false
-        applyButton.addActionListener { applyTests() }
     }
 
     /**
@@ -188,7 +189,7 @@ class GeneratedTestsTabBuilder(
     /**
      * Applies the selected test cases by passing them to the display utility for execution.
      */
-    private fun applyTests() {
+    fun applyTests() {
         // Filter the selected test cases
         val selectedTestCasePanels =
             generatedTestsTabData.testCaseNameToPanel.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
