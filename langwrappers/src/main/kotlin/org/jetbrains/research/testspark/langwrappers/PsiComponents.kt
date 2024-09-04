@@ -91,6 +91,14 @@ interface PsiHelper {
     val language: SupportedLanguage
 
     /**
+     * Checks if a class is available for generation at the given caret offset.
+     *
+     * @param e The AnActionEvent representing the current action event.
+     * @return `true` if a class is available for generation at the caret offset, `false` otherwise.
+     */
+    fun availableForGeneration(e: AnActionEvent): Boolean
+
+    /**
      * Returns the surrounding PsiClass object based on the caret position within the specified PsiFile.
      * The surrounding class is determined by finding the PsiClass objects within the PsiFile and checking
      * if the caret is within any of them.

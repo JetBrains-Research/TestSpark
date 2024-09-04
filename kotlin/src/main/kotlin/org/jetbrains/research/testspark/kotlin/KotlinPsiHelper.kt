@@ -25,6 +25,8 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
     override val language: SupportedLanguage get() = SupportedLanguage.Kotlin
 
+    override fun availableForGeneration(e: AnActionEvent): Boolean = getCurrentListOfCodeTypes(e).isNotEmpty()
+
     private val log = Logger.getInstance(this::class.java)
 
     override fun generateMethodDescriptor(psiMethod: PsiMethodWrapper): String {
