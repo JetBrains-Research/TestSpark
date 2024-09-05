@@ -146,8 +146,9 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
     override fun getInterestingPsiClassesWithQualifiedNames(
         cut: PsiClassWrapper?,
-        psiMethod: PsiMethodWrapper,
-    ): MutableSet<PsiClassWrapper> {
+        psiMethod: PsiMethodWrapper?,
+    ): MutableSet<PsiClassWrapper>? {
+        psiMethod ?: return null
         // The cut is always not null for Java, because all functions are always inside the class
         val interestingPsiClasses = cut!!.getInterestingPsiClassesWithQualifiedNames(psiMethod)
         log.info("There are ${interestingPsiClasses.size} interesting psi classes from method ${psiMethod.methodDescriptor}")

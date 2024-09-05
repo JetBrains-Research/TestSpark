@@ -149,8 +149,8 @@ interface PsiHelper {
      */
     fun getInterestingPsiClassesWithQualifiedNames(
         cut: PsiClassWrapper?,
-        psiMethod: PsiMethodWrapper,
-    ): MutableSet<PsiClassWrapper>
+        psiMethod: PsiMethodWrapper?,
+    ): MutableSet<PsiClassWrapper>?
 
     /**
      * Gets the current list of code types based on the given AnActionEvent.

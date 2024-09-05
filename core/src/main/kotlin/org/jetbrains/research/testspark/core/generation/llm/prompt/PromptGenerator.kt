@@ -73,8 +73,8 @@ class PromptGenerator(
      */
     fun generatePromptForLine(
         lineUnderTest: String,
-        method: MethodRepresentation,
-        interestingClassesFromMethod: List<ClassRepresentation>,
+        method: MethodRepresentation?,
+        interestingClassesFromMethod: List<ClassRepresentation>?,
         testSamplesCode: String,
     ): String {
         val prompt = PromptBuilder(promptTemplates.linePrompt)
@@ -82,7 +82,7 @@ class PromptGenerator(
             .insertName(lineUnderTest.trim())
             .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
             .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
-            .insertCodeUnderTest(method.text, context.classesToTest)
+            .insertCodeUnderTest(method?.text ?: context.cut!!.fullText, context.classesToTest)
             .insertMethodsSignatures(interestingClassesFromMethod)
             .insertPolymorphismRelations(context.polymorphismRelations)
             .insertTestSample(testSamplesCode)

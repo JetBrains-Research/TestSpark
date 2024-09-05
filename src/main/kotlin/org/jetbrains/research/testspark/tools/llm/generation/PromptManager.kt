@@ -111,7 +111,7 @@ class PromptManager(
                         val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
                         val method = createMethodRepresentation(psiMethod)!!
                         val interestingClassesFromMethod =
-                            psiHelper.getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
+                            psiHelper.getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)!!
                                 .map(this::createClassRepresentation)
                                 .toList()
 
@@ -125,7 +125,7 @@ class PromptManager(
 
                     CodeType.LINE -> {
                         val lineNumber = codeType.objectIndex
-                        val psiMethod = getPsiMethod(cut, getMethodDescriptor(cut, lineNumber))!!
+                        val psiMethod = getPsiMethod(cut, getMethodDescriptor(cut, lineNumber))
 
                         // get code of line under test
                         val document = psiHelper.getDocumentFromPsiFile()
@@ -133,11 +133,11 @@ class PromptManager(
                         val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
 
                         val lineUnderTest = document.getText(TextRange.create(lineStartOffset, lineEndOffset))
-                        val method = createMethodRepresentation(psiMethod)!!
+                        val method = createMethodRepresentation(psiMethod)
                         val interestingClassesFromMethod =
                             psiHelper.getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
-                                .map(this::createClassRepresentation)
-                                .toList()
+                                ?.map(this::createClassRepresentation)
+                                ?.toList()
 
                         promptGenerator.generatePromptForLine(
                             lineUnderTest,
@@ -153,7 +153,8 @@ class PromptManager(
         return prompt
     }
 
-    private fun createMethodRepresentation(psiMethod: PsiMethodWrapper): MethodRepresentation? {
+    private fun createMethodRepresentation(psiMethod: PsiMethodWrapper?): MethodRepresentation? {
+        psiMethod ?: return null
         psiMethod.text ?: return null
         return MethodRepresentation(
             signature = psiMethod.signature,

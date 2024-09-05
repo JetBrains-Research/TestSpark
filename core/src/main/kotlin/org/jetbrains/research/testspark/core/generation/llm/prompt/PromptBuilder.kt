@@ -69,7 +69,9 @@ internal class PromptBuilder(private var prompt: String) {
         }
     }
 
-    fun insertMethodsSignatures(interestingClasses: List<ClassRepresentation>) = apply {
+    fun insertMethodsSignatures(interestingClasses: List<ClassRepresentation>?) = apply {
+        interestingClasses ?: return@apply
+
         val keyword = "\$${PromptKeyword.METHODS.text}"
 
         if (isPromptValid(PromptKeyword.METHODS, prompt)) {

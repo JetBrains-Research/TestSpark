@@ -136,8 +136,9 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
     override fun getInterestingPsiClassesWithQualifiedNames(
         cut: PsiClassWrapper?,
-        psiMethod: PsiMethodWrapper,
-    ): MutableSet<PsiClassWrapper> {
+        psiMethod: PsiMethodWrapper?,
+    ): MutableSet<PsiClassWrapper>? {
+        psiMethod ?: return null
         val interestingPsiClasses =
             cut?.getInterestingPsiClassesWithQualifiedNames(psiMethod)
                 ?: (psiMethod as KotlinPsiMethodWrapper).getInterestingPsiClassesWithQualifiedNames()
