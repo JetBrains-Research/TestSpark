@@ -113,7 +113,7 @@ class TopButtonsPanelBuilder {
     private fun executeTasks(
         project: Project,
         tasks: Queue<(CustomProgressIndicator) -> Unit>,
-        generatedTestsTabData: GeneratedTestsTabData
+        generatedTestsTabData: GeneratedTestsTabData,
     ) {
         val nextTask = tasks.poll()
 

@@ -4,11 +4,11 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentManager
-import javax.swing.JButton
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.core.data.TestCase
+import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JPanel
-import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 
 class GeneratedTestsTabData {
     val testCaseNameToPanel: HashMap<String, JPanel> = HashMap()
