@@ -19,7 +19,6 @@ import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.Box
 import javax.swing.BoxLayout
-import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JSeparator
@@ -41,15 +40,13 @@ class GeneratedTestsTabBuilder(
 
     private var mainPanel: JPanel = JPanel()
 
-    private val applyButton = JButton(PluginLabelsBundle.get("applyButton"))
-
     private var displayUtils: DisplayUtils? = null
 
     fun generatedTestsTabData() = generatedTestsTabData
 
     fun getRemoveAllButton() = generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton()
 
-    fun getApplyButton() = applyButton
+    fun getApplyButton() = generatedTestsTabData.applyButton
 
     /**
      * Displays the generated tests tab in the tool window.
@@ -102,10 +99,10 @@ class GeneratedTestsTabBuilder(
             BorderLayout.NORTH,
         )
         mainPanel.add(generatedTestsTabData.scrollPane, BorderLayout.CENTER)
-        mainPanel.add(applyButton, BorderLayout.SOUTH)
+        mainPanel.add(generatedTestsTabData.applyButton, BorderLayout.SOUTH)
 
-        applyButton.isOpaque = false
-        applyButton.isContentAreaFilled = false
+        generatedTestsTabData.applyButton.isOpaque = false
+        generatedTestsTabData.applyButton.isContentAreaFilled = false
     }
 
     /**
