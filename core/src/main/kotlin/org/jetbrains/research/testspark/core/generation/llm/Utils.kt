@@ -83,12 +83,12 @@ fun executeTestCaseModificationRequest(
 ): TestSuiteGeneratedByLLM? {
     // Update Token information
     val prompt = buildString {
-            append("For this test:\n ```\n ")
-            append(testCase)
-            append("\n```\nYou are allowed to generate only 1 test method. Do not change class and method names.")
-            append("\nPerform the following task:\n")
-            append(task)
-        }
+        append("For this test:\n ```\n ")
+        append(testCase)
+        append("\n```\nYou are allowed to generate only 1 test method. Do not change class and method names.")
+        append("\nPerform the following task:\n")
+        append(task)
+    }
 
     val packageName = getPackageFromTestSuiteCode(testCase, language)
 
