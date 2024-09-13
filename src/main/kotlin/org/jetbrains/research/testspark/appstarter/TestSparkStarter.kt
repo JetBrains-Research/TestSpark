@@ -199,13 +199,13 @@ class TestSparkStarter : ApplicationStarter {
                             // Run test file
                             if (runCoverage) {
                                 runTestsWithCoverageCollection(
-                                        project,
-                                        output,
-                                        packageList,
-                                        classPath,
-                                        projectContext,
-                                        projectSDKPath,
-                                        testCompiler,
+                                    project,
+                                    output,
+                                    packageList,
+                                    classPath,
+                                    projectContext,
+                                    projectSDKPath,
+                                    testCompiler,
                                 )
                             }
                         } else {
