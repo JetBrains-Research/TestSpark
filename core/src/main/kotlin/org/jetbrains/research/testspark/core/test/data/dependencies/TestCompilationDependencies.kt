@@ -27,7 +27,7 @@ class TestCompilationDependencies {
             ),
             JarLibraryDescriptor(
                 "opentest4j-1.1.1.jar",
-            "https://repo1.maven.org/maven2/org/opentest4j/opentest4j/1.1.1/",
+                "https://repo1.maven.org/maven2/org/opentest4j/opentest4j/1.1.1/",
             ),
         )
     }
