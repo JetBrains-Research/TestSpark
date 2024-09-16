@@ -80,6 +80,9 @@ class LLMWithFeedbackCycle(
         var executionResult = FeedbackCycleExecutionResult.OK
         val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
 
+        // collect imports from all responses
+        val imports: MutableList<String> = mutableListOf()
+
         var generatedTestSuite: TestSuiteGeneratedByLLM? = null
 
         while (!generatedTestsArePassing) {
@@ -153,6 +156,9 @@ class LLMWithFeedbackCycle(
             }
 
             generatedTestSuite = response.testSuite
+
+            // update imports list
+            imports.addAll(generatedTestSuite.imports)
 
             // Process stopped checking
             if (indicator.isCanceled()) {
@@ -234,6 +240,8 @@ class LLMWithFeedbackCycle(
             }
 
             log.info { "Result is compilable" }
+
+            generatedTestSuite.imports.addAll(imports)
 
             generatedTestsArePassing = true
 
