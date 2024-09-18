@@ -119,7 +119,8 @@ class TestCasePanelBuilder(
     )
 
     // Create "Remove" button to remove the test from cache
-    private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
+    private val removeButton =
+        IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
 
     // Create "Reset" button to reset the changes in the source code of the test
     private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
@@ -208,11 +209,14 @@ class TestCasePanelBuilder(
                 ),
                 null,
             )
-            NotificationGroupManager.getInstance().getNotificationGroup("Test case copied").createNotification(
-                "",
-                PluginMessagesBundle.get("testCaseCopied"),
-                NotificationType.INFORMATION,
-            ).notify(project)
+            NotificationGroupManager.getInstance()
+                .getNotificationGroup("Test case copied")
+                .createNotification(
+                    "",
+                    PluginMessagesBundle.get("testCaseCopied"),
+                    NotificationType.INFORMATION,
+                )
+                .notify(project)
         }
 
         updateRequestLabel()
@@ -544,17 +548,18 @@ class TestCasePanelBuilder(
             language,
         )
 
-        val newTestCase = TestProcessor(project).processNewTestCase(
-            fileName,
-            testCase.id,
-            testCase.testName,
-            testCase.testCode,
-            uiContext!!.testGenerationOutput.packageName,
-            uiContext.testGenerationOutput.resultPath,
-            uiContext.projectContext,
-            testCompiler,
-            testsExecutionResultManager,
-        )
+        val newTestCase = TestProcessor(project)
+            .processNewTestCase(
+                fileName,
+                testCase.id,
+                testCase.testName,
+                testCase.testCode,
+                uiContext!!.testGenerationOutput.packageName,
+                uiContext.testGenerationOutput.resultPath,
+                uiContext.projectContext,
+                testCompiler,
+                testsExecutionResultManager,
+            )
 
         testCase.coveredLines = newTestCase.coveredLines
 
@@ -692,8 +697,7 @@ class TestCasePanelBuilder(
      * Updates the current test case with the specified test name and test code.
      */
     private fun updateTestCaseInformation() {
-        testCase.testName = TestAnalyzerFactory.create(language)
-            .extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
+        testCase.testName = TestAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 
