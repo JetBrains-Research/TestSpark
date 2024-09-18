@@ -117,15 +117,15 @@ class TestSparkStarter : ApplicationStarter {
                         // get target PsiClass
                         val psiFile = PsiManager.getInstance(project).findFile(cutSourceVirtualFile)
                         val targetPsiClass = detectPsiClass(
-                            when(language) {
+                            when (language) {
                                 SupportedLanguage.Java -> psiFile as PsiJavaFile
                                 SupportedLanguage.Kotlin -> psiFile as KtFile
                             }.classes,
-                                classUnderTestName
-                            ) ?: run {
-                                println("Couldn't find $classUnderTestName in $cutSourceFilePath")
-                                exitProcess(1)
-                            }
+                            classUnderTestName
+                        ) ?: run {
+                            println("Couldn't find $classUnderTestName in $cutSourceFilePath")
+                            exitProcess(1)
+                        }
 
                         println("PsiClass ${targetPsiClass.qualifiedName} is detected! Start the test generation process.")
 
