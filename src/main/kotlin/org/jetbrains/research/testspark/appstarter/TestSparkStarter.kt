@@ -39,7 +39,6 @@ import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.system.exitProcess
-import kotlin.test.assertIsNot
 
 /**
  * This class is responsible for generating and running tests based on the provided arguments in headless mode.
