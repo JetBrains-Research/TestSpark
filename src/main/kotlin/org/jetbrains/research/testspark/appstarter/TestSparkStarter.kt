@@ -14,15 +14,18 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
 import kotlinx.serialization.ExperimentalSerializationApi
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.kotlin.KotlinPsiHelperProvider
 import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
 import org.jetbrains.research.testspark.services.LLMSettingsService
@@ -36,6 +39,7 @@ import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.system.exitProcess
+import kotlin.test.assertIsNot
 
 /**
  * This class is responsible for generating and running tests based on the provided arguments in headless mode.
@@ -73,6 +77,9 @@ class TestSparkStarter : ApplicationStarter {
         val runCoverage = args[10].toBoolean()
 
         val testsExecutionResultManager = TestsExecutionResultManager()
+        // TODO check for suitable refactoring
+        val language =
+            if (cutSourceFilePath.toString().endsWith(".kt")) SupportedLanguage.Kotlin else SupportedLanguage.Java
 
         println("Test generation requested for $projectPath")
 
@@ -108,13 +115,18 @@ class TestSparkStarter : ApplicationStarter {
                                 println("Couldn't open file $cutSourceFilePath")
                                 exitProcess(1)
                             }
-
                         // get target PsiClass
-                        val psiFile = PsiManager.getInstance(project).findFile(cutSourceVirtualFile) as PsiJavaFile
-                        val targetPsiClass = detectPsiClass(psiFile.classes, classUnderTestName) ?: run {
-                            println("Couldn't find $classUnderTestName in $cutSourceFilePath")
-                            exitProcess(1)
-                        }
+                        val psiFile = PsiManager.getInstance(project).findFile(cutSourceVirtualFile)
+                        val targetPsiClass = detectPsiClass(
+                            when(language) {
+                                SupportedLanguage.Java -> psiFile as PsiJavaFile
+                                SupportedLanguage.Kotlin -> psiFile as KtFile
+                            }.classes,
+                                classUnderTestName
+                            ) ?: run {
+                                println("Couldn't find $classUnderTestName in $cutSourceFilePath")
+                                exitProcess(1)
+                            }
 
                         println("PsiClass ${targetPsiClass.qualifiedName} is detected! Start the test generation process.")
 
@@ -159,7 +171,10 @@ class TestSparkStarter : ApplicationStarter {
                         val packageName = packageList.joinToString(".")
 
                         // Get PsiHelper
-                        val psiHelper = PsiHelperProvider.getPsiHelper(psiFile)
+                        val psiHelper = when (language) {
+                            SupportedLanguage.Kotlin -> KotlinPsiHelperProvider().getPsiHelper(psiFile as KtFile)
+                            SupportedLanguage.Java -> PsiHelperProvider.getPsiHelper(psiFile as PsiJavaFile)
+                        }
                         if (psiHelper == null) {
                             // TODO exception: the support for the current language does not exist
                         }
@@ -255,6 +270,7 @@ class TestSparkStarter : ApplicationStarter {
         val targetDirectory = "$out${File.separator}${packageList.joinToString(File.separator)}"
         println("Run tests in $targetDirectory")
         File(targetDirectory).walk().forEach {
+            // TODO Doesn't work for compiled kotlin files
             if (it.name.endsWith(".class")) {
                 println("Running test ${it.name}")
                 var testcaseName = it.nameWithoutExtension.removePrefix("Generated")
