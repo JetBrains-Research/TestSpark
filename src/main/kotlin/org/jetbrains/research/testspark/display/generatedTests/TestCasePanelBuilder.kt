@@ -306,6 +306,9 @@ class TestCasePanelBuilder(
 
         sendButton.addActionListener { sendRequest() }
 
+        // Set the preferred size of the requestComboBox.
+        // The width is calculated by subtracting the combined heights of languageTextField, requestJLabel,
+        //     sendButton, and a padding of 20 from languageTextField's preferred height.
         requestComboBox.preferredSize = Dimension(
             languageTextField.preferredSize.height - requestJLabel.preferredSize.height - sendButton.preferredSize.height - 20,
             requestComboBox.preferredSize.height
