@@ -204,7 +204,7 @@ class TestSparkStarter : ApplicationStarter {
                         val codeType = when (methodName) {
                             "" -> FragmentToTestData(CodeType.CLASS)
                             else -> {
-                                val psiMethod = targetPsiClass.methods.find { it.name == methodName }  ?: run {
+                                val psiMethod = targetPsiClass.methods.find { it.name == methodName } ?: run {
                                     println("Couldn't find method $methodName")
                                     exitProcess(1)
                                 }
