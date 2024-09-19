@@ -107,10 +107,14 @@ class TopButtonsPanelBuilder {
             testCasePanelFactory.addTask(tasks)
         }
         // run tasks one after each other
-        executeTasks(project, tasks)
+        executeTasks(project, tasks, generatedTestsTabData)
     }
 
-    private fun executeTasks(project: Project, tasks: Queue<(CustomProgressIndicator) -> Unit>) {
+    private fun executeTasks(
+        project: Project,
+        tasks: Queue<(CustomProgressIndicator) -> Unit>,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
         val nextTask = tasks.poll()
 
         nextTask?.let { task ->
@@ -121,9 +125,13 @@ class TopButtonsPanelBuilder {
 
                 override fun onFinished() {
                     super.onFinished()
-                    executeTasks(project, tasks)
+                    executeTasks(project, tasks, generatedTestsTabData)
                 }
             })
+        }
+        if (nextTask == null) {
+            generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton().isEnabled = true
+            generatedTestsTabData.applyButton.isEnabled = true
         }
     }
 
