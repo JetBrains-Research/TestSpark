@@ -406,6 +406,7 @@ fun String?.orDefault(default: String): String = this ?: default
  * @param prompt a txt file containing the LLM's prompt template
  * @param out The output directory for the project.
  * @param enableCoverage flag to enable/disable coverage computation
+ * @param methodName indicates the name of the method under test or empty for class level generation
  */
 tasks.create<RunIdeTask>("headless") {
     val root: String? by project
@@ -418,8 +419,9 @@ tasks.create<RunIdeTask>("headless") {
     val prompt: String? by project
     val out: String? by project
     val enableCoverage: String? by project
+    val methodName: String? by project
 
-    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage.orDefault("false"))
+    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage.orDefault("false"), methodName.orDefault(""))
 
     jvmArgs(
         "-Xmx16G",

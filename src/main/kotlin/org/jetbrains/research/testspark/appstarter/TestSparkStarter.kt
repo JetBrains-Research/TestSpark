@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
+import com.intellij.psi.PsiMethod
 import kotlinx.serialization.ExperimentalSerializationApi
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
@@ -25,6 +26,7 @@ import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
+import org.jetbrains.research.testspark.java.JavaPsiMethodWrapper
 import org.jetbrains.research.testspark.kotlin.KotlinPsiHelperProvider
 import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.progress.HeadlessProgressIndicator
@@ -74,6 +76,8 @@ class TestSparkStarter : ApplicationStarter {
         val output = args[9]
         // Run coverage
         val runCoverage = args[10].toBoolean()
+        // Method under test name(or empty string for class level generation)
+        val methodName = args[11]
 
         val testsExecutionResultManager = TestsExecutionResultManager()
         // TODO check for suitable refactoring
@@ -197,9 +201,23 @@ class TestSparkStarter : ApplicationStarter {
                             psiHelper.language,
                             projectSDKPath.toString(),
                         )
+                        val codeType = when (methodName) {
+                            "" -> FragmentToTestData(CodeType.CLASS)
+                            else -> {
+                                val psiMethod = targetPsiClass.methods.find { it.name == methodName }  ?: run {
+                                    println("Couldn't find method $methodName")
+                                    exitProcess(1)
+                                }
+                                FragmentToTestData(
+                                    CodeType.METHOD,
+                                    psiHelper.generateMethodDescriptor(JavaPsiMethodWrapper(psiMethod as PsiMethod))
+                                )
+                            }
+                        }
+
                         val uiContext = llmProcessManager.runTestGenerator(
                             indicator,
-                            FragmentToTestData(CodeType.CLASS),
+                            codeType,
                             packageName,
                             projectContext,
                             testGenerationData,
