@@ -135,7 +135,7 @@ class PromptBuilder(private val promptTemplate: String) {
         polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
     ) = apply {
         var fullText = when {
-            polymorphismRelations.isNotEmpty() -> "Use the following polymorphic relationships of classes present in the project. Use them for instantiation when necessary. Do not mock classes if an instantiation of a sub-class is applicable"
+            polymorphismRelations.isNotEmpty() -> "Use the following polymorphic relationships of classes present in the project. Use them for instantiation when necessary. Do not mock classes if an instantiation of a sub-class is applicable.\n\n"
             else -> ""
         }
 
