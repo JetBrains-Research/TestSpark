@@ -5,9 +5,12 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 import java.util.EnumMap
 
 
+
 /**
- * Populates variables within the prompt template with the provided values.
- * Adheres to the **Builder Pattern**.
+ * Builds prompts by populating a template with keyword values,
+ * and validates that all mandatory keywords are provided.
+ *
+ * @property promptTemplate The template string for the prompt.
  */
 class PromptBuilder(private val promptTemplate: String) {
     private val insertedKeywordValues: EnumMap<PromptKeyword, String> = EnumMap(PromptKeyword::class.java)
@@ -21,8 +24,11 @@ class PromptBuilder(private val promptTemplate: String) {
     }
 
     /**
-     * Populates the `promptTemplate` with the values for keywords present in `insertedKeywordValues`.
-     * Validates that all mandatory fields are filled.
+     * Builds the prompt by populating the template with the inserted values
+     * and validating that all mandatory keywords were provided.
+     *
+     * @return The built prompt.
+     * @throws IllegalStateException if a mandatory keyword is not present in the template.
      */
     fun build(): String {
         var populatedPrompt = promptTemplate
@@ -42,6 +48,14 @@ class PromptBuilder(private val promptTemplate: String) {
         return populatedPrompt
     }
 
+    /**
+     * Inserts a keyword and its corresponding value into the prompt template.
+     * If the keyword is marked as mandatory and not present in the template, an IllegalArgumentException is thrown.
+     *
+     * @param keyword The keyword to be inserted.
+     * @param value The value corresponding to the keyword.
+     * @throws IllegalArgumentException if a mandatory keyword is not present in the template.
+     */
     private fun insert(keyword: PromptKeyword, value: String) {
         if (!templateKeywords.contains(keyword) && keyword.mandatory) {
             throw IllegalArgumentException("Prompt template does not contain mandatory ${keyword.name}")
@@ -65,9 +79,16 @@ class PromptBuilder(private val promptTemplate: String) {
         insert(PromptKeyword.MOCKING_FRAMEWORK, mockingFrameworkName)
     }
 
-    // TODO: rename variables (not class but code construct)
-    fun insertCodeUnderTest(classFullText: String, classesToTest: List<ClassRepresentation>) = apply {
-        var fullText = "```\n${classFullText}\n```\n"
+    /**
+     * Inserts the code under test and its related superclass code into the prompt template.
+     *
+     * @param codeFullText The full text of the code under test.
+     * @param classesToTest The list of ClassRepresentation objects representing the classes involved in the code under test.
+     * @return The modified prompt builder.
+     */
+    fun insertCodeUnderTest(codeFullText: String, classesToTest: List<ClassRepresentation>) = apply {
+        var fullText = "```\n${codeFullText}\n```\n"
+
         for (i in 2..classesToTest.size) {
             val subClass = classesToTest[i - 2]
             val superClass = classesToTest[i - 1]
@@ -82,19 +103,20 @@ class PromptBuilder(private val promptTemplate: String) {
 
     fun insertMethodsSignatures(interestingClasses: List<ClassRepresentation>) = apply {
         var fullText = ""
+
         if (interestingClasses.isNotEmpty()) {
             fullText += "Here are some information about other methods and classes used by the class under test. Only use them for creating objects, not your own ideas.\n"
         }
 
         for (interestingClass in interestingClasses) {
-            if (interestingClass.qualifiedName.startsWith("java")  || interestingClass.qualifiedName.startsWith("kotlin")) {
+            if (interestingClass.qualifiedName.startsWith("java") ||
+                interestingClass.qualifiedName.startsWith("kotlin")) {
                 continue
             }
 
             fullText += "=== methods in ${interestingClass.qualifiedName}:\n"
 
             for (method in interestingClass.allMethods) {
-                // Skip java methods
                 // TODO: checks for java methods should be done by a caller to make
                 //       this class as abstract and language agnostic as possible.
                 if (method.containingClassQualifiedName.startsWith("java") ||
