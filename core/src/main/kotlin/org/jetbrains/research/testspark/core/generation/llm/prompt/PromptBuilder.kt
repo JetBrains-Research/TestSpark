@@ -11,25 +11,12 @@ import java.util.EnumMap
  */
 class PromptBuilder(private val promptTemplate: String) {
     private val insertedKeywordValues: EnumMap<PromptKeyword, String> = EnumMap(PromptKeyword::class.java)
-    private val templateKeywords: List<PromptKeyword>
-
-    init {
-        // collect all the keywords present in the prompt template
-        templateKeywords = mutableListOf()
-
+    // collect all the keywords present in the prompt template
+    private val templateKeywords: List<PromptKeyword> = buildList {
         for (keyword in PromptKeyword.entries) {
-            if (containsPromptKeyword(keyword)) {
-                templateKeywords.add(keyword)
+            if (promptTemplate.contains(keyword.variable)) {
+                add(keyword)
             }
-        }
-    }
-
-    private fun containsPromptKeyword(keyword: PromptKeyword): Boolean =
-        promptTemplate.contains(keyword.variable)
-
-    private fun validatePromptKeyword(keyword: PromptKeyword) {
-        if (!insertedKeywordValues.contains(keyword) && keyword.mandatory) {
-            throw IllegalStateException("The prompt must contain ${keyword.text}")
         }
     }
 
@@ -47,7 +34,9 @@ class PromptBuilder(private val promptTemplate: String) {
 
         // validate that all mandatory keywords were provided
         for (keyword in templateKeywords) {
-            validatePromptKeyword(keyword)
+            if (!insertedKeywordValues.contains(keyword) && keyword.mandatory) {
+                throw IllegalStateException("The prompt must contain ${keyword.text} keyword")
+            }
         }
 
         return populatedPrompt
@@ -118,38 +107,6 @@ class PromptBuilder(private val promptTemplate: String) {
         }
 
         insert(PromptKeyword.METHODS, fullText)
-        /*
-        val keyword = "\$${PromptKeyword.METHODS.text}"
-
-        if (requiresPromptKeyword(PromptKeyword.METHODS, promptTemplate)) {
-            var fullText = ""
-            if (interestingClasses.isNotEmpty()) {
-                fullText += "Here are some information about other methods and classes used by the class under test. Only use them for creating objects, not your own ideas.\n"
-            }
-            for (interestingClass in interestingClasses) {
-                if (interestingClass.qualifiedName.startsWith("java") || interestingClass.qualifiedName.startsWith("kotlin")) {
-                    continue
-                }
-
-                fullText += "=== methods in ${interestingClass.qualifiedName}:\n"
-
-                for (method in interestingClass.allMethods) {
-                    // Skip java methods
-                    // TODO: checks for java methods should be done by a caller to make
-                    //       this class as abstract and language agnostic as possible.
-                    if (method.containingClassQualifiedName.startsWith("java") ||
-                        method.containingClassQualifiedName.startsWith("kotlin")
-                    ) {
-                        continue
-                    }
-
-                    fullText += " - ${method.signature}\n"
-                }
-            }
-            promptTemplate = promptTemplate.replace(keyword, fullText, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.METHODS.text}")
-        }*/
     }
 
     fun insertPolymorphismRelations(
@@ -160,7 +117,7 @@ class PromptBuilder(private val promptTemplate: String) {
             else -> ""
         }
 
-        polymorphismRelations.forEach { entry ->
+        for (entry in polymorphismRelations) {
             for (currentSubClass in entry.value) {
                 val subClassTypeName = when (currentSubClass.classType) {
                     ClassType.INTERFACE -> "an interface implementing"
@@ -175,35 +132,6 @@ class PromptBuilder(private val promptTemplate: String) {
         }
 
         insert(PromptKeyword.POLYMORPHISM, fullText)
-
-        /*
-        val keyword = "\$${PromptKeyword.POLYMORPHISM.text}"
-        if (requiresPromptKeyword(PromptKeyword.POLYMORPHISM, promptTemplate)) {
-            var fullText = ""
-
-        if (isPromptValid(PromptKeyword.POLYMORPHISM, prompt)) {
-            // If polymorphismRelations is not empty, we add an instruction to avoid mocking classes if an instantiation of a sub-class is applicable
-            var fullText = when {
-                polymorphismRelations.isNotEmpty() -> "Use the following polymorphic relationships of classes present in the project. Use them for instantiation when necessary. Do not mock classes if an instantiation of a sub-class is applicable"
-                else -> ""
-            }
-            polymorphismRelations.forEach { entry ->
-                for (currentSubClass in entry.value) {
-                    val subClassTypeName = when (currentSubClass.classType) {
-                        ClassType.INTERFACE -> "an interface implementing"
-                        ClassType.ABSTRACT_CLASS -> "an abstract sub-class of"
-                        ClassType.CLASS -> "a sub-class of"
-                        ClassType.DATA_CLASS -> "a sub data class of"
-                        ClassType.INLINE_VALUE_CLASS -> "a sub inline value class class of"
-                        ClassType.OBJECT -> "a sub object of"
-                    }
-                    fullText += "${currentSubClass.qualifiedName} is $subClassTypeName ${entry.key.qualifiedName}.\n"
-                }
-            }
-            promptTemplate = promptTemplate.replace(keyword, fullText, ignoreCase = false)
-        } else {
-            throw IllegalStateException("The prompt must contain ${PromptKeyword.POLYMORPHISM.text}")
-        }*/
     }
 
     fun insertTestSample(testSamplesCode: String) = apply {

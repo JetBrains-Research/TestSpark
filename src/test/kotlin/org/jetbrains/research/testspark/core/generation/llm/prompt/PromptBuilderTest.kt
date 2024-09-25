@@ -94,7 +94,7 @@ class PromptBuilderTest {
 
             if (keyword.mandatory) {
                 val exception = assertThrows<IllegalStateException> { PromptBuilder(promptTemplate).build() }
-                assertEquals("The prompt must contain ${keyword.text}", exception.message)
+                assertEquals("The prompt must contain ${keyword.text} keyword", exception.message)
             }
             else {
                 assertDoesNotThrow { PromptBuilder(promptTemplate).build() }
