@@ -1,5 +1,8 @@
 package org.jetbrains.research.testspark.core.generation.llm.prompt
 
+import org.jetbrains.research.testspark.core.data.ClassType
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
+import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.MethodRepresentation
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -123,7 +126,7 @@ class PromptBuilderTest {
     }
 
     @Test
-    fun insertMultipleVariables() {
+    fun testInsertMultipleVariables() {
         val template = """
             language: ${PromptKeyword.LANGUAGE.variable}
             name: ${PromptKeyword.NAME.variable}
@@ -149,7 +152,7 @@ class PromptBuilderTest {
     }
 
     @Test
-    fun throwsOnNonExistentKeywordInsertion() {
+    fun testThrowsOnNonExistentKeywordInsertion() {
         val template = "Language: ${PromptKeyword.LANGUAGE.variable}"
         val exception = assertThrows<IllegalArgumentException> {
             PromptBuilder(template).insertName("Name")
@@ -158,17 +161,107 @@ class PromptBuilderTest {
     }
 
     @Test
-    fun insertMethodsSignatures() {
-        // TODO: finish
+    fun testInsertMethodsSignatures() {
+        val keyword = PromptKeyword.METHODS
+
+        val method1 = MethodRepresentation(
+            signature = "method1():Boolean",
+            name = "method1",
+            text = "fun method1(): Boolean { return true }",
+            containingClassQualifiedName = "MyClass"
+        )
+        val method2 = MethodRepresentation(
+            signature = "method2():Boolean",
+            name = "method2",
+            text = "fun method2(): Boolean { return false }",
+            containingClassQualifiedName = "MyClass"
+        )
+        val myClass = ClassRepresentation(
+            qualifiedName = "MyClass",
+            fullText = """
+                    class MyClass {
+                        fun method1(): Boolean { return true }
+                        fun method2(): Boolean { return false }
+                    }
+                """.trimIndent(),
+            allMethods = listOf(method1, method2),
+            classType = ClassType.CLASS,
+        )
+
+        val interestingClasses = listOf(myClass)
+
+        val expectedMethodsText = """
+            Methods:
+            Here are some information about other methods and classes used by the class under test. Only use them for creating objects, not your own ideas.
+            === methods in MyClass:
+             - method1():Boolean
+             - method2():Boolean
+""".trimIndent()
+
+        val builder = PromptBuilder("Methods:\n${keyword.variable}")
+        builder.insertMethodsSignatures(interestingClasses)
+
+        val prompt = builder.build()
+
+        assertEquals(
+            expectedMethodsText + "\n",
+            prompt,
+            "Methods' signatures should be inserted into prompt template correctly"
+        )
     }
 
     @Test
-    fun insertPolymorphismRelations() {
-        // TODO: finish
+    fun testInsertPolymorphismRelations() {
+        val myInterface = ClassRepresentation(
+            qualifiedName = "MyInterface",
+            fullText = """
+            class MyInterface {
+            }
+        """.trimIndent(),
+            allMethods = emptyList(),
+            classType = ClassType.INTERFACE,
+        )
+        val mySubClass = ClassRepresentation(
+            qualifiedName = "MySubClass",
+            fullText = """
+            class MySubClass : MyInterface {
+            }
+        """.trimIndent(),
+            allMethods = emptyList(),
+            classType = ClassType.CLASS,
+        )
+        val polymorphicRelations = mapOf(myInterface to listOf(mySubClass))
+
+        val prompt = PromptBuilder(PromptKeyword.POLYMORPHISM.variable)
+            .insertPolymorphismRelations(polymorphicRelations)
+            .build()
+
+        println("'$prompt'")
+
+        val expected = """
+            Use the following polymorphic relationships of classes present in the project. Use them for instantiation when necessary. Do not mock classes if an instantiation of a sub-class is applicable.
+
+            MySubClass is a sub-class of MyInterface.
+        """.trimIndent()
+
+        assertEquals(expected + "\n", prompt)
     }
 
     @Test
-    fun insertTestSample() {
-        // TODO: finish
+    fun testInsertTestSample() {
+        val testSamplesCode = """
+        @Test
+        fun testMethod() {
+            assertEquals(4, 2+2)
+        }
+    """.trimIndent()
+
+        val prompt = PromptBuilder(PromptKeyword.TEST_SAMPLE.variable)
+            .insertTestSample(testSamplesCode)
+            .build()
+
+        val expected = "Use this test samples:\n" + testSamplesCode + "\n"
+
+        assertEquals(expected, prompt)
     }
 }
