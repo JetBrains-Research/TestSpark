@@ -35,7 +35,7 @@ class PromptBuilder(private val promptTemplate: String) {
         // validate that all mandatory keywords were provided
         for (keyword in templateKeywords) {
             if (!insertedKeywordValues.contains(keyword) && keyword.mandatory) {
-                throw IllegalStateException("The prompt must contain ${keyword.text} keyword")
+                throw IllegalStateException("The prompt must contain ${keyword.name} keyword")
             }
         }
 
@@ -44,7 +44,7 @@ class PromptBuilder(private val promptTemplate: String) {
 
     private fun insert(keyword: PromptKeyword, value: String) {
         if (!templateKeywords.contains(keyword) && keyword.mandatory) {
-            throw IllegalArgumentException("Prompt template does not contain mandatory ${keyword.text}")
+            throw IllegalArgumentException("Prompt template does not contain mandatory ${keyword.name}")
         }
         insertedKeywordValues[keyword] = value
     }
