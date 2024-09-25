@@ -4,8 +4,6 @@ import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
 import java.util.EnumMap
 
-
-
 /**
  * Builds prompts by populating a template with keyword values,
  * and validates that all mandatory keywords are provided.
@@ -14,6 +12,7 @@ import java.util.EnumMap
  */
 class PromptBuilder(private val promptTemplate: String) {
     private val insertedKeywordValues: EnumMap<PromptKeyword, String> = EnumMap(PromptKeyword::class.java)
+
     // collect all the keywords present in the prompt template
     private val templateKeywords: List<PromptKeyword> = buildList {
         for (keyword in PromptKeyword.entries) {
@@ -94,8 +93,8 @@ class PromptBuilder(private val promptTemplate: String) {
             val superClass = classesToTest[i - 1]
 
             fullText += "${subClass.qualifiedName} extends ${superClass.qualifiedName}. " +
-                    "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
-                    "```\n"
+                "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
+                "```\n"
         }
 
         insert(PromptKeyword.CODE, fullText)
@@ -110,7 +109,8 @@ class PromptBuilder(private val promptTemplate: String) {
 
         for (interestingClass in interestingClasses) {
             if (interestingClass.qualifiedName.startsWith("java") ||
-                interestingClass.qualifiedName.startsWith("kotlin")) {
+                interestingClass.qualifiedName.startsWith("kotlin")
+            ) {
                 continue
             }
 
@@ -120,7 +120,8 @@ class PromptBuilder(private val promptTemplate: String) {
                 // TODO: checks for java methods should be done by a caller to make
                 //       this class as abstract and language agnostic as possible.
                 if (method.containingClassQualifiedName.startsWith("java") ||
-                    method.containingClassQualifiedName.startsWith("kotlin")) {
+                    method.containingClassQualifiedName.startsWith("kotlin")
+                ) {
                     continue
                 }
 

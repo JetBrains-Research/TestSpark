@@ -3,19 +3,13 @@ package org.jetbrains.research.testspark.core.generation.llm.prompt
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.ClassRepresentation
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.MethodRepresentation
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertContains
 
 class PromptBuilderTest {
-    @BeforeEach
-    fun setUp() {
-
-    }
-
     @Test
     fun insertLanguage() {
         val (keyword, value) = PromptKeyword.LANGUAGE to "Java"
@@ -98,8 +92,7 @@ class PromptBuilderTest {
             if (keyword.mandatory) {
                 val exception = assertThrows<IllegalStateException> { PromptBuilder(promptTemplate).build() }
                 assertEquals("The prompt must contain ${keyword.name} keyword", exception.message)
-            }
-            else {
+            } else {
                 assertDoesNotThrow { PromptBuilder(promptTemplate).build() }
             }
         }
@@ -118,11 +111,14 @@ class PromptBuilderTest {
             .insertLanguage("Java")
             .build()
 
-        assertEquals("""
+        assertEquals(
+            """
             Language1: 'Java'
             Language2: \\Java\\
             Language3: `Java`
-        """.trimIndent(), prompt)
+            """.trimIndent(),
+            prompt,
+        )
     }
 
     @Test
@@ -168,13 +164,13 @@ class PromptBuilderTest {
             signature = "method1():Boolean",
             name = "method1",
             text = "fun method1(): Boolean { return true }",
-            containingClassQualifiedName = "MyClass"
+            containingClassQualifiedName = "MyClass",
         )
         val method2 = MethodRepresentation(
             signature = "method2():Boolean",
             name = "method2",
             text = "fun method2(): Boolean { return false }",
-            containingClassQualifiedName = "MyClass"
+            containingClassQualifiedName = "MyClass",
         )
         val myClass = ClassRepresentation(
             qualifiedName = "MyClass",
@@ -183,7 +179,7 @@ class PromptBuilderTest {
                         fun method1(): Boolean { return true }
                         fun method2(): Boolean { return false }
                     }
-                """.trimIndent(),
+            """.trimIndent(),
             allMethods = listOf(method1, method2),
             classType = ClassType.CLASS,
         )
@@ -196,7 +192,7 @@ class PromptBuilderTest {
             === methods in MyClass:
              - method1():Boolean
              - method2():Boolean
-""".trimIndent()
+        """.trimIndent()
 
         val builder = PromptBuilder("Methods:\n${keyword.variable}")
         builder.insertMethodsSignatures(interestingClasses)
@@ -206,7 +202,7 @@ class PromptBuilderTest {
         assertEquals(
             expectedMethodsText + "\n",
             prompt,
-            "Methods' signatures should be inserted into prompt template correctly"
+            "Methods' signatures should be inserted into prompt template correctly",
         )
     }
 
@@ -217,7 +213,7 @@ class PromptBuilderTest {
             fullText = """
             class MyInterface {
             }
-        """.trimIndent(),
+            """.trimIndent(),
             allMethods = emptyList(),
             classType = ClassType.INTERFACE,
         )
@@ -226,7 +222,7 @@ class PromptBuilderTest {
             fullText = """
             class MySubClass : MyInterface {
             }
-        """.trimIndent(),
+            """.trimIndent(),
             allMethods = emptyList(),
             classType = ClassType.CLASS,
         )
@@ -254,7 +250,7 @@ class PromptBuilderTest {
         fun testMethod() {
             assertEquals(4, 2+2)
         }
-    """.trimIndent()
+        """.trimIndent()
 
         val prompt = PromptBuilder(PromptKeyword.TEST_SAMPLE.variable)
             .insertTestSample(testSamplesCode)
