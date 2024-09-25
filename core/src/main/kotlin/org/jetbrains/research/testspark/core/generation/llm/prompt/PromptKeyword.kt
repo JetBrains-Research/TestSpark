@@ -20,7 +20,7 @@ enum class PromptKeyword(val text: String, val description: String, val mandator
     ;
 
     fun getOffsets(prompt: String): Pair<Int, Int>? {
-        val textToHighlight = "\$$text"
+        val textToHighlight = variable
         if (!prompt.contains(textToHighlight)) {
             return null
         }
@@ -30,9 +30,11 @@ enum class PromptKeyword(val text: String, val description: String, val mandator
         return Pair(startOffset, endOffset)
     }
 
-    // TODO: replace all "\$$" with use of this `PromptKeyword.variable`
     /**
-     * Provides variables from the underlying keyword.
+     * Returns a keyword's text (i.e., its name) with a `$` attached at the start.
+     *
+     * Inside a prompt template every keyword is used as `$KEYWORD_NAME`.
+     * Therefore, this property encapsulates keyword's prompt representation.
      */
     val variable: String
         get() = "\$${this.text}"
