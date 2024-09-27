@@ -111,7 +111,10 @@ class Pipeline(
 
                 override fun onFinished() {
                     super.onFinished()
+
                     testGenerationController.finished()
+
+                    if (testGenerationController.errorMonitor.hasErrorOccurred()) return
 
                     updateEditor(uiContext!!.testGenerationOutput.fileUrl)
 
