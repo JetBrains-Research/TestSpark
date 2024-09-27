@@ -5,7 +5,7 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 import java.util.EnumMap
 
 /**
- * Builds prompts by populating a template with keyword values,
+ * Builds prompts by populating a template with keyword values
  * and validates that all mandatory keywords are provided.
  *
  * @property promptTemplate The template string for the prompt.
@@ -86,25 +86,25 @@ class PromptBuilder(private val promptTemplate: String) {
      * @return The modified prompt builder.
      */
     fun insertCodeUnderTest(codeFullText: String, classesToTest: List<ClassRepresentation>) = apply {
-        var fullText = "```\n${codeFullText}\n```\n"
+        val fullText = StringBuilder("```\n${codeFullText}\n```\n")
 
         for (i in 2..classesToTest.size) {
             val subClass = classesToTest[i - 2]
             val superClass = classesToTest[i - 1]
 
-            fullText += "${subClass.qualifiedName} extends ${superClass.qualifiedName}. " +
-                "The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n" +
-                "```\n"
+            fullText.append("${subClass.qualifiedName} extends ${superClass.qualifiedName}. ")
+                .append("The source code of ${superClass.qualifiedName} is:\n```\n${superClass.fullText}\n")
+                .append("```\n")
         }
 
-        insert(PromptKeyword.CODE, fullText)
+        insert(PromptKeyword.CODE, fullText.toString())
     }
 
     fun insertMethodsSignatures(interestingClasses: List<ClassRepresentation>) = apply {
-        var fullText = ""
+        val fullText = StringBuilder()
 
         if (interestingClasses.isNotEmpty()) {
-            fullText += "Here are some information about other methods and classes used by the class under test. Only use them for creating objects, not your own ideas.\n"
+            fullText.append("Here are some information about other methods and classes used by the class under test. Only use them for creating objects, not your own ideas.\n")
         }
 
         for (interestingClass in interestingClasses) {
@@ -114,7 +114,7 @@ class PromptBuilder(private val promptTemplate: String) {
                 continue
             }
 
-            fullText += "=== methods in ${interestingClass.qualifiedName}:\n"
+            fullText.append("=== methods in ${interestingClass.qualifiedName}:\n")
 
             for (method in interestingClass.allMethods) {
                 // TODO: checks for java methods should be done by a caller to make
@@ -125,19 +125,20 @@ class PromptBuilder(private val promptTemplate: String) {
                     continue
                 }
 
-                fullText += " - ${method.signature}\n"
+                fullText.append(" - ${method.signature}\n")
             }
         }
 
-        insert(PromptKeyword.METHODS, fullText)
+        insert(PromptKeyword.METHODS, fullText.toString())
     }
 
     fun insertPolymorphismRelations(
         polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
     ) = apply {
-        var fullText = when {
-            polymorphismRelations.isNotEmpty() -> "Use the following polymorphic relationships of classes present in the project. Use them for instantiation when necessary. Do not mock classes if an instantiation of a sub-class is applicable.\n\n"
-            else -> ""
+        val fullText = StringBuilder()
+
+        if (polymorphismRelations.isNotEmpty()) {
+            fullText.append("Use the following polymorphic relationships of classes present in the project. Use them for instantiation when necessary. Do not mock classes if an instantiation of a sub-class is applicable.\n\n")
         }
 
         for (entry in polymorphismRelations) {
@@ -150,11 +151,11 @@ class PromptBuilder(private val promptTemplate: String) {
                     ClassType.INLINE_VALUE_CLASS -> "a sub inline value class class of"
                     ClassType.OBJECT -> "a sub object of"
                 }
-                fullText += "${currentSubClass.qualifiedName} is $subClassTypeName ${entry.key.qualifiedName}.\n"
+                fullText.append("${currentSubClass.qualifiedName} is $subClassTypeName ${entry.key.qualifiedName}.\n")
             }
         }
 
-        insert(PromptKeyword.POLYMORPHISM, fullText)
+        insert(PromptKeyword.POLYMORPHISM, fullText.toString())
     }
 
     fun insertTestSample(testSamplesCode: String) = apply {
