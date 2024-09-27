@@ -199,12 +199,15 @@ class LLMProcessManager(
         when (feedbackResponse.executionResult) {
             FeedbackCycleExecutionResult.OK -> {
                 log.info("Add ${feedbackResponse.compilableTestCases.size} compilable test cases into generatedTestsData")
-                // store compilable test cases
-                generatedTestsData.compilableTestCases.addAll(feedbackResponse.compilableTestCases)
             }
 
             FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED -> {
-                llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project, errorMonitor)
+                if (feedbackResponse.generatedTestSuite != null) {
+                    llmErrorManager.warningProcess(LLMMessagesBundle.get("noCompilableTestCases"), project)
+                }
+                else {
+                    llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project, errorMonitor)
+                }
             }
 
             FeedbackCycleExecutionResult.CANCELED -> {
