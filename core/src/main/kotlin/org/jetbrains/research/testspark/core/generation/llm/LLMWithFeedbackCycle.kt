@@ -282,7 +282,8 @@ class LLMWithFeedbackCycle(
 
         // test suite must not be provided upon failed execution
         if (executionResult != FeedbackCycleExecutionResult.OK &&
-            executionResult != FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED) {
+            executionResult != FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED
+        ) {
             generatedTestSuite = null
         }
 

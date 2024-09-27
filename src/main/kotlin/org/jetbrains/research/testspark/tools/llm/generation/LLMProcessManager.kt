@@ -204,8 +204,7 @@ class LLMProcessManager(
             FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED -> {
                 if (feedbackResponse.generatedTestSuite != null) {
                     llmErrorManager.warningProcess(LLMMessagesBundle.get("noCompilableTestCases"), project)
-                }
-                else {
+                } else {
                     llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project, errorMonitor)
                 }
             }
