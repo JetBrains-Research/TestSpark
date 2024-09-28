@@ -290,6 +290,7 @@ class TestCasePanelBuilder(
         buttonsPanel.add(removeButton)
         buttonsPanel.add(undoRemoveButton)
         undoRemoveButton.isEnabled = false
+        undoRemoveButton.isVisible = false
 
         buttonsPanel.add(Box.createRigidArea(Dimension(12, 0)))
 
@@ -623,7 +624,9 @@ class TestCasePanelBuilder(
 
         runTestButton.isEnabled = false
         removeButton.isEnabled = false
+        removeButton.isVisible = false
         undoRemoveButton.isEnabled = true
+        undoRemoveButton.isVisible = true
 
         isRemoved = true
 
@@ -635,7 +638,9 @@ class TestCasePanelBuilder(
     private fun undoRemove() {
         runTestButton.isEnabled = true
         removeButton.isEnabled = true
+        removeButton.isVisible = true
         undoRemoveButton.isEnabled = false
+        undoRemoveButton.isVisible = false
         
         isRemoved = false
     }
