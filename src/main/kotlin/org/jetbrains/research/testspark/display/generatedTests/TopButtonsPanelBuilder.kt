@@ -109,21 +109,35 @@ class TopButtonsPanelBuilder {
             testCasePanelFactory.addTask(tasks)
         }
         // run tasks one after each other
-        executeTasks(project, tasks)
+        executeTasks(project, tasks, generatedTestsTabData)
     }
 
-    private fun executeTasks(project: Project, tasks: Queue<(CustomProgressIndicator) -> Unit>) {
+    private fun executeTasks(project: Project, tasks: Queue<(CustomProgressIndicator) -> Unit>, generatedTestsTabData: GeneratedTestsTabData) {
         val nextTask = tasks.poll()
 
         nextTask?.let { task ->
             ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Test execution") {
+                var globalIndicator: ProgressIndicator? = null
+
                 override fun run(indicator: ProgressIndicator) {
+                    globalIndicator = indicator
                     task(IJProgressIndicator(indicator))
                 }
 
                 override fun onFinished() {
                     super.onFinished()
-                    executeTasks(project, tasks)
+                    if (globalIndicator != null && !globalIndicator!!.isCanceled) {
+                        executeTasks(project, tasks, generatedTestsTabData)
+                    } else {
+                        if (tasks.isNotEmpty()) {
+                            runAllButton.isEnabled = true
+                            val firstTestPanelFactoryIndex = generatedTestsTabData.testCasePanelFactories.size - tasks.size - 1
+                            val lastTestPanelFactoryIndex = generatedTestsTabData.testCasePanelFactories.size
+                            for (index in firstTestPanelFactoryIndex until lastTestPanelFactoryIndex) {
+                                generatedTestsTabData.testCasePanelFactories[index].removeTask()
+                            }
+                        }
+                    }
                 }
             })
         }
