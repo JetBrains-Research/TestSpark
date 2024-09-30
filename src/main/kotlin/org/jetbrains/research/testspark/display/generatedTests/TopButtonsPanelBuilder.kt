@@ -40,19 +40,13 @@ class TopButtonsPanelBuilder {
      * Updates the labels.
      */
     fun update(generatedTestsTabData: GeneratedTestsTabData) {
-        var numberOfPassedTests = 0
-        var numberOfRemovedTests = 0
-        for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
-            if (testCasePanelFactory.isRemoved()) {
-                numberOfRemovedTests++
-                continue
-            }
-            val error = testCasePanelFactory.getError()
-            if ((error is String) && error.isEmpty()) {
-                numberOfPassedTests++
-            }
-        }
-        if (generatedTestsTabData.testCasePanelFactories.size == numberOfRemovedTests) {
+        val passedTestsCount = generatedTestsTabData.testCasePanelFactories
+            .filter { !it.isRemoved() }
+            .count { it.getError()?.isEmpty() == true }
+
+        val removedTestsCount = generatedTestsTabData.testCasePanelFactories.count { it.isRemoved() }
+
+        if (generatedTestsTabData.testCasePanelFactories.size == removedTestsCount) {
             removeAllButton.doClick()
             return
         }
@@ -64,7 +58,7 @@ class TopButtonsPanelBuilder {
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
-                numberOfPassedTests,
+                passedTestsCount,
                 generatedTestsTabData.testCaseNameToPanel.size,
             )
         runAllButton.isEnabled = false
