@@ -109,10 +109,10 @@ class TopButtonsPanelBuilder {
             testCasePanelFactory.addTask(tasks)
         }
         // run tasks one after each other
-        executeTasks(project, tasks, runAllButton, generatedTestsTabData)
+        executeTasks(project, tasks, generatedTestsTabData)
     }
 
-    private fun executeTasks(project: Project, tasks: Queue<(CustomProgressIndicator) -> Unit>, runAllButton: JButton, generatedTestsTabData: GeneratedTestsTabData) {
+    private fun executeTasks(project: Project, tasks: Queue<(CustomProgressIndicator) -> Unit>, generatedTestsTabData: GeneratedTestsTabData) {
         val nextTask = tasks.poll()
 
         nextTask?.let { task ->
@@ -127,11 +127,13 @@ class TopButtonsPanelBuilder {
                 override fun onFinished() {
                     super.onFinished()
                     if (globalIndicator != null && !globalIndicator!!.isCanceled) {
-                        executeTasks(project, tasks, runAllButton, generatedTestsTabData)
+                        executeTasks(project, tasks, generatedTestsTabData)
                     } else {
                         if (tasks.isNotEmpty()) {
                             runAllButton.isEnabled = true
-                            for (index in generatedTestsTabData.testCasePanelFactories.size - tasks.size - 1 until generatedTestsTabData.testCasePanelFactories.size) {
+                            val firstTestPanelFactoryIndex = generatedTestsTabData.testCasePanelFactories.size - tasks.size - 1
+                            val lastTestPanelFactoryIndex = generatedTestsTabData.testCasePanelFactories.size
+                            for (index in firstTestPanelFactoryIndex until lastTestPanelFactoryIndex) {
                                 generatedTestsTabData.testCasePanelFactories[index].removeTask()
                             }
                         }
