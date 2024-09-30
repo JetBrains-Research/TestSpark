@@ -81,7 +81,7 @@ class LLMWithFeedbackCycle(
         val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
 
         // collect imports from all responses
-        val imports: MutableList<String> = mutableListOf()
+        val imports: MutableSet<String> = mutableSetOf()
 
         var generatedTestSuite: TestSuiteGeneratedByLLM? = null
 
