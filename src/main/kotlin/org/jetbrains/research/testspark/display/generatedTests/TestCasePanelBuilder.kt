@@ -608,6 +608,11 @@ class TestCasePanelBuilder(
         }
     }
 
+    fun removeTask() {
+        finishProcess()
+        update()
+    }
+
     private fun runTest(indicator: CustomProgressIndicator) {
         indicator.setText("Executing ${testCase.testName}")
 
