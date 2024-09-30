@@ -28,7 +28,7 @@ class JUnitTestSuiteParserStrategy {
                 // save imports
                 val imports = importPattern.findAll(rawCode)
                     .map { it.groupValues[0] }
-                    .toSet()
+                    .toMutableSet()
 
                 // save RunWith
                 val runWith: String = junitVersion.runWithAnnotationMeta.extract(rawCode) ?: ""
