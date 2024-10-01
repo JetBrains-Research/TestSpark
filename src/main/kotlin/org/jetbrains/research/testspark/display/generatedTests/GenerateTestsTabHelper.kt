@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.display.generatedTests
 
 object GenerateTestsTabHelper {
     /**
-     * A helper method to remove a test case from the cache and from the UI.
+     * A helper method to purge a test case from the cache and from the UI.
      *
      * @param testCaseName the name of the test
      */
@@ -25,6 +25,11 @@ object GenerateTestsTabHelper {
         generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
     }
 
+    /**
+     * A helper method to remove a test case temporarily.
+     *
+     * @param testCaseName the name of the test to remove
+     */
     fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
         // Uncheck the selected checkbox
         generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected = false
@@ -36,6 +41,11 @@ object GenerateTestsTabHelper {
         generatedTestsTabData.testCaseNameToEnabled[testCaseName] = false
     }
 
+    /**
+     * A helper method to restore a removed test case.
+     *
+     * @param testCaseName the name of the test to restore
+     */
     fun undoRemoveTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
         // Check the selected checkbox
         generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected = true

@@ -122,7 +122,7 @@ class TestCasePanelBuilder(
     private val removeButton =
         IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
 
-    // Create "Undo remove" button to undo previously removed button
+    // Create "Undo remove" button to brink back a removed test
     private val undoRemoveButton =
         IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("removeTip"))
 
@@ -294,7 +294,6 @@ class TestCasePanelBuilder(
         buttonsPanel.add(resetToLastRunButton)
         buttonsPanel.add(removeButton)
         buttonsPanel.add(undoRemoveButton)
-        undoRemoveButton.isEnabled = false
         undoRemoveButton.isVisible = false
 
         buttonsPanel.add(Box.createRigidArea(Dimension(12, 0)))
@@ -615,21 +614,18 @@ class TestCasePanelBuilder(
     }
 
     /**
-     * Removes the button listener for the test case.
+     * Marks the test as removed.
      *
-     * This method is responsible for:
-     * 1. Removing the highlighting of the test.
-     * 2. Removing the test case from the cache.
-     * 3. Updating the UI.
+     * 1. The state is propagated to other parts, including ReportUpdater.
+     * 2. The test is indicated as removed in the UI.
+     * 3. The test won't be runnable or selectable by any means until it's restored.
      */
     private fun remove() {
         // Temporarily remove the test case
         GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
-        removeButton.isEnabled = false
         removeButton.isVisible = false
-        undoRemoveButton.isEnabled = true
         undoRemoveButton.isVisible = true
 
         languageTextField.isEnabled = false
@@ -642,13 +638,18 @@ class TestCasePanelBuilder(
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
+    /**
+     * Marks the test as not removed.
+     *
+     * 1. The state is propagated to other parts, including ReportUpdater.
+     * 2. The test is indicated as normal in the UI.
+     * 3. The test is runnable and selectable like any other normal test.
+     */
     private fun undoRemove() {
         GenerateTestsTabHelper.undoRemoveTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = true
-        removeButton.isEnabled = true
         removeButton.isVisible = true
-        undoRemoveButton.isEnabled = false
         undoRemoveButton.isVisible = false
 
         languageTextField.isEnabled = true
