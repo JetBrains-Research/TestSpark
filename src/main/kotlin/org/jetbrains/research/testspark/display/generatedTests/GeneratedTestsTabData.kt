@@ -12,6 +12,7 @@ class GeneratedTestsTabData {
     val testCaseNameToPanel: HashMap<String, JPanel> = HashMap()
     val testCaseNameToSelectedCheckbox: HashMap<String, JCheckBox> = HashMap()
     val testCaseNameToEditorTextField: HashMap<String, EditorTextField> = HashMap()
+    val testCaseNameToEnabled: HashMap<String, Boolean> = HashMap()
     var testsSelected: Int = 0
     val unselectedTestCases: HashMap<Int, TestCase> = HashMap()
     val testCasePanelFactories: ArrayList<TestCasePanelBuilder> = arrayListOf()

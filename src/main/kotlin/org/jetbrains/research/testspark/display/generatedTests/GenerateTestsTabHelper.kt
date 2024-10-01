@@ -12,6 +12,9 @@ object GenerateTestsTabHelper {
 
         // Disable the selected checkbox
         generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isEnabled = false
+
+        // Update status
+        generatedTestsTabData.testCaseNameToEnabled[testCaseName] = false
     }
 
     fun undoRemoveTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
@@ -20,6 +23,9 @@ object GenerateTestsTabHelper {
 
         // Enable the selected checkbox
         generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isEnabled = true
+
+        // Update status
+        generatedTestsTabData.testCaseNameToEnabled[testCaseName] = true
     }
 
     /**

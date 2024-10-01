@@ -166,6 +166,7 @@ class GeneratedTestsTabBuilder(
             generatedTestsTabData.allTestCasePanel.add(testCasePanel)
             addSeparator()
 
+            generatedTestsTabData.testCaseNameToEnabled[testCase.testName] = true
             generatedTestsTabData.testCaseNameToPanel[testCase.testName] = testCasePanel
             generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName] = checkbox
             generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName] =

@@ -69,14 +69,16 @@ class TopButtonsPanelBuilder {
 
     /**
      * Toggles check boxes so that they are either all selected or all not selected,
-     *  depending on the provided parameter.
+     *  depending on the provided parameter. This affects only non-removed tests.
      *
      *  @param selected whether the checkboxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean, generatedTestsTabData: GeneratedTestsTabData) {
-        generatedTestsTabData.testCaseNameToPanel.forEach { (_, jPanel) ->
+        generatedTestsTabData.testCaseNameToPanel.forEach { (testCaseName, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
-            checkBox.isSelected = selected
+            if (generatedTestsTabData.testCaseNameToEnabled[testCaseName]!!) {
+                checkBox.isSelected = selected
+            }
         }
         generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseNameToPanel.size else 0
     }
