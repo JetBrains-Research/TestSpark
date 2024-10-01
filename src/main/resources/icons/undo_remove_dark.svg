@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Copyright 2000-2022 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license. -->
+
+<svg
+   width="16"
+   height="16"
+   viewBox="0 0 16 16"
+   fill="none"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="undo_remove_dark.svg"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="true"
+     inkscape:zoom="33.550101"
+     inkscape:cx="14.366574"
+     inkscape:cy="9.2697188"
+     inkscape:window-width="1536"
+     inkscape:window-height="810"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g1">
+    <inkscape:grid
+       id="grid8"
+       units="px"
+       originx="0"
+       originy="0"
+       spacingx="1"
+       spacingy="1"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       dotted="false"
+       gridanglex="30"
+       gridanglez="30"
+       visible="true" />
+  </sodipodi:namedview>
+  <g
+     id="g1">
+    <path
+       fill-rule="evenodd"
+       clip-rule="evenodd"
+       d="m 7,2 h 2 c 0.55228,0 1,0.44772 1,1 H 6 C 6,2.44772 6.44772,2 7,2 Z M 5,3 C 5,1.89543 5.89543,1 7,1 h 2 c 1.1046,0 2,0.89543 2,2 h 2 c 0.5523,0 1,0.44772 1,1 v 1 1 h -1 v 7 c 0,1.1046 -0.8954,2 -2,2 H 5 C 3.89543,15 3,14.1046 3,13 V 6 H 2 V 5 4 C 2,3.44772 2.44772,3 3,3 Z m 6,1 H 10 6 5 3 v 1 h 1 8 1 V 4 Z M 4,6 h 8 v 7 c 0,0.5523 -0.4477,1 -1,1 H 5 C 4.44772,14 4,13.5523 4,13 Z"
+       fill="#ced0d6"
+       id="path1"
+       sodipodi:nodetypes="ssccscsscsscccsssscccssccccccccccccccssssc" />
+    <rect
+       style="fill:#ced0d6;fill-opacity:1;stroke-width:1.21207"
+       id="rect7"
+       width="2.9315772"
+       height="3.9269018"
+       x="6.5342112"
+       y="9.0730982"
+       ry="0.57812244" />
+    <path
+       sodipodi:type="star"
+       style="fill:#ced0d6;fill-opacity:1"
+       id="path10"
+       inkscape:flatsided="true"
+       sodipodi:sides="3"
+       sodipodi:cx="6"
+       sodipodi:cy="8.6659517"
+       sodipodi:r1="2.0245099"
+       sodipodi:r2="1.0381094"
+       sodipodi:arg1="-1.5707963"
+       sodipodi:arg2="-0.52359882"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 6.0000001,6.6414418 1.7532769,3.0367649 -3.506554,-1e-7 z"
+       inkscape:transform-center-x="0.17559982"
+       inkscape:transform-center-y="-0.44375855"
+       transform="matrix(1.6407211,0,0,1.0475854,-1.8443266,-0.54811278)" />
+  </g>
+</svg>

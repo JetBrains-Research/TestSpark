@@ -124,7 +124,7 @@ class TestCasePanelBuilder(
 
     // Create "Undo remove" button to brink back a removed test
     private val undoRemoveButton =
-        IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("removeTip"))
+        IconButtonCreator.getButton(TestSparkIcons.undoRemove, PluginLabelsBundle.get("undoRemoveTip"))
 
     // Create "Reset" button to reset the changes in the source code of the test
     private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
