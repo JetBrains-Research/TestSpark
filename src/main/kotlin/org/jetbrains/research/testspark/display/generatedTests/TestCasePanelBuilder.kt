@@ -656,6 +656,8 @@ class TestCasePanelBuilder(
         
         isRemoved = false
 
+        ReportUpdater.addTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
