@@ -84,7 +84,7 @@ class TopButtonsPanelBuilder {
     }
 
     /**
-     * Executes all test cases.
+     * Executes all non-removed test cases.
      *
      * This method presents a caution message to the user and asks for confirmation before executing the test cases.
      * If the user confirms, it iterates through each test case panel factory and runs the corresponding test.
@@ -106,7 +106,9 @@ class TopButtonsPanelBuilder {
         val tasks: Queue<(CustomProgressIndicator) -> Unit> = LinkedList()
 
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
-            testCasePanelFactory.addTask(tasks)
+            if (!testCasePanelFactory.isRemoved()) {
+                testCasePanelFactory.addTask(tasks)
+            }
         }
         // run tasks one after each other
         executeTasks(project, tasks)
