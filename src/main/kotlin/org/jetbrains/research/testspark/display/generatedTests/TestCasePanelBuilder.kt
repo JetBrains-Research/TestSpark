@@ -139,6 +139,8 @@ class TestCasePanelBuilder(
     private val requestJLabel = JLabel(PluginLabelsBundle.get("requestJLabel"))
     private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(llmSettingsState.defaultLLMRequests))
 
+    private val removedTestJLabel = JLabel(PluginLabelsBundle.get("removedTestJLabel"))
+
     private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, PluginLabelsBundle.get("send"))
 
     private val loadingLabel: JLabel = JLabel(TestSparkIcons.loading)
@@ -282,6 +284,9 @@ class TestCasePanelBuilder(
         buttonsPanel.add(runTestButton)
         loadingLabel.isVisible = false
         buttonsPanel.add(loadingLabel)
+        buttonsPanel.add(Box.createHorizontalGlue())
+        removedTestJLabel.isVisible = false
+        buttonsPanel.add(removedTestJLabel)
         buttonsPanel.add(Box.createHorizontalGlue())
         resetButton.isEnabled = false
         buttonsPanel.add(resetButton)
@@ -627,6 +632,9 @@ class TestCasePanelBuilder(
         undoRemoveButton.isEnabled = true
         undoRemoveButton.isVisible = true
 
+        languageTextField.isEnabled = false
+        removedTestJLabel.isVisible = true
+
         isRemoved = true
 
         ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
@@ -642,6 +650,9 @@ class TestCasePanelBuilder(
         removeButton.isVisible = true
         undoRemoveButton.isEnabled = false
         undoRemoveButton.isVisible = false
+
+        languageTextField.isEnabled = true
+        removedTestJLabel.isVisible = false
         
         isRemoved = false
 
