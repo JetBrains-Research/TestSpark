@@ -244,7 +244,7 @@ class GeneratedTestsTabBuilder(
      */
     fun clear() {
         generatedTestsTabData.testCaseNameToPanel.toMap()
-            .forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
+            .forEach { GenerateTestsTabHelper.purgeTestCase(it.key, generatedTestsTabData) }
         generatedTestsTabData.testCasePanelFactories.clear()
         generatedTestsTabData.topButtonsPanelBuilder.clear(generatedTestsTabData)
 

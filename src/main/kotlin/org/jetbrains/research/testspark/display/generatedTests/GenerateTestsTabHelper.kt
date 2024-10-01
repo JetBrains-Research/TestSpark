@@ -6,6 +6,25 @@ object GenerateTestsTabHelper {
      *
      * @param testCaseName the name of the test
      */
+    fun purgeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+        // Update the number of selected test cases if necessary
+        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
+            generatedTestsTabData.testsSelected--
+        }
+
+        // Remove the test panel from the UI
+        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
+
+        // Remove the test panel
+        generatedTestsTabData.testCaseNameToPanel.remove(testCaseName)
+
+        // Remove the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox.remove(testCaseName)
+
+        // Remove the editorTextField
+        generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
+    }
+
     fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
         // Uncheck the selected checkbox
         generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected = false
