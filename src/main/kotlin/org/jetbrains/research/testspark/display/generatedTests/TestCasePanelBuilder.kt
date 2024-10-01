@@ -618,9 +618,8 @@ class TestCasePanelBuilder(
      * 3. Updating the UI.
      */
     private fun remove() {
-        // Remove the test case from the cache
-//        GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
-
+        // Temporarily remove the test case
+        GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
         removeButton.isEnabled = false
@@ -636,6 +635,8 @@ class TestCasePanelBuilder(
     }
 
     private fun undoRemove() {
+        GenerateTestsTabHelper.undoRemoveTestCase(testCase.testName, generatedTestsTabData)
+
         runTestButton.isEnabled = true
         removeButton.isEnabled = true
         removeButton.isVisible = true
@@ -643,6 +644,8 @@ class TestCasePanelBuilder(
         undoRemoveButton.isVisible = false
         
         isRemoved = false
+
+        GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
     /**

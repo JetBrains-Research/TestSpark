@@ -7,22 +7,19 @@ object GenerateTestsTabHelper {
      * @param testCaseName the name of the test
      */
     fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
-        // Update the number of selected test cases if necessary
-        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
-            generatedTestsTabData.testsSelected--
-        }
+        // Uncheck the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected = false
 
-        // Remove the test panel from the UI
-        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
+        // Disable the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isEnabled = false
+    }
 
-        // Remove the test panel
-        generatedTestsTabData.testCaseNameToPanel.remove(testCaseName)
+    fun undoRemoveTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+        // Check the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected = true
 
-        // Remove the selected checkbox
-        generatedTestsTabData.testCaseNameToSelectedCheckbox.remove(testCaseName)
-
-        // Remove the editorTextField
-        generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
+        // Enable the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isEnabled = true
     }
 
     /**
