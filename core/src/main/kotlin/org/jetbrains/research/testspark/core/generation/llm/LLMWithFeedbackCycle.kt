@@ -42,8 +42,8 @@ data class FeedbackResponse(
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM>,
 ) {
     init {
-        if ((executionResult == FeedbackCycleExecutionResult.OK || executionResult == FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED)
-            && (generatedTestSuite == null)
+        if ((executionResult == FeedbackCycleExecutionResult.OK || executionResult == FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED) &&
+            (generatedTestSuite == null)
         ) {
             throw IllegalArgumentException("Test suite must be provided when FeedbackCycleExecutionResult is OK, got null")
         }
