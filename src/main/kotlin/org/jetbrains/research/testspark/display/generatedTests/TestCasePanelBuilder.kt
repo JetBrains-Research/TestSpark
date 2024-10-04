@@ -306,6 +306,11 @@ class TestCasePanelBuilder(
 
         sendButton.addActionListener { sendRequest() }
 
+        /**
+         * The following code is a workaround for the issue with the ComboBox preferred size.
+         * See: https://github.com/JetBrains-Research/TestSpark/pull/343#discussion_r1781430743
+         */
+        requestComboBox.preferredSize = Dimension(0, 0)
         requestComboBox.isEditable = true
 
         return panel
