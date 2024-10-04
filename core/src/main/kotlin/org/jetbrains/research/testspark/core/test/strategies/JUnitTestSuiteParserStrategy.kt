@@ -111,20 +111,20 @@ class JUnitTestSuiteParserStrategy {
             }
 
             /**
-             * The test declaration is split into two parts:
+             * The test definition is split into two parts:
              * [void|fun] <testcase name>() [throws <exception>] { ... }
-             * The first part is the test declaration prologue,
-             * the second part is the test declaration epilogue.
+             * The first part is the test definition prologue,
+             * the second part is the test definition epilogue.
              *
              * Therefore, as an epilogue, we have everything after [void|fun].
              *
              * `limit = 2` is used to avoid additional splitting in case if the test
-             * case name starts with the same word as the test declaration prologue.
+             * case name starts with the same word as the test definition prologue.
              */
             val testCaseEpilogue = rawTest.split(testNamePattern, limit = 2)[1]
 
             /**
-             * Optional [throws <exception>] part is extracted from the test declaration epilogue.
+             * Optional [throws <exception>] part is extracted from the test definition epilogue.
              */
             val interestingPartOfSignature = testCaseEpilogue
                 .split("{")[0]
