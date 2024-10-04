@@ -103,6 +103,7 @@ dependencies {
     implementation(files("lib/standalone-runtime.jar"))
     implementation(files("lib/jacocoagent.jar"))
     implementation(files("lib/jacococli.jar"))
+    implementation(files("lib/opentest4j-1.1.1.jar"))
     implementation(files("lib/mockito-core-5.0.0.jar"))
     implementation(files("lib/byte-buddy-1.14.6.jar"))
     implementation(files("lib/byte-buddy-agent-1.14.6.jar"))
