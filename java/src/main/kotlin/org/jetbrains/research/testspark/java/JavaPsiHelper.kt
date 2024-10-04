@@ -26,8 +26,18 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
     override val language: SupportedLanguage get() = SupportedLanguage.Java
 
+    /**
+     * When dealing with Java PSI files, we expect that only classes and their methods are tested.
+     * Therefore, we expect a **class** to surround a cursor offset.
+     *
+     * This requirement ensures that the user is not trying
+     * to generate tests for a line of code outside the class scope.
+     *
+     * @param e `AnActionEvent` representing the current action event.
+     * @return `true` if the cursor is inside a class, `false` otherwise.
+     */
     override fun availableForGeneration(e: AnActionEvent): Boolean =
-        getCurrentListOfCodeTypes(e).map { it.first }.toList().contains(CodeType.CLASS)
+        getCurrentListOfCodeTypes(e).any { it.first == CodeType.CLASS }
 
     private val log = Logger.getInstance(this::class.java)
 
