@@ -25,7 +25,19 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 
     override val language: SupportedLanguage get() = SupportedLanguage.Kotlin
 
-    override fun availableForGeneration(e: AnActionEvent): Boolean = getCurrentListOfCodeTypes(e).isNotEmpty()
+    /**
+     * When dealing with Kotlin PSI files, we expect that only classes, their methods,
+     * top-level functions are tested.
+     * Therefore, we expect either a class or a method (top-level function) to surround a cursor offset.
+     *
+     * This requirement ensures that the user is not trying
+     * to generate tests for a line of code outside the aforementioned scopes.
+     *
+     * @param e `AnActionEvent` representing the current action event.
+     * @return `true` if the cursor is inside a class or method, `false` otherwise.
+     */
+    override fun availableForGeneration(e: AnActionEvent): Boolean =
+        getCurrentListOfCodeTypes(e).any { (it.first == CodeType.CLASS) || (it.first == CodeType.METHOD) }
 
     private val log = Logger.getInstance(this::class.java)
 
