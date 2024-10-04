@@ -193,8 +193,6 @@ class LLMWithFeedbackCycle(
 
             generatedTestSuite = response.testSuite
 
-            println("generatedTestSuite: $generatedTestSuite")
-
             // update imports list
             imports.addAll(generatedTestSuite.imports)
 
