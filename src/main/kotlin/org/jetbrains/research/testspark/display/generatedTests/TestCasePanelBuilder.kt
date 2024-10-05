@@ -401,8 +401,8 @@ class TestCasePanelBuilder(
 
         currentCodes[currentRequestNumber - 1] = testCase.testCode
 
-        // select checkbox
-        checkbox.isSelected = true
+        // select checkbox if the test is not removed
+        checkbox.isSelected = !isRemoved
 
         if (testCaseCodeToListOfCoveredLines.containsKey(testCase.testCode)) {
             testCase.coveredLines = testCaseCodeToListOfCoveredLines[testCase.testCode]!!
@@ -629,6 +629,9 @@ class TestCasePanelBuilder(
         resetButton.isEnabled = false
         resetToLastRunButton.isEnabled = false
 
+        checkbox.isSelected = false
+        checkbox.isEnabled = false
+
         removeButton.isVisible = false
         undoRemoveButton.isVisible = true
 
@@ -656,6 +659,9 @@ class TestCasePanelBuilder(
         sendButton.isEnabled = true
         resetButton.isEnabled = true
         resetToLastRunButton.isEnabled = true
+
+        checkbox.isSelected = true
+        checkbox.isEnabled = true
 
         removeButton.isVisible = true
         undoRemoveButton.isVisible = false
