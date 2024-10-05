@@ -39,6 +39,7 @@ object GenerateTestsTabHelper {
 
         // Update status
         generatedTestsTabData.testCaseNameToEnabled[testCaseName] = false
+        generatedTestsTabData.testsRemoved++
     }
 
     /**
@@ -55,6 +56,7 @@ object GenerateTestsTabHelper {
 
         // Update status
         generatedTestsTabData.testCaseNameToEnabled[testCaseName] = true
+        generatedTestsTabData.testsRemoved--
     }
 
     /**

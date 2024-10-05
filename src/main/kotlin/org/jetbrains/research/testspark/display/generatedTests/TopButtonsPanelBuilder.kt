@@ -48,16 +48,20 @@ class TopButtonsPanelBuilder {
                 numberOfPassedTests++
             }
         }
+        
+        val numberOfNonRemovedTests
+            = generatedTestsTabData.testCaseNameToPanel.size - generatedTestsTabData.testsRemoved
+
         testsSelectedLabel.text = String.format(
             testsSelectedText,
             generatedTestsTabData.testsSelected,
-            generatedTestsTabData.testCaseNameToPanel.size,
+            numberOfNonRemovedTests,
         )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 numberOfPassedTests,
-                generatedTestsTabData.testCaseNameToPanel.size,
+                numberOfNonRemovedTests,
             )
         runAllButton.isEnabled = false
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
