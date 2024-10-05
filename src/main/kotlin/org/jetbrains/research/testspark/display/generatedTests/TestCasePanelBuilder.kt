@@ -122,7 +122,7 @@ class TestCasePanelBuilder(
     private val removeButton =
         IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
 
-    // Create "Undo remove" button to brink back a removed test
+    // Create "Undo remove" button to restore a removed test
     private val undoRemoveButton =
         IconButtonCreator.getButton(TestSparkIcons.undoRemove, PluginLabelsBundle.get("undoRemoveTip"))
 
