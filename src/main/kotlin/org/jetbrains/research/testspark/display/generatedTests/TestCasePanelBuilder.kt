@@ -625,6 +625,10 @@ class TestCasePanelBuilder(
         GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
+        sendButton.isEnabled = false
+        resetButton.isEnabled = false
+        resetToLastRunButton.isEnabled = false
+
         removeButton.isVisible = false
         undoRemoveButton.isVisible = true
 
@@ -649,6 +653,10 @@ class TestCasePanelBuilder(
         GenerateTestsTabHelper.undoRemoveTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = true
+        sendButton.isEnabled = true
+        resetButton.isEnabled = true
+        resetToLastRunButton.isEnabled = true
+
         removeButton.isVisible = true
         undoRemoveButton.isVisible = false
 
