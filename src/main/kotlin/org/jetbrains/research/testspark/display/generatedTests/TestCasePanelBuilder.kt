@@ -655,7 +655,7 @@ class TestCasePanelBuilder(
     private fun undoRemove() {
         GenerateTestsTabHelper.undoRemoveTestCase(testCase.testName, generatedTestsTabData)
 
-        runTestButton.isEnabled = true
+        runTestButton.isEnabled = (getError() == null)
         sendButton.isEnabled = true
         resetButton.isEnabled = true
         resetToLastRunButton.isEnabled = true
