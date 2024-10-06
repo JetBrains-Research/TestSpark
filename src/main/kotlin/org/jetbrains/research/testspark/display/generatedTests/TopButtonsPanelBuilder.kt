@@ -47,11 +47,6 @@ class TopButtonsPanelBuilder {
         val nonRemovedTestsCount
             = generatedTestsTabData.testCaseNameToPanel.size - generatedTestsTabData.testsRemoved
 
-        if (nonRemovedTestsCount == 0) {
-            removeAllButton.doClick()
-            return
-        }
-
         testsSelectedLabel.text = String.format(
             testsSelectedText,
             generatedTestsTabData.testsSelected,
