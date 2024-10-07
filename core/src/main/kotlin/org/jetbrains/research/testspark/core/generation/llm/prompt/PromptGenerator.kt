@@ -90,4 +90,32 @@ class PromptGenerator(
 
         return prompt
     }
+
+    /**
+     * Generates a prompt for a given line under test using CUT as a context.
+     *
+     * @param lineUnderTest The source code of the line to be tested.
+     * @param interestingClasses The list of `ClassRepresentation` objects related to the line under test.
+     * @param testSamplesCode The code snippet that serves as test samples.
+     * @return The generated prompt as `String`.
+     * @throws IllegalStateException If any of the required keywords are missing in the prompt template.
+     */
+    fun generatePromptForLine(
+        lineUnderTest: String,
+        interestingClasses: List<ClassRepresentation>,
+        testSamplesCode: String
+    ): String {
+        val prompt = PromptBuilder(promptTemplates.linePrompt)
+            .insertLanguage(context.promptConfiguration.desiredLanguage)
+            .insertName(lineUnderTest.trim())
+            .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
+            .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
+            .insertCodeUnderTest(context.cut?.fullText ?: "", context.classesToTest)
+            .insertMethodsSignatures(interestingClasses)
+            .insertPolymorphismRelations(context.polymorphismRelations)
+            .insertTestSample(testSamplesCode)
+            .build()
+
+        return prompt
+    }
 }
