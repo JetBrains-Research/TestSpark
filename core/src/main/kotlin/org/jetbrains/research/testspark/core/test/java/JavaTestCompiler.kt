@@ -9,40 +9,47 @@ import java.io.File
 class JavaTestCompiler(
     libPaths: List<String>,
     junitLibPaths: List<String>,
-    private val javaHomeDirectoryPath: String,
+    javaHomeDirectoryPath: String,
 ) : TestCompiler(libPaths, junitLibPaths) {
+    private val logger = KotlinLogging.logger { this::class.java }
+    private val javac: String
 
-    private val log = KotlinLogging.logger { this::class.java }
-
-    override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
-        val classPaths = "\"${getClassPaths(projectBuildPath)}\""
-        // TODO: no need to search for it every time; memoize it
+    // init block to find the javac compiler
+    init {
         // find the proper javac
-        val javaCompile = File(javaHomeDirectoryPath).walk()
+        val javaCompiler = File(javaHomeDirectoryPath).walk()
             .filter {
-                val isCompilerName =
-                    if (DataFilesUtil.isWindows()) it.name.equals("javac.exe") else it.name.equals("javac")
+                val isCompilerName = if (DataFilesUtil.isWindows()) {
+                    it.name.equals("javac.exe")
+                } else {
+                    it.name.equals("javac")
+                }
                 isCompilerName && it.isFile
             }
             .firstOrNull()
 
-        if (javaCompile == null) {
+        if (javaCompiler == null) {
             val msg = "Cannot find java compiler 'javac' at '$javaHomeDirectoryPath'"
-            log.error { msg }
+            logger.error { msg }
             throw RuntimeException(msg)
         }
+        javac = javaCompiler.absolutePath
+    }
 
+
+    override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
+        val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // compile file
         val errorMsg = CommandLineRunner.run(
             arrayListOf(
-                javaCompile.absolutePath,
+                javac,
                 "-cp",
                 classPaths,
                 path,
             ),
         )
 
-        log.info { "Error message: '$errorMsg'" }
+        logger.info { "Error message: '$errorMsg'" }
         // create .class file path
         val classFilePath = path.replace(".java", ".class")
 
