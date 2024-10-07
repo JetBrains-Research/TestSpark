@@ -119,6 +119,8 @@ interface PsiHelper {
     /**
      * Returns the line number of the selected line where the caret is positioned.
      *
+     * The returned line number is **1-based**.
+     *
      * @param caretOffset The caret offset within the PSI file.
      * @return The line number of the selected line, otherwise null.
      */
