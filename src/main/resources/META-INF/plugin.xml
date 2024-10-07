@@ -149,7 +149,7 @@
     <depends>com.intellij.gradle</depends>
 
     <!--    Plugin depends on the Kotlin support plugin that comes with org.jetbrains.kotlin.
-            This dependency is optional, which means plugin can run even if the Java plugin is not available or not enabled.
+            This dependency is optional, which means plugin can run even if the Kotlin plugin is not available or not enabled.
             This dependency will be loaded only when actually needed.
             Moreover, we specify the configuration file to consider when the dependency is needed. -->
     <depends
