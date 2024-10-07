@@ -153,8 +153,7 @@ class PromptManager(
                                 interestingClassesFromMethod,
                                 testSamplesCode,
                             )
-                        }
-                        else {
+                        } else {
                             return@Computable promptGenerator.generatePromptForLine(
                                 lineUnderTest,
                                 interestingClasses,
@@ -315,8 +314,7 @@ class PromptManager(
              * we already know that the current language is supported
              */
             return psiHelper!!.generateMethodDescriptor(containingPsiMethod)
-        }
-        else {
+        } else {
             /**
              * When no PSI class provided we are dealing with a top-level function.
              * Processing function outside the class

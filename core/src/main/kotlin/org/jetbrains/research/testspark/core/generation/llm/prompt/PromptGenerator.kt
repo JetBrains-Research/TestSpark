@@ -103,7 +103,7 @@ class PromptGenerator(
     fun generatePromptForLine(
         lineUnderTest: String,
         interestingClasses: List<ClassRepresentation>,
-        testSamplesCode: String
+        testSamplesCode: String,
     ): String {
         val prompt = PromptBuilder(promptTemplates.linePrompt)
             .insertLanguage(context.promptConfiguration.desiredLanguage)
