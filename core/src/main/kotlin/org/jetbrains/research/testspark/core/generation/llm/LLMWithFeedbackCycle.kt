@@ -45,7 +45,9 @@ data class FeedbackResponse(
         if ((executionResult == FeedbackCycleExecutionResult.OK || executionResult == FeedbackCycleExecutionResult.NO_COMPILABLE_TEST_CASES_GENERATED) &&
             (generatedTestSuite == null)
         ) {
-            throw IllegalArgumentException("Test suite must be provided when FeedbackCycleExecutionResult is OK, got null")
+            throw IllegalArgumentException(
+                "Test suite must be provided when FeedbackCycleExecutionResult is OK or NO_COMPILABLE_TEST_CASES_GENERATED (currently, ${executionResult.name}), got null",
+            )
         }
     }
 }
