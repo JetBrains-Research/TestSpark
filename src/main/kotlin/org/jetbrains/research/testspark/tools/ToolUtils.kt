@@ -114,6 +114,7 @@ object ToolUtils {
 
     fun isProcessCanceled(indicator: CustomProgressIndicator): Boolean {
         if (indicator.isCanceled()) {
+            // TODO: we must not stop this indicator! cancellation MAY imply stoppage
             indicator.stop()
             return true
         }
