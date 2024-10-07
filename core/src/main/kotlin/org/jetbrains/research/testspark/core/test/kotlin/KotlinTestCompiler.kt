@@ -3,29 +3,57 @@ package org.jetbrains.research.testspark.core.test.kotlin
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
+import org.jetbrains.research.testspark.core.utils.DataFilesUtil
+import java.io.File
 
-class KotlinTestCompiler(libPaths: List<String>, junitLibPaths: List<String>) :
-    TestCompiler(libPaths, junitLibPaths) {
+class KotlinTestCompiler(
+    libPaths: List<String>,
+    junitLibPaths: List<String>,
+    kotlinSDKHomeDirectory: String,
+) : TestCompiler(libPaths, junitLibPaths) {
+    private val logger = KotlinLogging.logger { this::class.java }
+    private val kotlinc: String
 
-    private val log = KotlinLogging.logger { this::class.java }
+    // init block to find the kotlinc compiler
+    init {
+        // TODO: does it work on Windows?
+        // search for a proper kotlinc
+        val kotlinCompiler = File(kotlinSDKHomeDirectory).walk()
+            .filter {
+                val isCompilerName = if (DataFilesUtil.isWindows()) {
+                    // TODO: is it kotlinc.exe?
+                    it.name.equals("kotlinc.exe")
+                } else {
+                    it.name.equals("kotlinc")
+                }
+                isCompilerName && it.isFile
+            }.firstOrNull()
+
+        if (kotlinCompiler == null) {
+            val msg = "Cannot find Kotlinc compiler 'kotlinc' at '$kotlinSDKHomeDirectory'"
+            logger.error { msg }
+            throw RuntimeException(msg)
+        }
+        kotlinc = kotlinCompiler.absolutePath
+    }
 
     override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
-        log.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
+        logger.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
-        // TODO find the kotlinc if it is not in PATH
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // Compile file
         val errorMsg = CommandLineRunner.run(
             arrayListOf(
-                "kotlinc",
+                kotlinc,
                 "-cp",
                 classPaths,
                 path,
             ),
         )
 
+        // TODO: we treat warnings as errors for now
         if (errorMsg.isNotEmpty()) {
-            log.info { "Error message: '$errorMsg'" }
+            logger.info { "Error message: '$errorMsg'" }
             if (errorMsg.contains("kotlinc: command not found'")) {
                 throw RuntimeException(errorMsg)
             }

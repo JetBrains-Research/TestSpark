@@ -16,6 +16,7 @@ class JavaTestCompiler(
 
     override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
+        // TODO: no need to search for it every time; memoize it
         // find the proper javac
         val javaCompile = File(javaHomeDirectoryPath).walk()
             .filter {
@@ -30,8 +31,6 @@ class JavaTestCompiler(
             log.error { msg }
             throw RuntimeException(msg)
         }
-
-        println("javac found at '${javaCompile.absolutePath}'")
 
         // compile file
         val errorMsg = CommandLineRunner.run(
