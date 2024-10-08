@@ -16,13 +16,23 @@ class KotlinTestCompiler(
 
     // init block to find the kotlinc compiler
     init {
-        // TODO: does it work on Windows?
         // search for a proper kotlinc
         val kotlinCompiler = File(kotlinSDKHomeDirectory).walk()
             .filter {
+                /**
+                 * Tested on Windows 10, IntelliJ IDEA Community Edition 2023.1.4 (2023.1.4.IC-231.9225.26)
+                 *
+                 * Windows' kotlinc requires `java` command to be present in ENV (e.g., present in PATH).
+                 * Otherwise, it won't be able to execute itself.
+                 *
+                 * Missing `java` in PATH does not yield runtime error but is considered
+                 * as failed compilation because `kotlinc` will complain about
+                 * `java` command missing in PATH.
+                 *
+                 * TODO(vartiukhov): find a way to locate `java` on Windows
+                 */
                 val isCompilerName = if (DataFilesUtil.isWindows()) {
-                    // TODO: is it kotlinc.exe?
-                    it.name.equals("kotlinc.exe")
+                    it.name.equals("kotlinc")
                 } else {
                     it.name.equals("kotlinc")
                 }
