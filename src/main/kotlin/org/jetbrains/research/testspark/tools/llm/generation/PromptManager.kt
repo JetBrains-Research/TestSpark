@@ -57,6 +57,7 @@ class PromptManager(
     /**
      * The `cut` is null when we work with the function outside the class.
      */
+    // TODO: firstOrNull()?
     private val cut: PsiClassWrapper? = if (classesToTest.isNotEmpty()) classesToTest[0] else null
 
     private val llmSettingsState: LLMSettingsState
