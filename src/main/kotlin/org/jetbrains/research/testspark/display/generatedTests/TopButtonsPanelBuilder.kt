@@ -44,8 +44,7 @@ class TopButtonsPanelBuilder {
             .filter { !it.isRemoved() }
             .count { it.getError()?.isEmpty() == true }
 
-        val nonRemovedTestsCount
-            = generatedTestsTabData.testCaseNameToPanel.size - generatedTestsTabData.testsRemoved
+        val nonRemovedTestsCount = generatedTestsTabData.testCaseNameToPanel.size - generatedTestsTabData.testsRemoved
 
         testsSelectedLabel.text = String.format(
             testsSelectedText,

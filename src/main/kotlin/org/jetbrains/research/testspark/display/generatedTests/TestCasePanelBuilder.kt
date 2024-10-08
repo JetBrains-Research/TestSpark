@@ -678,7 +678,7 @@ class TestCasePanelBuilder(
 
         languageTextField.isEnabled = true
         removedTestJLabel.isVisible = false
-        
+
         isRemoved = false
 
         ReportUpdater.addTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
