@@ -36,7 +36,6 @@ class JavaTestCompiler(
         javac = javaCompiler.absolutePath
     }
 
-
     override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // compile file
