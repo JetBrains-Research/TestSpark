@@ -153,6 +153,7 @@ class PromptManager(
                                 method,
                                 interestingClassesFromMethod,
                                 testSamplesCode,
+                                packageName = psiHelper.getPackageName(),
                             )
                         } else {
                             return@Computable promptGenerator.generatePromptForLine(
