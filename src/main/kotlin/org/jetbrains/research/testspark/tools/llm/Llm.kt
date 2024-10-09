@@ -228,8 +228,7 @@ class Llm(override val name: String = "LLM") : Tool {
             )
 
             pipeline.runTestGeneration(manager, codeType)
-        }
-        catch (err: TestSparkException) {
+        } catch (err: TestSparkException) {
             testGenerationController.finished()
             LLMErrorManager().errorProcess(err.message!!, project, testGenerationController.errorMonitor)
         }

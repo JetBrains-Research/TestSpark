@@ -110,8 +110,7 @@ class Pipeline(
                         if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
                         ijIndicator.stop()
-                    }
-                    catch (err: TestSparkException) {
+                    } catch (err: TestSparkException) {
                         LLMErrorManager().errorProcess(err.message!!, project, testGenerationController.errorMonitor)
                     }
                 }

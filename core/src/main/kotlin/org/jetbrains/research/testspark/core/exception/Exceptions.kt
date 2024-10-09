@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.core.exception
 
-
 /**
  * Represents custom exceptions within TestSpark.
  *
