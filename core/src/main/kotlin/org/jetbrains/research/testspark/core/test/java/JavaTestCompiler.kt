@@ -34,7 +34,7 @@ class JavaTestCompiler(
         println("javac found at '${javaCompile.absolutePath}'")
 
         // compile file
-        val errorMsg = CommandLineRunner.run(
+        val executionResult = CommandLineRunner.run(
             arrayListOf(
                 javaCompile.absolutePath,
                 "-cp",
@@ -42,13 +42,14 @@ class JavaTestCompiler(
                 path,
             ),
         )
+        val executionMsg = executionResult.second
 
-        log.info { "Error message: '$errorMsg'" }
+        log.info { "Execution result: '${executionMsg}'" }
         // create .class file path
         val classFilePath = path.replace(".java", ".class")
 
         // check is .class file exists
-        return Pair(File(classFilePath).exists(), errorMsg)
+        return Pair(File(classFilePath).exists() && (executionResult.first == 0), executionMsg)
     }
 
     override fun getClassPaths(buildPath: String): String {

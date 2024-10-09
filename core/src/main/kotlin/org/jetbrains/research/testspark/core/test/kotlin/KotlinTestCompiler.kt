@@ -15,7 +15,7 @@ class KotlinTestCompiler(libPaths: List<String>, junitLibPaths: List<String>) :
         // TODO find the kotlinc if it is not in PATH
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // Compile file
-        val errorMsg = CommandLineRunner.run(
+        val executionResult = CommandLineRunner.run(
             arrayListOf(
                 "kotlinc",
                 "-cp",
@@ -23,16 +23,18 @@ class KotlinTestCompiler(libPaths: List<String>, junitLibPaths: List<String>) :
                 path,
             ),
         )
+        val executionMsg = executionResult.second
+        val execSuccessful = executionResult.first == 0
 
-        if (errorMsg.isNotEmpty()) {
-            log.info { "Error message: '$errorMsg'" }
-            if (errorMsg.contains("kotlinc: command not found'")) {
-                throw RuntimeException(errorMsg)
+        if (!execSuccessful) {
+            log.info { "Error message: '$executionMsg'" }
+            if (executionMsg.contains("kotlinc: command not found'")) {
+                throw RuntimeException(executionMsg)
             }
         }
 
-        // No need to save the .class file for kotlin, so checking the error message is enough
-        return Pair(errorMsg.isBlank(), errorMsg)
+        // TODO `.class` files are not saving for Kotlin
+        return Pair(execSuccessful, executionMsg)
     }
 
     override fun getClassPaths(buildPath: String): String = commonPath.plus(buildPath)

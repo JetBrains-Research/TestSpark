@@ -9,13 +9,13 @@ class CommandLineRunner {
         protected val log = KotlinLogging.logger {}
 
         /**
-         * Executes a command line process and returns the output as a string.
+         * Executes a command line process
          *
          * @param cmd The command line arguments as an ArrayList of strings.
-         * @return The output of the command line process as a string.
+         * @return A pair containing exit value and a string message containing execution results
          */
-        fun run(cmd: ArrayList<String>): String {
-            var errorMessage = ""
+        fun run(cmd: ArrayList<String>): Pair<Int, String> {
+            var executionMsg = ""
 
             /**
              * Since Windows does not provide bash, use cmd or similar default command line interpreter
@@ -37,12 +37,11 @@ class CommandLineRunner {
             var line: String?
 
             while (reader.readLine().also { line = it } != null) {
-                errorMessage += line
+                executionMsg += line
             }
 
             process.waitFor()
-
-            return errorMessage
+            return Pair(process.exitValue(), executionMsg)
         }
     }
 }

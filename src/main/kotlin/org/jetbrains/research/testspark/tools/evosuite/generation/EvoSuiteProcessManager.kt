@@ -84,7 +84,7 @@ class EvoSuiteProcessManager(
             if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
 
             val regex = Regex("version \"(.*?)\"")
-            val version = regex.find(CommandLineRunner.run(arrayListOf(evoSuiteSettingsState.javaPath, "-version")))
+            val version = regex.find(CommandLineRunner.run(arrayListOf(evoSuiteSettingsState.javaPath, "-version")).second)
                 ?.groupValues
                 ?.get(1)
                 ?.split(".")

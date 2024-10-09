@@ -99,7 +99,7 @@ class TestProcessor(
             } else {
                 "-javaagent:$jacocoAgentLibraryPath=destfile=$dataFileName.exec,append=false"
             }
-        val testExecutionError = CommandLineRunner.run(
+        val testExecutionResult = CommandLineRunner.run(
             arrayListOf(
                 javaRunner.absolutePath,
                 javaAgentFlag,
@@ -110,7 +110,7 @@ class TestProcessor(
             ),
         )
 
-        log.info("Test execution error message: $testExecutionError")
+        log.info("Test execution message: ${testExecutionResult.second}")
 
         // Prepare the command for generating the Jacoco report
         val command = mutableListOf(
@@ -140,7 +140,7 @@ class TestProcessor(
 
         CommandLineRunner.run(command as ArrayList<String>)
 
-        return testExecutionError
+        return if (testExecutionResult.first == 0) "" else testExecutionResult.second
     }
 
     /**
