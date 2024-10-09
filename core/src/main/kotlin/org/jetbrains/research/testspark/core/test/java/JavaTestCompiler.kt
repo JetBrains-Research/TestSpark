@@ -50,7 +50,7 @@ class JavaTestCompiler(
         )
         val executionMsg = executionResult.second
 
-        logger.info { "Error message: '$errorMsg'" }
+        log.info { "Execution result: '$executionMsg'" }
         // create .class file path
         val classFilePath = path.replace(".java", ".class")
 
