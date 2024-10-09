@@ -44,7 +44,7 @@ class JavaTestCompiler(
         )
         val executionMsg = executionResult.second
 
-        log.info { "Execution result: '${executionMsg}'" }
+        log.info { "Execution result: '$executionMsg'" }
         // create .class file path
         val classFilePath = path.replace(".java", ".class")
 
