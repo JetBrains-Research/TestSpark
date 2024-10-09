@@ -184,6 +184,7 @@ class PromptManager(
         return ClassRepresentation(
             psiClass.qualifiedName,
             psiClass.fullText,
+            psiClass.constructorSignatures,
             psiClass.allMethods.map(this::createMethodRepresentation).toList().filterNotNull(),
             psiClass.classType,
         )

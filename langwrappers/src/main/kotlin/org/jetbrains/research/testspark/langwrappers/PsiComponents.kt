@@ -46,6 +46,7 @@ interface PsiMethodWrapper {
  * @property text The text of the class.
  * @property methods All methods in the class
  * @property allMethods All methods in the class and all its superclasses
+ * @property constructorSignatures The signatures of all constructors in the class
  * @property superClass The superclass of the class
  * @property virtualFile Virtual file where the class is located
  * @property containingFile File where the method is located
@@ -59,6 +60,7 @@ interface PsiClassWrapper {
     val text: String?
     val methods: List<PsiMethodWrapper>
     val allMethods: List<PsiMethodWrapper>
+    val constructorSignatures: List<String>
     val superClass: PsiClassWrapper?
     val virtualFile: VirtualFile
     val containingFile: PsiFile
