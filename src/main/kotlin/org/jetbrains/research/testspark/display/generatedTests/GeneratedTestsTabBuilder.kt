@@ -197,10 +197,10 @@ class GeneratedTestsTabBuilder(
             .map { generatedTestsTabData.testCaseNameToEditorTextField[it]!! }
             .map { it.document.text }
 
-        displayUtils!!.applyTests(project, uiContext, testCaseComponents)
+        val applyingResult = displayUtils!!.applyTests(project, uiContext, testCaseComponents)
 
         // Remove the selected test cases from the cache and the tool window UI
-        clear()
+        if (applyingResult) clear()
     }
 
     /**

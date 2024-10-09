@@ -40,13 +40,15 @@ class TopButtonsPanelBuilder {
      * Updates the labels.
      */
     fun update(generatedTestsTabData: GeneratedTestsTabData) {
-        var numberOfPassedTests = 0
-        for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
-            if (testCasePanelFactory.isRemoved()) continue
-            val error = testCasePanelFactory.getError()
-            if ((error is String) && error.isEmpty()) {
-                numberOfPassedTests++
-            }
+        val passedTestsCount = generatedTestsTabData.testCasePanelFactories
+            .filter { !it.isRemoved() }
+            .count { it.getError()?.isEmpty() == true }
+
+        val removedTestsCount = generatedTestsTabData.testCasePanelFactories.count { it.isRemoved() }
+
+        if (generatedTestsTabData.testCasePanelFactories.size == removedTestsCount) {
+            removeAllButton.doClick()
+            return
         }
         testsSelectedLabel.text = String.format(
             testsSelectedText,
@@ -56,7 +58,7 @@ class TopButtonsPanelBuilder {
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
-                numberOfPassedTests,
+                passedTestsCount,
                 generatedTestsTabData.testCaseNameToPanel.size,
             )
         runAllButton.isEnabled = false
@@ -119,13 +121,27 @@ class TopButtonsPanelBuilder {
 
         nextTask?.let { task ->
             ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Test execution") {
+                var globalIndicator: ProgressIndicator? = null
+
                 override fun run(indicator: ProgressIndicator) {
+                    globalIndicator = indicator
                     task(IJProgressIndicator(indicator))
                 }
 
                 override fun onFinished() {
                     super.onFinished()
-                    executeTasks(project, tasks, generatedTestsTabData)
+                    if (globalIndicator != null && !globalIndicator!!.isCanceled) {
+                        executeTasks(project, tasks, generatedTestsTabData)
+                    } else {
+                        if (tasks.isNotEmpty()) {
+                            runAllButton.isEnabled = true
+                            val firstTestPanelFactoryIndex = generatedTestsTabData.testCasePanelFactories.size - tasks.size - 1
+                            val lastTestPanelFactoryIndex = generatedTestsTabData.testCasePanelFactories.size
+                            for (index in firstTestPanelFactoryIndex until lastTestPanelFactoryIndex) {
+                                generatedTestsTabData.testCasePanelFactories[index].removeTask()
+                            }
+                        }
+                    }
                 }
             })
         }

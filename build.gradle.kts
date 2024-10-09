@@ -103,6 +103,7 @@ dependencies {
     implementation(files("lib/standalone-runtime.jar"))
     implementation(files("lib/jacocoagent.jar"))
     implementation(files("lib/jacococli.jar"))
+    implementation(files("lib/opentest4j-1.1.1.jar"))
     implementation(files("lib/mockito-core-5.0.0.jar"))
     implementation(files("lib/byte-buddy-1.14.6.jar"))
     implementation(files("lib/byte-buddy-agent-1.14.6.jar"))
@@ -129,7 +130,7 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
     // https://mvnrepository.com/artifact/org.jacoco/org.jacoco.core
-    implementation("org.jacoco:org.jacoco.core:0.8.8")
+    implementation("org.jacoco:org.jacoco.core:0.8.12")
     // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-core
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
 

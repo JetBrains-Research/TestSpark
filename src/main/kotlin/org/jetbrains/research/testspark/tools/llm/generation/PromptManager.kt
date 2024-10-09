@@ -282,7 +282,7 @@ class PromptManager(
      *
      * @param psiClass the PsiClassWrapper containing the method
      * @param lineNumber the line number within the file where the method is located
-     * @return the method descriptor as a String, or an empty string if no method is found
+     * @return the method descriptor as `String`, or an empty string if no method is found
      */
     private fun getMethodDescriptor(
         psiClass: PsiClassWrapper?,

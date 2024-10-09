@@ -19,6 +19,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.Report
@@ -45,6 +46,7 @@ import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
+import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import java.awt.Dimension
 import java.awt.Toolkit
@@ -304,6 +306,11 @@ class TestCasePanelBuilder(
 
         sendButton.addActionListener { sendRequest() }
 
+        /**
+         * The following code is a workaround for the issue with the ComboBox preferred size.
+         * See: https://github.com/JetBrains-Research/TestSpark/pull/343#discussion_r1781430743
+         */
+        requestComboBox.preferredSize = Dimension(0, 0)
         requestComboBox.isEditable = true
 
         return panel
@@ -430,7 +437,9 @@ class TestCasePanelBuilder(
                         uiContext.errorMonitor,
                     )
 
-                    if (modifiedTest != null) {
+                    if (modifiedTest == null || modifiedTest.testCases.isEmpty()) {
+                        LLMErrorManager().warningProcess(LLMMessagesBundle.get("modifyWithLLMError"), project)
+                    } else {
                         modifiedTest.setTestFileName(
                             getClassWithTestCaseName(testCase.testName),
                         )
@@ -531,6 +540,11 @@ class TestCasePanelBuilder(
         tasks.add { indicator ->
             runTest(indicator, false)
         }
+    }
+
+    fun removeTask() {
+        finishProcess()
+        update()
     }
 
     private fun runTest(indicator: CustomProgressIndicator, enableGlobal: Boolean) {
