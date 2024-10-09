@@ -186,7 +186,7 @@ class GeneratedTestsTabBuilder(
     /**
      * Applies the selected test cases by passing them to the display utility for execution.
      */
-    fun applyTests() {
+    fun applyTests(): Boolean {
         // Filter the selected test cases
         val selectedTestCasePanels =
             generatedTestsTabData.testCaseNameToPanel.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
@@ -201,6 +201,8 @@ class GeneratedTestsTabBuilder(
 
         // Remove the selected test cases from the cache and the tool window UI
         if (applyingResult) clear()
+
+        return applyingResult
     }
 
     /**
