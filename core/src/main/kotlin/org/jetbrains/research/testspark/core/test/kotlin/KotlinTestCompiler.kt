@@ -54,7 +54,6 @@ class KotlinTestCompiler(
 
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // Compile file
-        // TODO: we treat warnings as errors for now
         val errorMsg = CommandLineRunner.run(
             arrayListOf(
                 kotlinc,
@@ -63,11 +62,13 @@ class KotlinTestCompiler(
                 path,
             ),
         )
+        val executionMsg = executionResult.second
+        val execSuccessful = executionResult.first == 0
 
         logger.info { "Error message: '$errorMsg'" }
 
-        // No need to save the .class file for kotlin, so checking the error message is enough
-        return Pair(errorMsg.isBlank(), errorMsg)
+        // TODO `.class` files are not saving for Kotlin
+        return Pair(execSuccessful, executionMsg)
     }
 
     override fun getClassPaths(buildPath: String): String = commonPath.plus(buildPath)

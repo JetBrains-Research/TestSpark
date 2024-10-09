@@ -40,7 +40,7 @@ class JavaTestCompiler(
     override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // compile file
-        val errorMsg = CommandLineRunner.run(
+        val executionResult = CommandLineRunner.run(
             arrayListOf(
                 javac,
                 "-cp",
@@ -48,13 +48,14 @@ class JavaTestCompiler(
                 path,
             ),
         )
+        val executionMsg = executionResult.second
 
         logger.info { "Error message: '$errorMsg'" }
         // create .class file path
         val classFilePath = path.replace(".java", ".class")
 
         // check is .class file exists
-        return Pair(File(classFilePath).exists(), errorMsg)
+        return Pair(File(classFilePath).exists() && (executionResult.first == 0), executionMsg)
     }
 
     override fun getClassPaths(buildPath: String): String {
