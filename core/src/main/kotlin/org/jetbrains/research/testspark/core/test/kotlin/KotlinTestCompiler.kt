@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.core.test.kotlin
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.exception.KotlinCompilerNotFoundException
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -40,10 +41,11 @@ class KotlinTestCompiler(
             }.firstOrNull()
 
         if (kotlinCompiler == null) {
-            val msg = "Cannot find Kotlinc compiler 'kotlinc' at '$kotlinSDKHomeDirectory'"
+            val msg = "Cannot find Kotlin compiler 'kotlinc' at $kotlinSDKHomeDirectory"
             logger.error { msg }
-            throw RuntimeException(msg)
+            throw KotlinCompilerNotFoundException("Please make sure that the Kotlin plugin is installed and enabled. $msg.")
         }
+
         kotlinc = kotlinCompiler.absolutePath
     }
 
@@ -52,6 +54,7 @@ class KotlinTestCompiler(
 
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // Compile file
+        // TODO: we treat warnings as errors for now
         val errorMsg = CommandLineRunner.run(
             arrayListOf(
                 kotlinc,
@@ -61,13 +64,7 @@ class KotlinTestCompiler(
             ),
         )
 
-        // TODO: we treat warnings as errors for now
-        if (errorMsg.isNotEmpty()) {
-            logger.info { "Error message: '$errorMsg'" }
-            if (errorMsg.contains("kotlinc: command not found'")) {
-                throw RuntimeException(errorMsg)
-            }
-        }
+        logger.info { "Error message: '$errorMsg'" }
 
         // No need to save the .class file for kotlin, so checking the error message is enough
         return Pair(errorMsg.isBlank(), errorMsg)

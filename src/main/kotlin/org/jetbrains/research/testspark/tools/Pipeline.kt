@@ -14,6 +14,7 @@ import com.intellij.openapi.util.io.FileUtilRt
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.exception.TestSparkException
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -21,6 +22,7 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
+import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -86,27 +88,32 @@ class Pipeline(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("testGenerationMessage")) {
                 override fun run(indicator: ProgressIndicator) {
-                    val ijIndicator = IJProgressIndicator(indicator)
+                    try {
+                        val ijIndicator = IJProgressIndicator(indicator)
 
-                    if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
-
-                    if (projectBuilder.runBuild(ijIndicator)) {
                         if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
-                        uiContext = processManager.runTestGenerator(
-                            ijIndicator,
-                            codeType,
-                            packageName,
-                            projectContext,
-                            generatedTestsData,
-                            testGenerationController.errorMonitor,
-                            testsExecutionResultManager,
-                        )
+                        if (projectBuilder.runBuild(ijIndicator)) {
+                            if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
+
+                            uiContext = processManager.runTestGenerator(
+                                ijIndicator,
+                                codeType,
+                                packageName,
+                                projectContext,
+                                generatedTestsData,
+                                testGenerationController.errorMonitor,
+                                testsExecutionResultManager,
+                            )
+                        }
+
+                        if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
+
+                        ijIndicator.stop()
                     }
-
-                    if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
-
-                    ijIndicator.stop()
+                    catch (err: TestSparkException) {
+                        LLMErrorManager().errorProcess(err.message!!, project, testGenerationController.errorMonitor)
+                    }
                 }
 
                 override fun onFinished() {
