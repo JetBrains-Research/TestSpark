@@ -115,7 +115,6 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
         }
     }
 
-
     companion object {
         /**
          * Builds a signature for a given `PsiMethod`.

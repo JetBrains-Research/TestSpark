@@ -136,7 +136,6 @@ class PromptGenerator(
     }
 }
 
-
 /**
  * Builds a cut declaration with constructor declarations and  a method under test.
  *
@@ -173,8 +172,11 @@ class PromptGenerator(
  */
 private fun buildCutDeclaration(cut: ClassRepresentation, method: MethodRepresentation): String {
     val instruction = buildString {
-        val constructorToUse = if (cut.constructorSignatures.isEmpty()) "a default constructor with zero arguments"
-                               else "the following constructor declarations"
+        val constructorToUse = if (cut.constructorSignatures.isEmpty()) {
+            "a default constructor with zero arguments"
+        } else {
+            "the following constructor declarations"
+        }
         append("Use $constructorToUse to instantiate `${cut.qualifiedName}` and call the method under test `${method.name}`")
     }
 
