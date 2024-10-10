@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
+import org.jetbrains.kotlin.psi.allConstructors
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.research.testspark.core.data.ClassType
@@ -34,6 +35,8 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
         get() = psiClass.body?.functions?.filter { it.name != null }?.map { KotlinPsiMethodWrapper(it) } ?: emptyList()
 
     override val allMethods: List<PsiMethodWrapper> get() = methods
+
+    override val constructorSignatures: List<String> get() = psiClass.allConstructors.map { KotlinPsiMethodWrapper.buildSignature(it) }
 
     override val superClass: PsiClassWrapper?
         get() {

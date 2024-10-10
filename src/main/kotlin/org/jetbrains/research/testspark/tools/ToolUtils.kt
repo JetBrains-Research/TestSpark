@@ -114,6 +114,8 @@ object ToolUtils {
 
     fun isProcessCanceled(indicator: CustomProgressIndicator): Boolean {
         if (indicator.isCanceled()) {
+            // TODO: we must not stop this indicator! cancellation MAY imply stoppage
+            //       See: https://github.com/JetBrains-Research/TestSpark/issues/375
             indicator.stop()
             return true
         }

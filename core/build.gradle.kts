@@ -42,7 +42,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = group as String
             artifactId = "testspark-core"
-            version = "3.0.1"
+            version = "4.0.0"
             from(components["java"])
 
             artifact(tasks["sourcesJar"])
