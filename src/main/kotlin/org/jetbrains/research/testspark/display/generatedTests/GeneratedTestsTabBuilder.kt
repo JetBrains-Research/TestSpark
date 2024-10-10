@@ -19,7 +19,6 @@ import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.Box
 import javax.swing.BoxLayout
-import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JPanel
 import javax.swing.JSeparator
@@ -46,6 +45,8 @@ class GeneratedTestsTabBuilder(
     fun generatedTestsTabData() = generatedTestsTabData
 
     fun getRemoveAllButton() = generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton()
+
+    fun getApplyButton() = generatedTestsTabData.applyButton
 
     /**
      * Displays the generated tests tab in the tool window.
@@ -91,8 +92,6 @@ class GeneratedTestsTabBuilder(
      * Initializes and fills the main panel with subcomponents.
      */
     private fun fillMainPanel() {
-        val applyButton = JButton(PluginLabelsBundle.get("applyButton"))
-
         mainPanel.layout = BorderLayout()
 
         mainPanel.add(
@@ -100,11 +99,10 @@ class GeneratedTestsTabBuilder(
             BorderLayout.NORTH,
         )
         mainPanel.add(generatedTestsTabData.scrollPane, BorderLayout.CENTER)
-        mainPanel.add(applyButton, BorderLayout.SOUTH)
+        mainPanel.add(generatedTestsTabData.applyButton, BorderLayout.SOUTH)
 
-        applyButton.isOpaque = false
-        applyButton.isContentAreaFilled = false
-        applyButton.addActionListener { applyTests() }
+        generatedTestsTabData.applyButton.isOpaque = false
+        generatedTestsTabData.applyButton.isContentAreaFilled = false
     }
 
     /**
@@ -188,7 +186,7 @@ class GeneratedTestsTabBuilder(
     /**
      * Applies the selected test cases by passing them to the display utility for execution.
      */
-    private fun applyTests() {
+    fun applyTests(): Boolean {
         // Filter the selected test cases
         val selectedTestCasePanels =
             generatedTestsTabData.testCaseNameToPanel.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
@@ -203,6 +201,8 @@ class GeneratedTestsTabBuilder(
 
         // Remove the selected test cases from the cache and the tool window UI
         if (applyingResult) clear()
+
+        return applyingResult
     }
 
     /**

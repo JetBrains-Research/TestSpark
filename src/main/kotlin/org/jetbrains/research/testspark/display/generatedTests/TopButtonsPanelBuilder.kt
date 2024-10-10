@@ -112,7 +112,11 @@ class TopButtonsPanelBuilder {
         executeTasks(project, tasks, generatedTestsTabData)
     }
 
-    private fun executeTasks(project: Project, tasks: Queue<(CustomProgressIndicator) -> Unit>, generatedTestsTabData: GeneratedTestsTabData) {
+    private fun executeTasks(
+        project: Project,
+        tasks: Queue<(CustomProgressIndicator) -> Unit>,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
         val nextTask = tasks.poll()
 
         nextTask?.let { task ->
@@ -140,6 +144,10 @@ class TopButtonsPanelBuilder {
                     }
                 }
             })
+        }
+        if (nextTask == null) {
+            generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton().isEnabled = true
+            generatedTestsTabData.applyButton.isEnabled = true
         }
     }
 
