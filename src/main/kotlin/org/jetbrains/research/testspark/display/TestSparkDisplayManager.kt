@@ -75,6 +75,10 @@ class TestSparkDisplayManager {
                 clear()
             }
         }
+
+        generatedTestsTabBuilder!!.getApplyButton().addActionListener {
+            if (generatedTestsTabBuilder!!.applyTests()) clear()
+        }
     }
 
     fun clear() {

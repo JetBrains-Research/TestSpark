@@ -494,7 +494,8 @@ class TestCasePanelBuilder(
      */
     private fun sendRequest() {
         loadingLabel.isVisible = true
-        enableComponents(false)
+        enableGlobalComponents(false)
+        enableLocalComponents(false)
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("sendingFeedback")) {
@@ -536,13 +537,19 @@ class TestCasePanelBuilder(
             })
     }
 
-    private fun finishProcess() {
+    private fun finishProcess(enableGlobal: Boolean = true) {
         uiContext!!.errorMonitor.clear()
         loadingLabel.isVisible = false
-        enableComponents(true)
+        if (enableGlobal) enableGlobalComponents(true)
+        enableLocalComponents(true)
     }
 
-    private fun enableComponents(isEnabled: Boolean) {
+    private fun enableGlobalComponents(isEnabled: Boolean) {
+        generatedTestsTabData.topButtonsPanelBuilder.getRemoveAllButton().isEnabled = isEnabled
+        generatedTestsTabData.applyButton.isEnabled = isEnabled
+    }
+
+    private fun enableLocalComponents(isEnabled: Boolean) {
         nextButton.isEnabled = isEnabled
         previousButton.isEnabled = isEnabled
         runTestButton.isEnabled = isEnabled
@@ -591,12 +598,13 @@ class TestCasePanelBuilder(
         if (!runTestButton.isEnabled) return
 
         loadingLabel.isVisible = true
-        enableComponents(false)
+        enableGlobalComponents(false)
+        enableLocalComponents(false)
 
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("sendingFeedback")) {
                 override fun run(indicator: ProgressIndicator) {
-                    runTest(IJProgressIndicator(indicator))
+                    runTest(IJProgressIndicator(indicator), true)
                 }
             })
     }
@@ -606,10 +614,11 @@ class TestCasePanelBuilder(
         if (!runTestButton.isEnabled) return
 
         loadingLabel.isVisible = true
-        enableComponents(false)
+        enableGlobalComponents(false)
+        enableLocalComponents(false)
 
         tasks.add { indicator ->
-            runTest(indicator)
+            runTest(indicator, false)
         }
     }
 
@@ -618,7 +627,7 @@ class TestCasePanelBuilder(
         update()
     }
 
-    private fun runTest(indicator: CustomProgressIndicator) {
+    private fun runTest(indicator: CustomProgressIndicator, enableGlobal: Boolean) {
         indicator.setText("Executing ${testCase.testName}")
 
         val fileName = TestAnalyzerFactory.create(language).getFileNameFromTestCaseCode(testCase.testCode)
@@ -652,7 +661,7 @@ class TestCasePanelBuilder(
             update()
         }
 
-        finishProcess()
+        finishProcess(enableGlobal)
         indicator.stop()
     }
 
