@@ -203,7 +203,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         name = properties("pluginName")
-        version = properties("platformVersion")
+        version = properties("pluginVersion")
 
         ideaVersion {
             sinceBuild = properties("pluginSinceBuild")
