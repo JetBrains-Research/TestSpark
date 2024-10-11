@@ -126,7 +126,7 @@ dependencies {
         zipSigner()
         instrumentationTools()
 
-        testFramework(TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.Bundled)
     }
 
     implementation(files("lib/evosuite-${properties("evosuiteVersion")}.jar"))
