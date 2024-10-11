@@ -218,7 +218,6 @@ intellijPlatform {
         channels = listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first())
     }
 
-    // ToDo signing
     pluginVerification {
         ides {
             recommended()
