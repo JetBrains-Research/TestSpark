@@ -1,4 +1,5 @@
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
@@ -7,7 +8,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.zip.ZipInputStream
-import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 fun properties(key: String) = project.findProperty(key).toString()
 
@@ -204,7 +204,7 @@ dependencies {
 
 // Configure Gradle IntelliJ Plugin - read more: // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellijPlatform {
-    pluginConfiguration{
+    pluginConfiguration {
         name = properties("pluginName")
         version = properties("platformVersion")
 
@@ -214,7 +214,7 @@ intellijPlatform {
         }
     }
 
-    publishing{
+    publishing {
         token = System.getenv("PUBLISH_TOKEN")
         channels = listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first())
     }
