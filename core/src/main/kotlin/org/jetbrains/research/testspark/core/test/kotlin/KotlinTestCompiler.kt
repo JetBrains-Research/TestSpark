@@ -10,7 +10,7 @@ import java.io.File
 class KotlinTestCompiler(
     libPaths: List<String>,
     junitLibPaths: List<String>,
-    kotlinSDKHomeDirectory: String,
+    kotlinSDKHomeDirectory: String
 ) : TestCompiler(libPaths, junitLibPaths) {
     private val logger = KotlinLogging.logger { this::class.java }
     private val kotlinc: String
@@ -49,7 +49,7 @@ class KotlinTestCompiler(
         kotlinc = kotlinCompiler.absolutePath
     }
 
-    override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
+    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): Pair<Boolean, String> {
         logger.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
@@ -64,13 +64,20 @@ class KotlinTestCompiler(
                 "-cp",
                 classPaths,
                 path,
+                /**
+                 * Forcing kotlinc to save a classfile in the same place, as '.kt' file
+                 */
+                "-d",
+                workingDir
             ),
         )
 
         logger.info { "Error message: '$errorMsg'" }
 
-        // No need to save the .class file for kotlin, so checking the error message is enough
-        return Pair(errorMsg.isBlank(), errorMsg)
+        val classFilePath = path.replace(".kt", ".class")
+
+        // check if .class file exists
+        return Pair(File(classFilePath).exists() && errorMsg.isBlank(), errorMsg)
     }
 
     override fun getClassPaths(buildPath: String): String = commonPath.plus(buildPath)

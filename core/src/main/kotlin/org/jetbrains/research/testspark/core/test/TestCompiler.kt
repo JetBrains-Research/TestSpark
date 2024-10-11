@@ -26,12 +26,13 @@ abstract class TestCompiler(libPaths: List<String>, junitLibPaths: List<String>)
         generatedTestCasesPaths: List<String>,
         buildPath: String,
         testCases: MutableList<TestCaseGeneratedByLLM>,
+        workingDir: String
     ): TestCasesCompilationResult {
         var allTestCasesCompilable = true
         val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
 
         for (index in generatedTestCasesPaths.indices) {
-            val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
+            val compilable = compileCode(generatedTestCasesPaths[index], buildPath, workingDir).first
             allTestCasesCompilable = allTestCasesCompilable && compilable
             if (compilable) {
                 compilableTestCases.add(testCases[index])
@@ -49,7 +50,7 @@ abstract class TestCompiler(libPaths: List<String>, junitLibPaths: List<String>)
      * @return A pair containing a boolean value indicating whether the compilation was successful (true) or not (false),
      *         and a string message describing any error encountered during compilation.
      */
-    abstract fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String>
+    abstract fun compileCode(path: String, projectBuildPath: String, workingDir: String): Pair<Boolean, String>
 
     /**
      * Generates the path for the command by concatenating the necessary paths.

@@ -37,7 +37,7 @@ class JavaTestCompiler(
         javac = javaCompiler.absolutePath
     }
 
-    override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
+    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): Pair<Boolean, String> {
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // compile file
         val errorMsg = CommandLineRunner.run(
@@ -49,6 +49,9 @@ class JavaTestCompiler(
                 "-cp",
                 classPaths,
                 path,
+                /**
+                 * We don't have to provide -d option, since javac saves class files in the same place by default
+                 */
             ),
         )
 
@@ -56,8 +59,8 @@ class JavaTestCompiler(
         // create .class file path
         val classFilePath = path.replace(".java", ".class")
 
-        // check is .class file exists
-        return Pair(File(classFilePath).exists(), errorMsg)
+        // check if .class file exists
+        return Pair(File(classFilePath).exists() && errorMsg.isBlank(), errorMsg)
     }
 
     override fun getClassPaths(buildPath: String): String {
