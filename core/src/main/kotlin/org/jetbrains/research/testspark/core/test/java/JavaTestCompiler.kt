@@ -42,7 +42,10 @@ class JavaTestCompiler(
         // compile file
         val errorMsg = CommandLineRunner.run(
             arrayListOf(
-                javac,
+                /**
+                 * Filepath may contain spaces, so we need to wrap it in quotes.
+                 */
+                "'$javac'",
                 "-cp",
                 classPaths,
                 path,
