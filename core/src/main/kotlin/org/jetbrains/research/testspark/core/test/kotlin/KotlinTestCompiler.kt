@@ -56,7 +56,10 @@ class KotlinTestCompiler(
         // Compile file
         val errorMsg = CommandLineRunner.run(
             arrayListOf(
-                kotlinc,
+                /**
+                 * Filepath may contain spaces, so we need to wrap it in quotes.
+                 */
+                "'$kotlinc'",
                 "-cp",
                 classPaths,
                 path,
