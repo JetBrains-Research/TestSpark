@@ -42,7 +42,8 @@ version = properties("pluginVersion")
 // Configure project's dependencies
 repositories {
     mavenCentral()
-    // this part is mandatory for all modules for platform version 2
+    // this part is mandatory for all modules for platform version 2:
+    // See https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html#default-repositories
     intellijPlatform {
         defaultRepositories()
     }
@@ -220,7 +221,8 @@ intellijPlatform {
         token = System.getenv("PUBLISH_TOKEN")
         channels = listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first())
     }
-
+    // Set the ides on which the plugin verification is executed.
+    // See https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides
     pluginVerification {
         ides {
             recommended()
