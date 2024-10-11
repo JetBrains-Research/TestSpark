@@ -218,12 +218,6 @@ intellijPlatform {
         channels = listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first())
     }
 
-    signing {
-        certificateChain = System.getenv("CERTIFICATE_CHAIN").trimIndent()
-        privateKey = System.getenv("PRIVATE_KEY").trimIndent()
-        password = System.getenv("PRIVATE_KEY_PASSWORD")
-    }
-
     pluginVerification {
         ides {
             recommended()
@@ -283,6 +277,12 @@ tasks {
         if (System.getProperty("test.profile") != "ui") {
             exclude("**/*uiTest*")
         }
+    }
+
+    signPlugin {
+        certificateChain.set(providers.environmentVariable("CERTIFICATE_CHAIN"))
+        privateKey.set(providers.environmentVariable("PRIVATE_KEY"))
+        password.set(providers.environmentVariable("PRIVATE_KEY_PASSWORD"))
     }
 
     patchPluginXml {
