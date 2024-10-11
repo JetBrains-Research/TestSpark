@@ -33,6 +33,7 @@ abstract class TestCompiler(libPaths: List<String>, junitLibPaths: List<String>)
         generatedTestCasesPaths: List<String>,
         buildPath: String,
         testCases: MutableList<TestCaseGeneratedByLLM>,
+        workingDir: String
     ): TestCasesCompilationResult {
         var allTestCasesCompilable = true
         val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
