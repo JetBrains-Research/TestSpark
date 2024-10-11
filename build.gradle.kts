@@ -1,5 +1,7 @@
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
@@ -217,6 +219,23 @@ intellijPlatform {
     publishing {
         token = System.getenv("PUBLISH_TOKEN")
         channels = listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first())
+    }
+
+    // ToDo signing
+    pluginVerification {
+        ides {
+            recommended()
+            select {
+                types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
+                channels = listOf(ProductRelease.Channel.RELEASE)
+                sinceBuild = properties("pluginSinceBuild")
+                untilBuild = properties("pluginUntilBuild")
+            }
+        }
+        freeArgs = listOf(
+            "-mute",
+            "TemplateWordInPluginId,ForbiddenPluginIdPrefix"
+        )
     }
 }
 
