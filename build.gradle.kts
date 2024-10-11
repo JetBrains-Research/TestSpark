@@ -218,6 +218,12 @@ intellijPlatform {
         channels = listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first())
     }
 
+    signing {
+        certificateChain = System.getenv("CERTIFICATE_CHAIN").trimIndent()
+        privateKey = System.getenv("PRIVATE_KEY").trimIndent()
+        password = System.getenv("PRIVATE_KEY_PASSWORD")
+    }
+
     pluginVerification {
         ides {
             recommended()
@@ -301,12 +307,6 @@ tasks {
                 }.toHTML()
             },
         )
-    }
-
-    signPlugin {
-        certificateChain.set(System.getenv("CERTIFICATE_CHAIN").trimIndent())
-        privateKey.set(System.getenv("PRIVATE_KEY").trimIndent())
-        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
     }
 
     publishPlugin {
