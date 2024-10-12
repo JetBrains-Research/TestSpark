@@ -26,6 +26,21 @@ object GenerateTestsTabHelper {
     }
 
     /**
+     * A helper method to remove a test case from the cache and from the UI.
+     *
+     * @param testCaseName the name of the test
+     */
+    fun removeUITestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+        // Update the number of selected test cases if necessary
+        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
+            generatedTestsTabData.testsSelected--
+        }
+
+        // Remove the test panel from the UI
+        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
+    }
+
+    /**
      * Updates the user interface of the tool window.
      *
      * This method updates the UI of the tool window tab by calling the updateUI
