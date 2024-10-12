@@ -302,7 +302,7 @@ class TestCasePanelBuilder(
         }
         resetButton.addActionListener { reset() }
         resetToLastRunButton.addActionListener { resetToLastRun() }
-        removeButton.addActionListener { remove() }
+        removeButton.addActionListener { remove() } // Can be replaced by any funciton
 
         sendButton.addActionListener { sendRequest() }
 
@@ -312,6 +312,27 @@ class TestCasePanelBuilder(
          */
         requestComboBox.preferredSize = Dimension(0, 0)
         requestComboBox.isEditable = true
+
+        return panel
+    }
+
+    /**
+     * Create button with text
+     */
+    fun getTestButton(): JPanel {
+        val panel = JPanel()
+
+        panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
+
+        val testButton = JButton("Test button")
+
+        testButton.isOpaque = false
+        testButton.isContentAreaFilled = false
+        testButton.isBorderPainted = true
+
+        panel.add(testButton)
+
+        panel.add(Box.createHorizontalGlue())
 
         return panel
     }
@@ -627,6 +648,7 @@ class TestCasePanelBuilder(
         ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
 
         GenerateTestsTabHelper.update(generatedTestsTabData)
+//        print("THERE YOU ARE LITTLE PIECE OF SHIT!")
     }
 
     /**
