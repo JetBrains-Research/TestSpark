@@ -245,8 +245,7 @@ class GeneratedTestsTabBuilder(
      * Clears all the generated test cases from the UI and the internal cache.
      */
     fun clear() {
-        generatedTestsTabData.testCaseNameToPanel.toMap()
-            .forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
+        GenerateTestsTabHelper.clear(generatedTestsTabData)
         generatedTestsTabData.testCasePanelFactories.clear()
         generatedTestsTabData.topButtonsPanelBuilder.clear(generatedTestsTabData)
 

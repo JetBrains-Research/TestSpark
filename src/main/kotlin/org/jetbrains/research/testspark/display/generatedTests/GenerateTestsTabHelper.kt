@@ -2,27 +2,53 @@ package org.jetbrains.research.testspark.display.generatedTests
 
 object GenerateTestsTabHelper {
     /**
-     * A helper method to remove a test case from the cache and from the UI.
+     * A helper method to remove a test case from the cache.
      *
      * @param testCaseName the name of the test
      */
     fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
-        // Update the number of selected test cases if necessary
-        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
-            generatedTestsTabData.testsSelected--
-        }
-
-        // Remove the test panel from the UI
-        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
-
         // Remove the test panel
-        generatedTestsTabData.testCaseNameToPanel.remove(testCaseName)
+        val panel = generatedTestsTabData.testCaseNameToPanel.remove(testCaseName)
 
         // Remove the selected checkbox
-        generatedTestsTabData.testCaseNameToSelectedCheckbox.remove(testCaseName)
+        val checkbox = generatedTestsTabData.testCaseNameToSelectedCheckbox.remove(testCaseName)
 
         // Remove the editorTextField
-        generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
+        val editorTextField = generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
+
+        // Save data for possible restoration
+        val deletedTest = DeletedTest(panel!!, checkbox!!, editorTextField!!)
+        generatedTestsTabData.testCaseNameToDeletedTestData[testCaseName] = deletedTest
+    }
+
+    /**
+     * A helper method to restore a previously deleted test case to the cache.
+     *
+     * @param testCaseName the name of the test
+     */
+    fun restoreTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+        // Retrieve information about previously deleted test
+        val deletedTest = generatedTestsTabData.testCaseNameToDeletedTestData.remove(testCaseName)!!
+
+        // Re-add the test panel
+        generatedTestsTabData.testCaseNameToPanel[testCaseName] = deletedTest.panel
+
+        // Re-add the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName] = deletedTest.checkbox
+
+        // Re-add the editorTextField
+        generatedTestsTabData.testCaseNameToEditorTextField[testCaseName] = deletedTest.editorTextField
+    }
+
+    /**
+     * A helper method to remove all test cases from the cache and UI.
+     */
+    fun clear(generatedTestsTabData: GeneratedTestsTabData) {
+        generatedTestsTabData.allTestCasePanel.removeAll()
+        generatedTestsTabData.testCaseNameToPanel.clear()
+        generatedTestsTabData.testCaseNameToSelectedCheckbox.clear()
+        generatedTestsTabData.testCaseNameToEditorTextField.clear()
+        generatedTestsTabData.testCaseNameToDeletedTestData.clear()
     }
 
     /**

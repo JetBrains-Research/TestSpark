@@ -52,6 +52,7 @@ import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
+import java.awt.event.MouseAdapter
 import java.util.Queue
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -60,6 +61,7 @@ import javax.swing.JCheckBox
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JPanel
+import javax.swing.OverlayLayout
 import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
@@ -302,7 +304,16 @@ class TestCasePanelBuilder(
         }
         resetButton.addActionListener { reset() }
         resetToLastRunButton.addActionListener { resetToLastRun() }
-        removeButton.addActionListener { remove() }
+
+        val deletedTestPanel = createDeletedTestPanel()
+        removeButton.addActionListener {
+            enableLocalComponents(false)
+            deletedTestPanel.isVisible = true
+            languageTextField.isEnabled = false
+            checkbox.isSelected = false
+            checkbox.isEnabled = false
+            remove()
+        }
 
         sendButton.addActionListener { sendRequest() }
 
@@ -313,7 +324,44 @@ class TestCasePanelBuilder(
         requestComboBox.preferredSize = Dimension(0, 0)
         requestComboBox.isEditable = true
 
-        return panel
+        val overlayPanel = object: JPanel() {
+            override fun isOptimizedDrawingEnabled()  = false
+        }.apply {
+            layout = OverlayLayout(this)
+            add(deletedTestPanel)
+            add(panel)
+        }
+
+        return overlayPanel
+    }
+
+    /**
+     * Creates the panel that will be displayed as the bottom panel for a deleted test case.
+     */
+    private fun createDeletedTestPanel(): JPanel {
+        val deletedTestPanel = JPanel().apply {
+            this.isVisible = false
+            this.addMouseListener(object: MouseAdapter() {})
+        };
+
+        deletedTestPanel.add(Box.createRigidArea(Dimension(15, 0)))
+        deletedTestPanel.add( JLabel("This test case has been deleted."))
+        deletedTestPanel.add(Box.createHorizontalGlue())
+
+        val undoButton = JButton("Undo")
+        deletedTestPanel.add(undoButton)
+        deletedTestPanel.add(Box.createRigidArea(Dimension(12, 0)))
+
+        undoButton.addActionListener {
+            deletedTestPanel.isVisible = false
+            languageTextField.isEnabled = true
+            checkbox.isSelected = true
+            checkbox.isEnabled = true
+            enableLocalComponents(true)
+            restore()
+        }
+
+        return deletedTestPanel
     }
 
     /**
@@ -634,6 +682,17 @@ class TestCasePanelBuilder(
         isRemoved = true
 
         ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+
+        GenerateTestsTabHelper.update(generatedTestsTabData)
+    }
+
+    private fun restore() {
+        GenerateTestsTabHelper.restoreTestCase(testCase.testName, generatedTestsTabData)
+
+        runTestButton.isEnabled = true
+        isRemoved = false
+
+        ReportUpdater.restoreTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
 
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }

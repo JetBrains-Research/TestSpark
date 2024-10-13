@@ -29,6 +29,17 @@ object ReportUpdater {
         coverageVisualisationTabBuilder.show(report, generatedTestsTabData)
     }
 
+    fun restoreTestCase(
+        report: Report,
+        testCase: TestCase,
+        coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
+        report.testCaseList[testCase.id] = testCase
+        report.normalized()
+        coverageVisualisationTabBuilder.show(report, generatedTestsTabData)
+    }
+
     fun unselectTestCase(
         report: Report,
         unselectedTestCases: HashMap<Int, TestCase>,
