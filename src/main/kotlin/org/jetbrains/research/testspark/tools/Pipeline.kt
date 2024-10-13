@@ -90,6 +90,7 @@ class Pipeline(
                 override fun run(indicator: ProgressIndicator) {
                     try {
                         val ijIndicator = IJProgressIndicator(indicator)
+                        testGenerationController.indicator = ijIndicator
 
                         if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
