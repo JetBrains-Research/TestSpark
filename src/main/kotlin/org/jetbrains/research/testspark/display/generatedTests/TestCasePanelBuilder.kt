@@ -324,8 +324,8 @@ class TestCasePanelBuilder(
         requestComboBox.preferredSize = Dimension(0, 0)
         requestComboBox.isEditable = true
 
-        val overlayPanel = object: JPanel() {
-            override fun isOptimizedDrawingEnabled()  = false
+        val overlayPanel = object : JPanel() {
+            override fun isOptimizedDrawingEnabled() = false
         }.apply {
             layout = OverlayLayout(this)
             add(deletedTestPanel)
@@ -341,11 +341,11 @@ class TestCasePanelBuilder(
     private fun createDeletedTestPanel(): JPanel {
         val deletedTestPanel = JPanel().apply {
             this.isVisible = false
-            this.addMouseListener(object: MouseAdapter() {})
-        };
+            this.addMouseListener(object : MouseAdapter() {})
+        }
 
         deletedTestPanel.add(Box.createRigidArea(Dimension(15, 0)))
-        deletedTestPanel.add( JLabel("This test case has been deleted."))
+        deletedTestPanel.add(JLabel("This test case has been deleted."))
         deletedTestPanel.add(Box.createHorizontalGlue())
 
         val undoButton = JButton("Undo")
