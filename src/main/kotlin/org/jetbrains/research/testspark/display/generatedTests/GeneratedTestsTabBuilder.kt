@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.display.generatedTests
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
+import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
@@ -233,9 +234,11 @@ class GeneratedTestsTabBuilder(
      * Closes the tool window by removing the content and hiding the window.
      */
     private fun closeToolWindow() {
-        generatedTestsTabData.contentManager?.removeContent(generatedTestsTabData.content!!, true)
-        ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
-        coverageVisualisationTabBuilder.closeToolWindowTab()
+        try {
+            generatedTestsTabData.contentManager?.removeContent(generatedTestsTabData.content!!, true)
+            ToolWindowManager.getInstance(project).getToolWindow("TestSpark")?.hide()
+            coverageVisualisationTabBuilder.closeToolWindowTab()
+        } catch (_: AlreadyDisposedException) {} // Make sure the process continues if the tool window is already closed
     }
 
     /**
