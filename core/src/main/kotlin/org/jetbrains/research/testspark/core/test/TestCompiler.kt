@@ -8,6 +8,13 @@ data class TestCasesCompilationResult(
     val compilableTestCases: MutableSet<TestCaseGeneratedByLLM>,
 )
 
+data class ExecutionResult(
+    val exitCode: Int,
+    val executionMessage: String,
+) {
+    fun isSuccessful(): Boolean = exitCode == 0
+}
+
 abstract class TestCompiler(libPaths: List<String>, junitLibPaths: List<String>) {
     val separator = DataFilesUtil.classpathSeparator
     val dependencyLibPath = libPaths.joinToString(separator.toString())
@@ -31,7 +38,7 @@ abstract class TestCompiler(libPaths: List<String>, junitLibPaths: List<String>)
         val compilableTestCases: MutableSet<TestCaseGeneratedByLLM> = mutableSetOf()
 
         for (index in generatedTestCasesPaths.indices) {
-            val compilable = compileCode(generatedTestCasesPaths[index], buildPath).first
+            val compilable = compileCode(generatedTestCasesPaths[index], buildPath).isSuccessful()
             allTestCasesCompilable = allTestCasesCompilable && compilable
             if (compilable) {
                 compilableTestCases.add(testCases[index])
@@ -49,7 +56,7 @@ abstract class TestCompiler(libPaths: List<String>, junitLibPaths: List<String>)
      * @return A pair containing a boolean value indicating whether the compilation was successful (true) or not (false),
      *         and a string message describing any error encountered during compilation.
      */
-    abstract fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String>
+    abstract fun compileCode(path: String, projectBuildPath: String): ExecutionResult
 
     /**
      * Generates the path for the command by concatenating the necessary paths.

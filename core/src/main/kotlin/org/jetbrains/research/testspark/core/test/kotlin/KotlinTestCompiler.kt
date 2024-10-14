@@ -62,8 +62,7 @@ class KotlinTestCompiler(
                 path,
             ),
         )
-        val executionMsg = executionResult.second
-        val execSuccessful = executionResult.first == 0
+        log.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
         logger.info { "Error message: '$errorMsg'" }
 

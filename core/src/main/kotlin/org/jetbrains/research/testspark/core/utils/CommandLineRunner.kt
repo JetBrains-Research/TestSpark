@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.core.utils
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.test.ExecutionResult
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -14,7 +15,7 @@ class CommandLineRunner {
          * @param cmd The command line arguments as an ArrayList of strings.
          * @return A pair containing exit value and a string message containing execution results
          */
-        fun run(cmd: ArrayList<String>): Pair<Int, String> {
+        fun run(cmd: ArrayList<String>): ExecutionResult {
             var executionMsg = ""
 
             /**
@@ -32,7 +33,6 @@ class CommandLineRunner {
                     .redirectErrorStream(true)
                     .start()
             }
-
             val reader = BufferedReader(InputStreamReader(process.inputStream))
             var line: String?
 
@@ -41,7 +41,7 @@ class CommandLineRunner {
             }
 
             process.waitFor()
-            return Pair(process.exitValue(), executionMsg)
+            return ExecutionResult(process.exitValue(), executionMsg)
         }
     }
 }
