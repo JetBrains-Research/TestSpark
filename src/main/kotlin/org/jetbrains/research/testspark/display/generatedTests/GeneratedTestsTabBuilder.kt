@@ -167,16 +167,16 @@ class GeneratedTestsTabBuilder(
             generatedTestsTabData.allTestCasePanel.add(testCasePanel)
             addSeparator()
 
-            val testCaseDeleteButtonPanel: JPanel = testCasePanelBuilder.getTestButton()
+            val testPanelIndex: Int =
+                generatedTestsTabData.allTestCasePanel.getComponentZOrder(testCasePanel)
 
-//            generatedTestsTabData.allTestCasePanel.add(testCasePanelBuilder.getTestButton(), BorderLayout.EAST)
-//            addSeparator()
+            val testCaseUndoRemoveButtonPanel: JPanel = testCasePanelBuilder.getUndoRemovePanel(testCase.testName, testPanelIndex)
 
             generatedTestsTabData.testCaseNameToPanel[testCase.testName] = testCasePanel
             generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName] = checkbox
             generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName] =
                 testCasePanelBuilder.getEditorTextField()
-            generatedTestsTabData.testCaseNameToDeleteButton[testCase.testName] = testCaseDeleteButtonPanel
+            generatedTestsTabData.testCaseNameToUndoRemovePanel[testCase.testName] = testCaseUndoRemoveButtonPanel
         }
         generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanel.size
         generatedTestsTabData.testCasePanelFactories.addAll(testCasePanelFactories)
