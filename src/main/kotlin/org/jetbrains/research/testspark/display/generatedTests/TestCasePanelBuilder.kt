@@ -53,17 +53,11 @@ import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
 import java.util.Queue
-import javax.swing.Box
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JOptionPane
-import javax.swing.JPanel
-import javax.swing.ScrollPaneConstants
-import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+
+import java.awt.BorderLayout
+import javax.swing.*
 
 class TestCasePanelBuilder(
     private val project: Project,
@@ -640,15 +634,20 @@ class TestCasePanelBuilder(
      */
     private fun remove() {
         // Remove the test case from the cache
-        GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
+        val index: Int = GenerateTestsTabHelper.removeUITestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
         ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
 
+        generatedTestsTabData.allTestCasePanel.add(
+            generatedTestsTabData.testCaseNameToDeleteButton[testCase.testName],
+            BorderLayout.EAST,
+            index
+        )
+
         GenerateTestsTabHelper.update(generatedTestsTabData)
-//        print("THERE YOU ARE LITTLE PIECE OF SHIT!")
     }
 
     /**
@@ -720,7 +719,8 @@ class TestCasePanelBuilder(
      * Updates the current test case with the specified test name and test code.
      */
     private fun updateTestCaseInformation() {
-        testCase.testName = TestAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
+        testCase.testName = TestAnalyzerFactory.create(language)
+            .extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 

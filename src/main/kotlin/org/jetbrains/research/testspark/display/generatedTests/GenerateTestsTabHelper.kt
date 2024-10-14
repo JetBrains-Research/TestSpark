@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.display.generatedTests
 
+import javax.swing.JPanel
+
 object GenerateTestsTabHelper {
     /**
      * A helper method to remove a test case from the cache and from the UI.
@@ -26,18 +28,23 @@ object GenerateTestsTabHelper {
     }
 
     /**
-     * A helper method to remove a test case from the cache and from the UI.
+     * A helper method to remove a test case from the UI.
      *
      * @param testCaseName the name of the test
      */
-    fun removeUITestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+    fun removeUITestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData): Int {
         // Update the number of selected test cases if necessary
         if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
             generatedTestsTabData.testsSelected--
         }
 
+        val index: Int =
+            generatedTestsTabData.allTestCasePanel.getComponentZOrder(generatedTestsTabData.testCaseNameToPanel[testCaseName])
+
         // Remove the test panel from the UI
         generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
+
+        return index
     }
 
     /**
