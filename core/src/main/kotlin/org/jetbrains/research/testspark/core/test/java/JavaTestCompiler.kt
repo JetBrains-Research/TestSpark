@@ -57,7 +57,7 @@ class JavaTestCompiler(
 
         logger.info { "Error message: '$errorMsg'" }
         // create .class file path
-        val classFilePath = path.replace(".java", ".class")
+        val classFilePath = path.removeSuffix(".java") + ".class"
 
         // check if .class file exists
         return Pair(File(classFilePath).exists() && errorMsg.isBlank(), errorMsg)

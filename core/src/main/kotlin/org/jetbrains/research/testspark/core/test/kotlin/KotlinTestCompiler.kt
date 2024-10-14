@@ -74,7 +74,7 @@ class KotlinTestCompiler(
 
         logger.info { "Error message: '$errorMsg'" }
 
-        val classFilePath = path.replace(".kt", ".class")
+        val classFilePath = path.removeSuffix(".kt") + ".class"
 
         // check if .class file exists
         return Pair(File(classFilePath).exists() && errorMsg.isBlank(), errorMsg)
