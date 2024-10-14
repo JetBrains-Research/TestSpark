@@ -110,7 +110,7 @@ class TestProcessor(
             ),
         )
 
-        log.info("Test execution message: ${testExecutionResult.second}")
+        log.info("Test execution message: ${testExecutionResult.executionMessage}")
 
         // Prepare the command for generating the Jacoco report
         val command = mutableListOf(
@@ -140,7 +140,7 @@ class TestProcessor(
 
         CommandLineRunner.run(command as ArrayList<String>)
 
-        return if (testExecutionResult.first == 0) "" else testExecutionResult.second
+        return if (testExecutionResult.isSuccessful()) "" else testExecutionResult.executionMessage
     }
 
     /**
@@ -179,8 +179,8 @@ class TestProcessor(
 
         // compilation checking
         val compilationResult = testCompiler.compileCode(generatedTestPath, buildPath)
-        if (!compilationResult.first) {
-            testsExecutionResultManager.addFailedTest(testId, testCode, compilationResult.second)
+        if (!compilationResult.isSuccessful()) {
+            testsExecutionResultManager.addFailedTest(testId, testCode, compilationResult.executionMessage)
         } else {
             val dataFileName = "$resultPath/jacoco-${fileName.split(".")[0]}"
 

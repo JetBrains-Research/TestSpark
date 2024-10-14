@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.core.test.kotlin
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.test.ExecutionResult
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 
@@ -9,7 +10,7 @@ class KotlinTestCompiler(libPaths: List<String>, junitLibPaths: List<String>) :
 
     private val log = KotlinLogging.logger { this::class.java }
 
-    override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
+    override fun compileCode(path: String, projectBuildPath: String): ExecutionResult {
         log.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
         // TODO find the kotlinc if it is not in PATH
@@ -23,18 +24,10 @@ class KotlinTestCompiler(libPaths: List<String>, junitLibPaths: List<String>) :
                 path,
             ),
         )
-        val executionMsg = executionResult.second
-        val execSuccessful = executionResult.first == 0
+        log.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
-        if (!execSuccessful) {
-            log.info { "Error message: '$executionMsg'" }
-            if (executionMsg.contains("kotlinc: command not found'")) {
-                throw RuntimeException(executionMsg)
-            }
-        }
-
-        // TODO `.class` files are not saving for Kotlin
-        return Pair(execSuccessful, executionMsg)
+        // TODO check for classfiles
+        return executionResult
     }
 
     override fun getClassPaths(buildPath: String): String = commonPath.plus(buildPath)
