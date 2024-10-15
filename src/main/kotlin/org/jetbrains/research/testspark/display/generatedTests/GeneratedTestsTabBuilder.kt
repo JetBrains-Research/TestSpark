@@ -159,7 +159,6 @@ class GeneratedTestsTabBuilder(
 
             testCasePanelFactories.add(testCasePanelBuilder)
 
-
             testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
             // Add panel to parent panel
@@ -170,13 +169,13 @@ class GeneratedTestsTabBuilder(
             val testPanelIndex: Int =
                 generatedTestsTabData.allTestCasePanel.getComponentZOrder(testCasePanel)
 
-            val testCaseUndoRemoveButtonPanel: JPanel = testCasePanelBuilder.getUndoRemovePanel(testCase.testName, testCase.id, testPanelIndex)
+            val testCaseRemovePanel: JPanel = testCasePanelBuilder.getRemovePanel(testPanelIndex)
 
             generatedTestsTabData.testCaseNameToPanel[testCase.testName] = testCasePanel
             generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName] = checkbox
             generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName] =
                 testCasePanelBuilder.getEditorTextField()
-            generatedTestsTabData.testCaseNameToUndoRemovePanel[testCase.testName] = testCaseUndoRemoveButtonPanel
+            generatedTestsTabData.testCaseNameToRemovePanel[testCase.testName] = testCaseRemovePanel
         }
         generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanel.size
         generatedTestsTabData.testCasePanelFactories.addAll(testCasePanelFactories)

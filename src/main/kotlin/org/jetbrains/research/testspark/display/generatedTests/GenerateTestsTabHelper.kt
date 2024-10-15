@@ -1,7 +1,5 @@
 package org.jetbrains.research.testspark.display.generatedTests
 
-import javax.swing.JPanel
-
 object GenerateTestsTabHelper {
     /**
      * A helper method to remove a test case from the cache and from the UI.
@@ -9,14 +7,6 @@ object GenerateTestsTabHelper {
      * @param testCaseName the name of the test
      */
     fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
-        // Update the number of selected test cases if necessary
-        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
-            generatedTestsTabData.testsSelected--
-        }
-
-        // Remove the test panel from the UI
-        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
-
         // Remove the test panel
         generatedTestsTabData.testCaseNameToPanel.remove(testCaseName)
 
@@ -27,7 +17,7 @@ object GenerateTestsTabHelper {
         generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
 
         // Remove the Panel for
-        generatedTestsTabData.testCaseNameToUndoRemovePanel.remove(testCaseName)
+        generatedTestsTabData.testCaseNameToRemovePanel.remove(testCaseName)
     }
 
     /**
@@ -35,17 +25,12 @@ object GenerateTestsTabHelper {
      *
      * @param testCaseName the name of the test
      */
-    fun removeUITestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData): Int {
-        // Update the number of selected test cases if necessary
+    fun removeUITestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+        // Change test from selected to unselected
         generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.setSelected(false)
-
-        val index: Int =
-            generatedTestsTabData.allTestCasePanel.getComponentZOrder(generatedTestsTabData.testCaseNameToPanel[testCaseName])
 
         // Remove the test panel from the UI
         generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
-
-        return index
     }
 
     /**

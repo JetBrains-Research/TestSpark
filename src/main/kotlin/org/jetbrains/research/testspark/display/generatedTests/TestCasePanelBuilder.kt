@@ -296,7 +296,7 @@ class TestCasePanelBuilder(
         }
         resetButton.addActionListener { reset() }
         resetToLastRunButton.addActionListener { resetToLastRun() }
-        removeButton.addActionListener { subtractTest() } // Can be replaced by any function
+        removeButton.addActionListener { subtractTest() }
 
         sendButton.addActionListener { sendRequest() }
 
@@ -313,36 +313,45 @@ class TestCasePanelBuilder(
     /**
      * Create button with text
      */
-    fun getUndoRemovePanel(testCaseName: String, testCaseId: Int, testPanelIndex: Int): JPanel {
+    fun getRemovePanel(testPanelIndex: Int): JPanel {
         val panel = JPanel()
 
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
 
-        val testButton = JButton("Return test")
+        val returnTestButton = JButton("Return test")
+        val removeTestButton = JButton("Remove test")
 
-        testButton.isOpaque = false
-        testButton.isContentAreaFilled = false
-        testButton.isBorderPainted = true
+        returnTestButton.isOpaque = false
+        returnTestButton.isContentAreaFilled = false
+        returnTestButton.isBorderPainted = true
 
-        testButton.addActionListener { undoRemove(testCaseName, testCaseId, testPanelIndex) }
+        removeTestButton.isOpaque = false
+        removeTestButton.isContentAreaFilled = false
+        removeTestButton.isBorderPainted = true
+
+        returnTestButton.addActionListener { undoRemove(testPanelIndex) }
+
+        removeTestButton.addActionListener { remove() }
 
         panel.add(Box.createHorizontalGlue())
 
-        panel.add(testButton)
+        panel.add(returnTestButton)
+
+        panel.add(removeTestButton)
 
         return panel
     }
 
-    private fun undoRemove(testCaseName: String, testCaseId: Int, testPanelIndex: Int) {
-        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToUndoRemovePanel[testCaseName])
+    private fun undoRemove(testPanelIndex: Int) {
+        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToRemovePanel[testCase.testName])
 
-        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.setSelected(true)
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName]!!.setSelected(true)
 
         runTestButton.isEnabled = true
         isRemoved = false
 
         generatedTestsTabData.allTestCasePanel.add(
-            generatedTestsTabData.testCaseNameToPanel[testCaseName],
+            generatedTestsTabData.testCaseNameToPanel[testCase.testName],
             testPanelIndex
         )
 
@@ -651,6 +660,8 @@ class TestCasePanelBuilder(
      * 3. Updating the UI.
      */
     private fun remove() {
+        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToRemovePanel[testCase.testName])
+
         // Remove the test case from the cache
         GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
@@ -663,13 +674,16 @@ class TestCasePanelBuilder(
     }
 
     private fun subtractTest() {
-        val index: Int = GenerateTestsTabHelper.removeUITestCase(testCase.testName, generatedTestsTabData)
+        val index: Int =
+            generatedTestsTabData.allTestCasePanel.getComponentZOrder(generatedTestsTabData.testCaseNameToPanel[testCase.testName])
+
+        GenerateTestsTabHelper.removeUITestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
         generatedTestsTabData.allTestCasePanel.add(
-            generatedTestsTabData.testCaseNameToUndoRemovePanel[testCase.testName],
+            generatedTestsTabData.testCaseNameToRemovePanel[testCase.testName],
             BorderLayout.EAST,
             index
         )
