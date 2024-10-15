@@ -25,6 +25,9 @@ object GenerateTestsTabHelper {
 
         // Remove the editorTextField
         generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
+
+        // Remove the Panel for
+        generatedTestsTabData.testCaseNameToUndoRemovePanel.remove(testCaseName)
     }
 
     /**
@@ -34,9 +37,7 @@ object GenerateTestsTabHelper {
      */
     fun removeUITestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData): Int {
         // Update the number of selected test cases if necessary
-        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
-            generatedTestsTabData.testsSelected--
-        }
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.setSelected(false)
 
         val index: Int =
             generatedTestsTabData.allTestCasePanel.getComponentZOrder(generatedTestsTabData.testCaseNameToPanel[testCaseName])

@@ -170,7 +170,7 @@ class GeneratedTestsTabBuilder(
             val testPanelIndex: Int =
                 generatedTestsTabData.allTestCasePanel.getComponentZOrder(testCasePanel)
 
-            val testCaseUndoRemoveButtonPanel: JPanel = testCasePanelBuilder.getUndoRemovePanel(testCase.testName, testPanelIndex)
+            val testCaseUndoRemoveButtonPanel: JPanel = testCasePanelBuilder.getUndoRemovePanel(testCase.testName, testCase.id, testPanelIndex)
 
             generatedTestsTabData.testCaseNameToPanel[testCase.testName] = testCasePanel
             generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName] = checkbox
