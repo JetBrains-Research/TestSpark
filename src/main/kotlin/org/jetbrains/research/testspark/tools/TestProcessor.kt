@@ -64,6 +64,7 @@ class TestProcessor(
      * @param projectBuildPath The build path of the project.
      * @param generatedTestPackage The package where the generated test class is located.
      * @return An empty string if the test execution is successful, otherwise an error message.
+     * TODO refactor method signature to return exit code as well, see `TestCompiler` for example
      */
     fun createXmlFromJacoco(
         className: String,
@@ -110,7 +111,8 @@ class TestProcessor(
             ),
         )
 
-        log.info("Test execution message: ${testExecutionResult.executionMessage}")
+        log.info("Exit code: '${testExecutionResult.exitCode}'; Execution message: '${testExecutionResult.executionMessage}'")
+
 
         // Prepare the command for generating the Jacoco report
         val command = mutableListOf(
@@ -287,7 +289,8 @@ class TestProcessor(
                     }
                     children("sourcefile") {
                         isCorrectSourceFile =
-                            this.attributes.getValue("name") == projectContext.fileUrlAsString!!.split(File.separatorChar).last()
+                            this.attributes.getValue("name") == projectContext.fileUrlAsString!!.split(File.separatorChar)
+                                .last()
                         children("line") {
                             if (isCorrectSourceFile && this.attributes.getValue("mi") == "0") {
                                 setOfLines.add(this.attributes.getValue("nr").toInt())
