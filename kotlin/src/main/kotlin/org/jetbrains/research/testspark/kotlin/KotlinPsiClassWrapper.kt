@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.idea.k2.codeinsight.quickFixes.createFromUsage.K2CreateFunctionFromUsageUtil.toKtClassOrFile
 import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
+import org.jetbrains.kotlin.idea.testIntegration.framework.KotlinPsiBasedTestFramework.Companion.asKtClassOrObject
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
@@ -96,7 +97,7 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
             query.findAll().filter { it.kotlinFqName != null }.map {
                 // If the sub-class is fetched as an ultra light class, get the KtClass
                 if (it is KtUltraLightClass) {
-                    KotlinPsiClassWrapper(it.toKtClassOrFile() as KtClass)
+                    KotlinPsiClassWrapper(it.asKtClassOrObject() as KtClass)
                 } else {
                     KotlinPsiClassWrapper(it as KtClass)
                 }
