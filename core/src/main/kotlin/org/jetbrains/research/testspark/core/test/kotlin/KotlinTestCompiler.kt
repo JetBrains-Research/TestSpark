@@ -2,8 +2,8 @@ package org.jetbrains.research.testspark.core.test.kotlin
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.research.testspark.core.exception.ClassFileNotFoundException
-import org.jetbrains.research.testspark.core.test.ExecutionResult
 import org.jetbrains.research.testspark.core.exception.KotlinCompilerNotFoundException
+import org.jetbrains.research.testspark.core.test.ExecutionResult
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -12,7 +12,7 @@ import java.io.File
 class KotlinTestCompiler(
     libPaths: List<String>,
     junitLibPaths: List<String>,
-    kotlinSDKHomeDirectory: String
+    kotlinSDKHomeDirectory: String,
 ) : TestCompiler(libPaths, junitLibPaths) {
     private val logger = KotlinLogging.logger { this::class.java }
     private val kotlinc: String
@@ -69,7 +69,7 @@ class KotlinTestCompiler(
                  * Forcing kotlinc to save a classfile in the same place, as '.kt' file
                  */
                 "-d",
-                workingDir
+                workingDir,
             ),
         )
         log.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }

@@ -113,7 +113,6 @@ class TestProcessor(
 
         log.info("Exit code: '${testExecutionResult.exitCode}'; Execution message: '${testExecutionResult.executionMessage}'")
 
-
         // Prepare the command for generating the Jacoco report
         val command = mutableListOf(
             javaRunner.absolutePath,

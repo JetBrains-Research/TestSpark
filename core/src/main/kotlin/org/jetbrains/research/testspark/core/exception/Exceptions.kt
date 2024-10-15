@@ -30,7 +30,6 @@ class JavaCompilerNotFoundException(message: String) : TestSparkException(messag
  */
 class JavaSDKMissingException(message: String) : TestSparkException(message)
 
-
 /**
  * Represents an exception thrown when a class file could not be found in the same path after the code compilation.
  *
