@@ -178,7 +178,7 @@ class TestProcessor(
         )
 
         // compilation checking
-        val compilationResult = testCompiler.compileCode(generatedTestPath, buildPath)
+        val compilationResult = testCompiler.compileCode(generatedTestPath, buildPath, resultPath)
         if (!compilationResult.first) {
             testsExecutionResultManager.addFailedTest(testId, testCode, compilationResult.second)
         } else {
