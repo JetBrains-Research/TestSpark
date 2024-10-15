@@ -13,13 +13,13 @@ class CommandLineRunner {
          * Executes a command line process
          *
          * @param cmd The command line arguments as an ArrayList of strings.
-         * @return A pair containing exit value and a string message containing execution results
+         * @return A pair containing exit code and a string message containing stdout and stderr of the executed process.
          */
         fun run(cmd: ArrayList<String>): ExecutionResult {
             var executionMsg = ""
 
             /**
-             * Since Windows does not provide bash, use cmd or similar default command line interpreter
+             * Since Windows does not provide bash, use cmd or simila       r default command line interpreter
              */
             val process = if (DataFilesUtil.isWindows()) {
                 ProcessBuilder()
@@ -34,10 +34,11 @@ class CommandLineRunner {
                     .start()
             }
             val reader = BufferedReader(InputStreamReader(process.inputStream))
+            val separator = System.lineSeparator()
             var line: String?
 
             while (reader.readLine().also { line = it } != null) {
-                executionMsg += line
+                executionMsg += "$line$separator"
             }
 
             process.waitFor()

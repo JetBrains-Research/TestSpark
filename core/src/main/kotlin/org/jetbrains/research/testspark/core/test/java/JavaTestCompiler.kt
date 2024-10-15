@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.core.test.java
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.exception.ClassFileNotFoundException
 import org.jetbrains.research.testspark.core.test.ExecutionResult
 import org.jetbrains.research.testspark.core.exception.JavaCompilerNotFoundException
 import org.jetbrains.research.testspark.core.test.TestCompiler
@@ -59,7 +60,7 @@ class JavaTestCompiler(
 
         val classFilePath = path.replace(".java", ".class")
         if (!File(classFilePath).exists()) {
-            throw IllegalStateException("Class files wasnt saved proeprly")
+            throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
         }
         return executionResult
     }

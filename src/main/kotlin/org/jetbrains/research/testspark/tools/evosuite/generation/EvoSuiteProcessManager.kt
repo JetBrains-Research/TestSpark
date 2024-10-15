@@ -85,6 +85,7 @@ class EvoSuiteProcessManager(
 
             val regex = Regex("version \"(.*?)\"")
             val versionCommandResult = CommandLineRunner.run(arrayListOf(evoSuiteSettingsState.javaPath, "-version"))
+            log.info("Version command result: exit code '${versionCommandResult.exitCode}', message '${versionCommandResult.executionMessage}'")
             val version = regex.find(versionCommandResult.executionMessage)
                 ?.groupValues
                 ?.get(1)

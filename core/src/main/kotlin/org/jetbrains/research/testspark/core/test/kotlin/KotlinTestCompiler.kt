@@ -1,6 +1,7 @@
 package org.jetbrains.research.testspark.core.test.kotlin
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.exception.ClassFileNotFoundException
 import org.jetbrains.research.testspark.core.test.ExecutionResult
 import org.jetbrains.research.testspark.core.exception.KotlinCompilerNotFoundException
 import org.jetbrains.research.testspark.core.test.TestCompiler
@@ -75,7 +76,7 @@ class KotlinTestCompiler(
 
         val classFilePath = path.removeSuffix(".kt") + ".class"
         if (!File(classFilePath).exists()) {
-            throw IllegalStateException("NO classfiles saved")
+            throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
         }
         return executionResult
     }
