@@ -181,6 +181,7 @@ class PromptBuilderTest {
                     }
             """.trimIndent(),
             allMethods = listOf(method1, method2),
+            constructorSignatures = emptyList(),
             classType = ClassType.CLASS,
         )
 
@@ -215,6 +216,7 @@ class PromptBuilderTest {
             }
             """.trimIndent(),
             allMethods = emptyList(),
+            constructorSignatures = emptyList(),
             classType = ClassType.INTERFACE,
         )
         val mySubClass = ClassRepresentation(
@@ -224,6 +226,7 @@ class PromptBuilderTest {
             }
             """.trimIndent(),
             allMethods = emptyList(),
+            constructorSignatures = emptyList(),
             classType = ClassType.CLASS,
         )
         val polymorphicRelations = mapOf(myInterface to listOf(mySubClass))
