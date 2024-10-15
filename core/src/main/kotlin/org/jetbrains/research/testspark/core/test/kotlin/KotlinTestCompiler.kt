@@ -11,7 +11,7 @@ import java.io.File
 class KotlinTestCompiler(
     libPaths: List<String>,
     junitLibPaths: List<String>,
-    kotlinSDKHomeDirectory: String,
+    kotlinSDKHomeDirectory: String
 ) : TestCompiler(libPaths, junitLibPaths) {
     private val logger = KotlinLogging.logger { this::class.java }
     private val kotlinc: String
@@ -50,7 +50,7 @@ class KotlinTestCompiler(
         kotlinc = kotlinCompiler.absolutePath
     }
 
-    override fun compileCode(path: String, projectBuildPath: String): ExecutionResult {
+    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): ExecutionResult {
         logger.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
@@ -64,10 +64,19 @@ class KotlinTestCompiler(
                 "-cp",
                 classPaths,
                 path,
+                /**
+                 * Forcing kotlinc to save a classfile in the same place, as '.kt' file
+                 */
+                "-d",
+                workingDir
             ),
         )
         logger.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
+        val classFilePath = path.removeSuffix(".kt") + ".class"
+        if (!File(classFilePath).exists()) {
+            throw IllegalStateException("NO classfiles saved")
+        }
         return executionResult
     }
 

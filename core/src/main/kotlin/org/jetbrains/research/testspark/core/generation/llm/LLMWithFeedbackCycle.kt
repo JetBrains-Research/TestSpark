@@ -263,9 +263,9 @@ class LLMWithFeedbackCycle(
             indicator.setText("Compilation tests checking")
 
             val testCasesCompilationResult =
-                testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases)
+                testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases, resultPath)
             val testSuiteCompilationResult =
-                testCompiler.compileCode(File(generatedTestSuitePath).absolutePath, buildPath)
+                testCompiler.compileCode(File(generatedTestSuitePath).absolutePath, buildPath, resultPath)
 
             // saving the compilable test cases
             compilableTestCases.addAll(testCasesCompilationResult.compilableTestCases)

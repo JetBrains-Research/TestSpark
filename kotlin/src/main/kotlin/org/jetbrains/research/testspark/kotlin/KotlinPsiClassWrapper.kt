@@ -6,10 +6,12 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTreeUtil
+import org.jetbrains.kotlin.asJava.classes.KtUltraLightClass
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
+import org.jetbrains.kotlin.idea.testIntegration.framework.KotlinPsiBasedTestFramework.Companion.asKtClassOrObject
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
@@ -91,7 +93,14 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
         val lightClass = psiClass.toLightClass()
         return if (lightClass != null) {
             val query = ClassInheritorsSearch.search(lightClass, scope, false)
-            query.findAll().filter { it.kotlinFqName != null }.map { KotlinPsiClassWrapper(it as KtClass) }
+            query.findAll().filter { it.kotlinFqName != null }.map {
+                // If the sub-class is fetched as an ultra light class, get the KtClass
+                if (it is KtUltraLightClass) {
+                    KotlinPsiClassWrapper(it.asKtClassOrObject() as KtClass)
+                } else {
+                    KotlinPsiClassWrapper(it as KtClass)
+                }
+            }
         } else {
             emptyList()
         }

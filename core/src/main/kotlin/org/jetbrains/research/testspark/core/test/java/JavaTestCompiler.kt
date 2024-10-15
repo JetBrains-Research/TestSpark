@@ -38,7 +38,7 @@ class JavaTestCompiler(
         javac = javaCompiler.absolutePath
     }
 
-    override fun compileCode(path: String, projectBuildPath: String): ExecutionResult {
+    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): ExecutionResult {
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // compile file
         val executionResult = CommandLineRunner.run(
@@ -50,6 +50,9 @@ class JavaTestCompiler(
                 "-cp",
                 classPaths,
                 path,
+                /**
+                 * We don't have to provide -d option, since javac saves class files in the same place by default
+                 */
             ),
         )
         logger.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
