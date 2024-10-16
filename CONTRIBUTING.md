@@ -229,7 +229,7 @@ All the listener classes can be found in `listeners` directory.
 ### Services
 
 All the service classes can be found in `services` directory.
-We have three services at this point only for managing setings in EvoSuite, LLM-based approach, and the general plugin's settings.
+We currently have three services for managing EvoSuite settings (`EvoSuiteSettingsService`), the LLM-based approach/generation (`LLMSettingsService`), and general plugin settings (`PluginSettingsService`).
 
 ### Tools
 
