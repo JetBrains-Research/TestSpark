@@ -239,7 +239,7 @@ Or to a new file:
 
 ![Tests adding to a new file](readme-images/gifs/AddingToANewFile.gif#gh-light-mode-only)
 ![Tests adding to a new file_dark](readme-images/gifs/AddingToANewFile_dark.gif#gh-dark-mode-only)
-### Disable-K2
+### Disable K2
 For LLM-based Kotlin test generation, you need to disable the K2 mode for now.
 ![Disable K2 mode](readme-images/pngs/k2-mode/disable-k2.png)
 ### Settings
