@@ -1,7 +1,9 @@
 package org.jetbrains.research.testspark.core.test.java
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.exception.ClassFileNotFoundException
 import org.jetbrains.research.testspark.core.exception.JavaCompilerNotFoundException
+import org.jetbrains.research.testspark.core.test.ExecutionResult
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -37,24 +39,30 @@ class JavaTestCompiler(
         javac = javaCompiler.absolutePath
     }
 
-    override fun compileCode(path: String, projectBuildPath: String): Pair<Boolean, String> {
+    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): ExecutionResult {
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // compile file
-        val errorMsg = CommandLineRunner.run(
+        val executionResult = CommandLineRunner.run(
             arrayListOf(
-                javac,
+                /**
+                 * Filepath may contain spaces, so we need to wrap it in quotes.
+                 */
+                "'$javac'",
                 "-cp",
                 classPaths,
                 path,
+                /**
+                 * We don't have to provide -d option, since javac saves class files in the same place by default
+                 */
             ),
         )
+        logger.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
-        logger.info { "Error message: '$errorMsg'" }
-        // create .class file path
         val classFilePath = path.replace(".java", ".class")
-
-        // check is .class file exists
-        return Pair(File(classFilePath).exists(), errorMsg)
+        if (!File(classFilePath).exists()) {
+            throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
+        }
+        return executionResult
     }
 
     override fun getClassPaths(buildPath: String): String {

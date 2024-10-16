@@ -263,9 +263,9 @@ class LLMWithFeedbackCycle(
             indicator.setText("Compilation tests checking")
 
             val testCasesCompilationResult =
-                testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases)
+                testCompiler.compileTestCases(generatedTestCasesPaths, buildPath, testCases, resultPath)
             val testSuiteCompilationResult =
-                testCompiler.compileCode(File(generatedTestSuitePath).absolutePath, buildPath)
+                testCompiler.compileCode(File(generatedTestSuitePath).absolutePath, buildPath, resultPath)
 
             // saving the compilable test cases
             compilableTestCases.addAll(testCasesCompilationResult.compilableTestCases)
@@ -281,8 +281,13 @@ class LLMWithFeedbackCycle(
 
                 onWarningCallback?.invoke(WarningType.COMPILATION_ERROR_OCCURRED)
 
-                nextPromptMessage =
-                    "I cannot compile the tests that you provided. The error is:\n${testSuiteCompilationResult.second}\n Fix this issue in the provided tests.\nGenerate public classes and public methods. Response only a code with tests between ```, do not provide any other text."
+                nextPromptMessage = """
+                   I cannot compile the tests that you provided. The error is:
+                   ```
+                   ${testSuiteCompilationResult.executionMessage}
+                   ```
+                   Fix this issue in the provided tests.\nGenerate public classes and public methods. Response only a code with tests between ```, do not provide any other text.
+                """.trimIndent()
                 log.info { nextPromptMessage }
                 continue
             }
