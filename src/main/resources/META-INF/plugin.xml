@@ -36,6 +36,14 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.3.0</h4>
+            <ul>
+                <li>Add full LLM-based Kotlin test generation for line, method/function, and class.</li>
+                <li>Integration with HuggingFace.</li>
+                <li>Support IDEA 242.*</li>
+                <li>Fixed multiple bugs in the LLM-based test generation algorithm.</li>
+                <li>Fixed multiple bugs in the UI.</li>
+            </ul>
         <h4>0.2.1</h4>
             <ul>
                 <li>Fix several minor bugs related to JUnit5 support and default template.</li>
