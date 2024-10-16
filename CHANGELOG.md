@@ -4,13 +4,15 @@
 ## Unreleased
 ## 0.3.0
 ### Fixed
-- Multiple bugs in the UI
-- Multiple bugs in the LLM-based test generation algorithm
+- Multiple bugs in the UI.
+- Multiple bugs in the LLM-based test generation algorithm.
 ### Changed
-- Major refactoring: removed most of the global services
+- Major refactoring: removed most of the global services.
+- Migration to Gradle IntelliJ Plugin 2.x,
 ### Added
-- Full LLM-based Kotlin test generation for line, method/function, and class
-- Integration with HuggingFace
+- Full LLM-based Kotlin test generation for line, method/function, and class.
+- Integration with HuggingFace.
+- Support IDEA `242.*`.
 
 ## 0.2.1
 ### Fixed
