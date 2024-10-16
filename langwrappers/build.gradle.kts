@@ -36,6 +36,7 @@ intellijPlatform {
 tasks.named("verifyPlugin") { enabled = false }
 tasks.named("runIde") { enabled = false }
 tasks.named("prepareJarSearchableOptions") { enabled = false }
+tasks.named("publishPlugin") { enabled = false }
 
 kotlin {
     jvmToolchain(rootProject.properties["jvmToolchainVersion"].toString().toInt())
