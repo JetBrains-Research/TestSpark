@@ -159,7 +159,7 @@ object ProjectApplicationUtils {
     private fun closeProject(project: Project) {
         logger.info("Closing project $project...")
         ApplicationManager.getApplication().assertIsNonDispatchThread()
-
+        // ToDo: move headless mode to another branch
 //        ApplicationManager.getApplication().invokeAndWait {
 //            ProjectManagerEx.getInstanceEx().forceCloseProject(project)
 //        }
@@ -167,6 +167,7 @@ object ProjectApplicationUtils {
 
     private suspend fun waitAllStartupActivitiesPassed(project: Project): Unit = suspendCoroutine {
         logger.info("Waiting all startup activities passed $project...")
+        // ToDo: move headless mode to another branch
 //        StartupManager.getInstance(project).runAfterOpened { it.resume(Unit) }
         waitForInvokeLaterActivities()
     }
