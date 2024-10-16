@@ -93,6 +93,10 @@ if (spaceCredentialsProvided()) {
         dependsOn("checkCredentials")
     }
 
+    tasks.named<Jar>(hasGrazieAccess.jarTaskName) {
+        exclude("**/plugin.xml")
+    }
+
     // add build of new source set as the part of UI testing
     tasks.prepareTestSandbox.configure {
         dependsOn(hasGrazieAccess.jarTaskName)
