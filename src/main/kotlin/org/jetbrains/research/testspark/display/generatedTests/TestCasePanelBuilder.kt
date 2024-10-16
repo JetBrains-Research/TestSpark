@@ -307,11 +307,7 @@ class TestCasePanelBuilder(
 
         val deletedTestPanel = createDeletedTestPanel()
         removeButton.addActionListener {
-            enableLocalComponents(false)
             deletedTestPanel.isVisible = true
-            languageTextField.isEnabled = false
-            checkbox.isSelected = false
-            checkbox.isEnabled = false
             remove()
         }
 
@@ -354,10 +350,6 @@ class TestCasePanelBuilder(
 
         undoButton.addActionListener {
             deletedTestPanel.isVisible = false
-            languageTextField.isEnabled = true
-            checkbox.isSelected = true
-            checkbox.isEnabled = true
-            enableLocalComponents(true)
             restore()
         }
 
@@ -678,7 +670,13 @@ class TestCasePanelBuilder(
         // Remove the test case from the cache
         GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
+        // Disable UI
+        enableLocalComponents(false)
+        languageTextField.isEnabled = false
+        checkbox.isSelected = false
+        checkbox.isEnabled = false
         runTestButton.isEnabled = false
+
         isRemoved = true
 
         ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
@@ -687,9 +685,16 @@ class TestCasePanelBuilder(
     }
 
     private fun restore() {
+        // Restore test case to cache
         GenerateTestsTabHelper.restoreTestCase(testCase.testName, generatedTestsTabData)
 
+        // Enable UI
+        enableLocalComponents(true)
+        languageTextField.isEnabled = true
+        checkbox.isSelected = true
+        checkbox.isEnabled = true
         runTestButton.isEnabled = true
+
         isRemoved = false
 
         ReportUpdater.restoreTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
