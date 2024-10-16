@@ -1,7 +1,9 @@
 package org.jetbrains.research.testspark.core.test.kotlin
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.exception.ClassFileNotFoundException
 import org.jetbrains.research.testspark.core.exception.KotlinCompilerNotFoundException
+import org.jetbrains.research.testspark.core.test.ExecutionResult
 import org.jetbrains.research.testspark.core.test.TestCompiler
 import org.jetbrains.research.testspark.core.utils.CommandLineRunner
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
@@ -10,7 +12,7 @@ import java.io.File
 class KotlinTestCompiler(
     libPaths: List<String>,
     junitLibPaths: List<String>,
-    kotlinSDKHomeDirectory: String
+    kotlinSDKHomeDirectory: String,
 ) : TestCompiler(libPaths, junitLibPaths) {
     private val logger = KotlinLogging.logger { this::class.java }
     private val kotlinc: String
@@ -49,13 +51,12 @@ class KotlinTestCompiler(
         kotlinc = kotlinCompiler.absolutePath
     }
 
-    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): Pair<Boolean, String> {
+    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): ExecutionResult {
         logger.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // Compile file
-        // TODO: we treat warnings as errors for now
-        val errorMsg = CommandLineRunner.run(
+        val executionResult = CommandLineRunner.run(
             arrayListOf(
                 /**
                  * Filepath may contain spaces, so we need to wrap it in quotes.
@@ -68,16 +69,16 @@ class KotlinTestCompiler(
                  * Forcing kotlinc to save a classfile in the same place, as '.kt' file
                  */
                 "-d",
-                workingDir
+                workingDir,
             ),
         )
-
-        logger.info { "Error message: '$errorMsg'" }
+        logger.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
         val classFilePath = path.removeSuffix(".kt") + ".class"
-
-        // check if .class file exists
-        return Pair(File(classFilePath).exists() && errorMsg.isBlank(), errorMsg)
+        if (!File(classFilePath).exists()) {
+            throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
+        }
+        return executionResult
     }
 
     override fun getClassPaths(buildPath: String): String = commonPath.plus(buildPath)

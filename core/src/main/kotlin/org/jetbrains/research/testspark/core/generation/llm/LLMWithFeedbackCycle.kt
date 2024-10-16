@@ -281,8 +281,13 @@ class LLMWithFeedbackCycle(
 
                 onWarningCallback?.invoke(WarningType.COMPILATION_ERROR_OCCURRED)
 
-                nextPromptMessage =
-                    "I cannot compile the tests that you provided. The error is:\n${testSuiteCompilationResult.second}\n Fix this issue in the provided tests.\nGenerate public classes and public methods. Response only a code with tests between ```, do not provide any other text."
+                nextPromptMessage = """
+                   I cannot compile the tests that you provided. The error is:
+                   ```
+                   ${testSuiteCompilationResult.executionMessage}
+                   ```
+                   Fix this issue in the provided tests.\nGenerate public classes and public methods. Response only a code with tests between ```, do not provide any other text.
+                """.trimIndent()
                 log.info { nextPromptMessage }
                 continue
             }
