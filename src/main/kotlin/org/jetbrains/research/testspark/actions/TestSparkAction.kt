@@ -7,22 +7,29 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiFile
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelFactory
-import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorFactory
-import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelFactory
-import org.jetbrains.research.testspark.actions.template.PanelFactory
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.bundles.TestSparkLabelsBundle
+import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.actions.controllers.VisibilityController
+import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelBuilder
+import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorBuilder
+import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelBuilder
+import org.jetbrains.research.testspark.actions.template.PanelBuilder
+import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.test.data.CodeType
+import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.TestSparkIcons
-import org.jetbrains.research.testspark.helpers.getCurrentListOfCodeTypes
-import org.jetbrains.research.testspark.services.SettingsApplicationService
-import org.jetbrains.research.testspark.settings.SettingsApplicationState
-import org.jetbrains.research.testspark.tools.Manager
+import org.jetbrains.research.testspark.langwrappers.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
+import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
+import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
+import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
+import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.llm.Llm
+import org.jetbrains.research.testspark.tools.template.Tool
 import java.awt.BorderLayout
 import java.awt.CardLayout
 import java.awt.Dimension
@@ -44,11 +51,12 @@ import javax.swing.JRadioButton
  * It creates a dialog wrapper and displays it when the associated action is performed.
  */
 class TestSparkAction : AnAction() {
-    class VisibilityController {
-        var isVisible = false
-    }
-
+    // Controllers
     private val visibilityController = VisibilityController()
+    private val testGenerationController = TestGenerationController()
+
+    private val testSparkDisplayManager = TestSparkDisplayManager()
+    private val testsExecutionResultManager = TestsExecutionResultManager()
 
     /**
      * Handles the action performed event.
@@ -60,16 +68,24 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(e, visibilityController)
+        TestSparkActionWindow(e, visibilityController, testGenerationController, testSparkDisplayManager, testsExecutionResultManager)
     }
 
     /**
      * Updates the state of the action based on the provided event.
      *
-     * @param e the AnActionEvent object representing the event
+     * @param e `AnActionEvent` object representing the event
      */
     override fun update(e: AnActionEvent) {
-        e.presentation.isEnabled = getCurrentListOfCodeTypes(e) != null
+        val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)
+
+        if (file == null) {
+            e.presentation.isEnabledAndVisible = false
+            return
+        }
+
+        val psiHelper = PsiHelperProvider.getPsiHelper(file)
+        e.presentation.isEnabledAndVisible = (psiHelper != null) && psiHelper.availableForGeneration(e)
     }
 
     /**
@@ -77,29 +93,48 @@ class TestSparkAction : AnAction() {
      *
      * @property e The AnActionEvent object.
      */
-    class TestSparkActionWindow(e: AnActionEvent, private val visibilityController: VisibilityController) :
+    class TestSparkActionWindow(
+        private val e: AnActionEvent,
+        private val visibilityController: VisibilityController,
+        private val testGenerationController: TestGenerationController,
+        private val testSparkDisplayManager: TestSparkDisplayManager,
+        private val testsExecutionResultManager: TestsExecutionResultManager,
+    ) :
         JFrame("TestSpark") {
         private val project: Project = e.project!!
-        private val settingsState: SettingsApplicationState
-            get() = project.getService(SettingsApplicationService::class.java).state
+
+        private val llmSettingsState: LLMSettingsState
+            get() = project.getService(LLMSettingsService::class.java).state
+        private val evoSuiteSettingsState: EvoSuiteSettingsState
+            get() = project.getService(EvoSuiteSettingsService::class.java).state
 
         private val llmButton = JRadioButton("<html><b>${Llm().name}</b></html>")
         private val evoSuiteButton = JRadioButton("<html><b>${EvoSuite().name}</b></html>")
         private val testGeneratorButtonGroup = ButtonGroup()
-        private val codeTypes = getCurrentListOfCodeTypes(e)!!
-        private val psiFile: PsiFile = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+
+        private val psiHelper: PsiHelper
+            get() {
+                val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
+                val psiHelper = PsiHelperProvider.getPsiHelper(file)
+                if (psiHelper == null) {
+                    // TODO exception
+                }
+                return psiHelper!!
+            }
+
+        private val codeTypes = psiHelper.getCurrentListOfCodeTypes(e)
         private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
         private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
-        private val codeTypeButtons: MutableList<JRadioButton> = mutableListOf()
+
+        private val codeTypeButtons: MutableList<Pair<CodeType, JRadioButton>> = mutableListOf()
         private val codeTypeButtonGroup = ButtonGroup()
 
-        private val nextButton = JButton(TestSparkLabelsBundle.defaultValue("next"))
+        private val nextButton = JButton(PluginLabelsBundle.get("next"))
 
         private val cardLayout = CardLayout()
-
-        private val llmSetupPanelFactory = LLMSetupPanelFactory(e, project)
-        private val llmSampleSelectorFactory = LLMSampleSelectorFactory(project)
-        private val evoSuitePanelFactory = EvoSuitePanelFactory(project)
+        private val llmSetupPanelFactory = LLMSetupPanelBuilder(e, project)
+        private val llmSampleSelectorFactory = LLMSampleSelectorBuilder(project, psiHelper.language)
+        private val evoSuitePanelFactory = EvoSuitePanelBuilder(project)
 
         init {
             if (!visibilityController.isVisible) {
@@ -135,19 +170,19 @@ class TestSparkAction : AnAction() {
                 NotificationGroupManager.getInstance()
                     .getNotificationGroup("Generation Error")
                     .createNotification(
-                        TestSparkBundle.message("generationWindowWarningTitle"),
-                        TestSparkBundle.message("generationWindowWarningMessage"),
+                        PluginMessagesBundle.get("generationWindowWarningTitle"),
+                        PluginMessagesBundle.get("generationWindowWarningMessage"),
                         NotificationType.WARNING,
                     )
                     .notify(e.project)
             }
         }
 
-        private fun createCardPanel(toolPanelFactory: PanelFactory): JPanel {
+        private fun createCardPanel(toolPanelBuilder: PanelBuilder): JPanel {
             val cardPanel = JPanel(BorderLayout())
-            cardPanel.add(toolPanelFactory.getTitlePanel(), BorderLayout.NORTH)
-            cardPanel.add(toolPanelFactory.getMiddlePanel(), BorderLayout.CENTER)
-            cardPanel.add(toolPanelFactory.getBottomPanel(), BorderLayout.SOUTH)
+            cardPanel.add(toolPanelBuilder.getTitlePanel(), BorderLayout.NORTH)
+            cardPanel.add(toolPanelBuilder.getMiddlePanel(), BorderLayout.CENTER)
+            cardPanel.add(toolPanelBuilder.getBottomPanel(), BorderLayout.SOUTH)
 
             return cardPanel
         }
@@ -174,16 +209,19 @@ class TestSparkAction : AnAction() {
             testGeneratorPanel.add(llmButton)
             testGeneratorPanel.add(evoSuiteButton)
 
-            for (codeType in codeTypes) {
-                val button = JRadioButton(codeType as String)
-                codeTypeButtons.add(button)
+            for ((codeType, codeTypeName) in codeTypes) {
+                val button = JRadioButton(codeTypeName)
+                codeTypeButtons.add(codeType to button)
                 codeTypeButtonGroup.add(button)
             }
 
             val codesToTestPanel = JPanel()
             codesToTestPanel.add(JLabel("Select the code type:"))
-            if (codeTypeButtons.size == 1) codeTypeButtons[0].isSelected = true
-            for (button in codeTypeButtons) codesToTestPanel.add(button)
+            if (codeTypeButtons.size == 1) {
+                // A single button is selected by default
+                codeTypeButtons[0].second.isSelected = true
+            }
+            for ((_, button) in codeTypeButtons) codesToTestPanel.add(button)
 
             val middlePanel = FormBuilder.createFormBuilder()
                 .setFormLeftIndent(10)
@@ -229,7 +267,7 @@ class TestSparkAction : AnAction() {
                 updateNextButton()
             }
 
-            for (button in codeTypeButtons) {
+            for ((_, button) in codeTypeButtons) {
                 button.addActionListener {
                     llmSetupPanelFactory.setPromptEditorType(button.text)
                     updateNextButton()
@@ -237,9 +275,9 @@ class TestSparkAction : AnAction() {
             }
 
             nextButton.addActionListener {
-                if (llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected && !settingsState.provideTestSamplesCheckBoxSelected) {
+                if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) {
                     startLLMGeneration()
-                } else if (llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected) {
+                } else if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected) {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     cardLayout.next(panel)
@@ -248,7 +286,7 @@ class TestSparkAction : AnAction() {
                     cardLayout.next(panel)
                     cardLayout.next(panel)
                     pack()
-                } else if (evoSuiteButton.isSelected && !settingsState.evosuiteSetupCheckBoxSelected) {
+                } else if (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected) {
                     startEvoSuiteGeneration()
                 } else {
                     cardLayout.next(panel)
@@ -269,7 +307,7 @@ class TestSparkAction : AnAction() {
 
             llmSetupPanelFactory.getFinishedButton().addActionListener {
                 llmSetupPanelFactory.applyUpdates()
-                if (settingsState.provideTestSamplesCheckBoxSelected) {
+                if (llmSettingsState.provideTestSamplesCheckBoxSelected) {
                     cardLayout.next(panel)
                 } else {
                     startLLMGeneration()
@@ -281,7 +319,7 @@ class TestSparkAction : AnAction() {
             }
 
             llmSampleSelectorFactory.getBackButton().addActionListener {
-                if (settingsState.llmSetupCheckBoxSelected) {
+                if (llmSettingsState.llmSetupCheckBoxSelected) {
                     cardLayout.previous(panel)
                 } else {
                     cardLayout.previous(panel)
@@ -302,35 +340,55 @@ class TestSparkAction : AnAction() {
             }
         }
 
-        private fun startEvoSuiteGeneration() {
-            val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
+        private fun startUnitTestGenerationTool(tool: Tool) {
+            if (!testGenerationController.isGeneratorRunning(project)) {
+                val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
-            if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByEvoSuite(project, psiFile, caretOffset, fileUrl, testSamplesCode)
+                for ((codeType, button) in codeTypeButtons) {
+                    if (button.isSelected) {
+                        when (codeType) {
+                            CodeType.CLASS -> tool.generateTestsForClass(
+                                project,
+                                psiHelper,
+                                caretOffset,
+                                fileUrl,
+                                testSamplesCode,
+                                testGenerationController,
+                                testSparkDisplayManager,
+                                testsExecutionResultManager,
+                            )
+                            CodeType.METHOD -> tool.generateTestsForMethod(
+                                project,
+                                psiHelper,
+                                caretOffset,
+                                fileUrl,
+                                testSamplesCode,
+                                testGenerationController,
+                                testSparkDisplayManager,
+                                testsExecutionResultManager,
+                            )
+                            CodeType.LINE -> tool.generateTestsForLine(
+                                project,
+                                psiHelper,
+                                caretOffset,
+                                fileUrl,
+                                testSamplesCode,
+                                testGenerationController,
+                                testSparkDisplayManager,
+                                testsExecutionResultManager,
+                            )
+                        }
+                        break
+                    }
+                }
             }
 
             visibilityController.isVisible = false
             dispose()
         }
 
-        private fun startLLMGeneration() {
-            val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
-
-            if (codeTypeButtons[0].isSelected) {
-                Manager.generateTestsForClassByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[1].isSelected) {
-                Manager.generateTestsForMethodByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            } else if (codeTypeButtons[2].isSelected) {
-                Manager.generateTestsForLineByLlm(project, psiFile, caretOffset, fileUrl, testSamplesCode)
-            }
-
-            visibilityController.isVisible = false
-            dispose()
-        }
+        private fun startEvoSuiteGeneration() = startUnitTestGenerationTool(tool = EvoSuite())
+        private fun startLLMGeneration() = startUnitTestGenerationTool(tool = Llm())
 
         /**
          * Updates the state of the "Next" button based on the selected options.
@@ -341,18 +399,15 @@ class TestSparkAction : AnAction() {
          */
         private fun updateNextButton() {
             val isTestGeneratorButtonGroupSelected = llmButton.isSelected || evoSuiteButton.isSelected
-            var isCodeTypeButtonGroupSelected = false
-            for (button in codeTypeButtons) {
-                isCodeTypeButtonGroupSelected = isCodeTypeButtonGroupSelected || button.isSelected
-            }
+            val isCodeTypeButtonGroupSelected = codeTypeButtons.any { it.second.isSelected }
             nextButton.isEnabled = isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected
 
-            if ((llmButton.isSelected && !settingsState.llmSetupCheckBoxSelected && !settingsState.provideTestSamplesCheckBoxSelected) ||
-                (evoSuiteButton.isSelected && !settingsState.evosuiteSetupCheckBoxSelected)
+            if ((llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) ||
+                (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected)
             ) {
-                nextButton.text = TestSparkLabelsBundle.defaultValue("ok")
+                nextButton.text = PluginLabelsBundle.get("ok")
             } else {
-                nextButton.text = TestSparkLabelsBundle.defaultValue("next")
+                nextButton.text = PluginLabelsBundle.get("next")
             }
         }
     }

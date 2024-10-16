@@ -10,17 +10,17 @@
 
     <p> TestSpark currently supports two test generation strategies:</p>
     <ul>
-        <li>LLM-based test generation (using <a href="https://openai.com">OpenAI</a> and JetBrains internal AI Assistant platform)</li>
+        <li>LLM-based test generation (using <a href="https://openai.com">OpenAI</a>, HuggingFace, and JetBrains internal AI Assistant platform)</li>
         <li>Local search-based test generation (using <a href="https://www.evosuite.org">EvoSuite</a>)</li>
     </ul>
 
     <h4>LLM-based test generation</h4>
     <p>For this type of test generation, TestSpark sends request to different Large Language Models. Also, it automatically checks if tests are valid before presenting it to users.</p>
-    <p>This feature needs a token from OpenAI platform or the AI Assistant platform.</p>
+    <p>This feature needs a token from OpenAI, HuggingFace, or the AI Assistant platform.</p>
     <ul>
-        <li>Supports Java (any version).</li>
+        <li>Supports Java (any version) and Kotlin (K2 mode should be disabled, checkout the Settings section on README).</li>
         <li>Generates unit tests for capturing failures.</li>
-        <li>Generate tests (JUnit4 and 5) for Java classes, methods, and single lines.</li>
+        <li>Generate tests for Java classes, methods, and single lines.</li>
     </ul>
 
     <h4>Local search-based test generation</h4>
@@ -36,6 +36,14 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.3.0</h4>
+            <ul>
+                <li>Add full LLM-based Kotlin test generation for line, method/function, and class.</li>
+                <li>Integration with HuggingFace.</li>
+                <li>Support IDEA 242.*</li>
+                <li>Fixed multiple bugs in the LLM-based test generation algorithm.</li>
+                <li>Fixed multiple bugs in the UI.</li>
+            </ul>
         <h4>0.2.1</h4>
             <ul>
                 <li>Fix several minor bugs related to JUnit5 support and default template.</li>
@@ -145,33 +153,73 @@
     </change-notes>
 
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.java</depends>
+    <depends>org.jetbrains.idea.maven</depends>
+    <depends>com.intellij.gradle</depends>
+
+    <!--    Plugin depends on the Kotlin support plugin that comes with org.jetbrains.kotlin.
+            This dependency is optional, which means plugin can run even if the Kotlin plugin is not available or not enabled.
+            This dependency will be loaded only when actually needed.
+            Moreover, we specify the configuration file to consider when the dependency is needed. -->
+    <depends
+            config-file="testgenie-kotlin.xml"
+            optional="true">
+        org.jetbrains.kotlin
+    </depends>
+
+    <!--    Plugin depends on the Java support plugin that comes with com.intellij.java.
+            This dependency is optional, which means plugin can run even if the Java plugin is not available or not enabled.
+            This dependency will be loaded only when actually needed.
+            Moreover, we specify the configuration file to consider when the dependency is needed. -->
+    <depends
+            config-file="testgenie-java.xml"
+            optional="true">
+        com.intellij.java
+    </depends>
+
+    <!-- Define an extension point for the plugin-->
+    <extensionPoints>
+        <extensionPoint
+                name="psiHelperProvider"
+                beanClass="com.intellij.lang.LanguageExtensionPoint"
+                dynamic="true">
+            <with attribute="implementationClass"
+                  implements="org.jetbrains.research.testspark.langwrappers.PsiHelperProvider"/>
+        </extensionPoint>
+    </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="TestSpark" secondary="true" anchor="right" icon="org.jetbrains.research.testspark.display.TestSparkIcons.toolWindowIcon"
+        <appStarter
+                implementation="org.jetbrains.research.testspark.appstarter.TestSparkStarter"
+                id="testspark"
+        />
+
+        <toolWindow id="TestSpark" secondary="true" anchor="right"
+                    icon="org.jetbrains.research.testspark.display.TestSparkIcons.toolWindowIcon"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>
 
         <!-- Application-level services -->
         <applicationService
-                serviceImplementation="org.jetbrains.research.testspark.services.SettingsApplicationService"/>
+                serviceImplementation="org.jetbrains.research.testspark.services.LLMSettingsService"/>
         <applicationService
-                serviceImplementation="org.jetbrains.research.testspark.services.SettingsProjectService"/>
+                serviceImplementation="org.jetbrains.research.testspark.services.PluginSettingsService"/>
+        <applicationService
+                serviceImplementation="org.jetbrains.research.testspark.services.EvoSuiteSettingsService"/>
 
         <!-- Configurables -->
         <projectConfigurable
                 parentId="tools"
-                instance="org.jetbrains.research.testspark.settings.SettingsPluginConfigurable"
-                id="TestSparkSettings"
+                instance="org.jetbrains.research.testspark.settings.plugin.PluginSettingsConfigurable"
+                id="PluginSettings"
                 displayName="TestSpark"/>
         <projectConfigurable
-                parentId="TestSparkSettings"
-                instance="org.jetbrains.research.testspark.settings.llm.SettingsLLMConfigurable"
-                id="TestSparkSettings.llm"
+                parentId="PluginSettings"
+                instance="org.jetbrains.research.testspark.settings.llm.LLMSettingsConfigurable"
+                id="LLMSettings"
                 displayName="Large Language Models"/>
         <projectConfigurable
-                parentId="TestSparkSettings"
-                instance="org.jetbrains.research.testspark.settings.evosuite.SettingsEvoSuiteConfigurable"
-                id="TestSparkSettings.evosuite"
+                parentId="PluginSettings"
+                instance="org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable"
+                id="EvoSuiteSettings"
                 displayName="EvoSuite"/>
 
         <!-- Notifications -->
@@ -190,19 +238,10 @@
 
     </extensions>
 
-    <projectListeners>
-        <listener
-                class="org.jetbrains.research.testspark.listener.TelemetrySubmitListenerImpl"
-                topic="com.intellij.openapi.startup.ProjectActivity"/>
-        <listener
-                class="org.jetbrains.research.testspark.listener.ProjectCloseListenerImpl"
-                topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </projectListeners>
-
     <actions>
         <!-- TestSpark actions -->
         <action id="TestSpark.TestSparkActions" text="TestSpark" description="Actions related to TestSpark"
-               class="org.jetbrains.research.testspark.actions.TestSparkAction">
+                class="org.jetbrains.research.testspark.actions.TestSparkAction">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
 
         </action>

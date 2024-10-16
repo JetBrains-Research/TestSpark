@@ -1,8 +1,13 @@
 package org.jetbrains.research.testspark.core.generation.llm.network
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.jetbrains.research.testspark.core.data.ChatAssistantMessage
 import org.jetbrains.research.testspark.core.data.ChatMessage
+import org.jetbrains.research.testspark.core.data.ChatUserMessage
+import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 
 abstract class RequestManager(var token: String) {
@@ -26,20 +31,21 @@ abstract class RequestManager(var token: String) {
      * @return the generated TestSuite, or null and prompt message
      */
     open fun request(
+        language: SupportedLanguage,
         prompt: String,
         indicator: CustomProgressIndicator,
         packageName: String,
         testsAssembler: TestsAssembler,
         isUserFeedback: Boolean = false,
+        errorMonitor: ErrorMonitor = DefaultErrorMonitor(), // The plugin for other IDEs can send LLM requests without passing an errorMonitor
     ): LLMResponse {
         // save the prompt in chat history
-        // TODO: make role to be an enum class
-        chatHistory.add(ChatMessage("user", prompt))
+        chatHistory.add(ChatUserMessage(prompt))
 
         // Send Request to LLM
         log.info { "Sending Request..." }
 
-        val sendResult = send(prompt, indicator, testsAssembler)
+        val sendResult = send(prompt, indicator, testsAssembler, errorMonitor)
 
         if (sendResult == SendResult.PROMPT_TOO_LONG) {
             return LLMResponse(ResponseErrorCode.PROMPT_TOO_LONG, null)
@@ -51,27 +57,28 @@ abstract class RequestManager(var token: String) {
         }
 
         return when (isUserFeedback) {
-            true -> processUserFeedbackResponse(testsAssembler, packageName)
-            false -> processResponse(testsAssembler, packageName)
+            true -> processUserFeedbackResponse(testsAssembler, packageName, language)
+            false -> processResponse(testsAssembler, packageName, language)
         }
     }
 
     open fun processResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
+        language: SupportedLanguage,
     ): LLMResponse {
         // save the full response in the chat history
         val response = testsAssembler.getContent()
 
         log.info { "The full response: \n $response" }
-        chatHistory.add(ChatMessage("assistant", response))
+        chatHistory.add(ChatAssistantMessage(response))
 
-        // check if response is empty
+        // check if the response is empty
         if (response.isEmpty() || response.isBlank()) {
             return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
         }
 
-        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite(packageName)
+        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite()
 
         return if (testSuiteGeneratedByLLM == null) {
             LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
@@ -84,22 +91,24 @@ abstract class RequestManager(var token: String) {
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
+        errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
     ): SendResult
 
     open fun processUserFeedbackResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
+        language: SupportedLanguage,
     ): LLMResponse {
         val response = testsAssembler.getContent()
 
         log.info { "The full response: \n $response" }
 
-        // check if response is empty
+        // check if the response is empty
         if (response.isEmpty() || response.isBlank()) {
             return LLMResponse(ResponseErrorCode.EMPTY_LLM_RESPONSE, null)
         }
 
-        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite(packageName)
+        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite()
 
         return if (testSuiteGeneratedByLLM == null) {
             LLMResponse(ResponseErrorCode.TEST_SUITE_PARSING_FAILURE, null)
