@@ -345,10 +345,10 @@ class TestCasePanelBuilder(
     private fun undoRemove(testPanelIndex: Int) {
         generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToRemovePanel[testCase.testName])
 
-        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName]!!.setSelected(true)
-
         runTestButton.isEnabled = true
         isRemoved = false
+
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName]!!.setSelected(true)
 
         generatedTestsTabData.allTestCasePanel.add(
             generatedTestsTabData.testCaseNameToPanel[testCase.testName],
