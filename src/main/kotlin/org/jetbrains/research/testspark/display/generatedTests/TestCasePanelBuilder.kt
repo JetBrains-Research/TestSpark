@@ -53,17 +53,11 @@ import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
 import java.util.Queue
-import javax.swing.Box
-import javax.swing.BoxLayout
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JOptionPane
-import javax.swing.JPanel
-import javax.swing.ScrollPaneConstants
-import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
+
+import java.awt.BorderLayout
+import javax.swing.*
 
 class TestCasePanelBuilder(
     private val project: Project,
@@ -302,7 +296,7 @@ class TestCasePanelBuilder(
         }
         resetButton.addActionListener { reset() }
         resetToLastRunButton.addActionListener { resetToLastRun() }
-        removeButton.addActionListener { remove() }
+        removeButton.addActionListener { switchTestPanel() }
 
         sendButton.addActionListener { sendRequest() }
 
@@ -314,6 +308,57 @@ class TestCasePanelBuilder(
         requestComboBox.isEditable = true
 
         return panel
+    }
+
+    /**
+     * Create a Panel that will replace test that was deleted by user.
+     */
+    fun getRemovePanel(testPanelIndex: Int): JPanel {
+        val panel = JPanel()
+
+        panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
+
+        val returnTestButton = JButton("Return test")
+        val removeTestButton = JButton("Remove test")
+
+        returnTestButton.isOpaque = false
+        returnTestButton.isContentAreaFilled = false
+        returnTestButton.isBorderPainted = true
+
+        removeTestButton.isOpaque = false
+        removeTestButton.isContentAreaFilled = false
+        removeTestButton.isBorderPainted = true
+
+        returnTestButton.addActionListener { undoRemove(testPanelIndex) }
+
+        removeTestButton.addActionListener { remove() }
+
+        panel.add(Box.createHorizontalGlue())
+
+        panel.add(returnTestButton)
+
+        panel.add(removeTestButton)
+
+        return panel
+    }
+
+    /**
+     * Method that switch removed panel to test panel that was deleted.
+     */
+    private fun undoRemove(testPanelIndex: Int) {
+        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToRemovePanel[testCase.testName])
+
+        runTestButton.isEnabled = true
+        isRemoved = false
+
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName]!!.setSelected(true)
+
+        generatedTestsTabData.allTestCasePanel.add(
+            generatedTestsTabData.testCaseNameToPanel[testCase.testName],
+            testPanelIndex
+        )
+
+        GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
     /**
@@ -627,6 +672,8 @@ class TestCasePanelBuilder(
      * 3. Updating the UI.
      */
     private fun remove() {
+        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToRemovePanel[testCase.testName])
+
         // Remove the test case from the cache
         GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
@@ -634,6 +681,27 @@ class TestCasePanelBuilder(
         isRemoved = true
 
         ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+
+        GenerateTestsTabHelper.update(generatedTestsTabData)
+    }
+
+    /**
+     * Switch test panel to removed panel of this test.
+     */
+    private fun switchTestPanel() {
+        val index: Int =
+            generatedTestsTabData.allTestCasePanel.getComponentZOrder(generatedTestsTabData.testCaseNameToPanel[testCase.testName])
+
+        GenerateTestsTabHelper.removeUITestCase(testCase.testName, generatedTestsTabData)
+
+        runTestButton.isEnabled = false
+        isRemoved = true
+
+        generatedTestsTabData.allTestCasePanel.add(
+            generatedTestsTabData.testCaseNameToRemovePanel[testCase.testName],
+            BorderLayout.EAST,
+            index
+        )
 
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
@@ -707,7 +775,8 @@ class TestCasePanelBuilder(
      * Updates the current test case with the specified test name and test code.
      */
     private fun updateTestCaseInformation() {
-        testCase.testName = TestAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
+        testCase.testName = TestAnalyzerFactory.create(language)
+            .extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 

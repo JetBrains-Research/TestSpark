@@ -165,10 +165,16 @@ class GeneratedTestsTabBuilder(
             generatedTestsTabData.allTestCasePanel.add(testCasePanel)
             addSeparator()
 
+            val testPanelIndex: Int =
+                generatedTestsTabData.allTestCasePanel.getComponentZOrder(testCasePanel)
+
+            val testCaseRemovePanel: JPanel = testCasePanelBuilder.getRemovePanel(testPanelIndex)
+
             generatedTestsTabData.testCaseNameToPanel[testCase.testName] = testCasePanel
             generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName] = checkbox
             generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName] =
                 testCasePanelBuilder.getEditorTextField()
+            generatedTestsTabData.testCaseNameToRemovePanel[testCase.testName] = testCaseRemovePanel
         }
         generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanel.size
         generatedTestsTabData.testCasePanelFactories.addAll(testCasePanelFactories)
