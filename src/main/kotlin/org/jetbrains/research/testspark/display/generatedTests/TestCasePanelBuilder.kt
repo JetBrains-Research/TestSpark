@@ -296,7 +296,7 @@ class TestCasePanelBuilder(
         }
         resetButton.addActionListener { reset() }
         resetToLastRunButton.addActionListener { resetToLastRun() }
-        removeButton.addActionListener { subtractTest() }
+        removeButton.addActionListener { switchTestPanel() }
 
         sendButton.addActionListener { sendRequest() }
 
@@ -311,7 +311,7 @@ class TestCasePanelBuilder(
     }
 
     /**
-     * Create button with text
+     * Create a Panel that will replace test that was deleted by user.
      */
     fun getRemovePanel(testPanelIndex: Int): JPanel {
         val panel = JPanel()
@@ -342,6 +342,9 @@ class TestCasePanelBuilder(
         return panel
     }
 
+    /**
+     * Method that switch removed panel to test panel that was deleted.
+     */
     private fun undoRemove(testPanelIndex: Int) {
         generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToRemovePanel[testCase.testName])
 
@@ -673,7 +676,10 @@ class TestCasePanelBuilder(
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
-    private fun subtractTest() {
+    /**
+     * Switch test panel to removed panel of this test.
+     */
+    private fun switchTestPanel() {
         val index: Int =
             generatedTestsTabData.allTestCasePanel.getComponentZOrder(generatedTestsTabData.testCaseNameToPanel[testCase.testName])
 
