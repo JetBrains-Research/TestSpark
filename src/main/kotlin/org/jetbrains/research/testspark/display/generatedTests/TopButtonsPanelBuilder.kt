@@ -44,22 +44,18 @@ class TopButtonsPanelBuilder {
             .filter { !it.isRemoved() }
             .count { it.getError()?.isEmpty() == true }
 
-        val removedTestsCount = generatedTestsTabData.testCasePanelFactories.count { it.isRemoved() }
+        val nonRemovedTestsCount = generatedTestsTabData.testCaseNameToPanel.size - generatedTestsTabData.testsRemoved
 
-        if (generatedTestsTabData.testCasePanelFactories.size == removedTestsCount) {
-            removeAllButton.doClick()
-            return
-        }
         testsSelectedLabel.text = String.format(
             testsSelectedText,
             generatedTestsTabData.testsSelected,
-            generatedTestsTabData.testCaseNameToPanel.size,
+            nonRemovedTestsCount,
         )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 passedTestsCount,
-                generatedTestsTabData.testCaseNameToPanel.size,
+                nonRemovedTestsCount,
             )
         runAllButton.isEnabled = false
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
@@ -71,20 +67,22 @@ class TopButtonsPanelBuilder {
 
     /**
      * Toggles check boxes so that they are either all selected or all not selected,
-     *  depending on the provided parameter.
+     *  depending on the provided parameter. This affects only non-removed tests.
      *
      *  @param selected whether the checkboxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean, generatedTestsTabData: GeneratedTestsTabData) {
-        generatedTestsTabData.testCaseNameToPanel.forEach { (_, jPanel) ->
+        generatedTestsTabData.testCaseNameToPanel.forEach { (testCaseName, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
-            checkBox.isSelected = selected
+            if (generatedTestsTabData.testCaseNameToEnabled[testCaseName]!!) {
+                checkBox.isSelected = selected
+            }
         }
         generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseNameToPanel.size else 0
     }
 
     /**
-     * Executes all test cases.
+     * Executes all non-removed test cases.
      *
      * This method presents a caution message to the user and asks for confirmation before executing the test cases.
      * If the user confirms, it iterates through each test case panel factory and runs the corresponding test.
@@ -106,7 +104,9 @@ class TopButtonsPanelBuilder {
         val tasks: Queue<(CustomProgressIndicator) -> Unit> = LinkedList()
 
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
-            testCasePanelFactory.addTask(tasks)
+            if (!testCasePanelFactory.isRemoved()) {
+                testCasePanelFactory.addTask(tasks)
+            }
         }
         // run tasks one after each other
         executeTasks(project, tasks, generatedTestsTabData)

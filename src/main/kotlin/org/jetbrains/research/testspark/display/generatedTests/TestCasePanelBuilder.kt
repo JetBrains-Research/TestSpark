@@ -118,9 +118,13 @@ class TestCasePanelBuilder(
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
 
-    // Create "Remove" button to remove the test from cache
+    // Create "Remove" button to remove the test temporarily
     private val removeButton =
         IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
+
+    // Create "Undo remove" button to restore a removed test
+    private val undoRemoveButton =
+        IconButtonCreator.getButton(TestSparkIcons.undoRemove, PluginLabelsBundle.get("undoRemoveTip"))
 
     // Create "Reset" button to reset the changes in the source code of the test
     private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
@@ -134,6 +138,8 @@ class TestCasePanelBuilder(
 
     private val requestJLabel = JLabel(PluginLabelsBundle.get("requestJLabel"))
     private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(llmSettingsState.defaultLLMRequests))
+
+    private val removedTestJLabel = JLabel(PluginLabelsBundle.get("removedTestJLabel"))
 
     private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, PluginLabelsBundle.get("send"))
 
@@ -279,11 +285,17 @@ class TestCasePanelBuilder(
         loadingLabel.isVisible = false
         buttonsPanel.add(loadingLabel)
         buttonsPanel.add(Box.createHorizontalGlue())
+        removedTestJLabel.isVisible = false
+        buttonsPanel.add(removedTestJLabel)
+        buttonsPanel.add(Box.createHorizontalGlue())
         resetButton.isEnabled = false
         buttonsPanel.add(resetButton)
         resetToLastRunButton.isEnabled = false
         buttonsPanel.add(resetToLastRunButton)
         buttonsPanel.add(removeButton)
+        buttonsPanel.add(undoRemoveButton)
+        undoRemoveButton.isVisible = false
+
         buttonsPanel.add(Box.createRigidArea(Dimension(12, 0)))
 
         panel.add(requestPanel)
@@ -303,6 +315,7 @@ class TestCasePanelBuilder(
         resetButton.addActionListener { reset() }
         resetToLastRunButton.addActionListener { resetToLastRun() }
         removeButton.addActionListener { remove() }
+        undoRemoveButton.addActionListener { undoRemove() }
 
         sendButton.addActionListener { sendRequest() }
 
@@ -393,8 +406,8 @@ class TestCasePanelBuilder(
 
         currentCodes[currentRequestNumber - 1] = testCase.testCode
 
-        // select checkbox
-        checkbox.isSelected = true
+        // select checkbox if the test is not removed
+        checkbox.isSelected = !isRemoved
 
         if (testCaseCodeToListOfCoveredLines.containsKey(testCase.testCode)) {
             testCase.coveredLines = testCaseCodeToListOfCoveredLines[testCase.testCode]!!
@@ -476,6 +489,7 @@ class TestCasePanelBuilder(
         resetToLastRunButton.isEnabled = isEnabled
         resetButton.isEnabled = isEnabled
         removeButton.isEnabled = isEnabled
+        undoRemoveButton.isEnabled = isEnabled
         sendButton.isEnabled = isEnabled
     }
 
@@ -619,21 +633,64 @@ class TestCasePanelBuilder(
     }
 
     /**
-     * Removes the button listener for the test case.
+     * Marks the test as removed.
      *
-     * This method is responsible for:
-     * 1. Removing the highlighting of the test.
-     * 2. Removing the test case from the cache.
-     * 3. Updating the UI.
+     * 1. The state is propagated to other parts, including ReportUpdater.
+     * 2. The test is indicated as removed in the UI.
+     * 3. The test won't be runnable or selectable by any means until it's restored.
      */
     private fun remove() {
-        // Remove the test case from the cache
+        // Temporarily remove the test case
         GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
+        sendButton.isEnabled = false
+        resetButton.isEnabled = false
+        resetToLastRunButton.isEnabled = false
+
+        checkbox.isSelected = false
+        checkbox.isEnabled = false
+
+        removeButton.isVisible = false
+        undoRemoveButton.isVisible = true
+
+        languageTextField.isEnabled = false
+        removedTestJLabel.isVisible = true
+
         isRemoved = true
 
         ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+
+        GenerateTestsTabHelper.update(generatedTestsTabData)
+    }
+
+    /**
+     * Marks the test as not removed.
+     *
+     * 1. The state is propagated to other parts, including ReportUpdater.
+     * 2. The test is indicated as normal in the UI.
+     * 3. The test is runnable and selectable like any other normal test.
+     */
+    private fun undoRemove() {
+        GenerateTestsTabHelper.undoRemoveTestCase(testCase.testName, generatedTestsTabData)
+
+        runTestButton.isEnabled = (getError() == null)
+        sendButton.isEnabled = true
+        resetButton.isEnabled = true
+        resetToLastRunButton.isEnabled = true
+
+        checkbox.isSelected = true
+        checkbox.isEnabled = true
+
+        removeButton.isVisible = true
+        undoRemoveButton.isVisible = false
+
+        languageTextField.isEnabled = true
+        removedTestJLabel.isVisible = false
+
+        isRemoved = false
+
+        ReportUpdater.addTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
 
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
