@@ -75,7 +75,7 @@ class KotlinTestCompiler(
         logger.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
         val classFilePath = path.removeSuffix(".kt") + ".class"
-        if (!File(classFilePath).exists()) {
+        if (executionResult.exitCode == 0 && !File(classFilePath).exists()) {
             throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
         }
         return executionResult
