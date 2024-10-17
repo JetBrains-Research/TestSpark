@@ -304,15 +304,6 @@ tasks {
                 subList(indexOf(start) + 1, indexOf(end))
             }.joinToString("\n").run { markdownToHTML(this) },
         )
-
-        // Get the latest available change notes from the changelog file
-        changeNotes.set(
-            provider {
-                changelog.run {
-                    getOrNull(properties("pluginVersion")) ?: getLatest()
-                }.toHTML()
-            },
-        )
     }
 
     publishPlugin {
