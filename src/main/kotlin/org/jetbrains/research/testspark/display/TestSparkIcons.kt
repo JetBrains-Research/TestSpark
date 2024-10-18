@@ -7,6 +7,7 @@ object TestSparkIcons {
     val remove = IconLoader.getIcon("/icons/remove.svg", javaClass)
 
     // TODO: Re-add icon here
+    val restore = IconLoader.getIcon("/icons/restore.svg", javaClass)
 
     @JvmField
     val reset = IconLoader.getIcon("/icons/reset.svg", javaClass)

@@ -2,7 +2,7 @@ package org.jetbrains.research.testspark.display.generatedTests
 
 object GenerateTestsTabHelper {
     /**
-     * A helper method to remove a test case from the cache and from the UI.
+     * A helper method to "remove" a test case from the cache and from the UI.
      *
      * @param testCaseName the name of the test
      */
