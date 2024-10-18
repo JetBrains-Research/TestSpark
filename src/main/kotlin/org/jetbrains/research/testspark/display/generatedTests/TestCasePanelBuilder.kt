@@ -122,6 +122,9 @@ class TestCasePanelBuilder(
     private val removeButton =
         IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
 
+    // TODO: Add implementation for the recover button
+
+
     // Create "Reset" button to reset the changes in the source code of the test
     private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
 

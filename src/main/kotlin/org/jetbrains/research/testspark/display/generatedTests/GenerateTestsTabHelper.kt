@@ -13,6 +13,7 @@ object GenerateTestsTabHelper {
         }
 
         // Remove the test panel from the UI
+        // TODO: We no longer want to remove the test case from the panel
         generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
 
         // Remove the test panel
