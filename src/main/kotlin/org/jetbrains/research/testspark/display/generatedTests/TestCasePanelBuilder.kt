@@ -48,16 +48,15 @@ import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
+import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
-import java.util.Queue
+import java.util.*
+import javax.swing.*
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-
-import java.awt.BorderLayout
-import javax.swing.*
 
 class TestCasePanelBuilder(
     private val project: Project,
