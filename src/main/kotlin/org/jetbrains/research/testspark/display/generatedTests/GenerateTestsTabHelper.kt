@@ -2,11 +2,11 @@ package org.jetbrains.research.testspark.display.generatedTests
 
 object GenerateTestsTabHelper {
     /**
-     * A helper method to remove a test case from the cache and from the UI.
+     * A helper method to purge a test case from the cache and from the UI.
      *
      * @param testCaseName the name of the test
      */
-    fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+    fun purgeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
         // Update the number of selected test cases if necessary
         if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
             generatedTestsTabData.testsSelected--
@@ -23,6 +23,40 @@ object GenerateTestsTabHelper {
 
         // Remove the editorTextField
         generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
+    }
+
+    /**
+     * A helper method to remove a test case temporarily.
+     *
+     * @param testCaseName the name of the test to remove
+     */
+    fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+        // Uncheck the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected = false
+
+        // Disable the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isEnabled = false
+
+        // Update status
+        generatedTestsTabData.testCaseNameToEnabled[testCaseName] = false
+        generatedTestsTabData.testsRemoved++
+    }
+
+    /**
+     * A helper method to restore a removed test case.
+     *
+     * @param testCaseName the name of the test to restore
+     */
+    fun undoRemoveTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+        // Check the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected = true
+
+        // Enable the selected checkbox
+        generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isEnabled = true
+
+        // Update status
+        generatedTestsTabData.testCaseNameToEnabled[testCaseName] = true
+        generatedTestsTabData.testsRemoved--
     }
 
     /**
