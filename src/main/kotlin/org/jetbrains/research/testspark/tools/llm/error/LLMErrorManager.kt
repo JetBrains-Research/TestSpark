@@ -2,10 +2,11 @@ package org.jetbrains.research.testspark.tools.llm.error
 
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
-import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.bundles.TestSparkBundle
-import org.jetbrains.research.testspark.services.ErrorService
+import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.tools.template.error.ErrorManager
 
 /**
@@ -20,13 +21,15 @@ import org.jetbrains.research.testspark.tools.template.error.ErrorManager
  * This class is part of the LLMErrorManager module.
  */
 class LLMErrorManager : ErrorManager {
+    private val log = Logger.getInstance(this::class.java)
+
     /**
      * Creates an error message for a request.
      *
      * @param code The error code associated with the request.
      * @return The error message for the request.
      */
-    fun createRequestErrorMessage(code: Int): String = TestSparkBundle.message("requestError") + " " + code.toString()
+    fun createRequestErrorMessage(code: Int): String = LLMMessagesBundle.get("requestError") + " " + code.toString()
 
     /**
      * Processes an error message and displays a notification if an error has occurred.
@@ -34,12 +37,13 @@ class LLMErrorManager : ErrorManager {
      * @param message The error message to be displayed in the notification.
      * @param project The project in which the error occurred.
      */
-    override fun errorProcess(message: String, project: Project) {
-        if (project.service<ErrorService>().errorOccurred()) {
+    override fun errorProcess(message: String, project: Project, errorMonitor: ErrorMonitor) {
+        if (errorMonitor.notifyErrorOccurrence()) {
+            log.warn("Error in Test Generation: $message")
             NotificationGroupManager.getInstance()
                 .getNotificationGroup("LLM Execution Error")
                 .createNotification(
-                    TestSparkBundle.message("llmErrorTitle"),
+                    PluginMessagesBundle.get("llmErrorTitle"),
                     message,
                     NotificationType.ERROR,
                 )
@@ -54,10 +58,11 @@ class LLMErrorManager : ErrorManager {
      * @param project The project in which to display the notification.
      */
     override fun warningProcess(message: String, project: Project) {
+        log.warn("Error in Test Generation: $message")
         NotificationGroupManager.getInstance()
             .getNotificationGroup("LLM Execution Error")
             .createNotification(
-                TestSparkBundle.message("llmWarningTitle"),
+                PluginMessagesBundle.get("llmWarningTitle"),
                 message,
                 NotificationType.WARNING,
             )

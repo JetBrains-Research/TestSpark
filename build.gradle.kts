@@ -1,4 +1,8 @@
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
+import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
 import java.net.URL
@@ -9,12 +13,14 @@ import java.util.zip.ZipInputStream
 
 fun properties(key: String) = project.findProperty(key).toString()
 
-val thunderdomeVersion = "1.0.5"
-
+// Space credentials
 val spaceUsername =
     System.getProperty("space.username")?.toString() ?: project.properties["spaceUsername"]?.toString() ?: ""
 val spacePassword =
     System.getProperty("space.pass")?.toString() ?: project.properties["spacePassword"]?.toString() ?: ""
+
+// the test generation module for interacting with Grazie (used when the space credentials are provided)
+val grazieTestGenerationVersion = "1.0.5"
 
 plugins {
     // Java support
@@ -22,7 +28,9 @@ plugins {
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "1.9.0"
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij") version "1.15.0"
+    id("org.jetbrains.intellij.platform") version "2.1.0"
+    // Gradle IntelliJ Plugin Migration Help (uncomment it for migration tips)
+//    id("org.jetbrains.intellij.platform.migration") version "2.1.0"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.1.2"
     // Gradle Qodana Plugin
@@ -34,6 +42,11 @@ version = properties("pluginVersion")
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    // this part is mandatory for all modules for platform version 2:
+    // See https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html#default-repositories
+    intellijPlatform {
+        defaultRepositories()
+    }
     maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
     maven("https://www.jetbrains.com/intellij-repository/snapshots")
 
@@ -63,9 +76,16 @@ if (spaceCredentialsProvided()) {
         usingSourceSet(hasGrazieAccess)
     }
 
+    // Add the dependencies for the new source set
+    dependencies {
+        add(hasGrazieAccess.implementationConfigurationName, kotlin("stdlib"))
+        add(hasGrazieAccess.implementationConfigurationName, "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+        add(hasGrazieAccess.implementationConfigurationName, "org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion")
+    }
+
     tasks.register("checkCredentials") {
         configurations.detachedConfiguration(
-            dependencies.create("org.jetbrains.research:grazie-test-generation:1.0.1"),
+            dependencies.create("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion"),
         ).files()
     }
 
@@ -73,8 +93,12 @@ if (spaceCredentialsProvided()) {
         dependsOn("checkCredentials")
     }
 
+    tasks.named<Jar>(hasGrazieAccess.jarTaskName) {
+        exclude("**/plugin.xml")
+    }
+
     // add build of new source set as the part of UI testing
-    tasks.prepareUiTestingSandbox.configure {
+    tasks.prepareTestSandbox.configure {
         dependsOn(hasGrazieAccess.jarTaskName)
         from(tasks.getByName(hasGrazieAccess.jarTaskName).outputs.files.asPath) { into("TestSpark/lib") }
 
@@ -96,16 +120,34 @@ if (spaceCredentialsProvided()) {
 }
 
 dependencies {
-    implementation(files("lib/evosuite-$thunderdomeVersion.jar"))
+    // Check platform V2 documentation for more details: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+    intellijPlatform {
+        // make a custom version of IDEA
+        create(properties("platformType"), properties("platformVersion"))
+        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
+        bundledPlugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
+
+        pluginVerifier()
+        zipSigner()
+        instrumentationTools()
+
+        testFramework(TestFrameworkType.Bundled)
+    }
+
+    implementation(files("lib/evosuite-${properties("evosuiteVersion")}.jar"))
     implementation(files("lib/standalone-runtime.jar"))
     implementation(files("lib/jacocoagent.jar"))
     implementation(files("lib/jacococli.jar"))
+    implementation(files("lib/opentest4j-1.1.1.jar"))
     implementation(files("lib/mockito-core-5.0.0.jar"))
     implementation(files("lib/byte-buddy-1.14.6.jar"))
     implementation(files("lib/byte-buddy-agent-1.14.6.jar"))
     implementation(files("lib/JUnitRunner.jar"))
 
     implementation(project(":core"))
+    implementation(project(":langwrappers")) // Needed to use Psi related interfaces and load proper implementation
+    implementation(project(":kotlin")) // Needed to load the testspark-kotlin.xml
+    implementation(project(":java")) // Needed to load the testspark-java.xml
     if (spaceCredentialsProvided()) {
         "hasGrazieAccessCompileOnly"(project(":core"))
     }
@@ -123,7 +165,7 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
     // https://mvnrepository.com/artifact/org.jacoco/org.jacoco.core
-    implementation("org.jacoco:org.jacoco.core:0.8.8")
+    implementation("org.jacoco:org.jacoco.core:0.8.12")
     // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-core
     implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
 
@@ -151,6 +193,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.mockito/mockito-all
     testImplementation("org.mockito:mockito-all:1.10.19")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
 
     // https://mvnrepository.com/artifact/net.jqwik/jqwik
     testImplementation("net.jqwik:jqwik:1.6.5")
@@ -161,23 +204,41 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-
-    if (spaceCredentialsProvided()) {
-        // Dependencies for hasGrazieAccess variant
-        "hasGrazieAccessImplementation"(kotlin("stdlib"))
-        "hasGrazieAccessImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-        "hasGrazieAccessImplementation"("org.jetbrains.research:grazie-test-generation:1.0.4")
-    }
 }
 
-// Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-intellij {
-    pluginName.set(properties("pluginName"))
-    version.set(properties("platformVersion"))
-    type.set(properties("platformType"))
+// Configure Gradle IntelliJ Plugin - read more: // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
+intellijPlatform {
+    pluginConfiguration {
+        name = properties("pluginName")
+        version = properties("pluginVersion")
 
-    // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
-    plugins.set(properties("platformPlugins").split(',').map(String::trim).filter(String::isNotEmpty))
+        ideaVersion {
+            sinceBuild = properties("pluginSinceBuild")
+            untilBuild = properties("pluginUntilBuild")
+        }
+    }
+
+    publishing {
+        token = System.getenv("PUBLISH_TOKEN")
+        channels = listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first())
+    }
+    // Set the ides on which the plugin verification is executed.
+    // See https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides
+    pluginVerification {
+        ides {
+            recommended()
+            select {
+                types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
+                channels = listOf(ProductRelease.Channel.RELEASE)
+                sinceBuild = properties("pluginSinceBuild")
+                untilBuild = properties("pluginUntilBuild")
+            }
+        }
+        freeArgs = listOf(
+            "-mute",
+            "TemplateWordInPluginId,ForbiddenPluginIdPrefix"
+        )
+    }
 }
 
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
@@ -201,6 +262,7 @@ tasks {
         dependsOn("copyJUnitRunnerLib")
         dependsOn(":core:compileKotlin")
     }
+
     // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
@@ -223,11 +285,13 @@ tasks {
         }
     }
 
-    patchPluginXml {
-        version.set(properties("pluginVersion"))
-        sinceBuild.set(properties("pluginSinceBuild"))
-        untilBuild.set(properties("pluginUntilBuild"))
+    signPlugin {
+        certificateChain.set(providers.environmentVariable("CERTIFICATE_CHAIN"))
+        privateKey.set(providers.environmentVariable("PRIVATE_KEY"))
+        password.set(providers.environmentVariable("PRIVATE_KEY_PASSWORD"))
+    }
 
+    patchPluginXml {
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription.set(
             projectDir.resolve("README.md").readText().lines().run {
@@ -251,33 +315,8 @@ tasks {
         )
     }
 
-    // Configure UI tests plugin
-    // Read more: https://github.com/JetBrains/intellij-ui-test-robot
-    runIdeForUiTests {
-        systemProperty("robot-server.port", "8082")
-        systemProperty("ide.mac.message.dialogs.as.sheets", "false")
-        systemProperty("jb.privacy.policy.text", "<!--999.999-->")
-        systemProperty("jb.consents.confirmation.enabled", "false")
-        systemProperty("idea.trust.all.projects", "true")
-        systemProperty("ide.show.tips.on.startup.default.value", "false")
-        systemProperty("jb.consents.confirmation.enabled", "false")
-        systemProperty("ide.mac.file.chooser.native", "false")
-        systemProperty("apple.laf.useScreenMenuBar", "false")
-    }
-
-    signPlugin {
-        certificateChain.set(System.getenv("CERTIFICATE_CHAIN").trimIndent())
-        privateKey.set(System.getenv("PRIVATE_KEY").trimIndent())
-        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
-    }
-
     publishPlugin {
         dependsOn("patchChangelog")
-        token.set(System.getenv("PUBLISH_TOKEN"))
-        // pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
-        // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
-        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
     }
 }
 
@@ -313,7 +352,7 @@ abstract class CopyJUnitRunnerLib : DefaultTask() {
  */
 abstract class UpdateEvoSuite : DefaultTask() {
     @Input
-    var version: String = ""
+    var evoSuiteVersion: String = ""
 
     @TaskAction
     fun execute() {
@@ -322,7 +361,7 @@ abstract class UpdateEvoSuite : DefaultTask() {
             libDir.mkdirs()
         }
 
-        val jarName = "evosuite-$version.jar"
+        val jarName = "evosuite-$evoSuiteVersion.jar"
 
         if (libDir.listFiles()?.any { it.name.matches(Regex(jarName)) } == true) {
             logger.info("Specified evosuite jar found, skipping update")
@@ -331,7 +370,7 @@ abstract class UpdateEvoSuite : DefaultTask() {
 
         logger.info("Specified evosuite jar not found, downloading release $jarName")
         val downloadUrl =
-            "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$version/release.zip"
+            "https://github.com/ciselab/evosuite/releases/download/thunderdome/release/$evoSuiteVersion/release.zip"
         val stream =
             try {
                 URL(downloadUrl).openStream()
@@ -359,12 +398,15 @@ abstract class UpdateEvoSuite : DefaultTask() {
 }
 
 tasks.register<UpdateEvoSuite>("updateEvosuite") {
-    version = thunderdomeVersion
+    evoSuiteVersion = properties("evosuiteVersion")
 }
-
+/**
+ * Copies the JUnitRunner.jar file to the lib directory of the project.
+ * This task depends on the "JUnitRunner" module being built beforehand.
+ * JUnitRunner.jar is required for running tests with coverage in the main plugin
+ */
 tasks.register<Copy>("copyJUnitRunnerLib") {
     dependsOn(":JUnitRunner:jar")
-
     val libName = "JUnitRunner.jar"
     val libSrcDir =
         "${project.projectDir}${File.separator}JUnitRunner${File.separator}build${File.separator}libs${File.separator}"
@@ -373,6 +415,50 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
 
     from(libSrcPath)
     into(libDestDir)
+}
+
+/**
+ * Returns the original string if it is not null, or the default string if the original string is null.
+ *
+ * @param default the default string to return if the original string is null
+ * @return the original string if it is not null, or the default string if the original string is null
+ */
+fun String?.orDefault(default: String): String = this ?: default
+
+/**
+ * This code sets up a Gradle task for running the plugin in headless mode
+ *
+ * @param root The root directory of the project under test.
+ * @param file The file containing unit under test.
+ * @param cut The class under test.
+ * @param cp The classpath of the project.
+ * @param llm The model used for the test generation task.
+ * @param token The token for using LLM.
+ * @param prompt a txt file containing the LLM's prompt template
+ * @param out The output directory for the project.
+ * @param enableCoverage flag to enable/disable coverage computation
+ */
+tasks.create<RunIdeTask>("headless") {
+    val root: String? by project
+    val file: String? by project
+    val cut: String? by project
+    val cp: String? by project
+    val junitv: String? by project
+    val llm: String? by project
+    val token: String? by project
+    val prompt: String? by project
+    val out: String? by project
+    val enableCoverage: String? by project
+
+    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage.orDefault("false"))
+
+    jvmArgs(
+        "-Xmx16G",
+        "-Djava.awt.headless=true",
+        "--add-exports",
+        "java.base/jdk.internal.vm=ALL-UNNAMED",
+        "-Didea.system.path",
+    )
 }
 
 fun spaceCredentialsProvided() = spaceUsername.isNotEmpty() && spacePassword.isNotEmpty()

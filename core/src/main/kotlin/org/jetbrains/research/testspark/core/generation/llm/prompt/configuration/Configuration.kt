@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 
+import org.jetbrains.research.testspark.core.data.ClassType
+
 /**
  * Represents the context for generating prompts for generating unit tests.
  *
@@ -8,7 +10,10 @@ package org.jetbrains.research.testspark.core.generation.llm.prompt.configuratio
  * @property polymorphismRelations A map where the key represents a ClassRepresentation object and the value is a list of its detected subclasses.
  */
 data class PromptGenerationContext(
-    val cut: ClassRepresentation,
+    /**
+     * The cut is null when we want to generate tests for top-level function
+     */
+    val cut: ClassRepresentation?,
     val classesToTest: List<ClassRepresentation>,
     val polymorphismRelations: Map<ClassRepresentation, List<ClassRepresentation>>,
     val promptConfiguration: PromptConfiguration,
@@ -38,7 +43,9 @@ data class PromptConfiguration(
 data class ClassRepresentation(
     val qualifiedName: String,
     val fullText: String,
+    val constructorSignatures: List<String>,
     val allMethods: List<MethodRepresentation>,
+    val classType: ClassType,
 )
 
 /**
