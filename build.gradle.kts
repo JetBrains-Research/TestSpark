@@ -233,7 +233,7 @@ intellijPlatform {
             select {
                 types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
                 channels = listOf(ProductRelease.Channel.RELEASE)
-                sinceBuild = properties("pluginSinceBuild")
+                sinceBuild = properties("pluginUntilBuild")
                 untilBuild = properties("pluginUntilBuild")
             }
         }
