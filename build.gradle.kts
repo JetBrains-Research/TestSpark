@@ -97,6 +97,10 @@ if (spaceCredentialsProvided()) {
         dependsOn("checkCredentials")
     }
 
+    tasks.named<Jar>(hasGrazieAccess.jarTaskName) {
+        exclude("**/plugin.xml")
+    }
+
     // add build of new source set as the part of UI testing
     tasks.prepareTestSandbox.configure {
         dependsOn(hasGrazieAccess.jarTaskName)
@@ -230,7 +234,7 @@ intellijPlatform {
             select {
                 types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
                 channels = listOf(ProductRelease.Channel.RELEASE)
-                sinceBuild = properties("pluginSinceBuild")
+                sinceBuild = properties("pluginUntilBuild")
                 untilBuild = properties("pluginUntilBuild")
             }
         }
@@ -303,15 +307,6 @@ tasks {
                 }
                 subList(indexOf(start) + 1, indexOf(end))
             }.joinToString("\n").run { markdownToHTML(this) },
-        )
-
-        // Get the latest available change notes from the changelog file
-        changeNotes.set(
-            provider {
-                changelog.run {
-                    getOrNull(properties("pluginVersion")) ?: getLatest()
-                }.toHTML()
-            },
         )
     }
 
