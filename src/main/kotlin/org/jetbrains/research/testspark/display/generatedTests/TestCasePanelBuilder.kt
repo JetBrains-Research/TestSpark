@@ -81,6 +81,7 @@ class TestCasePanelBuilder(
         get() = project.getService(LLMSettingsService::class.java).state
 
     private val panel = JPanel()
+    private var undoPanel: JPanel? = null
     private val previousButton =
         IconButtonCreator.getButton(TestSparkIcons.previous, PluginLabelsBundle.get("previousRequest"))
     private var requestNumber: String = "%d / %d"
@@ -136,6 +137,8 @@ class TestCasePanelBuilder(
     private val requestComboBox = ComboBox(arrayOf("") + JsonEncoding.decode(llmSettingsState.defaultLLMRequests))
 
     private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, PluginLabelsBundle.get("send"))
+
+    private val undoDeleteTestButton = JButton(PluginLabelsBundle.get("undoTestDelete"))
 
     private val loadingLabel: JLabel = JLabel(TestSparkIcons.loading)
 
@@ -314,6 +317,31 @@ class TestCasePanelBuilder(
         requestComboBox.isEditable = true
 
         return panel
+    }
+
+    /**
+     * Return the undo panel for a deleted test
+     */
+
+    private fun getUndoPanel(): JPanel {
+        if (this.undoPanel != null) {
+            return this.undoPanel as JPanel
+        }
+        this.undoPanel = JPanel()
+        this.undoPanel!!.layout = BoxLayout(undoPanel, BoxLayout.X_AXIS)
+
+        this.undoPanel!!.add(JLabel("Test deleted successfully\n"))
+        this.undoPanel!!.add(Box.createRigidArea(Dimension(10, 10)))
+
+        undoDeleteTestButton.isOpaque = false
+        undoDeleteTestButton.isContentAreaFilled = false
+        undoDeleteTestButton.isBorderPainted = true
+
+        this.undoPanel!!.add(undoDeleteTestButton)
+
+        undoDeleteTestButton.addActionListener { undoTestRemoval(this.undoPanel!!) }
+
+        return this.undoPanel as JPanel
     }
 
     /**
@@ -622,18 +650,43 @@ class TestCasePanelBuilder(
      * Removes the button listener for the test case.
      *
      * This method is responsible for:
-     * 1. Removing the highlighting of the test.
-     * 2. Removing the test case from the cache.
+     * 1. Removing the test and caching it
+     * 2. Adding an Undo button
      * 3. Updating the UI.
      */
     private fun remove() {
-        // Remove the test case from the cache
-        GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
+        // Remove the test case from the UI
+        val index = GenerateTestsTabHelper.removeTestCaseFromUI(testCase.testName, generatedTestsTabData)
+
+        // Add the undo button in place of the old test
+        generatedTestsTabData.allTestCasePanel.add(getUndoPanel(), index)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
         ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+
+        GenerateTestsTabHelper.update(generatedTestsTabData)
+    }
+
+
+    /**
+     * Adds the test case back to the UI
+     *
+     * This method is responsible for:
+     * 1. Adding the test back to the UI.
+     * 2. Updating the statistics.
+     * 3. Updating the UI.
+     */
+    private fun undoTestRemoval(currentPanel: JPanel) {
+
+        GenerateTestsTabHelper.restoreTestCaseToUI(testCase.testName, generatedTestsTabData, currentPanel)
+
+        runTestButton.isEnabled = true
+        isRemoved = false
+
+        // Update the statistics
+        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
 
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }

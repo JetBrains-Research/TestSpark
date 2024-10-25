@@ -191,6 +191,7 @@ class GeneratedTestsTabBuilder(
         // Filter the selected test cases
         val selectedTestCasePanels =
             generatedTestsTabData.testCaseNameToPanel.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+                .filter { !generatedTestsTabData.cacheIndexToDeletedTestCaseName.containsValue(it.key) }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
         // Get the test case components (source code of the tests)

@@ -53,13 +53,13 @@ class TopButtonsPanelBuilder {
         testsSelectedLabel.text = String.format(
             testsSelectedText,
             generatedTestsTabData.testsSelected,
-            generatedTestsTabData.testCaseNameToPanel.size,
+            generatedTestsTabData.testCaseNameToPanel.size - generatedTestsTabData.cacheIndexToDeletedTestCaseName.size,
         )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 passedTestsCount,
-                generatedTestsTabData.testCaseNameToPanel.size,
+                generatedTestsTabData.testCaseNameToPanel.size - generatedTestsTabData.cacheIndexToDeletedTestCaseName.size,
             )
         runAllButton.isEnabled = false
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
@@ -76,11 +76,14 @@ class TopButtonsPanelBuilder {
      *  @param selected whether the checkboxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean, generatedTestsTabData: GeneratedTestsTabData) {
-        generatedTestsTabData.testCaseNameToPanel.forEach { (_, jPanel) ->
-            val checkBox = jPanel.getComponent(0) as JCheckBox
-            checkBox.isSelected = selected
-        }
-        generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseNameToPanel.size else 0
+        generatedTestsTabData.testCaseNameToPanel
+            .filter { !generatedTestsTabData.cacheIndexToDeletedTestCaseName.containsValue(it.key) }
+            .forEach { (_, jPanel) ->
+                val checkBox = jPanel.getComponent(0) as JCheckBox
+                checkBox.isSelected = selected
+            }
+        generatedTestsTabData.testsSelected =
+            if (selected) generatedTestsTabData.testCaseNameToPanel.size - generatedTestsTabData.cacheIndexToDeletedTestCaseName.size else 0
     }
 
     /**
