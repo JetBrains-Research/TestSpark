@@ -33,7 +33,7 @@ object GenerateTestsTabHelper {
     }
 
     /**
-     * Helper function that removes a test from the cache.
+     * Helper function that removes a test from the cache if it stored.
      *
      * @param testCaseName the name of the test
      */
@@ -41,15 +41,19 @@ object GenerateTestsTabHelper {
         generatedTestsTabData: GeneratedTestsTabData,
         testCaseName: String
     ) {
-        // Remove all components from the cache
-        generatedTestsTabData.cacheTestCaseNameToSelectedCheckbox.remove(testCaseName)
-        generatedTestsTabData.cacheTestCaseNameToEditorTextField.remove(testCaseName)
-
-        generatedTestsTabData.cacheIndexToDeletedTestCaseName.remove(
-            generatedTestsTabData.allTestCasePanel.getComponentZOrder(
-                generatedTestsTabData.testCaseNameToPanel[testCaseName]
+        if (generatedTestsTabData.cacheTestCaseNameToSelectedCheckbox.containsKey(testCaseName)) {
+            generatedTestsTabData.cacheTestCaseNameToSelectedCheckbox.remove(testCaseName)
+        }
+        if (generatedTestsTabData.cacheTestCaseNameToEditorTextField.containsKey(testCaseName)) {
+            generatedTestsTabData.cacheTestCaseNameToEditorTextField.remove(testCaseName)
+        }
+        if (generatedTestsTabData.cacheIndexToDeletedTestCaseName.containsValue(testCaseName)) {
+            generatedTestsTabData.cacheIndexToDeletedTestCaseName.remove(
+                generatedTestsTabData.allTestCasePanel.getComponentZOrder(
+                    generatedTestsTabData.testCaseNameToPanel[testCaseName]
+                )
             )
-        )
+        }
     }
 
     /**
@@ -92,7 +96,8 @@ object GenerateTestsTabHelper {
         generatedTestsTabData.allTestCasePanel.remove(index)
 
         // Add the test back to the original position
-        val testPanel = generatedTestsTabData.testCaseNameToPanel[generatedTestsTabData.cacheIndexToDeletedTestCaseName[index]]
+        val testPanel =
+            generatedTestsTabData.testCaseNameToPanel[generatedTestsTabData.cacheIndexToDeletedTestCaseName[index]]
         generatedTestsTabData.allTestCasePanel.add(testPanel, index)
 
         // Restore the checkbox
