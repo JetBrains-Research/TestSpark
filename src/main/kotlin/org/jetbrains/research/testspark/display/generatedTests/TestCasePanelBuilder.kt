@@ -122,9 +122,6 @@ class TestCasePanelBuilder(
     private val removeButton =
         IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
 
-    // TODO: Add implementation for the recover button
-
-
     // Create "Reset" button to reset the changes in the source code of the test
     private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
 
@@ -306,7 +303,6 @@ class TestCasePanelBuilder(
         resetButton.addActionListener { reset() }
         resetToLastRunButton.addActionListener { resetToLastRun() }
         removeButton.addActionListener { remove() }
-
         sendButton.addActionListener { sendRequest() }
 
         /**
@@ -630,6 +626,7 @@ class TestCasePanelBuilder(
      * 3. Updating the UI.
      */
     private fun remove() {
+
         // Remove the test case from the cache
         GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
@@ -638,7 +635,73 @@ class TestCasePanelBuilder(
 
         ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
 
+        // Create a new test case panel with the recover button
+        val recoverTestPanel = createRecoverTestPanel()
+        generatedTestsTabData.allTestCasePanel.add(recoverTestPanel)
+
         GenerateTestsTabHelper.update(generatedTestsTabData)
+    }
+
+    /**
+     * Creates a recovery test panel for the specified test case.
+     *
+     * This method is responsible for:
+     * 1. Creating a new panel with a message indicating that the test case has been deleted.
+     * 2. Adding a "Recover" button to the panel.
+     * 3. Adding an action listener to the "Recover" button that recovers the test case, updates the panel and checkbox
+     * states, and updates the report with the recovered test case.
+     */
+    private fun createRecoverTestPanel(): JPanel {
+
+        val recoverTestPanel = JPanel()
+        recoverTestPanel.layout = BoxLayout(recoverTestPanel, BoxLayout.Y_AXIS)
+
+        val messagePanel = JPanel()
+        messagePanel.layout = BoxLayout(messagePanel, BoxLayout.X_AXIS)
+
+        // Text message label on the left
+        val deletionMessage = JLabel("Test ${testCase.testName} deleted.")
+        messagePanel.add(deletionMessage)
+        messagePanel.add(Box.createHorizontalGlue())
+
+        // Recover button on the right
+        val recoveryButton = JButton("Recover")
+        messagePanel.add(recoveryButton)
+        runTestButton.isEnabled = true
+        isRemoved = false
+
+        recoveryButton.addActionListener {
+            val oldTestCasePanel = generatedTestsTabData.removedtestCaseNameToPanel.remove(testCase.testName)
+            if (oldTestCasePanel != null) {
+                // Remove the recoverTestPanel from the allTestCasePanel
+                generatedTestsTabData.allTestCasePanel.remove(recoverTestPanel)
+
+                // Recover the test case that was deleted
+                generatedTestsTabData.allTestCasePanel.add(oldTestCasePanel)
+
+                // Update panel and checkbox states
+                generatedTestsTabData.testCaseNameToPanel[testCase.testName] = oldTestCasePanel
+                val associatedCheckbox = oldTestCasePanel.components[0] as JCheckBox
+                generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName] = associatedCheckbox
+
+                // Update the count of selected tests if the test is recovered successfully
+                if (!associatedCheckbox.isSelected) {
+                    associatedCheckbox.isSelected = true
+                    generatedTestsTabData.testsSelected++
+                }
+
+                // Update the report with the recovered test case
+                ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+
+                generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanel.size
+                generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
+            }
+        }
+
+        // Add the messagePanel to recoveryTestPanel
+        recoverTestPanel.add(messagePanel)
+
+        return recoverTestPanel
     }
 
     /**
