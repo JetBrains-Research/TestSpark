@@ -61,7 +61,7 @@ class KotlinTestCompiler(
                 /**
                  * Filepath may contain spaces, so we need to wrap it in quotes.
                  */
-                "'$kotlinc'",
+                kotlinc,
                 "-cp",
                 classPaths,
                 path,
