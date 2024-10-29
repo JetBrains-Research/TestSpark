@@ -5,7 +5,8 @@ package org.jetbrains.research.testspark.tools
  */
 enum class GenerationTool(val toolId: String) {
     EvoSuite("EvoSuite"),
-    LLM("LLM");
+    LLM("LLM"),
+    ;
 
     companion object {
         fun from(findValue: String): GenerationTool = entries.first { it.toolId == findValue }
