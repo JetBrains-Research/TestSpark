@@ -64,7 +64,7 @@ class TestSparkDisplayManager {
             uiContext,
             coverageVisualisationTabBuilder!!,
             testsExecutionResultManager,
-            generationTool
+            generationTool,
         )
 
         generatedTestsTabBuilder!!.show(contentManager!!, language)

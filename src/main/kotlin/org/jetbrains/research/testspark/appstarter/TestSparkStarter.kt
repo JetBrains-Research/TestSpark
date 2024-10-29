@@ -274,7 +274,7 @@ class TestSparkStarter : ApplicationStarter {
                     out,
                     projectContext,
                     testCompiler,
-                    junitVersion
+                    junitVersion,
                 )
                 // Saving exception (if exists) thrown during the test execution
                 saveException(testcaseName, targetDirectory, testExecutionError)
