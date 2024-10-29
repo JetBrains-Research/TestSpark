@@ -184,7 +184,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             testGenerationController,
             testSparkDisplayManager,
             testsExecutionResultManager,
-            name
+            name,
         )
     }
 }

@@ -22,6 +22,7 @@ import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
@@ -42,6 +43,7 @@ import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.testmanager.TestAnalyzerFactory
+import org.jetbrains.research.testspark.tools.GenerationTool
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
@@ -64,8 +66,6 @@ import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.tools.GenerationTool
 
 class TestCasePanelBuilder(
     private val project: Project,
@@ -574,7 +574,7 @@ class TestCasePanelBuilder(
                 uiContext.projectContext,
                 testCompiler,
                 testsExecutionResultManager,
-                junitVersion
+                junitVersion,
             )
 
         testCase.coveredLines = newTestCase.coveredLines

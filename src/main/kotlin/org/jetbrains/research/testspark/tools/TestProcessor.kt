@@ -157,7 +157,7 @@ class TestProcessor(
         projectContext: ProjectContext,
         testCompiler: TestCompiler,
         testsExecutionResultManager: TestsExecutionResultManager,
-        junitVersion: JUnitVersion
+        junitVersion: JUnitVersion,
     ): TestCase {
         // get buildPath
         var buildPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path

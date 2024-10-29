@@ -37,7 +37,7 @@ class GeneratedTestsTabBuilder(
     private val uiContext: UIContext,
     private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
     private val testsExecutionResultManager: TestsExecutionResultManager,
-    private val generationTool: GenerationTool
+    private val generationTool: GenerationTool,
 ) {
     private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData()
 
@@ -161,7 +161,7 @@ class GeneratedTestsTabBuilder(
                     coverageVisualisationTabBuilder,
                     generatedTestsTabData,
                     testsExecutionResultManager,
-                    generationTool
+                    generationTool,
                 )
             testCasePanel.add(testCasePanelBuilder.getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(testCasePanelBuilder.getMiddlePanel(), BorderLayout.CENTER)
