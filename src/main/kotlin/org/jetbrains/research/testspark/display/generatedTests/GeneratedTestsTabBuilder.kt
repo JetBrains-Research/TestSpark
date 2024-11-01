@@ -190,7 +190,10 @@ class GeneratedTestsTabBuilder(
     fun applyTests(): Boolean {
         // Filter the selected test cases
         val selectedTestCasePanels =
-            generatedTestsTabData.testCaseNameToPanel.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+            generatedTestsTabData.testCaseNameToPanel.filter {
+                val testIsNotHidden = !generatedTestsTabData.hiddenTestCases.contains(it.key)
+                (it.value.getComponent(0) as JCheckBox).isSelected && testIsNotHidden
+            }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
         // Get the test case components (source code of the tests)
