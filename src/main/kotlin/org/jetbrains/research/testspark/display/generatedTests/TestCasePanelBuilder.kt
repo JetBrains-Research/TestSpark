@@ -48,7 +48,6 @@ import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
-import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
 import java.awt.Toolkit
@@ -71,6 +70,9 @@ class TestCasePanelBuilder(
     private val generatedTestsTabData: GeneratedTestsTabData,
     private val testsExecutionResultManager: TestsExecutionResultManager,
 ) {
+    private var visibleTestCasePanel: JPanel? = null
+    private var hiddenTestCasePanel: JPanel? = null
+
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
@@ -311,7 +313,7 @@ class TestCasePanelBuilder(
         return panel
     }
 
-    private fun getRemovedTestPanel(): JPanel {
+    private fun getHiddenTestCasePanel(): JPanel {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
 
@@ -650,38 +652,40 @@ class TestCasePanelBuilder(
      * 3. Updating the UI.
      */
     private fun removePermanently() {
+        generatedTestsTabData.allTestCasePanel.remove(hiddenTestCasePanel)
+
         // Remove the test case from the cache
         GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
 
         runTestButton.isEnabled = false
         isRemoved = true
 
-        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
-
+        if (isShown) {
+            ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
+        }
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
     private fun toggleTestCaseVisibility(visible: Boolean) {
         isShown = visible
-        val testCasePanel = generatedTestsTabData.testCaseNameToPanel[testCase.testName]!!
         if (visible) {
-            testCasePanel.removeAll()
-            testCasePanel.add(getUpperPanel(), BorderLayout.NORTH)
-            testCasePanel.add(getMiddlePanel(), BorderLayout.CENTER)
-            testCasePanel.add(getBottomPanel(), BorderLayout.SOUTH)
+            val componentIndex = generatedTestsTabData.allTestCasePanel.getComponentZOrder(hiddenTestCasePanel)
+            generatedTestsTabData.allTestCasePanel.remove(hiddenTestCasePanel)
+            generatedTestsTabData.allTestCasePanel.add(visibleTestCasePanel, componentIndex)
 
-            generatedTestsTabData.hiddenTestCases.remove(testCase.id)
+            GenerateTestsTabHelper.showTestCase(testCase.testName, generatedTestsTabData)
             ReportUpdater.addTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
         } else {
-            testCasePanel.removeAll()
-            val removedTestPanel = getRemovedTestPanel()
-            testCasePanel.add(removedTestPanel)
+            val currentTestCasePanel = generatedTestsTabData.testCaseNameToPanel[testCase.testName]!!
+            if (visibleTestCasePanel == null) visibleTestCasePanel = currentTestCasePanel
+            if (hiddenTestCasePanel == null) hiddenTestCasePanel = getHiddenTestCasePanel()
+            val componentIndex = generatedTestsTabData.allTestCasePanel.getComponentZOrder(currentTestCasePanel)
+            generatedTestsTabData.allTestCasePanel.remove(currentTestCasePanel)
+            generatedTestsTabData.allTestCasePanel.add(hiddenTestCasePanel!!, componentIndex)
 
-            generatedTestsTabData.hiddenTestCases[testCase.id] = testCase
-            generatedTestsTabData.testsSelected--
+            GenerateTestsTabHelper.hideTestCase(testCase.testName, generatedTestsTabData)
             ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
         }
-        GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
     /**

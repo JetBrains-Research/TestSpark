@@ -8,12 +8,12 @@ object GenerateTestsTabHelper {
      */
     fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
         // Update the number of selected test cases if necessary
-        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
+        val testCaseIsSelected = generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected
+        val testCaseIsNotHidden = !generatedTestsTabData.hiddenTestCases.contains(testCaseName)
+        generatedTestsTabData.hiddenTestCases.remove(testCaseName)
+        if (testCaseIsSelected && testCaseIsNotHidden) {
             generatedTestsTabData.testsSelected--
         }
-
-        // Remove the test panel from the UI
-        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
 
         // Remove the test panel
         generatedTestsTabData.testCaseNameToPanel.remove(testCaseName)
@@ -23,6 +23,27 @@ object GenerateTestsTabHelper {
 
         // Remove the editorTextField
         generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
+    }
+
+    fun showTestCase(
+        testCaseName: String,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
+        generatedTestsTabData.hiddenTestCases.remove(testCaseName)
+        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
+            generatedTestsTabData.testsSelected++
+        }
+
+        update(generatedTestsTabData)
+    }
+
+    fun hideTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+        generatedTestsTabData.hiddenTestCases.add(testCaseName)
+        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
+            generatedTestsTabData.testsSelected--
+        }
+
+        update(generatedTestsTabData)
     }
 
     /**
