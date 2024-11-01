@@ -669,10 +669,12 @@ class TestCasePanelBuilder(
             testCasePanel.add(getUpperPanel(), BorderLayout.NORTH)
             testCasePanel.add(getMiddlePanel(), BorderLayout.CENTER)
             testCasePanel.add(getBottomPanel(), BorderLayout.SOUTH)
+            ReportUpdater.addTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
         } else {
             testCasePanel.removeAll()
             val removedTestPanel = getRemovedTestPanel()
             testCasePanel.add(removedTestPanel)
+            ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder, generatedTestsTabData)
         }
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
