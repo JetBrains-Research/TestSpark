@@ -94,6 +94,7 @@ class TestCasePanelBuilder(
     private val dimensionSize = 7
 
     private var isRemoved = false
+    private var isShown = true
 
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
@@ -661,6 +662,7 @@ class TestCasePanelBuilder(
     }
 
     private fun toggleTestCaseVisibility(visible: Boolean) {
+        isShown = visible
         val testCasePanel = generatedTestsTabData.testCaseNameToPanel[testCase.testName]!!
         if (visible) {
             testCasePanel.removeAll()
@@ -739,6 +741,7 @@ class TestCasePanelBuilder(
      * @return true if the item is removed, false otherwise.
      */
     fun isRemoved() = isRemoved
+    fun isShown() = isShown
 
     /**
      * Updates the current test case with the specified test name and test code.

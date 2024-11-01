@@ -106,7 +106,7 @@ class TopButtonsPanelBuilder {
         val tasks: Queue<(CustomProgressIndicator) -> Unit> = LinkedList()
 
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
-            testCasePanelFactory.addTask(tasks)
+            if (testCasePanelFactory.isShown()) testCasePanelFactory.addTask(tasks)
         }
         // run tasks one after each other
         executeTasks(project, tasks, generatedTestsTabData)
