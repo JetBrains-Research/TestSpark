@@ -56,12 +56,15 @@ class KotlinTestCompiler(
 
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // Compile file
+        // See: https://github.com/JetBrains-Research/TestSpark/issues/402
+        val kotlinc = if (DataFilesUtil.isWindows()) "\"$kotlinc\"" else "'$kotlinc'"
+
         val executionResult = CommandLineRunner.run(
             arrayListOf(
                 /**
                  * Filepath may contain spaces, so we need to wrap it in quotes.
                  */
-                "'$kotlinc'",
+                kotlinc,
                 "-cp",
                 classPaths,
                 path,
@@ -75,7 +78,7 @@ class KotlinTestCompiler(
         logger.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
         val classFilePath = path.removeSuffix(".kt") + ".class"
-        if (!File(classFilePath).exists()) {
+        if (executionResult.exitCode == 0 && !File(classFilePath).exists()) {
             throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
         }
         return executionResult
