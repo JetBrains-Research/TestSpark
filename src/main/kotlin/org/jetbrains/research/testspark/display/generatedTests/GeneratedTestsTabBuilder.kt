@@ -161,7 +161,7 @@ class GeneratedTestsTabBuilder(
             testCasePanel.add(Box.createRigidArea(Dimension(12, 0)), BorderLayout.EAST)
 
             // Add panel to parent panel
-            testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
+            testCasePanel.maximumSize = Dimension(Short.MAX_VALUE.toInt(), testCasePanel.preferredSize.height)
             generatedTestsTabData.allTestCasePanel.add(testCasePanel)
             addSeparator()
 

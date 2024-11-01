@@ -652,7 +652,10 @@ class TestCasePanelBuilder(
      * 3. Updating the UI.
      */
     private fun removePermanently() {
+        val indexOfSeparatorBelowTestCase =
+            generatedTestsTabData.allTestCasePanel.getComponentZOrder(hiddenTestCasePanel) + 1
         generatedTestsTabData.allTestCasePanel.remove(hiddenTestCasePanel)
+        generatedTestsTabData.allTestCasePanel.remove(indexOfSeparatorBelowTestCase)
 
         // Remove the test case from the cache
         GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
