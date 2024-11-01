@@ -79,11 +79,15 @@ class TopButtonsPanelBuilder {
      *  @param selected whether the checkboxes have to be selected or not
      */
     private fun toggleAllCheckboxes(selected: Boolean, generatedTestsTabData: GeneratedTestsTabData) {
-        generatedTestsTabData.testCaseNameToPanel.forEach { (_, jPanel) ->
+        generatedTestsTabData.testCaseNameToPanel
+            .filter { it.key !in generatedTestsTabData.hiddenTestCases }
+            .forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
-        generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseNameToPanel.size else 0
+        generatedTestsTabData.testsSelected = if (selected){
+            generatedTestsTabData.testCaseNameToPanel.size - generatedTestsTabData.hiddenTestCases.size
+        } else 0
     }
 
     /**
