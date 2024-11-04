@@ -13,9 +13,12 @@ class KotlinTestCompiler(
     libPaths: List<String>,
     junitLibPaths: List<String>,
     kotlinSDKHomeDirectory: String,
+    javaHomeDirectoryPath: String,
 ) : TestCompiler(libPaths, junitLibPaths) {
     private val logger = KotlinLogging.logger { this::class.java }
     private val kotlinc: String
+    // Direct declaration in constructor requires changes to TestCompiler, so we declare it here.
+    private val javaHomeDirectoryPath = javaHomeDirectoryPath
 
     // init block to find the kotlinc compiler
     init {
@@ -55,9 +58,14 @@ class KotlinTestCompiler(
         logger.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
+
+        // We need to ensure JAVA is in the path variable
+        // See: https://github.com/JetBrains-Research/TestSpark/issues/410
+        val setJavaPathOnWindows = "set PATH=%PATH%;$javaHomeDirectoryPath\\bin\\&&"
+
         // Compile file
         // See: https://github.com/JetBrains-Research/TestSpark/issues/402
-        val kotlinc = if (DataFilesUtil.isWindows()) "\"$kotlinc\"" else "'$kotlinc'"
+        val kotlinc = if (DataFilesUtil.isWindows()) "$setJavaPathOnWindows\"$kotlinc\"" else "'$kotlinc'"
 
         val executionResult = CommandLineRunner.run(
             arrayListOf(
