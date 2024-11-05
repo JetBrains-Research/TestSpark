@@ -101,7 +101,7 @@ class TestProcessor(
                 javaAgentFlag,
                 "-cp",
                 "\"${testCompiler.getClassPaths(projectBuildPath)}${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
-                "org.jetbrains.research.SingleJUnitTestRunner$junitVersion",
+                "org.jetbrains.research.SingleJUnitTestRunner${junitVersion.version}",
                 name,
             ),
         )
