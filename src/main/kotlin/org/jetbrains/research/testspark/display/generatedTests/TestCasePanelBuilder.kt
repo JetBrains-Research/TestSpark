@@ -22,6 +22,7 @@ import com.intellij.util.ui.JBUI
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
@@ -42,6 +43,7 @@ import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.testmanager.TestAnalyzerFactory
+import org.jetbrains.research.testspark.tools.GenerationTool
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
@@ -76,6 +78,7 @@ class TestCasePanelBuilder(
     private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
     private val generatedTestsTabData: GeneratedTestsTabData,
     private val testsExecutionResultManager: TestsExecutionResultManager,
+    private val generationTool: GenerationTool,
 ) {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
@@ -551,10 +554,12 @@ class TestCasePanelBuilder(
         indicator.setText("Executing ${testCase.testName}")
 
         val fileName = TestAnalyzerFactory.create(language).getFileNameFromTestCaseCode(testCase.testCode)
+        val junitVersion =
+            if (generationTool.toolId == "EvoSuite") JUnitVersion.JUnit4 else llmSettingsState.junitVersion
 
         val testCompiler = TestCompilerFactory.create(
             project,
-            llmSettingsState.junitVersion,
+            junitVersion,
             language,
         )
 
@@ -569,6 +574,7 @@ class TestCasePanelBuilder(
                 uiContext.projectContext,
                 testCompiler,
                 testsExecutionResultManager,
+                junitVersion,
             )
 
         testCase.coveredLines = newTestCase.coveredLines
@@ -707,7 +713,8 @@ class TestCasePanelBuilder(
      * Updates the current test case with the specified test name and test code.
      */
     private fun updateTestCaseInformation() {
-        testCase.testName = TestAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
+        testCase.testName = TestAnalyzerFactory.create(language)
+            .extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 
