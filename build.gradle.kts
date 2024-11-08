@@ -415,5 +415,4 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
  */
 fun String?.orDefault(default: String): String = this ?: default
 
-
 fun spaceCredentialsProvided() = spaceUsername.isNotEmpty() && spacePassword.isNotEmpty()
