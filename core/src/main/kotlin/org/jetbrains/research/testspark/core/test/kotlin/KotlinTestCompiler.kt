@@ -13,12 +13,10 @@ class KotlinTestCompiler(
     libPaths: List<String>,
     junitLibPaths: List<String>,
     kotlinSDKHomeDirectory: String,
-    javaHomeDirectoryPath: String,
+    private val javaHomeDirectoryPath: String,
 ) : TestCompiler(libPaths, junitLibPaths) {
     private val logger = KotlinLogging.logger { this::class.java }
     private val kotlinc: String
-    // Direct declaration in constructor requires changes to TestCompiler, so we declare it here.
-    private val javaHomeDirectoryPath = javaHomeDirectoryPath
 
     // init block to find the kotlinc compiler
     init {
@@ -35,7 +33,6 @@ class KotlinTestCompiler(
                  * as failed compilation because `kotlinc` will complain about
                  * `java` command missing in PATH.
                  *
-                 * TODO(vartiukhov): find a way to locate `java` on Windows
                  */
                 val isCompilerName = if (DataFilesUtil.isWindows()) {
                     it.name.equals("kotlinc")

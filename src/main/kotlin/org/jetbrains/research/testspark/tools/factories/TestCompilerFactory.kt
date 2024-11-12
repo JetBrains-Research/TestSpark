@@ -29,7 +29,9 @@ object TestCompilerFactory {
                 JavaTestCompiler(libraryPaths, junitLibraryPaths, javaSDKHomePath)
             }
             SupportedLanguage.Kotlin -> {
-                val javaSDKHomePath = findJavaSDKHomePath(javaHomeDirectory, project) // Kotlinc relies on java to compile kotlin files.
+                // Kotlinc relies on java to compile kotlin files.
+                val javaSDKHomePath = findJavaSDKHomePath(javaHomeDirectory, project)
+                // kotlinc should be under `[kotlinSDKHomeDirectory]/bin/kotlinc`
                 val kotlinSDKHomeDirectory = KotlinPluginLayout.kotlinc.absolutePath
                 KotlinTestCompiler(libraryPaths, junitLibraryPaths, kotlinSDKHomeDirectory, javaSDKHomePath)
             }
