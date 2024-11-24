@@ -25,7 +25,7 @@ class GeminiRequestManager(project: Project) : IJRequestManager(project) {
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
-        errorMonitor: ErrorMonitor
+        errorMonitor: ErrorMonitor,
     ): SendResult {
         val model = LlmSettingsArguments(project).getModel()
         val apiURL = "$url$model:generateContent?key=$token"
@@ -86,7 +86,6 @@ class GeminiRequestManager(project: Project) : IJRequestManager(project) {
                     }
                 }
             }
-
         } catch (e: HttpStatusException) {
             log.error { "Error in sending request: ${e.message}" }
         }
