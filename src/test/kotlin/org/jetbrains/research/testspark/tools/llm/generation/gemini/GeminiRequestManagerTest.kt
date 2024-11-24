@@ -16,21 +16,18 @@ import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 
-@Disabled(
-    value = "These tests require an API key from the Google AI Platform; add the key to the apiKey variable and " +
-            "remove the @Disabled annotation to run them."
-)
+@EnabledIfEnvironmentVariable(named = "GOOGLE_API_KEY", matches = ".+")
 class GeminiRequestManagerTest {
 
     private lateinit var project: Project
     private lateinit var testsAssembler: TestsAssembler
 
-    private val apiKey: String = "" // TODO: Insert API key if you want to run these tests
+    private val apiKey: String = System.getenv("GOOGLE_API_KEY")!!
 
     private val indicator = mock(CustomProgressIndicator::class.java)
     private val errorMonitor = mock(ErrorMonitor::class.java)
