@@ -34,7 +34,7 @@ class LLMSetupPanelBuilder(e: AnActionEvent, private val project: Project) : Pan
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
-    private var platformSelector = ComboBox(arrayOf(llmSettingsState.openAIName, llmSettingsState.huggingFaceName))
+    private var platformSelector = ComboBox(arrayOf(llmSettingsState.openAIName, llmSettingsState.huggingFaceName, llmSettingsState.geminiName))
     private val backLlmButton = JButton(PluginLabelsBundle.get("back"))
     private val okLlmButton = JButton(PluginLabelsBundle.get("next"))
     private val junitSelector = JUnitCombobox(e)
