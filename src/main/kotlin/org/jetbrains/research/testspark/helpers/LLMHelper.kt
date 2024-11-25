@@ -378,9 +378,9 @@ object LLMHelper {
         val models = mutableListOf<String>()
 
         try {
-            httpRequest.connect { it ->
-                if ((it.connection as HttpURLConnection).responseCode == HttpURLConnection.HTTP_OK) {
-                    val jsonObject = JsonParser.parseString(it.readString()).asJsonObject
+            httpRequest.connect { request ->
+                if ((request.connection as HttpURLConnection).responseCode == HttpURLConnection.HTTP_OK) {
+                    val jsonObject = JsonParser.parseString(request.readString()).asJsonObject
                     val dataArray = jsonObject.getAsJsonArray("models")
                     for (dataObject in dataArray) {
                         val id = dataObject.asJsonObject.getAsJsonPrimitive("name").asString
@@ -388,7 +388,7 @@ object LLMHelper {
                             .getAsJsonArray("supportedGenerationMethods")
                             .map { method -> method.asString }
                         if (methods.contains("generateContent")) {
-                            models.add(id)
+                            models.add(id.removePrefix("models/"))
                         }
                     }
                 }
