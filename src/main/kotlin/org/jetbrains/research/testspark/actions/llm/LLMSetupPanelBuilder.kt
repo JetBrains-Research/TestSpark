@@ -146,6 +146,10 @@ class LLMSetupPanelBuilder(e: AnActionEvent, private val project: Project) : Pan
                 llmSettingsState.huggingFaceToken = llmPlatforms[index].token
                 llmSettingsState.huggingFaceModel = llmPlatforms[index].model
             }
+            if (llmPlatforms[index].name == llmSettingsState.geminiName) {
+                llmSettingsState.geminiToken = llmPlatforms[index].token
+                llmSettingsState.geminiModel = llmPlatforms[index].model
+            }
         }
         llmSettingsState.junitVersion = junitSelector.selectedItem!! as JUnitVersion
 

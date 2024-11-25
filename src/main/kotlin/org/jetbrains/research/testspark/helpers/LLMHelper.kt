@@ -98,6 +98,12 @@ object LLMHelper {
                     modelSelector.selectedItem = settingsState.huggingFaceModel
                     llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
                 }
+                if (llmPlatforms[index].name == settingsState.geminiName &&
+                    llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+                ) {
+                    modelSelector.selectedItem = settingsState.geminiModel
+                    llmPlatforms[index].model = modelSelector.selectedItem!!.toString()
+                }
             }
             modelSelector.isEnabled = true
             if (models.contentEquals(arrayOf(""))) modelSelector.isEnabled = false
@@ -134,6 +140,12 @@ object LLMHelper {
             ) {
                 llmUserTokenField.text = settingsState.huggingFaceToken
                 llmPlatforms[index].token = settingsState.huggingFaceToken
+            }
+            if (llmPlatforms[index].name == settingsState.geminiName &&
+                llmPlatforms[index].name == platformSelector.selectedItem!!.toString()
+            ) {
+                llmUserTokenField.text = settingsState.geminiToken
+                llmPlatforms[index].token = settingsState.geminiToken
             }
         }
     }
