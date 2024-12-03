@@ -36,6 +36,7 @@ plugins {
     // Gradle Qodana Plugin
 //    id("org.jetbrains.qodana") version "0.1.13"
 }
+
 group = properties("pluginGroup")
 version = properties("pluginVersion")
 
@@ -46,6 +47,8 @@ repositories {
     // See https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html#default-repositories
     intellijPlatform {
         defaultRepositories()
+        intellijDependencies()
+        localPlatformArtifacts()
     }
     maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
     maven("https://www.jetbrains.com/intellij-repository/snapshots")
@@ -152,6 +155,8 @@ dependencies {
         "hasGrazieAccessCompileOnly"(project(":core"))
     }
 
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
+
     // https://central.sonatype.com/artifact/io.github.oshai/kotlin-logging-jvm/overview
     implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
 
@@ -226,7 +231,7 @@ intellijPlatform {
     // See https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides
     pluginVerification {
         ides {
-            recommended()
+            // recommended()
             select {
                 types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
                 channels = listOf(ProductRelease.Channel.RELEASE)
@@ -256,7 +261,6 @@ changelog {
 // }
 
 tasks {
-
     compileKotlin {
         dependsOn("updateEvosuite")
         dependsOn("copyJUnitRunnerLib")
@@ -391,6 +395,7 @@ abstract class UpdateEvoSuite : DefaultTask() {
 tasks.register<UpdateEvoSuite>("updateEvosuite") {
     evoSuiteVersion = properties("evosuiteVersion")
 }
+
 /**
  * Copies the JUnitRunner.jar file to the lib directory of the project.
  * This task depends on the "JUnitRunner" module being built beforehand.
@@ -415,6 +420,37 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
  * @return the original string if it is not null, or the default string if the original string is null
  */
 fun String?.orDefault(default: String): String = this ?: default
+
+
+val headless2 by intellijPlatformTesting.runIde.registering {
+    type = IntelliJPlatformType.IntellijIdeaCommunity
+    version = properties("platformVersion")
+
+    val root: String? by project
+    val file: String? by project
+    val cut: String? by project
+    val cp: String? by project
+    val junitv: String? by project
+    val llm: String? by project
+    val token: String? by project
+    val prompt: String? by project
+    val out: String? by project
+    val enableCoverage: String? by project
+
+    task {
+        jvmArgumentProviders += CommandLineArgumentProvider {
+            listOf(
+                "-Xmx16G",
+                "-Djava.awt.headless=true",
+                "--add-exports",
+                "java.base/jdk.internal.vm=ALL-UNNAMED",
+                "-Didea.system.path",
+            )
+        }
+
+        args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage.orDefault("false"))
+    }
+}
 
 /**
  * This code sets up a Gradle task for running the plugin in headless mode
