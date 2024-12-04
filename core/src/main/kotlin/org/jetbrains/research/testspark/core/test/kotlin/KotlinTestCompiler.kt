@@ -13,6 +13,7 @@ class KotlinTestCompiler(
     libPaths: List<String>,
     junitLibPaths: List<String>,
     kotlinSDKHomeDirectory: String,
+    private val javaHomeDirectoryPath: String,
 ) : TestCompiler(libPaths, junitLibPaths) {
     private val logger = KotlinLogging.logger { this::class.java }
     private val kotlinc: String
@@ -32,7 +33,6 @@ class KotlinTestCompiler(
                  * as failed compilation because `kotlinc` will complain about
                  * `java` command missing in PATH.
                  *
-                 * TODO(vartiukhov): find a way to locate `java` on Windows
                  */
                 val isCompilerName = if (DataFilesUtil.isWindows()) {
                     it.name.equals("kotlinc")
@@ -55,9 +55,14 @@ class KotlinTestCompiler(
         logger.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
+
+        // We need to ensure JAVA is in the path variable
+        // See: https://github.com/JetBrains-Research/TestSpark/issues/410
+        val setJavaPathOnWindows = "set PATH=%PATH%;$javaHomeDirectoryPath\\bin\\&&"
+
         // Compile file
         // See: https://github.com/JetBrains-Research/TestSpark/issues/402
-        val kotlinc = if (DataFilesUtil.isWindows()) "\"$kotlinc\"" else "'$kotlinc'"
+        val kotlinc = if (DataFilesUtil.isWindows()) "$setJavaPathOnWindows\"$kotlinc\"" else "'$kotlinc'"
 
         val executionResult = CommandLineRunner.run(
             arrayListOf(

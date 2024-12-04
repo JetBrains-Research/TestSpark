@@ -13,11 +13,13 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.ex.ApplicationManagerEx
 import com.intellij.openapi.progress.util.ProgressIndicatorBase
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.openapi.startup.StartupManager
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.idea.maven.MavenCommandLineInspectionProjectConfigurator
 import org.jetbrains.idea.maven.project.MavenProjectsManager
@@ -25,6 +27,7 @@ import org.jetbrains.plugins.gradle.GradleCommandLineProjectConfigurator
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import java.util.function.Predicate
+import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class ProjectConfiguratorException : Exception {
@@ -160,15 +163,17 @@ object ProjectApplicationUtils {
         logger.info("Closing project $project...")
         ApplicationManager.getApplication().assertIsNonDispatchThread()
         // ToDo: move headless mode to another branch
-//        ApplicationManager.getApplication().invokeAndWait {
-//            ProjectManagerEx.getInstanceEx().forceCloseProject(project)
-//        }
+        ApplicationManager.getApplication().invokeAndWait {
+            ProjectManager.getInstance().closeAndDispose(project)
+            // TODO: what is ProjectManagerEx?
+            // ProjectManagerEx.getInstanceEx().forceCloseProject(project)
+        }
     }
 
     private suspend fun waitAllStartupActivitiesPassed(project: Project): Unit = suspendCoroutine {
         logger.info("Waiting all startup activities passed $project...")
         // ToDo: move headless mode to another branch
-//        StartupManager.getInstance(project).runAfterOpened { it.resume(Unit) }
+        StartupManager.getInstance(project).runAfterOpened { it.resume(Unit) }
         waitForInvokeLaterActivities()
     }
 
