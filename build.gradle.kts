@@ -2,7 +2,6 @@ import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
-import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileOutputStream
 import java.net.URL
@@ -236,7 +235,7 @@ intellijPlatform {
         }
         freeArgs = listOf(
             "-mute",
-            "TemplateWordInPluginId,ForbiddenPluginIdPrefix"
+            "TemplateWordInPluginId,ForbiddenPluginIdPrefix",
         )
     }
 }
@@ -415,41 +414,5 @@ tasks.register<Copy>("copyJUnitRunnerLib") {
  * @return the original string if it is not null, or the default string if the original string is null
  */
 fun String?.orDefault(default: String): String = this ?: default
-
-/**
- * This code sets up a Gradle task for running the plugin in headless mode
- *
- * @param root The root directory of the project under test.
- * @param file The file containing unit under test.
- * @param cut The class under test.
- * @param cp The classpath of the project.
- * @param llm The model used for the test generation task.
- * @param token The token for using LLM.
- * @param prompt a txt file containing the LLM's prompt template
- * @param out The output directory for the project.
- * @param enableCoverage flag to enable/disable coverage computation
- */
-tasks.create<RunIdeTask>("headless") {
-    val root: String? by project
-    val file: String? by project
-    val cut: String? by project
-    val cp: String? by project
-    val junitv: String? by project
-    val llm: String? by project
-    val token: String? by project
-    val prompt: String? by project
-    val out: String? by project
-    val enableCoverage: String? by project
-
-    args = listOfNotNull("testspark", root, file, cut, cp, junitv, llm, token, prompt, out, enableCoverage.orDefault("false"))
-
-    jvmArgs(
-        "-Xmx16G",
-        "-Djava.awt.headless=true",
-        "--add-exports",
-        "java.base/jdk.internal.vm=ALL-UNNAMED",
-        "-Didea.system.path",
-    )
-}
 
 fun spaceCredentialsProvided() = spaceUsername.isNotEmpty() && spacePassword.isNotEmpty()
