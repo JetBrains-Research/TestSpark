@@ -18,7 +18,7 @@
     <p>For this type of test generation, TestSpark sends request to different Large Language Models. Also, it automatically checks if tests are valid before presenting it to users.</p>
     <p>This feature needs a token from OpenAI, HuggingFace, or the AI Assistant platform.</p>
     <ul>
-        <li>Supports Java (any version) and Kotlin (K2 mode should be disabled, checkout the Settings section on README).</li>
+        <li>Supports Java and Kotlin.</li>
         <li>Generates unit tests for capturing failures.</li>
         <li>Generate tests for Java classes, methods, and single lines.</li>
     </ul>
