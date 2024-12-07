@@ -187,6 +187,11 @@
         </extensionPoint>
     </extensionPoints>
 
+    <!-- This is a temporary mechanism to mark the plugin as K2 compatible. -->
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true"/>
+    </extensions>
+
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="TestSpark" secondary="true" anchor="right"
                     icon="org.jetbrains.research.testspark.display.TestSparkIcons.toolWindowIcon"
