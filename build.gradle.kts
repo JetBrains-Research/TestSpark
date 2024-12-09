@@ -255,6 +255,12 @@ changelog {
 // }
 
 tasks {
+    // enable K2 mode in UI test
+    runIde {
+        jvmArgumentProviders += CommandLineArgumentProvider {
+            listOf("-Didea.kotlin.plugin.use.k2=true")
+        }
+    }
 
     compileKotlin {
         dependsOn("updateEvosuite")
