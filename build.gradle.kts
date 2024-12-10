@@ -25,7 +25,7 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "1.9.0"
+    id("org.jetbrains.kotlin.jvm") version "2.1.0"
     // Gradle IntelliJ Plugin
     id("org.jetbrains.intellij.platform") version "2.1.0"
     // Gradle IntelliJ Plugin Migration Help (uncomment it for migration tips)
@@ -77,7 +77,6 @@ if (spaceCredentialsProvided()) {
 
     // Add the dependencies for the new source set
     dependencies {
-        add(hasGrazieAccess.implementationConfigurationName, kotlin("stdlib"))
         add(hasGrazieAccess.implementationConfigurationName, "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
         add(hasGrazieAccess.implementationConfigurationName, "org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion")
     }
