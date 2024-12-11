@@ -36,6 +36,12 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.3.1</h4>
+            <ul>
+                <li>Kotlin test generation now works in K2 mode as well./li>
+                <li>Support IDEA 243.*.</li>
+                <li>Fixed minor bugs.</li>
+            </ul>
         <h4>0.3.0</h4>
             <ul>
                 <li>Add full LLM-based Kotlin test generation for line, method/function, and class.</li>

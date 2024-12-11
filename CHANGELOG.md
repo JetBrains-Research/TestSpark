@@ -2,6 +2,12 @@
 
 # TestSpark Changelog
 ## Unreleased
+## 0.3.1
+### Fixed
+- Multiple minor bugs in test generation algorithms.
+### Added
+- Kotlin test generation now works in K2 mode as well.
+- Support IDEA `243.*`.
 ## 0.3.0
 ### Fixed
 - Multiple bugs in the UI.
