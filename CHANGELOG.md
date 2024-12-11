@@ -4,6 +4,26 @@
 
 ## Unreleased
 
+## 0.4.0
+
+### Fixed
+- Resolve compatibility issues with Marketplace verifier
+
+### Changed
+- Improve the collection of sample test code candidates
+
+### Added
+- Support for Google AI as an LLM
+- KEX as a new test generation feature
+- Support IDEA 251.*
+
+## 0.3.1
+### Fixed
+- Multiple minor bugs in test generation algorithms.
+### Added
+- Kotlin test generation now works in K2 mode as well.
+- Support IDEA `243.*`.
+
 ## 0.3.0
 
 ### Fixed
@@ -51,9 +71,6 @@
 ### Changed
 - Better default prompt
 - Better user's request handling
-
-### Added
-- Model selection for JetBrains AI Assistant platform
 
 ## 0.1.8
 
