@@ -13,12 +13,11 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import com.intellij.refactoring.suggested.endOffset
-import com.intellij.refactoring.suggested.startOffset
 import com.intellij.util.containers.stream
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtPsiFactory
+import org.jetbrains.kotlin.psi.psiUtil.pureEndOffset
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
@@ -213,8 +212,8 @@ class KotlinDisplayUtils : DisplayUtils {
         val importsString = uiContext.testGenerationOutput.importsCode.joinToString("\n") + "\n\n"
 
         // Find the insertion offset
-        val insertionOffset = outputFile.importList?.startOffset
-            ?: outputFile.packageDirective?.endOffset
+        val insertionOffset = outputFile.importList?.startOffsetInParent
+            ?: outputFile.packageDirective?.pureEndOffset
             ?: 0
 
         // Insert the imports into the document
