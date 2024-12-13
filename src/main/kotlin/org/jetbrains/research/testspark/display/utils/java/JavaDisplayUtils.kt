@@ -15,7 +15,6 @@ import com.intellij.psi.PsiElementFactory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
-import com.intellij.refactoring.suggested.startOffset
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.data.UIContext
@@ -202,7 +201,7 @@ class JavaDisplayUtils : DisplayUtils {
 
         // insert imports to a code
         PsiDocumentManager.getInstance(project).getDocument(outputFile)!!.insertString(
-            outputFile.importList?.startOffset ?: outputFile.packageStatement?.startOffset ?: 0,
+            outputFile.importList?.startOffsetInParent ?: outputFile.packageStatement?.startOffsetInParent ?: 0,
             uiContext.testGenerationOutput.importsCode.joinToString("\n") + "\n\n",
         )
 
