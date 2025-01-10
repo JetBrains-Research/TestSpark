@@ -39,7 +39,7 @@ class JavaTestCompiler(
         javac = javaCompiler.absolutePath
     }
 
-    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): Pair<Boolean, String> {
+    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): ExecutionResult {
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // compile file
         // See: https://github.com/JetBrains-Research/TestSpark/issues/402
@@ -59,9 +59,12 @@ class JavaTestCompiler(
                  */
             ),
         )
-        log.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
+        logger.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
-        // TODO check for classfiles
+        val classFilePath = path.replace(".java", ".class")
+        if (executionResult.exitCode == 0 && !File(classFilePath).exists()) {
+            throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
+        }
         return executionResult
     }
 

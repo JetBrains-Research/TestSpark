@@ -13,6 +13,7 @@ class KotlinTestCompiler(
     libPaths: List<String>,
     junitLibPaths: List<String>,
     kotlinSDKHomeDirectory: String,
+    private val javaHomeDirectoryPath: String,
 ) : TestCompiler(libPaths, junitLibPaths) {
     private val logger = KotlinLogging.logger { this::class.java }
     private val kotlinc: String
@@ -32,7 +33,6 @@ class KotlinTestCompiler(
                  * as failed compilation because `kotlinc` will complain about
                  * `java` command missing in PATH.
                  *
-                 * TODO(vartiukhov): find a way to locate `java` on Windows
                  */
                 val isCompilerName = if (DataFilesUtil.isWindows()) {
                     it.name.equals("kotlinc")
@@ -51,12 +51,20 @@ class KotlinTestCompiler(
         kotlinc = kotlinCompiler.absolutePath
     }
 
-    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): Pair<Boolean, String> {
+    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): ExecutionResult {
         logger.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
+
+        // We need to ensure JAVA is in the path variable
+        // See: https://github.com/JetBrains-Research/TestSpark/issues/410
+        val setJavaPathOnWindows = "set PATH=%PATH%;$javaHomeDirectoryPath\\bin\\&&"
+
         // Compile file
-        val errorMsg = CommandLineRunner.run(
+        // See: https://github.com/JetBrains-Research/TestSpark/issues/402
+        val kotlinc = if (DataFilesUtil.isWindows()) "$setJavaPathOnWindows\"$kotlinc\"" else "'$kotlinc'"
+
+        val executionResult = CommandLineRunner.run(
             arrayListOf(
                 /**
                  * Filepath may contain spaces, so we need to wrap it in quotes.
@@ -72,12 +80,13 @@ class KotlinTestCompiler(
                 workingDir,
             ),
         )
-        log.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
+        logger.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
-        logger.info { "Error message: '$errorMsg'" }
-
-        // TODO `.class` files are not saving for Kotlin
-        return Pair(execSuccessful, executionMsg)
+        val classFilePath = path.removeSuffix(".kt") + ".class"
+        if (executionResult.exitCode == 0 && !File(classFilePath).exists()) {
+            throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
+        }
+        return executionResult
     }
 
     override fun getClassPaths(buildPath: String): String = commonPath.plus(buildPath)
