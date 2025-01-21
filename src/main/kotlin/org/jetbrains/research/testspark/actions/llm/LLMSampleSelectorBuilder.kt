@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.actions.llm
 
 import com.intellij.openapi.project.Project
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.kotlin.idea.util.application.executeOnPooledThread
 import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
@@ -122,7 +123,10 @@ class LLMSampleSelectorBuilder(private val project: Project, private val languag
         }
 
         addButton.addActionListener {
-            sampleSelector.collectTestSamples(project)
+            // Use a future to collect test samples to not block the EDT
+            val collector = executeOnPooledThread { sampleSelector.collectTestSamples(project) }
+            collector.get()
+
             val testSamplePanelBuilder = TestSamplePanelBuilder(
                 project,
                 middlePanel,
