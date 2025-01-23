@@ -93,7 +93,7 @@ class EvoSuiteProcessManager(
                     evoSuiteErrorManager.errorProcess(
                         EvoSuiteMessagesBundle.get("incorrectJavaVersion"),
                         project,
-                        errorMonitor
+                        errorMonitor,
                     )
                     return null
                 }
