@@ -20,6 +20,7 @@ import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import org.jetbrains.research.testspark.tools.template.Tool
 import java.nio.file.Path
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 
 /**
  * The Llm class represents a tool called "Llm" that is used to generate tests for Java code.
@@ -181,6 +182,11 @@ class Llm(override val name: String = "LLM") : Tool {
             testsExecutionResultManager,
             codeType,
         )
+    }
+
+    override fun appliedForLanguage(language: SupportedLanguage): Boolean {
+        // LLM test generation applied for all languages
+        return true
     }
 
     /**
