@@ -12,6 +12,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.Key
 import org.jetbrains.research.testspark.bundles.kex.KexDefaultsBundle
 import org.jetbrains.research.testspark.bundles.kex.KexMessagesBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -87,6 +88,8 @@ class KexProcessManager(
             val resultName = ToolUtils.osJoin(generatedTestsData.resultPath, "KexResult")
             val projectSdk = ProjectRootManager.getInstance(project).projectSdk!!
             val javaExecPath = ToolUtils.osJoin(projectSdk.homePath!!, "bin", "java")
+
+            indicator.setText(PluginMessagesBundle.get("searchMessage"))
 
             // set target argument for kex subprocess. ensure not Line codetype which is unsupported
             val target: String = when (codeType.type!!) {
