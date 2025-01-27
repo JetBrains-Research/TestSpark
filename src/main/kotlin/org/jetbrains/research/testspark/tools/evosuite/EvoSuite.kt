@@ -16,6 +16,7 @@ import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.evosuite.generation.EvoSuiteProcessManager
 import org.jetbrains.research.testspark.tools.template.Tool
 import java.io.File
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 
 /**
  * Represents the EvoSuite class, which is a tool used to generate tests for Java code.
@@ -149,6 +150,11 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
                 selectedLine,
             ),
         )
+    }
+
+    override fun appliedForLanguage(language: SupportedLanguage): Boolean {
+        // EvoSuite is a Java test generation tool
+        return language == SupportedLanguage.Java
     }
 
     /**
