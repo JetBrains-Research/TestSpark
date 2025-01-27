@@ -208,15 +208,17 @@ class TestSparkAction : AnAction() {
             panelTitle.add(JLabel(TestSparkIcons.pluginIcon))
             panelTitle.add(textTitle)
 
-            testGeneratorButtonGroup.add(llmButton)
-            testGeneratorButtonGroup.add(evoSuiteButton)
-            testGeneratorButtonGroup.add(kexButton)
+            if (Llm().appliedForLanguage(psiHelper.language)) testGeneratorButtonGroup.add(llmButton)
+            if (EvoSuite().appliedForLanguage(psiHelper.language)) testGeneratorButtonGroup.add(evoSuiteButton)
+            if (Kex().appliedForLanguage(psiHelper.language)) testGeneratorButtonGroup.add(kexButton)
 
             val testGeneratorPanel = JPanel()
             testGeneratorPanel.add(JLabel("Select the test generator:"))
-            testGeneratorPanel.add(llmButton)
-            testGeneratorPanel.add(evoSuiteButton)
-            testGeneratorPanel.add(kexButton)
+            for (button in testGeneratorButtonGroup.elements) testGeneratorPanel.add(button)
+            if (testGeneratorButtonGroup.elements.toList().size == 1) {
+                // A single button is selected by default
+                testGeneratorButtonGroup.elements.toList()[0].isSelected = true
+            }
 
             for ((codeType, codeTypeName) in codeTypes) {
                 val button = JRadioButton(codeTypeName)
@@ -253,6 +255,7 @@ class TestSparkAction : AnAction() {
             nextButtonPanel.add(kexForLineCodeTypeErrMsg)
             nextButtonPanel.add(Box.createVerticalStrut(10)) // Add some space between label and button
             nextButtonPanel.add(nextButton)
+            updateNextButton()
 
             val cardPanel = JPanel(BorderLayout())
             cardPanel.add(panelTitle, BorderLayout.NORTH)
