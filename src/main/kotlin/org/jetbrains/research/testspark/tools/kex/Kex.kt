@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.tools.evosuite
+package org.jetbrains.research.testspark.tools.kex
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -14,34 +14,28 @@ import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
-import org.jetbrains.research.testspark.tools.evosuite.generation.EvoSuiteProcessManager
+import org.jetbrains.research.testspark.tools.ToolUtils
+import org.jetbrains.research.testspark.tools.kex.generation.KexProcessManager
 import org.jetbrains.research.testspark.tools.template.Tool
-import java.io.File
 
-/**
- * Represents the EvoSuite class, which is a tool used to generate tests for Java code.
- * Implements the Tool interface.
- *
- * @param name The name of the EvoSuite tool.
- */
-class EvoSuite(override val name: String = "EvoSuite") : Tool {
+class Kex(override val name: String = "Kex") : Tool {
     private val log = Logger.getInstance(this::class.java)
 
     /**
-     * Returns a new instance of EvoSuiteProcessManager for the given project.
+     * Returns a new instance of KexProcessManager for the given project.
      *
-     * @param project The IntelliJ IDEA project for which the EvoSuiteProcessManager is created.
-     * @return The EvoSuiteProcessManager instance created for the given project.
+     * @param project The IntelliJ IDEA project for which the KexProcessManager is created.
+     * @return The KexProcessManager instance created for the given project.
      */
-    private fun getEvoSuiteProcessManager(project: Project): EvoSuiteProcessManager {
+    private fun getKexProcessManager(project: Project): KexProcessManager {
         val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
         val settingsProjectState = project.service<PluginSettingsService>().state
-        val buildPath = "$projectClassPath${File.separatorChar}${settingsProjectState.buildPath}"
-        return EvoSuiteProcessManager(project, buildPath)
+        val buildPath = ToolUtils.osJoin(projectClassPath, settingsProjectState.buildPath)
+        return KexProcessManager(project, buildPath)
     }
 
     /**
-     * Generates tests for a class using EvoSuite.
+     * Generates tests for a class using Kex.
      *
      * @param project The current project.
      * @param psiFile The PsiFile containing the class to generate tests for.
@@ -59,7 +53,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
-        log.info("Starting tests generation for class by EvoSuite")
+        log.info("Starting tests generation for class by Kex")
         createPipeline(
             project,
             psiHelper,
@@ -69,22 +63,13 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             testSparkDisplayManager,
             testsExecutionResultManager,
         ).runTestGeneration(
-            getEvoSuiteProcessManager(project),
+            getKexProcessManager(project),
             FragmentToTestData(
                 CodeType.CLASS,
             ),
         )
     }
 
-    /**
-     * Generates tests for a given method using EvoSuite.
-     *
-     * @param project The current project.
-     * @param psiFile The PSI file containing the method.
-     * @param caret The caret position within the PSI file.
-     * @param fileUrl The URL of the file containing the method.
-     * @param testSamplesCode The sample code for the test cases.
-     */
     override fun generateTestsForMethod(
         project: Project,
         psiHelper: PsiHelper,
@@ -95,7 +80,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
-        log.info("Starting tests generation for method by EvoSuite")
+        log.info("Starting tests generation for method by Kex")
         val psiMethod: PsiMethodWrapper = psiHelper.getSurroundingMethod(caretOffset)!!
         createPipeline(
             project,
@@ -106,23 +91,18 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             testSparkDisplayManager,
             testsExecutionResultManager,
         ).runTestGeneration(
-            getEvoSuiteProcessManager(project),
+            getKexProcessManager(project),
             FragmentToTestData(
                 CodeType.METHOD,
-                psiHelper.generateMethodDescriptor(psiMethod),
+                // remove generics due to type erasure at jvm and the bool is a strange requirement by kex
+                removeGenerics("${psiMethod.name}(${psiMethod.parameterTypes.joinToString(",")}):${psiMethod.returnType}").replace(
+                    "boolean",
+                    "bool",
+                ),
             ),
         )
     }
 
-    /**
-     * Generates tests for a specific line of code using EvoSuite.
-     *
-     * @param project The project in which the code is located.
-     * @param psiFile The PsiFile object representing the code file.
-     * @param caret The Caret object representing the current cursor position.
-     * @param fileUrl The URL of the code file.
-     * @param testSamplesCode The code samples used for testing.
-     */
     override fun generateTestsForLine(
         project: Project,
         psiHelper: PsiHelper,
@@ -133,27 +113,10 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
-        log.info("Starting tests generation for line by EvoSuite")
-        val selectedLine: Int = psiHelper.getSurroundingLineNumber(caretOffset)!!
-        createPipeline(
-            project,
-            psiHelper,
-            caretOffset,
-            fileUrl,
-            testGenerationController,
-            testSparkDisplayManager,
-            testsExecutionResultManager,
-        ).runTestGeneration(
-            getEvoSuiteProcessManager(project),
-            FragmentToTestData(
-                CodeType.LINE,
-                selectedLine,
-            ),
-        )
     }
 
     override fun appliedForLanguage(language: SupportedLanguage): Boolean {
-        // EvoSuite is a Java test generation tool
+        // Kex is a Java test generation tool
         return language == SupportedLanguage.Java
     }
 
@@ -167,6 +130,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @param fileUrl The URL of the file associated with the pipeline. Can be null.
      * @return The created pipeline object.
      */
+
     private fun createPipeline(
         project: Project,
         psiHelper: PsiHelper,
@@ -192,5 +156,25 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             testsExecutionResultManager,
             name,
         )
+    }
+
+    /**
+     * Removes the generic type arguments from a string. Any characters between angle brackets (<>) are removed,
+     * along with the angle brackets themselves. The resulting string does not contain any generic type information.
+     *
+     * @receiver The string from which to remove the generic type arguments.
+     * @return The resulting string with generic type arguments removed.
+     */
+    private fun removeGenerics(typeString: String): String {
+        val s = StringBuilder()
+        var stack: Int = 0
+        for (c in typeString) {
+            if (c == '<') {
+                ++stack
+            } else if (c == '>') {
+                --stack
+            } else if (stack == 0) s.append(c)
+        }
+        return s.toString()
     }
 }
