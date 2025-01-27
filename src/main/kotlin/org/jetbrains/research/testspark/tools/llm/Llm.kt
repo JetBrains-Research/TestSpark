@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.exception.TestSparkException
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
@@ -20,7 +21,6 @@ import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import org.jetbrains.research.testspark.tools.template.Tool
 import java.nio.file.Path
-import org.jetbrains.research.testspark.core.test.SupportedLanguage
 
 /**
  * The Llm class represents a tool called "Llm" that is used to generate tests for Java code.
