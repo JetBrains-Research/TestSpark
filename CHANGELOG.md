@@ -18,8 +18,10 @@
 - Support IDEA 251.*
 
 ## 0.3.1
+
 ### Fixed
 - Multiple minor bugs in test generation algorithms.
+
 ### Added
 - Kotlin test generation now works in K2 mode as well.
 - Support IDEA `243.*`.
@@ -71,6 +73,9 @@
 ### Changed
 - Better default prompt
 - Better user's request handling
+
+### Added
+- Model selection for JetBrains AI Assistant platform
 
 ## 0.1.8
 
