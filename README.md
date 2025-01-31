@@ -28,7 +28,7 @@ TestSpark currently supports two test generation strategies:
     <p>For this type of test generation, TestSpark sends request to different Large Language Models. Also, it automatically checks if tests are valid before presenting it to users.</p>
     <p>This feature needs a token from OpenAI, HuggingFace, or the AI Assistant platform.</p>
     <ul>
-        <li>Supports Java (any version) and Kotlin (K2 mode should be disabled, checkout the Settings section on README).</li>
+        <li>Supports Java and Kotlin.</li>
         <li>Generates unit tests for capturing failures.</li>
         <li>Generate tests for Java classes, methods, and single lines.</li>
     </ul>
@@ -40,6 +40,15 @@ TestSpark currently supports two test generation strategies:
 <li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage, mutation score.</li>
 <li>Generates unit tests for capturing failures.</li>
 <li>Generate tests for Java classes, methods, and single lines.</li>
+</ul>
+
+<h4>Symbolic execution-based test generation</h4>
+<p>For this type of test generation, TestSpark uses <a href="https://github.com/vorpal-research/kex">Kex</a>, supporting symbolic execution for Java Byte Code. </p>
+<ul>
+<li>Supports up to Java 8 and upwards.</li>
+<li>Powered by SMT solvers, it supports really high coverages given larger time frames.</li>
+<li>Generated test cases are however not very readable (there are plans to automatically refactor with the help of LLMs).</li>
+<li>Generates tests for Java classes and methods.</li>
 </ul>
 
 <p>Initially implemented by <a href="https://www.ciselab.nl">CISELab</a> at <a href="https://se.ewi.tudelft.nl">SERG @ TU Delft</a>, TestSpark is currently developed and maintained by <a href="https://lp.jetbrains.com/research/ictl/">ICTL at JetBrains Research</a>.</p>
@@ -230,9 +239,6 @@ Or to a new file:
 
 ![Tests adding to a new file](readme-images/gifs/AddingToANewFile.gif#gh-light-mode-only)
 ![Tests adding to a new file_dark](readme-images/gifs/AddingToANewFile_dark.gif#gh-dark-mode-only)
-### Disable K2
-For LLM-based Kotlin test generation, you need to disable the K2 mode for now.
-![Disable K2 mode](readme-images/pngs/k2-mode/disable-k2.png)
 ### Settings
 <!-- How can users configure the plugin to match their needs? -->
 The plugin is configured mainly through the Settings menu. The plugin settings can be found under <kbd>Settings</kbd> > <kbd>Tools</kbd> > <kbd>TestSpark</kbd>. Here, the user is able to select options for the plugin:

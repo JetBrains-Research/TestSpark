@@ -1,15 +1,18 @@
 package org.jetbrains.research.testspark.kotlin
 
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.util.concurrency.AppExecutorUtil
+import com.intellij.util.concurrency.annotations.RequiresReadLock
+import org.jetbrains.kotlin.analysis.api.analyze
 import org.jetbrains.kotlin.asJava.classes.KtUltraLightClass
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
-import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
 import org.jetbrains.kotlin.idea.testIntegration.framework.KotlinPsiBasedTestFramework.Companion.asKtClassOrObject
 import org.jetbrains.kotlin.lexer.KtTokens
@@ -17,8 +20,6 @@ import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.allConstructors
-import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.resolve.DescriptorToSourceUtils
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
 import org.jetbrains.research.testspark.core.utils.kotlinPackagePattern
@@ -41,25 +42,35 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
     override val constructorSignatures: List<String> get() = psiClass.allConstructors.map { KotlinPsiMethodWrapper.buildSignature(it) }
 
     override val superClass: PsiClassWrapper?
+        @RequiresReadLock
         get() {
-            // Get the superTypeListEntries of the Kotlin class
-            val superTypeListEntries = psiClass.superTypeListEntries
-            // Find the superclass entry (if any)
-            val superClassEntry = superTypeListEntries.firstOrNull()
-            // Resolve the superclass type reference to a PsiClass
-            val superClassTypeReference = superClassEntry?.typeReference
-            val superClassDescriptor = superClassTypeReference?.let {
-                val bindingContext = it.analyze()
-                bindingContext[BindingContext.TYPE, it]
+            // Ensure this operation is performed in a background thread
+            return ReadAction.nonBlocking<KotlinPsiClassWrapper?> {
+                // Get the superTypeListEntries of the Kotlin class
+                val superTypeListEntries = psiClass.superTypeListEntries
+
+                // Find the superclass entry (if any)
+                val superClassEntry = superTypeListEntries.firstOrNull()
+
+                // Resolve the superclass type reference to a KtClass
+                val superClassPsiClass = superClassEntry?.typeReference?.let { typeRef ->
+                    analyze(typeRef) {
+                        val ktType = typeRef.type
+                        val superClassSymbol = ktType.expandedSymbol
+                        superClassSymbol?.psi as? KtClass
+                    }
+                }
+
+                // Return a wrapped superclass if the current class has a fully qualified name
+                if (psiClass.fqName != null) {
+                    superClassPsiClass?.let { KotlinPsiClassWrapper(it) }
+                } else {
+                    null
+                }
             }
-            val superClassPsiClass = superClassDescriptor?.constructor?.declarationDescriptor?.let { descriptor ->
-                DescriptorToSourceUtils.getSourceFromDescriptor(descriptor) as? KtClass
-            }
-            return if (psiClass.fqName != null) {
-                superClassPsiClass?.let { KotlinPsiClassWrapper(it) }
-            } else {
-                null
-            }
+                .expireWith(psiClass.project) // Ensure the action is canceled if the project is disposed
+                .submit(AppExecutorUtil.getAppExecutorService())
+                .get()
         }
 
     override val virtualFile: VirtualFile get() = psiClass.containingFile.virtualFile

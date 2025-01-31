@@ -5,6 +5,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
@@ -151,6 +152,11 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         )
     }
 
+    override fun appliedForLanguage(language: SupportedLanguage): Boolean {
+        // EvoSuite is a Java test generation tool
+        return language == SupportedLanguage.Java
+    }
+
     /**
      * Creates a pipeline object for the given project, psiFile, caret, and fileUrl.
      * The packageName is determined based on the projectClassPath and the buildPath from the project settings.
@@ -184,6 +190,7 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
             testGenerationController,
             testSparkDisplayManager,
             testsExecutionResultManager,
+            name,
         )
     }
 }

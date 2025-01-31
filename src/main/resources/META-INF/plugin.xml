@@ -11,20 +11,20 @@
     <p> TestSpark currently supports two test generation strategies:</p>
     <ul>
         <li>LLM-based test generation (using <a href="https://openai.com">OpenAI</a>, HuggingFace, and JetBrains internal AI Assistant platform)</li>
-        <li>Local search-based test generation (using <a href="https://www.evosuite.org">EvoSuite</a>)</li>
+        <li>Local search-based test generation (using <a href="https://www.evosuite.org">EvoSuite</a> and <a href="https://github.com/vorpal-research/kex">Kex</a>)</li>
     </ul>
 
     <h4>LLM-based test generation</h4>
     <p>For this type of test generation, TestSpark sends request to different Large Language Models. Also, it automatically checks if tests are valid before presenting it to users.</p>
-    <p>This feature needs a token from OpenAI, HuggingFace, or the AI Assistant platform.</p>
+    <p>This feature needs a token from OpenAI, HuggingFace, GoogleAI or the AI Assistant platform.</p>
     <ul>
-        <li>Supports Java (any version) and Kotlin (K2 mode should be disabled, checkout the Settings section on README).</li>
+        <li>Supports Java and Kotlin.</li>
         <li>Generates unit tests for capturing failures.</li>
         <li>Generate tests for Java classes, methods, and single lines.</li>
     </ul>
 
     <h4>Local search-based test generation</h4>
-    <p>For this type of test generation, TestSpark uses <a href="https://www.evosuite.org">EvoSuite</a>, which is the  most powerful search-based local test generator. </p>
+    <p>For this type of test generation, TestSpark uses <a href="https://www.evosuite.org">EvoSuite</a>, which is the most powerful search-based local test generator, and <a href="https://github.com/vorpal-research/kex">Kex</a>, which is a symbolic execution engine for Kotlin and Java, developed by Vorpal Research at JetBrains.</p>
     <ul>
         <li>Supports up to Java 11.</li>
         <li>Generates tests for different test criteria: line coverage, branch coverage, I/O diversity, exception coverage, mutation score.</li>
@@ -36,6 +36,19 @@
       ]]></description>
 
     <change-notes><![CDATA[
+        <h4>0.4.0</h4>
+            <ul>
+                <li>Add support for Google AI as an LLM.</li>
+                <li>Add KEX as a new test generation feature.</li>
+                <li>Improve the collection of sample test code candidates.</li>
+                <li>Support IDEA 251.*</li>
+            </ul>
+        <h4>0.3.1</h4>
+            <ul>
+                <li>Kotlin test generation now works in K2 mode as well.</li>
+                <li>Support IDEA 243.*</li>
+                <li>Fixed minor bugs.</li>
+            </ul>
         <h4>0.3.0</h4>
             <ul>
                 <li>Add full LLM-based Kotlin test generation for line, method/function, and class.</li>
@@ -187,12 +200,12 @@
         </extensionPoint>
     </extensionPoints>
 
-    <extensions defaultExtensionNs="com.intellij">
-        <appStarter
-                implementation="org.jetbrains.research.testspark.appstarter.TestSparkStarter"
-                id="testspark"
-        />
+    <!-- This is a temporary mechanism to mark the plugin as K2 compatible. -->
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK2="true"/>
+    </extensions>
 
+    <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="TestSpark" secondary="true" anchor="right"
                     icon="org.jetbrains.research.testspark.display.TestSparkIcons.toolWindowIcon"
                     factoryClass="org.jetbrains.research.testspark.toolwindow.TestSparkToolWindowFactory"/>
@@ -204,6 +217,8 @@
                 serviceImplementation="org.jetbrains.research.testspark.services.PluginSettingsService"/>
         <applicationService
                 serviceImplementation="org.jetbrains.research.testspark.services.EvoSuiteSettingsService"/>
+        <applicationService
+                serviceImplementation="org.jetbrains.research.testspark.services.KexSettingsService"/>
 
         <!-- Configurables -->
         <projectConfigurable
@@ -221,6 +236,11 @@
                 instance="org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsConfigurable"
                 id="EvoSuiteSettings"
                 displayName="EvoSuite"/>
+        <projectConfigurable
+                parentId="PluginSettings"
+                instance="org.jetbrains.research.testspark.settings.kex.KexSettingsConfigurable"
+                id="KexSettings"
+                displayName="Kex"/>
 
         <!-- Notifications -->
         <notificationGroup id="Execution Error"
@@ -230,6 +250,8 @@
         <notificationGroup id="Build Execution Error"
                            displayType="BALLOON"/>
         <notificationGroup id="LLM Execution Error"
+                           displayType="BALLOON"/>
+        <notificationGroup id="Kex Execution Error"
                            displayType="BALLOON"/>
         <notificationGroup id="Generation Error"
                            displayType="BALLOON"/>
