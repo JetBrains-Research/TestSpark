@@ -33,7 +33,6 @@ import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.template.Tool
 import java.awt.BorderLayout
 import java.awt.CardLayout
-import java.awt.Component
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Toolkit
@@ -249,8 +248,8 @@ class TestSparkAction : AnAction() {
             val nextButtonPanel = JPanel()
             nextButtonPanel.layout = BoxLayout(nextButtonPanel, BoxLayout.Y_AXIS)
             nextButton.isEnabled = false
-            nextButton.alignmentX = Component.CENTER_ALIGNMENT
-            kexForLineCodeTypeErrMsg.alignmentX = Component.CENTER_ALIGNMENT
+            nextButton.alignmentX = CENTER_ALIGNMENT
+            kexForLineCodeTypeErrMsg.alignmentX = CENTER_ALIGNMENT
             kexForLineCodeTypeErrMsg.horizontalAlignment = SwingConstants.CENTER
             nextButtonPanel.add(kexForLineCodeTypeErrMsg)
             nextButtonPanel.add(Box.createVerticalStrut(10)) // Add some space between label and button
