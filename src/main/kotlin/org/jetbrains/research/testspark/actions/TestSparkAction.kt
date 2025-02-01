@@ -56,12 +56,6 @@ import javax.swing.SwingConstants
  * It creates a dialog wrapper and displays it when the associated action is performed.
  */
 class TestSparkAction : AnAction() {
-    // Controllers
-    private val visibilityController = VisibilityController()
-    private val testGenerationController = TestGenerationController()
-
-    private val testSparkDisplayManager = TestSparkDisplayManager()
-    private val testsExecutionResultManager = TestsExecutionResultManager()
 
     /**
      * Handles the action performed event.
@@ -73,7 +67,13 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(e, visibilityController, testGenerationController, testSparkDisplayManager, testsExecutionResultManager)
+        TestSparkActionWindow(
+            e = e,
+            visibilityController = VisibilityController(),
+            testGenerationController = TestGenerationController(),
+            testSparkDisplayManager = TestSparkDisplayManager(),
+            testsExecutionResultManager = TestsExecutionResultManager(),
+        )
     }
 
     /**
@@ -381,6 +381,7 @@ class TestSparkAction : AnAction() {
                                 testSparkDisplayManager,
                                 testsExecutionResultManager,
                             )
+
                             CodeType.METHOD -> tool.generateTestsForMethod(
                                 project,
                                 psiHelper,
@@ -391,6 +392,7 @@ class TestSparkAction : AnAction() {
                                 testSparkDisplayManager,
                                 testsExecutionResultManager,
                             )
+
                             CodeType.LINE -> tool.generateTestsForLine(
                                 project,
                                 psiHelper,
@@ -423,7 +425,8 @@ class TestSparkAction : AnAction() {
          * This method should be called whenever the mentioned above buttons are clicked.
          */
         private fun updateNextButton() {
-            val isTestGeneratorButtonGroupSelected = llmButton.isSelected || evoSuiteButton.isSelected || kexButton.isSelected
+            val isTestGeneratorButtonGroupSelected =
+                llmButton.isSelected || evoSuiteButton.isSelected || kexButton.isSelected
             val isCodeTypeButtonGroupSelected = codeTypeButtons.any { it.second.isSelected }
             val kexForCodeLineType =
                 kexButton.isSelected && codeTypeButtons.any { (codeType, button) -> codeType == CodeType.LINE && button.isSelected }
