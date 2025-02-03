@@ -64,9 +64,6 @@ class TestSparkActionWindow(
         get() {
             val file = e.dataContext.getData(CommonDataKeys.PSI_FILE)!!
             val psiHelper = PsiHelperProvider.getPsiHelper(file)
-            if (psiHelper == null) {
-                // TODO exception
-            }
             return psiHelper!!
         }
 
