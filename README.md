@@ -21,12 +21,12 @@ TestSpark is a plugin for generating unit tests. TestSpark natively integrates d
 
 TestSpark currently supports two test generation strategies:
 <ul>
-        <li>LLM-based test generation (using <a href="https://openai.com">OpenAI</a>, HuggingFace, and JetBrains internal AI Assistant platform)</li>
+        <li>LLM-based test generation (using <a href="https://openai.com">OpenAI</a>, HuggingFace, <a href="https://ai.google/">Google AI</a>, and JetBrains internal AI Assistant platform)</li>
         <li>Local search-based test generation (using <a href="https://www.evosuite.org">EvoSuite</a>)</li>
 </ul>
 <h4>LLM-based test generation</h4>
     <p>For this type of test generation, TestSpark sends request to different Large Language Models. Also, it automatically checks if tests are valid before presenting it to users.</p>
-    <p>This feature needs a token from OpenAI, HuggingFace, or the AI Assistant platform.</p>
+    <p>This feature needs a token from OpenAI, HuggingFace, Google AI, or the AI Assistant platform.</p>
     <ul>
         <li>Supports Java and Kotlin.</li>
         <li>Generates unit tests for capturing failures.</li>
