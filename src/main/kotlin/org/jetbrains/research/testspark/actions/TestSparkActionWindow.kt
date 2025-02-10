@@ -29,10 +29,22 @@ import org.jetbrains.research.testspark.tools.evosuite.EvoSuite
 import org.jetbrains.research.testspark.tools.kex.Kex
 import org.jetbrains.research.testspark.tools.llm.Llm
 import org.jetbrains.research.testspark.tools.template.Tool
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.CardLayout
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.Toolkit
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
-import javax.swing.*
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.ButtonGroup
+import javax.swing.JButton
+import javax.swing.JFrame
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JRadioButton
+import javax.swing.SwingConstants
 
 /**
  * Class representing the TestSparkActionWindow.
