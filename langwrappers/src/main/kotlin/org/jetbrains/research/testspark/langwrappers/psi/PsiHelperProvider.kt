@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.langwrappers
+package org.jetbrains.research.testspark.langwrappers.psi
 
 import com.intellij.lang.LanguageExtension
 import com.intellij.psi.PsiFile

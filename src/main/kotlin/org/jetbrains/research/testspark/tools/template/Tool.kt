@@ -5,7 +5,7 @@ import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
-import org.jetbrains.research.testspark.langwrappers.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.psi.PsiHelper
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 
 /**

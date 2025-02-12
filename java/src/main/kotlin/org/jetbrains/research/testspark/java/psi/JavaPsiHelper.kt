@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.java
+package org.jetbrains.research.testspark.java.psi
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -17,10 +17,10 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
-import org.jetbrains.research.testspark.langwrappers.CodeTypeDisplayName
-import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
-import org.jetbrains.research.testspark.langwrappers.PsiHelper
-import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.psi.CodeTypeDisplayName
+import org.jetbrains.research.testspark.langwrappers.psi.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.psi.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.psi.PsiMethodWrapper
 
 class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 

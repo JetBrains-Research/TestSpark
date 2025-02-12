@@ -1,12 +1,11 @@
 package org.jetbrains.research.testspark.langwrappers.strategies
 
 import com.intellij.psi.PsiFile
-import org.jetbrains.research.testspark.langwrappers.LanguageClassTextExtractor
 
 /**
 Direct implementor for the Java and Kotlin PsiWrappers
  */
-class JavaKotlinClassTextExtractor : LanguageClassTextExtractor {
+class DefaultClassTextExtractor : ClassTextExtractor {
 
     override fun extract(
         file: PsiFile,

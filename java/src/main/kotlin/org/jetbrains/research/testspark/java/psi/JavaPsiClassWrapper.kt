@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.java
+package org.jetbrains.research.testspark.java.psi
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
@@ -12,9 +12,9 @@ import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
 import org.jetbrains.research.testspark.core.utils.javaPackagePattern
-import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
-import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
-import org.jetbrains.research.testspark.langwrappers.strategies.JavaKotlinClassTextExtractor
+import org.jetbrains.research.testspark.langwrappers.psi.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.psi.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.strategies.DefaultClassTextExtractor
 
 class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
@@ -36,7 +36,7 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     override val containingFile: PsiFile get() = psiClass.containingFile
 
     override val fullText: String
-        get() = JavaKotlinClassTextExtractor().extract(
+        get() = DefaultClassTextExtractor().extract(
             psiClass.containingFile,
             psiClass.text,
             javaPackagePattern,

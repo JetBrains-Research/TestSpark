@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.kotlin
+package org.jetbrains.research.testspark.kotlin.psi
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -16,10 +16,10 @@ import org.jetbrains.kotlin.psi.KtFunction
 import org.jetbrains.kotlin.psi.KtPsiUtil
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
-import org.jetbrains.research.testspark.langwrappers.CodeTypeDisplayName
-import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
-import org.jetbrains.research.testspark.langwrappers.PsiHelper
-import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
+import org.jetbrains.research.testspark.langwrappers.psi.CodeTypeDisplayName
+import org.jetbrains.research.testspark.langwrappers.psi.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.psi.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.psi.PsiMethodWrapper
 
 class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
 

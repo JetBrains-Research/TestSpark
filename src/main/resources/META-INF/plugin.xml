@@ -196,7 +196,7 @@
                 beanClass="com.intellij.lang.LanguageExtensionPoint"
                 dynamic="true">
             <with attribute="implementationClass"
-                  implements="org.jetbrains.research.testspark.langwrappers.PsiHelperProvider"/>
+                  implements="org.jetbrains.research.testspark.langwrappers.psi.PsiHelperProvider"/>
         </extensionPoint>
     </extensionPoints>
 

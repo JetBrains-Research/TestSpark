@@ -3,7 +3,7 @@
     <extensions defaultExtensionNs="org.jetbrains.research.testgenie">
         <psiHelperProvider
                 language="JAVA"
-                implementationClass="org.jetbrains.research.testspark.java.JavaPsiHelperProvider"
+                implementationClass="org.jetbrains.research.testspark.java.psi.JavaPsiHelperProvider"
         />
     </extensions>
 </idea-plugin>

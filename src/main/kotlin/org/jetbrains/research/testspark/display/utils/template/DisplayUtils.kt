@@ -3,7 +3,7 @@ package org.jetbrains.research.testspark.display.utils.template
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.data.UIContext
-import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.psi.PsiClassWrapper
 
 /**
  * Interface for utility functions related to tests applying to the project.

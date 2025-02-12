@@ -2,7 +2,7 @@
 <idea-plugin>
     <extensions defaultExtensionNs="org.jetbrains.research.testgenie">
         <psiHelperProvider
-                implementationClass="org.jetbrains.research.testspark.kotlin.KotlinPsiHelperProvider"
+                implementationClass="org.jetbrains.research.testspark.kotlin.psi.KotlinPsiHelperProvider"
                 language="kotlin"/>
     </extensions>
 </idea-plugin>
