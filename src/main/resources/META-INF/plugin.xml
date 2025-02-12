@@ -198,6 +198,13 @@
             <with attribute="implementationClass"
                   implements="org.jetbrains.research.testspark.langwrappers.psi.PsiHelperProvider"/>
         </extensionPoint>
+        <extensionPoint
+                name="testGeneratorProvider"
+                beanClass="com.intellij.lang.LanguageExtensionPoint"
+                dynamic="true">
+            <with attribute="implementationClass"
+                  implements="org.jetbrains.research.testspark.langwrappers.test.manager.TestGeneratorProvider"/>
+        </extensionPoint>
     </extensionPoints>
 
     <!-- This is a temporary mechanism to mark the plugin as K2 compatible. -->

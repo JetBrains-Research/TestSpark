@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.testmanager.kotlin
+package org.jetbrains.research.testspark.kotlin.test.manager
 
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.diagnostic.Logger
@@ -9,7 +9,8 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.testmanager.template.TestGenerator
+import org.jetbrains.research.testspark.langwrappers.test.manager.TestGenerator
+import org.jetbrains.research.testspark.langwrappers.test.manager.TestGeneratorProvider
 import java.io.File
 
 object KotlinTestGenerator : TestGenerator {
@@ -98,4 +99,8 @@ object KotlinTestGenerator : TestGenerator {
 
         return testText
     }
+}
+
+class KotlinTestGeneratorProvider : TestGeneratorProvider {
+    override fun getTestGenerator(): TestGenerator = KotlinTestGenerator
 }

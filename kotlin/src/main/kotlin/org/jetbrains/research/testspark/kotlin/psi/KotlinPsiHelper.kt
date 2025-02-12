@@ -19,6 +19,7 @@ import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.langwrappers.psi.CodeTypeDisplayName
 import org.jetbrains.research.testspark.langwrappers.psi.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.psi.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.psi.PsiHelperProvider
 import org.jetbrains.research.testspark.langwrappers.psi.PsiMethodWrapper
 
 class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
@@ -207,4 +208,8 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
             else -> "<html><b><font color='orange'>method</font> ${psiMethod.name}</b></html>"
         }
     }
+}
+
+class KotlinPsiHelperProvider : PsiHelperProvider {
+    override fun getPsiHelper(file: PsiFile) = KotlinPsiHelper(file)
 }

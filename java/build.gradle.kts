@@ -22,7 +22,15 @@ dependencies {
 
     implementation(project(":langwrappers")) // Interfaces that cover language-specific logic
     implementation(project(":core"))
-}
+
+    // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-core
+    implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")
+
+    // for merging generated kex tests into a single file
+    implementation("com.github.javaparser:javaparser-core:3.26.1")
+
+    // https://mvnrepository.com/artifact/com.github.javaparser/javaparser-symbol-solver-core
+    implementation("com.github.javaparser:javaparser-symbol-solver-core:3.24.2")}
 
 intellijPlatform {
     pluginConfiguration {

@@ -22,8 +22,8 @@ import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
 import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
 import org.jetbrains.research.testspark.java.psi.JavaPsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.psi.PsiClassWrapper
+import org.jetbrains.research.testspark.java.test.manager.JavaTestGenerator
 import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
-import org.jetbrains.research.testspark.testmanager.java.JavaTestGenerator
 import java.io.File
 import java.util.Locale
 import javax.swing.JOptionPane

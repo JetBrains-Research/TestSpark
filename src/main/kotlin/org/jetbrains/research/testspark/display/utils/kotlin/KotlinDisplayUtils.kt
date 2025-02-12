@@ -23,9 +23,9 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
 import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
 import org.jetbrains.research.testspark.kotlin.psi.KotlinPsiClassWrapper
+import org.jetbrains.research.testspark.kotlin.test.manager.KotlinTestGenerator
 import org.jetbrains.research.testspark.langwrappers.psi.PsiClassWrapper
 import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer
-import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestGenerator
 import java.io.File
 import java.util.Locale
 import javax.swing.JOptionPane

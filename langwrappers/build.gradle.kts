@@ -22,6 +22,9 @@ dependencies {
     implementation(kotlin("stdlib"))
 
     implementation(project(":core"))
+
+    // for merging generated kex tests into a single file
+    implementation("com.github.javaparser:javaparser-core:3.26.1")
 }
 
 intellijPlatform {

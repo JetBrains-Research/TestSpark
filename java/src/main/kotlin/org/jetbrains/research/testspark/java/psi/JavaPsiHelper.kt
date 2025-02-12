@@ -20,6 +20,7 @@ import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.langwrappers.psi.CodeTypeDisplayName
 import org.jetbrains.research.testspark.langwrappers.psi.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.psi.PsiHelper
+import org.jetbrains.research.testspark.langwrappers.psi.PsiHelperProvider
 import org.jetbrains.research.testspark.langwrappers.psi.PsiMethodWrapper
 
 class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
@@ -218,4 +219,8 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     private fun PsiElement.containsOffset(caretOffset: Int): Boolean {
         return (textRange.startOffset <= caretOffset) && (textRange.endOffset >= caretOffset)
     }
+}
+
+class JavaPsiHelperProvider : PsiHelperProvider {
+    override fun getPsiHelper(file: PsiFile) = JavaPsiHelper(file)
 }

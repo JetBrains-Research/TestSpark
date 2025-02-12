@@ -5,5 +5,9 @@
                 language="JAVA"
                 implementationClass="org.jetbrains.research.testspark.java.psi.JavaPsiHelperProvider"
         />
+        <testGeneratorProvider
+                language="JAVA"
+                implementationClass="org.jetbrains.research.testspark.java.test.manager.JavaTestGeneratorProvider"
+        />
     </extensions>
 </idea-plugin>

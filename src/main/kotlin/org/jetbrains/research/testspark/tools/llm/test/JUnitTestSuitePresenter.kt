@@ -5,7 +5,8 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.generation.llm.getClassWithTestCaseName
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
-import org.jetbrains.research.testspark.testmanager.TestGeneratorFactory
+import org.jetbrains.research.testspark.langwrappers.test.manager.TestGeneratorProvider
+import org.jetbrains.research.testspark.tools.asIntellijLanguage
 
 class JUnitTestSuitePresenter(
     private val project: Project,
@@ -36,7 +37,7 @@ class JUnitTestSuitePresenter(
             // Add each test
             testCases.forEach { testCase -> testBody += "$testCase\n" }
 
-            TestGeneratorFactory.create(language).generateCode(
+            TestGeneratorProvider.getTestGenerator(language.asIntellijLanguage())!!.generateCode(
                 project,
                 testFileName,
                 testBody,
@@ -59,7 +60,7 @@ class JUnitTestSuitePresenter(
         testCaseIndex: Int,
     ): String =
         testSuite.run {
-            TestGeneratorFactory.create(language).generateCode(
+            TestGeneratorProvider.getTestGenerator(language.asIntellijLanguage())!!.generateCode(
                 project,
                 getClassWithTestCaseName(testCases[testCaseIndex].name),
                 testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
@@ -83,7 +84,7 @@ class JUnitTestSuitePresenter(
             // Add each test (exclude expected exception)
             testCases.forEach { testCase -> testBody += "${testCase.toStringWithoutExpectedException()}\n" }
 
-            TestGeneratorFactory.create(language).generateCode(
+            TestGeneratorProvider.getTestGenerator(language.asIntellijLanguage())!!.generateCode(
                 project,
                 testFileName,
                 testBody,
