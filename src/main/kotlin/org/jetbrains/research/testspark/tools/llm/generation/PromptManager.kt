@@ -306,23 +306,15 @@ class PromptManager(
         psiClass: PsiClassWrapper?,
         lineNumber: Int,
     ): String? {
-        if (psiClass != null) {
-            val containingPsiMethod = psiClass.allMethods.find { it.containsLine(lineNumber) } ?: return null
-
-            val file = psiClass.containingFile
-            val psiHelper = PsiHelperProvider.getPsiHelper(file)
-            /**
-             * psiHelper will not be null here because at this point,
-             * we already know that the current language is supported
-             */
-            return psiHelper!!.generateMethodDescriptor(containingPsiMethod)
-        } else {
-            /**
-             * When no PSI class provided we are dealing with a top-level function.
-             * Processing function outside the class
-             */
+        val isTopLevelFunction = psiClass == null
+        if (isTopLevelFunction) {
             val currentPsiMethod = psiHelper.getSurroundingMethod(caret) ?: return null
             return psiHelper.generateMethodDescriptor(currentPsiMethod)
+        } else {
+            val containingPsiMethod = psiClass.allMethods.find { it.containsLine(lineNumber) } ?: return null
+            val file = psiClass.containingFile
+            val psiHelper = PsiHelperProvider.getPsiHelper(file)
+            return psiHelper!!.generateMethodDescriptor(containingPsiMethod)
         }
     }
 }

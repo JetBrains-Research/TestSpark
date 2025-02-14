@@ -22,7 +22,6 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
-import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -114,8 +113,9 @@ class Pipeline(
                         if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
                         ijIndicator.stop()
-                    } catch (err: TestSparkException) {
-                        LLMErrorManager().errorProcess(err.message!!, project, testGenerationController.errorMonitor)
+                    } catch (exception: TestSparkException) {
+                        project.errorProcess(exception)
+                        exception.printStackTrace()
                     }
                 }
 

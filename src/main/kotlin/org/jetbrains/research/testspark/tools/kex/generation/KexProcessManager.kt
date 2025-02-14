@@ -26,6 +26,7 @@ import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.kex.KexSettingsArguments
 import org.jetbrains.research.testspark.tools.kex.error.KexErrorManager
+import org.jetbrains.research.testspark.core.exception.KexException
 import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestManagerFactory
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
@@ -138,11 +139,7 @@ class KexProcessManager(
                 projectContext,
             )
         } catch (e: Exception) {
-            kexErrorManager.errorProcess(
-                KexMessagesBundle.get("kexErrorCommon").format(e.message),
-                project,
-                errorMonitor,
-            )
+            throw KexException.Common(e.message)
             e.printStackTrace()
         }
 
