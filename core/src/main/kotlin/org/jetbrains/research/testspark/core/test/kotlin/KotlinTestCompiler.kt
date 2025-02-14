@@ -44,7 +44,6 @@ class KotlinTestCompiler(
 
         if (kotlinCompiler == null) {
             val msg = "Cannot find Kotlin compiler 'kotlinc' at $kotlinSDKHomeDirectory"
-            logger.error { msg }
             throw KotlinCompilerNotFoundException("Please make sure that the Kotlin plugin is installed and enabled. $msg.")
         }
 
@@ -84,7 +83,7 @@ class KotlinTestCompiler(
 
         val classFilePath = path.removeSuffix(".kt") + ".class"
         if (executionResult.exitCode == 0 && !File(classFilePath).exists()) {
-            throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
+            throw ClassFileNotFoundException()
         }
         return executionResult
     }

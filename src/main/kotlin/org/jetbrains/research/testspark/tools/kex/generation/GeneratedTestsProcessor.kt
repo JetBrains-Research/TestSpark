@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.kex.KexMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.exception.KexException
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.data.IJReport
@@ -75,11 +76,7 @@ class GeneratedTestsProcessor(
                 )
             }
         } else {
-            kexErrorManager.errorProcess(
-                KexMessagesBundle.get("testsDontExist"),
-                project,
-                errorMonitor,
-            )
+            throw KexException.MissingGeneratedTests()
         }
 
         ToolUtils.transferToIJTestCases(report)
