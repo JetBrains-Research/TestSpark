@@ -48,6 +48,6 @@ object TestCompilerFactory {
             .projectSdk
             ?.homeDirectory
             ?.path
-            ?: (throw JavaSDKMissingException(LLMMessagesBundle.get("javaSdkNotConfigured")))
+            ?: (throw JavaSDKMissingException())
     }
 }

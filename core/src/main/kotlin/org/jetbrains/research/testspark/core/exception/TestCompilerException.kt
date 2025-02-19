@@ -1,6 +1,6 @@
 package org.jetbrains.research.testspark.core.exception
 
-sealed class GeneralException() : TestSparkException()
+sealed class TestCompilerException() : TestSparkException()
 
 /**
  * Custom exception to indicate that the Kotlin compiler was not found.
@@ -8,25 +8,25 @@ sealed class GeneralException() : TestSparkException()
  * @param message A descriptive message explaining the error.
  */
 
-class KotlinCompilerNotFoundException(val kotlinSdkHomeDirectory: String) : GeneralException()
+class KotlinCompilerNotFoundException(val kotlinSdkHomeDirectory: String) : TestCompilerException()
 
 /**
  * Custom exception to indicate that the Java compiler was not found.
  *
  * @param message A descriptive message explaining the error.
  */
-class JavaCompilerNotFoundException() : GeneralException()
+class JavaCompilerNotFoundException() : TestCompilerException()
 
 /**
  * Represents an exception thrown when a required Java SDK is missing in the system.
  *
  * @param message A descriptive message explaining the specific error that led to this exception.
  */
-class JavaSDKMissingException() : GeneralException()
+class JavaSDKMissingException() : TestCompilerException()
 
 /**
  * Represents an exception thrown when a class file could not be found in the same path after the code compilation.
  *
  * @param message A descriptive message explaining the error
  */
-class ClassFileNotFoundException() : GeneralException()
+class ClassFileNotFoundException() : TestCompilerException()

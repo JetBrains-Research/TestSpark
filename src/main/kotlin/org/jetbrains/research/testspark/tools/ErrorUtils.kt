@@ -6,10 +6,10 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
-import org.jetbrains.research.testspark.core.exception.GeneralException
-import org.jetbrains.research.testspark.core.exception.KexException
+import org.jetbrains.research.testspark.core.exception.TestCompilerException
+import org.jetbrains.research.testspark.core.exception.LlmException
 import org.jetbrains.research.testspark.core.exception.TestSparkException
-import org.jetbrains.research.testspark.tools.kex.error.kexDisplayMessage
+import org.jetbrains.research.testspark.tools.kex.error.llmDisplayMessage
 
 fun Project.errorProcess(exception: TestSparkException) {
     val log = Logger.getInstance(this::class.java)
@@ -25,26 +25,28 @@ fun Project.errorProcess(exception: TestSparkException) {
         .notify(this)
 }
 
+
+
 val TestSparkException.displayMessage: String
     get() = when (this) {
-        is KexException -> kexDisplayMessage
-        is GeneralException -> generalDisplayMessage
+        is LlmException -> llmDisplayMessage
+        is TestCompilerException -> generalDisplayMessage
         else -> PluginMessagesBundle.get("unknownErrorOccurredMessage")
     }
 
 private fun NotificationGroupManager.getNotificationGroupFor(
     exception: TestSparkException
 ): NotificationGroup = when (exception) {
-    is KexException -> getNotificationGroup("Kex Execution Error")
-    is GeneralException -> getNotificationGroup("Generation Error")
+    is LlmException -> getNotificationGroup("LLM Execution Error")
+    is TestCompilerException -> getNotificationGroup("Generation Error")
     else -> getNotificationGroup("Execution Error")
 }
 
 private fun getNotificationTitleFor(
     exception: TestSparkException
 ): String = when (exception) {
-    is KexException -> PluginMessagesBundle.get("kexErrorTitle")
-    is GeneralException -> PluginMessagesBundle.get("buildErrorTitle")
+    is LlmException -> PluginMessagesBundle.get("kexErrorTitle")
+    is TestCompilerException -> PluginMessagesBundle.get("buildErrorTitle")
     else -> PluginMessagesBundle.get("unknownErrorOccurredMessage")
 }
 
