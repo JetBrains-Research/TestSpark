@@ -74,13 +74,13 @@ abstract class RequestManager(
 
         // check if the response is empty
         if (response.isEmpty() || response.isBlank()) {
-            return TestSparkResult.Failure(error = LlmError.EmptyLlmResponse())
+            return TestSparkResult.Failure(error = LlmError.EmptyLlmResponse)
         }
 
         val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite()
 
         return if (testSuiteGeneratedByLLM == null) {
-            TestSparkResult.Failure(error = LlmError.TestSuiteParsingError())
+            TestSparkResult.Failure(error = LlmError.TestSuiteParsingError)
         } else {
             TestSparkResult.Success(data = testSuiteGeneratedByLLM.reformat())
         }
@@ -104,13 +104,13 @@ abstract class RequestManager(
 
         // check if the response is empty
         if (response.isEmpty() || response.isBlank()) {
-            return TestSparkResult.Failure(error = LlmError.EmptyLlmResponse())
+            return TestSparkResult.Failure(error = LlmError.EmptyLlmResponse)
         }
 
         val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite()
 
         return if (testSuiteGeneratedByLLM == null) {
-            TestSparkResult.Failure(error = LlmError.TestSuiteParsingError())
+            TestSparkResult.Failure(error = LlmError.TestSuiteParsingError)
         } else {
             TestSparkResult.Success(data = testSuiteGeneratedByLLM.reformat())
         }

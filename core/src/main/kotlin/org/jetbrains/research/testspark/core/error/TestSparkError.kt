@@ -1,3 +1,8 @@
 package org.jetbrains.research.testspark.core.error
 
-abstract class TestSparkError(val cause: Throwable? = null)
+import org.jetbrains.research.testspark.core.data.TestSparkModule
+
+abstract class TestSparkError(
+    open val module: TestSparkModule,
+    open val cause: Throwable? = null,
+)

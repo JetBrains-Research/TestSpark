@@ -2,6 +2,9 @@ package org.jetbrains.research.testspark.tools.llm.generation.grazie
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.core.data.ChatMessage
+import org.jetbrains.research.testspark.core.data.LlmModuleType
+import org.jetbrains.research.testspark.core.data.TestSparkModule
+import org.jetbrains.research.testspark.core.error.HttpError
 import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.error.TestSparkResult
@@ -31,15 +34,17 @@ class GrazieRequestManager(project: Project) : RequestManager(
                 with(requestError) {
                     when {
                         contains("invalid: 401") -> TestSparkResult.Failure(
-                            error = LlmError.HttpUnauthorized()
+                            error = HttpError(httpCode = 401)
                         )
 
                         contains("invalid: 413 Payload Too Large") -> TestSparkResult.Failure(
-                            error = LlmError.PromptTooLong()
+                            error = HttpError(httpCode = 413)
                         )
 
                         else -> TestSparkResult.Failure(
-                            error = LlmError.GrazieHttpError(requestError)
+                            error = HttpError(
+                                message = this, module = TestSparkModule.LLM(LlmModuleType.Grazie)
+                            )
                         )
                     }
                 }
@@ -47,7 +52,7 @@ class GrazieRequestManager(project: Project) : RequestManager(
                 TestSparkResult.Success(data = Unit)
             }
         } catch (_: ClassNotFoundException) {
-            TestSparkResult.Failure(error = LlmError.GrazieNotAvailable())
+            TestSparkResult.Failure(error = LlmError.GrazieNotAvailable)
         }
     }
 

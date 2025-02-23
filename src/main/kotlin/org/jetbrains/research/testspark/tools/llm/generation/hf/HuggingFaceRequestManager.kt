@@ -6,12 +6,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
 import org.jetbrains.research.testspark.core.data.ChatUserMessage
-import org.jetbrains.research.testspark.core.error.LlmError
+import org.jetbrains.research.testspark.core.data.LlmModuleType
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.TestSparkRequestManager
-import java.net.HttpURLConnection
 import java.net.URLConnection
 
 /**
@@ -28,6 +27,8 @@ class HuggingFaceRequestManager(project: Project) : TestSparkRequestManager(proj
             val baseUrl ="https://api-inference.huggingface.co/models/meta-llama/"
             return "$baseUrl$llmModel"
         }
+
+    override val moduleType = LlmModuleType.HuggingFace
 
     override fun assembleRequestBodyJson(): String {
         if (chatHistory.size == 1) {
@@ -58,12 +59,6 @@ class HuggingFaceRequestManager(project: Project) : TestSparkRequestManager(proj
                 .asJsonObject["generated_text"].asString.trim(),
         )
         testsAssembler.consume(generatedTestCases)
-    }
-
-    override fun mapHttpCodeToError(httpCode: Int) = when(httpCode) {
-        HttpURLConnection.HTTP_INTERNAL_ERROR -> LlmError.HttpInternalError()
-        HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.HuggingFaceServerError()
-        else -> LlmError.HttpError(httpCode)
     }
 
     /**

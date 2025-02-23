@@ -3,7 +3,9 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
-import org.jetbrains.research.testspark.core.error.LlmError
+import org.jetbrains.research.testspark.core.data.LlmModuleType
+import org.jetbrains.research.testspark.core.data.TestSparkModule
+import org.jetbrains.research.testspark.core.error.HttpError
 import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.error.TestSparkResult
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
@@ -19,6 +21,7 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
     llmModel = LlmSettingsArguments(project).getModel(),
 ) {
     protected abstract val url: String
+    protected abstract val moduleType: LlmModuleType
 
     protected abstract fun assembleRequestBodyJson(): String
 
@@ -32,12 +35,8 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
         errorMonitor: ErrorMonitor,
     )
 
-    protected open fun mapHttpCodeToError(httpCode: Int): TestSparkError = when(httpCode) {
-        HttpURLConnection.HTTP_INTERNAL_ERROR -> LlmError.HttpInternalError()
-        HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.PromptTooLong()
-        HttpURLConnection.HTTP_UNAUTHORIZED -> LlmError.HttpUnauthorized()
-        else -> LlmError.HttpError(httpCode)
-    }
+    protected open fun mapHttpCodeToError(httpCode: Int): TestSparkError =
+        HttpError(httpCode = httpCode, module = TestSparkModule.LLM(moduleType))
 
     override fun send(
         prompt: String,
@@ -58,7 +57,7 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
                     else -> TestSparkResult.Failure(mapHttpCodeToError(responseCode))
                 }
             }
-    } catch (e: HttpStatusException) {
-        TestSparkResult.Failure(LlmError.HttpStatusError(e))
+    } catch (exception: HttpStatusException) {
+        TestSparkResult.Failure(HttpError(cause = exception))
     }
 }

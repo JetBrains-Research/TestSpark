@@ -102,7 +102,7 @@ class LLMWithFeedbackCycle(
 
             // Process stopped checking
             if (indicator.isCanceled()) {
-                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled())
+                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled)
                 break
             }
 
@@ -129,7 +129,7 @@ class LLMWithFeedbackCycle(
 
             // Process stopped checking
             if (indicator.isCanceled()) {
-                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled())
+                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled)
                 break
             }
 
@@ -165,7 +165,7 @@ class LLMWithFeedbackCycle(
                                 requestsCount--
                                 continue
                             } else {
-                                return TestSparkResult.Failure(error = LlmError.PromptTooLong())
+                                return TestSparkResult.Failure(error = LlmError.PromptTooLong)
                             }
                         }
 
@@ -188,7 +188,7 @@ class LLMWithFeedbackCycle(
 
             // Process stopped checking
             if (indicator.isCanceled()) {
-                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled())
+                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled)
             }
 
             // Save the generated TestSuite into a temp file
@@ -230,7 +230,7 @@ class LLMWithFeedbackCycle(
             }
             if (!(allFilesCreated && File(generatedTestSuitePath).exists())) {
                 // either some test case file or the test suite file was not created
-                return TestSparkResult.Failure(error = LlmError.FailedToSaveTestFiles())
+                return TestSparkResult.Failure(error = LlmError.FailedToSaveTestFiles)
             }
 
             // Get test cases
@@ -254,7 +254,7 @@ class LLMWithFeedbackCycle(
 
             // Process stopped checking
             if (indicator.isCanceled()) {
-                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled())
+                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled)
             }
 
             if (!testCasesCompilationResult.allTestCasesCompilable && !isLastIteration(requestsCount)) {
