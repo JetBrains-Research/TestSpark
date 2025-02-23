@@ -125,7 +125,7 @@ class TestSparkActionWindow(
             setLocation(x, y)
         } else {
             NotificationGroupManager.getInstance()
-                .getNotificationGroup("Generation Error")
+                .getNotificationGroup("UserInterface")
                 .createNotification(
                     PluginMessagesBundle.get("generationWindowWarningTitle"),
                     PluginMessagesBundle.get("generationWindowWarningMessage"),

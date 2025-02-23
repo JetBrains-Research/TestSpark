@@ -226,7 +226,7 @@ class TestCasePanelBuilder(
                 null,
             )
             NotificationGroupManager.getInstance()
-                .getNotificationGroup("Test case copied")
+                .getNotificationGroup("UserInterface")
                 .createNotification(
                     "",
                     PluginMessagesBundle.get("testCaseCopied"),
