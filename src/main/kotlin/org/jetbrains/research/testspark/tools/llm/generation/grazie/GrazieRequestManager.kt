@@ -38,7 +38,7 @@ class GrazieRequestManager(project: Project) : RequestManager(
                         )
 
                         contains("invalid: 413 Payload Too Large") -> TestSparkResult.Failure(
-                            error = HttpError(httpCode = 413)
+                            error = LlmError.PromptTooLong
                         )
 
                         else -> TestSparkResult.Failure(

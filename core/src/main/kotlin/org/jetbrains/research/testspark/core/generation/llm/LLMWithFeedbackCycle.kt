@@ -75,15 +75,9 @@ class LLMWithFeedbackCycle(
     private val requestsCountThreshold: Int,
     private val errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
 ) {
-    enum class WarningType {
-        TEST_SUITE_PARSING_FAILED,
-        NO_TEST_CASES_GENERATED,
-        COMPILATION_ERROR_OCCURRED,
-    }
-
     private val log = KotlinLogging.logger { this::class.java }
 
-    fun run(onWarningCallback: ((WarningType) -> Unit)? = null): TestSparkResult<FeedbackResponse, TestSparkError> {
+    fun run(onWarningCallback: ((TestSparkError) -> Unit)? = null): TestSparkResult<FeedbackResponse, TestSparkError> {
         var requestsCount = 0
         var generatedTestsArePassing = false
         var nextPromptMessage = initialPromptMessage
@@ -135,10 +129,10 @@ class LLMWithFeedbackCycle(
 
             when (response) {
                 is TestSparkResult.Success -> {
-                    log.info { "Test suite generated successfully: ${response.data!!}" }
+                    log.info { "Test suite generated successfully: ${response.data}" }
                     // check that there are some test cases generated
-                    if (response.data!!.testCases.isEmpty()) {
-                        onWarningCallback?.invoke(WarningType.NO_TEST_CASES_GENERATED)
+                    if (response.data.testCases.isEmpty()) {
+                        onWarningCallback?.invoke(LlmError.EmptyLlmResponse)
 
                         nextPromptMessage =
                             "You have provided an empty answer! Please answer my previous question with the same formats."
@@ -170,7 +164,7 @@ class LLMWithFeedbackCycle(
                         }
 
                         is LlmError.TestSuiteParsingError -> {
-                            onWarningCallback?.invoke(WarningType.TEST_SUITE_PARSING_FAILED)
+                            onWarningCallback?.invoke(LlmError.TestSuiteParsingError)
                             log.info { "Cannot parse a test suite from the LLM response. LLM response: '$response'" }
 
                             nextPromptMessage = "The provided code is not parsable. Please, generate the correct code"
@@ -258,9 +252,9 @@ class LLMWithFeedbackCycle(
             }
 
             if (!testCasesCompilationResult.allTestCasesCompilable && !isLastIteration(requestsCount)) {
-                log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite!!)}" }
+                log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite)}" }
 
-                onWarningCallback?.invoke(WarningType.COMPILATION_ERROR_OCCURRED)
+                onWarningCallback?.invoke(LlmError.CompilationError)
 
                 nextPromptMessage = """
                    I cannot compile the tests that you provided. The error is:

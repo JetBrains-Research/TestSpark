@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.tools.llm.generation
 
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -29,6 +30,7 @@ import org.jetbrains.research.testspark.services.PluginSettingsService
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
+import org.jetbrains.research.testspark.tools.error.createNotification
 import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
 import org.jetbrains.research.testspark.tools.factories.TestsAssemblerFactory
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
@@ -186,16 +188,7 @@ class LLMProcessManager(
         )
 
         val feedbackResponse = llmFeedbackCycle.run { warning ->
-            when (warning) {
-                LLMWithFeedbackCycle.WarningType.TEST_SUITE_PARSING_FAILED ->
-                    llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
-
-                LLMWithFeedbackCycle.WarningType.NO_TEST_CASES_GENERATED ->
-                    llmErrorManager.warningProcess(LLMMessagesBundle.get("emptyResponse"), project)
-
-                LLMWithFeedbackCycle.WarningType.COMPILATION_ERROR_OCCURRED ->
-                    llmErrorManager.warningProcess(LLMMessagesBundle.get("compilationError"), project)
-            }
+            project.createNotification(warning, NotificationType.WARNING)
         }
 
         // Process stopped checking
