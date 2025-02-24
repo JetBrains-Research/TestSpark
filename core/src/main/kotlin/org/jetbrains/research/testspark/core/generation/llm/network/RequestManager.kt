@@ -55,22 +55,22 @@ abstract class RequestManager(
             chatHistory.removeLast()
         }
 
-        return when (isUserFeedback) {
-            true -> processUserFeedbackResponse(testsAssembler, packageName, language)
-            false -> processResponse(testsAssembler, packageName, language)
-        }
+        return processResponse(testsAssembler, packageName, language, isUserFeedback)
     }
 
     open fun processResponse(
         testsAssembler: TestsAssembler,
         packageName: String,
         language: SupportedLanguage,
+        isUserFeedback: Boolean,
     ): TestSparkResult<TestSuiteGeneratedByLLM, TestSparkError> {
         // save the full response in the chat history
         val response = testsAssembler.getContent()
 
         log.info { "The full response: \n $response" }
-        chatHistory.add(ChatAssistantMessage(response))
+        if (!isUserFeedback) {
+            chatHistory.add(ChatAssistantMessage(response))
+        }
 
         // check if the response is empty
         if (response.isEmpty() || response.isBlank()) {
@@ -92,27 +92,4 @@ abstract class RequestManager(
         testsAssembler: TestsAssembler,
         errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
     ): TestSparkResult<Unit, TestSparkError>
-
-    open fun processUserFeedbackResponse(
-        testsAssembler: TestsAssembler,
-        packageName: String,
-        language: SupportedLanguage,
-    ): TestSparkResult<TestSuiteGeneratedByLLM, TestSparkError> {
-        val response = testsAssembler.getContent()
-
-        log.info { "The full response: \n $response" }
-
-        // check if the response is empty
-        if (response.isEmpty() || response.isBlank()) {
-            return TestSparkResult.Failure(error = LlmError.EmptyLlmResponse)
-        }
-
-        val testSuiteGeneratedByLLM = testsAssembler.assembleTestSuite()
-
-        return if (testSuiteGeneratedByLLM == null) {
-            TestSparkResult.Failure(error = LlmError.TestSuiteParsingError)
-        } else {
-            TestSparkResult.Success(data = testSuiteGeneratedByLLM.reformat())
-        }
-    }
 }
