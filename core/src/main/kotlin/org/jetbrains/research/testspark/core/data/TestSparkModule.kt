@@ -6,6 +6,7 @@ sealed interface TestSparkModule {
     data object Kex : TestSparkModule
     data object UI : TestSparkModule
     data object ProjectBuilder : TestSparkModule
+    data object Compiler : TestSparkModule
     data object Common : TestSparkModule
 }
 

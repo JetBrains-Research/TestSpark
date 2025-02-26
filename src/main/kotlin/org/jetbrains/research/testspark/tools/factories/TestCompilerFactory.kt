@@ -3,7 +3,6 @@ package org.jetbrains.research.testspark.tools.factories
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.kotlin.idea.compiler.configuration.KotlinPluginLayout
-import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
@@ -48,6 +47,6 @@ object TestCompilerFactory {
             .projectSdk
             ?.homeDirectory
             ?.path
-            ?: (throw JavaSDKMissingException(LLMMessagesBundle.get("javaSdkNotConfigured")))
+            ?: (throw JavaSDKMissingException())
     }
 }

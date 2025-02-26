@@ -59,7 +59,7 @@ class LLMProcessManager(
 
     private val homeDirectory = projectSDKPath?.toString() ?: run {
         val sdk = ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path
-            ?: throw JavaSDKMissingException(LLMMessagesBundle.get("javaSdkNotConfigured"))
+            ?: throw JavaSDKMissingException()
 
         return@run sdk
     }

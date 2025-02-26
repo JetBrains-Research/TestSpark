@@ -255,6 +255,8 @@
                            displayType="BALLOON"/>
         <notificationGroup id="UserInterface"
                            displayType="BALLOON"/>
+        <notificationGroup id="Compiler Error"
+                           displayType="BALLOON"/>
 
     </extensions>
 

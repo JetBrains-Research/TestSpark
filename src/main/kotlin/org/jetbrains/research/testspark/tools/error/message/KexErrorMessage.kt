@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.tools.kex.error
+package org.jetbrains.research.testspark.tools.error.message
 
 import org.jetbrains.research.testspark.core.error.KexError
 

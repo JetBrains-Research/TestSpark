@@ -12,19 +12,40 @@ import org.jetbrains.research.testspark.core.error.HttpError
 import org.jetbrains.research.testspark.core.error.KexError
 import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.TestSparkError
-import org.jetbrains.research.testspark.tools.evosuite.error.evoSuiteErrorDisplayMessage
-import org.jetbrains.research.testspark.tools.kex.error.kexErrorDisplayMessage
-import org.jetbrains.research.testspark.tools.llm.error.httpErrorDisplayMessage
-import org.jetbrains.research.testspark.tools.llm.error.llmErrorDisplayMessage
+import org.jetbrains.research.testspark.core.exception.CommonException
+import org.jetbrains.research.testspark.core.exception.CompilerException
+import org.jetbrains.research.testspark.core.exception.TestSparkException
+import org.jetbrains.research.testspark.tools.error.message.commonExceptionMessage
+import org.jetbrains.research.testspark.tools.error.message.compilerExceptionMessage
+import org.jetbrains.research.testspark.tools.error.message.evoSuiteErrorDisplayMessage
+import org.jetbrains.research.testspark.tools.error.message.httpErrorDisplayMessage
+import org.jetbrains.research.testspark.tools.error.message.kexErrorDisplayMessage
+import org.jetbrains.research.testspark.tools.error.message.llmErrorDisplayMessage
 
 fun Project.createNotification(
     error: TestSparkError, notificationType: NotificationType
-) = showNotification(
+) = createNotification(
     module = error.module,
     message = error.displayMessage ?: PluginMessagesBundle.get("unknownErrorMessage"),
     notificationType = notificationType,
-    logMessage = error.toString(),
+    logMessage = "$error ${error.displayMessage?.let { ": $it" } ?: ""}",
 )
+
+fun Project.createNotification(
+    exception: TestSparkException, notificationType: NotificationType
+) = createNotification(
+    module = exception.module,
+    message = exception.displayMessage ?: PluginMessagesBundle.get("unknownErrorMessage"),
+    notificationType = notificationType,
+    logMessage = "$exception ${exception.displayMessage?.let { ": $it" } ?: ""}",
+)
+
+val TestSparkException.displayMessage: String?
+    get() = when (this) {
+        is CommonException -> commonExceptionMessage
+        is CompilerException -> compilerExceptionMessage
+        else -> null
+    }
 
 val TestSparkError.displayMessage: String?
     get() = when (this) {
@@ -35,7 +56,7 @@ val TestSparkError.displayMessage: String?
         else -> null
     }
 
-private fun Project.showNotification(
+fun Project.createNotification(
     module: TestSparkModule,
     message: String,
     notificationType: NotificationType,
@@ -67,6 +88,7 @@ private fun NotificationGroupManager.getNotificationGroupFor(
     is TestSparkModule.UI -> getNotificationGroup("UserInterface")
     is TestSparkModule.ProjectBuilder -> getNotificationGroup("Build Execution Error")
     is TestSparkModule.Common -> getNotificationGroup("Execution Error")
+    is TestSparkModule.Compiler -> getNotificationGroup("Compiler Error")
 }
 
 private fun getNotificationTitleFor(
@@ -78,4 +100,5 @@ private fun getNotificationTitleFor(
     is TestSparkModule.UI -> PluginMessagesBundle.get("generationWindowWarningTitle")
     is TestSparkModule.ProjectBuilder -> PluginMessagesBundle.get("buildErrorTitle")
     is TestSparkModule.Common -> PluginMessagesBundle.get("commonErrorTitle")
+    is TestSparkModule.Compiler -> PluginMessagesBundle.get("compilerErrorTitle")
 }

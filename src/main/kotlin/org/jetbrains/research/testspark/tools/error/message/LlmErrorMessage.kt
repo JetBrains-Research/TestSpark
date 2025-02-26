@@ -1,4 +1,4 @@
-package org.jetbrains.research.testspark.tools.llm.error
+package org.jetbrains.research.testspark.tools.error.message
 
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.core.error.HttpError
