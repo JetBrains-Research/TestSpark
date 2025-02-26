@@ -170,6 +170,8 @@ class LLMWithFeedbackCycle(
                             nextPromptMessage = "The provided code is not parsable. Please, generate the correct code"
                             continue
                         }
+
+                        else -> return response
                     }
                     continue
                 }

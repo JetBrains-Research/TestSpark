@@ -8,7 +8,6 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.TestSparkResult
 import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
@@ -201,33 +200,8 @@ class LLMProcessManager(
             }
 
             is TestSparkResult.Failure -> {
-                when (feedbackResponse.error) {
-                    is LlmError.NoCompilableTestCasesGenerated -> {
-                        llmErrorManager.errorProcess(LLMMessagesBundle.get("invalidLLMResult"), project, errorMonitor)
-                    }
-
-                    is LlmError.FeedbackCycleCancelled -> {
-                        log.info("Process stopped")
-                        return null
-                    }
-
-                    is LlmError.PromptTooLong -> {
-                        llmErrorManager.errorProcess(
-                            LLMMessagesBundle.get("tooLongPromptRequest"),
-                            project,
-                            errorMonitor
-                        )
-                        return null
-                    }
-
-                    is LlmError.FailedToSaveTestFiles -> {
-                        llmErrorManager.errorProcess(
-                            LLMMessagesBundle.get("savingTestFileIssue"),
-                            project,
-                            errorMonitor
-                        )
-                    }
-                }
+                project.createNotification(feedbackResponse.error, NotificationType.ERROR)
+                return null
             }
         }
 
