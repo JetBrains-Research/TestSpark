@@ -23,8 +23,6 @@ class OpenAIRequestManager(project: Project) : TestSparkRequestManager(project) 
 
     override val url = "https://api.openai.com/v1/chat/completions"
 
-    override val moduleType = LlmModuleType.OpenAi
-
     override fun tuneRequest(connection: URLConnection) {
         connection.setRequestProperty("Authorization", "Bearer $token")
     }

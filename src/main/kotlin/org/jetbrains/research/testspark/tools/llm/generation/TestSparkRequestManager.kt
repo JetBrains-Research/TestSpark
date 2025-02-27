@@ -3,11 +3,10 @@ package org.jetbrains.research.testspark.tools.llm.generation
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
-import org.jetbrains.research.testspark.core.data.LlmModuleType
 import org.jetbrains.research.testspark.core.data.TestSparkModule
 import org.jetbrains.research.testspark.core.error.HttpError
-import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -21,7 +20,6 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
     llmModel = LlmSettingsArguments(project).getModel(),
 ) {
     protected abstract val url: String
-    protected abstract val moduleType: LlmModuleType
 
     protected abstract fun assembleRequestBodyJson(): String
 
@@ -36,7 +34,7 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
     )
 
     protected open fun mapHttpCodeToError(httpCode: Int): TestSparkError =
-        HttpError(httpCode = httpCode, module = TestSparkModule.Llm(moduleType))
+        HttpError(httpCode = httpCode, module = TestSparkModule.Llm())
 
     override fun send(
         prompt: String,

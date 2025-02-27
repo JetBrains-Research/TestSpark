@@ -27,8 +27,6 @@ class GeminiRequestManager(project: Project) : TestSparkRequestManager(project) 
             return "$baseUrl$llmModel:generateContent?key=$token"
         }
 
-    override val moduleType: LlmModuleType = LlmModuleType.Gemini
-
     override fun tuneRequest(connection: URLConnection) = Unit
 
     override fun assembleRequestBodyJson(): String {
