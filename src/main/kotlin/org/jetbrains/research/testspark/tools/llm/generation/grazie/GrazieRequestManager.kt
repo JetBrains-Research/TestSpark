@@ -7,7 +7,7 @@ import org.jetbrains.research.testspark.core.data.TestSparkModule
 import org.jetbrains.research.testspark.core.error.HttpError
 import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.TestSparkError
-import org.jetbrains.research.testspark.core.error.TestSparkResult
+import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -23,7 +23,7 @@ class GrazieRequestManager(project: Project) : RequestManager(
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
         errorMonitor: ErrorMonitor,
-    ): TestSparkResult<Unit, TestSparkError> {
+    ): Result<Unit, TestSparkError> {
         return try {
             val className = "org.jetbrains.research.grazie.Request"
             val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
@@ -33,15 +33,15 @@ class GrazieRequestManager(project: Project) : RequestManager(
             if (requestError.isNotEmpty()) {
                 with(requestError) {
                     when {
-                        contains("invalid: 401") -> TestSparkResult.Failure(
+                        contains("invalid: 401") -> Result.Failure(
                             error = HttpError(httpCode = 401)
                         )
 
-                        contains("invalid: 413 Payload Too Large") -> TestSparkResult.Failure(
+                        contains("invalid: 413 Payload Too Large") -> Result.Failure(
                             error = LlmError.PromptTooLong
                         )
 
-                        else -> TestSparkResult.Failure(
+                        else -> Result.Failure(
                             error = HttpError(
                                 message = this, module = TestSparkModule.LLM(LlmModuleType.Grazie)
                             )
@@ -49,10 +49,10 @@ class GrazieRequestManager(project: Project) : RequestManager(
                     }
                 }
             } else {
-                TestSparkResult.Success(data = Unit)
+                Result.Success(data = Unit)
             }
         } catch (_: ClassNotFoundException) {
-            TestSparkResult.Failure(error = LlmError.GrazieNotAvailable)
+            Result.Failure(error = LlmError.GrazieNotAvailable)
         }
     }
 

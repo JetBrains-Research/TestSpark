@@ -7,7 +7,7 @@ import org.jetbrains.research.testspark.core.data.LlmModuleType
 import org.jetbrains.research.testspark.core.data.TestSparkModule
 import org.jetbrains.research.testspark.core.error.HttpError
 import org.jetbrains.research.testspark.core.error.TestSparkError
-import org.jetbrains.research.testspark.core.error.TestSparkResult
+import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -43,7 +43,7 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
         errorMonitor: ErrorMonitor
-    ): TestSparkResult<Unit, TestSparkError> = try {
+    ): Result<Unit, TestSparkError> = try {
         HttpRequests
             .post(url, "application/json")
             .tuner { tuneRequest(it) }
@@ -51,13 +51,13 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
                 request.write(assembleRequestBodyJson())
                 val connection = request.connection as HttpURLConnection
                 when (val responseCode = connection.responseCode) {
-                    HttpURLConnection.HTTP_OK -> TestSparkResult.Success(
+                    HttpURLConnection.HTTP_OK -> Result.Success(
                         data = assembleResponse(request, testsAssembler, indicator, errorMonitor)
                     )
-                    else -> TestSparkResult.Failure(mapHttpCodeToError(responseCode))
+                    else -> Result.Failure(mapHttpCodeToError(responseCode))
                 }
             }
     } catch (exception: HttpStatusException) {
-        TestSparkResult.Failure(HttpError(cause = exception))
+        Result.Failure(HttpError(cause = exception))
     }
 }

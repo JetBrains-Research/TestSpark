@@ -5,7 +5,7 @@ import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.TestSparkError
-import org.jetbrains.research.testspark.core.error.TestSparkResult
+import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
@@ -77,7 +77,7 @@ class LLMWithFeedbackCycle(
 ) {
     private val log = KotlinLogging.logger { this::class.java }
 
-    fun run(onWarningCallback: ((TestSparkError) -> Unit)? = null): TestSparkResult<FeedbackResponse, TestSparkError> {
+    fun run(onWarningCallback: ((TestSparkError) -> Unit)? = null): Result<FeedbackResponse, TestSparkError> {
         var requestsCount = 0
         var generatedTestsArePassing = false
         var nextPromptMessage = initialPromptMessage
@@ -96,7 +96,7 @@ class LLMWithFeedbackCycle(
 
             // Process stopped checking
             if (indicator.isCanceled()) {
-                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled)
+                return Result.Failure(error = LlmError.FeedbackCycleCancelled)
                 break
             }
 
@@ -111,7 +111,7 @@ class LLMWithFeedbackCycle(
 
             // clearing test assembler's collected text on the previous attempts
             testsAssembler.clear()
-            val response: TestSparkResult<TestSuiteGeneratedByLLM, TestSparkError> = requestManager.request(
+            val response: Result<TestSuiteGeneratedByLLM, TestSparkError> = requestManager.request(
                 language = language,
                 prompt = nextPromptMessage,
                 indicator = indicator,
@@ -123,12 +123,12 @@ class LLMWithFeedbackCycle(
 
             // Process stopped checking
             if (indicator.isCanceled()) {
-                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled)
+                return Result.Failure(error = LlmError.FeedbackCycleCancelled)
                 break
             }
 
             when (response) {
-                is TestSparkResult.Success -> {
+                is Result.Success -> {
                     log.info { "Test suite generated successfully: ${response.data}" }
                     // check that there are some test cases generated
                     if (response.data.testCases.isEmpty()) {
@@ -140,7 +140,7 @@ class LLMWithFeedbackCycle(
                     }
                 }
 
-                is TestSparkResult.Failure -> {
+                is Result.Failure -> {
                     when (response.error) {
                         is LlmError.EmptyLlmResponse -> {
                             nextPromptMessage =
@@ -159,7 +159,7 @@ class LLMWithFeedbackCycle(
                                 requestsCount--
                                 continue
                             } else {
-                                return TestSparkResult.Failure(error = LlmError.PromptTooLong)
+                                return Result.Failure(error = LlmError.PromptTooLong)
                             }
                         }
 
@@ -184,7 +184,7 @@ class LLMWithFeedbackCycle(
 
             // Process stopped checking
             if (indicator.isCanceled()) {
-                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled)
+                return Result.Failure(error = LlmError.FeedbackCycleCancelled)
             }
 
             // Save the generated TestSuite into a temp file
@@ -226,7 +226,7 @@ class LLMWithFeedbackCycle(
             }
             if (!(allFilesCreated && File(generatedTestSuitePath).exists())) {
                 // either some test case file or the test suite file was not created
-                return TestSparkResult.Failure(error = LlmError.FailedToSaveTestFiles)
+                return Result.Failure(error = LlmError.FailedToSaveTestFiles)
             }
 
             // Get test cases
@@ -250,7 +250,7 @@ class LLMWithFeedbackCycle(
 
             // Process stopped checking
             if (indicator.isCanceled()) {
-                return TestSparkResult.Failure(error = LlmError.FeedbackCycleCancelled)
+                return Result.Failure(error = LlmError.FeedbackCycleCancelled)
             }
 
             if (!testCasesCompilationResult.allTestCasesCompilable && !isLastIteration(requestsCount)) {
@@ -278,7 +278,7 @@ class LLMWithFeedbackCycle(
             recordReport(report, testCases)
         }
 
-        return TestSparkResult.Success(
+        return Result.Success(
             data = FeedbackResponse(
                 generatedTestSuite = generatedTestSuite!!,
                 compilableTestCases = compilableTestCases,

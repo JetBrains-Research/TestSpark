@@ -8,7 +8,7 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
-import org.jetbrains.research.testspark.core.error.TestSparkResult
+import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
@@ -195,11 +195,11 @@ class LLMProcessManager(
 //        log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
 
         when (feedbackResponse) {
-            is TestSparkResult.Success -> {
+            is Result.Success -> {
                 log.info("Add ${feedbackResponse.data.compilableTestCases.size} compilable test cases into generatedTestsData")
             }
 
-            is TestSparkResult.Failure -> {
+            is Result.Failure -> {
                 project.createNotification(feedbackResponse.error, NotificationType.ERROR)
                 return null
             }
