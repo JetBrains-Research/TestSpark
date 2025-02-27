@@ -87,7 +87,6 @@ class LLMWithFeedbackCycle(
         // collect imports from all responses
         val imports: MutableSet<String> = mutableSetOf()
 
-
         while (!generatedTestsArePassing) {
             requestsCount++
 
@@ -101,7 +100,7 @@ class LLMWithFeedbackCycle(
                 // non-compilable test cases stored in
                 // the generated test suite
                 // TODO: ensure generatedTestSuite is always non-null here
-                if(::generatedTestSuite.isInitialized) { recordReport(report, generatedTestSuite.testCases) }
+                if (::generatedTestSuite.isInitialized) { recordReport(report, generatedTestSuite.testCases) }
                 break
             }
 
