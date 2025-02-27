@@ -39,7 +39,7 @@ class GeminiRequestManager(project: Project) : TestSparkRequestManager(project) 
 
     override fun mapHttpCodeToError(httpCode: Int): TestSparkError = when(httpCode) {
         HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.PromptTooLong
-        else -> HttpError(httpCode = httpCode, module = TestSparkModule.LLM(LlmModuleType.Gemini))
+        else -> HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.Gemini))
     }
 
     override fun assembleResponse(

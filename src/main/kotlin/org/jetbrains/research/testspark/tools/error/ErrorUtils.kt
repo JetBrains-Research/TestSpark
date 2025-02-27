@@ -82,7 +82,7 @@ fun Project.createNotification(
 private fun NotificationGroupManager.getNotificationGroupFor(
     module: TestSparkModule
 ): NotificationGroup = when (module) {
-    is TestSparkModule.LLM -> getNotificationGroup("LLM Execution Error")
+    is TestSparkModule.Llm -> getNotificationGroup("LLM Execution Error")
     is TestSparkModule.EvoSuite -> getNotificationGroup("EvoSuite Execution Error")
     is TestSparkModule.Kex -> getNotificationGroup("Kex Execution Error")
     is TestSparkModule.UI -> getNotificationGroup("UserInterface")
@@ -94,7 +94,7 @@ private fun NotificationGroupManager.getNotificationGroupFor(
 private fun getNotificationTitleFor(
     module: TestSparkModule
 ): String = when (module) {
-    is TestSparkModule.LLM -> PluginMessagesBundle.get("llmErrorTitle")
+    is TestSparkModule.Llm -> PluginMessagesBundle.get("llmErrorTitle")
     is TestSparkModule.EvoSuite -> PluginMessagesBundle.get("evosuiteErrorTitle")
     is TestSparkModule.Kex -> PluginMessagesBundle.get("kexErrorTitle")
     is TestSparkModule.UI -> PluginMessagesBundle.get("generationWindowWarningTitle")

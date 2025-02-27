@@ -43,7 +43,7 @@ class GrazieRequestManager(project: Project) : RequestManager(
 
                         else -> Result.Failure(
                             error = HttpError(
-                                message = this, module = TestSparkModule.LLM(LlmModuleType.Grazie)
+                                message = this, module = TestSparkModule.Llm(LlmModuleType.Grazie)
                             )
                         )
                     }

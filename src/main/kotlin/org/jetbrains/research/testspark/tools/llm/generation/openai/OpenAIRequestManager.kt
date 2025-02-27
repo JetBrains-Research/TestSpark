@@ -43,7 +43,7 @@ class OpenAIRequestManager(project: Project) : TestSparkRequestManager(project) 
 
     override fun mapHttpCodeToError(httpCode: Int): TestSparkError = when(httpCode) {
         HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.PromptTooLong
-        else -> HttpError(httpCode = httpCode, module = TestSparkModule.LLM(LlmModuleType.OpenAi))
+        else -> HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.OpenAi))
     }
 
     override fun assembleResponse(

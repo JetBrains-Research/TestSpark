@@ -36,7 +36,7 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
     )
 
     protected open fun mapHttpCodeToError(httpCode: Int): TestSparkError =
-        HttpError(httpCode = httpCode, module = TestSparkModule.LLM(moduleType))
+        HttpError(httpCode = httpCode, module = TestSparkModule.Llm(moduleType))
 
     override fun send(
         prompt: String,
