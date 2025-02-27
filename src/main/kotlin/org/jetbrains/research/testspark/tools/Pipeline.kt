@@ -125,7 +125,7 @@ class Pipeline(
 
                     testGenerationController.finished()
 
-                    if (testGenerationController.errorMonitor.hasErrorOccurred()) return
+                    if (testGenerationController.errorMonitor.hasErrorOccurred() || uiContext == null) return
 
                     updateEditor(uiContext!!.testGenerationOutput.fileUrl)
 

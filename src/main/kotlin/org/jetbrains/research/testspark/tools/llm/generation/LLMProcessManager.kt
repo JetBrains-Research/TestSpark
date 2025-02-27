@@ -8,8 +8,10 @@ import com.intellij.openapi.roots.ProjectRootManager
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.data.TestSparkModule
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
+import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
 import org.jetbrains.research.testspark.core.generation.llm.LLMWithFeedbackCycle
 import org.jetbrains.research.testspark.core.generation.llm.getImportsCodeFromTestSuiteCode
 import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSuiteCode
@@ -90,7 +92,7 @@ class LLMProcessManager(
     ): UIContext? {
         log.info("LLM test generation begins")
 
-        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
 
         // update build path
         var buildPath = projectContext.projectClassPath!!
@@ -191,7 +193,7 @@ class LLMProcessManager(
         }
 
         // Process stopped checking
-        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
 //        log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
 
         when (feedbackResponse) {
@@ -205,10 +207,10 @@ class LLMProcessManager(
             }
         }
 
-        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) return null
+        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
 
         // Error during the collecting
-        if (errorMonitor.hasErrorOccurred()) return null
+        if (errorMonitor.hasErrorOccurred()) throw ProcessCancelledException(TestSparkModule.Llm())
 
         log.info("Save generated test suite and test cases into the project workspace")
 
