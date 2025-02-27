@@ -11,7 +11,6 @@ sealed class LlmError(
     data object GrazieNotAvailable : LlmError(module = LlmModuleType.Grazie)
     data object EmptyLlmResponse : LlmError()
     data object TestSuiteParsingError : LlmError()
-    data object FeedbackCycleCancelled : LlmError()
     data object NoCompilableTestCasesGenerated : LlmError()
     data object FailedToSaveTestFiles : LlmError()
     data object CompilationError : LlmError()

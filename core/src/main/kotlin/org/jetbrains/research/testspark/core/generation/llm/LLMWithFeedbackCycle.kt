@@ -3,9 +3,11 @@ package org.jetbrains.research.testspark.core.generation.llm
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jetbrains.research.testspark.core.data.Report
 import org.jetbrains.research.testspark.core.data.TestCase
+import org.jetbrains.research.testspark.core.data.TestSparkModule
 import org.jetbrains.research.testspark.core.error.LlmError
-import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.error.TestSparkError
+import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
@@ -95,10 +97,7 @@ class LLMWithFeedbackCycle(
             log.info { "Iteration #$requestsCount of feedback cycle" }
 
             // Process stopped checking
-            if (indicator.isCanceled()) {
-                return Result.Failure(error = LlmError.FeedbackCycleCancelled)
-                break
-            }
+            if (indicator.isCanceled()) throw ProcessCancelledException(module = TestSparkModule.Llm())
 
             if (isLastIteration(requestsCount) && compilableTestCases.isEmpty()) {
                 // record a report with parsable yet potentially
@@ -122,10 +121,7 @@ class LLMWithFeedbackCycle(
             )
 
             // Process stopped checking
-            if (indicator.isCanceled()) {
-                return Result.Failure(error = LlmError.FeedbackCycleCancelled)
-                break
-            }
+            if (indicator.isCanceled()) throw ProcessCancelledException(module = TestSparkModule.Llm())
 
             when (response) {
                 is Result.Success -> {
@@ -183,9 +179,7 @@ class LLMWithFeedbackCycle(
             imports.addAll(generatedTestSuite.imports)
 
             // Process stopped checking
-            if (indicator.isCanceled()) {
-                return Result.Failure(error = LlmError.FeedbackCycleCancelled)
-            }
+            if (indicator.isCanceled()) throw ProcessCancelledException(module = TestSparkModule.Llm())
 
             // Save the generated TestSuite into a temp file
             val generatedTestCasesPaths: MutableList<String> = mutableListOf()
@@ -249,9 +243,7 @@ class LLMWithFeedbackCycle(
             compilableTestCases.addAll(testCasesCompilationResult.compilableTestCases)
 
             // Process stopped checking
-            if (indicator.isCanceled()) {
-                return Result.Failure(error = LlmError.FeedbackCycleCancelled)
-            }
+            if (indicator.isCanceled()) throw ProcessCancelledException(module = TestSparkModule.Llm())
 
             if (!testCasesCompilationResult.allTestCasesCompilable && !isLastIteration(requestsCount)) {
                 log.info { "Non-compilable test suite: \n${testsPresenter.representTestSuite(generatedTestSuite)}" }

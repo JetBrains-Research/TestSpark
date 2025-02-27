@@ -14,7 +14,6 @@ val LlmError.llmErrorDisplayMessage: String?
         is LlmError.CompilationError -> LLMMessagesBundle.get("compilationError")
         is LlmError.EmptyLlmResponse -> LLMMessagesBundle.get("emptyResponse")
         is LlmError.TestSuiteParsingError -> LLMMessagesBundle.get("emptyResponse")
-        is LlmError.FeedbackCycleCancelled -> null
     }
 
 val HttpError.httpErrorDisplayMessage: String?
