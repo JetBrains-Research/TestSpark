@@ -7,6 +7,11 @@ sealed class CompilerException(cause: Throwable? = null) : TestSparkException(
     cause = cause,
 )
 
+/**
+ * Custom exception to indicate that the Kotlin compiler was not found.
+ *
+ * @param message A descriptive message explaining the error.
+ */
 class KotlinCompilerNotFoundException(val kotlinSdkHomeDirectory: String) : CompilerException()
 
 /**

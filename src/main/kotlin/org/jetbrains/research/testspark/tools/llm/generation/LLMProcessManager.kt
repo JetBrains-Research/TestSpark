@@ -194,7 +194,7 @@ class LLMProcessManager(
 
         // Process stopped checking
         if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())
-//        log.info("Feedback cycle finished execution with ${feedbackResponse.executionResult} result code")
+        log.info("Feedback cycle finished execution with $feedbackResponse")
 
         when (feedbackResponse) {
             is Result.Success -> {
