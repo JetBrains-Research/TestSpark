@@ -5,6 +5,8 @@ sealed interface Result<out D, out E: TestSparkError> {
     data class Failure<out E: TestSparkError>(val error: E): Result<Nothing, E>
 
     fun getDataOrNull(): D? = if (this is Success) data else null
+    fun isSuccess(): Boolean = this is Success
+    fun isFailure(): Boolean = this is Failure
 
     fun <R> mapData(transform: (D) -> R): Result<R, E> {
         return when (this) {
