@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.tools.llm
 
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressManager
@@ -16,6 +17,7 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
+import org.jetbrains.research.testspark.tools.error.createNotification
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
@@ -237,7 +239,7 @@ class Llm(override val name: String = "LLM") : Tool {
             pipeline.runTestGeneration(manager, codeType)
         } catch (err: TestSparkException) {
             testGenerationController.finished()
-            LLMErrorManager().errorProcess(err.message!!, project, testGenerationController.errorMonitor)
+            project.createNotification(err, NotificationType.ERROR)
         }
     }
 }
