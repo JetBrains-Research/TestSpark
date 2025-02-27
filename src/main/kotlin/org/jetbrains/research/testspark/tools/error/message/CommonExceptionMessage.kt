@@ -4,6 +4,6 @@ import org.jetbrains.research.testspark.core.exception.CommonException
 import org.jetbrains.research.testspark.core.exception.ProcessCancelledException
 
 val CommonException.commonExceptionMessage: String?
-    get() = when(this) {
+    get() = when (this) {
         is ProcessCancelledException -> null
     }

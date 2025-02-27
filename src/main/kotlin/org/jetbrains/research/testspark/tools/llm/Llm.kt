@@ -18,7 +18,6 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.tools.Pipeline
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.error.createNotification
-import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import org.jetbrains.research.testspark.tools.template.Tool

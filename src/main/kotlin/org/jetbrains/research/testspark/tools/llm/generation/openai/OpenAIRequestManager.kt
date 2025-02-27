@@ -39,7 +39,7 @@ class OpenAIRequestManager(project: Project) : TestSparkRequestManager(project) 
         return GsonBuilder().create().toJson(llmRequestBody)
     }
 
-    override fun mapHttpCodeToError(httpCode: Int): TestSparkError = when(httpCode) {
+    override fun mapHttpCodeToError(httpCode: Int): TestSparkError = when (httpCode) {
         HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.PromptTooLong
         else -> HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.OpenAi))
     }

@@ -23,7 +23,7 @@ class HuggingFaceRequestManager(project: Project) : TestSparkRequestManager(proj
 
     override val url: String
         get() {
-            val baseUrl ="https://api-inference.huggingface.co/models/meta-llama/"
+            val baseUrl = "https://api-inference.huggingface.co/models/meta-llama/"
             return "$baseUrl$llmModel"
         }
 

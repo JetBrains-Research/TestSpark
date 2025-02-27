@@ -1,6 +1,5 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
-import org.jetbrains.research.testspark.core.error.LlmError
 import org.jetbrains.research.testspark.core.error.Result
 import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager

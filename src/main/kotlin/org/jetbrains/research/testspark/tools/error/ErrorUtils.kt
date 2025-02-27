@@ -23,7 +23,8 @@ import org.jetbrains.research.testspark.tools.error.message.kexErrorDisplayMessa
 import org.jetbrains.research.testspark.tools.error.message.llmErrorDisplayMessage
 
 fun Project.createNotification(
-    error: TestSparkError, notificationType: NotificationType
+    error: TestSparkError,
+    notificationType: NotificationType
 ) = createNotification(
     module = error.module,
     message = error.displayMessage ?: PluginMessagesBundle.get("unknownErrorMessage"),
@@ -32,7 +33,8 @@ fun Project.createNotification(
 )
 
 fun Project.createNotification(
-    exception: TestSparkException, notificationType: NotificationType
+    exception: TestSparkException,
+    notificationType: NotificationType
 ) = createNotification(
     module = exception.module,
     message = exception.displayMessage ?: PluginMessagesBundle.get("unknownErrorMessage"),

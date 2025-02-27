@@ -6,8 +6,8 @@ import org.jetbrains.research.testspark.core.data.LlmModuleType
 import org.jetbrains.research.testspark.core.data.TestSparkModule
 import org.jetbrains.research.testspark.core.error.HttpError
 import org.jetbrains.research.testspark.core.error.LlmError
-import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator

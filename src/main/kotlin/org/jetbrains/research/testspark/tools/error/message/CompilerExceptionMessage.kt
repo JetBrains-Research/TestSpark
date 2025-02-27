@@ -9,7 +9,7 @@ import org.jetbrains.research.testspark.core.exception.JavaSDKMissingException
 import org.jetbrains.research.testspark.core.exception.KotlinCompilerNotFoundException
 
 val CompilerException.compilerExceptionMessage: String?
-    get() = when(this) {
+    get() = when (this) {
         is ClassFileNotFoundException ->
             PluginMessagesBundle.get("classFileNotFoundErrorMessage").format(classFilePath, filePath)
         is JavaSDKMissingException -> LLMMessagesBundle.get("javaSdkNotConfigured")
@@ -18,4 +18,3 @@ val CompilerException.compilerExceptionMessage: String?
         is KotlinCompilerNotFoundException ->
             PluginMessagesBundle.get("compilerNotFoundErrorMessage").format("Kotlin", kotlinSdkHomeDirectory)
     }
-

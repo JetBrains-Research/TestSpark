@@ -1,8 +1,8 @@
 package org.jetbrains.research.testspark.core.error
 
-sealed interface Result<out D, out E: TestSparkError> {
-    data class Success<out D>(val data: D): Result<D, Nothing>
-    data class Failure<out E: TestSparkError>(val error: E): Result<Nothing, E>
+sealed interface Result<out D, out E : TestSparkError> {
+    data class Success<out D>(val data: D) : Result<D, Nothing>
+    data class Failure<out E : TestSparkError>(val error: E) : Result<Nothing, E>
 
     fun getDataOrNull(): D? = if (this is Success) data else null
     fun isSuccess(): Boolean = this is Success

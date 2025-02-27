@@ -5,8 +5,8 @@ import org.jetbrains.research.testspark.core.data.ChatAssistantMessage
 import org.jetbrains.research.testspark.core.data.ChatMessage
 import org.jetbrains.research.testspark.core.data.ChatUserMessage
 import org.jetbrains.research.testspark.core.error.LlmError
-import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
