@@ -8,6 +8,9 @@ import com.intellij.util.io.HttpRequests
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.llm.LLMSettingsBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.core.error.LlmError
+import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModificationRequest
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
@@ -271,10 +274,10 @@ object LLMHelper {
         project: Project,
         testGenerationOutput: TestGenerationData,
         errorMonitor: ErrorMonitor,
-    ): TestSuiteGeneratedByLLM? {
+    ): Result<TestSuiteGeneratedByLLM, TestSparkError> {
         // Update Token information
         if (!updateToken(requestManager, project, errorMonitor)) {
-            return null
+            return Result.Failure(error = LlmError.UnsetTokenError)
         }
 
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
@@ -311,7 +314,7 @@ object LLMHelper {
      */
     private fun updateToken(requestManager: RequestManager, project: Project, errorMonitor: ErrorMonitor): Boolean {
         requestManager.token = LlmSettingsArguments(project).getToken()
-        return isCorrectToken(project, errorMonitor)
+        return LlmSettingsArguments(project).isTokenSet()
     }
 
     /**
