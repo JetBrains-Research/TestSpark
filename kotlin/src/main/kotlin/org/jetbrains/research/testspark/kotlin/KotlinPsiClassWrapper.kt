@@ -6,7 +6,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
-import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.concurrency.annotations.RequiresReadLock
 import org.jetbrains.kotlin.analysis.api.analyze
@@ -18,7 +17,9 @@ import org.jetbrains.kotlin.idea.testIntegration.framework.KotlinPsiBasedTestFra
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtNullableType
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
+import org.jetbrains.kotlin.psi.KtUserType
 import org.jetbrains.kotlin.psi.allConstructors
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
@@ -124,10 +125,19 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
         val method = psiMethod as KotlinPsiMethodWrapper
 
         method.psiFunction.valueParameters.forEach { parameter ->
-            val typeReference = parameter.typeReference
-            val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
-            if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
-                interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
+            var typeElement = parameter.typeReference?.typeElement
+            if (typeElement is KtNullableType) {
+                typeElement = typeElement.innerType
+            }
+            if (typeElement is KtUserType) {
+                val psiClass =
+                    typeElement.referenceExpression
+                        ?.references
+                        ?.firstOrNull()
+                        ?.resolve()
+                if (psiClass is KtClass && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
+                    interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
+                }
             }
         }
 
