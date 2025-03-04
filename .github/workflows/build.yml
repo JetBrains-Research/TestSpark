@@ -24,7 +24,7 @@ jobs:
   ktlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: |
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.44.0/ktlint && chmod a+x ktlint && sudo mv ktlint /usr/local/bin/
       - name: run ktlint
@@ -46,7 +46,7 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v4
 
       # Validate wrapper
       - name: Gradle Wrapper Validation
@@ -143,7 +143,7 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v4
 
       # Remove old release drafts by using the curl request for the available releases with draft flag
       - name: Remove Old Release Drafts
