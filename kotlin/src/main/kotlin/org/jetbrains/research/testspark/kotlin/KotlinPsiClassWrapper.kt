@@ -17,9 +17,7 @@ import org.jetbrains.kotlin.idea.testIntegration.framework.KotlinPsiBasedTestFra
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
-import org.jetbrains.kotlin.psi.KtNullableType
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
-import org.jetbrains.kotlin.psi.KtUserType
 import org.jetbrains.kotlin.psi.allConstructors
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.utils.kotlinImportPattern
@@ -118,28 +116,10 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
         }
     }
 
-    override fun getInterestingPsiClassesWithQualifiedNames(
-        psiMethod: PsiMethodWrapper,
-    ): MutableSet<PsiClassWrapper> {
+    override fun getInterestingPsiClassesWithQualifiedNames(psiMethod: PsiMethodWrapper): MutableSet<PsiClassWrapper> {
         val interestingPsiClasses = mutableSetOf<PsiClassWrapper>()
         val method = psiMethod as KotlinPsiMethodWrapper
-
-        method.psiFunction.valueParameters.forEach { parameter ->
-            var typeElement = parameter.typeReference?.typeElement
-            if (typeElement is KtNullableType) {
-                typeElement = typeElement.innerType
-            }
-            if (typeElement is KtUserType) {
-                val psiClass =
-                    typeElement.referenceExpression
-                        ?.references
-                        ?.firstOrNull()
-                        ?.resolve()
-                if (psiClass is KtClass && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
-                    interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
-                }
-            }
-        }
+        interestingPsiClasses.addAll(method.getInterestingPsiClassesWithQualifiedNames())
 
         interestingPsiClasses.add(this)
         return interestingPsiClasses
