@@ -6,7 +6,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
-import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.concurrency.annotations.RequiresReadLock
 import org.jetbrains.kotlin.analysis.api.analyze
@@ -117,19 +116,10 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
         }
     }
 
-    override fun getInterestingPsiClassesWithQualifiedNames(
-        psiMethod: PsiMethodWrapper,
-    ): MutableSet<PsiClassWrapper> {
+    override fun getInterestingPsiClassesWithQualifiedNames(psiMethod: PsiMethodWrapper): MutableSet<PsiClassWrapper> {
         val interestingPsiClasses = mutableSetOf<PsiClassWrapper>()
         val method = psiMethod as KotlinPsiMethodWrapper
-
-        method.psiFunction.valueParameters.forEach { parameter ->
-            val typeReference = parameter.typeReference
-            val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
-            if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
-                interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
-            }
-        }
+        interestingPsiClasses.addAll(method.getInterestingPsiClassesWithQualifiedNames())
 
         interestingPsiClasses.add(this)
         return interestingPsiClasses

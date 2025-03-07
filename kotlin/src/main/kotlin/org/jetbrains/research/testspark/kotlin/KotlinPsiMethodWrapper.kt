@@ -8,9 +8,11 @@ import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFunction
+import org.jetbrains.kotlin.psi.KtNullableType
 import org.jetbrains.kotlin.psi.KtPrimaryConstructor
 import org.jetbrains.kotlin.psi.KtSecondaryConstructor
 import org.jetbrains.kotlin.psi.KtTypeReference
+import org.jetbrains.kotlin.psi.KtUserType
 import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
@@ -84,10 +86,19 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
         val interestingPsiClasses = mutableSetOf<PsiClassWrapper>()
 
         psiFunction.valueParameters.forEach { parameter ->
-            val typeReference = parameter.typeReference
-            val psiClass = PsiTreeUtil.getParentOfType(typeReference, KtClass::class.java)
-            if (psiClass != null && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
-                interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
+            var typeElement = parameter.typeReference?.typeElement
+            if (typeElement is KtNullableType) {
+                typeElement = typeElement.innerType
+            }
+            if (typeElement is KtUserType) {
+                val psiClass =
+                    typeElement.referenceExpression
+                        ?.references
+                        ?.firstOrNull()
+                        ?.resolve()
+                if (psiClass is KtClass && psiClass.fqName != null && !psiClass.fqName.toString().startsWith("kotlin.")) {
+                    interestingPsiClasses.add(KotlinPsiClassWrapper(psiClass))
+                }
             }
         }
 
