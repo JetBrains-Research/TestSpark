@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.tools
 
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -22,7 +23,7 @@ import org.jetbrains.research.testspark.data.UIContext
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
-import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.error.createNotification
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
 
@@ -115,7 +116,7 @@ class Pipeline(
 
                         ijIndicator.stop()
                     } catch (err: TestSparkException) {
-                        LLMErrorManager().errorProcess(err.message!!, project, testGenerationController.errorMonitor)
+                        project.createNotification(err, NotificationType.ERROR)
                     }
                 }
 
@@ -124,7 +125,7 @@ class Pipeline(
 
                     testGenerationController.finished()
 
-                    if (testGenerationController.errorMonitor.hasErrorOccurred()) return
+                    if (testGenerationController.errorMonitor.hasErrorOccurred() || uiContext == null) return
 
                     updateEditor(uiContext!!.testGenerationOutput.fileUrl)
 

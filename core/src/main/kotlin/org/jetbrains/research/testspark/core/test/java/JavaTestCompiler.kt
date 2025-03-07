@@ -31,11 +31,7 @@ class JavaTestCompiler(
             }
             .firstOrNull()
 
-        if (javaCompiler == null) {
-            val msg = "Cannot find Java compiler 'javac' at $javaHomeDirectoryPath"
-            logger.error { msg }
-            throw JavaCompilerNotFoundException("Ensure Java SDK is configured for the project. $msg.")
-        }
+        if (javaCompiler == null) throw JavaCompilerNotFoundException(javaHomeDirectoryPath)
         javac = javaCompiler.absolutePath
     }
 
@@ -63,7 +59,7 @@ class JavaTestCompiler(
 
         val classFilePath = path.replace(".java", ".class")
         if (executionResult.exitCode == 0 && !File(classFilePath).exists()) {
-            throw ClassFileNotFoundException("Expected class file at $classFilePath after the compilation of file $path, but it does not exist.")
+            throw ClassFileNotFoundException(classFilePath = classFilePath, filePath = path)
         }
         return executionResult
     }

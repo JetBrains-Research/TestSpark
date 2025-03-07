@@ -4,44 +4,30 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import com.intellij.openapi.project.Project
 import com.intellij.util.io.HttpRequests
-import com.intellij.util.io.HttpRequests.HttpStatusException
 import org.jetbrains.research.testspark.bundles.llm.LLMDefaultsBundle
-import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.core.data.ChatUserMessage
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
-import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
-import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
-import org.jetbrains.research.testspark.tools.llm.generation.IJRequestManager
-import java.net.HttpURLConnection
+import org.jetbrains.research.testspark.tools.llm.generation.TestSparkRequestManager
+import java.net.URLConnection
 
 /**
  * A class to manage requests sent to large language models hosted on HuggingFace
  */
-class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
-    private val url = "https://api-inference.huggingface.co/models/meta-llama/"
+class HuggingFaceRequestManager(project: Project) : TestSparkRequestManager(project) {
 
     // TODO: The user should be able to change these numbers in the plugin's settings
     private val topProbability = 0.9
     private val temperature = 0.9
 
-    private val llmErrorManager = LLMErrorManager()
-
-    override fun send(
-        prompt: String,
-        indicator: CustomProgressIndicator,
-        testsAssembler: TestsAssembler,
-        errorMonitor: ErrorMonitor,
-    ): SendResult {
-        val httpRequest = HttpRequests.post(
-            url + LlmSettingsArguments(project).getModel(),
-            "application/json",
-        ).tuner {
-            it.setRequestProperty("Authorization", "Bearer $token")
+    override val url: String
+        get() {
+            val baseUrl = "https://api-inference.huggingface.co/models/meta-llama/"
+            return "$baseUrl$llmModel"
         }
 
-        // Add system prompt
+    override fun assembleRequestBodyJson(): String {
         if (chatHistory.size == 1) {
             chatHistory[0] = ChatUserMessage(
                 createInstructionPrompt(
@@ -49,45 +35,27 @@ class HuggingFaceRequestManager(project: Project) : IJRequestManager(project) {
                 ),
             )
         }
+        val llmRequestBody =
+            HuggingFaceRequestBody(chatHistory, Parameters(topProbability, temperature)).toMap()
+        return GsonBuilder().disableHtmlEscaping().create().toJson(llmRequestBody)
+    }
 
-        val llmRequestBody = HuggingFaceRequestBody(chatHistory, Parameters(topProbability, temperature)).toMap()
-        var sendResult = SendResult.OK
-        try {
-            httpRequest.connect {
-                it.write(GsonBuilder().disableHtmlEscaping().create().toJson(llmRequestBody))
-                when (val responseCode = (it.connection as HttpURLConnection).responseCode) {
-                    HttpURLConnection.HTTP_OK -> {
-                        val text = it.reader.readLine()
-                        val generatedTestCases = extractLLMGeneratedCode(
-                            JsonParser.parseString(text).asJsonArray[0]
-                                .asJsonObject["generated_text"].asString.trim(),
-                        )
-                        testsAssembler.consume(generatedTestCases)
-                    }
+    override fun tuneRequest(connection: URLConnection) {
+        connection.setRequestProperty("Authorization", "Bearer $token")
+    }
 
-                    HttpURLConnection.HTTP_INTERNAL_ERROR -> {
-                        llmErrorManager.errorProcess(
-                            LLMMessagesBundle.get("serverProblems"),
-                            project,
-                            errorMonitor,
-                        )
-                        sendResult = SendResult.OTHER
-                    }
-
-                    HttpURLConnection.HTTP_BAD_REQUEST -> {
-                        llmErrorManager.errorProcess(
-                            LLMMessagesBundle.get("hfServerError"),
-                            project,
-                            errorMonitor,
-                        )
-                        sendResult = SendResult.OTHER
-                    }
-                }
-            }
-        } catch (e: HttpStatusException) {
-            log.error { "Error in sending request: ${e.message}" }
-        }
-        return sendResult
+    override fun assembleResponse(
+        httpRequest: HttpRequests.Request,
+        testsAssembler: TestsAssembler,
+        indicator: CustomProgressIndicator,
+        errorMonitor: ErrorMonitor
+    ) {
+        val text = httpRequest.reader.readLine()
+        val generatedTestCases = extractLLMGeneratedCode(
+            JsonParser.parseString(text).asJsonArray[0]
+                .asJsonObject["generated_text"].asString.trim(),
+        )
+        testsAssembler.consume(generatedTestCases)
     }
 
     /**

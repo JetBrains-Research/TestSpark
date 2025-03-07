@@ -1,5 +1,7 @@
 package org.jetbrains.research.testspark.core.generation.llm
 
+import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
@@ -80,7 +82,7 @@ fun executeTestCaseModificationRequest(
     requestManager: RequestManager,
     testsAssembler: TestsAssembler,
     errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
-): TestSuiteGeneratedByLLM? {
+): Result<TestSuiteGeneratedByLLM, TestSparkError> {
     // Update Token information
     val prompt = buildString {
         append("For this test:\n ```\n ")
@@ -102,5 +104,5 @@ fun executeTestCaseModificationRequest(
         errorMonitor,
     )
 
-    return response.testSuite
+    return response
 }

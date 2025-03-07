@@ -253,9 +253,9 @@
                            displayType="BALLOON"/>
         <notificationGroup id="Kex Execution Error"
                            displayType="BALLOON"/>
-        <notificationGroup id="Generation Error"
+        <notificationGroup id="UserInterface"
                            displayType="BALLOON"/>
-        <notificationGroup id="Test case copied"
+        <notificationGroup id="Compiler Error"
                            displayType="BALLOON"/>
 
     </extensions>
