@@ -8,7 +8,6 @@ sealed interface OperationResult<out ValueType, out ErrorType> {
     data class Error<ErrorType>(val error: ErrorType) : OperationResult<Nothing, ErrorType>
 }
 
-
 interface TestSuiteParser {
     /**
      * Extracts test cases from raw text and generates a test suite.
