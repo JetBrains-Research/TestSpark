@@ -2,12 +2,12 @@ package org.jetbrains.research.testspark.core.test
 
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
-data class OperationResult<Payload>(
-    val content: Payload? = null,
-    val error: ErrorDetails? = null,
-)
+sealed interface OperationResult<out ValueType, out ErrorType> {
+    data class Ok<ValueType>(val value: ValueType) : OperationResult<ValueType, Nothing>
 
-data class ErrorDetails(val message: String)
+    data class Error<ErrorType>(val error: ErrorType) : OperationResult<Nothing, ErrorType>
+}
+
 
 interface TestSuiteParser {
     /**

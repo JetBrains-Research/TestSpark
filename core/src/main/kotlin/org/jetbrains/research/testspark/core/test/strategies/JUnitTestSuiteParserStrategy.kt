@@ -1,7 +1,6 @@
 package org.jetbrains.research.testspark.core.test.strategies
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.test.ErrorDetails
 import org.jetbrains.research.testspark.core.test.OperationResult
 import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
@@ -9,7 +8,7 @@ import org.jetbrains.research.testspark.core.test.data.TestLine
 import org.jetbrains.research.testspark.core.test.data.TestLineType
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
-typealias TestCaseParseResult = OperationResult<TestCaseGeneratedByLLM>
+typealias TestCaseParseResult = OperationResult<TestCaseGeneratedByLLM, String>
 
 class JUnitTestSuiteParserStrategy {
     companion object {
@@ -60,12 +59,12 @@ class JUnitTestSuiteParserStrategy {
                     val result: TestCaseParseResult =
                         testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, printTestBodyStrategy)
 
-                    if (result.error != null) {
+                    if (result is OperationResult.Error) {
                         println("WARNING: ${result.error}")
                         return@ca
                     }
 
-                    val currentTest = result.content!!
+                    val currentTest = (result as OperationResult.Ok).value
 
                     // TODO: make logging work
                     // log.info("New test case: $currentTest")
@@ -111,7 +110,7 @@ class JUnitTestSuiteParserStrategy {
                Tests do not return anything so it is safe to consider that void always appears before test case name
              */
             if (!rawTest.contains(testNamePattern)) {
-                return TestCaseParseResult(error = ErrorDetails("The raw Test does not contain $testNamePattern:\n $rawTest"))
+                return OperationResult.Error("The raw Test does not contain $testNamePattern:\n $rawTest")
             }
 
             /**
@@ -195,7 +194,7 @@ class JUnitTestSuiteParserStrategy {
                     printTestBodyStrategy = printTestBodyStrategy,
                 )
 
-            return TestCaseParseResult(content = currentTest)
+            return OperationResult.Ok(currentTest)
         }
     }
 }
