@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class KotlinJUnitTestSuiteParserTest {
-
     @Test
     fun testParseTestSuite() {
-        val text = """
+        val text =
+            """
             ```kotlin
             import org.junit.jupiter.api.Assertions.*
             import org.junit.jupiter.api.Test
@@ -111,7 +111,7 @@ class KotlinJUnitTestSuiteParserTest {
                 }
             }
             ```
-        """.trimIndent()
+            """.trimIndent()
 
         val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
@@ -122,13 +122,14 @@ class KotlinJUnitTestSuiteParserTest {
         assertTrue(testSuite.imports.contains("import org.test.Message as TestMessage"))
         assertTrue(testSuite.imports.contains("import org.mockito.kotlin.mock"))
 
-        val expectedTestCasesNames = listOf(
-            "compileTestCases_AllCompilableTest",
-            "compileTestCases_NoneCompilableTest",
-            "compileTestCases_SomeCompilableTest",
-            "compileTestCases_EmptyTestCasesTest",
-            "compileTestCases_omg",
-        )
+        val expectedTestCasesNames =
+            listOf(
+                "compileTestCases_AllCompilableTest",
+                "compileTestCases_NoneCompilableTest",
+                "compileTestCases_SomeCompilableTest",
+                "compileTestCases_EmptyTestCasesTest",
+                "compileTestCases_omg",
+            )
 
         testSuite.testCases.forEachIndexed { index, testCase ->
             val expected = expectedTestCasesNames[index]
@@ -140,14 +141,15 @@ class KotlinJUnitTestSuiteParserTest {
 
     @Test
     fun testParseEmptyTestSuite() {
-        val text = """
+        val text =
+            """
             ```kotlin
             package com.example.testsuite
             
             class EmptyTestClass {
             }
             ```
-        """.trimIndent()
+            """.trimIndent()
 
         val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
@@ -160,7 +162,8 @@ class KotlinJUnitTestSuiteParserTest {
 
     @Test
     fun testParseSingleTestCase() {
-        val text = """
+        val text =
+            """
             ```kotlin
             import org.junit.jupiter.api.Test
             
@@ -171,7 +174,7 @@ class KotlinJUnitTestSuiteParserTest {
                 }
             }
             ```
-        """.trimIndent()
+            """.trimIndent()
 
         val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
@@ -184,7 +187,8 @@ class KotlinJUnitTestSuiteParserTest {
 
     @Test
     fun testParseTwoTestCases() {
-        val text = """
+        val text =
+            """
             ```kotlin
             import org.junit.jupiter.api.Test
             
@@ -200,7 +204,7 @@ class KotlinJUnitTestSuiteParserTest {
                 }
             }
             ```
-        """.trimIndent()
+            """.trimIndent()
 
         val testBodyPrinter = KotlinTestBodyPrinter()
         val parser =
@@ -214,35 +218,37 @@ class KotlinJUnitTestSuiteParserTest {
 
     @Test
     fun testParseTwoTestCasesWithDifferentPackage() {
-        val code1 = """
-        ```kotlin
-        package org.pkg1
-        
-        import org.junit.jupiter.api.Test
-        
-        class TestCasesClass1 {
-            @Test
-            fun firstTestCase() {
-                // Test case implementation
-            }
-        }  
-        ```
-        """.trimIndent()
+        val code1 =
+            """
+            ```kotlin
+            package org.pkg1
+            
+            import org.junit.jupiter.api.Test
+            
+            class TestCasesClass1 {
+                @Test
+                fun firstTestCase() {
+                    // Test case implementation
+                }
+            }  
+            ```
+            """.trimIndent()
 
-        val code2 = """
-        ```kotlin
-        package org.pkg2
-        
-        import org.junit.jupiter.api.Test
-        
-        class 2TestCasesClass {
-            @Test
-            fun firstTestCase() {
-                // Test case implementation
+        val code2 =
+            """
+            ```kotlin
+            package org.pkg2
+            
+            import org.junit.jupiter.api.Test
+            
+            class 2TestCasesClass {
+                @Test
+                fun firstTestCase() {
+                    // Test case implementation
+                }
             }
-        }
-        ```
-        """.trimIndent()
+            ```
+            """.trimIndent()
 
         val testBodyPrinter = KotlinTestBodyPrinter()
         val parser = KotlinJUnitTestSuiteParser("", JUnitVersion.JUnit5, testBodyPrinter)

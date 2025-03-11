@@ -30,18 +30,20 @@ class TestSamplePanelBuilder(
 ) {
     // init components
     private val currentTestCodes = initialTestCodes.toMutableList()
-    private val languageTextField = LanguageTextField(
-        Language.findLanguageByID(language.languageId),
-        project,
-        initialTestCodes[0],
-        TestCaseDocumentCreator("TestSample"),
-        false,
-    )
-    private var languageTextFieldScrollPane = JBScrollPane(
-        languageTextField,
-        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
-    )
+    private val languageTextField =
+        LanguageTextField(
+            Language.findLanguageByID(language.languageId),
+            project,
+            initialTestCodes[0],
+            TestCaseDocumentCreator("TestSample"),
+            false,
+        )
+    private var languageTextFieldScrollPane =
+        JBScrollPane(
+            languageTextField,
+            ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
+        )
     private var testSamplesSelector = ComboBox(arrayOf(""))
     private val resetButton = IconButtonCreator.getButton(TestSparkIcons.reset, PluginLabelsBundle.get("resetTip"))
     private val removeButton = IconButtonCreator.getButton(TestSparkIcons.remove, PluginLabelsBundle.get("removeTip"))
@@ -56,33 +58,36 @@ class TestSamplePanelBuilder(
      * Add listeners.
      */
     private fun addListeners() {
-        languageTextField.document.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                languageTextField.editor?.markupModel?.removeAllHighlighters()
+        languageTextField.document.addDocumentListener(
+            object : DocumentListener {
+                override fun documentChanged(event: DocumentEvent) {
+                    languageTextField.editor?.markupModel?.removeAllHighlighters()
 
-                for (index in testNames.indices) {
-                    if (testNames[index] == testSamplesSelector.selectedItem) {
-                        currentTestCodes[index] = languageTextField.text
+                    for (index in testNames.indices) {
+                        if (testNames[index] == testSamplesSelector.selectedItem) {
+                            currentTestCodes[index] = languageTextField.text
 
-                        val modifiedLineIndexes = ModifiedLinesGetter.getLines(
-                            initialTestCodes[index].split("\n"),
-                            currentTestCodes[index].split("\n"),
-                        )
+                            val modifiedLineIndexes =
+                                ModifiedLinesGetter.getLines(
+                                    initialTestCodes[index].split("\n"),
+                                    currentTestCodes[index].split("\n"),
+                                )
 
-                        for (line in modifiedLineIndexes) {
-                            languageTextField.editor!!.markupModel.addLineHighlighter(
-                                DiffColors.DIFF_MODIFIED,
-                                line,
-                                HighlighterLayer.FIRST,
-                            )
+                            for (line in modifiedLineIndexes) {
+                                languageTextField.editor!!.markupModel.addLineHighlighter(
+                                    DiffColors.DIFF_MODIFIED,
+                                    line,
+                                    HighlighterLayer.FIRST,
+                                )
+                            }
+
+                            resetButton.isEnabled = initialTestCodes[index] != currentTestCodes[index]
                         }
-
-                        resetButton.isEnabled = initialTestCodes[index] != currentTestCodes[index]
                     }
+                    middlePanel.revalidate()
                 }
-                middlePanel.revalidate()
-            }
-        })
+            },
+        )
 
         testSamplesSelector.addActionListener {
             for (index in testNames.indices) {
@@ -126,9 +131,7 @@ class TestSamplePanelBuilder(
     /**
      * @return languageTextFieldScrollPane
      */
-    fun getCodeScrollPanel(): JBScrollPane {
-        return languageTextFieldScrollPane
-    }
+    fun getCodeScrollPanel(): JBScrollPane = languageTextFieldScrollPane
 
     /**
      * Enables and disables the components in the panel in case of type button selection.

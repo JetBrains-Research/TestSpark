@@ -25,20 +25,23 @@ class TestGenerationController {
      * Method to show notification that test generation is already running.
      */
     private fun showGenerationRunningNotification(project: Project) {
-        val terminateButton: AnAction = object : AnAction("Terminate") {
-            override fun actionPerformed(e: AnActionEvent) {
-                indicator?.stop()
-                errorMonitor.notifyErrorOccurrence()
+        val terminateButton: AnAction =
+            object : AnAction("Terminate") {
+                override fun actionPerformed(e: AnActionEvent) {
+                    indicator?.stop()
+                    errorMonitor.notifyErrorOccurrence()
+                }
             }
-        }
 
-        val notification = NotificationGroupManager.getInstance()
-            .getNotificationGroup("Execution Error")
-            .createNotification(
-                PluginMessagesBundle.get("alreadyRunningNotificationTitle"),
-                PluginMessagesBundle.get("alreadyRunningTextNotificationText"),
-                NotificationType.WARNING,
-            )
+        val notification =
+            NotificationGroupManager
+                .getInstance()
+                .getNotificationGroup("Execution Error")
+                .createNotification(
+                    PluginMessagesBundle.get("alreadyRunningNotificationTitle"),
+                    PluginMessagesBundle.get("alreadyRunningTextNotificationText"),
+                    NotificationType.WARNING,
+                )
 
         notification.addAction(terminateButton)
 

@@ -6,7 +6,10 @@ object GenerateTestsTabHelper {
      *
      * @param testCaseName the name of the test
      */
-    fun removeTestCase(testCaseName: String, generatedTestsTabData: GeneratedTestsTabData) {
+    fun removeTestCase(
+        testCaseName: String,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
         // Update the number of selected test cases if necessary
         if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
             generatedTestsTabData.testsSelected--

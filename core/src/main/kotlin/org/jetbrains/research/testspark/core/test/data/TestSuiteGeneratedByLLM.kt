@@ -22,9 +22,7 @@ data class TestSuiteGeneratedByLLM(
      *
      * @return `true` if the testCases collection is empty, `false` otherwise.
      */
-    fun isEmpty(): Boolean {
-        return testCases.isEmpty()
-    }
+    fun isEmpty(): Boolean = testCases.isEmpty()
 
     /**
      * Sets the test cases for this object.

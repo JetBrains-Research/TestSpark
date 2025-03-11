@@ -6,7 +6,6 @@ import org.jetbrains.research.testspark.core.test.data.CodeType
  * Data about test objects that require test generators.
  */
 class FragmentToTestData {
-
     // Variable which contains all code elements for which it is possible to request test generation.
     var type: CodeType? = null
 

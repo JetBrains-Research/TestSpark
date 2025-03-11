@@ -5,7 +5,10 @@ package org.jetbrains.research.testspark.tools.llm.generation.openai
  * <br/>
  * Use this class as a carrier of messages that should be sent to OpenAI API.
  */
-data class OpenAIChatMessage(val role: String, val content: String) {
+data class OpenAIChatMessage(
+    val role: String,
+    val content: String,
+) {
     private companion object {
         /**
          * The API strictly defines the set of roles.
@@ -18,7 +21,13 @@ data class OpenAIChatMessage(val role: String, val content: String) {
 
     init {
         if (!supportedRoles.contains(role)) {
-            throw IllegalArgumentException("'$role' is not supported ${OpenAIChatMessage::class}. Available roles are: ${(supportedRoles.joinToString(", ") { "'$it'" })}")
+            throw IllegalArgumentException(
+                "'$role' is not supported ${OpenAIChatMessage::class}. Available roles are: ${(
+                    supportedRoles.joinToString(
+                        ", ",
+                    ) { "'$it'" }
+                )}",
+            )
         }
     }
 }

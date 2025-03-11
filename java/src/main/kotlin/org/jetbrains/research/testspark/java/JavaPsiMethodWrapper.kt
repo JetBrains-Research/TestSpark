@@ -11,7 +11,9 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import java.util.stream.Collectors
 
-class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper {
+class JavaPsiMethodWrapper(
+    private val psiMethod: PsiMethod,
+) : PsiMethodWrapper {
     override val name: String get() = psiMethod.name
 
     override val text: String? = psiMethod.text
@@ -23,7 +25,8 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
     override val methodDescriptor: String
         get() {
             val parameterTypes =
-                psiMethod.getSignature(PsiSubstitutor.EMPTY)
+                psiMethod
+                    .getSignature(PsiSubstitutor.EMPTY)
                     .parameterTypes
                     .stream()
                     .map { i -> generateFieldType(i) }
@@ -133,7 +136,10 @@ class JavaPsiMethodWrapper(private val psiMethod: PsiMethod) : PsiMethodWrapper 
          */
         fun buildSignature(method: PsiMethod): String {
             val bodyStart = method.body?.startOffsetInParent ?: method.textLength
-            return method.text.substring(0, bodyStart).replace("\\n", "").trim()
+            return method.text
+                .substring(0, bodyStart)
+                .replace("\\n", "")
+                .trim()
         }
     }
 }

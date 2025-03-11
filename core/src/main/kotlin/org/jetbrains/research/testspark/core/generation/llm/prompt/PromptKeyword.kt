@@ -1,6 +1,9 @@
 package org.jetbrains.research.testspark.core.generation.llm.prompt
 
-enum class PromptKeyword(val description: String, val mandatory: Boolean) {
+enum class PromptKeyword(
+    val description: String,
+    val mandatory: Boolean,
+) {
     NAME("The name of the code under test (Class name, method name, line number)", true),
     CODE("The code under test (Class, method, or line)", true),
     LANGUAGE("Programming language of the project under test (only Java supported at this point)", true),

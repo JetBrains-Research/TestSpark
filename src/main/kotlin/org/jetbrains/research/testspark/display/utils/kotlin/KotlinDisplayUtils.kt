@@ -31,32 +31,42 @@ import java.util.Locale
 import javax.swing.JOptionPane
 
 class KotlinDisplayUtils : DisplayUtils {
-    override fun applyTests(project: Project, uiContext: UIContext?, testCaseComponents: List<String>): Boolean {
+    override fun applyTests(
+        project: Project,
+        uiContext: UIContext?,
+        testCaseComponents: List<String>,
+    ): Boolean {
         val descriptor = FileChooserDescriptor(true, true, false, false, false, false)
 
         // Apply filter with folders and java files with main class
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
-                file.isDirectory || (
-                    file.extension?.lowercase(Locale.getDefault()) == "kotlin" && (
-                        PsiManager.getInstance(project).findFile(file!!) as KtFile
-                        ).classes.stream().map { it.name }
-                        .toArray()
-                        .contains(
+                file.isDirectory ||
+                    (
+                        file.extension?.lowercase(Locale.getDefault()) == "kotlin" &&
                             (
-                                PsiManager.getInstance(project)
-                                    .findFile(file) as PsiJavaFile
-                                ).name.removeSuffix(".kt"),
-                        )
+                                PsiManager.getInstance(project).findFile(file!!) as KtFile
+                            ).classes
+                                .stream()
+                                .map { it.name }
+                                .toArray()
+                                .contains(
+                                    (
+                                        PsiManager
+                                            .getInstance(project)
+                                            .findFile(file) as PsiJavaFile
+                                    ).name.removeSuffix(".kt"),
+                                )
                     )
             }
         }
 
-        val fileChooser = FileChooser.chooseFiles(
-            descriptor,
-            project,
-            LocalFileSystem.getInstance().findFileByPath(project.basePath!!),
-        )
+        val fileChooser =
+            FileChooser.chooseFiles(
+                descriptor,
+                project,
+                LocalFileSystem.getInstance().findFileByPath(project.basePath!!),
+            )
 
         /**
          * Cancel button pressed
@@ -185,14 +195,16 @@ class KotlinDisplayUtils : DisplayUtils {
         // insert tests to a code
         testCaseComponents.reversed().forEach {
             val testMethodCode =
-                KotlinTestAnalyzer.extractFirstTestMethodCode(
-                    KotlinTestGenerator.formatCode(
-                        project,
-                        it.replace("\r\n", "\n")
-                            .replace("verifyException(", "// verifyException("),
-                        uiContext!!.testGenerationOutput,
-                    ),
-                )
+                KotlinTestAnalyzer
+                    .extractFirstTestMethodCode(
+                        KotlinTestGenerator.formatCode(
+                            project,
+                            it
+                                .replace("\r\n", "\n")
+                                .replace("verifyException(", "// verifyException("),
+                            uiContext!!.testGenerationOutput,
+                        ),
+                    )
                     // Fix Windows line separators
                     .replace("\r\n", "\n")
 
@@ -212,9 +224,10 @@ class KotlinDisplayUtils : DisplayUtils {
         val importsString = uiContext.testGenerationOutput.importsCode.joinToString("\n") + "\n\n"
 
         // Find the insertion offset
-        val insertionOffset = outputFile.importList?.startOffsetInParent
-            ?: outputFile.packageDirective?.pureEndOffset
-            ?: 0
+        val insertionOffset =
+            outputFile.importList?.startOffsetInParent
+                ?: outputFile.packageDirective?.pureEndOffset
+                ?: 0
 
         // Insert the imports into the document
         PsiDocumentManager.getInstance(project).getDocument(outputFile)?.let { document ->

@@ -11,7 +11,6 @@ import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.tools.template.error.ErrorManager
 
 class KexErrorManager : ErrorManager {
-
     private var output = StringBuilder()
 
     fun addLineToKexOutput(line: String) {
@@ -19,30 +18,38 @@ class KexErrorManager : ErrorManager {
     }
 
     private val log = Logger.getInstance(this::class.java)
-    override fun errorProcess(message: String, project: Project, errorMonitor: ErrorMonitor) {
+
+    override fun errorProcess(
+        message: String,
+        project: Project,
+        errorMonitor: ErrorMonitor,
+    ) {
         if (errorMonitor.notifyErrorOccurrence()) {
             log.warn("Error in Test Generation: $message")
-            NotificationGroupManager.getInstance()
+            NotificationGroupManager
+                .getInstance()
                 .getNotificationGroup("LLM Execution Error")
                 .createNotification(
                     PluginMessagesBundle.get("kexErrorTitle"),
                     message,
                     NotificationType.ERROR,
-                )
-                .notify(project)
+                ).notify(project)
         }
     }
 
-    override fun warningProcess(message: String, project: Project) {
+    override fun warningProcess(
+        message: String,
+        project: Project,
+    ) {
         log.warn("Error in Test Generation: $message")
-        NotificationGroupManager.getInstance()
+        NotificationGroupManager
+            .getInstance()
             .getNotificationGroup("Kex Execution Error")
             .createNotification(
                 PluginMessagesBundle.get("kexWarningTitle"),
                 message,
                 NotificationType.WARNING,
-            )
-            .notify(project)
+            ).notify(project)
     }
 
     fun isProcessCorrect(

@@ -21,8 +21,9 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
-class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
-
+class KotlinPsiHelper(
+    private val psiFile: PsiFile,
+) : PsiHelper {
     override val language: SupportedLanguage get() = SupportedLanguage.Kotlin
 
     /**
@@ -166,7 +167,10 @@ class KotlinPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     override fun getCurrentListOfCodeTypes(e: AnActionEvent): List<CodeTypeDisplayName> {
         val result: ArrayList<CodeTypeDisplayName> = arrayListOf()
         val caret: Caret =
-            e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return result
+            e.dataContext
+                .getData(CommonDataKeys.CARET)
+                ?.caretModel
+                ?.primaryCaret ?: return result
 
         val ktClass = getSurroundingClass(caret.offset)
         val ktFunction = getSurroundingMethod(caret.offset)

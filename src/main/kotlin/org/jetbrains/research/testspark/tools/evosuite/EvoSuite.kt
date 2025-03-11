@@ -24,7 +24,9 @@ import java.io.File
  *
  * @param name The name of the EvoSuite tool.
  */
-class EvoSuite(override val name: String = "EvoSuite") : Tool {
+class EvoSuite(
+    override val name: String = "EvoSuite",
+) : Tool {
     private val log = Logger.getInstance(this::class.java)
 
     /**
@@ -34,7 +36,12 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
      * @return The EvoSuiteProcessManager instance created for the given project.
      */
     private fun getEvoSuiteProcessManager(project: Project): EvoSuiteProcessManager {
-        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        val projectClassPath: String =
+            ProjectRootManager
+                .getInstance(project)
+                .contentRoots
+                .first()
+                .path
         val settingsProjectState = project.service<PluginSettingsService>().state
         val buildPath = "$projectClassPath${File.separatorChar}${settingsProjectState.buildPath}"
         return EvoSuiteProcessManager(project, buildPath)
@@ -176,7 +183,12 @@ class EvoSuite(override val name: String = "EvoSuite") : Tool {
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ): Pipeline {
-        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        val projectClassPath: String =
+            ProjectRootManager
+                .getInstance(project)
+                .contentRoots
+                .first()
+                .path
 
         val settingsProjectState = project.service<PluginSettingsService>().state
         val packageName = "$projectClassPath/${settingsProjectState.buildPath}"

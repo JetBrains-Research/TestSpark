@@ -61,7 +61,12 @@ class Pipeline(
         val testResultName = "test_gen_result_$id"
 
         ApplicationManager.getApplication().runWriteAction {
-            projectContext.projectClassPath = ProjectRootManager.getInstance(project).contentRoots.first().path
+            projectContext.projectClassPath =
+                ProjectRootManager
+                    .getInstance(project)
+                    .contentRoots
+                    .first()
+                    .path
             projectContext.fileUrlAsString = fileUrl
             cutPsiClass?.let { projectContext.classFQN = it.qualifiedName }
             projectContext.cutModule = psiHelper.getModuleFromPsiFile()
@@ -78,7 +83,10 @@ class Pipeline(
     /**
      * Builds the project and launches generation on a separate thread.
      */
-    fun runTestGeneration(processManager: ProcessManager, codeType: FragmentToTestData) {
+    fun runTestGeneration(
+        processManager: ProcessManager,
+        codeType: FragmentToTestData,
+    ) {
         testGenerationController.errorMonitor.clear()
         testSparkDisplayManager.clear()
         testsExecutionResultManager.clear()
@@ -89,73 +97,81 @@ class Pipeline(
 
         var uiContext: UIContext? = null
 
-        ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("testGenerationMessage")) {
-                override fun run(indicator: ProgressIndicator) {
-                    try {
-                        val ijIndicator = IJProgressIndicator(indicator)
-                        testGenerationController.indicator = ijIndicator
+        ProgressManager
+            .getInstance()
+            .run(
+                object : Task.Backgroundable(project, PluginMessagesBundle.get("testGenerationMessage")) {
+                    override fun run(indicator: ProgressIndicator) {
+                        try {
+                            val ijIndicator = IJProgressIndicator(indicator)
+                            testGenerationController.indicator = ijIndicator
 
-                        if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
-
-                        if (projectBuilder.runBuild(ijIndicator)) {
                             if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
 
-                            uiContext = processManager.runTestGenerator(
-                                ijIndicator,
-                                codeType,
-                                packageName,
-                                projectContext,
-                                generatedTestsData,
-                                testGenerationController.errorMonitor,
+                            if (projectBuilder.runBuild(ijIndicator)) {
+                                if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
+
+                                uiContext =
+                                    processManager.runTestGenerator(
+                                        ijIndicator,
+                                        codeType,
+                                        packageName,
+                                        projectContext,
+                                        generatedTestsData,
+                                        testGenerationController.errorMonitor,
+                                        testsExecutionResultManager,
+                                    )
+                            }
+
+                            if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
+
+                            ijIndicator.stop()
+                        } catch (err: TestSparkException) {
+                            project.createNotification(err, NotificationType.ERROR)
+                        }
+                    }
+
+                    override fun onFinished() {
+                        super.onFinished()
+
+                        testGenerationController.finished()
+
+                        if (testGenerationController.errorMonitor.hasErrorOccurred() || uiContext == null) return
+
+                        updateEditor(uiContext!!.testGenerationOutput.fileUrl)
+
+                        if (editor != null) {
+                            val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
+                            testSparkDisplayManager.display(
+                                report,
+                                editor!!,
+                                uiContext!!,
+                                psiHelper.language,
+                                project,
                                 testsExecutionResultManager,
+                                generationTool,
                             )
                         }
-
-                        if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
-
-                        ijIndicator.stop()
-                    } catch (err: TestSparkException) {
-                        project.createNotification(err, NotificationType.ERROR)
                     }
-                }
 
-                override fun onFinished() {
-                    super.onFinished()
-
-                    testGenerationController.finished()
-
-                    if (testGenerationController.errorMonitor.hasErrorOccurred() || uiContext == null) return
-
-                    updateEditor(uiContext!!.testGenerationOutput.fileUrl)
-
-                    if (editor != null) {
-                        val report = uiContext!!.testGenerationOutput.testGenerationResultList[0]!!
-                        testSparkDisplayManager.display(
-                            report,
-                            editor!!,
-                            uiContext!!,
-                            psiHelper.language,
-                            project,
-                            testsExecutionResultManager,
-                            generationTool,
-                        )
-                    }
-                }
-
-                private fun updateEditor(fileUrl: String) {
-                    val documentManager = FileDocumentManager.getInstance()
-                    // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
-                    FileEditorManager.getInstance(project).selectedEditors.map { it as TextEditor }.map { it.editor }
-                        .map {
-                            val currentFile = documentManager.getFile(it.document)
-                            if (currentFile != null) {
-                                if (currentFile.presentableUrl == fileUrl) {
-                                    editor = it
+                    private fun updateEditor(fileUrl: String) {
+                        val documentManager = FileDocumentManager.getInstance()
+                        // https://intellij-support.jetbrains.com/hc/en-us/community/posts/360004480599/comments/360000703299
+                        FileEditorManager
+                            .getInstance(project)
+                            .selectedEditors
+                            .map { it as TextEditor }
+                            .map { it.editor }
+                            .map {
+                                val currentFile = documentManager.getFile(it.document)
+                                if (currentFile != null) {
+                                    if (currentFile.presentableUrl == fileUrl) {
+                                        editor = it
+                                    }
                                 }
                             }
-                        }
-                }
-            })
+                    }
+                },
+            )
     }
 }

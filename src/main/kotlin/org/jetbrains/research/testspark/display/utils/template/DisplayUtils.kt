@@ -15,7 +15,11 @@ interface DisplayUtils {
      *
      * @returns true, if tests applying is successful, otherwise false
      */
-    fun applyTests(project: Project, uiContext: UIContext?, testCaseComponents: List<String>): Boolean
+    fun applyTests(
+        project: Project,
+        uiContext: UIContext?,
+        testCaseComponents: List<String>,
+    ): Boolean
 
     /**
      * Appends specified tests to a class within the given project.

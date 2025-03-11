@@ -26,9 +26,11 @@ class JUnitTestSuiteParserStrategy {
                 val rawCode = if (rawText.contains("```")) rawText.split("```")[1] else rawText
 
                 // save imports
-                val imports = importPattern.findAll(rawCode)
-                    .map { it.groupValues[0] }
-                    .toMutableSet()
+                val imports =
+                    importPattern
+                        .findAll(rawCode)
+                        .map { it.groupValues[0] }
+                        .toMutableSet()
 
                 // save RunWith
                 val runWith: String = junitVersion.runWithAnnotationMeta.extract(rawCode) ?: ""
@@ -36,12 +38,13 @@ class JUnitTestSuiteParserStrategy {
                 val testSet: MutableList<String> = rawCode.split("@Test").toMutableList()
 
                 // save annotations and pre-set methods
-                val otherInfo: String = run {
-                    val otherInfoList = testSet.removeAt(0).split("{").toMutableList()
-                    otherInfoList.removeFirst()
-                    val otherInfo = otherInfoList.joinToString("{").trimEnd() + "\n\n"
-                    otherInfo.ifBlank { "" }
-                }
+                val otherInfo: String =
+                    run {
+                        val otherInfoList = testSet.removeAt(0).split("{").toMutableList()
+                        otherInfoList.removeFirst()
+                        val otherInfo = otherInfoList.joinToString("{").trimEnd() + "\n\n"
+                        otherInfo.ifBlank { "" }
+                    }
 
                 // Save the main test cases
                 val testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf()
@@ -67,13 +70,14 @@ class JUnitTestSuiteParserStrategy {
                     testCases.add(currentTest)
                 }
 
-                val testSuite = TestSuiteGeneratedByLLM(
-                    imports = imports,
-                    packageName = packageName,
-                    runWith = runWith,
-                    otherInfo = otherInfo,
-                    testCases = testCases,
-                )
+                val testSuite =
+                    TestSuiteGeneratedByLLM(
+                        imports = imports,
+                        packageName = packageName,
+                        runWith = runWith,
+                        otherInfo = otherInfo,
+                        testCases = testCases,
+                    )
 
                 return testSuite
             } catch (e: Exception) {
@@ -99,8 +103,9 @@ class JUnitTestSuiteParserStrategy {
             }
 
             // Get unexpected exceptions
+
             /* Each test case should follow fun <testcase name> {...}
-                Tests do not return anything so it is safe to consider that void always appears before test case name
+               Tests do not return anything so it is safe to consider that void always appears before test case name
              */
             if (!rawTest.contains(testNamePattern)) {
                 return TestCaseParseResult(
@@ -126,23 +131,30 @@ class JUnitTestSuiteParserStrategy {
             /**
              * Optional [throws <exception>] part is extracted from the test definition epilogue.
              */
-            val interestingPartOfSignature = testCaseEpilogue
-                .split("{")[0]
-                .split("()")[1]
-                .trim()
+            val interestingPartOfSignature =
+                testCaseEpilogue
+                    .split("{")[0]
+                    .split("()")[1]
+                    .trim()
 
             if (interestingPartOfSignature.contains("throws")) {
                 throwsException = interestingPartOfSignature.split("throws")[1].trim()
             }
 
             // Get test name
-            val testName: String = testCaseEpilogue
-                .split("()")[0]
-                .trim()
+            val testName: String =
+                testCaseEpilogue
+                    .split("()")[0]
+                    .trim()
 
             // Get test body and remove opening bracket
-            var testBody = rawTest.split("{").toMutableList().apply { removeFirst() }
-                .joinToString("{").trim()
+            var testBody =
+                rawTest
+                    .split("{")
+                    .toMutableList()
+                    .apply { removeFirst() }
+                    .joinToString("{")
+                    .trim()
 
             // remove closing bracket
             val tempList = testBody.split("}").toMutableList()
@@ -164,23 +176,25 @@ class JUnitTestSuiteParserStrategy {
             rawLines.forEach { rawLine ->
                 val line = rawLine.trim()
 
-                val type: TestLineType = when {
-                    line.startsWith("//") -> TestLineType.COMMENT
-                    line.isBlank() -> TestLineType.BREAK
-                    line.lowercase().startsWith("assert") -> TestLineType.ASSERTION
-                    else -> TestLineType.CODE
-                }
+                val type: TestLineType =
+                    when {
+                        line.startsWith("//") -> TestLineType.COMMENT
+                        line.isBlank() -> TestLineType.BREAK
+                        line.lowercase().startsWith("assert") -> TestLineType.ASSERTION
+                        else -> TestLineType.CODE
+                    }
 
                 testLines.add(TestLine(type, line))
             }
 
-            val currentTest = TestCaseGeneratedByLLM(
-                name = testName,
-                expectedException = expectedException,
-                throwsException = throwsException,
-                lines = testLines,
-                printTestBodyStrategy = printTestBodyStrategy,
-            )
+            val currentTest =
+                TestCaseGeneratedByLLM(
+                    name = testName,
+                    expectedException = expectedException,
+                    throwsException = throwsException,
+                    lines = testLines,
+                    printTestBodyStrategy = printTestBodyStrategy,
+                )
 
             return TestCaseParseResult(
                 testCase = currentTest,

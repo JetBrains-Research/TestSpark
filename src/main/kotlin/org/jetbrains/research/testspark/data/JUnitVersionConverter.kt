@@ -6,11 +6,7 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.research.testspark.core.data.JUnitVersion
 
 class JUnitVersionConverter : Converter<JUnitVersion>() {
-    override fun fromString(value: String): JUnitVersion {
-        return Json.decodeFromString(value)
-    }
+    override fun fromString(value: String): JUnitVersion = Json.decodeFromString(value)
 
-    override fun toString(value: JUnitVersion): String {
-        return Json.encodeToString(value)
-    }
+    override fun toString(value: JUnitVersion): String = Json.encodeToString(value)
 }

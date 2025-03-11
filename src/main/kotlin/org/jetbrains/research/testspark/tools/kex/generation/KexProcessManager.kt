@@ -40,7 +40,6 @@ class KexProcessManager(
     private val project: Project,
     private val projectPath: String,
 ) : ProcessManager {
-
     private val kexErrorManager: KexErrorManager = KexErrorManager()
     private val log = Logger.getInstance(this::class.java)
 
@@ -52,14 +51,17 @@ class KexProcessManager(
         // use default cache location if not explicitly provided
         if (kexHome.isBlank()) {
             val userHome = System.getProperty("user.home")
-            val kexHomeFile = when {
-                // On Windows, use the LOCALAPPDATA environment variable
-                // TODO windows stuff is untested
-                System.getProperty("os.name").startsWith("Windows") -> System.getenv("LOCALAPPDATA")
-                    ?.let { File(it, ToolUtils.osJoin("JetBrains", "TestSpark", "kex")) }
-                // On Unix-like systems, use the ~/.cache directory
-                else -> File(userHome, ToolUtils.osJoin(".cache", "JetBrains", "TestSpark", "kex"))
-            }
+            val kexHomeFile =
+                when {
+                    // On Windows, use the LOCALAPPDATA environment variable
+                    // TODO windows stuff is untested
+                    System.getProperty("os.name").startsWith("Windows") ->
+                        System
+                            .getenv("LOCALAPPDATA")
+                            ?.let { File(it, ToolUtils.osJoin("JetBrains", "TestSpark", "kex")) }
+                    // On Unix-like systems, use the ~/.cache directory
+                    else -> File(userHome, ToolUtils.osJoin(".cache", "JetBrains", "TestSpark", "kex"))
+                }
             // Ensure the cache directory exists
             if (kexHomeFile != null && !kexHomeFile.exists()) {
                 kexHomeFile.mkdirs()
@@ -67,6 +69,7 @@ class KexProcessManager(
             kexHome = kexHomeFile.toString()
         }
     }
+
     private val kexSettingsState: KexSettingsState
         get() = project.getService(KexSettingsService::class.java).state
     private var kexExecPath =
@@ -92,11 +95,12 @@ class KexProcessManager(
             indicator.setText(PluginMessagesBundle.get("searchMessage"))
 
             // set target argument for kex subprocess. ensure not Line codetype which is unsupported
-            val target: String = when (codeType.type!!) {
-                CodeType.CLASS -> classFQN
-                CodeType.METHOD -> "$classFQN::${codeType.objectDescription}"
-                CodeType.LINE -> return null // This is impossible since this combination is disallowed in UI (see TestSparkAction.kt)
-            }
+            val target: String =
+                when (codeType.type!!) {
+                    CodeType.CLASS -> classFQN
+                    CodeType.METHOD -> "$classFQN::${codeType.objectDescription}"
+                    CodeType.LINE -> return null // This is impossible since this combination is disallowed in UI (see TestSparkAction.kt)
+                }
 
             // Disallow old java versions
             val version = ToolUtils.getJavaVersion(javaExecPath)
@@ -112,16 +116,17 @@ class KexProcessManager(
                 return null
             }
 
-            val cmd = KexSettingsArguments(
-                javaExecPath,
-                version,
-                projectContext.cutModule!!,
-                target,
-                resultName,
-                kexSettingsState,
-                kexExecPath,
-                kexHome,
-            ).buildCommand()
+            val cmd =
+                KexSettingsArguments(
+                    javaExecPath,
+                    version,
+                    projectContext.cutModule!!,
+                    target,
+                    resultName,
+                    kexSettingsState,
+                    kexExecPath,
+                    kexHome,
+                ).buildCommand()
 
             val cmdString = cmd.fold(String()) { acc, e -> acc.plus(e).plus(" ") }
             log.info("Starting Kex with arguments: $cmdString")
@@ -173,26 +178,31 @@ class KexProcessManager(
             ProcessTerminatedListener.attach(handler)
 
             // rerouting stdout and stderr
-            handler.addProcessListener(object : ProcessAdapter() {
-                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (ToolUtils.isProcessStopped(errorMonitor, indicator)) {
-                        handler.destroyProcess()
-                        return
+            handler.addProcessListener(
+                object : ProcessAdapter() {
+                    override fun onTextAvailable(
+                        event: ProcessEvent,
+                        outputType: Key<*>,
+                    ) {
+                        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) {
+                            handler.destroyProcess()
+                            return
+                        }
+                        kexErrorManager.addLineToKexOutput(event.text)
+                        if (outputType.toString() == "stdout") {
+                            output.appendStdout(event.text)
+                        } else if (outputType.toString() == "stderr") {
+                            output.appendStderr(event.text)
+                        }
                     }
-                    kexErrorManager.addLineToKexOutput(event.text)
-                    if (outputType.toString() == "stdout") {
-                        output.appendStdout(event.text)
-                    } else if (outputType.toString() == "stderr") {
-                        output.appendStderr(event.text)
-                    }
-                }
 
-                override fun processTerminated(event: ProcessEvent) {
-                    log.info("Process terminated with exit code: ${event.exitCode}")
-                    log.info("Output from Kex stdout:\n ${output.stdout}")
-                    log.info("Output from Kex stderr:\n ${output.stderr}")
-                }
-            })
+                    override fun processTerminated(event: ProcessEvent) {
+                        log.info("Process terminated with exit code: ${event.exitCode}")
+                        log.info("Output from Kex stdout:\n ${output.stdout}")
+                        log.info("Output from Kex stderr:\n ${output.stderr}")
+                    }
+                },
+            )
 
             handler.startNotify()
             handler.waitFor() // no timeout provided since kex has builtin timeouts which we pass as args

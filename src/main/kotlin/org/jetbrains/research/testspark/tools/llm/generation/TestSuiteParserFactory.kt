@@ -13,17 +13,20 @@ object TestSuiteParserFactory {
         language: SupportedLanguage,
         testBodyPrinter: TestBodyPrinter,
         packageName: String = "",
-    ): TestSuiteParser = when (language) {
-        SupportedLanguage.Java -> JavaJUnitTestSuiteParser(
-            packageName,
-            jUnitVersion,
-            testBodyPrinter,
-        )
+    ): TestSuiteParser =
+        when (language) {
+            SupportedLanguage.Java ->
+                JavaJUnitTestSuiteParser(
+                    packageName,
+                    jUnitVersion,
+                    testBodyPrinter,
+                )
 
-        SupportedLanguage.Kotlin -> KotlinJUnitTestSuiteParser(
-            packageName,
-            jUnitVersion,
-            testBodyPrinter,
-        )
-    }
+            SupportedLanguage.Kotlin ->
+                KotlinJUnitTestSuiteParser(
+                    packageName,
+                    jUnitVersion,
+                    testBodyPrinter,
+                )
+        }
 }

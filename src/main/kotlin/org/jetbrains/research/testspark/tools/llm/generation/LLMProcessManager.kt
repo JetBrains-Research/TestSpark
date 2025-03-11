@@ -57,18 +57,24 @@ class LLMProcessManager(
     private val testSamplesCode: String,
     projectSDKPath: Path? = null,
 ) : ProcessManager {
+    private val homeDirectory =
+        projectSDKPath?.toString() ?: run {
+            val sdk =
+                ProjectRootManager
+                    .getInstance(project)
+                    .projectSdk
+                    ?.homeDirectory
+                    ?.path
+                    ?: throw JavaSDKMissingException()
 
-    private val homeDirectory = projectSDKPath?.toString() ?: run {
-        val sdk = ProjectRootManager.getInstance(project).projectSdk?.homeDirectory?.path
-            ?: throw JavaSDKMissingException()
+            return@run sdk
+        }
 
-        return@run sdk
-    }
-
-    private val testFileName: String = when (language) {
-        SupportedLanguage.Java -> "GeneratedTest.java"
-        SupportedLanguage.Kotlin -> "GeneratedTest.kt"
-    }
+    private val testFileName: String =
+        when (language) {
+            SupportedLanguage.Java -> "GeneratedTest.java"
+            SupportedLanguage.Kotlin -> "GeneratedTest.kt"
+        }
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
     private val maxRequests = LlmSettingsArguments(project).maxLLMRequest()
@@ -96,7 +102,11 @@ class LLMProcessManager(
 
         // update build path
         var buildPath = projectContext.projectClassPath!!
-        if (project.service<PluginSettingsService>().state.buildPath.isEmpty()) {
+        if (project
+                .service<PluginSettingsService>()
+                .state.buildPath
+                .isEmpty()
+        ) {
             // User did not set own path
             buildPath = ToolUtils.getBuildPath(project)
         }
@@ -117,80 +127,86 @@ class LLMProcessManager(
         val requestManager = StandardRequestManagerFactory(project).getRequestManager(project)
 
         // adapter for the existing prompt reduction functionality
-        val promptSizeReductionStrategy = object : PromptSizeReductionStrategy {
-            override fun isReductionPossible(): Boolean =
-                promptManager.isPromptSizeReductionPossible(generatedTestsData)
+        val promptSizeReductionStrategy =
+            object : PromptSizeReductionStrategy {
+                override fun isReductionPossible(): Boolean = promptManager.isPromptSizeReductionPossible(generatedTestsData)
 
-            override fun reduceSizeAndGeneratePrompt(): String {
-                if (!isReductionPossible()) {
-                    throw IllegalStateException("Prompt size reduction is not possible yet requested")
+                override fun reduceSizeAndGeneratePrompt(): String {
+                    if (!isReductionPossible()) {
+                        throw IllegalStateException("Prompt size reduction is not possible yet requested")
+                    }
+                    val reductionSuccess = promptManager.reducePromptSize(generatedTestsData)
+                    assert(reductionSuccess)
+
+                    return promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
                 }
-                val reductionSuccess = promptManager.reducePromptSize(generatedTestsData)
-                assert(reductionSuccess)
-
-                return promptManager.generatePrompt(codeType, testSamplesCode, generatedTestsData.polyDepthReducing)
             }
-        }
 
         // adapter for the existing test case/test suite string representing functionality
-        val testsPresenter = object : TestsPresenter {
-            private val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
+        val testsPresenter =
+            object : TestsPresenter {
+                private val testSuitePresenter = JUnitTestSuitePresenter(project, generatedTestsData, language)
 
-            override fun representTestSuite(testSuite: TestSuiteGeneratedByLLM): String {
-                return testSuitePresenter.toStringWithoutExpectedException(testSuite)
-            }
+                override fun representTestSuite(testSuite: TestSuiteGeneratedByLLM): String =
+                    testSuitePresenter.toStringWithoutExpectedException(testSuite)
 
-            override fun representTestCase(testSuite: TestSuiteGeneratedByLLM, testCaseIndex: Int): String {
-                return testSuitePresenter.toStringSingleTestCaseWithoutExpectedException(testSuite, testCaseIndex)
+                override fun representTestCase(
+                    testSuite: TestSuiteGeneratedByLLM,
+                    testCaseIndex: Int,
+                ): String = testSuitePresenter.toStringSingleTestCaseWithoutExpectedException(testSuite, testCaseIndex)
             }
-        }
 
         // Creation of JUnit specific parser, printer and assembler
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
         val testBodyPrinter = TestBodyPrinterFactory.create(language)
-        val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
-            jUnitVersion,
-            language,
-            testBodyPrinter,
-            packageName,
-        )
-        val testsAssembler = TestsAssemblerFactory.create(
-            indicator,
-            generatedTestsData,
-            testSuiteParser,
-            jUnitVersion,
-        )
+        val testSuiteParser =
+            TestSuiteParserFactory.createJUnitTestSuiteParser(
+                jUnitVersion,
+                language,
+                testBodyPrinter,
+                packageName,
+            )
+        val testsAssembler =
+            TestsAssemblerFactory.create(
+                indicator,
+                generatedTestsData,
+                testSuiteParser,
+                jUnitVersion,
+            )
 
-        val testCompiler = TestCompilerFactory.create(
-            project,
-            jUnitVersion,
-            language,
-            homeDirectory,
-        )
+        val testCompiler =
+            TestCompilerFactory.create(
+                project,
+                jUnitVersion,
+                language,
+                homeDirectory,
+            )
 
         // Asking LLM to generate a test suite. Here we have a feedback cycle for LLM in case of wrong responses
-        val llmFeedbackCycle = LLMWithFeedbackCycle(
-            language = language,
-            report = report,
-            initialPromptMessage = initialPromptMessage,
-            promptSizeReductionStrategy = promptSizeReductionStrategy,
-            testSuiteFilename = testFileName,
-            packageName = packageName,
-            resultPath = generatedTestsData.resultPath,
-            buildPath = buildPath,
-            requestManager = requestManager,
-            testsAssembler = testsAssembler,
-            testCompiler = testCompiler,
-            testStorage = testProcessor,
-            testsPresenter = testsPresenter,
-            indicator = indicator,
-            requestsCountThreshold = maxRequests,
-            errorMonitor = errorMonitor,
-        )
+        val llmFeedbackCycle =
+            LLMWithFeedbackCycle(
+                language = language,
+                report = report,
+                initialPromptMessage = initialPromptMessage,
+                promptSizeReductionStrategy = promptSizeReductionStrategy,
+                testSuiteFilename = testFileName,
+                packageName = packageName,
+                resultPath = generatedTestsData.resultPath,
+                buildPath = buildPath,
+                requestManager = requestManager,
+                testsAssembler = testsAssembler,
+                testCompiler = testCompiler,
+                testStorage = testProcessor,
+                testsPresenter = testsPresenter,
+                indicator = indicator,
+                requestsCountThreshold = maxRequests,
+                errorMonitor = errorMonitor,
+            )
 
-        val feedbackResponse = llmFeedbackCycle.run { warning ->
-            project.createNotification(warning, NotificationType.WARNING)
-        }
+        val feedbackResponse =
+            llmFeedbackCycle.run { warning ->
+                project.createNotification(warning, NotificationType.WARNING)
+            }
 
         // Process stopped checking
         if (ToolUtils.isProcessStopped(errorMonitor, indicator)) throw ProcessCancelledException(TestSparkModule.Llm())

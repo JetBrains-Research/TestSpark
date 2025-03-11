@@ -38,7 +38,7 @@ abstract class RequestManager(
         packageName: String,
         testsAssembler: TestsAssembler,
         isUserFeedback: Boolean = false,
-        errorMonitor: ErrorMonitor = DefaultErrorMonitor(), // The plugin for other IDEs can send LLM requests without passing an errorMonitor
+        errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
     ): Result<TestSuiteGeneratedByLLM, TestSparkError> {
         // save the prompt in chat history
         chatHistory.add(ChatUserMessage(prompt))

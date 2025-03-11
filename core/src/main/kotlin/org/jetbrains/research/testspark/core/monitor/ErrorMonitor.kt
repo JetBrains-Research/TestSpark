@@ -4,7 +4,6 @@ package org.jetbrains.research.testspark.core.monitor
  * This interface is used for contract adherence in error monitoring.
  */
 interface ErrorMonitor {
-
     /**
      * Notifies when an error has occurred. If this function is called,
      * it means an error has occurred and should return true.
@@ -40,9 +39,7 @@ abstract class AbstractErrorMonitor : ErrorMonitor {
      * Returns the current state of error occurrence.
      * @return errorOccurred - a Boolean value representing whether an error has occurred or not.
      */
-    override fun hasErrorOccurred(): Boolean {
-        return errorOccurred
-    }
+    override fun hasErrorOccurred(): Boolean = errorOccurred
 
     /**
      * Resets the state of error occurrence by setting 'errorOccurred' to false.
@@ -57,7 +54,6 @@ abstract class AbstractErrorMonitor : ErrorMonitor {
  * If an error has already occurred, it returns false, otherwise it sets 'errorOccurred' to true and returns true.
  */
 class DefaultErrorMonitor : AbstractErrorMonitor() {
-
     /**
      * Handles the case when an error occurrence has been notified.
      * If an error has already occurred, it ignores the notification and returns false.

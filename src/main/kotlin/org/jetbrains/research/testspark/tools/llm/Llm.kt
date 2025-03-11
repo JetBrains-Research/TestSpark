@@ -28,8 +28,9 @@ import java.nio.file.Path
  *
  * @param name The name of the tool. Default value is "Llm".
  */
-class Llm(override val name: String = "LLM") : Tool {
-
+class Llm(
+    override val name: String = "LLM",
+) : Tool {
     private val log = Logger.getInstance(this::class.java)
 
     /**
@@ -216,24 +217,26 @@ class Llm(override val name: String = "LLM") : Tool {
     ) {
         try {
             val packageName = psiHelper.getPackageName()
-            val pipeline = Pipeline(
-                project,
-                psiHelper,
-                caretOffset,
-                fileUrl,
-                packageName,
-                testGenerationController,
-                testSparkDisplayManager,
-                testsExecutionResultManager,
-                name,
-            )
+            val pipeline =
+                Pipeline(
+                    project,
+                    psiHelper,
+                    caretOffset,
+                    fileUrl,
+                    packageName,
+                    testGenerationController,
+                    testSparkDisplayManager,
+                    testsExecutionResultManager,
+                    name,
+                )
 
-            val manager = LLMProcessManager(
-                project,
-                psiHelper.language,
-                PromptManager(project, psiHelper, caretOffset),
-                testSamplesCode,
-            )
+            val manager =
+                LLMProcessManager(
+                    project,
+                    psiHelper.language,
+                    PromptManager(project, psiHelper, caretOffset),
+                    testSamplesCode,
+                )
 
             pipeline.runTestGeneration(manager, codeType)
         } catch (err: TestSparkException) {

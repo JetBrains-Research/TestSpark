@@ -22,8 +22,9 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
-class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
-
+class JavaPsiHelper(
+    private val psiFile: PsiFile,
+) : PsiHelper {
     override val language: SupportedLanguage get() = SupportedLanguage.Java
 
     /**
@@ -36,8 +37,7 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
      * @param e `AnActionEvent` representing the current action event.
      * @return `true` if the cursor is inside a class, `false` otherwise.
      */
-    override fun availableForGeneration(e: AnActionEvent): Boolean =
-        getCurrentListOfCodeTypes(e).any { it.first == CodeType.CLASS }
+    override fun availableForGeneration(e: AnActionEvent): Boolean = getCurrentListOfCodeTypes(e).any { it.first == CodeType.CLASS }
 
     private val log = Logger.getInstance(this::class.java)
 
@@ -172,7 +172,10 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     override fun getCurrentListOfCodeTypes(e: AnActionEvent): List<CodeTypeDisplayName> {
         val result: ArrayList<CodeTypeDisplayName> = arrayListOf()
         val caret: Caret =
-            e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return result
+            e.dataContext
+                .getData(CommonDataKeys.CARET)
+                ?.caretModel
+                ?.primaryCaret ?: return result
 
         val javaPsiClassWrapped = getSurroundingClass(caret.offset) as JavaPsiClassWrapper?
         val javaPsiMethodWrapped = getSurroundingMethod(caret.offset) as JavaPsiMethodWrapper?
@@ -203,8 +206,8 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
     override fun getClassHTMLDisplayName(psiClass: PsiClassWrapper): String =
         "<html><b><font color='orange'>${psiClass.classType.representation}</font> ${psiClass.qualifiedName}</b></html>"
 
-    override fun getMethodHTMLDisplayName(psiMethod: PsiMethodWrapper): String {
-        return if ((psiMethod as JavaPsiMethodWrapper).isDefaultConstructor) {
+    override fun getMethodHTMLDisplayName(psiMethod: PsiMethodWrapper): String =
+        if ((psiMethod as JavaPsiMethodWrapper).isDefaultConstructor) {
             "<html><b><font color='orange'>default constructor</font></b></html>"
         } else if (psiMethod.isConstructor) {
             "<html><b><font color='orange'>constructor</font></b></html>"
@@ -213,9 +216,7 @@ class JavaPsiHelper(private val psiFile: PsiFile) : PsiHelper {
         } else {
             "<html><b><font color='orange'>method</font> ${psiMethod.name}</b></html>"
         }
-    }
 
-    private fun PsiElement.containsOffset(caretOffset: Int): Boolean {
-        return (textRange.startOffset <= caretOffset) && (textRange.endOffset >= caretOffset)
-    }
+    private fun PsiElement.containsOffset(caretOffset: Int): Boolean =
+        (textRange.startOffset <= caretOffset) && (textRange.endOffset >= caretOffset)
 }

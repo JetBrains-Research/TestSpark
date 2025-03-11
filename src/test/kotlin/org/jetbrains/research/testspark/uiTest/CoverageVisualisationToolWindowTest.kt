@@ -20,21 +20,21 @@ import java.time.Duration
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(RemoteRobotExtension::class)
 class CoverageVisualisationToolWindowTest {
-
     @BeforeAll
-    fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
-            open("untitled")
-        }
+    fun setUpAll(remoteRobot: RemoteRobot): Unit =
+        with(remoteRobot) {
+            find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
+                open("untitled")
+            }
 
-        Thread.sleep(10000)
+            Thread.sleep(10000)
 
-        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
-            waitForBackgroundTasks()
-            clickOnToolWindow()
+            find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
+                waitForBackgroundTasks()
+                clickOnToolWindow()
 
-            // Open file ArrayUtils in project untitled
-            openProjectFile("ArrayUtils", "untitled")
+                // Open file ArrayUtils in project untitled
+                openProjectFile("ArrayUtils", "untitled")
 
             // Run EvoSuite on entire class
             runTestsForClass()
@@ -47,20 +47,22 @@ class CoverageVisualisationToolWindowTest {
     @Order(1)
     @Video
     @Test
-    fun testCoverageVisualisationTab(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
-        ideaFrame.apply {
-            coverageVisualisationTab.click()
-            assertThat(coverageVisualisationTab.hasText("Coverage")).isTrue
+    fun testCoverageVisualisationTab(remoteRobot: RemoteRobot): Unit =
+        with(remoteRobot) {
+            val ideaFrame = find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15))
+            ideaFrame.apply {
+                coverageVisualisationTab.click()
+                assertThat(coverageVisualisationTab.hasText("Coverage")).isTrue
+            }
         }
-    }
 
     @AfterAll
-    fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
-            clickOnToolWindow()
-            closeProjectFile()
-            closeProject()
+    fun closeAll(remoteRobot: RemoteRobot): Unit =
+        with(remoteRobot) {
+            find(IdeaFrame::class.java, timeout = Duration.ofSeconds(60)).apply {
+                clickOnToolWindow()
+                closeProjectFile()
+                closeProject()
+            }
         }
-    }
 }

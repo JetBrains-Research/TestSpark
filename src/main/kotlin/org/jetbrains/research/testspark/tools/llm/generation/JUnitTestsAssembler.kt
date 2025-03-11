@@ -22,7 +22,6 @@ class JUnitTestsAssembler(
     private val testSuiteParser: TestSuiteParser,
     val junitVersion: JUnitVersion,
 ) : TestsAssembler() {
-
     private val log: Logger = Logger.getInstance(this.javaClass)
 
     private var lastTestCount = 0

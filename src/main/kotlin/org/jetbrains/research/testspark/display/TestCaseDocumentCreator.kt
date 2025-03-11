@@ -18,7 +18,9 @@ import com.intellij.util.LocalTimeCounter
  *
  * @constructor Creates a new TestCaseDocumentCreator object.
  */
-open class TestCaseDocumentCreator(private val className: String) : LanguageTextField.DocumentCreator {
+open class TestCaseDocumentCreator(
+    private val className: String,
+) : LanguageTextField.DocumentCreator {
     /**
      * Creates a document based on the given parameters. Copied from com.intellij.ui.LanguageTextField
      *
@@ -28,20 +30,25 @@ open class TestCaseDocumentCreator(private val className: String) : LanguageText
      * @return The created document. Can be null if the language is null and the document
      *         is created using EditorFactory.
      */
-    override fun createDocument(value: String?, language: Language?, project: Project?): Document {
-        return if (language != null) {
+    override fun createDocument(
+        value: String?,
+        language: Language?,
+        project: Project?,
+    ): Document =
+        if (language != null) {
             val notNullProject = project ?: ProjectManager.getInstance().defaultProject
             val factory = PsiFileFactory.getInstance(notNullProject)
             val fileType: FileType = language.associatedFileType!!
             val stamp = LocalTimeCounter.currentTime()
-            val psiFile = factory.createFileFromText(
-                "$className." + fileType.defaultExtension,
-                fileType,
-                "",
-                stamp,
-                true,
-                false,
-            )
+            val psiFile =
+                factory.createFileFromText(
+                    "$className." + fileType.defaultExtension,
+                    fileType,
+                    "",
+                    stamp,
+                    true,
+                    false,
+                )
             customizePsiFile(psiFile)
 
             // No need to guess project in getDocument - we already know it
@@ -53,7 +60,6 @@ open class TestCaseDocumentCreator(private val className: String) : LanguageText
         } else {
             EditorFactory.getInstance().createDocument(value!!)
         }
-    }
 
     /**
      * Customizes the given PsiFile.

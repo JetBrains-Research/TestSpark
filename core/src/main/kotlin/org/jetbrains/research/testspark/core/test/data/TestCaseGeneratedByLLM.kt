@@ -15,7 +15,6 @@ data class TestCaseGeneratedByLLM(
     var lines: MutableList<TestLine> = mutableListOf(),
     val printTestBodyStrategy: TestBodyPrinter,
 ) {
-
     /**
      * Compares this object to the specified object for equality.
      *
@@ -38,9 +37,7 @@ data class TestCaseGeneratedByLLM(
      *
      * @return true if the lines list is empty, false otherwise.
      */
-    fun isEmpty(): Boolean {
-        return (lines.size == 0)
-    }
+    fun isEmpty(): Boolean = (lines.size == 0)
 
     /**
      * Returns the hash code value for this object.
@@ -65,18 +62,14 @@ data class TestCaseGeneratedByLLM(
      *
      * @return The string representation of the test case.
      */
-    override fun toString(): String {
-        return printTestBody(initiateTestString(true))
-    }
+    override fun toString(): String = printTestBody(initiateTestString(true))
 
     /**
      * Returns a string representation of the method's test case (excluding the expected exception).
      *
      * @return The string representation of the test case (excluding the expected exception).
      */
-    fun toStringWithoutExpectedException(): String {
-        return printTestBody(initiateTestString(false))
-    }
+    fun toStringWithoutExpectedException(): String = printTestBody(initiateTestString(false))
 
     /**
      * Initiate the string of test case
@@ -106,9 +99,8 @@ data class TestCaseGeneratedByLLM(
      * @param testInitiatedText a string containing the upper part of the test case.
      * @return a string containing the body of test case
      */
-    private fun printTestBody(testInitiatedText: String): String {
-        return printTestBodyStrategy.printTestBody(testInitiatedText, lines, throwsException, name)
-    }
+    private fun printTestBody(testInitiatedText: String): String =
+        printTestBodyStrategy.printTestBody(testInitiatedText, lines, throwsException, name)
 
     /**
      * Removes trailing lines of type TestLineType.BREAK from the given list of lines.

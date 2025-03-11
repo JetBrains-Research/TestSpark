@@ -41,12 +41,11 @@ object TestCompilerFactory {
      * @return The home path of the Java SDK.
      * @throws JavaSDKMissingException If no Java SDK is configured for the project.
      */
-    private fun findJavaSDKHomePath(project: Project): String {
-        return ProjectRootManager
+    private fun findJavaSDKHomePath(project: Project): String =
+        ProjectRootManager
             .getInstance(project)
             .projectSdk
             ?.homeDirectory
             ?.path
             ?: (throw JavaSDKMissingException())
-    }
 }

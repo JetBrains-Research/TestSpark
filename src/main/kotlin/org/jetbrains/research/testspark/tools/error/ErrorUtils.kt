@@ -43,20 +43,22 @@ fun Project.createNotification(
 )
 
 val TestSparkException.displayMessage: String?
-    get() = when (this) {
-        is CommonException -> commonExceptionMessage
-        is CompilerException -> compilerExceptionMessage
-        else -> null
-    }
+    get() =
+        when (this) {
+            is CommonException -> commonExceptionMessage
+            is CompilerException -> compilerExceptionMessage
+            else -> null
+        }
 
 val TestSparkError.displayMessage: String?
-    get() = when (this) {
-        is LlmError -> llmErrorDisplayMessage
-        is HttpError -> httpErrorDisplayMessage
-        is EvoSuiteError -> evoSuiteErrorDisplayMessage
-        is KexError -> kexErrorDisplayMessage
-        else -> null
-    }
+    get() =
+        when (this) {
+            is LlmError -> llmErrorDisplayMessage
+            is HttpError -> httpErrorDisplayMessage
+            is EvoSuiteError -> evoSuiteErrorDisplayMessage
+            is KexError -> kexErrorDisplayMessage
+            else -> null
+        }
 
 fun Project.createNotification(
     module: TestSparkModule,
@@ -67,36 +69,34 @@ fun Project.createNotification(
     val log = Logger.getInstance(this::class.java)
     log.info("Error in $module module: $logMessage")
 
-    NotificationGroupManager.getInstance()
+    NotificationGroupManager
+        .getInstance()
         .getNotificationGroupFor(module)
         .createNotification(
             getNotificationTitleFor(module),
             message,
             notificationType,
-        )
-        .notify(this)
+        ).notify(this)
 }
 
-private fun NotificationGroupManager.getNotificationGroupFor(
-    module: TestSparkModule,
-): NotificationGroup = when (module) {
-    is TestSparkModule.Llm -> getNotificationGroup("LLM Execution Error")
-    is TestSparkModule.EvoSuite -> getNotificationGroup("EvoSuite Execution Error")
-    is TestSparkModule.Kex -> getNotificationGroup("Kex Execution Error")
-    is TestSparkModule.UI -> getNotificationGroup("UserInterface")
-    is TestSparkModule.ProjectBuilder -> getNotificationGroup("Build Execution Error")
-    is TestSparkModule.Common -> getNotificationGroup("Execution Error")
-    is TestSparkModule.Compiler -> getNotificationGroup("Compiler Error")
-}
+private fun NotificationGroupManager.getNotificationGroupFor(module: TestSparkModule): NotificationGroup =
+    when (module) {
+        is TestSparkModule.Llm -> getNotificationGroup("LLM Execution Error")
+        is TestSparkModule.EvoSuite -> getNotificationGroup("EvoSuite Execution Error")
+        is TestSparkModule.Kex -> getNotificationGroup("Kex Execution Error")
+        is TestSparkModule.UI -> getNotificationGroup("UserInterface")
+        is TestSparkModule.ProjectBuilder -> getNotificationGroup("Build Execution Error")
+        is TestSparkModule.Common -> getNotificationGroup("Execution Error")
+        is TestSparkModule.Compiler -> getNotificationGroup("Compiler Error")
+    }
 
-private fun getNotificationTitleFor(
-    module: TestSparkModule,
-): String = when (module) {
-    is TestSparkModule.Llm -> PluginMessagesBundle.get("llmErrorTitle")
-    is TestSparkModule.EvoSuite -> PluginMessagesBundle.get("evosuiteErrorTitle")
-    is TestSparkModule.Kex -> PluginMessagesBundle.get("kexErrorTitle")
-    is TestSparkModule.UI -> PluginMessagesBundle.get("generationWindowWarningTitle")
-    is TestSparkModule.ProjectBuilder -> PluginMessagesBundle.get("buildErrorTitle")
-    is TestSparkModule.Common -> PluginMessagesBundle.get("commonErrorTitle")
-    is TestSparkModule.Compiler -> PluginMessagesBundle.get("compilerErrorTitle")
-}
+private fun getNotificationTitleFor(module: TestSparkModule): String =
+    when (module) {
+        is TestSparkModule.Llm -> PluginMessagesBundle.get("llmErrorTitle")
+        is TestSparkModule.EvoSuite -> PluginMessagesBundle.get("evosuiteErrorTitle")
+        is TestSparkModule.Kex -> PluginMessagesBundle.get("kexErrorTitle")
+        is TestSparkModule.UI -> PluginMessagesBundle.get("generationWindowWarningTitle")
+        is TestSparkModule.ProjectBuilder -> PluginMessagesBundle.get("buildErrorTitle")
+        is TestSparkModule.Common -> PluginMessagesBundle.get("commonErrorTitle")
+        is TestSparkModule.Compiler -> PluginMessagesBundle.get("compilerErrorTitle")
+    }

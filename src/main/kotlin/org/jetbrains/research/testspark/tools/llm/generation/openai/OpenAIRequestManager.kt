@@ -19,8 +19,9 @@ import org.jetbrains.research.testspark.tools.llm.generation.TestSparkRequestMan
 import java.net.HttpURLConnection
 import java.net.URLConnection
 
-class OpenAIRequestManager(project: Project) : TestSparkRequestManager(project) {
-
+class OpenAIRequestManager(
+    project: Project,
+) : TestSparkRequestManager(project) {
     override val url = "https://api.openai.com/v1/chat/completions"
 
     override fun tuneRequest(connection: URLConnection) {
@@ -28,21 +29,24 @@ class OpenAIRequestManager(project: Project) : TestSparkRequestManager(project) 
     }
 
     override fun assembleRequestBodyJson(): String {
-        val messages = chatHistory.map {
-            val role = when (it.role) {
-                ChatMessage.ChatRole.User -> "user"
-                ChatMessage.ChatRole.Assistant -> "assistant"
+        val messages =
+            chatHistory.map {
+                val role =
+                    when (it.role) {
+                        ChatMessage.ChatRole.User -> "user"
+                        ChatMessage.ChatRole.Assistant -> "assistant"
+                    }
+                OpenAIChatMessage(role, it.content)
             }
-            OpenAIChatMessage(role, it.content)
-        }
         val llmRequestBody = OpenAIRequestBody(llmModel, messages)
         return GsonBuilder().create().toJson(llmRequestBody)
     }
 
-    override fun mapHttpCodeToError(httpCode: Int): TestSparkError = when (httpCode) {
-        HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.PromptTooLong
-        else -> HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.OpenAi))
-    }
+    override fun mapHttpCodeToError(httpCode: Int): TestSparkError =
+        when (httpCode) {
+            HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.PromptTooLong
+            else -> HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.OpenAi))
+        }
 
     override fun assembleResponse(
         httpRequest: HttpRequests.Request,
@@ -59,9 +63,11 @@ class OpenAIRequestManager(project: Project) : TestSparkRequestManager(project) 
 
             val choices =
                 Gson().fromJson(
-                    JsonParser.parseString(text)
+                    JsonParser
+                        .parseString(text)
                         .asJsonObject["choices"]
-                        .asJsonArray[0].asJsonObject,
+                        .asJsonArray[0]
+                        .asJsonObject,
                     OpenAIChoice::class.java,
                 )
             if (choices.finishedReason == "stop") break

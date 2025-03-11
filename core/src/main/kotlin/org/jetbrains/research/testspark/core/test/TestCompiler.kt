@@ -15,7 +15,10 @@ data class ExecutionResult(
     fun isSuccessful(): Boolean = exitCode == 0
 }
 
-abstract class TestCompiler(libPaths: List<String>, junitLibPaths: List<String>) {
+abstract class TestCompiler(
+    libPaths: List<String>,
+    junitLibPaths: List<String>,
+) {
     val separator = DataFilesUtil.classpathSeparator
     val dependencyLibPath = libPaths.joinToString(separator.toString())
     val junitPath = junitLibPaths.joinToString(separator.toString())
@@ -59,7 +62,11 @@ abstract class TestCompiler(libPaths: List<String>, junitLibPaths: List<String>)
      * @return A pair containing a boolean value indicating whether the compilation was successful (true) or not (false),
      *         and a string message describing any error encountered during compilation.
      */
-    abstract fun compileCode(path: String, projectBuildPath: String, workingDir: String): ExecutionResult
+    abstract fun compileCode(
+        path: String,
+        projectBuildPath: String,
+        workingDir: String,
+    ): ExecutionResult
 
     /**
      * Generates the path for the command by concatenating the necessary paths.

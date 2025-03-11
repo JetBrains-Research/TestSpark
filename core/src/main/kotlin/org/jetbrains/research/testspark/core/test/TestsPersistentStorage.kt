@@ -4,7 +4,6 @@ package org.jetbrains.research.testspark.core.test
  * The TestPersistentStorage interface represents a contract for saving generated tests to a specified file system location.
  */
 interface TestsPersistentStorage {
-
     /**
      * Save the generated tests to a specified directory.
      *
@@ -14,5 +13,10 @@ interface TestsPersistentStorage {
      * @param testFileName The name of the test file.
      * @return The path where the generated tests are saved.
      */
-    fun saveGeneratedTest(packageString: String, code: String, resultPath: String, testFileName: String): String
+    fun saveGeneratedTest(
+        packageString: String,
+        code: String,
+        resultPath: String,
+        testFileName: String,
+    ): String
 }

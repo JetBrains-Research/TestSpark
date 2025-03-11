@@ -12,10 +12,9 @@ object TestAnalyzerFactory {
      * @param language the programming language for which to create the analyzer
      * @return an instance of TestClassCodeAnalyzer
      */
-    fun create(language: SupportedLanguage): TestAnalyzer {
-        return when (language) {
+    fun create(language: SupportedLanguage): TestAnalyzer =
+        when (language) {
             SupportedLanguage.Kotlin -> KotlinTestAnalyzer
             SupportedLanguage.Java -> JavaTestAnalyzer
         }
-    }
 }

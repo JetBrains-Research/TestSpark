@@ -20,7 +20,10 @@ import java.util.concurrent.CountDownLatch
 /**
  * This class builds the project before running EvoSuite and before validating the tests.
  */
-class ProjectBuilder(private val project: Project, private val errorMonitor: ErrorMonitor) {
+class ProjectBuilder(
+    private val project: Project,
+    private val errorMonitor: ErrorMonitor,
+) {
     private val pluginSettingsState: PluginSettingsState
         get() = project.getService(PluginSettingsService::class.java).state
 
@@ -28,7 +31,12 @@ class ProjectBuilder(private val project: Project, private val errorMonitor: Err
 
     private val builderTimeout: Long = 12000000
 
-    private val projectPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+    private val projectPath: String =
+        ProjectRootManager
+            .getInstance(project)
+            .contentRoots
+            .first()
+            .path
 
     /**
      * Runs the build process.
@@ -114,11 +122,14 @@ class ProjectBuilder(private val project: Project, private val errorMonitor: Err
 
     private fun errorProcess() {
         if (errorMonitor.notifyErrorOccurrence()) {
-            NotificationGroupManager.getInstance().getNotificationGroup("Build Execution Error").createNotification(
-                PluginMessagesBundle.get("buildErrorTitle"),
-                PluginMessagesBundle.get("commonBuildErrorMessage"),
-                NotificationType.ERROR,
-            ).notify(project)
+            NotificationGroupManager
+                .getInstance()
+                .getNotificationGroup("Build Execution Error")
+                .createNotification(
+                    PluginMessagesBundle.get("buildErrorTitle"),
+                    PluginMessagesBundle.get("commonBuildErrorMessage"),
+                    NotificationType.ERROR,
+                ).notify(project)
         }
     }
 }

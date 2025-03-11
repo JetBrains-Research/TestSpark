@@ -3,7 +3,9 @@ package org.jetbrains.research.testspark.display.custom
 import com.intellij.openapi.progress.ProgressIndicator
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 
-class IJProgressIndicator(private val indicator: ProgressIndicator) : CustomProgressIndicator {
+class IJProgressIndicator(
+    private val indicator: ProgressIndicator,
+) : CustomProgressIndicator {
     override fun setText(text: String) {
         indicator.text = text
     }

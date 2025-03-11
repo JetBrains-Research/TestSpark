@@ -21,9 +21,7 @@ class KexSettingsService : PersistentStateComponent<KexSettingsState> {
      * If the values from getState are different from the default values obtained by calling
      *  the default constructor, the state is persisted (serialised and stored).
      */
-    override fun getState(): KexSettingsState {
-        return kexSettingsState
-    }
+    override fun getState(): KexSettingsState = kexSettingsState
 
     /**
      * Loads the state of the application-level settings.

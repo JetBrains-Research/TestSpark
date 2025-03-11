@@ -15,8 +15,9 @@ import java.net.URLConnection
 /**
  * A class to manage requests sent to large language models hosted on HuggingFace
  */
-class HuggingFaceRequestManager(project: Project) : TestSparkRequestManager(project) {
-
+class HuggingFaceRequestManager(
+    project: Project,
+) : TestSparkRequestManager(project) {
     // TODO: The user should be able to change these numbers in the plugin's settings
     private val topProbability = 0.9
     private val temperature = 0.9
@@ -29,11 +30,12 @@ class HuggingFaceRequestManager(project: Project) : TestSparkRequestManager(proj
 
     override fun assembleRequestBodyJson(): String {
         if (chatHistory.size == 1) {
-            chatHistory[0] = ChatUserMessage(
-                createInstructionPrompt(
-                    chatHistory[0].content,
-                ),
-            )
+            chatHistory[0] =
+                ChatUserMessage(
+                    createInstructionPrompt(
+                        chatHistory[0].content,
+                    ),
+                )
         }
         val llmRequestBody =
             HuggingFaceRequestBody(chatHistory, Parameters(topProbability, temperature)).toMap()
@@ -51,10 +53,15 @@ class HuggingFaceRequestManager(project: Project) : TestSparkRequestManager(proj
         errorMonitor: ErrorMonitor,
     ) {
         val text = httpRequest.reader.readLine()
-        val generatedTestCases = extractLLMGeneratedCode(
-            JsonParser.parseString(text).asJsonArray[0]
-                .asJsonObject["generated_text"].asString.trim(),
-        )
+        val generatedTestCases =
+            extractLLMGeneratedCode(
+                JsonParser
+                    .parseString(text)
+                    .asJsonArray[0]
+                    .asJsonObject["generated_text"]
+                    .asString
+                    .trim(),
+            )
         testsAssembler.consume(generatedTestCases)
     }
 

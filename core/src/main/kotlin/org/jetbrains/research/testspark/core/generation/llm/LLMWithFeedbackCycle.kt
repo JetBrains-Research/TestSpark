@@ -100,21 +100,24 @@ class LLMWithFeedbackCycle(
                 // non-compilable test cases stored in
                 // the generated test suite
                 // TODO: ensure generatedTestSuite is always non-null here
-                if (::generatedTestSuite.isInitialized) { recordReport(report, generatedTestSuite.testCases) }
+                if (::generatedTestSuite.isInitialized) {
+                    recordReport(report, generatedTestSuite.testCases)
+                }
                 break
             }
 
             // clearing test assembler's collected text on the previous attempts
             testsAssembler.clear()
-            val response: Result<TestSuiteGeneratedByLLM, TestSparkError> = requestManager.request(
-                language = language,
-                prompt = nextPromptMessage,
-                indicator = indicator,
-                packageName = packageName,
-                testsAssembler = testsAssembler,
-                isUserFeedback = false,
-                errorMonitor,
-            )
+            val response: Result<TestSuiteGeneratedByLLM, TestSparkError> =
+                requestManager.request(
+                    language = language,
+                    prompt = nextPromptMessage,
+                    indicator = indicator,
+                    packageName = packageName,
+                    testsAssembler = testsAssembler,
+                    isUserFeedback = false,
+                    errorMonitor,
+                )
 
             // Process stopped checking
             if (indicator.isCanceled()) throw ProcessCancelledException(module = TestSparkModule.Llm())
@@ -184,30 +187,33 @@ class LLMWithFeedbackCycle(
                 generatedTestSuite.updateTestCases(compilableTestCases.toMutableList())
             } else {
                 for (testCaseIndex in generatedTestSuite.testCases.indices) {
-                    val testCaseFilename = when (language) {
-                        SupportedLanguage.Java -> "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
-                        SupportedLanguage.Kotlin -> "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.kt"
-                    }
+                    val testCaseFilename =
+                        when (language) {
+                            SupportedLanguage.Java -> "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.java"
+                            SupportedLanguage.Kotlin -> "${getClassWithTestCaseName(generatedTestSuite.testCases[testCaseIndex].name)}.kt"
+                        }
 
                     val testCaseRepresentation = testsPresenter.representTestCase(generatedTestSuite, testCaseIndex)
 
-                    val saveFilepath = testStorage.saveGeneratedTest(
-                        generatedTestSuite.packageName,
-                        testCaseRepresentation,
-                        resultPath,
-                        testCaseFilename,
-                    )
+                    val saveFilepath =
+                        testStorage.saveGeneratedTest(
+                            generatedTestSuite.packageName,
+                            testCaseRepresentation,
+                            resultPath,
+                            testCaseFilename,
+                        )
 
                     generatedTestCasesPaths.add(saveFilepath)
                 }
             }
 
-            val generatedTestSuitePath: String = testStorage.saveGeneratedTest(
-                generatedTestSuite.packageName,
-                testsPresenter.representTestSuite(generatedTestSuite),
-                resultPath,
-                testSuiteFilename,
-            )
+            val generatedTestSuitePath: String =
+                testStorage.saveGeneratedTest(
+                    generatedTestSuite.packageName,
+                    testsPresenter.representTestSuite(generatedTestSuite),
+                    resultPath,
+                    testSuiteFilename,
+                )
 
             // check that the file creation was successful
             var allFilesCreated = true
@@ -246,13 +252,14 @@ class LLMWithFeedbackCycle(
 
                 onWarningCallback?.invoke(LlmError.CompilationError)
 
-                nextPromptMessage = """
-                   I cannot compile the tests that you provided. The error is:
-                   ```
-                   ${testSuiteCompilationResult.executionMessage}
-                   ```
-                   Fix this issue in the provided tests.\nGenerate public classes and public methods. Response only a code with tests between ```, do not provide any other text.
-                """.trimIndent()
+                nextPromptMessage =
+                    """
+                    I cannot compile the tests that you provided. The error is:
+                    ```
+                    ${testSuiteCompilationResult.executionMessage}
+                    ```
+                    Fix this issue in the provided tests.\nGenerate public classes and public methods. Response only a code with tests between ```, do not provide any other text.
+                    """.trimIndent()
                 log.info { nextPromptMessage }
                 continue
             }
@@ -267,10 +274,11 @@ class LLMWithFeedbackCycle(
         }
 
         return Result.Success(
-            data = FeedbackResponse(
-                generatedTestSuite = generatedTestSuite,
-                compilableTestCases = compilableTestCases,
-            ),
+            data =
+                FeedbackResponse(
+                    generatedTestSuite = generatedTestSuite,
+                    compilableTestCases = compilableTestCases,
+                ),
         )
     }
 
@@ -280,7 +288,10 @@ class LLMWithFeedbackCycle(
      * @param report The report object to store the test cases in.
      * @param testCases The list of test cases generated by LLM.
      */
-    private fun recordReport(report: Report, testCases: MutableList<TestCaseGeneratedByLLM>) {
+    private fun recordReport(
+        report: Report,
+        testCases: MutableList<TestCaseGeneratedByLLM>,
+    ) {
         for ((index, test) in testCases.withIndex()) {
             report.testCaseList[index] = TestCase(index, test.name, test.toString(), setOf())
         }

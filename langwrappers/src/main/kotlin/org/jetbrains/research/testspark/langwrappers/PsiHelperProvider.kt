@@ -8,7 +8,6 @@ import com.intellij.psi.PsiFile
  * custom handling or manipulating PSI (Program Structure Interface) elements.
  */
 interface PsiHelperProvider {
-
     /**
      * Get a PsiHelper for the given file.
      *

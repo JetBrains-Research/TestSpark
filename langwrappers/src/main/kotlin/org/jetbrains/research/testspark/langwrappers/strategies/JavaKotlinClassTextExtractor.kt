@@ -7,7 +7,6 @@ import org.jetbrains.research.testspark.langwrappers.LanguageClassTextExtractor
 Direct implementor for the Java and Kotlin PsiWrappers
  */
 class JavaKotlinClassTextExtractor : LanguageClassTextExtractor {
-
     override fun extract(
         file: PsiFile,
         classText: String,
@@ -18,18 +17,22 @@ class JavaKotlinClassTextExtractor : LanguageClassTextExtractor {
         val fileText = file.text
 
         // get package
-        packagePattern.findAll(fileText, 0).map {
-            it.groupValues[0]
-        }.forEach {
-            fullText += "$it\n\n"
-        }
+        packagePattern
+            .findAll(fileText, 0)
+            .map {
+                it.groupValues[0]
+            }.forEach {
+                fullText += "$it\n\n"
+            }
 
         // get imports
-        importPattern.findAll(fileText, 0).map {
-            it.groupValues[0]
-        }.forEach {
-            fullText += "$it\n"
-        }
+        importPattern
+            .findAll(fileText, 0)
+            .map {
+                it.groupValues[0]
+            }.forEach {
+                fullText += "$it\n"
+            }
 
         // Add class code
         fullText += classText

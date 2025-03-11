@@ -9,10 +9,11 @@ package org.jetbrains.research.testspark.core.data
  */
 open class Report {
     // Fields were created based on the fields in org.evosuite.utils.CompactReport for easier transformation
+
     /**
      * Unit Under Test. This variable stores the name of the class or component that is being tested.
      */
-    var UUT: String = ""
+    var uut: String = ""
     var allCoveredLines: Set<Int> = setOf()
     var allUncoveredLines: Set<Int> = setOf()
     var testCaseList: HashMap<Int, TestCase> = hashMapOf()
@@ -23,7 +24,11 @@ open class Report {
      * @return The normalized report.
      */
     fun normalized(): Report {
-        allCoveredLines = testCaseList.values.map { it.coveredLines }.flatten().toSet()
+        allCoveredLines =
+            testCaseList.values
+                .map { it.coveredLines }
+                .flatten()
+                .toSet()
         return this
     }
 }
