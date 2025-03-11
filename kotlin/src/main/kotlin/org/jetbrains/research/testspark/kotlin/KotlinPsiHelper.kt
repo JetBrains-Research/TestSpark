@@ -6,7 +6,6 @@ import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.kotlin.psi.KtPsiUtil
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
@@ -62,23 +61,6 @@ class KotlinPsiHelper(
         return null
     }
 
-    override fun collectInterestingPsiClassesFromMethod(
-        methodIt: PsiMethodWrapper,
-        currentLevelSetOfClasses: MutableSet<PsiClassWrapper>,
-        interestingPsiClasses: MutableSet<PsiClassWrapper>
-    ) {
-        (methodIt as KotlinPsiMethodWrapper).parameterList?.parameters?.forEach { paramIt ->
-            KtPsiUtil.getClassIfParameterIsProperty(paramIt)?.let { typeIt ->
-                KotlinPsiClassWrapper(typeIt).let {
-                    if (!it.qualifiedName.startsWith(languagePrefix)) {
-                        interestingPsiClasses.add(it)
-                        currentLevelSetOfClasses.add(it)
-                    }
-                }
-            }
-        }
-    }
-
     override fun getInterestingPsiClassesWithQualifiedNames(
         cut: PsiClassWrapper?,
         psiMethod: PsiMethodWrapper,
@@ -95,7 +77,7 @@ class KotlinPsiHelper(
     override fun getMethodHTMLDisplayName(psiMethod: PsiMethodWrapper): String {
         psiMethod as KotlinPsiMethodWrapper
         return when {
-            psiMethod.isTopLevelFunction -> "<html><b><font color='orange'>top-level function</font> ${psiMethod.name}</b></html>"
+            psiMethod.isTopLevelFunction -> formatAsHTMLHighlightedWithAdditionalText("top-level function", psiMethod.name)
             psiMethod.isSecondaryConstructor -> formatAsHTMLHighlighted("secondary constructor")
             psiMethod.isPrimaryConstructor -> formatAsHTMLHighlighted("constructor")
             psiMethod.isDefaultMethod -> formatAsHTMLHighlightedWithAdditionalText("default method", psiMethod.name)

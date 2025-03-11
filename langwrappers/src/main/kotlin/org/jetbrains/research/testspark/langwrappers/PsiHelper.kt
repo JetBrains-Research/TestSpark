@@ -86,12 +86,6 @@ abstract class PsiHelper(private val psiFile: PsiFile) {
         return selectedLine + 1
     }
 
-    abstract fun collectInterestingPsiClassesFromMethod(
-        methodIt: PsiMethodWrapper,
-        currentLevelSetOfClasses: MutableSet<PsiClassWrapper>,
-        interestingPsiClasses: MutableSet<PsiClassWrapper>
-    )
-
     /**
      * Retrieves a set of interesting PsiClasses based on a given project,
      * a list of classes to test, and a depth reducing factor.
@@ -114,7 +108,9 @@ abstract class PsiHelper(private val psiFile: PsiFile) {
 
             currentLevelClasses.forEach { classIt ->
                 classIt.methods.forEach { methodIt ->
-                    collectInterestingPsiClassesFromMethod(methodIt, currentLevelSetOfClasses, interestingPsiClasses)
+                    val currentMethodSetOfClasses = methodIt.getInterestingPsiClassesWithQualifiedNames()
+                    interestingPsiClasses.addAll(currentMethodSetOfClasses)
+                    currentLevelSetOfClasses.addAll(currentMethodSetOfClasses)
                 }
             }
             currentLevelClasses = mutableListOf<PsiClassWrapper>().apply { addAll(currentLevelSetOfClasses) }

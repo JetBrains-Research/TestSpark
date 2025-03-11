@@ -30,4 +30,12 @@ interface PsiMethodWrapper {
      * @return `true` if the line number is within the range of the method, `false` otherwise.
      */
     fun containsLine(lineNumber: Int): Boolean
+
+    /**
+     * Returns a set of `PsiClassWrapper` instances for non-standard classes referenced by the
+     * parameters of the current function.
+     *
+     * @return A mutable set of `PsiClassWrapper` instances representing non-standard classes.
+     */
+    fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper>
 }

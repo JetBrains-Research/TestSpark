@@ -7,7 +7,6 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
@@ -64,23 +63,6 @@ class JavaPsiHelper(
         }
         log.info("No surrounding method for caret in $caretOffset")
         return null
-    }
-
-    override fun collectInterestingPsiClassesFromMethod(
-        methodIt: PsiMethodWrapper,
-        currentLevelSetOfClasses: MutableSet<PsiClassWrapper>,
-        interestingPsiClasses: MutableSet<PsiClassWrapper>
-    ) {
-        (methodIt as JavaPsiMethodWrapper).parameterList.parameters.forEach { paramIt ->
-            PsiTypesUtil.getPsiClass(paramIt.type)?.let { typeIt ->
-                JavaPsiClassWrapper(typeIt).let {
-                    if (!it.qualifiedName.startsWith(languagePrefix)) {
-                        interestingPsiClasses.add(it)
-                        currentLevelSetOfClasses.add(it)
-                    }
-                }
-            }
-        }
     }
 
     override fun getInterestingPsiClassesWithQualifiedNames(
