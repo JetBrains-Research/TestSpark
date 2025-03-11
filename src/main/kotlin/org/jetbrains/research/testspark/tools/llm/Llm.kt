@@ -34,40 +34,6 @@ class Llm(
     private val log = Logger.getInstance(this::class.java)
 
     /**
-     * Returns an instance of the LLMProcessManager.
-     *
-     * @param project The current project.
-     * @param psiFile The PSI file.
-     * @param caretOffset The caret offset in the file.
-     * @param testSamplesCode The test samples code.
-     * @return An instance of LLMProcessManager.
-     */
-    fun getLLMProcessManager(
-        project: Project,
-        psiHelper: PsiHelper,
-        caretOffset: Int,
-        testSamplesCode: String,
-        projectSDKPath: Path? = null,
-    ): LLMProcessManager {
-        val classesToTest = mutableListOf<PsiClassWrapper>()
-        val maxPolymorphismDepth = LlmSettingsArguments(project).maxPolyDepth(polyDepthReducing = 0)
-
-        ProgressManager.getInstance().runProcessWithProgressSynchronously({
-            ApplicationManager.getApplication().runReadAction {
-                psiHelper.collectClassesToTest(project, classesToTest, caretOffset, maxPolymorphismDepth)
-            }
-        }, PluginMessagesBundle.get("collectingClassesToTest"), false, project)
-
-        return LLMProcessManager(
-            project,
-            psiHelper.language,
-            PromptManager(project, psiHelper, caretOffset),
-            testSamplesCode,
-            projectSDKPath,
-        )
-    }
-
-    /**
      * Generates test cases for a class in the specified project.
      *
      * @param project The project containing the class.
