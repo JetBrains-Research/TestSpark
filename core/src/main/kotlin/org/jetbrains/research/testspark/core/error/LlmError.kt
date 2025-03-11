@@ -5,7 +5,7 @@ import org.jetbrains.research.testspark.core.data.TestSparkModule
 
 sealed class LlmError(
     cause: Throwable? = null,
-    module: LlmModuleType? = null
+    module: LlmModuleType? = null,
 ) : TestSparkError(module = TestSparkModule.Llm(module), cause = cause) {
     data object PromptTooLong : LlmError()
     data object GrazieNotAvailable : LlmError(module = LlmModuleType.Grazie)

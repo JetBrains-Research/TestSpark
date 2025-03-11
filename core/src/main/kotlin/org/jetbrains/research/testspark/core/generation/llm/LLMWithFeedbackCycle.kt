@@ -270,7 +270,7 @@ class LLMWithFeedbackCycle(
             data = FeedbackResponse(
                 generatedTestSuite = generatedTestSuite,
                 compilableTestCases = compilableTestCases,
-            )
+            ),
         )
     }
 

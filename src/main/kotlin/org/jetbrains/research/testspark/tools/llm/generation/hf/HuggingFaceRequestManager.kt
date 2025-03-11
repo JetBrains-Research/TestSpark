@@ -48,7 +48,7 @@ class HuggingFaceRequestManager(project: Project) : TestSparkRequestManager(proj
         httpRequest: HttpRequests.Request,
         testsAssembler: TestsAssembler,
         indicator: CustomProgressIndicator,
-        errorMonitor: ErrorMonitor
+        errorMonitor: ErrorMonitor,
     ) {
         val text = httpRequest.reader.readLine()
         val generatedTestCases = extractLLMGeneratedCode(

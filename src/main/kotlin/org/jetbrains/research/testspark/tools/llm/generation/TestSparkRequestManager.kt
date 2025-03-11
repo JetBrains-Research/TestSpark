@@ -40,7 +40,7 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
-        errorMonitor: ErrorMonitor
+        errorMonitor: ErrorMonitor,
     ): Result<Unit, TestSparkError> = try {
         HttpRequests
             .post(url, "application/json")
@@ -50,7 +50,7 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
                 val connection = request.connection as HttpURLConnection
                 when (val responseCode = connection.responseCode) {
                     HttpURLConnection.HTTP_OK -> Result.Success(
-                        data = assembleResponse(request, testsAssembler, indicator, errorMonitor)
+                        data = assembleResponse(request, testsAssembler, indicator, errorMonitor),
                     )
                     else -> Result.Failure(mapHttpCodeToError(responseCode))
                 }

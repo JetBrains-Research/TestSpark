@@ -14,5 +14,5 @@ enum class LlmModuleType {
     HuggingFace,
     Gemini,
     Grazie,
-    OpenAi
+    OpenAi,
 }

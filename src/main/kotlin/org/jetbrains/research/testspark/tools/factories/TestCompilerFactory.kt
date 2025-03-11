@@ -16,7 +16,7 @@ object TestCompilerFactory {
         project: Project,
         junitVersion: JUnitVersion,
         language: SupportedLanguage,
-        javaSDKHomePath: String = findJavaSDKHomePath(project)
+        javaSDKHomePath: String = findJavaSDKHomePath(project),
     ): TestCompiler {
         val libraryPaths = LibraryPathsProvider.getTestCompilationLibraryPaths()
         val junitLibraryPaths = LibraryPathsProvider.getJUnitLibraryPaths(junitVersion)

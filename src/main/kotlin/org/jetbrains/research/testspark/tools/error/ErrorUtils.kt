@@ -24,7 +24,7 @@ import org.jetbrains.research.testspark.tools.error.message.llmErrorDisplayMessa
 
 fun Project.createNotification(
     error: TestSparkError,
-    notificationType: NotificationType
+    notificationType: NotificationType,
 ) = createNotification(
     module = error.module,
     message = error.displayMessage ?: PluginMessagesBundle.get("unknownErrorMessage"),
@@ -34,7 +34,7 @@ fun Project.createNotification(
 
 fun Project.createNotification(
     exception: TestSparkException,
-    notificationType: NotificationType
+    notificationType: NotificationType,
 ) = createNotification(
     module = exception.module,
     message = exception.displayMessage ?: PluginMessagesBundle.get("unknownErrorMessage"),
@@ -62,7 +62,7 @@ fun Project.createNotification(
     module: TestSparkModule,
     message: String,
     notificationType: NotificationType,
-    logMessage: String
+    logMessage: String,
 ) {
     val log = Logger.getInstance(this::class.java)
     log.info("Error in $module module: $logMessage")
@@ -78,7 +78,7 @@ fun Project.createNotification(
 }
 
 private fun NotificationGroupManager.getNotificationGroupFor(
-    module: TestSparkModule
+    module: TestSparkModule,
 ): NotificationGroup = when (module) {
     is TestSparkModule.Llm -> getNotificationGroup("LLM Execution Error")
     is TestSparkModule.EvoSuite -> getNotificationGroup("EvoSuite Execution Error")
@@ -90,7 +90,7 @@ private fun NotificationGroupManager.getNotificationGroupFor(
 }
 
 private fun getNotificationTitleFor(
-    module: TestSparkModule
+    module: TestSparkModule,
 ): String = when (module) {
     is TestSparkModule.Llm -> PluginMessagesBundle.get("llmErrorTitle")
     is TestSparkModule.EvoSuite -> PluginMessagesBundle.get("evosuiteErrorTitle")

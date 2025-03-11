@@ -523,7 +523,8 @@ class TestCasePanelBuilder(
                     when (testModificationResult) {
                         is Result.Failure -> {
                             project.createNotification(
-                                testModificationResult.error, NotificationType.ERROR
+                                testModificationResult.error,
+                                NotificationType.ERROR,
                             )
                             return
                         }

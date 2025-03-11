@@ -34,17 +34,18 @@ class GrazieRequestManager(project: Project) : RequestManager(
                 with(requestError) {
                     when {
                         contains("invalid: 401") -> Result.Failure(
-                            error = HttpError(httpCode = 401)
+                            error = HttpError(httpCode = 401),
                         )
 
                         contains("invalid: 413 Payload Too Large") -> Result.Failure(
-                            error = LlmError.PromptTooLong
+                            error = LlmError.PromptTooLong,
                         )
 
                         else -> Result.Failure(
                             error = HttpError(
-                                message = this, module = TestSparkModule.Llm(LlmModuleType.Grazie)
-                            )
+                                message = this,
+                                module = TestSparkModule.Llm(LlmModuleType.Grazie),
+                            ),
                         )
                     }
                 }
