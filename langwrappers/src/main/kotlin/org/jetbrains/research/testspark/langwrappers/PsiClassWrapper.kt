@@ -5,7 +5,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import org.jetbrains.research.testspark.core.data.ClassType
 
-
 /**
  * Interface representing a wrapper for PSI classes,
  * providing a common API to handle class-related data for different languages.

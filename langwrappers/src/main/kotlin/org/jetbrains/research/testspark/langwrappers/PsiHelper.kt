@@ -159,9 +159,9 @@ abstract class PsiHelper(private val psiFile: PsiFile) {
 
         log.info(
             "The test can be generated for: \n " +
-                    " 1) Class ${psiClassWrapped?.qualifiedName ?: "no class"} \n" +
-                    " 2) Method ${psiMethodWrapped?.name ?: "no method"} \n" +
-                    " 3) Line $line",
+                " 1) Class ${psiClassWrapped?.qualifiedName ?: "no class"} \n" +
+                " 2) Method ${psiMethodWrapped?.name ?: "no method"} \n" +
+                " 3) Line $line",
         )
 
         return result
