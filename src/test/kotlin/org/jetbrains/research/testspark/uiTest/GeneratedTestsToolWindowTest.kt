@@ -52,15 +52,15 @@ class GeneratedTestsToolWindowTest {
                 // Open file ArrayUtils in project untitled
                 openProjectFile("ArrayUtils", PROJECT_NAME)
 
-            // Create the test class
-            createTestClass(TEST_FILE_NAME)
-            // Run EvoSuite on entire class
-            runTestsForClass()
-            // Wait for background tasks to finish
-            Thread.sleep(5000)
-            waitForBackgroundTasks()
+                // Create the test class
+                createTestClass(TEST_FILE_NAME)
+                // Run EvoSuite on entire class
+                runTestsForClass()
+                // Wait for background tasks to finish
+                Thread.sleep(5000)
+                waitForBackgroundTasks()
+            }
         }
-    }
 
     @Order(1)
     @Video

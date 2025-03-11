@@ -36,13 +36,13 @@ class CoverageVisualisationToolWindowTest {
                 // Open file ArrayUtils in project untitled
                 openProjectFile("ArrayUtils", "untitled")
 
-            // Run EvoSuite on entire class
-            runTestsForClass()
-            // Wait for background tasks to finish
-            Thread.sleep(5000)
-            waitForBackgroundTasks()
+                // Run EvoSuite on entire class
+                runTestsForClass()
+                // Wait for background tasks to finish
+                Thread.sleep(5000)
+                waitForBackgroundTasks()
+            }
         }
-    }
 
     @Order(1)
     @Video
