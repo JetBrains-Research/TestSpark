@@ -36,8 +36,6 @@ class CoverageVisualisationToolWindowTest {
             // Open file ArrayUtils in project untitled
             openProjectFile("ArrayUtils", "untitled")
 
-            // Change quick access params
-            changeQuickAccess()
             // Run EvoSuite on entire class
             runTestsForClass()
             // Wait for background tasks to finish

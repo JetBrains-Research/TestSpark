@@ -118,18 +118,6 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
     }
 
     /**
-     * Change the quick access params to have max search time to 2 seconds.
-     */
-    fun changeQuickAccess() {
-        find(QuickAccessParametersFixtures::class.java, timeout = Duration.ofSeconds(60)).apply {
-            searchBudgetTypeComboBox.selectItem("Max time")
-            searchBudgetValueSpinnerTextField.text = "2"
-            saveButton.click()
-        }
-        find<JButtonFixture>(byXpath("//div[@text='OK']")).click()
-    }
-
-    /**
      * Creates a class and closes the tab after its creation.
      * @param testFileName - the name of the file that you want to create.
      */

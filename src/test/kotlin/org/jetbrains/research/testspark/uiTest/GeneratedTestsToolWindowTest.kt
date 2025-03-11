@@ -52,8 +52,6 @@ class GeneratedTestsToolWindowTest {
             // Open file ArrayUtils in project untitled
             openProjectFile("ArrayUtils", projectName)
 
-            // Change quick access params
-            changeQuickAccess()
             // Create the test class
             createTestClass(testFileName)
             // Run EvoSuite on entire class
