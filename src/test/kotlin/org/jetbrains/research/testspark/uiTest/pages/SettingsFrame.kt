@@ -22,9 +22,10 @@ import java.time.Duration
 
 @FixtureName("Settings Frame")
 @DefaultXpath("type", "//div[@class='MyDialog']")
-class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) :
-    CommonContainerFixture(remoteRobot, remoteComponent) {
-
+class SettingsFrame(
+    remoteRobot: RemoteRobot,
+    remoteComponent: RemoteComponent,
+) : CommonContainerFixture(remoteRobot, remoteComponent) {
     // Locator to Dialog for wrong seed
     val seedDialogLocator
         get() = byXpath("//div[@accessiblename='Incorrect Numeric Type For Seed' and @class='MyDialog']")
@@ -43,10 +44,11 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for search text filed in Settings menu
     val searchTextBox
-        get() = textField(
-            byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"),
-            Duration.ofSeconds(60),
-        )
+        get() =
+            textField(
+                byXpath("//div[@class='SettingsSearch']//div[@class='TextFieldWithProcessing']"),
+                Duration.ofSeconds(60),
+            )
 
     // Action to find Settings tree view
     val projectViewTree
@@ -54,7 +56,12 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for introduction label
     val introLabel
-        get() = jLabel(byXpath("//div[@class='JLabel' and @text='<html><body>TestSpark is an external graphical IntelliJ plugin that integrates EvoSuite into the IDE. EvoSuite is a tool that automatically generates test cases with assertions for classes written in Java code. TestSpark makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI.']"))
+        get() =
+            jLabel(
+                byXpath(
+                    "//div[@class='JLabel' and @text='<html><body>TestSpark is an external graphical IntelliJ plugin that integrates EvoSuite into the IDE. EvoSuite is a tool that automatically generates test cases with assertions for classes written in Java code. TestSpark makes this much easier, as it provides an intuitive modern interface for EvoSuite – so, no more CLI.']",
+                ),
+            )
 
     // Action for separator "Environment settings"
     val environmentSettingsSeparator
@@ -114,7 +121,12 @@ class SettingsFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) 
 
     // Action for configuration id text field
     val configurationIdField
-        get() = textField(byXpath("//div[@tooltiptext='Label that identifies the used configuration of EvoSuite. This is only done when running experiments']"))
+        get() =
+            textField(
+                byXpath(
+                    "//div[@tooltiptext='Label that identifies the used configuration of EvoSuite. This is only done when running experiments']",
+                ),
+            )
 
     // Action for Execute tests in a sandbox environment checkbox
     val executeTestsCheckbox

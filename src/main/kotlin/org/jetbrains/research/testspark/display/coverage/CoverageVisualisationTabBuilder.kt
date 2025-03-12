@@ -34,7 +34,6 @@ class CoverageVisualisationTabBuilder(
     private val project: Project,
     private val editor: Editor,
 ) {
-
     // Variable to keep reference to the coverage visualisation content
     private var content: Content? = null
     private var contentManager: ContentManager? = null
@@ -71,14 +70,19 @@ class CoverageVisualisationTabBuilder(
      *
      * @param testReport the generated tests summary
      */
-    fun show(testReport: Report, generatedTestsTabData: GeneratedTestsTabData) {
+    fun show(
+        testReport: Report,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
         // Show toolWindow statistics
         fillToolWindowContents(testReport)
         createToolWindowTab()
 
         updateCoverage(
             testReport.allCoveredLines,
-            testReport.testCaseList.values.map { it.id }.toHashSet(),
+            testReport.testCaseList.values
+                .map { it.id }
+                .toHashSet(),
             testReport,
             generatedTestsTabData,
         )
@@ -105,19 +109,21 @@ class CoverageVisualisationTabBuilder(
         val settingsProjectState = project.service<PluginSettingsService>().state
 
         if (settingsProjectState.showCoverageCheckboxSelected) {
-            val color = JBColor(
-                PluginSettingsBundle.get("colorName"),
-                Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue),
-            )
-            val colorForLines = JBColor(
-                PluginSettingsBundle.get("colorName"),
-                Color(
-                    settingsProjectState.colorRed,
-                    settingsProjectState.colorGreen,
-                    settingsProjectState.colorBlue,
-                    30,
-                ),
-            )
+            val color =
+                JBColor(
+                    PluginSettingsBundle.get("colorName"),
+                    Color(settingsProjectState.colorRed, settingsProjectState.colorGreen, settingsProjectState.colorBlue),
+                )
+            val colorForLines =
+                JBColor(
+                    PluginSettingsBundle.get("colorName"),
+                    Color(
+                        settingsProjectState.colorRed,
+                        settingsProjectState.colorGreen,
+                        settingsProjectState.colorBlue,
+                        30,
+                    ),
+                )
 
             // Update the color used for highlighting if necessary
             textAttribute.backgroundColor = colorForLines
@@ -135,7 +141,9 @@ class CoverageVisualisationTabBuilder(
                         testCasesCoveringMutant.add(testName)
                     }
                 } else {
-                    throw IllegalStateException("all test cases passed to the plugin visualizer in IDEA should be an instance of IJTestCase")
+                    throw IllegalStateException(
+                        "all test cases passed to the plugin visualizer in IDEA should be an instance of IJTestCase",
+                    )
                 }
             }
 
@@ -147,11 +155,12 @@ class CoverageVisualisationTabBuilder(
             for (i in linesToCover) {
                 val line = i - 1
 
-                val hl = editor.markupModel.addLineHighlighter(
-                    line,
-                    HighlighterLayer.ADDITIONAL_SYNTAX,
-                    textAttribute,
-                )
+                val hl =
+                    editor.markupModel.addLineHighlighter(
+                        line,
+                        HighlighterLayer.ADDITIONAL_SYNTAX,
+                        textAttribute,
+                    )
 
                 // get tests that are covering the current line
                 val testsCoveringLine = getCoveringLines(testReport, selectedTests, i)
@@ -159,39 +168,55 @@ class CoverageVisualisationTabBuilder(
                 val mutationCoveredLine = mutationCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
                 val mutationNotCoveredLine = mutationNotCovered.getOrDefault(i, listOf()).map { x -> x.replacement }
 
-                hl.lineMarkerRenderer = CoverageRenderer(
-                    color,
-                    line,
-                    testsCoveringLine,
-                    mutationCoveredLine,
-                    mutationNotCoveredLine,
-                    mapMutantsToTests,
-                    project,
-                    generatedTestsTabData,
-                )
+                hl.lineMarkerRenderer =
+                    CoverageRenderer(
+                        color,
+                        line,
+                        testsCoveringLine,
+                        mutationCoveredLine,
+                        mutationNotCoveredLine,
+                        mapMutantsToTests,
+                        project,
+                        generatedTestsTabData,
+                    )
             }
         }
     }
 
-    private fun getCoveringLines(testReport: Report, selectedTests: HashSet<Int>, lineNumber: Int): List<String> {
-        return testReport.testCaseList.filter { x -> lineNumber in x.value.coveredLines && x.value.id in selectedTests }
+    private fun getCoveringLines(
+        testReport: Report,
+        selectedTests: HashSet<Int>,
+        lineNumber: Int,
+    ): List<String> =
+        testReport.testCaseList
+            .filter { x -> lineNumber in x.value.coveredLines && x.value.id in selectedTests }
             .map { x -> x.value.testName }
-    }
 
-    private fun getUncoveredMutants(testReport: Report, selectedTests: HashSet<Int>): Map<Int, List<MutationInfo>> {
+    private fun getUncoveredMutants(
+        testReport: Report,
+        selectedTests: HashSet<Int>,
+    ): Map<Int, List<MutationInfo>> {
         if (testReport is IJReport) {
-            return testReport.allUncoveredMutation.groupBy { x -> x.lineNo } + testReport.testCaseList.filter { x -> x.value.id !in selectedTests }
-                .map { x -> (x.value as IJTestCase).coveredMutants }.flatten().groupBy { x -> x.lineNo }
+            return testReport.allUncoveredMutation.groupBy { x -> x.lineNo } +
+                testReport.testCaseList
+                    .filter { x -> x.value.id !in selectedTests }
+                    .map { x -> (x.value as IJTestCase).coveredMutants }
+                    .flatten()
+                    .groupBy { x -> x.lineNo }
         } else {
             throw IllegalStateException("The report provided to IDEA's UI should be an instance of IJReport")
         }
     }
 
-    private fun getCoveredMutants(testReport: Report, selectedTests: HashSet<Int>): Map<Int, List<MutationInfo>> {
-        return testReport.testCaseList.filter { x -> x.value.id in selectedTests }
+    private fun getCoveredMutants(
+        testReport: Report,
+        selectedTests: HashSet<Int>,
+    ): Map<Int, List<MutationInfo>> =
+        testReport.testCaseList
+            .filter { x -> x.value.id in selectedTests }
             .map { x -> (x.value as IJTestCase).coveredMutants }
-            .flatten().groupBy { x -> x.lineNo }
-    }
+            .flatten()
+            .groupBy { x -> x.lineNo }
 
     /**
      * Fill the toolWindow to contain the coverage in the labels.
@@ -224,14 +249,15 @@ class CoverageVisualisationTabBuilder(
         }
 
         // Change the values in the table
-        mainScrollPane = getPanel(
-            arrayListOf(
-                testReport.UUT,
-                "$relativeLines% ($coveredLines/$allLines)",
-                "$relativeBranch% ($coveredBranches/$allBranches)",
-                "$relativeMutations% ($coveredMutations/$allMutations)",
-            ),
-        )
+        mainScrollPane =
+            getPanel(
+                arrayListOf(
+                    testReport.uut,
+                    "$relativeLines% ($coveredLines/$allLines)",
+                    "$relativeBranch% ($coveredBranches/$allBranches)",
+                    "$relativeMutations% ($coveredMutations/$allMutations)",
+                ),
+            )
     }
 
     /**
@@ -247,46 +273,45 @@ class CoverageVisualisationTabBuilder(
 
         // If there is no coverage visualisation tab, make it
         val contentFactory: ContentFactory = ContentFactory.getInstance()
-        content = contentFactory.createContent(
-            mainScrollPane,
-            PluginLabelsBundle.get("coverageVisualisation"),
-            true,
-        )
+        content =
+            contentFactory.createContent(
+                mainScrollPane,
+                PluginLabelsBundle.get("coverageVisualisation"),
+                true,
+            )
         contentManager!!.addContent(content!!)
     }
 
     private fun getPanel(data: ArrayList<String>): JScrollPane {
         // Implementation of abstract table model
-        val tableModel = object : AbstractTableModel() {
-            /**
-             * Returns the number of rows.
-             *
-             * @return row count
-             */
-            override fun getRowCount(): Int {
-                return 1
-            }
+        val tableModel =
+            object : AbstractTableModel() {
+                /**
+                 * Returns the number of rows.
+                 *
+                 * @return row count
+                 */
+                override fun getRowCount(): Int = 1
 
-            /**
-             * Returns the number of columns.
-             *
-             * @return column count
-             */
-            override fun getColumnCount(): Int {
-                return 4
-            }
+                /**
+                 * Returns the number of columns.
+                 *
+                 * @return column count
+                 */
+                override fun getColumnCount(): Int = 4
 
-            /**
-             * Returns the value at index.
-             *
-             * @param rowIndex index of row
-             * @param columnIndex index of column
-             * @return value at row
-             */
-            override fun getValueAt(rowIndex: Int, columnIndex: Int): Any {
-                return data[rowIndex * 4 + columnIndex]
+                /**
+                 * Returns the value at index.
+                 *
+                 * @param rowIndex index of row
+                 * @param columnIndex index of column
+                 * @return value at row
+                 */
+                override fun getValueAt(
+                    rowIndex: Int,
+                    columnIndex: Int,
+                ): Any = data[rowIndex * 4 + columnIndex]
             }
-        }
 
         val table = JBTable(tableModel)
 

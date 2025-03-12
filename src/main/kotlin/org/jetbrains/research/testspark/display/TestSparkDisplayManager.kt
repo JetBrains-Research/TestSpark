@@ -57,15 +57,16 @@ class TestSparkDisplayManager {
         this.editor = editor
 
         coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project, editor)
-        generatedTestsTabBuilder = GeneratedTestsTabBuilder(
-            project,
-            report,
-            editor,
-            uiContext,
-            coverageVisualisationTabBuilder!!,
-            testsExecutionResultManager,
-            generationTool,
-        )
+        generatedTestsTabBuilder =
+            GeneratedTestsTabBuilder(
+                project,
+                report,
+                editor,
+                uiContext,
+                coverageVisualisationTabBuilder!!,
+                testsExecutionResultManager,
+                generationTool,
+            )
 
         generatedTestsTabBuilder!!.show(contentManager!!, language)
         coverageVisualisationTabBuilder!!.show(report, generatedTestsTabBuilder!!.generatedTestsTabData())
@@ -81,13 +82,14 @@ class TestSparkDisplayManager {
             }
 
             val parentComponent: Component? = null
-            val choice = JOptionPane.showConfirmDialog(
-                parentComponent,
-                PluginMessagesBundle.get("removeAllMessage"),
-                PluginMessagesBundle.get("confirmationTitle"),
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.WARNING_MESSAGE,
-            )
+            val choice =
+                JOptionPane.showConfirmDialog(
+                    parentComponent,
+                    PluginMessagesBundle.get("removeAllMessage"),
+                    PluginMessagesBundle.get("confirmationTitle"),
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE,
+                )
 
             if (choice == JOptionPane.OK_OPTION) {
                 clear()
@@ -114,6 +116,7 @@ class TestSparkDisplayManager {
         }
         try {
             toolWindow?.hide()
-        } catch (_: AlreadyDisposedException) {} // Make sure the process continues if the tool window is already closed
+        } catch (_: AlreadyDisposedException) {
+        } // Make sure the process continues if the tool window is already closed
     }
 }

@@ -13,7 +13,9 @@ import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JList
 
-class JUnitCombobox(val e: AnActionEvent) : ComboBox<JUnitVersion>(JUnitVersion.entries.toTypedArray()) {
+class JUnitCombobox(
+    val e: AnActionEvent,
+) : ComboBox<JUnitVersion>(JUnitVersion.entries.toTypedArray()) {
     private val llmSettingsState: LLMSettingsState
         get() = e.project!!.getService(LLMSettingsService::class.java).state
 
@@ -30,24 +32,25 @@ class JUnitCombobox(val e: AnActionEvent) : ComboBox<JUnitVersion>(JUnitVersion.
             }
         }
 
-        renderer = object : DefaultListCellRenderer() {
-            override fun getListCellRendererComponent(
-                list: JList<*>?,
-                value: Any?,
-                index: Int,
-                isSelected: Boolean,
-                cellHasFocus: Boolean,
-            ): Component {
-                var name = value
-                if (value is JUnitVersion) {
-                    name = value.showName
-                    if (detected.contains(value)) {
-                        name += " (Detected)"
+        renderer =
+            object : DefaultListCellRenderer() {
+                override fun getListCellRendererComponent(
+                    list: JList<*>?,
+                    value: Any?,
+                    index: Int,
+                    isSelected: Boolean,
+                    cellHasFocus: Boolean,
+                ): Component {
+                    var name = value
+                    if (value is JUnitVersion) {
+                        name = value.showName
+                        if (detected.contains(value)) {
+                            name += " (Detected)"
+                        }
                     }
+                    return super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus)
                 }
-                return super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus)
             }
-        }
     }
 
     private fun findJUnitDependency(): List<JUnitVersion> {

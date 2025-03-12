@@ -10,5 +10,10 @@ open class ChatMessage protected constructor(
     }
 }
 
-class ChatUserMessage(content: String) : ChatMessage(ChatRole.User, content)
-class ChatAssistantMessage(content: String) : ChatMessage(ChatRole.Assistant, content)
+class ChatUserMessage(
+    content: String,
+) : ChatMessage(ChatRole.User, content)
+
+class ChatAssistantMessage(
+    content: String,
+) : ChatMessage(ChatRole.Assistant, content)

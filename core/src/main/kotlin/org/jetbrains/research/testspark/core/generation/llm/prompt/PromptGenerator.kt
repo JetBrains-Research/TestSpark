@@ -16,17 +16,21 @@ class PromptGenerator(
      * @return The generated prompt.
      * @throws IllegalStateException If any of the required keywords are missing in the prompt template.
      */
-    fun generatePromptForClass(interestingClasses: List<ClassRepresentation>, testSamplesCode: String): String {
-        val prompt = PromptBuilder(promptTemplates.classPrompt)
-            .insertLanguage(context.promptConfiguration.desiredLanguage)
-            .insertName(context.cut!!.qualifiedName)
-            .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
-            .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
-            .insertCodeUnderTest(context.cut.fullText, context.classesToTest)
-            .insertMethodsSignatures(interestingClasses)
-            .insertPolymorphismRelations(context.polymorphismRelations)
-            .insertTestSample(testSamplesCode)
-            .build()
+    fun generatePromptForClass(
+        interestingClasses: List<ClassRepresentation>,
+        testSamplesCode: String,
+    ): String {
+        val prompt =
+            PromptBuilder(promptTemplates.classPrompt)
+                .insertLanguage(context.promptConfiguration.desiredLanguage)
+                .insertName(context.cut!!.qualifiedName)
+                .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
+                .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
+                .insertCodeUnderTest(context.cut.fullText, context.classesToTest)
+                .insertMethodsSignatures(interestingClasses)
+                .insertPolymorphismRelations(context.polymorphismRelations)
+                .insertTestSample(testSamplesCode)
+                .build()
 
         println("Prompt: $prompt")
         return prompt
@@ -48,16 +52,17 @@ class PromptGenerator(
     ): String {
         val methodQualifiedName = context.cut?.let { "${it.qualifiedName}.${method.name}" } ?: "$packageName.${method.name}"
 
-        val prompt = PromptBuilder(promptTemplates.methodPrompt)
-            .insertLanguage(context.promptConfiguration.desiredLanguage)
-            .insertName(methodQualifiedName)
-            .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
-            .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
-            .insertCodeUnderTest(method.text, context.classesToTest)
-            .insertMethodsSignatures(interestingClassesFromMethod)
-            .insertPolymorphismRelations(context.polymorphismRelations)
-            .insertTestSample(testSamplesCode)
-            .build()
+        val prompt =
+            PromptBuilder(promptTemplates.methodPrompt)
+                .insertLanguage(context.promptConfiguration.desiredLanguage)
+                .insertName(methodQualifiedName)
+                .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
+                .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
+                .insertCodeUnderTest(method.text, context.classesToTest)
+                .insertMethodsSignatures(interestingClassesFromMethod)
+                .insertPolymorphismRelations(context.polymorphismRelations)
+                .insertTestSample(testSamplesCode)
+                .build()
 
         return prompt
     }
@@ -78,27 +83,29 @@ class PromptGenerator(
         testSamplesCode: String,
         packageName: String,
     ): String {
-        val codeUnderTest = if (context.cut != null) {
-            // `method` is a method within a class
-            buildCutDeclaration(context.cut, method)
-        } else {
-            // `method` is a top-level function
-            method.text
-        }
+        val codeUnderTest =
+            if (context.cut != null) {
+                // `method` is a method within a class
+                buildCutDeclaration(context.cut, method)
+            } else {
+                // `method` is a top-level function
+                method.text
+            }
 
         val methodQualifiedName = context.cut?.let { "${it.qualifiedName}.${method.name}" } ?: "$packageName.${method.name}"
         val lineReference = "`${lineUnderTest.trim()}` within `$methodQualifiedName`"
 
-        val prompt = PromptBuilder(promptTemplates.linePrompt)
-            .insertLanguage(context.promptConfiguration.desiredLanguage)
-            .insertName(lineReference)
-            .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
-            .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
-            .insertCodeUnderTest(codeUnderTest, context.classesToTest)
-            .insertMethodsSignatures(interestingClassesFromMethod)
-            .insertPolymorphismRelations(context.polymorphismRelations)
-            .insertTestSample(testSamplesCode)
-            .build()
+        val prompt =
+            PromptBuilder(promptTemplates.linePrompt)
+                .insertLanguage(context.promptConfiguration.desiredLanguage)
+                .insertName(lineReference)
+                .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
+                .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
+                .insertCodeUnderTest(codeUnderTest, context.classesToTest)
+                .insertMethodsSignatures(interestingClassesFromMethod)
+                .insertPolymorphismRelations(context.polymorphismRelations)
+                .insertTestSample(testSamplesCode)
+                .build()
 
         return prompt
     }
@@ -121,16 +128,17 @@ class PromptGenerator(
     ): String {
         val lineReference = "`${lineUnderTest.trim()}` within `${context.cut!!.qualifiedName}`"
 
-        val prompt = PromptBuilder(promptTemplates.linePrompt)
-            .insertLanguage(context.promptConfiguration.desiredLanguage)
-            .insertName(lineReference)
-            .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
-            .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
-            .insertCodeUnderTest(context.cut.fullText, context.classesToTest)
-            .insertMethodsSignatures(interestingClasses)
-            .insertPolymorphismRelations(context.polymorphismRelations)
-            .insertTestSample(testSamplesCode)
-            .build()
+        val prompt =
+            PromptBuilder(promptTemplates.linePrompt)
+                .insertLanguage(context.promptConfiguration.desiredLanguage)
+                .insertName(lineReference)
+                .insertTestingPlatform(context.promptConfiguration.desiredTestingPlatform)
+                .insertMockingFramework(context.promptConfiguration.desiredMockingFramework)
+                .insertCodeUnderTest(context.cut.fullText, context.classesToTest)
+                .insertMethodsSignatures(interestingClasses)
+                .insertPolymorphismRelations(context.polymorphismRelations)
+                .insertTestSample(testSamplesCode)
+                .build()
 
         return prompt
     }
@@ -170,36 +178,43 @@ class PromptGenerator(
  * @param method The `MethodRepresentation` object representing the method under test.
  * @return A formatted `String` representing the cut declaration, containing constructor declarations and method text.
  */
-private fun buildCutDeclaration(cut: ClassRepresentation, method: MethodRepresentation): String {
-    val instruction = buildString {
-        val constructorToUse = if (cut.constructorSignatures.isEmpty()) {
-            "a default constructor with zero arguments"
-        } else {
-            "the following constructor declarations"
+private fun buildCutDeclaration(
+    cut: ClassRepresentation,
+    method: MethodRepresentation,
+): String {
+    val instruction =
+        buildString {
+            val constructorToUse =
+                if (cut.constructorSignatures.isEmpty()) {
+                    "a default constructor with zero arguments"
+                } else {
+                    "the following constructor declarations"
+                }
+            append("Use $constructorToUse to instantiate `${cut.qualifiedName}` and call the method under test `${method.name}`")
         }
-        append("Use $constructorToUse to instantiate `${cut.qualifiedName}` and call the method under test `${method.name}`")
-    }
 
     val classType = cut.classType.representation
 
-    val constructorDeclarations = buildString {
-        appendLine("Constructors of the $classType ${cut.qualifiedName}:")
-        if (cut.constructorSignatures.isEmpty()) {
-            appendLine("=== Default constructor")
-        }
-        for (constructor in cut.constructorSignatures) {
-            appendLine("\t=== $constructor")
-        }
-    }.trim()
+    val constructorDeclarations =
+        buildString {
+            appendLine("Constructors of the $classType ${cut.qualifiedName}:")
+            if (cut.constructorSignatures.isEmpty()) {
+                appendLine("=== Default constructor")
+            }
+            for (constructor in cut.constructorSignatures) {
+                appendLine("\t=== $constructor")
+            }
+        }.trim()
 
-    val cutDeclaration = buildString {
-        appendLine("[Instruction]: $instruction:")
-        appendLine()
-        appendLine(constructorDeclarations)
-        appendLine()
-        appendLine("Method:")
-        appendLine(method.text)
-    }.trim()
+    val cutDeclaration =
+        buildString {
+            appendLine("[Instruction]: $instruction:")
+            appendLine()
+            appendLine(constructorDeclarations)
+            appendLine()
+            appendLine("Method:")
+            appendLine(method.text)
+        }.trim()
 
     return cutDeclaration
 }

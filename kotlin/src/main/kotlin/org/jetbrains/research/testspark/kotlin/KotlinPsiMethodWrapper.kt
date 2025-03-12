@@ -17,24 +17,27 @@ import org.jetbrains.kotlin.psi.psiUtil.containingClassOrObject
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
-class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
-
+class KotlinPsiMethodWrapper(
+    val psiFunction: KtFunction,
+) : PsiMethodWrapper {
     override val name: String get() = psiFunction.name!!
 
     override val text: String? = psiFunction.text
 
-    override val containingClass: PsiClassWrapper? = psiFunction.run {
-        parentOfType<KtClass>()?.let { KotlinPsiClassWrapper(it) }
-    }
+    override val containingClass: PsiClassWrapper? =
+        psiFunction.run {
+            parentOfType<KtClass>()?.let { KotlinPsiClassWrapper(it) }
+        }
 
     override val containingFile: PsiFile = psiFunction.containingFile
 
     override val methodDescriptor: String
-        get() = psiFunction.run {
-            val parameterTypes = valueParameters.joinToString("") { generateFieldType(it.typeReference) }
-            val returnType = generateReturnDescriptor(psiFunction)
-            return "$name($parameterTypes)$returnType"
-        }
+        get() =
+            psiFunction.run {
+                val parameterTypes = valueParameters.joinToString("") { generateFieldType(it.typeReference) }
+                val returnType = generateReturnDescriptor(psiFunction)
+                return "$name($parameterTypes)$returnType"
+            }
 
     override val signature: String
         get() = buildSignature(psiFunction)
@@ -56,14 +59,17 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
 
     val isTopLevelFunction: Boolean = psiFunction.containingClassOrObject == null
 
-    val isDefaultMethod: Boolean = psiFunction.run {
-        val containingClass = PsiTreeUtil.getParentOfType(this, KtClassOrObject::class.java)
-        val containingInterface = containingClass?.isInterfaceClass()
-        // ensure that the function is a non-abstract method defined in an interface
-        name != "<init>" && // function is not a constructor
-            bodyExpression != null && // function has an implementation
-            containingInterface == true // function is defined within an interface
-    }
+    val isDefaultMethod: Boolean =
+        psiFunction.run {
+            val containingClass = PsiTreeUtil.getParentOfType(this, KtClassOrObject::class.java)
+            val containingInterface = containingClass?.isInterfaceClass()
+            // ensure that the function is a non-abstract method defined in an interface
+            name != "<init>" &&
+                // function is not a constructor
+                bodyExpression != null &&
+                // function has an implementation
+                containingInterface == true // function is defined within an interface
+        }
 
     override fun containsLine(lineNumber: Int): Boolean {
         val psiFile = psiFunction.containingFile
@@ -134,8 +140,8 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
      * @param type the type to generate the descriptor for
      * @return the field descriptor
      */
-    private fun generateFieldType(type: String): String {
-        return when (type) {
+    private fun generateFieldType(type: String): String =
+        when (type) {
             "Int" -> "I"
             "Long" -> "J"
             "Float" -> "F"
@@ -147,7 +153,6 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
             "Unit" -> "V"
             else -> "L${type.replace('.', '/')};"
         }
-    }
 
     companion object {
         /**
@@ -156,9 +161,10 @@ class KotlinPsiMethodWrapper(val psiFunction: KtFunction) : PsiMethodWrapper {
          * @param function The Kotlin function to build the signature for.
          * @return The signature of the function.
          */
-        fun buildSignature(function: KtFunction) = function.run {
-            val bodyStart = bodyExpression?.startOffsetInParent ?: textLength
-            text.substring(0, bodyStart).replace('\n', ' ').trim()
-        }
+        fun buildSignature(function: KtFunction) =
+            function.run {
+                val bodyStart = bodyExpression?.startOffsetInParent ?: textLength
+                text.substring(0, bodyStart).replace('\n', ' ').trim()
+            }
     }
 }

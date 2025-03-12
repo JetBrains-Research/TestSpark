@@ -17,8 +17,9 @@ import org.jetbrains.research.testspark.tools.llm.generation.TestSparkRequestMan
 import java.net.HttpURLConnection
 import java.net.URLConnection
 
-class GeminiRequestManager(project: Project) : TestSparkRequestManager(project) {
-
+class GeminiRequestManager(
+    project: Project,
+) : TestSparkRequestManager(project) {
     private val gson = GsonBuilder().create()
 
     override val url: String
@@ -35,10 +36,11 @@ class GeminiRequestManager(project: Project) : TestSparkRequestManager(project) 
         return gson.toJson(geminiRequest)
     }
 
-    override fun mapHttpCodeToError(httpCode: Int): TestSparkError = when (httpCode) {
-        HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.PromptTooLong
-        else -> HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.Gemini))
-    }
+    override fun mapHttpCodeToError(httpCode: Int): TestSparkError =
+        when (httpCode) {
+            HttpURLConnection.HTTP_BAD_REQUEST -> LlmError.PromptTooLong
+            else -> HttpError(httpCode = httpCode, module = TestSparkModule.Llm(LlmModuleType.Gemini))
+        }
 
     override fun assembleResponse(
         httpRequest: HttpRequests.Request,
@@ -52,9 +54,11 @@ class GeminiRequestManager(project: Project) : TestSparkRequestManager(project) 
             val text = httpRequest.reader.readText()
             val result =
                 gson.fromJson(
-                    JsonParser.parseString(text)
+                    JsonParser
+                        .parseString(text)
                         .asJsonObject["candidates"]
-                        .asJsonArray[0].asJsonObject,
+                        .asJsonArray[0]
+                        .asJsonObject,
                     GeminiReply::class.java,
                 )
 

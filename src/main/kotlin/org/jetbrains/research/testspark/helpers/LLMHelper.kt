@@ -168,28 +168,30 @@ object LLMHelper {
         llmPlatforms: List<LLMPlatform>,
         settingsState: LLMSettingsState,
     ) {
-        llmUserTokenField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent?) {
-                updateToken()
-            }
-
-            override fun removeUpdate(e: DocumentEvent?) {
-                updateToken()
-            }
-
-            override fun changedUpdate(e: DocumentEvent?) {
-                updateToken()
-            }
-
-            private fun updateToken() {
-                for (llmPlatform in llmPlatforms) {
-                    if (platformSelector.selectedItem!!.toString() == llmPlatform.name) {
-                        llmPlatform.token = llmUserTokenField.text
-                    }
+        llmUserTokenField.document.addDocumentListener(
+            object : DocumentListener {
+                override fun insertUpdate(e: DocumentEvent?) {
+                    updateToken()
                 }
-                updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
-            }
-        })
+
+                override fun removeUpdate(e: DocumentEvent?) {
+                    updateToken()
+                }
+
+                override fun changedUpdate(e: DocumentEvent?) {
+                    updateToken()
+                }
+
+                private fun updateToken() {
+                    for (llmPlatform in llmPlatforms) {
+                        if (platformSelector.selectedItem!!.toString() == llmPlatform.name) {
+                            llmPlatform.token = llmUserTokenField.text
+                        }
+                    }
+                    updateModelSelector(platformSelector, modelSelector, llmUserTokenField, llmPlatforms, settingsState)
+                }
+            },
+        )
 
         platformSelector.addItemListener {
             updateLlmUserTokenField(platformSelector, llmUserTokenField, llmPlatforms, settingsState)
@@ -237,16 +239,17 @@ object LLMHelper {
      *
      * @return The list of LLMPlatforms.
      */
-    fun getLLLMPlatforms(): List<LLMPlatform> {
-        return listOf(OpenAIPlatform(), GraziePlatform(), HuggingFacePlatform(), GeminiPlatform())
-    }
+    fun getLLLMPlatforms(): List<LLMPlatform> = listOf(OpenAIPlatform(), GraziePlatform(), HuggingFacePlatform(), GeminiPlatform())
 
     /**
      * Checks if the token is set.
      *
      * @return True if the token is set, false otherwise.
      */
-    fun isCorrectToken(project: Project, errorMonitor: ErrorMonitor): Boolean {
+    fun isCorrectToken(
+        project: Project,
+        errorMonitor: ErrorMonitor,
+    ): Boolean {
         if (!LlmSettingsArguments(project).isTokenSet()) {
             LLMErrorManager().errorProcess(LLMMessagesBundle.get("missingToken"), project, errorMonitor)
             return false
@@ -282,28 +285,31 @@ object LLMHelper {
 
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
         val testBodyPrinter = TestBodyPrinterFactory.create(language)
-        val testSuiteParser = TestSuiteParserFactory.createJUnitTestSuiteParser(
-            jUnitVersion,
-            language,
-            testBodyPrinter,
-        )
+        val testSuiteParser =
+            TestSuiteParserFactory.createJUnitTestSuiteParser(
+                jUnitVersion,
+                language,
+                testBodyPrinter,
+            )
 
-        val testsAssembler = TestsAssemblerFactory.create(
-            indicator,
-            testGenerationOutput,
-            testSuiteParser,
-            jUnitVersion,
-        )
+        val testsAssembler =
+            TestsAssemblerFactory.create(
+                indicator,
+                testGenerationOutput,
+                testSuiteParser,
+                jUnitVersion,
+            )
 
-        val testSuite = executeTestCaseModificationRequest(
-            language,
-            testCase,
-            task,
-            indicator,
-            requestManager,
-            testsAssembler,
-            errorMonitor,
-        )
+        val testSuite =
+            executeTestCaseModificationRequest(
+                language,
+                testCase,
+                task,
+                indicator,
+                requestManager,
+                testsAssembler,
+                errorMonitor,
+            )
         return testSuite
     }
 
@@ -312,7 +318,11 @@ object LLMHelper {
      *
      * @return True if the token is set, false otherwise.
      */
-    private fun updateToken(requestManager: RequestManager, project: Project, errorMonitor: ErrorMonitor): Boolean {
+    private fun updateToken(
+        requestManager: RequestManager,
+        project: Project,
+        errorMonitor: ErrorMonitor,
+    ): Boolean {
         requestManager.token = LlmSettingsArguments(project).getToken()
         return LlmSettingsArguments(project).isTokenSet()
     }
@@ -327,9 +337,10 @@ object LLMHelper {
     private fun getOpenAIModels(providedToken: String): Array<String> {
         val url = "https://api.openai.com/v1/models"
 
-        val httpRequest = HttpRequests.request(url).tuner {
-            it.setRequestProperty("Authorization", "Bearer $providedToken")
-        }
+        val httpRequest =
+            HttpRequests.request(url).tuner {
+                it.setRequestProperty("Authorization", "Bearer $providedToken")
+            }
 
         val models = mutableListOf<String>()
 
@@ -348,17 +359,21 @@ object LLMHelper {
             return arrayOf("")
         }
 
-        val gptComparator = Comparator<String> { s1, s2 ->
-            when {
-                s1.contains("gpt") && s2.contains("gpt") -> s2.compareTo(s1)
-                s1.contains("gpt") -> -1
-                s2.contains("gpt") -> 1
-                else -> s1.compareTo(s2)
+        val gptComparator =
+            Comparator<String> { s1, s2 ->
+                when {
+                    s1.contains("gpt") && s2.contains("gpt") -> s2.compareTo(s1)
+                    s1.contains("gpt") -> -1
+                    s2.contains("gpt") -> 1
+                    else -> s1.compareTo(s2)
+                }
             }
-        }
 
         if (models.isNotEmpty()) {
-            return models.sortedWith(gptComparator).toTypedArray().filter { !it.contains("vision") }
+            return models
+                .sortedWith(gptComparator)
+                .toTypedArray()
+                .filter { !it.contains("vision") }
                 .toTypedArray()
         }
 
@@ -387,9 +402,10 @@ object LLMHelper {
                     val dataArray = jsonObject.getAsJsonArray("models")
                     for (dataObject in dataArray) {
                         val id = dataObject.asJsonObject.getAsJsonPrimitive("name").asString
-                        val methods = dataObject.asJsonObject
-                            .getAsJsonArray("supportedGenerationMethods")
-                            .map { method -> method.asString }
+                        val methods =
+                            dataObject.asJsonObject
+                                .getAsJsonArray("supportedGenerationMethods")
+                                .map { method -> method.asString }
                         if (methods.contains("generateContent")) {
                             models.add(id.removePrefix("models/"))
                         }
@@ -415,7 +431,8 @@ object LLMHelper {
     private fun getGrazieModels(): Array<String> {
         val className = "org.jetbrains.research.grazie.Info"
         return try {
-            (Class.forName(className).getDeclaredConstructor().newInstance() as GrazieInfo).availableProfiles()
+            (Class.forName(className).getDeclaredConstructor().newInstance() as GrazieInfo)
+                .availableProfiles()
                 .toTypedArray()
         } catch (e: ClassNotFoundException) {
             arrayOf("")
@@ -427,7 +444,5 @@ object LLMHelper {
      *
      * @return an array of string representing the available HuggingFace models
      */
-    private fun getHuggingFaceModels(): Array<String> {
-        return arrayOf("Meta-Llama-3-8B-Instruct", "Meta-Llama-3-70B-Instruct")
-    }
+    private fun getHuggingFaceModels(): Array<String> = arrayOf("Meta-Llama-3-8B-Instruct", "Meta-Llama-3-70B-Instruct")
 }

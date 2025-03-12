@@ -8,13 +8,15 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import org.jetbrains.research.testspark.testmanager.template.TestAnalyzer
 
 object JavaTestAnalyzer : TestAnalyzer {
-
     override fun extractFirstTestMethodCode(classCode: String): String {
         var result = ""
         try {
             val componentUnit: CompilationUnit = StaticJavaParser.parse(classCode)
             object : VoidVisitorAdapter<Any?>() {
-                override fun visit(method: MethodDeclaration, arg: Any?) {
+                override fun visit(
+                    method: MethodDeclaration,
+                    arg: Any?,
+                ) {
                     super.visit(method, arg)
                     if (method.getAnnotationByName("Test").isPresent) {
                         result += "\t" + method.toString().replace("\n", "\n\t") + "\n\n"
@@ -44,13 +46,19 @@ object JavaTestAnalyzer : TestAnalyzer {
         }
     }
 
-    override fun extractFirstTestMethodName(oldTestCaseName: String, classCode: String): String {
+    override fun extractFirstTestMethodName(
+        oldTestCaseName: String,
+        classCode: String,
+    ): String {
         var result = ""
         try {
             val componentUnit: CompilationUnit = StaticJavaParser.parse(classCode)
 
             object : VoidVisitorAdapter<Any?>() {
-                override fun visit(method: MethodDeclaration, arg: Any?) {
+                override fun visit(
+                    method: MethodDeclaration,
+                    arg: Any?,
+                ) {
                     super.visit(method, arg)
                     if (method.getAnnotationByName("Test").isPresent) {
                         result = method.nameAsString
@@ -72,7 +80,5 @@ object JavaTestAnalyzer : TestAnalyzer {
         return className
     }
 
-    override fun getFileNameFromTestCaseCode(code: String): String {
-        return "${getClassFromTestCaseCode(code)}.java"
-    }
+    override fun getFileNameFromTestCaseCode(code: String): String = "${getClassFromTestCaseCode(code)}.java"
 }

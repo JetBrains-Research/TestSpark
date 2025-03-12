@@ -11,8 +11,9 @@ import javax.swing.JComponent
  * It interacts with the SettingsPluginComponent, TestSparkSettingsService and TestSparkSettingsState.
  * It provides controller functionality for the TestSparkSettingsState.
  */
-class PluginSettingsConfigurable(val project: Project) : SettingsConfigurable {
-
+class PluginSettingsConfigurable(
+    val project: Project,
+) : SettingsConfigurable {
     var settingsComponent: PluginSettingsComponent? = null
 
     /**
@@ -72,9 +73,7 @@ class PluginSettingsConfigurable(val project: Project) : SettingsConfigurable {
      *
      * @return the name displayed in the menu (settings)
      */
-    override fun getDisplayName(): String {
-        return "TestSpark"
-    }
+    override fun getDisplayName(): String = "TestSpark"
 
     /**
      * Disposes the UI resources. It is called when a user closes the Settings dialog.

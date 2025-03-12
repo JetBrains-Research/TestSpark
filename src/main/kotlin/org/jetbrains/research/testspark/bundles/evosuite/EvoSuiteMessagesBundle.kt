@@ -7,12 +7,13 @@ import org.jetbrains.annotations.PropertyKey
 /**
  * Loads the `resources` directory.
  */
-object EvoSuiteMessagesBundle : DynamicBundle(EvoSuiteBundlePaths.messages) {
-
+object EvoSuiteMessagesBundle : DynamicBundle(EvoSuiteBundlePaths.MESSAGES) {
     /**
      * Gets the requested message.
      */
     @Nls
-    fun get(@PropertyKey(resourceBundle = EvoSuiteBundlePaths.messages) key: String, vararg params: Any): String =
-        getMessage(key, *params)
+    fun get(
+        @PropertyKey(resourceBundle = EvoSuiteBundlePaths.MESSAGES) key: String,
+        vararg params: Any,
+    ): String = getMessage(key, *params)
 }

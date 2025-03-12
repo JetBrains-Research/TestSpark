@@ -21,16 +21,16 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertContentEquals
 
 class LLMSampleSelectorTest {
-
     private lateinit var selector: LLMSampleSelector
     private lateinit var fixture: CodeInsightTestFixture
     private lateinit var openFile: PsiJavaFile
 
-    private val sampleTestCode = """
+    private val sampleTestCode =
+        """
         public class TestSample {
             ${LLMSampleSelector.DEFAULT_TEST_CODE}
         }
-    """.trimIndent()
+        """.trimIndent()
 
     @BeforeEach
     @BeforeTry
@@ -43,25 +43,27 @@ class LLMSampleSelectorTest {
         val projectBuilder: TestFixtureBuilder<IdeaProjectTestFixture> =
             IdeaTestFixtureFactory.getFixtureFactory().createFixtureBuilder("project")
 
-        fixture = JavaTestFixtureFactory.getFixtureFactory()
-            .createCodeInsightFixture(projectBuilder.fixture)
+        fixture =
+            JavaTestFixtureFactory
+                .getFixtureFactory()
+                .createCodeInsightFixture(projectBuilder.fixture)
         fixture.setUp()
 
         addFilesFromJSONToFixture()
     }
 
-    private fun classFromFile(psiJavaFile: PsiJavaFile): PsiClass {
-        return runReadAction {
+    private fun classFromFile(psiJavaFile: PsiJavaFile): PsiClass =
+        runReadAction {
             psiJavaFile.classes[
-                psiJavaFile.classes.stream().map { it.name }.toArray()
+                psiJavaFile.classes
+                    .stream()
+                    .map { it.name }
+                    .toArray()
                     .indexOf(psiJavaFile.name.removeSuffix(".java")),
             ]
         }
-    }
 
-    private fun methodsFromClass(psiClass: PsiClass): Array<out PsiMethod> {
-        return psiClass.methods
-    }
+    private fun methodsFromClass(psiClass: PsiClass): Array<out PsiMethod> = psiClass.methods
 
     private fun addFilesFromJSONToFixture() {
         val jsonFileContent = getResourceAsText("/llm/sampleSelectorTestFiles.json")
@@ -75,8 +77,7 @@ class LLMSampleSelectorTest {
         }
     }
 
-    private fun getResourceAsText(path: String): String? =
-        object {}.javaClass.getResource(path)?.readText()
+    private fun getResourceAsText(path: String): String? = object {}.javaClass.getResource(path)?.readText()
 
     @Test
     fun `test the initial test names`() {
@@ -93,7 +94,10 @@ class LLMSampleSelectorTest {
     }
 
     @Property
-    fun `test the append of test sample code`(@ForAll index: Int, @ForAll code: String) {
+    fun `test the append of test sample code`(
+        @ForAll index: Int,
+        @ForAll code: String,
+    ) {
         selector.appendTestSampleCode(index, code)
         val expected = "Test sample number ${index + 1}\n```\n$code\n```\n"
         val actual = selector.getTestSamplesCode()
@@ -109,25 +113,28 @@ class LLMSampleSelectorTest {
 
     @Test
     fun `test the import-statement retrieval`() {
-        val expected = """
+        val expected =
+            """
             import org.junit.jupiter.api.Test;
             import static org.junit.jupiter.api.Assertions.assertEquals;
             import dummy.*;
-        """.trimIndent()
-        val actual = runReadAction {
-            val file = openFile
-            selector.retrieveImportStatements(file, classFromFile(file))
-        }
+            """.trimIndent()
+        val actual =
+            runReadAction {
+                val file = openFile
+                selector.retrieveImportStatements(file, classFromFile(file))
+            }
         assertEquals(expected, actual)
     }
 
     @Test
     fun `test the create test-sample class`() {
         val expected = "import org.junit.jupiter.api.Test;\n\n$sampleTestCode"
-        val actual = selector.createTestSampleClass(
-            "import org.junit.jupiter.api.Test;",
-            LLMSampleSelector.DEFAULT_TEST_CODE,
-        )
+        val actual =
+            selector.createTestSampleClass(
+                "import org.junit.jupiter.api.Test;",
+                LLMSampleSelector.DEFAULT_TEST_CODE,
+            )
         assertEquals(expected, actual)
     }
 

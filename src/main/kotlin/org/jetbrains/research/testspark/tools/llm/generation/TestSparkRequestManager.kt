@@ -15,10 +15,12 @@ import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import java.net.HttpURLConnection
 import java.net.URLConnection
 
-abstract class TestSparkRequestManager(project: Project) : RequestManager(
-    token = LlmSettingsArguments(project).getToken(),
-    llmModel = LlmSettingsArguments(project).getModel(),
-) {
+abstract class TestSparkRequestManager(
+    project: Project,
+) : RequestManager(
+        token = LlmSettingsArguments(project).getToken(),
+        llmModel = LlmSettingsArguments(project).getModel(),
+    ) {
     protected abstract val url: String
 
     protected abstract fun assembleRequestBodyJson(): String
@@ -33,29 +35,30 @@ abstract class TestSparkRequestManager(project: Project) : RequestManager(
         errorMonitor: ErrorMonitor,
     )
 
-    protected open fun mapHttpCodeToError(httpCode: Int): TestSparkError =
-        HttpError(httpCode = httpCode, module = TestSparkModule.Llm())
+    protected open fun mapHttpCodeToError(httpCode: Int): TestSparkError = HttpError(httpCode = httpCode, module = TestSparkModule.Llm())
 
     override fun send(
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
-        errorMonitor: ErrorMonitor
-    ): Result<Unit, TestSparkError> = try {
-        HttpRequests
-            .post(url, "application/json")
-            .tuner { tuneRequest(it) }
-            .connect { request ->
-                request.write(assembleRequestBodyJson())
-                val connection = request.connection as HttpURLConnection
-                when (val responseCode = connection.responseCode) {
-                    HttpURLConnection.HTTP_OK -> Result.Success(
-                        data = assembleResponse(request, testsAssembler, indicator, errorMonitor)
-                    )
-                    else -> Result.Failure(mapHttpCodeToError(responseCode))
+        errorMonitor: ErrorMonitor,
+    ): Result<Unit, TestSparkError> =
+        try {
+            HttpRequests
+                .post(url, "application/json")
+                .tuner { tuneRequest(it) }
+                .connect { request ->
+                    request.write(assembleRequestBodyJson())
+                    val connection = request.connection as HttpURLConnection
+                    when (val responseCode = connection.responseCode) {
+                        HttpURLConnection.HTTP_OK ->
+                            Result.Success(
+                                data = assembleResponse(request, testsAssembler, indicator, errorMonitor),
+                            )
+                        else -> Result.Failure(mapHttpCodeToError(responseCode))
+                    }
                 }
-            }
-    } catch (exception: HttpStatusException) {
-        Result.Failure(HttpError(cause = exception))
-    }
+        } catch (exception: HttpStatusException) {
+            Result.Failure(HttpError(cause = exception))
+        }
 }

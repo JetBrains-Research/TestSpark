@@ -50,8 +50,8 @@ class CoverageRenderer(
     private val mapMutantsToTests: HashMap<String, MutableList<String>>,
     private val project: Project,
     private val generatedTestsTabData: GeneratedTestsTabData,
-) :
-    ActiveGutterRenderer, LineMarkerRendererEx {
+) : ActiveGutterRenderer,
+    LineMarkerRendererEx {
     private val evoSuiteSettingsState: EvoSuiteSettingsState
         get() = project.getService(EvoSuiteSettingsService::class.java).state
 
@@ -63,11 +63,15 @@ class CoverageRenderer(
      * @param editor the editor
      * @param e mouse event
      */
-    override fun doAction(editor: Editor, e: MouseEvent) {
+    override fun doAction(
+        editor: Editor,
+        e: MouseEvent,
+    ) {
         e.consume()
-        val prePanel = FormBuilder
-            .createFormBuilder()
-            .addComponent(JBLabel(" Covered by tests:"), 10)
+        val prePanel =
+            FormBuilder
+                .createFormBuilder()
+                .addComponent(JBLabel(" Covered by tests:"), 10)
 
         for (testName in tests) {
             prePanel.addComponent(
@@ -97,11 +101,12 @@ class CoverageRenderer(
             }
         }
 
-        val panel = JBScrollPane(
-            prePanel.addVerticalGap(10).panel,
-            JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-            JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
-        )
+        val panel =
+            JBScrollPane(
+                prePanel.addVerticalGap(10).panel,
+                JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
+            )
 
         panel.preferredSize = Dimension(panel.preferredSize.width, 400.coerceAtMost(panel.preferredSize.height))
 
@@ -111,7 +116,8 @@ class CoverageRenderer(
             hint,
             editor,
             point,
-            HintManager.HIDE_BY_ANY_KEY or HintManager.HIDE_BY_TEXT_CHANGE or HintManager.HIDE_BY_OTHER_HINT or HintManager.HIDE_BY_SCROLLING,
+            HintManager.HIDE_BY_ANY_KEY or HintManager.HIDE_BY_TEXT_CHANGE or HintManager.HIDE_BY_OTHER_HINT or
+                HintManager.HIDE_BY_SCROLLING,
             -1,
             false,
             HintHint(editor, point),
@@ -125,7 +131,10 @@ class CoverageRenderer(
      * @param e mouse event
      * @return true iff mouse has interacted with gutter
      */
-    override fun canDoAction(editor: Editor, e: MouseEvent): Boolean {
+    override fun canDoAction(
+        editor: Editor,
+        e: MouseEvent,
+    ): Boolean {
         val component = e.component
         if (component is EditorGutterComponentEx) {
             return e.x > component.lineMarkerAreaOffset && e.x < component.iconAreaOffset
@@ -138,7 +147,10 @@ class CoverageRenderer(
      * @param mutantName name of the mutant whose coverage to visualise
      * @param map map of mutant operations -> List of names of tests which cover the mutants
      */
-    private fun highlightMutantsInToolwindow(mutantName: String, map: HashMap<String, MutableList<String>>) {
+    private fun highlightMutantsInToolwindow(
+        mutantName: String,
+        map: HashMap<String, MutableList<String>>,
+    ) {
         highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
     }
 
@@ -232,7 +244,11 @@ class CoverageRenderer(
      * @param g graphics used to draw
      * @param r rectangle object
      */
-    override fun paint(editor: Editor, g: Graphics, r: Rectangle) {
+    override fun paint(
+        editor: Editor,
+        g: Graphics,
+        r: Rectangle,
+    ) {
         g.fillRect(r.x, r.y, r.width * 3 / 2, r.height * 5 / 6)
         g.color = color
     }
@@ -242,7 +258,5 @@ class CoverageRenderer(
      *
      * @return position
      */
-    override fun getPosition(): LineMarkerRendererEx.Position {
-        return LineMarkerRendererEx.Position.LEFT
-    }
+    override fun getPosition(): LineMarkerRendererEx.Position = LineMarkerRendererEx.Position.LEFT
 }

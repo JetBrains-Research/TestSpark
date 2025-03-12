@@ -120,21 +120,23 @@ class TestCasePanelBuilder(
     private var isRemoved = false
 
     // Add an editor to modify the test source code
-    private val languageTextField = LanguageTextField(
-        Language.findLanguageByID(language.languageId),
-        editor.project,
-        testCase.testCode,
-        TestCaseDocumentCreator(
-            getClassWithTestCaseName(testCase.testName),
-        ),
-        false,
-    )
+    private val languageTextField =
+        LanguageTextField(
+            Language.findLanguageByID(language.languageId),
+            editor.project,
+            testCase.testCode,
+            TestCaseDocumentCreator(
+                getClassWithTestCaseName(testCase.testName),
+            ),
+            false,
+        )
 
-    private val languageTextFieldScrollPane = JBScrollPane(
-        languageTextField,
-        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
-    )
+    private val languageTextFieldScrollPane =
+        JBScrollPane(
+            languageTextField,
+            ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
+        )
 
     // Create "Remove" button to remove the test from cache
     private val removeButton =
@@ -227,14 +229,14 @@ class TestCasePanelBuilder(
                 ),
                 null,
             )
-            NotificationGroupManager.getInstance()
+            NotificationGroupManager
+                .getInstance()
                 .getNotificationGroup("UserInterface")
                 .createNotification(
                     "",
                     PluginMessagesBundle.get("testCaseCopied"),
                     NotificationType.INFORMATION,
-                )
-                .notify(project)
+                ).notify(project)
         }
 
         updateRequestLabel()
@@ -264,11 +266,13 @@ class TestCasePanelBuilder(
 
         addLanguageTextFieldListener(languageTextField)
 
-        PsiManager.getInstance(project).addPsiTreeChangeListener(object : PsiTreeChangeAdapter() {
-            override fun childAdded(event: PsiTreeChangeEvent) {
-                languageTextField.editor?.foldHelperCode()
-            }
-        })
+        PsiManager.getInstance(project).addPsiTreeChangeListener(
+            object : PsiTreeChangeAdapter() {
+                override fun childAdded(event: PsiTreeChangeEvent) {
+                    languageTextField.editor?.foldHelperCode()
+                }
+            },
+        )
         return panel
     }
 
@@ -313,13 +317,14 @@ class TestCasePanelBuilder(
         panel.add(buttonsPanel)
 
         runTestButton.addActionListener {
-            val choice = JOptionPane.showConfirmDialog(
-                null,
-                PluginMessagesBundle.get("runCautionMessage"),
-                PluginMessagesBundle.get("confirmationTitle"),
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.WARNING_MESSAGE,
-            )
+            val choice =
+                JOptionPane.showConfirmDialog(
+                    null,
+                    PluginMessagesBundle.get("runCautionMessage"),
+                    PluginMessagesBundle.get("confirmationTitle"),
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.WARNING_MESSAGE,
+                )
 
             if (choice == JOptionPane.OK_OPTION) runTest()
         }
@@ -344,11 +349,12 @@ class TestCasePanelBuilder(
      * Uses the requestNumber template to format the label text.
      */
     private fun updateRequestLabel() {
-        requestLabel.text = String.format(
-            requestNumber,
-            currentRequestNumber,
-            allRequestsNumber,
-        )
+        requestLabel.text =
+            String.format(
+                requestNumber,
+                currentRequestNumber,
+                allRequestsNumber,
+            )
     }
 
     /**
@@ -371,14 +377,19 @@ class TestCasePanelBuilder(
      * @param languageTextField the LanguageTextField to add the listener to
      */
     private fun addLanguageTextFieldListener(languageTextField: LanguageTextField) {
-        languageTextField.document.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                update()
-            }
-        })
+        languageTextField.document.addDocumentListener(
+            object : DocumentListener {
+                override fun documentChanged(event: DocumentEvent) {
+                    update()
+                }
+            },
+        )
     }
 
-    private fun updateRange(offsets: Pair<Int, Int>, element: PsiElement): Pair<Int, Int> {
+    private fun updateRange(
+        offsets: Pair<Int, Int>,
+        element: PsiElement,
+    ): Pair<Int, Int> {
         var (start, end) = offsets
         start = if (start < element.textRange.startOffset) start else element.textRange.startOffset
         end = if (end > element.textRange.endOffset) end else element.textRange.endOffset
@@ -402,31 +413,33 @@ class TestCasePanelBuilder(
 
             var range = document.textLength to 0
             // Find start and end offsets for folding
-            psiFile.accept(object : JavaRecursiveElementVisitor() {
-                override fun visitMethod(element: PsiMethod) {
-                    super.visitMethod(element)
-                    if (hasTestAnnotation(element)) {
-                        val (startOffset, endOffset) = range
-                        // apply accumulating folding range
-                        foldingModel.addFoldRegion(startOffset, endOffset, "...")?.isExpanded = false
-                        // reset folding range after end of test method
-                        range = element.endOffset to element.endOffset
-                    } else {
-                        range = updateRange(range, element)
+            psiFile.accept(
+                object : JavaRecursiveElementVisitor() {
+                    override fun visitMethod(element: PsiMethod) {
+                        super.visitMethod(element)
+                        if (hasTestAnnotation(element)) {
+                            val (startOffset, endOffset) = range
+                            // apply accumulating folding range
+                            foldingModel.addFoldRegion(startOffset, endOffset, "...")?.isExpanded = false
+                            // reset folding range after end of test method
+                            range = element.endOffset to element.endOffset
+                        } else {
+                            range = updateRange(range, element)
+                        }
                     }
-                }
 
-                override fun visitField(field: PsiField) {
-                    super.visitField(field)
-                    range = updateRange(range, field)
-                }
+                    override fun visitField(field: PsiField) {
+                        super.visitField(field)
+                        range = updateRange(range, field)
+                    }
 
-                // These are example static initializers which can also be hidden from the user
-                override fun visitClassInitializer(initializer: PsiClassInitializer) {
-                    super.visitClassInitializer(initializer)
-                    range = updateRange(range, initializer)
-                }
-            })
+                    // These are example static initializers which can also be hidden from the user
+                    override fun visitClassInitializer(initializer: PsiClassInitializer) {
+                        super.visitClassInitializer(initializer)
+                        range = updateRange(range, initializer)
+                    }
+                },
+            )
 
             val (startOffset, endOffset) = range
             val foldRegion = foldingModel.addFoldRegion(startOffset, endOffset, "...")
@@ -435,9 +448,10 @@ class TestCasePanelBuilder(
         }
     }
 
-    private fun hasTestAnnotation(element: PsiModifierListOwner): Boolean {
-        return element.modifierList?.annotations?.any { it.qualifiedName?.contains("Test") ?: false } ?: false
-    }
+    private fun hasTestAnnotation(element: PsiModifierListOwner): Boolean =
+        element.modifierList?.annotations?.any {
+            it.qualifiedName?.contains("Test") ?: false
+        } ?: false
 
     /**
      * Updates the user interface based on the provided code.
@@ -461,10 +475,11 @@ class TestCasePanelBuilder(
 
         updateBorder()
 
-        val modifiedLineIndexes = ModifiedLinesGetter.getLines(
-            lastRunCode.split("\n"),
-            testCase.testCode.split("\n"),
-        )
+        val modifiedLineIndexes =
+            ModifiedLinesGetter.getLines(
+                lastRunCode.split("\n"),
+                testCase.testCode.split("\n"),
+            )
 
         for (index in modifiedLineIndexes) {
             languageTextField.editor!!.markupModel.addLineHighlighter(
@@ -500,55 +515,60 @@ class TestCasePanelBuilder(
         enableGlobalComponents(false)
         enableLocalComponents(false)
 
-        ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("sendingFeedback")) {
-                override fun run(indicator: ProgressIndicator) {
-                    val ijIndicator = IJProgressIndicator(indicator)
-                    if (ToolUtils.isProcessStopped(uiContext!!.errorMonitor, ijIndicator)) {
-                        finishProcess()
-                        return
-                    }
-
-                    val testModificationResult = LLMHelper.testModificationRequest(
-                        language,
-                        initialCodes[currentRequestNumber - 1],
-                        requestComboBox.editor.item.toString(),
-                        ijIndicator,
-                        uiContext.requestManager!!,
-                        project,
-                        uiContext.testGenerationOutput,
-                        uiContext.errorMonitor,
-                    )
-
-                    when (testModificationResult) {
-                        is Result.Failure -> {
-                            project.createNotification(
-                                testModificationResult.error, NotificationType.ERROR
-                            )
+        ProgressManager
+            .getInstance()
+            .run(
+                object : Task.Backgroundable(project, PluginMessagesBundle.get("sendingFeedback")) {
+                    override fun run(indicator: ProgressIndicator) {
+                        val ijIndicator = IJProgressIndicator(indicator)
+                        if (ToolUtils.isProcessStopped(uiContext!!.errorMonitor, ijIndicator)) {
+                            finishProcess()
                             return
                         }
 
-                        is Result.Success -> {
-                            if (testModificationResult.data.isEmpty()) {
-                                LLMErrorManager().warningProcess(LLMMessagesBundle.get("modifyWithLLMError"), project)
-                            } else {
-                                testModificationResult.data.setTestFileName(
-                                    getClassWithTestCaseName(testCase.testName),
-                                )
-                                addTest(testModificationResult.data)
-                            }
+                        val testModificationResult =
+                            LLMHelper.testModificationRequest(
+                                language,
+                                initialCodes[currentRequestNumber - 1],
+                                requestComboBox.editor.item.toString(),
+                                ijIndicator,
+                                uiContext.requestManager!!,
+                                project,
+                                uiContext.testGenerationOutput,
+                                uiContext.errorMonitor,
+                            )
 
-                            if (ToolUtils.isProcessStopped(uiContext.errorMonitor, ijIndicator)) {
-                                finishProcess()
+                        when (testModificationResult) {
+                            is Result.Failure -> {
+                                project.createNotification(
+                                    testModificationResult.error,
+                                    NotificationType.ERROR,
+                                )
                                 return
                             }
 
-                            finishProcess()
-                            ijIndicator.stop()
+                            is Result.Success -> {
+                                if (testModificationResult.data.isEmpty()) {
+                                    LLMErrorManager().warningProcess(LLMMessagesBundle.get("modifyWithLLMError"), project)
+                                } else {
+                                    testModificationResult.data.setTestFileName(
+                                        getClassWithTestCaseName(testCase.testName),
+                                    )
+                                    addTest(testModificationResult.data)
+                                }
+
+                                if (ToolUtils.isProcessStopped(uiContext.errorMonitor, ijIndicator)) {
+                                    finishProcess()
+                                    return
+                                }
+
+                                finishProcess()
+                                ijIndicator.stop()
+                            }
                         }
                     }
-                }
-            })
+                },
+            )
     }
 
     private fun finishProcess(enableGlobal: Boolean = true) {
@@ -615,12 +635,15 @@ class TestCasePanelBuilder(
         enableGlobalComponents(false)
         enableLocalComponents(false)
 
-        ProgressManager.getInstance()
-            .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("sendingFeedback")) {
-                override fun run(indicator: ProgressIndicator) {
-                    runTest(IJProgressIndicator(indicator), true)
-                }
-            })
+        ProgressManager
+            .getInstance()
+            .run(
+                object : Task.Backgroundable(project, PluginMessagesBundle.get("sendingFeedback")) {
+                    override fun run(indicator: ProgressIndicator) {
+                        runTest(IJProgressIndicator(indicator), true)
+                    }
+                },
+            )
     }
 
     fun addTask(tasks: Queue<(CustomProgressIndicator) -> Unit>) {
@@ -641,32 +664,37 @@ class TestCasePanelBuilder(
         update()
     }
 
-    private fun runTest(indicator: CustomProgressIndicator, enableGlobal: Boolean) {
+    private fun runTest(
+        indicator: CustomProgressIndicator,
+        enableGlobal: Boolean,
+    ) {
         indicator.setText("Executing ${testCase.testName}")
 
         val fileName = TestAnalyzerFactory.create(language).getFileNameFromTestCaseCode(testCase.testCode)
         // For LLM JUnit version is taken from settings, while for Kex and EvoSuite only JUnit4 is allowed
         val junitVersion = if (generationTool.toolId == "LLM") llmSettingsState.junitVersion else JUnitVersion.JUnit4
 
-        val testCompiler = TestCompilerFactory.create(
-            project,
-            junitVersion,
-            language,
-        )
-
-        val newTestCase = TestProcessor(project)
-            .processNewTestCase(
-                fileName,
-                testCase.id,
-                testCase.testName,
-                testCase.testCode,
-                uiContext!!.testGenerationOutput.packageName,
-                uiContext.testGenerationOutput.resultPath,
-                uiContext.projectContext,
-                testCompiler,
-                testsExecutionResultManager,
+        val testCompiler =
+            TestCompilerFactory.create(
+                project,
                 junitVersion,
+                language,
             )
+
+        val newTestCase =
+            TestProcessor(project)
+                .processNewTestCase(
+                    fileName,
+                    testCase.id,
+                    testCase.testName,
+                    testCase.testCode,
+                    uiContext!!.testGenerationOutput.packageName,
+                    uiContext.testGenerationOutput.resultPath,
+                    uiContext.projectContext,
+                    testCompiler,
+                    testsExecutionResultManager,
+                    junitVersion,
+                )
 
         testCase.coveredLines = newTestCase.coveredLines
 
@@ -804,8 +832,10 @@ class TestCasePanelBuilder(
      * Updates the current test case with the specified test name and test code.
      */
     private fun updateTestCaseInformation() {
-        testCase.testName = TestAnalyzerFactory.create(language)
-            .extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
+        testCase.testName =
+            TestAnalyzerFactory
+                .create(language)
+                .extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text
     }
 

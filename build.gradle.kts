@@ -82,9 +82,10 @@ if (spaceCredentialsProvided()) {
     }
 
     tasks.register("checkCredentials") {
-        configurations.detachedConfiguration(
-            dependencies.create("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion"),
-        ).files()
+        configurations
+            .detachedConfiguration(
+                dependencies.create("org.jetbrains.research:grazie-test-generation:$grazieTestGenerationVersion"),
+            ).files()
     }
 
     tasks.named(hasGrazieAccess.jarTaskName).configure {
@@ -98,20 +99,32 @@ if (spaceCredentialsProvided()) {
     // add build of new source set as the part of UI testing
     tasks.prepareTestSandbox.configure {
         dependsOn(hasGrazieAccess.jarTaskName)
-        from(tasks.getByName(hasGrazieAccess.jarTaskName).outputs.files.asPath) { into("TestSpark/lib") }
+        from(
+            tasks
+                .getByName(hasGrazieAccess.jarTaskName)
+                .outputs.files.asPath,
+        ) { into("TestSpark/lib") }
 
         hasGrazieAccess.runtimeClasspath
-            .elements.get().forEach {
+            .elements
+            .get()
+            .forEach {
                 from(it.asFile.absolutePath) { into("TestSpark/lib") }
             }
     }
     // add build of new source set as the part of pluginBuild process
     tasks.prepareSandbox.configure {
         dependsOn(hasGrazieAccess.jarTaskName)
-        from(tasks.getByName(hasGrazieAccess.jarTaskName).outputs.files.asPath) { into("TestSpark/lib") }
+        from(
+            tasks
+                .getByName(hasGrazieAccess.jarTaskName)
+                .outputs.files.asPath,
+        ) { into("TestSpark/lib") }
 
         hasGrazieAccess.runtimeClasspath
-            .elements.get().forEach {
+            .elements
+            .get()
+            .forEach {
                 from(it.asFile.absolutePath) { into("TestSpark/lib") }
             }
     }
@@ -221,7 +234,14 @@ intellijPlatform {
 
     publishing {
         token = System.getenv("PUBLISH_TOKEN")
-        channels = listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first())
+        channels =
+            listOf(
+                properties("pluginVersion")
+                    .split('-')
+                    .getOrElse(1) { "default" }
+                    .split('.')
+                    .first(),
+            )
     }
     // Set the ides on which the plugin verification is executed.
     // See https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides
@@ -235,10 +255,11 @@ intellijPlatform {
                 untilBuild = properties("pluginUntilBuild")
             }
         }
-        freeArgs = listOf(
-            "-mute",
-            "TemplateWordInPluginId,ForbiddenPluginIdPrefix",
-        )
+        freeArgs =
+            listOf(
+                "-mute",
+                "TemplateWordInPluginId,ForbiddenPluginIdPrefix",
+            )
     }
 }
 
@@ -259,9 +280,10 @@ changelog {
 tasks {
     // enable K2 mode in UI test
     runIde {
-        jvmArgumentProviders += CommandLineArgumentProvider {
-            listOf("-Didea.kotlin.plugin.use.k2=true")
-        }
+        jvmArgumentProviders +=
+            CommandLineArgumentProvider {
+                listOf("-Didea.kotlin.plugin.use.k2=true")
+            }
     }
 
     compileKotlin {
@@ -301,15 +323,20 @@ tasks {
     patchPluginXml {
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription.set(
-            projectDir.resolve("README.md").readText().lines().run {
-                val start = "<!-- Plugin description -->"
-                val end = "<!-- Plugin description end -->"
+            projectDir
+                .resolve("README.md")
+                .readText()
+                .lines()
+                .run {
+                    val start = "<!-- Plugin description -->"
+                    val end = "<!-- Plugin description end -->"
 
-                if (!containsAll(listOf(start, end))) {
-                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
-                }
-                subList(indexOf(start) + 1, indexOf(end))
-            }.joinToString("\n").run { markdownToHTML(this) },
+                    if (!containsAll(listOf(start, end))) {
+                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                    }
+                    subList(indexOf(start) + 1, indexOf(end))
+                }.joinToString("\n")
+                .run { markdownToHTML(this) },
         )
     }
 

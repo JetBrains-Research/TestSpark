@@ -18,7 +18,9 @@ import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.kex.generation.KexProcessManager
 import org.jetbrains.research.testspark.tools.template.Tool
 
-class Kex(override val name: String = "Kex") : Tool {
+class Kex(
+    override val name: String = "Kex",
+) : Tool {
     private val log = Logger.getInstance(this::class.java)
 
     /**
@@ -28,7 +30,12 @@ class Kex(override val name: String = "Kex") : Tool {
      * @return The KexProcessManager instance created for the given project.
      */
     private fun getKexProcessManager(project: Project): KexProcessManager {
-        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        val projectClassPath: String =
+            ProjectRootManager
+                .getInstance(project)
+                .contentRoots
+                .first()
+                .path
         val settingsProjectState = project.service<PluginSettingsService>().state
         val buildPath = ToolUtils.osJoin(projectClassPath, settingsProjectState.buildPath)
         return KexProcessManager(project, buildPath)
@@ -140,7 +147,12 @@ class Kex(override val name: String = "Kex") : Tool {
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ): Pipeline {
-        val projectClassPath: String = ProjectRootManager.getInstance(project).contentRoots.first().path
+        val projectClassPath: String =
+            ProjectRootManager
+                .getInstance(project)
+                .contentRoots
+                .first()
+                .path
 
         val settingsProjectState = project.service<PluginSettingsService>().state
         val packageName = "$projectClassPath/${settingsProjectState.buildPath}"
@@ -173,7 +185,9 @@ class Kex(override val name: String = "Kex") : Tool {
                 ++stack
             } else if (c == '>') {
                 --stack
-            } else if (stack == 0) s.append(c)
+            } else if (stack == 0) {
+                s.append(c)
+            }
         }
         return s.toString()
     }

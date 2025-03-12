@@ -16,7 +16,9 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.langwrappers.strategies.JavaKotlinClassTextExtractor
 
-class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
+class JavaPsiClassWrapper(
+    private val psiClass: PsiClass,
+) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
 
     override val qualifiedName: String get() = psiClass.qualifiedName ?: ""
@@ -36,12 +38,13 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
     override val containingFile: PsiFile get() = psiClass.containingFile
 
     override val fullText: String
-        get() = JavaKotlinClassTextExtractor().extract(
-            psiClass.containingFile,
-            psiClass.text,
-            javaPackagePattern,
-            javaImportPattern,
-        )
+        get() =
+            JavaKotlinClassTextExtractor().extract(
+                psiClass.containingFile,
+                psiClass.text,
+                javaPackagePattern,
+                javaImportPattern,
+            )
 
     override val classType: ClassType
         get() {
@@ -62,9 +65,7 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
         return query.findAll().map { JavaPsiClassWrapper(it) }
     }
 
-    override fun getInterestingPsiClassesWithQualifiedNames(
-        psiMethod: PsiMethodWrapper,
-    ): MutableSet<PsiClassWrapper> {
+    override fun getInterestingPsiClassesWithQualifiedNames(psiMethod: PsiMethodWrapper): MutableSet<PsiClassWrapper> {
         val interestingMethods = mutableSetOf(psiMethod as JavaPsiMethodWrapper)
         for (currentPsiMethod in allMethods) {
             if ((currentPsiMethod as JavaPsiMethodWrapper).isConstructor) interestingMethods.add(currentPsiMethod)
@@ -91,7 +92,5 @@ class JavaPsiClassWrapper(private val psiClass: PsiClass) : PsiClassWrapper {
      *
      * @return true if the constraints are satisfied, false otherwise
      */
-    fun isTestableClass(): Boolean {
-        return !psiClass.isEnum && psiClass !is PsiAnonymousClass
-    }
+    fun isTestableClass(): Boolean = !psiClass.isEnum && psiClass !is PsiAnonymousClass
 }

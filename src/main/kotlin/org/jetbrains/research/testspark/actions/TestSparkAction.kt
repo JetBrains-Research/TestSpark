@@ -17,7 +17,6 @@ import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
  * It creates a dialog wrapper and displays it when the associated action is performed.
  */
 class TestSparkAction : AnAction() {
-
     /**
      * Handles the action performed event.
      *

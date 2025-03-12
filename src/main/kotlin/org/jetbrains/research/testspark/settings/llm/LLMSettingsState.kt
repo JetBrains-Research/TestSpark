@@ -40,7 +40,6 @@ data class LLMSettingsState(
     var provideTestSamplesCheckBoxSelected: Boolean = DefaultLLMSettingsState.provideTestSamplesCheckBoxSelected,
     var llmSetupCheckBoxSelected: Boolean = DefaultLLMSettingsState.llmSetupCheckBoxSelected,
 ) {
-
     /**
      * Default values of SettingsLLMState.
      */

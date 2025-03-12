@@ -14,17 +14,19 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 
-class GrazieRequestManager(project: Project) : RequestManager(
-    token = LlmSettingsArguments(project).getToken(),
-    llmModel = LlmSettingsArguments(project).getModel(),
-) {
+class GrazieRequestManager(
+    project: Project,
+) : RequestManager(
+        token = LlmSettingsArguments(project).getToken(),
+        llmModel = LlmSettingsArguments(project).getModel(),
+    ) {
     override fun send(
         prompt: String,
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
         errorMonitor: ErrorMonitor,
-    ): Result<Unit, TestSparkError> {
-        return try {
+    ): Result<Unit, TestSparkError> =
+        try {
             val className = "org.jetbrains.research.grazie.Request"
             val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
 
@@ -33,19 +35,24 @@ class GrazieRequestManager(project: Project) : RequestManager(
             if (requestError.isNotEmpty()) {
                 with(requestError) {
                     when {
-                        contains("invalid: 401") -> Result.Failure(
-                            error = HttpError(httpCode = 401)
-                        )
-
-                        contains("invalid: 413 Payload Too Large") -> Result.Failure(
-                            error = LlmError.PromptTooLong
-                        )
-
-                        else -> Result.Failure(
-                            error = HttpError(
-                                message = this, module = TestSparkModule.Llm(LlmModuleType.Grazie)
+                        contains("invalid: 401") ->
+                            Result.Failure(
+                                error = HttpError(httpCode = 401),
                             )
-                        )
+
+                        contains("invalid: 413 Payload Too Large") ->
+                            Result.Failure(
+                                error = LlmError.PromptTooLong,
+                            )
+
+                        else ->
+                            Result.Failure(
+                                error =
+                                    HttpError(
+                                        message = this,
+                                        module = TestSparkModule.Llm(LlmModuleType.Grazie),
+                                    ),
+                            )
                     }
                 }
             } else {
@@ -54,15 +61,14 @@ class GrazieRequestManager(project: Project) : RequestManager(
         } catch (_: ClassNotFoundException) {
             Result.Failure(error = LlmError.GrazieNotAvailable)
         }
-    }
 
-    private fun getMessages(): List<Pair<String, String>> {
-        return chatHistory.map {
-            val role = when (it.role) {
-                ChatMessage.ChatRole.User -> "user"
-                ChatMessage.ChatRole.Assistant -> "assistant"
-            }
+    private fun getMessages(): List<Pair<String, String>> =
+        chatHistory.map {
+            val role =
+                when (it.role) {
+                    ChatMessage.ChatRole.User -> "user"
+                    ChatMessage.ChatRole.Assistant -> "assistant"
+                }
             (role to it.content)
         }
-    }
 }

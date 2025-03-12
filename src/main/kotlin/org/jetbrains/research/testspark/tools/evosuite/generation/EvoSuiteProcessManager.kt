@@ -58,7 +58,9 @@ class EvoSuiteProcessManager(
     private val evoSuiteProcessTimeout: Long = 12000000
     private val evosuiteVersion = EvoSuiteDefaultsBundle.get("evosuiteVersion")
 
-    private val pluginsPath = com.intellij.openapi.application.PathManager.getPluginsPath()
+    private val pluginsPath =
+        com.intellij.openapi.application.PathManager
+            .getPluginsPath()
     private var evoSuitePath = "$pluginsPath${ToolUtils.sep}TestSpark${ToolUtils.sep}lib${ToolUtils.sep}evosuite-$evosuiteVersion.jar"
 
     private val settingsProjectState = project.service<PluginSettingsService>().state
@@ -96,18 +98,50 @@ class EvoSuiteProcessManager(
             Path(generatedTestsData.resultPath).createDirectories()
 
             // get command
-            val command = when (codeType.type!!) {
-                CodeType.CLASS -> EvoSuiteSettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).build()
-                CodeType.METHOD -> {
-                    EvoSuiteSettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).forMethod(codeType.objectDescription).build()
+            val command =
+                when (codeType.type!!) {
+                    CodeType.CLASS ->
+                        EvoSuiteSettingsArguments(
+                            projectClassPath,
+                            projectPath,
+                            resultName,
+                            classFQN,
+                            baseDir,
+                            evoSuiteSettingsState,
+                        ).build()
+                    CodeType.METHOD -> {
+                        EvoSuiteSettingsArguments(
+                            projectClassPath,
+                            projectPath,
+                            resultName,
+                            classFQN,
+                            baseDir,
+                            evoSuiteSettingsState,
+                        ).forMethod(codeType.objectDescription).build()
+                    }
+
+                    CodeType.LINE ->
+                        EvoSuiteSettingsArguments(
+                            projectClassPath,
+                            projectPath,
+                            resultName,
+                            classFQN,
+                            baseDir,
+                            evoSuiteSettingsState,
+                        ).forLine(codeType.objectIndex).build(true)
                 }
 
-                CodeType.LINE -> EvoSuiteSettingsArguments(projectClassPath, projectPath, resultName, classFQN, baseDir, evoSuiteSettingsState).forLine(codeType.objectIndex).build(true)
-            }
-
             if (evoSuiteSettingsState.seed.isNotBlank()) command.add("-seed=${evoSuiteSettingsState.seed}")
-            if (evoSuiteSettingsState.configurationId.isNotBlank()) command.add("-Dconfiguration_id=${evoSuiteSettingsState.configurationId}")
-            if (evoSuiteSettingsState.evosuitePort.isNotBlank()) command.add("-Dprocess_communication_port=${evoSuiteSettingsState.evosuitePort}")
+            if (evoSuiteSettingsState.configurationId.isNotBlank()) {
+                command.add(
+                    "-Dconfiguration_id=${evoSuiteSettingsState.configurationId}",
+                )
+            }
+            if (evoSuiteSettingsState.evosuitePort.isNotBlank()) {
+                command.add(
+                    "-Dprocess_communication_port=${evoSuiteSettingsState.evosuitePort}",
+                )
+            }
 
             // update build path
             var buildPath = projectClassPath
@@ -138,49 +172,54 @@ class EvoSuiteProcessManager(
             val handler = OSProcessHandler(evoSuiteProcess)
 
             // attach process listener for output
-            handler.addProcessListener(object : ProcessAdapter() {
-                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (ToolUtils.isProcessStopped(errorMonitor, indicator)) {
-                        handler.destroyProcess()
-                        return
-                    }
-
-                    val text = event.text
-
-                    evoSuiteErrorManager.addLineToEvoSuiteOutput(text)
-
-                    val progressMatcher =
-                        Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
-                    val coverageMatcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
-
-                    log.info(text) // kept for debugging purposes
-
-                    val progress =
-                        if (progressMatcher.find()) {
-                            progressMatcher.group(1)?.toDouble()?.div(100)
-                        } else {
-                            null
-                        }
-                    val coverage =
-                        if (coverageMatcher.find()) {
-                            coverageMatcher.group(1)?.toDouble()?.div(100)
-                        } else {
-                            null
+            handler.addProcessListener(
+                object : ProcessAdapter() {
+                    override fun onTextAvailable(
+                        event: ProcessEvent,
+                        outputType: Key<*>,
+                    ) {
+                        if (ToolUtils.isProcessStopped(errorMonitor, indicator)) {
+                            handler.destroyProcess()
+                            return
                         }
 
-                    if (progress != null && coverage != null) {
-                        indicator.setFraction(if (progress >= coverage) progress else coverage)
-                    } else if (progress != null) {
-                        indicator.setFraction(progress)
-                    } else if (coverage != null) {
-                        indicator.setFraction(coverage)
-                    }
+                        val text = event.text
 
-                    if (indicator.getFraction() == 1.0 && indicator.getText() != PluginMessagesBundle.get("testCasesSaving")) {
-                        indicator.setText(PluginMessagesBundle.get("testCasesSaving"))
+                        evoSuiteErrorManager.addLineToEvoSuiteOutput(text)
+
+                        val progressMatcher =
+                            Pattern.compile("Progress:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
+                        val coverageMatcher = Pattern.compile("Cov:[>= ]*(\\d+(?:\\.\\d+)?)%").matcher(text)
+
+                        log.info(text) // kept for debugging purposes
+
+                        val progress =
+                            if (progressMatcher.find()) {
+                                progressMatcher.group(1)?.toDouble()?.div(100)
+                            } else {
+                                null
+                            }
+                        val coverage =
+                            if (coverageMatcher.find()) {
+                                coverageMatcher.group(1)?.toDouble()?.div(100)
+                            } else {
+                                null
+                            }
+
+                        if (progress != null && coverage != null) {
+                            indicator.setFraction(if (progress >= coverage) progress else coverage)
+                        } else if (progress != null) {
+                            indicator.setFraction(progress)
+                        } else if (coverage != null) {
+                            indicator.setFraction(coverage)
+                        }
+
+                        if (indicator.getFraction() == 1.0 && indicator.getText() != PluginMessagesBundle.get("testCasesSaving")) {
+                            indicator.setText(PluginMessagesBundle.get("testCasesSaving"))
+                        }
                     }
-                }
-            })
+                },
+            )
 
             handler.startNotify()
 
@@ -208,6 +247,11 @@ class EvoSuiteProcessManager(
             e.printStackTrace()
         }
 
-        return UIContext(projectContext, generatedTestsData, StandardRequestManagerFactory(project).getRequestManager(project), errorMonitor)
+        return UIContext(
+            projectContext,
+            generatedTestsData,
+            StandardRequestManagerFactory(project).getRequestManager(project),
+            errorMonitor,
+        )
     }
 }

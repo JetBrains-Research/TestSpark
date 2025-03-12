@@ -13,12 +13,16 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
 
-class LLMSampleSelectorBuilder(private val project: Project, private val language: SupportedLanguage) : PanelBuilder {
+class LLMSampleSelectorBuilder(
+    private val project: Project,
+    private val language: SupportedLanguage,
+) : PanelBuilder {
     // init components
-    private val selectionTypeButtons: MutableList<JRadioButton> = mutableListOf(
-        JRadioButton(PluginLabelsBundle.get("provideTestSample")),
-        JRadioButton(PluginLabelsBundle.get("noTestSample")),
-    )
+    private val selectionTypeButtons: MutableList<JRadioButton> =
+        mutableListOf(
+            JRadioButton(PluginLabelsBundle.get("provideTestSample")),
+            JRadioButton(PluginLabelsBundle.get("noTestSample")),
+        )
     private val selectionTypeButtonGroup = ButtonGroup()
     private val radioButtonsPanel = JPanel()
 
@@ -31,11 +35,13 @@ class LLMSampleSelectorBuilder(private val project: Project, private val languag
     private val nextButton = JButton(PluginLabelsBundle.get("ok"))
     private val backLlmButton = JButton(PluginLabelsBundle.get("back"))
 
-    private var formBuilder = FormBuilder.createFormBuilder()
-        .setFormLeftIndent(10)
-        .addComponent(JPanel(), 0)
-        .addComponent(radioButtonsPanel, 10)
-        .addComponent(addButtonPanel, 10)
+    private var formBuilder =
+        FormBuilder
+            .createFormBuilder()
+            .setFormLeftIndent(10)
+            .addComponent(JPanel(), 0)
+            .addComponent(radioButtonsPanel, 10)
+            .addComponent(addButtonPanel, 10)
 
     private var middlePanel = formBuilder.panel
 
@@ -127,19 +133,21 @@ class LLMSampleSelectorBuilder(private val project: Project, private val languag
             val collector = executeOnPooledThread { sampleSelector.collectTestSamples(project) }
             collector.get()
 
-            val testSamplePanelBuilder = TestSamplePanelBuilder(
-                project,
-                middlePanel,
-                sampleSelector.getTestNames(),
-                sampleSelector.getInitialTestCodes(),
-                language,
-            )
+            val testSamplePanelBuilder =
+                TestSamplePanelBuilder(
+                    project,
+                    middlePanel,
+                    sampleSelector.getTestNames(),
+                    sampleSelector.getInitialTestCodes(),
+                    language,
+                )
             testSamplePanelFactories.add(testSamplePanelBuilder)
             val testSamplePanel = testSamplePanelBuilder.getTestSamplePanel()
             val codeScrollPanel = testSamplePanelBuilder.getCodeScrollPanel()
-            formBuilder = formBuilder
-                .addComponent(testSamplePanel, 10)
-                .addComponent(codeScrollPanel, 10)
+            formBuilder =
+                formBuilder
+                    .addComponent(testSamplePanel, 10)
+                    .addComponent(codeScrollPanel, 10)
             middlePanel = formBuilder.panel
             middlePanel.revalidate()
 

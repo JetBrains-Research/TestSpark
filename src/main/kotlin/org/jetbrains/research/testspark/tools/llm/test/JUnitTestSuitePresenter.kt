@@ -104,12 +104,11 @@ class JUnitTestSuitePresenter(
      *
      * @return The printable package string.
      */
-    fun getPrintablePackageString(testSuite: TestSuiteGeneratedByLLM): String {
-        return testSuite.run {
+    fun getPrintablePackageString(testSuite: TestSuiteGeneratedByLLM): String =
+        testSuite.run {
             when {
                 packageName.isEmpty() || packageName.isBlank() -> ""
                 else -> packageName
             }
         }
-    }
 }

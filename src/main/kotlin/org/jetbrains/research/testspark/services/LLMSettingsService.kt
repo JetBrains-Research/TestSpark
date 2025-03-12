@@ -13,7 +13,6 @@ import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 @Service(Service.Level.PROJECT)
 @State(name = "LLMSettingsState", storages = [Storage("LLMSettings.xml")])
 class LLMSettingsService : PersistentStateComponent<LLMSettingsState> {
-
     private var llmSettingsState: LLMSettingsState = LLMSettingsState()
 
     /**
@@ -22,9 +21,7 @@ class LLMSettingsService : PersistentStateComponent<LLMSettingsState> {
      * If the values from getState are different from the default values obtained by calling
      *  the default constructor, the state is persisted (serialised and stored).
      */
-    override fun getState(): LLMSettingsState {
-        return llmSettingsState
-    }
+    override fun getState(): LLMSettingsState = llmSettingsState
 
     /**
      * Loads the state of the application-level settings.

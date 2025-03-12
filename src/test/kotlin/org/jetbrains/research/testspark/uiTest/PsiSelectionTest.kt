@@ -84,28 +84,29 @@ class PsiSelectionTest {
      * Opens a 'pizzeria' project from the IntelliJ welcome screen.
      */
     @BeforeAll
-    fun setUpAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        // Open 'pizzeria' project
-        find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            open("pizzeria")
+    fun setUpAll(remoteRobot: RemoteRobot): Unit =
+        with(remoteRobot) {
+            // Open 'pizzeria' project
+            find(WelcomeFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+                open("pizzeria")
+            }
+
+            // Wait for background tasks
+            Thread.sleep(5000L)
+
+            // Open the main file of the project and enter full screen mode
+            find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+                openMainFileFromProjectTree(pathToMainFile, mainClass)
+                // Wait for the file to load
+                Thread.sleep(8000L)
+                goFullScreen()
+            }
+
+            // Wait a little bit more
+            Thread.sleep(3000L)
+
+            editor = find(byXpath("//div[@class='EditorComponentImpl']"))
         }
-
-        // Wait for background tasks
-        Thread.sleep(5000L)
-
-        // Open the main file of the project and enter full screen mode
-        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            openMainFileFromProjectTree(pathToMainFile, mainClass)
-            // Wait for the file to load
-            Thread.sleep(8000L)
-            goFullScreen()
-        }
-
-        // Wait a little bit more
-        Thread.sleep(3000L)
-
-        editor = find(byXpath("//div[@class='EditorComponentImpl']"))
-    }
 
     @BeforeEach
     fun setUp(_remoteRobot: RemoteRobot) {
@@ -166,54 +167,137 @@ class PsiSelectionTest {
         Thread.sleep(1000L)
     }
 
-    private fun valueGenerator(): Stream<Arguments> = Stream.of(
-        // Line 2
-        Arguments.of("Classe", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
-        // Line 3
-        Arguments.of("Base", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
-        // Line 4
-        Arguments.of("main", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText, true, true, true, false),
-        // Line 6
-        Arguments.of("256", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText.plus("6"), true, true, true, true),
-        // Line 9
-        Arguments.of("BuonaPizza", actionClassText.plus("PizzaClasse"), actionMethodText.plus("main"), actionLineText.plus("9"), true, true, true, true),
-        // Line 1
-        Arguments.of("util", actionClassText, actionMethodText, actionLineText, false, false, false, false),
-        // Line 14
-        Arguments.of("italiana", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("14"), true, true, true, true),
-        // Line 15
-        Arguments.of("commento", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
-        // Line 17
-        Arguments.of("anche", actionClassText.plus("PizzaClasse"), actionMethodText.plus("pizzaMetodo"), actionLineText.plus("17"), true, true, true, true),
-        // Line 19
-        Arguments.of("interface", "Interface PizzaServizio", actionMethodText, actionLineText, true, true, false, false),
-        // Line 20
-        Arguments.of("default", "Interface PizzaServizio", "Default Method saluto", actionLineText.plus("20"), true, true, true, true),
-        // Line 21
-        Arguments.of("quantita", "Interface PizzaServizio", actionMethodText.plus("pizzaMetodo"), actionLineText, true, true, false, false),
-        // Line 23
-        Arguments.of("abstract", "Abstract Class PizzaAstratta", actionMethodText, actionLineText, true, true, false, false),
-        // Line 24
-        Arguments.of("Saluto", "Abstract Class PizzaAstratta", actionMethodText.plus("salutoSaluto"), actionLineText.plus("24"), true, true, true, true),
-        // Line 25
-        Arguments.of("Ingredienti", "Abstract Class PizzaAstratta", actionMethodText, actionLineText, true, true, false, false),
-        // Line 27
-        Arguments.of("extends", actionClassText.plus("BuonaPizza"), actionMethodText, actionLineText, true, true, false, false),
-        // Line 28
-        Arguments.of("Overriden", actionClassText.plus("BuonaPizza"), actionMethodText.plus("selencaGliIngredienti"), actionLineText, true, true, true, false),
-        // Line 29
-        Arguments.of("Salame", actionClassText.plus("BuonaPizza"), actionMethodText.plus("selencaGliIngredienti"), actionLineText.plus(29), true, true, true, true),
-        // Line 31
-        Arguments.of("Appetito", actionClassText, actionMethodText, actionLineText, false, false, false, false),
-    )
+    private fun valueGenerator(): Stream<Arguments> =
+        Stream.of(
+            // Line 2
+            Arguments.of("Classe", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
+            // Line 3
+            Arguments.of("Base", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
+            // Line 4
+            Arguments.of(
+                "main",
+                actionClassText.plus("PizzaClasse"),
+                actionMethodText.plus("main"),
+                actionLineText,
+                true,
+                true,
+                true,
+                false,
+            ),
+            // Line 6
+            Arguments.of(
+                "256",
+                actionClassText.plus("PizzaClasse"),
+                actionMethodText.plus("main"),
+                actionLineText.plus("6"),
+                true,
+                true,
+                true,
+                true,
+            ),
+            // Line 9
+            Arguments.of(
+                "BuonaPizza",
+                actionClassText.plus("PizzaClasse"),
+                actionMethodText.plus("main"),
+                actionLineText.plus("9"),
+                true,
+                true,
+                true,
+                true,
+            ),
+            // Line 1
+            Arguments.of("util", actionClassText, actionMethodText, actionLineText, false, false, false, false),
+            // Line 14
+            Arguments.of(
+                "italiana",
+                actionClassText.plus("PizzaClasse"),
+                actionMethodText.plus("pizzaMetodo"),
+                actionLineText.plus("14"),
+                true,
+                true,
+                true,
+                true,
+            ),
+            // Line 15
+            Arguments.of("commento", actionClassText.plus("PizzaClasse"), actionMethodText, actionLineText, true, true, false, false),
+            // Line 17
+            Arguments.of(
+                "anche",
+                actionClassText.plus("PizzaClasse"),
+                actionMethodText.plus("pizzaMetodo"),
+                actionLineText.plus("17"),
+                true,
+                true,
+                true,
+                true,
+            ),
+            // Line 19
+            Arguments.of("interface", "Interface PizzaServizio", actionMethodText, actionLineText, true, true, false, false),
+            // Line 20
+            Arguments.of("default", "Interface PizzaServizio", "Default Method saluto", actionLineText.plus("20"), true, true, true, true),
+            // Line 21
+            Arguments.of(
+                "quantita",
+                "Interface PizzaServizio",
+                actionMethodText.plus("pizzaMetodo"),
+                actionLineText,
+                true,
+                true,
+                false,
+                false,
+            ),
+            // Line 23
+            Arguments.of("abstract", "Abstract Class PizzaAstratta", actionMethodText, actionLineText, true, true, false, false),
+            // Line 24
+            Arguments.of(
+                "Saluto",
+                "Abstract Class PizzaAstratta",
+                actionMethodText.plus("salutoSaluto"),
+                actionLineText.plus("24"),
+                true,
+                true,
+                true,
+                true,
+            ),
+            // Line 25
+            Arguments.of("Ingredienti", "Abstract Class PizzaAstratta", actionMethodText, actionLineText, true, true, false, false),
+            // Line 27
+            Arguments.of("extends", actionClassText.plus("BuonaPizza"), actionMethodText, actionLineText, true, true, false, false),
+            // Line 28
+            Arguments.of(
+                "Overriden",
+                actionClassText.plus("BuonaPizza"),
+                actionMethodText.plus("selencaGliIngredienti"),
+                actionLineText,
+                true,
+                true,
+                true,
+                false,
+            ),
+            // Line 29
+            Arguments.of(
+                "Salame",
+                actionClassText.plus("BuonaPizza"),
+                actionMethodText.plus("selencaGliIngredienti"),
+                actionLineText.plus(29),
+                true,
+                true,
+                true,
+                true,
+            ),
+            // Line 31
+            Arguments.of("Appetito", actionClassText, actionMethodText, actionLineText, false, false, false, false),
+        )
 
     @AfterAll
-    fun closeAll(remoteRobot: RemoteRobot): Unit = with(remoteRobot) {
-        // Exit full screen mode and close the project
-        find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
-            closeMainFileFromProjectTree(pathToMainFile.dropLast(1).reversed())
-            quitFullScreen()
-            closeProject()
+    fun closeAll(remoteRobot: RemoteRobot): Unit =
+        with(remoteRobot) {
+            // Exit full screen mode and close the project
+            find(IdeaFrame::class.java, timeout = Duration.ofSeconds(15)).apply {
+                closeMainFileFromProjectTree(pathToMainFile.dropLast(1).reversed())
+                quitFullScreen()
+                closeProject()
+            }
         }
-    }
 }

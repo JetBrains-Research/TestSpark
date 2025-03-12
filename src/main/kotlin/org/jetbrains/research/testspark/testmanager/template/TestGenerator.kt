@@ -39,5 +39,9 @@ interface TestGenerator {
      * @param generatedTestData the data used for generating the test
      * @return the formatted Java code
      */
-    fun formatCode(project: Project, code: String, generatedTestData: TestGenerationData): String
+    fun formatCode(
+        project: Project,
+        code: String,
+        generatedTestData: TestGenerationData,
+    ): String
 }

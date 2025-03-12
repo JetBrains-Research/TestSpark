@@ -19,11 +19,12 @@ class GeneratedTestsTabData {
     val testCasePanelFactories: ArrayList<TestCasePanelBuilder> = arrayListOf()
     var allTestCasePanel: JPanel = JPanel()
     val applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
-    var scrollPane: JBScrollPane = JBScrollPane(
-        allTestCasePanel,
-        JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-        JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
-    )
+    var scrollPane: JBScrollPane =
+        JBScrollPane(
+            allTestCasePanel,
+            JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
+        )
     var topButtonsPanelBuilder = TopButtonsPanelBuilder()
     var contentManager: ContentManager? = null
     var content: Content? = null

@@ -26,7 +26,10 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-class LLMSetupPanelBuilder(e: AnActionEvent, private val project: Project) : PanelBuilder {
+class LLMSetupPanelBuilder(
+    e: AnActionEvent,
+    private val project: Project,
+) : PanelBuilder {
     private val llmSettingsState: LLMSettingsState
         get() = project.getService(LLMSettingsService::class.java).state
 
@@ -34,7 +37,8 @@ class LLMSetupPanelBuilder(e: AnActionEvent, private val project: Project) : Pan
     private val defaultModulesArray = arrayOf("")
     private var modelSelector = ComboBox(defaultModulesArray)
     private var llmUserTokenField = JTextField(30)
-    private var platformSelector = ComboBox(arrayOf(llmSettingsState.openAIName, llmSettingsState.huggingFaceName, llmSettingsState.geminiName))
+    private var platformSelector =
+        ComboBox(arrayOf(llmSettingsState.openAIName, llmSettingsState.huggingFaceName, llmSettingsState.geminiName))
     private val backLlmButton = JButton(PluginLabelsBundle.get("back"))
     private val okLlmButton = JButton(PluginLabelsBundle.get("next"))
     private val junitSelector = JUnitCombobox(e)
@@ -75,39 +79,35 @@ class LLMSetupPanelBuilder(e: AnActionEvent, private val project: Project) : Pan
 
         updatePromptSelectionPanel()
 
-        return FormBuilder.createFormBuilder()
+        return FormBuilder
+            .createFormBuilder()
             .setFormLeftIndent(10)
             .addLabeledComponent(
                 JBLabel(LLMLabelsBundle.get("llmPlatform")),
                 platformSelector,
                 10,
                 false,
-            )
-            .addLabeledComponent(
+            ).addLabeledComponent(
                 JBLabel(LLMLabelsBundle.get("llmToken")),
                 llmUserTokenField,
                 10,
                 false,
-            )
-            .addLabeledComponent(
+            ).addLabeledComponent(
                 JBLabel(LLMLabelsBundle.get("model")),
                 modelSelector,
                 10,
                 false,
-            )
-            .addLabeledComponent(
+            ).addLabeledComponent(
                 JBLabel(LLMLabelsBundle.get("junitVersion")),
                 junitSelector,
                 10,
                 false,
-            )
-            .addLabeledComponent(
+            ).addLabeledComponent(
                 JBLabel(LLMLabelsBundle.get("selectPrompt")),
                 getPromptSelectionPanel(),
                 10,
                 false,
-            )
-            .panel
+            ).panel
     }
 
     override fun getBottomPanel(): JPanel {
@@ -154,9 +154,15 @@ class LLMSetupPanelBuilder(e: AnActionEvent, private val project: Project) : Pan
         llmSettingsState.junitVersion = junitSelector.selectedItem!! as JUnitVersion
 
         when (promptEditorType) {
-            PromptEditorType.CLASS -> llmSettingsState.classCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
-            PromptEditorType.METHOD -> llmSettingsState.methodCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
-            PromptEditorType.LINE -> llmSettingsState.lineCurrentDefaultPromptIndex = JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
+            PromptEditorType.CLASS ->
+                llmSettingsState.classCurrentDefaultPromptIndex =
+                    JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
+            PromptEditorType.METHOD ->
+                llmSettingsState.methodCurrentDefaultPromptIndex =
+                    JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
+            PromptEditorType.LINE ->
+                llmSettingsState.lineCurrentDefaultPromptIndex =
+                    JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())
         }
     }
 
@@ -223,7 +229,8 @@ class LLMSetupPanelBuilder(e: AnActionEvent, private val project: Project) : Pan
      */
     private fun addListeners() {
         promptTemplateNames.addActionListener {
-            showCodeJLabel.toolTipText = JsonEncoding.decode(prompts)[JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())]
+            showCodeJLabel.toolTipText =
+                JsonEncoding.decode(prompts)[JsonEncoding.decode(promptNames).indexOf(promptTemplateNames.selectedItem!!.toString())]
         }
     }
 }

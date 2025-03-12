@@ -13,7 +13,6 @@ import org.jetbrains.research.testspark.settings.plugin.PluginSettingsState
 @Service(Service.Level.PROJECT)
 @State(name = "PluginSettingsState", storages = [Storage("ProjectSettings.xml")])
 class PluginSettingsService : PersistentStateComponent<PluginSettingsState> {
-
     private var pluginSettingsState: PluginSettingsState = PluginSettingsState()
 
     /**
@@ -22,9 +21,7 @@ class PluginSettingsService : PersistentStateComponent<PluginSettingsState> {
      * If the values from getState are different from the default values obtained by calling
      *  the default constructor, the state is persisted (serialised and stored).
      */
-    override fun getState(): PluginSettingsState {
-        return pluginSettingsState
-    }
+    override fun getState(): PluginSettingsState = pluginSettingsState
 
     /**
      * Loads the state of the settings of the open project.

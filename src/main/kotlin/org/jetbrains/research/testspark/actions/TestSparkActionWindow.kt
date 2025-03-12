@@ -57,8 +57,7 @@ class TestSparkActionWindow(
     private val testGenerationController: TestGenerationController,
     private val testSparkDisplayManager: TestSparkDisplayManager,
     private val testsExecutionResultManager: TestsExecutionResultManager,
-) :
-    JFrame("TestSpark") {
+) : JFrame("TestSpark") {
     private val project: Project = e.project!!
 
     private val llmSettingsState: LLMSettingsState
@@ -80,7 +79,12 @@ class TestSparkActionWindow(
         }
 
     private val codeTypes = psiHelper.getCurrentListOfCodeTypes(e)
-    private val caretOffset: Int = e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret!!.offset
+    private val caretOffset: Int =
+        e.dataContext
+            .getData(CommonDataKeys.CARET)
+            ?.caretModel
+            ?.primaryCaret!!
+            .offset
     private val fileUrl = e.dataContext.getData(CommonDataKeys.VIRTUAL_FILE)!!.presentableUrl
 
     private val codeTypeButtons: MutableList<Pair<CodeType, JRadioButton>> = mutableListOf()
@@ -124,14 +128,14 @@ class TestSparkActionWindow(
             val y = (dimension.height - size.height) / 2
             setLocation(x, y)
         } else {
-            NotificationGroupManager.getInstance()
+            NotificationGroupManager
+                .getInstance()
                 .getNotificationGroup("UserInterface")
                 .createNotification(
                     PluginMessagesBundle.get("generationWindowWarningTitle"),
                     PluginMessagesBundle.get("generationWindowWarningMessage"),
                     NotificationType.WARNING,
-                )
-                .notify(e.project)
+                ).notify(e.project)
         }
     }
 
@@ -184,17 +188,17 @@ class TestSparkActionWindow(
         }
         for ((_, button) in codeTypeButtons) codesToTestPanel.add(button)
 
-        val middlePanel = FormBuilder.createFormBuilder()
-            .setFormLeftIndent(10)
-            .addComponent(
-                testGeneratorPanel,
-                10,
-            )
-            .addComponent(
-                codesToTestPanel,
-                10,
-            )
-            .panel
+        val middlePanel =
+            FormBuilder
+                .createFormBuilder()
+                .setFormLeftIndent(10)
+                .addComponent(
+                    testGeneratorPanel,
+                    10,
+                ).addComponent(
+                    codesToTestPanel,
+                    10,
+                ).panel
 
         val nextButtonPanel = JPanel()
         nextButtonPanel.layout = BoxLayout(nextButtonPanel, BoxLayout.Y_AXIS)
@@ -221,11 +225,13 @@ class TestSparkActionWindow(
      * @param panel the JPanel to add listeners to
      */
     private fun addListeners(panel: JPanel) {
-        addWindowListener(object : WindowAdapter() {
-            override fun windowClosing(e: WindowEvent?) {
-                visibilityController.isVisible = false
-            }
-        })
+        addWindowListener(
+            object : WindowAdapter() {
+                override fun windowClosing(e: WindowEvent?) {
+                    visibilityController.isVisible = false
+                }
+            },
+        )
 
         llmButton.addActionListener {
             updateNextButton()
@@ -247,7 +253,10 @@ class TestSparkActionWindow(
         }
 
         nextButton.addActionListener {
-            if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) {
+            if (llmButton.isSelected &&
+                !llmSettingsState.llmSetupCheckBoxSelected &&
+                !llmSettingsState.provideTestSamplesCheckBoxSelected
+            ) {
                 startLLMGeneration()
             } else if (llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected) {
                 cardLayout.next(panel)
@@ -321,38 +330,41 @@ class TestSparkActionWindow(
             for ((codeType, button) in codeTypeButtons) {
                 if (button.isSelected) {
                     when (codeType) {
-                        CodeType.CLASS -> tool.generateTestsForClass(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                            testSparkDisplayManager,
-                            testsExecutionResultManager,
-                        )
+                        CodeType.CLASS ->
+                            tool.generateTestsForClass(
+                                project,
+                                psiHelper,
+                                caretOffset,
+                                fileUrl,
+                                testSamplesCode,
+                                testGenerationController,
+                                testSparkDisplayManager,
+                                testsExecutionResultManager,
+                            )
 
-                        CodeType.METHOD -> tool.generateTestsForMethod(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                            testSparkDisplayManager,
-                            testsExecutionResultManager,
-                        )
+                        CodeType.METHOD ->
+                            tool.generateTestsForMethod(
+                                project,
+                                psiHelper,
+                                caretOffset,
+                                fileUrl,
+                                testSamplesCode,
+                                testGenerationController,
+                                testSparkDisplayManager,
+                                testsExecutionResultManager,
+                            )
 
-                        CodeType.LINE -> tool.generateTestsForLine(
-                            project,
-                            psiHelper,
-                            caretOffset,
-                            fileUrl,
-                            testSamplesCode,
-                            testGenerationController,
-                            testSparkDisplayManager,
-                            testsExecutionResultManager,
-                        )
+                        CodeType.LINE ->
+                            tool.generateTestsForLine(
+                                project,
+                                psiHelper,
+                                caretOffset,
+                                fileUrl,
+                                testSamplesCode,
+                                testGenerationController,
+                                testSparkDisplayManager,
+                                testsExecutionResultManager,
+                            )
                     }
                     break
                 }
@@ -364,7 +376,9 @@ class TestSparkActionWindow(
     }
 
     private fun startKexGeneration() = startUnitTestGenerationTool(tool = Kex())
+
     private fun startEvoSuiteGeneration() = startUnitTestGenerationTool(tool = EvoSuite())
+
     private fun startLLMGeneration() = startUnitTestGenerationTool(tool = Llm())
 
     /**
@@ -388,7 +402,9 @@ class TestSparkActionWindow(
         }
 
         nextButton.isEnabled =
-            isTestGeneratorButtonGroupSelected && isCodeTypeButtonGroupSelected && !kexForCodeLineType
+            isTestGeneratorButtonGroupSelected &&
+            isCodeTypeButtonGroupSelected &&
+            !kexForCodeLineType
 
         if ((llmButton.isSelected && !llmSettingsState.llmSetupCheckBoxSelected && !llmSettingsState.provideTestSamplesCheckBoxSelected) ||
             (evoSuiteButton.isSelected && !evoSuiteSettingsState.evosuiteSetupCheckBoxSelected) ||

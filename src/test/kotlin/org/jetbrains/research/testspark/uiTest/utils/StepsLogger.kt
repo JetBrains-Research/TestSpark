@@ -10,10 +10,12 @@ object StepsLogger {
 
     @JvmStatic
     private val lock = Any()
-    fun init() = synchronized(lock) {
-        if (initializaed.not()) {
-            StepWorker.registerProcessor(StepLogger())
-            initializaed = true
+
+    fun init() =
+        synchronized(lock) {
+            if (initializaed.not()) {
+                StepWorker.registerProcessor(StepLogger())
+                initializaed = true
+            }
         }
-    }
 }

@@ -65,106 +65,127 @@ class PromptManager(
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
-    fun generatePrompt(codeType: FragmentToTestData, testSamplesCode: String, polyDepthReducing: Int): String {
-        val prompt = ApplicationManager.getApplication().runReadAction(
-            Computable {
-                val maxInputParamsDepth = LlmSettingsArguments(project).maxInputParamsDepth(polyDepthReducing)
-                val interestingPsiClasses =
-                    psiHelper.getInterestingPsiClassesWithQualifiedNames(
-                        project,
-                        classesToTest,
-                        polyDepthReducing,
-                        maxInputParamsDepth,
-                    )
-
-                val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
-                val polymorphismRelations =
-                    getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses)
-                        .map(this::createClassRepresentation)
-                        .toMap()
-
-                val context = PromptGenerationContext(
-                    cut = cut?.let { createClassRepresentation(it) },
-                    classesToTest = classesToTest.map(this::createClassRepresentation).toList(),
-                    polymorphismRelations = polymorphismRelations,
-                    promptConfiguration = PromptConfiguration(
-                        desiredLanguage = psiHelper.language.languageId,
-                        desiredTestingPlatform = llmSettingsState.junitVersion.showName,
-                        desiredMockingFramework = "Mockito 5",
-                    ),
-                )
-
-                val promptTemplates = PromptTemplates(
-                    classPrompt = JsonEncoding.decode(llmSettingsState.classPrompts)[llmSettingsState.classCurrentDefaultPromptIndex],
-                    methodPrompt = JsonEncoding.decode(llmSettingsState.methodPrompts)[llmSettingsState.methodCurrentDefaultPromptIndex],
-                    linePrompt = JsonEncoding.decode(llmSettingsState.linePrompts)[llmSettingsState.lineCurrentDefaultPromptIndex],
-                )
-
-                val promptGenerator = PromptGenerator(context, promptTemplates)
-
-                when (codeType.type!!) {
-                    CodeType.CLASS -> {
-                        promptGenerator.generatePromptForClass(interestingClasses, testSamplesCode)
-                    }
-
-                    CodeType.METHOD -> {
-                        val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
-                        val method = createMethodRepresentation(psiMethod)!!
-                        val interestingClassesFromMethod =
-                            psiHelper.getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
-                                .map(this::createClassRepresentation)
-                                .toList()
-
-                        promptGenerator.generatePromptForMethod(
-                            method,
-                            interestingClassesFromMethod,
-                            testSamplesCode,
-                            psiHelper.getPackageName(),
+    fun generatePrompt(
+        codeType: FragmentToTestData,
+        testSamplesCode: String,
+        polyDepthReducing: Int,
+    ): String {
+        val prompt =
+            ApplicationManager.getApplication().runReadAction(
+                Computable {
+                    val maxInputParamsDepth = LlmSettingsArguments(project).maxInputParamsDepth(polyDepthReducing)
+                    val interestingPsiClasses =
+                        psiHelper.getInterestingPsiClassesWithQualifiedNames(
+                            project,
+                            classesToTest,
+                            polyDepthReducing,
+                            maxInputParamsDepth,
                         )
-                    }
 
-                    CodeType.LINE -> {
-                        // two possible cases: the line inside a method/function or inside a class
-                        val lineNumber = codeType.objectIndex
-                        // get code of line under test
-                        val lineUnderTest = psiHelper.getDocumentFromPsiFile()!!.let { document ->
-                            val lineStartOffset = document.getLineStartOffset(lineNumber - 1)
-                            val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
-                            document.getText(TextRange.create(lineStartOffset, lineEndOffset))
+                    val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
+                    val polymorphismRelations =
+                        getPolymorphismRelationsWithQualifiedNames(project, interestingPsiClasses)
+                            .map(this::createClassRepresentation)
+                            .toMap()
+
+                    val context =
+                        PromptGenerationContext(
+                            cut = cut?.let { createClassRepresentation(it) },
+                            classesToTest = classesToTest.map(this::createClassRepresentation).toList(),
+                            polymorphismRelations = polymorphismRelations,
+                            promptConfiguration =
+                                PromptConfiguration(
+                                    desiredLanguage = psiHelper.language.languageId,
+                                    desiredTestingPlatform = llmSettingsState.junitVersion.showName,
+                                    desiredMockingFramework = "Mockito 5",
+                                ),
+                        )
+
+                    val promptTemplates =
+                        PromptTemplates(
+                            classPrompt =
+                                JsonEncoding.decode(
+                                    llmSettingsState.classPrompts,
+                                )[llmSettingsState.classCurrentDefaultPromptIndex],
+                            methodPrompt =
+                                JsonEncoding.decode(
+                                    llmSettingsState.methodPrompts,
+                                )[llmSettingsState.methodCurrentDefaultPromptIndex],
+                            linePrompt =
+                                JsonEncoding.decode(
+                                    llmSettingsState.linePrompts,
+                                )[llmSettingsState.lineCurrentDefaultPromptIndex],
+                        )
+
+                    val promptGenerator = PromptGenerator(context, promptTemplates)
+
+                    when (codeType.type!!) {
+                        CodeType.CLASS -> {
+                            promptGenerator.generatePromptForClass(interestingClasses, testSamplesCode)
                         }
 
-                        val psiMethod = getMethodDescriptor(cut, lineNumber)?.let { descriptor ->
-                            getPsiMethod(cut, descriptor)
-                        }
-                        /**
-                         * if psiMethod exists, then use it as a context for a line,
-                         * otherwise use the cut as a context
-                         */
-                        if (psiMethod != null) {
+                        CodeType.METHOD -> {
+                            val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
                             val method = createMethodRepresentation(psiMethod)!!
                             val interestingClassesFromMethod =
-                                psiHelper.getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
+                                psiHelper
+                                    .getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
                                     .map(this::createClassRepresentation)
                                     .toList()
 
-                            return@Computable promptGenerator.generatePromptForLine(
-                                lineUnderTest,
+                            promptGenerator.generatePromptForMethod(
                                 method,
                                 interestingClassesFromMethod,
                                 testSamplesCode,
-                                packageName = psiHelper.getPackageName(),
-                            )
-                        } else {
-                            return@Computable promptGenerator.generatePromptForLine(
-                                lineUnderTest,
-                                interestingClasses,
-                                testSamplesCode,
+                                psiHelper.getPackageName(),
                             )
                         }
+
+                        CodeType.LINE -> {
+                            // two possible cases: the line inside a method/function or inside a class
+                            val lineNumber = codeType.objectIndex
+                            // get code of line under test
+                            val lineUnderTest =
+                                psiHelper.getDocumentFromPsiFile()!!.let { document ->
+                                    val lineStartOffset = document.getLineStartOffset(lineNumber - 1)
+                                    val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
+                                    document.getText(TextRange.create(lineStartOffset, lineEndOffset))
+                                }
+
+                            val psiMethod =
+                                getMethodDescriptor(cut, lineNumber)?.let { descriptor ->
+                                    getPsiMethod(cut, descriptor)
+                                }
+                            /**
+                             * if psiMethod exists, then use it as a context for a line,
+                             * otherwise use the cut as a context
+                             */
+                            if (psiMethod != null) {
+                                val method = createMethodRepresentation(psiMethod)!!
+                                val interestingClassesFromMethod =
+                                    psiHelper
+                                        .getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
+                                        .map(this::createClassRepresentation)
+                                        .toList()
+
+                                return@Computable promptGenerator.generatePromptForLine(
+                                    lineUnderTest,
+                                    method,
+                                    interestingClassesFromMethod,
+                                    testSamplesCode,
+                                    packageName = psiHelper.getPackageName(),
+                                )
+                            } else {
+                                return@Computable promptGenerator.generatePromptForLine(
+                                    lineUnderTest,
+                                    interestingClasses,
+                                    testSamplesCode,
+                                )
+                            }
+                        }
                     }
-                }
-            },
-        ) + LLMSettingsBundle.get("commonPromptPart")
+                },
+            ) + LLMSettingsBundle.get("commonPromptPart")
         log.info("Prompt is:\n$prompt")
         println("Prompt is:\n$prompt")
         return prompt
@@ -180,15 +201,17 @@ class PromptManager(
         )
     }
 
-    private fun createClassRepresentation(psiClass: PsiClassWrapper): ClassRepresentation {
-        return ClassRepresentation(
+    private fun createClassRepresentation(psiClass: PsiClassWrapper): ClassRepresentation =
+        ClassRepresentation(
             psiClass.qualifiedName,
             psiClass.fullText,
             psiClass.constructorSignatures,
-            psiClass.allMethods.map(this::createMethodRepresentation).toList().filterNotNull(),
+            psiClass.allMethods
+                .map(this::createMethodRepresentation)
+                .toList()
+                .filterNotNull(),
             psiClass.classType,
         )
-    }
 
     private fun createClassRepresentation(
         entry: Map.Entry<PsiClassWrapper, MutableList<PsiClassWrapper>>,
@@ -199,10 +222,9 @@ class PromptManager(
         return key to value // mapOf(key to value).entries.first()
     }
 
-    fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
-        return (LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
+    fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean =
+        (LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
             (LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
-    }
 
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
         // reducing depth of polymorphism
@@ -216,7 +238,9 @@ class PromptManager(
         // reducing depth of input params
         if (LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1) {
             testGenerationData.inputParamsDepthReducing++
-            log.info("input params depth is: ${LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}")
+            log.info(
+                "input params depth is: ${LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}",
+            )
             showPromptReductionWarning(testGenerationData)
             return true
         }
@@ -228,7 +252,9 @@ class PromptManager(
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
                 "Maximum depth of polymorphism is ${LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
-                "Maximum depth for input parameters is ${LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
+                "Maximum depth for input parameters is ${LlmSettingsArguments(
+                    project,
+                ).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
             project,
         )
     }

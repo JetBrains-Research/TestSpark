@@ -26,7 +26,9 @@ import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.langwrappers.strategies.JavaKotlinClassTextExtractor
 
-class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWrapper {
+class KotlinPsiClassWrapper(
+    private val psiClass: KtClassOrObject,
+) : PsiClassWrapper {
     override val name: String get() = psiClass.name ?: ""
 
     override val qualifiedName: String get() = psiClass.fqName!!.asString()
@@ -34,7 +36,11 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
     override val text: String? get() = psiClass.text
 
     override val methods: List<PsiMethodWrapper>
-        get() = psiClass.body?.functions?.filter { it.name != null }?.map { KotlinPsiMethodWrapper(it) } ?: emptyList()
+        get() =
+            psiClass.body
+                ?.functions
+                ?.filter { it.name != null }
+                ?.map { KotlinPsiMethodWrapper(it) } ?: emptyList()
 
     override val allMethods: List<PsiMethodWrapper> get() = methods
 
@@ -44,30 +50,31 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
         @RequiresReadLock
         get() {
             // Ensure this operation is performed in a background thread
-            return ReadAction.nonBlocking<KotlinPsiClassWrapper?> {
-                // Get the superTypeListEntries of the Kotlin class
-                val superTypeListEntries = psiClass.superTypeListEntries
+            return ReadAction
+                .nonBlocking<KotlinPsiClassWrapper?> {
+                    // Get the superTypeListEntries of the Kotlin class
+                    val superTypeListEntries = psiClass.superTypeListEntries
 
-                // Find the superclass entry (if any)
-                val superClassEntry = superTypeListEntries.firstOrNull()
+                    // Find the superclass entry (if any)
+                    val superClassEntry = superTypeListEntries.firstOrNull()
 
-                // Resolve the superclass type reference to a KtClass
-                val superClassPsiClass = superClassEntry?.typeReference?.let { typeRef ->
-                    analyze(typeRef) {
-                        val ktType = typeRef.type
-                        val superClassSymbol = ktType.expandedSymbol
-                        superClassSymbol?.psi as? KtClass
+                    // Resolve the superclass type reference to a KtClass
+                    val superClassPsiClass =
+                        superClassEntry?.typeReference?.let { typeRef ->
+                            analyze(typeRef) {
+                                val ktType = typeRef.type
+                                val superClassSymbol = ktType.expandedSymbol
+                                superClassSymbol?.psi as? KtClass
+                            }
+                        }
+
+                    // Return a wrapped superclass if the current class has a fully qualified name
+                    if (psiClass.fqName != null) {
+                        superClassPsiClass?.let { KotlinPsiClassWrapper(it) }
+                    } else {
+                        null
                     }
-                }
-
-                // Return a wrapped superclass if the current class has a fully qualified name
-                if (psiClass.fqName != null) {
-                    superClassPsiClass?.let { KotlinPsiClassWrapper(it) }
-                } else {
-                    null
-                }
-            }
-                .expireWith(psiClass.project) // Ensure the action is canceled if the project is disposed
+                }.expireWith(psiClass.project) // Ensure the action is canceled if the project is disposed
                 .submit(AppExecutorUtil.getAppExecutorService())
                 .get()
         }
@@ -77,12 +84,13 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
     override val containingFile: PsiFile get() = psiClass.containingFile
 
     override val fullText: String
-        get() = JavaKotlinClassTextExtractor().extract(
-            psiClass.containingFile,
-            psiClass.text,
-            kotlinPackagePattern,
-            kotlinImportPattern,
-        )
+        get() =
+            JavaKotlinClassTextExtractor().extract(
+                psiClass.containingFile,
+                psiClass.text,
+                kotlinPackagePattern,
+                kotlinImportPattern,
+            )
 
     override val classType: ClassType
         get() {
@@ -96,7 +104,11 @@ class KotlinPsiClassWrapper(private val psiClass: KtClassOrObject) : PsiClassWra
             }
         }
 
-    override val rBrace: Int? = psiClass.body?.rBrace?.textRange?.startOffset
+    override val rBrace: Int? =
+        psiClass.body
+            ?.rBrace
+            ?.textRange
+            ?.startOffset
 
     override fun searchSubclasses(project: Project): Collection<PsiClassWrapper> {
         val scope = GlobalSearchScope.projectScope(project)

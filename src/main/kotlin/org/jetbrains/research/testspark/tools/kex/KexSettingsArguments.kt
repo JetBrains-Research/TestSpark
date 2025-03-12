@@ -21,22 +21,20 @@ class KexSettingsArguments(
     private val kexExecPath: String,
     private val kexHome: String,
 ) {
-    fun buildCommand(): MutableList<String> {
-        return mutableListOf<String>(javaExecPath)
+    fun buildCommand(): MutableList<String> =
+        mutableListOf<String>(javaExecPath)
             .setJvmProperties()
             .setAddOpensArgs(javaVersion)
             .setKexParams()
             .setKexIniOptions()
-    }
 
-    private fun MutableList<String>.setJvmProperties(): MutableList<String> {
-        return this.addAll(
+    private fun MutableList<String>.setJvmProperties(): MutableList<String> =
+        this.addAll(
             "-Xmx${KexDefaultsBundle.get("heapSize")}g",
             "-Djava.security.manager",
             "-Djava.security.policy==$kexHome/kex.policy",
             "-Dlogback.statusListenerClass=ch.qos.logback.core.status.NopStatusListener",
         )
-    }
 
     private fun MutableList<String>.setAddOpensArgs(javaVersion: Int): MutableList<String> {
         if (javaVersion > 8) {
@@ -48,8 +46,8 @@ class KexSettingsArguments(
     /**
      * @see kex readme
      */
-    private fun MutableList<String>.setKexParams(): MutableList<String> {
-        return this.addAll(
+    private fun MutableList<String>.setKexParams(): MutableList<String> =
+        this.addAll(
             "-jar",
             kexExecPath,
             "--classpath",
@@ -61,7 +59,6 @@ class KexSettingsArguments(
             "--mode",
             kexSettingsState.kexMode.toString(),
         )
-    }
 
     /**
      * Kex uses a configuration file kex.ini.
@@ -69,15 +66,15 @@ class KexSettingsArguments(
      */
     private fun MutableList<String>.setKexIniOptions(): MutableList<String> {
         // Add options provided with help of settings ui
-        val optionStrings = mutableListOf(
-            listOf("kex", "minimizeTestSuite", KexDefaultsBundle.get("minimizeTestSuite")),
-            listOf("testGen", "maxTests", kexSettingsState.maxTests.toString()),
-            listOf("concolic", "timeLimit", "${kexSettingsState.timeLimit.inWholeSeconds}"),
-            listOf("symbolic", "timeLimit", "${kexSettingsState.timeLimit.inWholeSeconds}"),
-            listOf("testGen", "defaultPackageName", GeneratedTestsProcessor.DEFAULT_PACKAGE_NAME),
-        )
-            .map { it.joinToString(":") }
-            .toMutableList()
+        val optionStrings =
+            mutableListOf(
+                listOf("kex", "minimizeTestSuite", KexDefaultsBundle.get("minimizeTestSuite")),
+                listOf("testGen", "maxTests", kexSettingsState.maxTests.toString()),
+                listOf("concolic", "timeLimit", "${kexSettingsState.timeLimit.inWholeSeconds}"),
+                listOf("symbolic", "timeLimit", "${kexSettingsState.timeLimit.inWholeSeconds}"),
+                listOf("testGen", "defaultPackageName", GeneratedTestsProcessor.DEFAULT_PACKAGE_NAME),
+            ).map { it.joinToString(":") }
+                .toMutableList()
 
         // adding explicitly provided user option
         // break into a list of options if multiple are provided
@@ -87,11 +84,12 @@ class KexSettingsArguments(
 
         // add --option before every option
         val separator = "--option"
-        val interspersed = optionStrings.fold(mutableListOf<String>()) { acc, item ->
-            acc.add(separator)
-            acc.add(item)
-            acc
-        }
+        val interspersed =
+            optionStrings.fold(mutableListOf<String>()) { acc, item ->
+                acc.add(separator)
+                acc.add(item)
+                acc
+            }
         this.addAll(interspersed)
         return this
     }

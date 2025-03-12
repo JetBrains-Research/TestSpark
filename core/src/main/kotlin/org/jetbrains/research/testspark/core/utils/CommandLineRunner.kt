@@ -21,18 +21,19 @@ class CommandLineRunner {
             /**
              * Since Windows does not provide bash, use cmd or simila       r default command line interpreter
              */
-            val process = if (DataFilesUtil.isWindows()) {
-                ProcessBuilder()
-                    .command("cmd", "/c", cmd.joinToString(" "))
-                    .redirectErrorStream(true)
-                    .start()
-            } else {
-                log.info { "Running command: ${cmd.joinToString(" ")}" }
-                ProcessBuilder()
-                    .command("bash", "-c", cmd.joinToString(" "))
-                    .redirectErrorStream(true)
-                    .start()
-            }
+            val process =
+                if (DataFilesUtil.isWindows()) {
+                    ProcessBuilder()
+                        .command("cmd", "/c", cmd.joinToString(" "))
+                        .redirectErrorStream(true)
+                        .start()
+                } else {
+                    log.info { "Running command: ${cmd.joinToString(" ")}" }
+                    ProcessBuilder()
+                        .command("bash", "-c", cmd.joinToString(" "))
+                        .redirectErrorStream(true)
+                        .start()
+                }
             val reader = BufferedReader(InputStreamReader(process.inputStream))
             val separator = System.lineSeparator()
             var line: String?

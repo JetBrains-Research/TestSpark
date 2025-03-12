@@ -48,7 +48,10 @@ class LLMSampleSelector {
      */
     fun getInitialTestCodes(): MutableList<String> = initialTestCodes
 
-    fun appendTestSampleCode(index: Int, code: String) {
+    fun appendTestSampleCode(
+        index: Int,
+        code: String,
+    ) {
         testSamplesCode += "Test sample number ${index + 1}\n```\n${code}\n```\n"
     }
 
@@ -98,7 +101,10 @@ class LLMSampleSelector {
      * @param currentFile The current file.
      * @param project The project.
      */
-    private fun collectTestSamplesForCurrentFile(currentFile: VirtualFile, project: Project) {
+    private fun collectTestSamplesForCurrentFile(
+        currentFile: VirtualFile,
+        project: Project,
+    ) {
         val projectScope = ProjectAndLibrariesScope(project)
         if (isJavaFileTypes(currentFile)) {
             val psiJavaFile = findJavaFileFromProject(currentFile, project)
@@ -127,7 +133,10 @@ class LLMSampleSelector {
      * @param project The project instance.
      * @return The PSI Java file for the given file and project.
      */
-    private fun findJavaFileFromProject(file: VirtualFile, project: Project): PsiJavaFile {
+    private fun findJavaFileFromProject(
+        file: VirtualFile,
+        project: Project,
+    ): PsiJavaFile {
         val psiManager = PsiManager.getInstance(project)
         return psiManager.findFile(file) as PsiJavaFile
     }
@@ -139,7 +148,11 @@ class LLMSampleSelector {
      * @param psiMethod The method from which the search for references starts.
      * @param scope The scope of the search
      */
-    private fun processMethod(psiClass: PsiClass, psiMethod: PsiMethod, scope: SearchScope) {
+    private fun processMethod(
+        psiClass: PsiClass,
+        psiMethod: PsiMethod,
+        scope: SearchScope,
+    ) {
         ReferencesSearch.search(psiMethod, scope).forEach { reference ->
             val enclosingMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
             if (enclosingMethod != null) {
@@ -154,7 +167,10 @@ class LLMSampleSelector {
      * @param enclosingMethod The enclosing method.
      * @param psiClass The class that defines the method.
      */
-    private fun processEnclosingMethod(enclosingMethod: PsiMethod, psiClass: PsiClass) {
+    private fun processEnclosingMethod(
+        enclosingMethod: PsiMethod,
+        psiClass: PsiClass,
+    ) {
         val enclosingClass = enclosingMethod.containingClass
         val enclosingFile = (enclosingMethod.containingFile as PsiJavaFile)
         val imports = retrieveImportStatements(enclosingFile, enclosingClass!!)
@@ -167,12 +183,14 @@ class LLMSampleSelector {
      * @param psiJavaFile The PSI Java file object
      * @return The PSI class object.
      */
-    fun retrievePsiClass(psiJavaFile: PsiJavaFile): PsiClass {
-        return psiJavaFile.classes[
-            psiJavaFile.classes.stream().map { it.name }.toArray()
+    fun retrievePsiClass(psiJavaFile: PsiJavaFile): PsiClass =
+        psiJavaFile.classes[
+            psiJavaFile.classes
+                .stream()
+                .map { it.name }
+                .toArray()
                 .indexOf(psiJavaFile.name.removeSuffix(".java")),
         ]
-    }
 
     /**
      * Retrieves the import statements for a {@link PsiJavaFile} and {@link PsiClass}.
@@ -181,9 +199,16 @@ class LLMSampleSelector {
      * @param psiClass The PSI class object.
      * @return A string of import statements.
      */
-    fun retrieveImportStatements(psiJavaFile: PsiJavaFile, psiClass: PsiClass): String {
-        var imports = psiJavaFile.importList?.allImportStatements?.map { it.text }?.toList()
-            ?.joinToString("\n") ?: ""
+    fun retrieveImportStatements(
+        psiJavaFile: PsiJavaFile,
+        psiClass: PsiClass,
+    ): String {
+        var imports =
+            psiJavaFile.importList
+                ?.allImportStatements
+                ?.map { it.text }
+                ?.toList()
+                ?.joinToString("\n") ?: ""
         if (psiClass.qualifiedName != null && psiClass.qualifiedName!!.contains(".")) {
             imports += "\nimport ${psiClass.qualifiedName?.substringBeforeLast(".") + ".*"};"
         }
@@ -200,7 +225,11 @@ class LLMSampleSelector {
      * @param imports The imports required for the code generation.
      * @param psiClass The PSI class object.
      */
-    private fun processCandidateMethod(psiMethod: PsiMethod, imports: String, psiClass: PsiClass) {
+    private fun processCandidateMethod(
+        psiMethod: PsiMethod,
+        imports: String,
+        psiClass: PsiClass,
+    ) {
         val annotations = psiMethod.annotations
         annotations.forEach { annotation ->
             if (annotation.qualifiedName == "org.junit.jupiter.api.Test" ||
@@ -220,7 +249,10 @@ class LLMSampleSelector {
      * @param methodCode The code of the method.
      * @return A class wrapping the given method.
      */
-    fun createTestSampleClass(imports: String, methodCode: String): String {
+    fun createTestSampleClass(
+        imports: String,
+        methodCode: String,
+    ): String {
         var normalizedImports = imports
         if (normalizedImports.isNotBlank()) normalizedImports += "\n\n"
         return normalizedImports +
@@ -236,8 +268,10 @@ class LLMSampleSelector {
      * @param method The method object.
      * @return A fully-qualified method name.
      */
-    fun createMethodName(psiClass: PsiClass, method: PsiMethod): String =
-        "<html>${psiClass.qualifiedName}#${method.name}</html>"
+    fun createMethodName(
+        psiClass: PsiClass,
+        method: PsiMethod,
+    ): String = "<html>${psiClass.qualifiedName}#${method.name}</html>"
 
     companion object {
         const val DEFAULT_TEST_NAME = "<html>provide manually</html>"

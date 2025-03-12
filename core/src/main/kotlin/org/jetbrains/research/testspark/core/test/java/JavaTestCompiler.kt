@@ -20,41 +20,48 @@ class JavaTestCompiler(
     // init block to find the javac compiler
     init {
         // find the proper javac
-        val javaCompiler = File(javaHomeDirectoryPath).walk()
-            .filter {
-                val isCompilerName = if (DataFilesUtil.isWindows()) {
-                    it.name.equals("javac.exe")
-                } else {
-                    it.name.equals("javac")
-                }
-                isCompilerName && it.isFile
-            }
-            .firstOrNull()
+        val javaCompiler =
+            File(javaHomeDirectoryPath)
+                .walk()
+                .filter {
+                    val isCompilerName =
+                        if (DataFilesUtil.isWindows()) {
+                            it.name.equals("javac.exe")
+                        } else {
+                            it.name.equals("javac")
+                        }
+                    isCompilerName && it.isFile
+                }.firstOrNull()
 
         if (javaCompiler == null) throw JavaCompilerNotFoundException(javaHomeDirectoryPath)
         javac = javaCompiler.absolutePath
     }
 
-    override fun compileCode(path: String, projectBuildPath: String, workingDir: String): ExecutionResult {
+    override fun compileCode(
+        path: String,
+        projectBuildPath: String,
+        workingDir: String,
+    ): ExecutionResult {
         val classPaths = "\"${getClassPaths(projectBuildPath)}\""
         // compile file
         // See: https://github.com/JetBrains-Research/TestSpark/issues/402
         val javac = if (DataFilesUtil.isWindows()) "\"$javac\"" else "'$javac'"
 
-        val executionResult = CommandLineRunner.run(
-            arrayListOf(
-                /**
-                 * Filepath may contain spaces, so we need to wrap it in quotes.
-                 */
-                javac,
-                "-cp",
-                classPaths,
-                path,
-                /**
-                 * We don't have to provide -d option, since javac saves class files in the same place by default
-                 */
-            ),
-        )
+        val executionResult =
+            CommandLineRunner.run(
+                arrayListOf(
+                    /**
+                     * Filepath may contain spaces, so we need to wrap it in quotes.
+                     */
+                    javac,
+                    "-cp",
+                    classPaths,
+                    path,
+                    /**
+                     * We don't have to provide -d option, since javac saves class files in the same place by default
+                     */
+                ),
+            )
         logger.info { "Exit code: '${executionResult.exitCode}'; Execution message: '${executionResult.executionMessage}'" }
 
         val classFilePath = path.replace(".java", ".class")

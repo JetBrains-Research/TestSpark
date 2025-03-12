@@ -13,7 +13,6 @@ import org.jetbrains.research.testspark.settings.evosuite.EvoSuiteSettingsState
 @Service(Service.Level.PROJECT)
 @State(name = "EvoSuiteSettingsState", storages = [Storage("EvoSuiteSettings.xml")])
 class EvoSuiteSettingsService : PersistentStateComponent<EvoSuiteSettingsState> {
-
     private var evoSuiteSettingsState: EvoSuiteSettingsState = EvoSuiteSettingsState()
 
     /**
@@ -22,9 +21,7 @@ class EvoSuiteSettingsService : PersistentStateComponent<EvoSuiteSettingsState> 
      * If the values from getState are different from the default values obtained by calling
      *  the default constructor, the state is persisted (serialised and stored).
      */
-    override fun getState(): EvoSuiteSettingsState {
-        return evoSuiteSettingsState
-    }
+    override fun getState(): EvoSuiteSettingsState = evoSuiteSettingsState
 
     /**
      * Loads the state of the application-level settings.

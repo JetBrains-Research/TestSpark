@@ -3,7 +3,6 @@ package org.jetbrains.research.testspark.testmanager.kotlin
 import org.jetbrains.research.testspark.testmanager.template.TestAnalyzer
 
 object KotlinTestAnalyzer : TestAnalyzer {
-
     override fun extractFirstTestMethodCode(classCode: String): String {
         val testMethods = StringBuilder()
         val lines = classCode.lines()
@@ -34,7 +33,10 @@ object KotlinTestAnalyzer : TestAnalyzer {
         return testMethods.toString()
     }
 
-    override fun extractFirstTestMethodName(oldTestCaseName: String, classCode: String): String {
+    override fun extractFirstTestMethodName(
+        oldTestCaseName: String,
+        classCode: String,
+    ): String {
         val lines = classCode.lines()
         var testMethodName = oldTestCaseName
 
@@ -59,7 +61,5 @@ object KotlinTestAnalyzer : TestAnalyzer {
         return className
     }
 
-    override fun getFileNameFromTestCaseCode(code: String): String {
-        return "${getClassFromTestCaseCode(code)}.kt"
-    }
+    override fun getFileNameFromTestCaseCode(code: String): String = "${getClassFromTestCaseCode(code)}.kt"
 }

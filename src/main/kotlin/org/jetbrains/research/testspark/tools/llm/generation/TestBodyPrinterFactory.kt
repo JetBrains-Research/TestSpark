@@ -6,10 +6,9 @@ import org.jetbrains.research.testspark.core.test.java.JavaTestBodyPrinter
 import org.jetbrains.research.testspark.core.test.kotlin.KotlinTestBodyPrinter
 
 object TestBodyPrinterFactory {
-    fun create(language: SupportedLanguage): TestBodyPrinter {
-        return when (language) {
+    fun create(language: SupportedLanguage): TestBodyPrinter =
+        when (language) {
             SupportedLanguage.Kotlin -> KotlinTestBodyPrinter()
             SupportedLanguage.Java -> JavaTestBodyPrinter()
         }
-    }
 }

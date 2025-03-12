@@ -14,7 +14,11 @@ class TestsExecutionResultManager {
      * @param testCaseCode The code of the failed test case.
      * @param testError The error message or description of the failed test.
      */
-    fun addFailedTest(testId: Int, testCaseCode: String, testError: String) {
+    fun addFailedTest(
+        testId: Int,
+        testCaseCode: String,
+        testError: String,
+    ) {
         val htmlError = "<html>${testError.replace("===", "").replace("\t", "<br/>").trimEnd()}</html>"
         currentTestErrors[testId] = htmlError
         executionResult[testId]!![getTrimmedCode(testCaseCode)] = htmlError
@@ -26,7 +30,10 @@ class TestsExecutionResultManager {
      * @param testId The id of the test.
      * @param testCaseCode The code of the test case.
      */
-    fun addPassedTest(testId: Int, testCaseCode: String) {
+    fun addPassedTest(
+        testId: Int,
+        testCaseCode: String,
+    ) {
         if (currentTestErrors.contains(testId)) currentTestErrors.remove(testId)
         executionResult[testId]!![getTrimmedCode(testCaseCode)] = ""
     }
@@ -46,7 +53,10 @@ class TestsExecutionResultManager {
      * @param testId The id of the failed test.
      * @param testError The error message of the failed test.
      */
-    fun addCurrentFailedTest(testId: Int, testError: String) {
+    fun addCurrentFailedTest(
+        testId: Int,
+        testError: String,
+    ) {
         val htmlError = "<html>${testError.replace("===", "").replace("\t", "<br/>").trimEnd()}</html>"
         currentTestErrors[testId] = htmlError
     }
@@ -68,7 +78,10 @@ class TestsExecutionResultManager {
      * @param testCaseCode The code of the specific test case.
      * @return The error message for the given test.
      */
-    fun getError(testCaseId: Int, testCaseCode: String) = executionResult[testCaseId]!![getTrimmedCode(testCaseCode)]
+    fun getError(
+        testCaseId: Int,
+        testCaseCode: String,
+    ) = executionResult[testCaseId]!![getTrimmedCode(testCaseCode)]
 
     /**
      * Returns the trimmed code by removing all whitespace characters from the given code.

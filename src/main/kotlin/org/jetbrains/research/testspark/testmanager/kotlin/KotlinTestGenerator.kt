@@ -13,7 +13,6 @@ import org.jetbrains.research.testspark.testmanager.template.TestGenerator
 import java.io.File
 
 object KotlinTestGenerator : TestGenerator {
-
     private val log = Logger.getInstance(this::class.java)
 
     override fun generateCode(
@@ -43,13 +42,19 @@ object KotlinTestGenerator : TestGenerator {
         return formatCode(project, Regex("\n\n\n(?:\n)*").replace(testFullText, "\n\n"), testGenerationData)
     }
 
-    override fun formatCode(project: Project, code: String, generatedTestData: TestGenerationData): String {
+    override fun formatCode(
+        project: Project,
+        code: String,
+        generatedTestData: TestGenerationData,
+    ): String {
         var result = ""
         WriteCommandAction.runWriteCommandAction(project) {
             val fileName = generatedTestData.resultPath + File.separatorChar + "Formatted.kt"
             // Create a temporary PsiFile
-            val psiFile: PsiFile = PsiFileFactory.getInstance(project)
-                .createFileFromText(fileName, KotlinLanguage.INSTANCE, code)
+            val psiFile: PsiFile =
+                PsiFileFactory
+                    .getInstance(project)
+                    .createFileFromText(fileName, KotlinLanguage.INSTANCE, code)
 
             CodeStyleManager.getInstance(project).reformat(psiFile)
 

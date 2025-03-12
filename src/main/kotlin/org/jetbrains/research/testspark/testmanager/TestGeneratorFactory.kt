@@ -12,10 +12,9 @@ object TestGeneratorFactory {
      * @param language the programming language for which to create the generator
      * @return an instance of TestClassCodeGenerator
      */
-    fun create(language: SupportedLanguage): TestGenerator {
-        return when (language) {
+    fun create(language: SupportedLanguage): TestGenerator =
+        when (language) {
             SupportedLanguage.Kotlin -> KotlinTestGenerator
             SupportedLanguage.Java -> JavaTestGenerator
         }
-    }
 }
