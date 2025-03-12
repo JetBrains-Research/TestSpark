@@ -64,12 +64,17 @@ class PromptManager(
     private val log = Logger.getInstance(this::class.java)
     private val llmErrorManager: LLMErrorManager = LLMErrorManager()
 
-    fun generatePrompt(codeType: FragmentToTestData, testSamplesCode: String, polyDepthReducing: Int): String {
-        val prompt = ApplicationManager.getApplication().runReadAction(
-            Computable {
-                val maxInputParamsDepth = LlmSettingsArguments(project).maxInputParamsDepth(polyDepthReducing)
-                val interestingPsiClasses =
-                    psiHelper.getInterestingPsiClassesWithQualifiedNames(classesToTest, maxInputParamsDepth)
+    fun generatePrompt(
+        codeType: FragmentToTestData,
+        testSamplesCode: String,
+        polyDepthReducing: Int,
+    ): String {
+        val prompt =
+            ApplicationManager.getApplication().runReadAction(
+                Computable {
+                    val maxInputParamsDepth = LlmSettingsArguments(project).maxInputParamsDepth(polyDepthReducing)
+                    val interestingPsiClasses =
+                        psiHelper.getInterestingPsiClassesWithQualifiedNames(classesToTest, maxInputParamsDepth)
 
                     val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
                     val polymorphismRelations =
@@ -113,13 +118,14 @@ class PromptManager(
                             promptGenerator.generatePromptForClass(interestingClasses, testSamplesCode)
                         }
 
-                    CodeType.METHOD -> {
-                        val psiMethod = psiHelper.getPsiMethod(cut, codeType.objectDescription, caret)!!
-                        val method = createMethodRepresentation(psiMethod)!!
-                        val interestingClassesFromMethod =
-                            psiHelper.getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
-                                .map(this::createClassRepresentation)
-                                .toList()
+                        CodeType.METHOD -> {
+                            val psiMethod = psiHelper.getPsiMethod(cut, codeType.objectDescription, caret)!!
+                            val method = createMethodRepresentation(psiMethod)!!
+                            val interestingClassesFromMethod =
+                                psiHelper
+                                    .getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
+                                    .map(this::createClassRepresentation)
+                                    .toList()
 
                             promptGenerator.generatePromptForMethod(
                                 method,
@@ -140,19 +146,21 @@ class PromptManager(
                                     document.getText(TextRange.create(lineStartOffset, lineEndOffset))
                                 }
 
-                        val psiMethod = psiHelper.getMethodDescriptor(cut, lineNumber, caret)?.let { descriptor ->
-                            psiHelper.getPsiMethod(cut, descriptor, caret)
-                        }
-                        /**
-                         * if psiMethod exists, then use it as a context for a line,
-                         * otherwise use the cut as a context
-                         */
-                        if (psiMethod != null) {
-                            val method = createMethodRepresentation(psiMethod)!!
-                            val interestingClassesFromMethod =
-                                psiHelper.getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
-                                    .map(this::createClassRepresentation)
-                                    .toList()
+                            val psiMethod =
+                                psiHelper.getMethodDescriptor(cut, lineNumber, caret)?.let { descriptor ->
+                                    psiHelper.getPsiMethod(cut, descriptor, caret)
+                                }
+                            /**
+                             * if psiMethod exists, then use it as a context for a line,
+                             * otherwise use the cut as a context
+                             */
+                            if (psiMethod != null) {
+                                val method = createMethodRepresentation(psiMethod)!!
+                                val interestingClassesFromMethod =
+                                    psiHelper
+                                        .getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
+                                        .map(this::createClassRepresentation)
+                                        .toList()
 
                                 return@Computable promptGenerator.generatePromptForLine(
                                     lineUnderTest,
@@ -208,10 +216,9 @@ class PromptManager(
         return key to value // mapOf(key to value).entries.first()
     }
 
-    fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean {
-        return (LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
+    fun isPromptSizeReductionPossible(testGenerationData: TestGenerationData): Boolean =
+        (LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing) > 1) ||
             (LlmSettingsArguments(project).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing) > 1)
-    }
 
     fun reducePromptSize(testGenerationData: TestGenerationData): Boolean {
         // reducing depth of polymorphism

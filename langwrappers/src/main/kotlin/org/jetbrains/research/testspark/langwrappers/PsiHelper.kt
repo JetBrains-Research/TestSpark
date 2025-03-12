@@ -18,7 +18,9 @@ typealias CodeTypeDisplayName = Pair<CodeType, String>
  * Interface that declares all the methods needed for parsing and
  * handling the PSI (Program Structure Interface) for different languages.
  */
-abstract class PsiHelper(private val psiFile: PsiFile) {
+abstract class PsiHelper(
+    private val psiFile: PsiFile,
+) {
     abstract val language: SupportedLanguage
 
     abstract val languagePrefix: String
@@ -27,8 +29,10 @@ abstract class PsiHelper(private val psiFile: PsiFile) {
 
     protected fun formatAsHTMLHighlighted(text: String) = "<html><b><font color='orange'>$text</font></b></html>"
 
-    protected fun formatAsHTMLHighlightedWithAdditionalText(highlightedText: String, additionalText: String) =
-        "<html><b><font color='orange'>$highlightedText</font> $additionalText</b></html>"
+    protected fun formatAsHTMLHighlightedWithAdditionalText(
+        highlightedText: String,
+        additionalText: String,
+    ) = "<html><b><font color='orange'>$highlightedText</font> $additionalText</b></html>"
 
     /**
      * Checks if a code construct is valid for unit test generation at the given caret offset.
@@ -143,7 +147,10 @@ abstract class PsiHelper(private val psiFile: PsiFile) {
     fun getCurrentListOfCodeTypes(e: AnActionEvent): List<CodeTypeDisplayName> {
         val result: ArrayList<CodeTypeDisplayName> = arrayListOf()
         val caret: Caret =
-            e.dataContext.getData(CommonDataKeys.CARET)?.caretModel?.primaryCaret ?: return result
+            e.dataContext
+                .getData(CommonDataKeys.CARET)
+                ?.caretModel
+                ?.primaryCaret ?: return result
 
         val psiClassWrapped = getSurroundingClass(caret.offset)
         val psiMethodWrapped = getSurroundingMethod(caret.offset)
