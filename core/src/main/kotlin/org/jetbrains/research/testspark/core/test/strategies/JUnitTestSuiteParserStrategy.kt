@@ -1,16 +1,23 @@
 package org.jetbrains.research.testspark.core.test.strategies
 
 import org.jetbrains.research.testspark.core.data.JUnitVersion
-import org.jetbrains.research.testspark.core.test.OperationResult
+import org.jetbrains.research.testspark.core.data.TestSparkModule
+import org.jetbrains.research.testspark.core.error.Result
+import org.jetbrains.research.testspark.core.error.TestSparkError
 import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.data.TestCaseGeneratedByLLM
 import org.jetbrains.research.testspark.core.test.data.TestLine
 import org.jetbrains.research.testspark.core.test.data.TestLineType
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 
-typealias TestCaseParseResult = OperationResult<TestCaseGeneratedByLLM, String>
-
 class JUnitTestSuiteParserStrategy {
+    private class ParserError(
+        cause: Throwable? = null,
+    ) : TestSparkError(
+            module = TestSparkModule.Common,
+            cause = cause,
+        )
+
     companion object {
         fun parseJUnitTestSuite(
             rawText: String,
@@ -56,15 +63,20 @@ class JUnitTestSuiteParserStrategy {
                     val rawTest = "@Test$it"
 
                     val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
-                    val result: TestCaseParseResult =
+                    val result: Result<TestCaseGeneratedByLLM, TestSparkError> =
                         testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, printTestBodyStrategy)
 
-                    if (result is OperationResult.Error) {
-                        println("WARNING: ${result.error}")
+                    if (result.isFailure()) {
+                        val failure = result as Result.Failure
+                        val parserError = failure.error as ParserError
+                        val runtimeException = parserError.cause as? RuntimeException
+                        val errorMessage = runtimeException?.message
+
+                        println("WARNING: $errorMessage")
                         return@ca
                     }
 
-                    val currentTest = (result as OperationResult.Ok).value
+                    val currentTest = (result as Result.Success).data
 
                     // TODO: make logging work
                     // log.info("New test case: $currentTest")
@@ -94,7 +106,7 @@ class JUnitTestSuiteParserStrategy {
             isLastTestCaseInTestSuite: Boolean,
             testNamePattern: String,
             printTestBodyStrategy: TestBodyPrinter,
-        ): TestCaseParseResult {
+        ): Result<TestCaseGeneratedByLLM, TestSparkError> {
             var expectedException = ""
             var throwsException = ""
             val testLines: MutableList<TestLine> = mutableListOf()
@@ -110,7 +122,7 @@ class JUnitTestSuiteParserStrategy {
                Tests do not return anything so it is safe to consider that void always appears before test case name
              */
             if (!rawTest.contains(testNamePattern)) {
-                return OperationResult.Error("The raw Test does not contain $testNamePattern:\n $rawTest")
+                return Result.Failure(ParserError(RuntimeException("The raw Test does not contain $testNamePattern:\n $rawTest")))
             }
 
             /**
@@ -194,7 +206,7 @@ class JUnitTestSuiteParserStrategy {
                     printTestBodyStrategy = printTestBodyStrategy,
                 )
 
-            return OperationResult.Ok(currentTest)
+            return Result.Success(currentTest)
         }
     }
 }
