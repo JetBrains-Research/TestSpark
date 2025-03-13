@@ -5,7 +5,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
-import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.exception.TestSparkException
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
@@ -22,6 +22,7 @@ import org.jetbrains.research.testspark.tools.llm.generation.LLMProcessManager
 import org.jetbrains.research.testspark.tools.llm.generation.PromptManager
 import org.jetbrains.research.testspark.tools.template.Tool
 import java.nio.file.Path
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 
 /**
  * The Llm class represents a tool called "Llm" that is used to generate tests for Java code.
@@ -82,13 +83,14 @@ class Llm(
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Generation of tests for CLASS was selected")
-        if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
-            testGenerationController.finished()
+        if (!LLMHelper.isCorrectToken(project, errorMonitor)) {
+            indicatorController.finished()
             return
         }
         val codeType = FragmentToTestData(CodeType.CLASS)
@@ -99,7 +101,8 @@ class Llm(
             caretOffset,
             fileUrl,
             testSamplesCode,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
             codeType,
@@ -121,13 +124,14 @@ class Llm(
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Generation of tests for METHOD was selected")
-        if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
-            testGenerationController.finished()
+        if (!LLMHelper.isCorrectToken(project, errorMonitor)) {
+            indicatorController.finished()
             return
         }
         val psiMethod = psiHelper.getSurroundingMethod(caretOffset)!!
@@ -139,7 +143,8 @@ class Llm(
             caretOffset,
             fileUrl,
             testSamplesCode,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
             codeType,
@@ -161,13 +166,14 @@ class Llm(
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
         log.info("Generation of tests for LINE was selected")
-        if (!LLMHelper.isCorrectToken(project, testGenerationController.errorMonitor)) {
-            testGenerationController.finished()
+        if (!LLMHelper.isCorrectToken(project, errorMonitor)) {
+            indicatorController.finished()
             return
         }
         val selectedLine: Int = psiHelper.getSurroundingLineNumber(caretOffset)!!
@@ -179,7 +185,8 @@ class Llm(
             caretOffset,
             fileUrl,
             testSamplesCode,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
             codeType,
@@ -199,7 +206,7 @@ class Llm(
      * @param caretOffset The offset of the caret position in the PSI file.
      * @param fileUrl The URL of the file to generate tests for (optional).
      * @param testSamplesCode The code of the test samples to use for test generation.
-     * @param testGenerationController The controller for test generation operations.
+     * @param indicatorController The controller for test generation operations.
      * @param testSparkDisplayManager The manager for displaying test-related information.
      * @param testsExecutionResultManager The manager for handling test execution results.
      * @param codeType The type of data fragment to generate tests for.
@@ -210,7 +217,8 @@ class Llm(
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
         codeType: FragmentToTestData,
@@ -224,7 +232,8 @@ class Llm(
                     caretOffset,
                     fileUrl,
                     packageName,
-                    testGenerationController,
+                    indicatorController,
+                    errorMonitor,
                     testSparkDisplayManager,
                     testsExecutionResultManager,
                     name,
@@ -240,7 +249,7 @@ class Llm(
 
             pipeline.runTestGeneration(manager, codeType)
         } catch (err: TestSparkException) {
-            testGenerationController.finished()
+            indicatorController.finished()
             project.createNotification(err, NotificationType.ERROR)
         }
     }

@@ -6,33 +6,19 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
-import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
-import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 
 /**
  * Manager used for monitoring the unit test generation process.
  * It also limits TestSpark to generate tests only once at a time.
  */
-class TestGenerationController {
+class IndicatorController {
     var indicator: CustomProgressIndicator? = null
-
-    // errorMonitor is passed in many places in the project
-    // and reflects if any bug happened in the test generation process
-    val errorMonitor: ErrorMonitor = DefaultErrorMonitor()
 
     /**
      * Method to show notification that test generation is already running.
      */
     private fun showGenerationRunningNotification(project: Project) {
-        val terminateButton: AnAction =
-            object : AnAction("Terminate") {
-                override fun actionPerformed(e: AnActionEvent) {
-                    indicator?.stop()
-                    errorMonitor.notifyErrorOccurrence()
-                }
-            }
-
         val notification =
             NotificationGroupManager
                 .getInstance()
@@ -42,6 +28,14 @@ class TestGenerationController {
                     PluginMessagesBundle.get("alreadyRunningTextNotificationText"),
                     NotificationType.WARNING,
                 )
+
+        val terminateButton: AnAction =
+            object : AnAction(PluginMessagesBundle.get("terminateButtonText")) {
+                override fun actionPerformed(e: AnActionEvent) {
+                    indicator?.stop()
+                    notification.expire()
+                }
+            }
 
         notification.addAction(terminateButton)
 

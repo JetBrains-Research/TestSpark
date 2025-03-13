@@ -4,8 +4,10 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.actions.controllers.VisibilityController
+import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
@@ -17,6 +19,15 @@ import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
  * It creates a dialog wrapper and displays it when the associated action is performed.
  */
 class TestSparkAction : AnAction() {
+    // Visibility controller within the context of the action.
+    val visibilityController = VisibilityController()
+
+    // Controller responsible for managing the unit test generation process.
+    val indicatorController = IndicatorController()
+
+    // Manages error monitoring and handling
+    val errorMonitor: ErrorMonitor = DefaultErrorMonitor()
+
     /**
      * Handles the action performed event.
      *
@@ -29,8 +40,9 @@ class TestSparkAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         TestSparkActionWindow(
             e = e,
-            visibilityController = VisibilityController(),
-            testGenerationController = TestGenerationController(),
+            visibilityController = visibilityController,
+            indicatorController = indicatorController,
+            errorMonitor = errorMonitor,
             testSparkDisplayManager = TestSparkDisplayManager(),
             testsExecutionResultManager = TestsExecutionResultManager(),
         )
