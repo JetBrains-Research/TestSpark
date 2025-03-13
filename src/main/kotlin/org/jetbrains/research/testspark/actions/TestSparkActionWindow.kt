@@ -15,6 +15,7 @@ import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelBuilder
 import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.TestSparkIcons
@@ -45,7 +46,6 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JRadioButton
 import javax.swing.SwingConstants
-import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 
 /**
  * Class representing the TestSparkActionWindow.

@@ -13,7 +13,7 @@ import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
  * It also limits TestSpark to generate tests only once at a time.
  */
 class IndicatorController {
-    var indicator: CustomProgressIndicator? = null
+    var activeIndicators: MutableList<CustomProgressIndicator?> = mutableListOf()
 
     /**
      * Method to show notification that test generation is already running.
@@ -32,7 +32,9 @@ class IndicatorController {
         val terminateButton: AnAction =
             object : AnAction(PluginMessagesBundle.get("terminateButtonText")) {
                 override fun actionPerformed(e: AnActionEvent) {
-                    indicator?.stop()
+                    for (indicator in activeIndicators) {
+                        indicator?.cancel()
+                    }
                     notification.expire()
                 }
             }
@@ -43,11 +45,14 @@ class IndicatorController {
     }
 
     fun finished() {
-        if (indicator != null &&
-            indicator!!.isRunning()
-        ) {
-            indicator?.stop()
+        for (indicator in activeIndicators) {
+            if (indicator != null &&
+                indicator.isRunning()
+            ) {
+                indicator.stop()
+            }
         }
+        activeIndicators.clear()
     }
 
     /**
@@ -57,13 +62,11 @@ class IndicatorController {
      */
     fun isGeneratorRunning(project: Project): Boolean {
         // If indicator is null, we have never initiated an indicator before and there is no running test generation
-        if (indicator == null) {
-            return false
-        }
-
-        if (indicator!!.isRunning()) {
-            showGenerationRunningNotification(project)
-            return true
+        for (indicator in activeIndicators) {
+            if (indicator != null && indicator.isRunning()) {
+                showGenerationRunningNotification(project)
+                return true
+            }
         }
         return false
     }

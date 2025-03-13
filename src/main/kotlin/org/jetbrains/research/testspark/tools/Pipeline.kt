@@ -16,6 +16,7 @@ import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.exception.TestSparkException
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -26,7 +27,6 @@ import org.jetbrains.research.testspark.langwrappers.PsiHelper
 import org.jetbrains.research.testspark.tools.error.createNotification
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.util.UUID
-import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 
 /**
  * Pipeline class represents a pipeline for generating tests in a project.
@@ -92,6 +92,7 @@ class Pipeline(
         errorMonitor.clear()
         testSparkDisplayManager.clear()
         testsExecutionResultManager.clear()
+        indicatorController.finished()
 
         val projectBuilder = ProjectBuilder(project, errorMonitor)
 
@@ -106,7 +107,7 @@ class Pipeline(
                     override fun run(indicator: ProgressIndicator) {
                         try {
                             val ijIndicator = IJProgressIndicator(indicator)
-                            indicatorController.indicator = ijIndicator
+                            indicatorController.activeIndicators.add(ijIndicator)
 
                             if (ToolUtils.isProcessStopped(errorMonitor, ijIndicator)) return
 
@@ -120,6 +121,7 @@ class Pipeline(
                                         packageName,
                                         projectContext,
                                         generatedTestsData,
+                                        indicatorController,
                                         errorMonitor,
                                         testsExecutionResultManager,
                                     )
@@ -135,8 +137,6 @@ class Pipeline(
 
                     override fun onFinished() {
                         super.onFinished()
-
-                        indicatorController.finished()
 
                         if (errorMonitor.hasErrorOccurred() || uiContext == null) return
 

@@ -11,6 +11,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import org.evosuite.utils.CompactReport
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteDefaultsBundle
 import org.jetbrains.research.testspark.bundles.evosuite.EvoSuiteMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
@@ -78,6 +79,7 @@ class EvoSuiteProcessManager(
         packageName: String,
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
+        indicatorController: IndicatorController,
         errorMonitor: ErrorMonitor,
         testsExecutionResultManager: TestsExecutionResultManager,
     ): UIContext? {
@@ -251,6 +253,7 @@ class EvoSuiteProcessManager(
             projectContext,
             generatedTestsData,
             StandardRequestManagerFactory(project).getRequestManager(project),
+            indicatorController,
             errorMonitor,
         )
     }
