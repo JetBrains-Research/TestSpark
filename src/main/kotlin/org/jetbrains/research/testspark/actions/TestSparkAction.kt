@@ -28,6 +28,10 @@ class TestSparkAction : AnAction() {
     // Manages error monitoring and handling
     val errorMonitor: ErrorMonitor = DefaultErrorMonitor()
 
+    val testSparkDisplayManager = TestSparkDisplayManager()
+
+    val testsExecutionResultManager = TestsExecutionResultManager()
+
     /**
      * Handles the action performed event.
      *
@@ -43,8 +47,8 @@ class TestSparkAction : AnAction() {
             visibilityController = visibilityController,
             indicatorController = indicatorController,
             errorMonitor = errorMonitor,
-            testSparkDisplayManager = TestSparkDisplayManager(),
-            testsExecutionResultManager = TestsExecutionResultManager(),
+            testSparkDisplayManager = testSparkDisplayManager,
+            testsExecutionResultManager = testsExecutionResultManager,
         )
     }
 
