@@ -39,7 +39,7 @@ class GeneratedTestsTabBuilder(
     private val testsExecutionResultManager: TestsExecutionResultManager,
     private val generationTool: GenerationTool,
 ) {
-    private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData()
+    private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData(uiContext.indicatorController)
 
     private var mainPanel: JPanel = JPanel()
 

@@ -135,7 +135,12 @@ class TopButtonsPanelBuilder {
 
                     override fun run(indicator: ProgressIndicator) {
                         globalIndicator = indicator
-                        task(IJProgressIndicator(indicator))
+
+                        val ijIndicator = IJProgressIndicator(indicator)
+
+                        generatedTestsTabData.indicatorController.activeIndicators.add(ijIndicator)
+
+                        task(ijIndicator)
                     }
 
                     override fun onFinished() {

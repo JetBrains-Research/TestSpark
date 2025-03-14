@@ -88,7 +88,7 @@ class TestCasePanelBuilder(
     private val testCase: TestCase,
     editor: Editor,
     private val checkbox: JCheckBox,
-    val uiContext: UIContext?,
+    val uiContext: UIContext,
     val report: Report,
     private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
     private val generatedTestsTabData: GeneratedTestsTabData,
@@ -521,7 +521,9 @@ class TestCasePanelBuilder(
                 object : Task.Backgroundable(project, PluginMessagesBundle.get("sendingFeedback")) {
                     override fun run(indicator: ProgressIndicator) {
                         val ijIndicator = IJProgressIndicator(indicator)
-                        if (ToolUtils.isProcessStopped(uiContext!!.errorMonitor, ijIndicator)) {
+                        uiContext.indicatorController.activeIndicators.add(ijIndicator)
+
+                        if (ToolUtils.isProcessStopped(uiContext.errorMonitor, ijIndicator)) {
                             finishProcess()
                             return
                         }
@@ -564,6 +566,7 @@ class TestCasePanelBuilder(
 
                                 finishProcess()
                                 ijIndicator.stop()
+                                uiContext.indicatorController.activeIndicators.remove(ijIndicator)
                             }
                         }
                     }
@@ -572,7 +575,7 @@ class TestCasePanelBuilder(
     }
 
     private fun finishProcess(enableGlobal: Boolean = true) {
-        uiContext!!.errorMonitor.clear()
+        uiContext.errorMonitor.clear()
         loadingLabel.isVisible = false
         if (enableGlobal) enableGlobalComponents(true)
         enableLocalComponents(true)
@@ -594,7 +597,7 @@ class TestCasePanelBuilder(
     }
 
     private fun addTest(testSuite: TestSuiteGeneratedByLLM) {
-        val testSuitePresenter = JUnitTestSuitePresenter(project, uiContext!!.testGenerationOutput, language)
+        val testSuitePresenter = JUnitTestSuitePresenter(project, uiContext.testGenerationOutput, language)
 
         WriteCommandAction.runWriteCommandAction(project) {
             uiContext.errorMonitor.clear()
@@ -688,7 +691,7 @@ class TestCasePanelBuilder(
                     testCase.id,
                     testCase.testName,
                     testCase.testCode,
-                    uiContext!!.testGenerationOutput.packageName,
+                    uiContext.testGenerationOutput.packageName,
                     uiContext.testGenerationOutput.resultPath,
                     uiContext.projectContext,
                     testCompiler,

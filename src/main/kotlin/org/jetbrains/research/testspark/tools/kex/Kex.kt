@@ -4,7 +4,8 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
-import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -56,7 +57,8 @@ class Kex(
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
@@ -66,7 +68,8 @@ class Kex(
             psiHelper,
             caretOffset,
             fileUrl,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
         ).runTestGeneration(
@@ -83,7 +86,8 @@ class Kex(
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
@@ -94,7 +98,8 @@ class Kex(
             psiHelper,
             caretOffset,
             fileUrl,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
         ).runTestGeneration(
@@ -116,7 +121,8 @@ class Kex(
         caretOffset: Int,
         fileUrl: String?,
         testSamplesCode: String,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ) {
@@ -143,7 +149,8 @@ class Kex(
         psiHelper: PsiHelper,
         caretOffset: Int,
         fileUrl: String?,
-        testGenerationController: TestGenerationController,
+        indicatorController: IndicatorController,
+        errorMonitor: ErrorMonitor,
         testSparkDisplayManager: TestSparkDisplayManager,
         testsExecutionResultManager: TestsExecutionResultManager,
     ): Pipeline {
@@ -163,7 +170,8 @@ class Kex(
             caretOffset,
             fileUrl,
             packageName,
-            testGenerationController,
+            indicatorController,
+            errorMonitor,
             testSparkDisplayManager,
             testsExecutionResultManager,
             name,

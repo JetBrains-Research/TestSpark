@@ -5,6 +5,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.llm.LLMMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
@@ -93,6 +94,7 @@ class LLMProcessManager(
         packageName: String,
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
+        indicatorController: IndicatorController,
         errorMonitor: ErrorMonitor,
         testsExecutionResultManager: TestsExecutionResultManager,
     ): UIContext? {
@@ -248,6 +250,6 @@ class LLMProcessManager(
             language,
         )
 
-        return UIContext(projectContext, generatedTestsData, requestManager, errorMonitor)
+        return UIContext(projectContext, generatedTestsData, requestManager, indicatorController, errorMonitor)
     }
 }

@@ -7,7 +7,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
-import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.actions.controllers.VisibilityController
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelBuilder
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorBuilder
@@ -15,6 +15,7 @@ import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelBuilder
 import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
 import org.jetbrains.research.testspark.display.TestSparkIcons
@@ -54,7 +55,8 @@ import javax.swing.SwingConstants
 class TestSparkActionWindow(
     private val e: AnActionEvent,
     private val visibilityController: VisibilityController,
-    private val testGenerationController: TestGenerationController,
+    private val indicatorController: IndicatorController,
+    private val errorMonitor: ErrorMonitor,
     private val testSparkDisplayManager: TestSparkDisplayManager,
     private val testsExecutionResultManager: TestsExecutionResultManager,
 ) : JFrame("TestSpark") {
@@ -324,7 +326,7 @@ class TestSparkActionWindow(
     }
 
     private fun startUnitTestGenerationTool(tool: Tool) {
-        if (!testGenerationController.isGeneratorRunning(project)) {
+        if (!indicatorController.isGeneratorRunning(project)) {
             val testSamplesCode = llmSampleSelectorFactory.getTestSamplesCode()
 
             for ((codeType, button) in codeTypeButtons) {
@@ -337,7 +339,8 @@ class TestSparkActionWindow(
                                 caretOffset,
                                 fileUrl,
                                 testSamplesCode,
-                                testGenerationController,
+                                indicatorController,
+                                errorMonitor,
                                 testSparkDisplayManager,
                                 testsExecutionResultManager,
                             )
@@ -349,7 +352,8 @@ class TestSparkActionWindow(
                                 caretOffset,
                                 fileUrl,
                                 testSamplesCode,
-                                testGenerationController,
+                                indicatorController,
+                                errorMonitor,
                                 testSparkDisplayManager,
                                 testsExecutionResultManager,
                             )
@@ -361,7 +365,8 @@ class TestSparkActionWindow(
                                 caretOffset,
                                 fileUrl,
                                 testSamplesCode,
-                                testGenerationController,
+                                indicatorController,
+                                errorMonitor,
                                 testSparkDisplayManager,
                                 testsExecutionResultManager,
                             )

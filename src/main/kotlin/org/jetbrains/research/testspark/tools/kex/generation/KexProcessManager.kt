@@ -10,6 +10,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.Key
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.kex.KexDefaultsBundle
 import org.jetbrains.research.testspark.bundles.kex.KexMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
@@ -81,6 +82,7 @@ class KexProcessManager(
         packageName: String,
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
+        indicatorController: IndicatorController,
         errorMonitor: ErrorMonitor,
         testsExecutionResultManager: TestsExecutionResultManager,
     ): UIContext? {
@@ -155,6 +157,7 @@ class KexProcessManager(
             projectContext,
             generatedTestsData,
             StandardRequestManagerFactory(project).getRequestManager(project),
+            indicatorController,
             errorMonitor,
         )
     }
