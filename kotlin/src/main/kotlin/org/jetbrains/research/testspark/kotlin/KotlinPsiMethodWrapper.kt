@@ -82,6 +82,15 @@ class KotlinPsiMethodWrapper(
         return lineNumber in startLine..endLine
     }
 
+    override fun isTestableMethod(): Boolean =
+        psiFunction.annotationEntries.none { annotation ->
+            val text = (annotation.text)
+            text == "@org.junit.Test" ||
+                text == "@org.junit.jupiter.api.Test" ||
+                text == "@org.testng.annotations.Test" ||
+                text == "@Test"
+        }
+
     /**
      * Returns a set of `PsiClassWrapper` instances for non-standard Kotlin classes referenced by the
      * parameters of the current function.

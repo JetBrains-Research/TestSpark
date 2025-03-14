@@ -5,9 +5,11 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiModifier
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
+import com.intellij.psi.util.InheritanceUtil
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
@@ -29,7 +31,13 @@ class JavaPsiClassWrapper(
 
     override val allMethods: List<PsiMethodWrapper> get() = psiClass.allMethods.map { JavaPsiMethodWrapper(it) }
 
-    override val constructorSignatures: List<String> get() = psiClass.constructors.map { JavaPsiMethodWrapper.buildSignature(it) }
+    override val constructorSignatures: List<String>
+        get() =
+            psiClass.constructors.map {
+                JavaPsiMethodWrapper.buildSignature(
+                    it,
+                )
+            }
 
     override val superClass: PsiClassWrapper? get() = psiClass.superClass?.let { JavaPsiClassWrapper(it) }
 
@@ -86,11 +94,26 @@ class JavaPsiClassWrapper(
         return interestingPsiClasses.toMutableSet()
     }
 
-    /**
-     * Checks if the constraints on the selected class are satisfied, so that EvoSuite can generate tests for it.
-     * Namely, it is not an enum and not an anonymous inner class.
-     *
-     * @return true if the constraints are satisfied, false otherwise
-     */
-    fun isTestableClass(): Boolean = !psiClass.isEnum && psiClass !is PsiAnonymousClass
+    override fun isTestableClass(): Boolean {
+        if (psiClass.isInterface ||
+            psiClass.isEnum ||
+            psiClass.hasModifierProperty(PsiModifier.ABSTRACT) ||
+            psiClass.isAnnotationType ||
+            psiClass is PsiAnonymousClass
+        ) {
+            return false
+        }
+
+        // Check if the class has methods annotated with @Test
+        val areAllMethodsTestable =
+            psiClass.methods.any { psiMethod: PsiMethod ->
+                JavaPsiMethodWrapper(psiMethod).isTestableMethod()
+            }
+        if (!areAllMethodsTestable) return false
+
+        // Check if the class explicitly subclasses a known test framework class (e.g., TestCase)
+        if (InheritanceUtil.isInheritor(psiClass, "junit.framework.TestCase")) return false
+
+        return true
+    }
 }

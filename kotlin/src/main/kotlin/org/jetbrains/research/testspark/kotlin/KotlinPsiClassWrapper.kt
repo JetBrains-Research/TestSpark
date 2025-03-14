@@ -140,4 +140,29 @@ class KotlinPsiClassWrapper(
         interestingPsiClasses.add(this)
         return interestingPsiClasses
     }
+
+    override fun isTestableClass(): Boolean {
+        // Check if the class type is not suitable for testing:
+        if (psiClass.isInterfaceClass() ||
+            psiClass is KtObjectDeclaration ||
+            psiClass.hasModifier(KtTokens.ABSTRACT_KEYWORD) ||
+            psiClass.isData() ||
+            psiClass.annotationEntries.any { it.text == "@JvmInline" }
+        ) {
+            return false
+        }
+
+        // Check if the class has methods that are not testable
+        if (methods.any { !it.isTestableMethod() }) {
+            return false
+        }
+
+        // Check if the class explicitly subclasses a known test framework class (e.g., TestCase for JUnit)
+        val superClassFqName = superClass?.qualifiedName
+        if (superClassFqName == "junit.framework.TestCase") {
+            return false
+        }
+
+        return true
+    }
 }

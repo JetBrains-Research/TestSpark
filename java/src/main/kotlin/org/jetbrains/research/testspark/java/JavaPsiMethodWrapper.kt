@@ -87,6 +87,16 @@ class JavaPsiMethodWrapper(
         return interestingPsiClasses
     }
 
+    override fun isTestableMethod(): Boolean {
+        // Check if the method is not annotated with @Test
+        return psiMethod.annotations.none { annotation ->
+            val qualifiedName = annotation.qualifiedName
+            qualifiedName == "org.junit.Test" ||
+                qualifiedName == "org.junit.jupiter.api.Test" ||
+                qualifiedName == "org.testng.annotations.Test"
+        }
+    }
+
     /**
      * Generates the return descriptor for a method.
      *
