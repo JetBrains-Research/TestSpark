@@ -1,11 +1,13 @@
 package org.jetbrains.research.testspark.actions
 
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import org.jetbrains.research.testspark.actions.controllers.IndicatorController
-import org.jetbrains.research.testspark.actions.controllers.VisibilityController
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
@@ -19,14 +21,14 @@ import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
  * It creates a dialog wrapper and displays it when the associated action is performed.
  */
 class TestSparkAction : AnAction() {
-    // Visibility controller within the context of the action.
-    val visibilityController = VisibilityController()
-
     // Controller responsible for managing the unit test generation process.
     val indicatorController = IndicatorController()
 
     // Manages error monitoring and handling
     val errorMonitor: ErrorMonitor = DefaultErrorMonitor()
+
+    // Represents the currently active instance of the TestSparkActionWindow associated with the action.
+    var currentTestSparkActionWindow: TestSparkActionWindow? = null
 
     /**
      * Handles the action performed event.
@@ -38,14 +40,27 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        TestSparkActionWindow(
-            e = e,
-            visibilityController = visibilityController,
-            indicatorController = indicatorController,
-            errorMonitor = errorMonitor,
-            testSparkDisplayManager = TestSparkDisplayManager(),
-            testsExecutionResultManager = TestsExecutionResultManager(),
-        )
+        if (currentTestSparkActionWindow != null && currentTestSparkActionWindow!!.isVisible) {
+            NotificationGroupManager
+                .getInstance()
+                .getNotificationGroup("UserInterface")
+                .createNotification(
+                    PluginMessagesBundle.get("generationWindowWarningTitle"),
+                    PluginMessagesBundle.get("generationWindowWarningMessage"),
+                    NotificationType.WARNING,
+                ).notify(e.project)
+
+            currentTestSparkActionWindow!!.toFront()
+            currentTestSparkActionWindow!!.requestFocus()
+        } else {
+            currentTestSparkActionWindow = TestSparkActionWindow(
+                e = e,
+                indicatorController = indicatorController,
+                errorMonitor = errorMonitor,
+                testSparkDisplayManager = TestSparkDisplayManager(),
+                testsExecutionResultManager = TestsExecutionResultManager(),
+            )
+        }
     }
 
     /**
