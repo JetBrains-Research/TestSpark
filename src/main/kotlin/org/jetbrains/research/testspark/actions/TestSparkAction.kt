@@ -53,13 +53,14 @@ class TestSparkAction : AnAction() {
             currentTestSparkActionWindow!!.toFront()
             currentTestSparkActionWindow!!.requestFocus()
         } else {
-            currentTestSparkActionWindow = TestSparkActionWindow(
-                e = e,
-                indicatorController = indicatorController,
-                errorMonitor = errorMonitor,
-                testSparkDisplayManager = TestSparkDisplayManager(),
-                testsExecutionResultManager = TestsExecutionResultManager(),
-            )
+            currentTestSparkActionWindow =
+                TestSparkActionWindow(
+                    e = e,
+                    indicatorController = indicatorController,
+                    errorMonitor = errorMonitor,
+                    testSparkDisplayManager = TestSparkDisplayManager(),
+                    testsExecutionResultManager = TestsExecutionResultManager(),
+                )
         }
     }
 
