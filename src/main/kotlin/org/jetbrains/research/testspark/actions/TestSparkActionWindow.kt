@@ -31,8 +31,6 @@ import java.awt.CardLayout
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Toolkit
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
