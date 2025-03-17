@@ -34,6 +34,7 @@ import java.awt.Graphics
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
 import javax.swing.JPanel
+import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 
 /**
  * This class extends the line marker and gutter editor to allow more functionality.
@@ -233,6 +234,7 @@ class CoverageRenderer(
         ProgressManager.getInstance().run(
             object : Task.Backgroundable(project, "${PluginMessagesBundle.get("coverageMessage")} $name") {
                 override fun run(indicator: ProgressIndicator) {
+                    generatedTestsTabData.indicatorController.activeIndicators.add(IJProgressIndicator(indicator))
                     val timeWithHighlightedBackground: Long =
                         PluginDefaultsBundle.get("testCaseHighlightingDurationMs").toLong()
                     val numberOfIterations = 100
