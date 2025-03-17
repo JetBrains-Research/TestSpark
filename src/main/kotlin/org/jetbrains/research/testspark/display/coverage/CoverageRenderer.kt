@@ -8,6 +8,9 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ex.EditorGutterComponentEx
 import com.intellij.openapi.editor.markup.ActiveGutterRenderer
 import com.intellij.openapi.editor.markup.LineMarkerRendererEx
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.EditorTextField
@@ -18,6 +21,8 @@ import com.intellij.ui.components.ActionLink
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
+import org.jetbrains.research.testspark.bundles.plugin.PluginDefaultsBundle
+import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.display.generatedTests.GeneratedTestsTabData
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
@@ -56,6 +61,8 @@ class CoverageRenderer(
         get() = project.getService(EvoSuiteSettingsService::class.java).state
 
     private var defaultEditorColor: Color? = null
+
+    private val editorLock = Any()
 
     /**
      * Perform the action - show toolTip on mouse click.
@@ -179,7 +186,7 @@ class CoverageRenderer(
         if (editorTextField.background.equals(highlightColor)) return
         defaultEditorColor = editorTextField.background
         editorTextField.background = highlightColor
-        returnOriginalEditorBackground(editorTextField)
+        returnOriginalEditorBackground(editorTextField, name)
     }
 
     /**
@@ -219,12 +226,30 @@ class CoverageRenderer(
      * Reset the provided editors color to the default (initial) one after 10 seconds
      * @param editor the editor whose color to change
      */
-    private fun returnOriginalEditorBackground(editor: EditorTextField) {
-        Thread {
-            val timeWithHighlightedBackground: Long = 10000
-            Thread.sleep(timeWithHighlightedBackground)
-            editor.background = defaultEditorColor
-        }.start()
+    private fun returnOriginalEditorBackground(
+        editor: EditorTextField,
+        name: String,
+    ) {
+        ProgressManager.getInstance().run(
+            object : Task.Backgroundable(project, "${PluginMessagesBundle.get("coverageMessage")} $name") {
+                override fun run(indicator: ProgressIndicator) {
+                    val timeWithHighlightedBackground: Long =
+                        PluginDefaultsBundle.get("testCaseHighlightingDurationMs").toLong()
+                    val numberOfIterations = 100
+                    repeat(numberOfIterations) {
+                        if (indicator.isCanceled) return
+                        Thread.sleep(timeWithHighlightedBackground / numberOfIterations)
+                    }
+                }
+
+                override fun onFinished() {
+                    super.onFinished()
+                    synchronized(editorLock) {
+                        editor.background = defaultEditorColor
+                    }
+                }
+            },
+        )
     }
 
     /**
