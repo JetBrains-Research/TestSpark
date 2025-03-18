@@ -14,6 +14,7 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptConfiguration
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptGenerationContext
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptTemplates
+import org.jetbrains.research.testspark.core.generation.llm.ranker.KuzuGraph
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
@@ -126,7 +127,9 @@ class PromptManager(
                                     .getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
                                     .map(this::createClassRepresentation)
                                     .toList()
-
+                            val graph = KuzuGraph()
+                            psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, psiMethod)
+                            graph.close()
                             promptGenerator.generatePromptForMethod(
                                 method,
                                 interestingClassesFromMethod,
