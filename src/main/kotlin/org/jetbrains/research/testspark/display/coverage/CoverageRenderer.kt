@@ -19,6 +19,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
+import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.display.generatedTests.GeneratedTestsTabData
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
 import org.jetbrains.research.testspark.services.PluginSettingsService
@@ -29,7 +30,6 @@ import java.awt.Graphics
 import java.awt.Rectangle
 import java.awt.event.MouseEvent
 import javax.swing.JPanel
-import org.jetbrains.research.testspark.core.data.TestCase
 
 /**
  * This class extends the line marker and gutter editor to allow more functionality.
