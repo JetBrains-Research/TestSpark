@@ -7,6 +7,8 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.util.PsiTypesUtil
+import org.jetbrains.research.testspark.core.generation.llm.ranker.Graph
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
@@ -91,4 +93,11 @@ class JavaPsiHelper(
 
     private fun PsiElement.containsOffset(caretOffset: Int): Boolean =
         (textRange.startOffset <= caretOffset) && (textRange.endOffset >= caretOffset)
+
+    override fun createGraph(
+        graph: Graph,
+        classesToTest: List<PsiClassWrapper>,
+        interestingClasses: Set<PsiClassWrapper>,
+        psiMethod: PsiMethodWrapper?,
+    ): Graph = JavaPsiExplorer(graph).explore(classesToTest, interestingClasses, psiMethod)
 }

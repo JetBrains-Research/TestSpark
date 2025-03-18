@@ -6,6 +6,8 @@ import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
+import org.jetbrains.kotlin.psi.KtPsiUtil
+import org.jetbrains.research.testspark.core.generation.llm.ranker.Graph
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
@@ -87,5 +89,14 @@ class KotlinPsiHelper(
             psiMethod.isDefaultMethod -> formatAsHTMLHighlightedWithAdditionalText("default method", psiMethod.name)
             else -> formatAsHTMLHighlightedWithAdditionalText("method", psiMethod.name)
         }
+    }
+
+    override fun createGraph(
+        graph: Graph,
+        classesToTest: List<PsiClassWrapper>,
+        interestingClasses: Set<PsiClassWrapper>,
+        psiMethod: PsiMethodWrapper?,
+    ): Graph {
+        TODO("Not yet implemented")
     }
 }

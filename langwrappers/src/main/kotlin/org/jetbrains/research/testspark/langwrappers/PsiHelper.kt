@@ -9,6 +9,7 @@ import com.intellij.openapi.module.ModuleUtilCore
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import org.jetbrains.research.testspark.core.generation.llm.ranker.Graph
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
 
@@ -304,4 +305,11 @@ abstract class PsiHelper(
      * @return The display name of the PSI method.
      */
     abstract fun getMethodHTMLDisplayName(psiMethod: PsiMethodWrapper): String
+
+    abstract fun createGraph(
+        graph: Graph,
+        classesToTest: List<PsiClassWrapper>,
+        interestingClasses: Set<PsiClassWrapper>,
+        psiMethod: PsiMethodWrapper?,
+    ): Graph
 }
