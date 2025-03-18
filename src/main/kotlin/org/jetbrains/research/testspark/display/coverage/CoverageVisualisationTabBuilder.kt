@@ -16,6 +16,7 @@ import org.evosuite.result.MutationInfo
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
 import org.jetbrains.research.testspark.core.data.Report
+import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.data.IJReport
 import org.jetbrains.research.testspark.data.IJTestCase
 import org.jetbrains.research.testspark.display.generatedTests.GeneratedTestsTabData
@@ -25,7 +26,6 @@ import java.awt.Dimension
 import javax.swing.JScrollPane
 import javax.swing.table.AbstractTableModel
 import kotlin.math.roundToInt
-import org.jetbrains.research.testspark.core.data.TestCase
 
 /**
  * This class is responsible for building and managing the "Coverage" tab in TestSpark.
