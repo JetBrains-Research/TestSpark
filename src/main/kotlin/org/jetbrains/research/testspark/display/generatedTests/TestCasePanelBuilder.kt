@@ -225,7 +225,7 @@ class TestCasePanelBuilder(
             val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
             clipboard.setContents(
                 StringSelection(
-                    generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName]!!.document.text,
+                    generatedTestsTabData.testCaseIdToEditorTextField[testCase.id]!!.document.text,
                 ),
                 null,
             )
@@ -756,7 +756,7 @@ class TestCasePanelBuilder(
      */
     private fun remove() {
         // Remove the test case from the cache
-        GenerateTestsTabHelper.removeTestCase(testCase.testName, generatedTestsTabData)
+        GenerateTestsTabHelper.removeTestCase(testCase.id, generatedTestsTabData)
 
         runTestButton.isEnabled = false
         isRemoved = true

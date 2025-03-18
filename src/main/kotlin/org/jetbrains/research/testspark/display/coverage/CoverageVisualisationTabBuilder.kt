@@ -25,6 +25,7 @@ import java.awt.Dimension
 import javax.swing.JScrollPane
 import javax.swing.table.AbstractTableModel
 import kotlin.math.roundToInt
+import org.jetbrains.research.testspark.core.data.TestCase
 
 /**
  * This class is responsible for building and managing the "Coverage" tab in TestSpark.
@@ -129,16 +130,16 @@ class CoverageVisualisationTabBuilder(
             textAttribute.backgroundColor = colorForLines
 
             // map of mutant operations -> List of names of tests which cover the mutant
-            val mapMutantsToTests = HashMap<String, MutableList<String>>()
+            val mapMutantsToTests = HashMap<String, MutableList<Int>>()
 
             testReport.testCaseList.values.forEach { compactTestCase ->
                 // Since we are in the IntelliJ plugin's visualizer, all test cases should be an instance of IJTestCase
                 if (compactTestCase is IJTestCase) {
                     val mutantsCovered = compactTestCase.coveredMutants
-                    val testName = compactTestCase.testName
+                    val testId = compactTestCase.id
                     mutantsCovered.forEach {
                         val testCasesCoveringMutant = mapMutantsToTests.getOrPut(it.replacement) { ArrayList() }
-                        testCasesCoveringMutant.add(testName)
+                        testCasesCoveringMutant.add(testId)
                     }
                 } else {
                     throw IllegalStateException(
@@ -187,10 +188,10 @@ class CoverageVisualisationTabBuilder(
         testReport: Report,
         selectedTests: HashSet<Int>,
         lineNumber: Int,
-    ): List<String> =
+    ): List<TestCase> =
         testReport.testCaseList
             .filter { x -> lineNumber in x.value.coveredLines && x.value.id in selectedTests }
-            .map { x -> x.value.testName }
+            .map { x -> x.value }
 
     private fun getUncoveredMutants(
         testReport: Report,
