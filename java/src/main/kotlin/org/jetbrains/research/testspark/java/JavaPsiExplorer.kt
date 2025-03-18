@@ -1,0 +1,163 @@
+package org.jetbrains.research.testspark.java
+
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiTypeParameter
+import com.intellij.psi.impl.source.PsiClassReferenceType
+import com.intellij.psi.util.PsiTreeUtil
+import org.jetbrains.research.testspark.core.generation.llm.ranker.Graph
+import org.jetbrains.research.testspark.core.generation.llm.ranker.GraphEdge
+import org.jetbrains.research.testspark.core.generation.llm.ranker.GraphEdgeType
+import org.jetbrains.research.testspark.core.generation.llm.ranker.GraphNode
+import org.jetbrains.research.testspark.core.generation.llm.ranker.GraphNodeType
+import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
+
+const val MAX_DEPTH = 10
+
+class JavaPsiExplorer(
+    val graph: Graph,
+) {
+    val classVisited = mutableSetOf<String>()
+    val methodVisited = mutableSetOf<String>()
+
+    fun explore(
+        classesToTest: List<PsiClassWrapper>,
+        interestingClasses: Set<PsiClassWrapper>,
+        psiMethod: PsiMethodWrapper?,
+        depth: Int = MAX_DEPTH,
+    ): Graph {
+        val javaPsiMethod = psiMethod as? JavaPsiMethodWrapper
+        var isUnderTest = true
+        if (javaPsiMethod != null) {
+            exploreMethod(javaPsiMethod, isUnderTest = true, depth = depth)?.let { methodFqName ->
+                if (javaPsiMethod.containingClass is JavaPsiClassWrapper) {
+                    exploreClass(javaPsiMethod.containingClass, isUnderTest = false, depth = depth)?.let { classFqName ->
+                        graph.addEdge(
+                            GraphEdge(
+                                from = classFqName,
+                                to = methodFqName,
+                                type = GraphEdgeType.HAS_METHOD,
+                            ),
+                        )
+                    }
+                }
+            }
+            isUnderTest = false
+        }
+        classesToTest.forEach {
+            val clsName = exploreClass(it as JavaPsiClassWrapper, isUnderTest = isUnderTest, depth)
+        }
+//        interestingClasses.forEach { exploreClass(it as JavaPsiClassWrapper, isUnderTest = isUnderTest, depth) }
+        return graph
+    }
+
+    private fun exploreClass(
+        javaCls: JavaPsiClassWrapper,
+        isUnderTest: Boolean = false,
+        depth: Int = 0,
+    ): String? {
+        val clsFqName = javaCls.qualifiedName
+        if (clsFqName.isEmpty() || clsFqName.startsWith("java.")) return null
+        if (classVisited.contains(javaCls.qualifiedName)) return clsFqName
+        classVisited.add(clsFqName)
+        graph.addNode(
+            GraphNode(
+                javaCls.name,
+                clsFqName,
+                type = GraphNodeType.CLASS,
+                isUnitUnderTest = isUnderTest,
+                properties = mapOf("type" to javaCls.classType.representation),
+            ),
+        )
+        if (depth > 0) {
+            javaCls.methods.forEach {
+                exploreMethod(it as JavaPsiMethodWrapper, depth = depth)?.let { methodFqName ->
+                    graph.addEdge(
+                        GraphEdge(
+                            from = clsFqName,
+                            to = methodFqName,
+                            type = GraphEdgeType.HAS_METHOD,
+                        ),
+                    )
+                }
+            }
+        }
+        // super class
+        val superClass = javaCls.superClass
+        if (superClass is JavaPsiClassWrapper) {
+            exploreClass(superClass)?.let { superClassFqName ->
+                graph.addEdge(
+                    GraphEdge(
+                        from = clsFqName,
+                        to = superClassFqName,
+                        type = GraphEdgeType.INHERITANCE,
+                    ),
+                )
+            }
+        }
+        // sub class
+        // todo
+        return clsFqName
+    }
+
+    private fun exploreMethod(
+        javaMethod: JavaPsiMethodWrapper,
+        isUnderTest: Boolean = false,
+        depth: Int = 0,
+    ): String? {
+        val methodFqName =
+            (javaMethod.containingClass?.qualifiedName ?: javaMethod.containingFile.name) + "#" +
+                javaMethod.name
+        if (methodFqName.startsWith("java.")) return null
+        if (methodVisited.contains(methodFqName)) return methodFqName
+        methodVisited.add(methodFqName)
+        graph.addNode(
+            GraphNode(
+                javaMethod.name,
+                methodFqName,
+                type = GraphNodeType.METHOD,
+                isUnitUnderTest = isUnderTest,
+            ),
+        )
+        // TODO: rework: Need access to psi instance
+        val psiClass = PsiTreeUtil.getChildOfType<PsiClass>(javaMethod.containingFile, PsiClass::class.java)
+        val psiMethod = psiClass?.findMethodsByName(javaMethod.name)?.firstOrNull()
+        // return type
+        val psiReturnType = psiMethod?.returnType
+        if (psiReturnType is PsiClassReferenceType) {
+            psiReturnType.resolve()?.let {
+                if (it !is PsiTypeParameter) {
+                    exploreClass(JavaPsiClassWrapper(it), depth = depth - 1)?.let { classFqName ->
+                        graph.addEdge(
+                            GraphEdge(
+                                from = methodFqName,
+                                to = classFqName,
+                                type = GraphEdgeType.HAS_RETURN_TYPE,
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+        // parameters
+        psiMethod?.parameters?.forEach { parameter ->
+            val psiType = parameter.type
+            if (psiType is PsiClassReferenceType) {
+                psiType.resolve()?.let {
+                    if (it !is PsiTypeParameter) {
+                        exploreClass(JavaPsiClassWrapper(it), depth = depth - 1)?.let { classFqName ->
+                            graph.addEdge(
+                                GraphEdge(
+                                    from = methodFqName,
+                                    to = classFqName,
+                                    type = GraphEdgeType.HAS_TYPE_PARAMETER,
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        return methodFqName
+    }
+}
