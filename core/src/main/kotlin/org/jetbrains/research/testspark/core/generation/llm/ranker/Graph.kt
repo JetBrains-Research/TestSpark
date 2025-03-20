@@ -66,7 +66,7 @@ class KuzuGraph(
 
     override fun addNode(node: GraphNode) {
         conn.query(
-            "CREATE (:${node.type.label} {name: \"${node.name}\", fqName: \"${node.fqName}\", isUnitUnderTest: ${node.isUnitUnderTest}})",
+            "CREATE (:${node.type.label} {name: \"${node.name}\", fqName: \"${node.fqName}\", isUnitUnderTest: ${node.isUnitUnderTest}, isStandardLibrary: ${node.isStandardLibrary}})",
         )
     }
 
