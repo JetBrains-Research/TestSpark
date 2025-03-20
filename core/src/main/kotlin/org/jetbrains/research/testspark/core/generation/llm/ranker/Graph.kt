@@ -12,7 +12,7 @@ enum class GraphNodeType(
 
 enum class GraphEdgeType {
     INHERITANCE,
-    CALL,
+    CALLS,
     HAS_METHOD,
     HAS_TYPE_PARAMETER,
     HAS_RETURN_TYPE,
@@ -57,7 +57,7 @@ class KuzuGraph(
         )
         // Create Edge tables
         conn.query("CREATE REL TABLE INHERITANCE(FROM Class TO Class)")
-        conn.query("CREATE REL TABLE CALL(FROM Method TO Method)")
+        conn.query("CREATE REL TABLE CALLS(FROM Method TO Method)")
         conn.query("CREATE REL TABLE HAS_METHOD(FROM Class TO Method)")
         conn.query("CREATE REL TABLE HAS_TYPE_PARAMETER(FROM Method TO Class, FROM Class TO Class)")
         conn.query("CREATE REL TABLE HAS_RETURN_TYPE(FROM Method TO Class)")
@@ -80,7 +80,7 @@ class KuzuGraph(
                        |MERGE (n1)-[:${edge.type}]->(n2)
                     """.trimMargin(),
                 )
-            GraphEdgeType.CALL ->
+            GraphEdgeType.CALLS ->
                 conn.query(
                     """
                        |MATCH (n1:Method), (n2:Method) 
