@@ -77,17 +77,20 @@ abstract class PsiHelper(
          *
          * Therefore, we need to increase the result by one to get the line number.
          */
-        val selectedLine = doc.getLineNumber(caretOffset)
+        var selectedLine = doc.getLineNumber(caretOffset)
         val selectedLineText =
             doc.getText(TextRange(doc.getLineStartOffset(selectedLine), doc.getLineEndOffset(selectedLine)))
+
+        // increase by one is necessary due to different start of numbering
+        selectedLine++
 
         if (selectedLineText.isBlank()) {
             log.info("Line $selectedLine at caret $caretOffset is blank")
             return null
         }
         log.info("Surrounding line at caret $caretOffset is $selectedLine")
-        // increase by one is necessary due to different start of numbering
-        return selectedLine + 1
+
+        return selectedLine
     }
 
     /**
@@ -267,8 +270,8 @@ abstract class PsiHelper(
     /**
      * Get the module of the file.
      */
-    fun getModuleFromPsiFile(): com.intellij.openapi.module.Module =
-        ModuleUtilCore.findModuleForFile(psiFile.virtualFile, psiFile.project)!!
+    fun getModuleFromPsiFile(): com.intellij.openapi.module.Module? =
+        ModuleUtilCore.findModuleForFile(psiFile.virtualFile, psiFile.project)
 
     /**
      * Get the module of the file.
