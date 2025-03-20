@@ -99,5 +99,5 @@ class JavaPsiHelper(
         classesToTest: List<PsiClassWrapper>,
         interestingClasses: Set<PsiClassWrapper>,
         psiMethod: PsiMethodWrapper?,
-    ): Graph = JavaPsiExplorer(graph).explore(classesToTest, interestingClasses, psiMethod)
+    ): Graph = JavaPsiExplorer(graph, psiFile.project).explore(classesToTest, interestingClasses, psiMethod)
 }
