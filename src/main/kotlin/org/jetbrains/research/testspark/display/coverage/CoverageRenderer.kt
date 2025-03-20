@@ -63,8 +63,6 @@ class CoverageRenderer(
 
     private var defaultEditorColor: Color? = null
 
-    private val editorLock = Any()
-
     /**
      * Perform the action - show toolTip on mouse click.
      *
@@ -246,7 +244,7 @@ class CoverageRenderer(
 
                 override fun onFinished() {
                     super.onFinished()
-                    synchronized(editorLock) {
+                    synchronized(this) {
                         editor.background = defaultEditorColor
                     }
                 }
