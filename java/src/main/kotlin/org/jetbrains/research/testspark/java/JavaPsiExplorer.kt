@@ -59,7 +59,8 @@ class JavaPsiExplorer(
         depth: Int = 0,
     ): String? {
         val clsFqName = javaCls.qualifiedName
-        if (clsFqName.isEmpty() || clsFqName.startsWith("java.")) return null
+        val isStdLib = clsFqName.startsWith("java.") || clsFqName.startsWith("javax.")
+        if (clsFqName.isEmpty()) return null
         if (classVisited.contains(javaCls.qualifiedName)) return clsFqName
         classVisited.add(clsFqName)
         graph.addNode(
@@ -68,6 +69,7 @@ class JavaPsiExplorer(
                 clsFqName,
                 type = GraphNodeType.CLASS,
                 isUnitUnderTest = isUnderTest,
+                isStandardLibrary = isStdLib,
                 properties = mapOf("type" to javaCls.classType.representation),
             ),
         )
