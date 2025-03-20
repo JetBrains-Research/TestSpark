@@ -73,18 +73,21 @@ class JavaPsiExplorer(
                 properties = mapOf("type" to javaCls.classType.representation),
             ),
         )
-        if (depth > 0) {
-            javaCls.methods.forEach {
-                exploreMethod(it as JavaPsiMethodWrapper, depth = depth)?.let { methodFqName ->
-                    graph.addEdge(
-                        GraphEdge(
-                            from = clsFqName,
-                            to = methodFqName,
-                            type = GraphEdgeType.HAS_METHOD,
-                        ),
-                    )
-                }
+
+        javaCls.methods.forEach {
+            exploreMethod(it as JavaPsiMethodWrapper, depth = depth)?.let { methodFqName ->
+                graph.addEdge(
+                    GraphEdge(
+                        from = clsFqName,
+                        to = methodFqName,
+                        type = GraphEdgeType.HAS_METHOD,
+                    ),
+                )
             }
+        }
+
+        if (depth <= 0) {
+            return clsFqName
         }
         // super class
         val superClass = javaCls.superClass
