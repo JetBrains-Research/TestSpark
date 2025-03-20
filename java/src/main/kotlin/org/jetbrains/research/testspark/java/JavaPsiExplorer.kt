@@ -140,7 +140,7 @@ class JavaPsiExplorer(
         )
         // TODO: rework: Need access to psi instance
         val psiClass = PsiTreeUtil.getChildOfType<PsiClass>(javaMethod.containingFile, PsiClass::class.java)
-        val psiMethod = psiClass?.findMethodsByName(javaMethod.name)?.firstOrNull()
+        val psiMethod = psiClass?.methods?.firstOrNull { it.name == javaMethod.name } ?: return methodFqName
         // return type
         val psiReturnType = psiMethod?.returnType
         if (psiReturnType is PsiClassReferenceType) {
