@@ -142,41 +142,58 @@ class JavaPsiExplorer(
         val psiClass = PsiTreeUtil.getChildOfType<PsiClass>(javaMethod.containingFile, PsiClass::class.java)
         val psiMethod = psiClass?.methods?.firstOrNull { it.name == javaMethod.name } ?: return methodFqName
         // return type
-        val psiReturnType = psiMethod?.returnType
-        if (psiReturnType is PsiClassReferenceType) {
-            psiReturnType.resolve()?.let {
-                if (it !is PsiTypeParameter) {
-                    exploreClass(JavaPsiClassWrapper(it), depth = depth - 1)?.let { classFqName ->
-                        graph.addEdge(
-                            GraphEdge(
-                                from = methodFqName,
-                                to = classFqName,
-                                type = GraphEdgeType.HAS_RETURN_TYPE,
-                            ),
-                        )
-                    }
-                }
+        val psiReturnType = psiMethod.returnType
+        if (psiReturnType != null) {
+            exploreType(psiReturnType, depth = depth - 1)?.let { classFqName ->
+                graph.addEdge(
+                    GraphEdge(
+                        from = methodFqName,
+                        to = classFqName,
+                        type = GraphEdgeType.HAS_RETURN_TYPE,
+                    ),
+                )
             }
         }
         // parameters
         psiMethod.parameterList.parameters.forEach { parameter ->
             val psiType = parameter.type
-            if (psiType is PsiClassReferenceType) {
-                psiType.resolve()?.let {
-                    if (it !is PsiTypeParameter) {
-                        exploreClass(JavaPsiClassWrapper(it), depth = depth - 1)?.let { classFqName ->
-                            graph.addEdge(
-                                GraphEdge(
-                                    from = methodFqName,
-                                    to = classFqName,
-                                    type = GraphEdgeType.HAS_TYPE_PARAMETER,
-                                ),
-                            )
+            exploreType(psiType, depth - 1)?.let { paramFqName ->
+                graph.addEdge(
+                    GraphEdge(
+                        from = methodFqName,
+                        to = paramFqName,
+                        type = GraphEdgeType.HAS_TYPE_PARAMETER,
+                    ),
+                )
+            }
+        }
+        return methodFqName
+    }
+
+    private fun exploreType(
+        psiType: PsiType,
+        depth: Int,
+    ): String? {
+        if (psiType is PsiClassReferenceType) {
+            psiType.resolve()?.let {
+                if (it !is PsiTypeParameter) {
+                    exploreClass(JavaPsiClassWrapper(it), depth = depth - 1)?.let { classFqName ->
+                        psiType.parameters.forEach { param ->
+                            exploreType(param, depth - 1)?.let { paramFqName ->
+                                graph.addEdge(
+                                    GraphEdge(
+                                        from = classFqName,
+                                        to = paramFqName,
+                                        type = GraphEdgeType.HAS_TYPE_PARAMETER,
+                                    ),
+                                )
+                            }
                         }
+                        return classFqName
                     }
                 }
             }
         }
-        return methodFqName
+        return null
     }
 }
