@@ -159,7 +159,7 @@ class JavaPsiExplorer(
             }
         }
         // parameters
-        psiMethod?.parameters?.forEach { parameter ->
+        psiMethod.parameterList.parameters.forEach { parameter ->
             val psiType = parameter.type
             if (psiType is PsiClassReferenceType) {
                 psiType.resolve()?.let {
