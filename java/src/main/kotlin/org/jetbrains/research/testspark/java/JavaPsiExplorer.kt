@@ -2,9 +2,11 @@ package org.jetbrains.research.testspark.java
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiType
 import com.intellij.psi.PsiTypeParameter
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.util.PsiTreeUtil
+import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.generation.llm.ranker.Graph
 import org.jetbrains.research.testspark.core.generation.llm.ranker.GraphEdge
 import org.jetbrains.research.testspark.core.generation.llm.ranker.GraphEdgeType
