@@ -92,7 +92,7 @@ class JavaPsiExplorer(
         // super class
         val superClass = javaCls.superClass
         if (superClass is JavaPsiClassWrapper) {
-            exploreClass(superClass)?.let { superClassFqName ->
+            exploreClass(superClass, depth = depth - 1)?.let { superClassFqName ->
                 graph.addEdge(
                     GraphEdge(
                         from = clsFqName,
