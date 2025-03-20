@@ -17,6 +17,7 @@ enum class GraphEdgeType {
     HAS_TYPE_PARAMETER,
     HAS_RETURN_TYPE,
     HAS_TYPE_PROPERTY,
+    THROWS,
 }
 
 data class GraphNode(
@@ -62,6 +63,7 @@ class KuzuGraph(
         conn.query("CREATE REL TABLE HAS_TYPE_PARAMETER(FROM Method TO Class, FROM Class TO Class)")
         conn.query("CREATE REL TABLE HAS_RETURN_TYPE(FROM Method TO Class)")
         conn.query("CREATE REL TABLE HAS_TYPE_PROPERTY(FROM Class TO Class)")
+        conn.query("CREATE REL TABLE THROWS(FROM Method TO Class)")
     }
 
     override fun addNode(node: GraphNode) {
@@ -119,6 +121,14 @@ class KuzuGraph(
                        |WHERE n1.fqName = '${edge.from}' AND n2.fqName = '${edge.to}'
                        |MERGE (n1)-[:${edge.type}]->(n2)
                     """.trimMargin(),
+                )
+            GraphEdgeType.THROWS ->
+                conn.query(
+                    """
+                    |MATCH (n1:Method), (n2:Class)
+                    |WHERE n1.fqName = '${edge.from}' AND n2.fqName = '${edge.to}'
+                    |MERGE (n1)-[:${edge.type}]->(n2)
+                    """.trimIndent(),
                 )
         }
     }
