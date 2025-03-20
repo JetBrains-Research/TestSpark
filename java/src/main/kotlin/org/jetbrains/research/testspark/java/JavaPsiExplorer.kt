@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.java
 
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiTypeParameter
 import com.intellij.psi.impl.source.PsiClassReferenceType
@@ -16,6 +17,7 @@ const val MAX_DEPTH = 10
 
 class JavaPsiExplorer(
     val graph: Graph,
+    private val project: Project,
 ) {
     val classVisited = mutableSetOf<String>()
     val methodVisited = mutableSetOf<String>()
@@ -95,8 +97,20 @@ class JavaPsiExplorer(
                 )
             }
         }
-        // sub class
-        // todo
+        // subclass
+        if (javaCls.classType == ClassType.ABSTRACT_CLASS || javaCls.classType == ClassType.INTERFACE) {
+            javaCls.searchSubclasses(project).forEach {
+                exploreClass(it as JavaPsiClassWrapper, depth = depth - 1)?.let { subClassFqName ->
+                    graph.addEdge(
+                        GraphEdge(
+                            from = subClassFqName,
+                            to = clsFqName,
+                            type = GraphEdgeType.INHERITANCE,
+                        ),
+                    )
+                }
+            }
+        }
         return clsFqName
     }
 
