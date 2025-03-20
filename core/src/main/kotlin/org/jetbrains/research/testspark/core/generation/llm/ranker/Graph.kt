@@ -59,7 +59,7 @@ class KuzuGraph(
         conn.query("CREATE REL TABLE INHERITANCE(FROM Class TO Class)")
         conn.query("CREATE REL TABLE CALL(FROM Method TO Method)")
         conn.query("CREATE REL TABLE HAS_METHOD(FROM Class TO Method)")
-        conn.query("CREATE REL TABLE HAS_TYPE_PARAMETER(FROM Method TO Class)")
+        conn.query("CREATE REL TABLE HAS_TYPE_PARAMETER(FROM Method TO Class, FROM Class TO Class)")
         conn.query("CREATE REL TABLE HAS_RETURN_TYPE(FROM Method TO Class)")
         conn.query("CREATE REL TABLE HAS_TYPE_PROPERTY(FROM Class TO Class)")
     }
