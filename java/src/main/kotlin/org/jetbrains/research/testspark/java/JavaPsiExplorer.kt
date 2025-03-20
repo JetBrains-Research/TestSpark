@@ -146,7 +146,7 @@ class JavaPsiExplorer(
         // return type
         val psiReturnType = psiMethod.returnType
         if (psiReturnType != null) {
-            exploreType(psiReturnType, depth = depth - 1)?.let { classFqName ->
+            exploreType(psiReturnType, depth = depth - 1).forEach { classFqName ->
                 graph.addEdge(
                     GraphEdge(
                         from = methodFqName,
@@ -159,7 +159,7 @@ class JavaPsiExplorer(
         // parameters
         psiMethod.parameterList.parameters.forEach { parameter ->
             val psiType = parameter.type
-            exploreType(psiType, depth - 1)?.let { paramFqName ->
+            exploreType(psiType, depth - 1).forEach { paramFqName ->
                 graph.addEdge(
                     GraphEdge(
                         from = methodFqName,
@@ -175,27 +175,20 @@ class JavaPsiExplorer(
     private fun exploreType(
         psiType: PsiType,
         depth: Int,
-    ): String? {
+    ): List<String> {
+        val result = mutableListOf<String>()
         if (psiType is PsiClassReferenceType) {
             psiType.resolve()?.let {
                 if (it !is PsiTypeParameter) {
                     exploreClass(JavaPsiClassWrapper(it), depth = depth - 1)?.let { classFqName ->
+                        result.add(classFqName)
                         psiType.parameters.forEach { param ->
-                            exploreType(param, depth - 1)?.let { paramFqName ->
-                                graph.addEdge(
-                                    GraphEdge(
-                                        from = classFqName,
-                                        to = paramFqName,
-                                        type = GraphEdgeType.HAS_TYPE_PARAMETER,
-                                    ),
-                                )
-                            }
+                            result.addAll(exploreType(param, depth - 1))
                         }
-                        return classFqName
                     }
                 }
             }
         }
-        return null
+        return result
     }
 }
