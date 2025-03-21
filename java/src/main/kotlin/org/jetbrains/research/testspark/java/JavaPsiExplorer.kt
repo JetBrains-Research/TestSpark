@@ -169,6 +169,18 @@ class JavaPsiExplorer(
                 )
             }
         }
+        // exceptions
+        psiMethod.throwsList.referencedTypes.forEach { throwType ->
+            exploreType(throwType, depth - 1).forEach { throwFqName ->
+                graph.addEdge(
+                    GraphEdge(
+                        from = methodFqName,
+                        to = throwFqName,
+                        type = GraphEdgeType.THROWS,
+                    ),
+                )
+            }
+        }
         return methodFqName
     }
 
