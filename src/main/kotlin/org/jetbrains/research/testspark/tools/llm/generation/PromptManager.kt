@@ -187,7 +187,6 @@ class PromptManager(
                 },
             ) + LLMSettingsBundle.get("commonPromptPart")
         log.info("Prompt is:\n$prompt")
-        println("Prompt is:\n$prompt")
         return prompt
     }
 
