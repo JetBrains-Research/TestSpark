@@ -186,7 +186,7 @@ class CoverageRenderer(
         if (editorTextField.background.equals(highlightColor)) return
         defaultEditorColor = editorTextField.background
         editorTextField.background = highlightColor
-        returnOriginalEditorBackground(editorTextField, name)
+        returnOriginalEditorBackground(editorTextField, id)
     }
 
     /**
@@ -228,10 +228,10 @@ class CoverageRenderer(
      */
     private fun returnOriginalEditorBackground(
         editor: EditorTextField,
-        name: String,
+        id: Int,
     ) {
         ProgressManager.getInstance().run(
-            object : Task.Backgroundable(project, "${PluginMessagesBundle.get("coverageMessage")} $name") {
+            object : Task.Backgroundable(project, "${PluginMessagesBundle.get("coverageMessage")} $id") {
                 override fun run(indicator: ProgressIndicator) {
                     generatedTestsTabData.indicatorController.activeIndicators.add(IJProgressIndicator(indicator))
                     val timeWithHighlightedBackground: Long =
