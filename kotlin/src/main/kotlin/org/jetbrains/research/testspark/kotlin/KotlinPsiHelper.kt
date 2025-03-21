@@ -55,7 +55,7 @@ class KotlinPsiHelper(
 
         if (method != null && method.name != null) {
             val wrappedMethod = KotlinPsiMethodWrapper(method)
-            if (wrappedMethod.isTestableMethod()) {
+            if (wrappedMethod.isTestingMethod()) {
                 log.info("Surrounding method for caret at $caretOffset is ${wrappedMethod.methodDescriptor}")
                 return wrappedMethod
             }

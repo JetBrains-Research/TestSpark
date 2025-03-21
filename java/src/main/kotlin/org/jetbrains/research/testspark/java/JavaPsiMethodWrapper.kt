@@ -87,7 +87,7 @@ class JavaPsiMethodWrapper(
         return interestingPsiClasses
     }
 
-    override fun isTestableMethod(): Boolean {
+    override fun isTestingMethod(): Boolean {
         // Check if the method is not annotated with @Test
         return psiMethod.annotations.none { annotation ->
             val qualifiedName = annotation.qualifiedName

@@ -82,7 +82,7 @@ class KotlinPsiMethodWrapper(
         return lineNumber in startLine..endLine
     }
 
-    override fun isTestableMethod(): Boolean =
+    override fun isTestingMethod(): Boolean =
         psiFunction.annotationEntries.none { annotation ->
             val text = (annotation.text)
             text == "@org.junit.Test" ||
