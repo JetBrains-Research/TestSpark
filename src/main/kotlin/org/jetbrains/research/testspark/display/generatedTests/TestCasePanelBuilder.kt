@@ -159,8 +159,6 @@ class TestCasePanelBuilder(
 
     private val sendButton = IconButtonCreator.getButton(TestSparkIcons.send, PluginLabelsBundle.get("send"))
 
-    private val loadingLabel: JLabel = JLabel(TestSparkIcons.loading)
-
     private val initialCodes: MutableList<String> = mutableListOf()
     private val lastRunCodes: MutableList<String> = mutableListOf()
     private val currentCodes: MutableList<String> = mutableListOf()
@@ -308,8 +306,6 @@ class TestCasePanelBuilder(
         buttonsPanel.add(Box.createRigidArea(Dimension(checkbox.preferredSize.width, checkbox.preferredSize.height)))
         runTestButton.isEnabled = true
         buttonsPanel.add(runTestButton)
-        loadingLabel.isVisible = false
-        buttonsPanel.add(loadingLabel)
         buttonsPanel.add(Box.createHorizontalGlue())
         resetButton.isEnabled = false
         buttonsPanel.add(resetButton)
@@ -516,7 +512,6 @@ class TestCasePanelBuilder(
      * After adding the code, it switches to another code.
      */
     private fun sendRequest() {
-        loadingLabel.isVisible = true
         enableGlobalComponents(false)
         enableLocalComponents(false)
 
@@ -581,7 +576,6 @@ class TestCasePanelBuilder(
 
     private fun finishProcess(enableGlobal: Boolean = true) {
         uiContext.errorMonitor.clear()
-        loadingLabel.isVisible = false
         if (enableGlobal) enableGlobalComponents(true)
         enableLocalComponents(true)
     }
@@ -639,7 +633,6 @@ class TestCasePanelBuilder(
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
 
-        loadingLabel.isVisible = true
         enableGlobalComponents(false)
         enableLocalComponents(false)
 
@@ -658,7 +651,6 @@ class TestCasePanelBuilder(
         if (isRemoved) return
         if (!runTestButton.isEnabled) return
 
-        loadingLabel.isVisible = true
         enableGlobalComponents(false)
         enableLocalComponents(false)
 
