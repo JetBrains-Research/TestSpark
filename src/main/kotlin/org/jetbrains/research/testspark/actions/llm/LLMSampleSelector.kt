@@ -1,8 +1,6 @@
 package org.jetbrains.research.testspark.actions.llm
 
 import com.intellij.openapi.application.runReadAction
-import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
@@ -13,11 +11,8 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiMethod
-import com.intellij.psi.search.ProjectAndLibrariesScope
-import com.intellij.psi.search.SearchScope
-import com.intellij.psi.search.searches.ReferencesSearch
-import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.containers.stream
+import org.jetbrains.research.testspark.java.JavaPsiMethodWrapper
 
 /**
  * A selector for samples for the LLM.
@@ -59,58 +54,17 @@ class LLMSampleSelector {
      * Collects the test samples for the LLM from the current project.
      */
     fun collectTestSamples(project: Project) {
-        val currentDocument = FileEditorManager.getInstance(project).selectedTextEditor?.document
-        val currentFile = currentDocument?.let { FileDocumentManager.getInstance().getFile(it) }
+        runReadAction {
+            val projectFileIndex: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
 
-        runReadAction { collectTestSamplesForCurrentFile(currentFile!!, project) }
-
-        if (testNames.size == 1) {
-            // Only the default test name is there, thus we did not find any tests related to the current file;
-            // collect all test samples and provide them to the user instead
-            runReadAction { collectTestSamplesFromProject(project) }
-        }
-    }
-
-    /**
-     * Collects all test methods as samples from a given {@link Project}.
-     *
-     * @param project The project to retrieve all test samples from.
-     */
-    private fun collectTestSamplesFromProject(project: Project) {
-        val projectFileIndex: ProjectFileIndex = ProjectRootManager.getInstance(project).fileIndex
-
-        projectFileIndex.iterateContent { file ->
-            if (isJavaFileTypes(file)) {
-                try {
+            projectFileIndex.iterateContent { file ->
+                if (isJavaFileTypes(file)) {
                     val psiJavaFile = findJavaFileFromProject(file, project)
                     val psiClass = retrievePsiClass(psiJavaFile)
                     val imports = retrieveImportStatements(psiJavaFile, psiClass)
                     psiClass.allMethods.forEach { method -> processCandidateMethod(method, imports, psiClass) }
-                } catch (_: Exception) {
                 }
-            }
-            true
-        }
-    }
-
-    /**
-     * Collect the test samples relevant for the current file.
-     *
-     * These test samples are those methods that call a method in the current file of a project.
-     *
-     * @param currentFile The current file.
-     * @param project The project.
-     */
-    private fun collectTestSamplesForCurrentFile(
-        currentFile: VirtualFile,
-        project: Project,
-    ) {
-        val projectScope = ProjectAndLibrariesScope(project)
-        if (isJavaFileTypes(currentFile)) {
-            val psiJavaFile = findJavaFileFromProject(currentFile, project)
-            val psiClass = retrievePsiClass(psiJavaFile)
-            psiClass.methods.forEach { method ->
-                processMethod(psiClass, method, projectScope)
+                true
             }
         }
     }
@@ -139,42 +93,6 @@ class LLMSampleSelector {
     ): PsiJavaFile {
         val psiManager = PsiManager.getInstance(project)
         return psiManager.findFile(file) as PsiJavaFile
-    }
-
-    /**
-     * Processes a method and searches for methods that reference this method.
-     *
-     * @param psiClass The class that defines the method.
-     * @param psiMethod The method from which the search for references starts.
-     * @param scope The scope of the search
-     */
-    private fun processMethod(
-        psiClass: PsiClass,
-        psiMethod: PsiMethod,
-        scope: SearchScope,
-    ) {
-        ReferencesSearch.search(psiMethod, scope).forEach { reference ->
-            val enclosingMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
-            if (enclosingMethod != null) {
-                processEnclosingMethod(enclosingMethod, psiClass)
-            }
-        }
-    }
-
-    /**
-     * Processes an enclosing method of a statement.
-     *
-     * @param enclosingMethod The enclosing method.
-     * @param psiClass The class that defines the method.
-     */
-    private fun processEnclosingMethod(
-        enclosingMethod: PsiMethod,
-        psiClass: PsiClass,
-    ) {
-        val enclosingClass = enclosingMethod.containingClass
-        val enclosingFile = (enclosingMethod.containingFile as PsiJavaFile)
-        val imports = retrieveImportStatements(enclosingFile, enclosingClass!!)
-        processCandidateMethod(enclosingMethod, imports, psiClass)
     }
 
     /**
@@ -230,15 +148,10 @@ class LLMSampleSelector {
         imports: String,
         psiClass: PsiClass,
     ) {
-        val annotations = psiMethod.annotations
-        annotations.forEach { annotation ->
-            if (annotation.qualifiedName == "org.junit.jupiter.api.Test" ||
-                annotation.qualifiedName == "org.junit.Test"
-            ) {
-                val code: String = createTestSampleClass(imports, psiMethod.text)
-                testNames.add(createMethodName(psiClass, psiMethod))
-                initialTestCodes.add(code)
-            }
+        if (JavaPsiMethodWrapper(psiMethod).isTestingMethod()) {
+            val code: String = createTestSampleClass(imports, psiMethod.text)
+            testNames.add(createMethodName(psiClass, psiMethod))
+            initialTestCodes.add(code)
         }
     }
 
