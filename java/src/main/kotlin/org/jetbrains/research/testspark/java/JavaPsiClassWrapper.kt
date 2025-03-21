@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.java
 
+import com.intellij.openapi.fileEditor.impl.waitForFullyCompleted
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiAnonymousClass
@@ -94,7 +95,14 @@ class JavaPsiClassWrapper(
         return interestingPsiClasses.toMutableSet()
     }
 
-    override fun isTestableClass(): Boolean {
+    override fun getListOfTestingImports(): List<String> = listOf(
+        "org.junit.jupiter.api",
+        "org.hamcrest",
+        "org.assertj",
+        "com.google.common.truth"
+    )
+
+    override fun isValidTestClass(): Boolean {
         if (psiClass.isInterface ||
             psiClass.isEnum ||
             psiClass.hasModifierProperty(PsiModifier.ABSTRACT) ||
@@ -104,16 +112,17 @@ class JavaPsiClassWrapper(
             return false
         }
 
-        // Check if the class has methods annotated with @Test
-        val areAllMethodsTestable =
-            psiClass.methods.any { psiMethod: PsiMethod ->
-                JavaPsiMethodWrapper(psiMethod).isTestableMethod()
-            }
-        if (!areAllMethodsTestable) return false
+        val importsSet = fullText
+            .replace("\r\n", "\n")
+            .split("\n")
+            .asSequence()
+            .filter { it.contains("^import".toRegex()) }
+            .toMutableSet()
 
-        // Check if the class explicitly subclasses a known test framework class (e.g., TestCase)
-        if (InheritanceUtil.isInheritor(psiClass, "junit.framework.TestCase")) return false
+        val containsImport = importsSet.any { import ->
+            getListOfTestingImports().any { it in import }
+        }
 
-        return true
+        return !containsImport
     }
 }

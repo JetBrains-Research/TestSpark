@@ -39,7 +39,7 @@ class KotlinPsiHelper(
 
         if (cls != null && cls.name != null && cls.fqName != null) {
             val kotlinClassWrapper = KotlinPsiClassWrapper(cls)
-            if (kotlinClassWrapper.isTestableClass()) {
+            if (kotlinClassWrapper.isValidTestClass()) {
                 log.info("Surrounding class for caret in $caretOffset is ${kotlinClassWrapper.qualifiedName}")
                 return kotlinClassWrapper
             }

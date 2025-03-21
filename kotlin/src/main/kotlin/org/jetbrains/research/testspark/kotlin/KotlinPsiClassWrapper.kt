@@ -141,7 +141,14 @@ class KotlinPsiClassWrapper(
         return interestingPsiClasses
     }
 
-    override fun isTestableClass(): Boolean {
+    override fun getListOfTestingImports(): List<String> = listOf(
+        "org.junit.jupiter.api",
+        "org.hamcrest",
+        "org.assertj",
+        "com.google.common.truth"
+    )
+
+    override fun isValidTestClass(): Boolean {
         // Check if the class type is not suitable for testing:
         if (psiClass.isInterfaceClass() ||
             psiClass is KtObjectDeclaration ||
@@ -152,17 +159,17 @@ class KotlinPsiClassWrapper(
             return false
         }
 
-        // Check if the class has methods that are not testable
-        if (methods.any { !it.isTestableMethod() }) {
-            return false
+        val importsSet = fullText
+            .replace("\r\n", "\n")
+            .split("\n")
+            .asSequence()
+            .filter { it.contains("^import".toRegex()) }
+            .toMutableSet()
+
+        val containsImport = importsSet.any { import ->
+            getListOfTestingImports().any { it in import }
         }
 
-        // Check if the class explicitly subclasses a known test framework class (e.g., TestCase for JUnit)
-        val superClassFqName = superClass?.qualifiedName
-        if (superClassFqName == "junit.framework.TestCase") {
-            return false
-        }
-
-        return true
+        return !containsImport
     }
 }
