@@ -15,7 +15,7 @@ import org.jetbrains.research.testspark.core.generation.llm.ranker.GraphNodeType
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 
-const val MAX_DEPTH = 10
+const val MAX_DEPTH = 5
 
 class JavaPsiExplorer(
     val graph: Graph,
@@ -49,9 +49,9 @@ class JavaPsiExplorer(
             isUnderTest = false
         }
         classesToTest.forEach {
-            val clsName = exploreClass(it as JavaPsiClassWrapper, isUnderTest = isUnderTest, depth)
+            exploreClass(it as JavaPsiClassWrapper, isUnderTest = isUnderTest, depth)
         }
-//        interestingClasses.forEach { exploreClass(it as JavaPsiClassWrapper, isUnderTest = isUnderTest, depth) }
+        interestingClasses.forEach { exploreClass(it as JavaPsiClassWrapper, isUnderTest = false, depth) }
         return graph
     }
 
@@ -62,7 +62,7 @@ class JavaPsiExplorer(
     ): String? {
         val clsFqName = javaCls.qualifiedName
         val isStdLib = clsFqName.startsWith("java.") || clsFqName.startsWith("javax.")
-        if (clsFqName.isEmpty()) return null
+        if (clsFqName.isEmpty() || isStdLib) return null
         if (classVisited.contains(javaCls.qualifiedName)) return clsFqName
         classVisited.add(clsFqName)
         graph.addNode(
