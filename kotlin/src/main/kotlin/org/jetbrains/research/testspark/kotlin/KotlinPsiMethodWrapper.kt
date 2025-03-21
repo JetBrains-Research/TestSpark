@@ -88,7 +88,7 @@ class KotlinPsiMethodWrapper(
      *
      * @return A mutable set of `PsiClassWrapper` instances representing non-standard Kotlin classes.
      */
-    fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper> {
+    override fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper> {
         val interestingPsiClasses = mutableSetOf<PsiClassWrapper>()
 
         psiFunction.valueParameters.forEach { parameter ->

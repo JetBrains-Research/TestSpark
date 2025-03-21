@@ -19,7 +19,6 @@ import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.llm.JsonEncoding
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiHelper
-import org.jetbrains.research.testspark.langwrappers.PsiHelperProvider
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
@@ -48,7 +47,7 @@ class PromptManager(
             ApplicationManager.getApplication().runReadAction(
                 Computable {
                     val maxPolymorphismDepth = LlmSettingsArguments(project).maxPolyDepth(polyDepthReducing = 0)
-                    psiHelper.collectClassesToTest(project, classesToTest, caret, maxPolymorphismDepth)
+                    psiHelper.collectClassesToTest(classesToTest, caret, maxPolymorphismDepth)
                 },
             )
             return classesToTest
@@ -75,12 +74,7 @@ class PromptManager(
                 Computable {
                     val maxInputParamsDepth = LlmSettingsArguments(project).maxInputParamsDepth(polyDepthReducing)
                     val interestingPsiClasses =
-                        psiHelper.getInterestingPsiClassesWithQualifiedNames(
-                            project,
-                            classesToTest,
-                            polyDepthReducing,
-                            maxInputParamsDepth,
-                        )
+                        psiHelper.getInterestingPsiClassesWithQualifiedNames(classesToTest, maxInputParamsDepth)
 
                     val interestingClasses = interestingPsiClasses.map(this::createClassRepresentation).toList()
                     val polymorphismRelations =
@@ -125,7 +119,7 @@ class PromptManager(
                         }
 
                         CodeType.METHOD -> {
-                            val psiMethod = getPsiMethod(cut, codeType.objectDescription)!!
+                            val psiMethod = psiHelper.getPsiMethod(cut, codeType.objectDescription, caret)!!
                             val method = createMethodRepresentation(psiMethod)!!
                             val interestingClassesFromMethod =
                                 psiHelper
@@ -153,8 +147,8 @@ class PromptManager(
                                 }
 
                             val psiMethod =
-                                getMethodDescriptor(cut, lineNumber)?.let { descriptor ->
-                                    getPsiMethod(cut, descriptor)
+                                psiHelper.getMethodDescriptor(cut, lineNumber, caret)?.let { descriptor ->
+                                    psiHelper.getPsiMethod(cut, descriptor, caret)
                                 }
                             /**
                              * if psiMethod exists, then use it as a context for a line,
@@ -290,64 +284,5 @@ class PromptManager(
         interestingPsiClasses.remove(cut)
 
         return polymorphismRelations.toMutableMap()
-    }
-
-    /**
-     * Retrieves a PsiMethod matching the given method descriptor within the provided PsiClass.
-     *
-     * @param psiClass The PsiClassWrapper in which to search for the method.
-     * @param methodDescriptor The method descriptor to match against.
-     * @return The matching PsiMethod if found, otherwise an empty string.
-     */
-    private fun getPsiMethod(
-        psiClass: PsiClassWrapper?,
-        methodDescriptor: String,
-    ): PsiMethodWrapper? {
-        // Processing function outside the class
-        if (psiClass == null) {
-            val currentPsiMethod = psiHelper.getSurroundingMethod(caret)!!
-            return currentPsiMethod
-        }
-        for (currentPsiMethod in psiClass.allMethods) {
-            val file = psiClass.containingFile
-            val psiHelper = PsiHelperProvider.getPsiHelper(file)
-            // psiHelper will not be null here
-            // because if we are here, then we already know that the current language is supported
-            if (psiHelper!!.generateMethodDescriptor(currentPsiMethod) == methodDescriptor) {
-                return currentPsiMethod
-            }
-        }
-        return null
-    }
-
-    /**
-     * Returns the method descriptor of the method containing the given line number in the specified PsiClass.
-     *
-     * @param psiClass the PsiClassWrapper containing the method
-     * @param lineNumber the line number within the file where the method is located
-     * @return the method descriptor as `String` if the surrounding method exists, or `null` when no method found
-     */
-    private fun getMethodDescriptor(
-        psiClass: PsiClassWrapper?,
-        lineNumber: Int,
-    ): String? {
-        if (psiClass != null) {
-            val containingPsiMethod = psiClass.allMethods.find { it.containsLine(lineNumber) } ?: return null
-
-            val file = psiClass.containingFile
-            val psiHelper = PsiHelperProvider.getPsiHelper(file)
-            /**
-             * psiHelper will not be null here because at this point,
-             * we already know that the current language is supported
-             */
-            return psiHelper!!.generateMethodDescriptor(containingPsiMethod)
-        } else {
-            /**
-             * When no PSI class provided we are dealing with a top-level function.
-             * Processing function outside the class
-             */
-            val currentPsiMethod = psiHelper.getSurroundingMethod(caret) ?: return null
-            return psiHelper.generateMethodDescriptor(currentPsiMethod)
-        }
     }
 }
