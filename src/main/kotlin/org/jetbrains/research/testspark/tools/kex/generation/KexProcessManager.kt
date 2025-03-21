@@ -31,7 +31,7 @@ import org.jetbrains.research.testspark.tools.llm.generation.StandardRequestMana
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.io.File
 import java.io.IOException
-import java.net.URL
+import java.net.URI
 import java.nio.charset.Charset
 import java.util.zip.ZipInputStream
 import kotlin.io.path.Path
@@ -242,7 +242,7 @@ class KexProcessManager(
         log.info("Kex executable and helper files not found, downloading Kex")
         val stream =
             try {
-                URL(kexUrl).openStream()
+                URI(kexUrl).toURL().openStream()
             } catch (e: Exception) {
                 log.error("Error fetching latest kex custom release - $e")
                 return false
