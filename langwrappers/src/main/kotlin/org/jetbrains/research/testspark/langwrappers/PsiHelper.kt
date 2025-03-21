@@ -270,8 +270,7 @@ abstract class PsiHelper(
     /**
      * Get the module of the file.
      */
-    fun getModuleFromPsiFile(): com.intellij.openapi.module.Module? =
-        ModuleUtilCore.findModuleForFile(psiFile.virtualFile, psiFile.project)
+    fun getModuleFromPsiFile(): com.intellij.openapi.module.Module? = ModuleUtilCore.findModuleForFile(psiFile.virtualFile, psiFile.project)
 
     /**
      * Get the module of the file.
