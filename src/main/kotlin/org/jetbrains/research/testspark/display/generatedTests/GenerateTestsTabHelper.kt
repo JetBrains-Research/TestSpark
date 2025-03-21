@@ -4,28 +4,28 @@ object GenerateTestsTabHelper {
     /**
      * A helper method to remove a test case from the cache and from the UI.
      *
-     * @param testCaseName the name of the test
+     * @param testCaseId the id of the test
      */
     fun removeTestCase(
-        testCaseName: String,
+        testCaseId: Int,
         generatedTestsTabData: GeneratedTestsTabData,
     ) {
         // Update the number of selected test cases if necessary
-        if (generatedTestsTabData.testCaseNameToSelectedCheckbox[testCaseName]!!.isSelected) {
+        if (generatedTestsTabData.testCaseIdToSelectedCheckbox[testCaseId]!!.isSelected) {
             generatedTestsTabData.testsSelected--
         }
 
         // Remove the test panel from the UI
-        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseNameToPanel[testCaseName])
+        generatedTestsTabData.allTestCasePanel.remove(generatedTestsTabData.testCaseIdToPanel[testCaseId])
 
         // Remove the test panel
-        generatedTestsTabData.testCaseNameToPanel.remove(testCaseName)
+        generatedTestsTabData.testCaseIdToPanel.remove(testCaseId)
 
         // Remove the selected checkbox
-        generatedTestsTabData.testCaseNameToSelectedCheckbox.remove(testCaseName)
+        generatedTestsTabData.testCaseIdToSelectedCheckbox.remove(testCaseId)
 
         // Remove the editorTextField
-        generatedTestsTabData.testCaseNameToEditorTextField.remove(testCaseName)
+        generatedTestsTabData.testCaseIdToEditorTextField.remove(testCaseId)
     }
 
     /**

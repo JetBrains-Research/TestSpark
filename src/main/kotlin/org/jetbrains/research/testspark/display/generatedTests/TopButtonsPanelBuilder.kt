@@ -55,13 +55,13 @@ class TopButtonsPanelBuilder {
             String.format(
                 testsSelectedText,
                 generatedTestsTabData.testsSelected,
-                generatedTestsTabData.testCaseNameToPanel.size,
+                generatedTestsTabData.testCaseIdToPanel.size,
             )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
                 passedTestsCount,
-                generatedTestsTabData.testCaseNameToPanel.size,
+                generatedTestsTabData.testCaseIdToPanel.size,
             )
         runAllButton.isEnabled = false
         for (testCasePanelFactory in generatedTestsTabData.testCasePanelFactories) {
@@ -81,11 +81,11 @@ class TopButtonsPanelBuilder {
         selected: Boolean,
         generatedTestsTabData: GeneratedTestsTabData,
     ) {
-        generatedTestsTabData.testCaseNameToPanel.forEach { (_, jPanel) ->
+        generatedTestsTabData.testCaseIdToPanel.forEach { (_, jPanel) ->
             val checkBox = jPanel.getComponent(0) as JCheckBox
             checkBox.isSelected = selected
         }
-        generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseNameToPanel.size else 0
+        generatedTestsTabData.testsSelected = if (selected) generatedTestsTabData.testCaseIdToPanel.size else 0
     }
 
     /**
@@ -135,7 +135,12 @@ class TopButtonsPanelBuilder {
 
                     override fun run(indicator: ProgressIndicator) {
                         globalIndicator = indicator
-                        task(IJProgressIndicator(indicator))
+
+                        val ijIndicator = IJProgressIndicator(indicator)
+
+                        generatedTestsTabData.indicatorController.activeIndicators.add(ijIndicator)
+
+                        task(ijIndicator)
                     }
 
                     override fun onFinished() {

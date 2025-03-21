@@ -34,17 +34,19 @@ class JavaPsiHelper(
 
     override fun getSurroundingClass(caretOffset: Int): PsiClassWrapper? {
         val classElements = PsiTreeUtil.findChildrenOfAnyType(psiFile, PsiClass::class.java)
+
+        var surroundingClass: PsiClassWrapper? = null
+
         for (cls in classElements) {
             if (cls.containsOffset(caretOffset)) {
                 val javaClassWrapper = JavaPsiClassWrapper(cls)
                 if (javaClassWrapper.isTestableClass()) {
-                    log.info("Surrounding class for caret in $caretOffset is ${javaClassWrapper.qualifiedName}")
-                    return javaClassWrapper
+                    surroundingClass = javaClassWrapper
                 }
             }
         }
-        log.info("No surrounding class for caret in $caretOffset")
-        return null
+        log.info("Surrounding class for caret in $caretOffset is ${surroundingClass?.qualifiedName}")
+        return surroundingClass
     }
 
     override fun getSurroundingMethod(caretOffset: Int): PsiMethodWrapper? {

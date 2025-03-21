@@ -1,5 +1,6 @@
 package org.jetbrains.research.testspark.tools.template.generation
 
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
@@ -25,6 +26,7 @@ interface ProcessManager {
         packageName: String,
         projectContext: ProjectContext,
         generatedTestsData: TestGenerationData,
+        indicatorController: IndicatorController,
         errorMonitor: ErrorMonitor,
         testsExecutionResultManager: TestsExecutionResultManager,
     ): UIContext?

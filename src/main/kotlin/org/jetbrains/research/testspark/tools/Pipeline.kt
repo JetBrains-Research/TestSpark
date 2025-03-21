@@ -12,10 +12,11 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.util.io.FileUtilRt
-import org.jetbrains.research.testspark.actions.controllers.TestGenerationController
+import org.jetbrains.research.testspark.actions.controllers.IndicatorController
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.exception.TestSparkException
+import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.utils.DataFilesUtil
 import org.jetbrains.research.testspark.data.FragmentToTestData
 import org.jetbrains.research.testspark.data.ProjectContext
@@ -43,7 +44,8 @@ class Pipeline(
     private val caretOffset: Int,
     private val fileUrl: String?,
     private val packageName: String,
-    private val testGenerationController: TestGenerationController,
+    private val indicatorController: IndicatorController,
+    private val errorMonitor: ErrorMonitor,
     private val testSparkDisplayManager: TestSparkDisplayManager,
     private val testsExecutionResultManager: TestsExecutionResultManager,
     generationToolName: String,
@@ -87,11 +89,12 @@ class Pipeline(
         processManager: ProcessManager,
         codeType: FragmentToTestData,
     ) {
-        testGenerationController.errorMonitor.clear()
+        errorMonitor.clear()
         testSparkDisplayManager.clear()
         testsExecutionResultManager.clear()
+        indicatorController.finished()
 
-        val projectBuilder = ProjectBuilder(project, testGenerationController.errorMonitor)
+        val projectBuilder = ProjectBuilder(project, errorMonitor)
 
         var editor: Editor? = null
 
@@ -104,12 +107,12 @@ class Pipeline(
                     override fun run(indicator: ProgressIndicator) {
                         try {
                             val ijIndicator = IJProgressIndicator(indicator)
-                            testGenerationController.indicator = ijIndicator
+                            indicatorController.activeIndicators.add(ijIndicator)
 
-                            if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
+                            if (ToolUtils.isProcessStopped(errorMonitor, ijIndicator)) return
 
                             if (projectBuilder.runBuild(ijIndicator)) {
-                                if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
+                                if (ToolUtils.isProcessStopped(errorMonitor, ijIndicator)) return
 
                                 uiContext =
                                     processManager.runTestGenerator(
@@ -118,12 +121,13 @@ class Pipeline(
                                         packageName,
                                         projectContext,
                                         generatedTestsData,
-                                        testGenerationController.errorMonitor,
+                                        indicatorController,
+                                        errorMonitor,
                                         testsExecutionResultManager,
                                     )
                             }
 
-                            if (ToolUtils.isProcessStopped(testGenerationController.errorMonitor, ijIndicator)) return
+                            if (ToolUtils.isProcessStopped(errorMonitor, ijIndicator)) return
 
                             ijIndicator.stop()
                         } catch (err: TestSparkException) {
@@ -134,9 +138,7 @@ class Pipeline(
                     override fun onFinished() {
                         super.onFinished()
 
-                        testGenerationController.finished()
-
-                        if (testGenerationController.errorMonitor.hasErrorOccurred() || uiContext == null) return
+                        if (errorMonitor.hasErrorOccurred() || uiContext == null) return
 
                         updateEditor(uiContext!!.testGenerationOutput.fileUrl)
 
