@@ -24,6 +24,7 @@ import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginDefaultsBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.bundles.plugin.PluginSettingsBundle
+import org.jetbrains.research.testspark.core.data.TestCase
 import org.jetbrains.research.testspark.display.custom.IJProgressIndicator
 import org.jetbrains.research.testspark.display.generatedTests.GeneratedTestsTabData
 import org.jetbrains.research.testspark.services.EvoSuiteSettingsService
@@ -50,10 +51,10 @@ import javax.swing.JPanel
 class CoverageRenderer(
     private val color: Color,
     private val lineNumber: Int,
-    private val tests: List<String>,
+    private val tests: List<TestCase>,
     private val coveredMutation: List<String>,
     private val notCoveredMutation: List<String>,
-    private val mapMutantsToTests: HashMap<String, MutableList<String>>,
+    private val mapMutantsToTests: HashMap<String, MutableList<Int>>,
     private val project: Project,
     private val generatedTestsTabData: GeneratedTestsTabData,
 ) : ActiveGutterRenderer,
@@ -79,10 +80,10 @@ class CoverageRenderer(
                 .createFormBuilder()
                 .addComponent(JBLabel(" Covered by tests:"), 10)
 
-        for (testName in tests) {
+        for (testCase in tests) {
             prePanel.addComponent(
-                ActionLink(testName) {
-                    highlightTestCase(testName)
+                ActionLink(testCase.testName) {
+                    highlightTestCase(testCase.id)
                 },
             )
         }
@@ -155,7 +156,7 @@ class CoverageRenderer(
      */
     private fun highlightMutantsInToolwindow(
         mutantName: String,
-        map: HashMap<String, MutableList<String>>,
+        map: HashMap<String, MutableList<Int>>,
     ) {
         highlightCoveredMutants(map.getOrPut(mutantName) { ArrayList() })
     }
@@ -163,14 +164,14 @@ class CoverageRenderer(
     /**
      * Highlight the mini-editor in the tool window whose name corresponds with the name of the test provided
      *
-     * @param name name of the test whose editor should be highlighted
+     * @param id id of the test whose editor should be highlighted
      */
-    private fun highlightTestCase(name: String) {
-        val myPanel = generatedTestsTabData.testCaseNameToPanel[name] ?: return
+    private fun highlightTestCase(id: Int) {
+        val myPanel = generatedTestsTabData.testCaseIdToPanel[id] ?: return
         openToolWindowTab()
         scrollToPanel(myPanel)
 
-        val editorTextField = generatedTestsTabData.testCaseNameToEditorTextField[name] ?: return
+        val editorTextField = generatedTestsTabData.testCaseIdToEditorTextField[id] ?: return
         val settingsProjectState = project.service<PluginSettingsService>().state
         val highlightColor =
             JBColor(
@@ -185,7 +186,7 @@ class CoverageRenderer(
         if (editorTextField.background.equals(highlightColor)) return
         defaultEditorColor = editorTextField.background
         editorTextField.background = highlightColor
-        returnOriginalEditorBackground(editorTextField, name)
+        returnOriginalEditorBackground(editorTextField, id)
     }
 
     /**
@@ -227,10 +228,10 @@ class CoverageRenderer(
      */
     private fun returnOriginalEditorBackground(
         editor: EditorTextField,
-        name: String,
+        id: Int,
     ) {
         ProgressManager.getInstance().run(
-            object : Task.Backgroundable(project, "${PluginMessagesBundle.get("coverageMessage")} $name") {
+            object : Task.Backgroundable(project, "${PluginMessagesBundle.get("coverageMessage")} $id") {
                 override fun run(indicator: ProgressIndicator) {
                     generatedTestsTabData.indicatorController.activeIndicators.add(IJProgressIndicator(indicator))
                     val timeWithHighlightedBackground: Long =
@@ -254,10 +255,10 @@ class CoverageRenderer(
 
     /**
      * Highlight a range of editors
-     * @param names list of test names to pass to highlight function
+     * @param ids list of test ids to pass to highlight function
      */
-    private fun highlightCoveredMutants(names: List<String>) {
-        names.forEach {
+    private fun highlightCoveredMutants(ids: List<Int>) {
+        ids.forEach {
             highlightTestCase(it)
         }
     }

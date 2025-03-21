@@ -62,7 +62,7 @@ class GeneratedTestsTabBuilder(
         generatedTestsTabData.allTestCasePanel.removeAll()
         generatedTestsTabData.allTestCasePanel.layout =
             BoxLayout(generatedTestsTabData.allTestCasePanel, BoxLayout.Y_AXIS)
-        generatedTestsTabData.testCaseNameToPanel.clear()
+        generatedTestsTabData.testCaseIdToPanel.clear()
 
         generatedTestsTabData.contentManager = contentManager
 
@@ -180,12 +180,12 @@ class GeneratedTestsTabBuilder(
             generatedTestsTabData.allTestCasePanel.add(testCasePanel)
             addSeparator()
 
-            generatedTestsTabData.testCaseNameToPanel[testCase.testName] = testCasePanel
-            generatedTestsTabData.testCaseNameToSelectedCheckbox[testCase.testName] = checkbox
-            generatedTestsTabData.testCaseNameToEditorTextField[testCase.testName] =
+            generatedTestsTabData.testCaseIdToPanel[testCase.id] = testCasePanel
+            generatedTestsTabData.testCaseIdToSelectedCheckbox[testCase.id] = checkbox
+            generatedTestsTabData.testCaseIdToEditorTextField[testCase.id] =
                 testCasePanelBuilder.getEditorTextField()
         }
-        generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseNameToPanel.size
+        generatedTestsTabData.testsSelected = generatedTestsTabData.testCaseIdToPanel.size
         generatedTestsTabData.testCasePanelFactories.addAll(testCasePanelFactories)
         generatedTestsTabData.topButtonsPanelBuilder.update(generatedTestsTabData)
     }
@@ -205,13 +205,13 @@ class GeneratedTestsTabBuilder(
     fun applyTests(): Boolean {
         // Filter the selected test cases
         val selectedTestCasePanels =
-            generatedTestsTabData.testCaseNameToPanel.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
+            generatedTestsTabData.testCaseIdToPanel.filter { (it.value.getComponent(0) as JCheckBox).isSelected }
         val selectedTestCases = selectedTestCasePanels.map { it.key }
 
         // Get the test case components (source code of the tests)
         val testCaseComponents =
             selectedTestCases
-                .map { generatedTestsTabData.testCaseNameToEditorTextField[it]!! }
+                .map { generatedTestsTabData.testCaseIdToEditorTextField[it]!! }
                 .map { it.document.text }
 
         val applyingResult = displayUtils!!.applyTests(project, uiContext, testCaseComponents)
@@ -263,7 +263,7 @@ class GeneratedTestsTabBuilder(
      * Clears all the generated test cases from the UI and the internal cache.
      */
     fun clear() {
-        generatedTestsTabData.testCaseNameToPanel
+        generatedTestsTabData.testCaseIdToPanel
             .toMap()
             .forEach { GenerateTestsTabHelper.removeTestCase(it.key, generatedTestsTabData) }
         generatedTestsTabData.testCasePanelFactories.clear()

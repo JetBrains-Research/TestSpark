@@ -14,9 +14,9 @@ import javax.swing.JPanel
 class GeneratedTestsTabData(
     val indicatorController: IndicatorController,
 ) {
-    val testCaseNameToPanel: HashMap<String, JPanel> = HashMap()
-    val testCaseNameToSelectedCheckbox: HashMap<String, JCheckBox> = HashMap()
-    val testCaseNameToEditorTextField: HashMap<String, EditorTextField> = HashMap()
+    val testCaseIdToPanel: HashMap<Int, JPanel> = HashMap()
+    val testCaseIdToSelectedCheckbox: HashMap<Int, JCheckBox> = HashMap()
+    val testCaseIdToEditorTextField: HashMap<Int, EditorTextField> = HashMap()
     var testsSelected: Int = 0
     val unselectedTestCases: HashMap<Int, TestCase> = HashMap()
     val testCasePanelFactories: ArrayList<TestCasePanelBuilder> = arrayListOf()
