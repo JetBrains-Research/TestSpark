@@ -31,7 +31,6 @@ class TestSparkAction : AnAction() {
 
     val testsExecutionResultManager = TestsExecutionResultManager()
 
-
     /**
      * Handles the action performed event.
      *
@@ -42,7 +41,6 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-
         if (currentTestSparkActionWindow != null) {
             currentTestSparkActionWindow?.dispose()
         }
