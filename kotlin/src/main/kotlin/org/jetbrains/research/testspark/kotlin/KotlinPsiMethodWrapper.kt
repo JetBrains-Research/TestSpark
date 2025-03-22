@@ -88,7 +88,7 @@ class KotlinPsiMethodWrapper(
      *
      * @return A mutable set of `PsiClassWrapper` instances representing non-standard Kotlin classes.
      */
-    fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper> {
+    override fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper> {
         val interestingPsiClasses = mutableSetOf<PsiClassWrapper>()
 
         psiFunction.valueParameters.forEach { parameter ->
@@ -164,7 +164,9 @@ class KotlinPsiMethodWrapper(
         fun buildSignature(function: KtFunction) =
             function.run {
                 val bodyStart = bodyExpression?.startOffsetInParent ?: textLength
-                text.substring(0, bodyStart).replace('\n', ' ').trim()
+                val prefix = if (this is KtPrimaryConstructor || this is KtSecondaryConstructor) name else ""
+                val signatureStart = if (this is KtSecondaryConstructor) "constructor".length else 0
+                prefix + text.substring(signatureStart, bodyStart).replace('\n', ' ').trim()
             }
     }
 }

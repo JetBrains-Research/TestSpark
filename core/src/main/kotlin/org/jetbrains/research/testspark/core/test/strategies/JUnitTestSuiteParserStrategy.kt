@@ -67,12 +67,6 @@ class JUnitTestSuiteParserStrategy {
                         testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, printTestBodyStrategy)
 
                     if (result.isFailure()) {
-                        val failure = result as Result.Failure
-                        val parserError = failure.error as ParserError
-                        val runtimeException = parserError.cause as? RuntimeException
-                        val errorMessage = runtimeException?.message
-
-                        println("WARNING: $errorMessage")
                         return@ca
                     }
 
@@ -174,8 +168,6 @@ class JUnitTestSuiteParserStrategy {
                 // it is the last test, thus we should remove another closing bracket
                 if (tempList.isNotEmpty()) {
                     tempList.removeLast()
-                } else {
-                    println("WARNING: the final test does not have the enclosing bracket:\n $testBody")
                 }
             }
 

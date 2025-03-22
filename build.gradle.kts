@@ -138,7 +138,7 @@ dependencies {
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
         bundledPlugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 
-        pluginVerifier()
+        pluginVerifier("1.383")
         zipSigner()
         instrumentationTools()
 

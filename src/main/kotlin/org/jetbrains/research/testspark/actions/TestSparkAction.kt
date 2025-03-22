@@ -27,6 +27,11 @@ class TestSparkAction : AnAction() {
     // Represents the currently active instance of the TestSparkActionWindow associated with the action.
     var currentTestSparkActionWindow: TestSparkActionWindow? = null
 
+    val testSparkDisplayManager = TestSparkDisplayManager()
+
+    val testsExecutionResultManager = TestsExecutionResultManager()
+
+
     /**
      * Handles the action performed event.
      *
@@ -37,6 +42,7 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
+
         if (currentTestSparkActionWindow != null) {
             currentTestSparkActionWindow?.dispose()
         }
@@ -45,8 +51,8 @@ class TestSparkAction : AnAction() {
                 e = e,
                 indicatorController = indicatorController,
                 errorMonitor = errorMonitor,
-                testSparkDisplayManager = TestSparkDisplayManager(),
-                testsExecutionResultManager = TestsExecutionResultManager(),
+                testSparkDisplayManager = testSparkDisplayManager,
+                testsExecutionResultManager = testsExecutionResultManager,
             )
     }
 

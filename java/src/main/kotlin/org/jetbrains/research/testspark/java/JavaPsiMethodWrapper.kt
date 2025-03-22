@@ -6,6 +6,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiSubstitutor
 import com.intellij.psi.PsiType
+import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.util.containers.stream
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiMethodWrapper
@@ -68,6 +69,22 @@ class JavaPsiMethodWrapper(
         val startLine = document.getLineNumber(textRange.startOffset) + 1
         val endLine = document.getLineNumber(textRange.endOffset) + 1
         return lineNumber in startLine..endLine
+    }
+
+    override fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper> {
+        val interestingPsiClasses = mutableSetOf<PsiClassWrapper>()
+
+        parameterList.parameters.forEach { paramIt ->
+            PsiTypesUtil.getPsiClass(paramIt.type)?.let { typeIt ->
+                JavaPsiClassWrapper(typeIt).let {
+                    if (!it.qualifiedName.startsWith("java.")) {
+                        interestingPsiClasses.add(it)
+                    }
+                }
+            }
+        }
+
+        return interestingPsiClasses
     }
 
     /**
