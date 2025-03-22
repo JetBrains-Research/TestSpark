@@ -44,13 +44,14 @@ class TestSparkAction : AnAction() {
         if (currentTestSparkActionWindow != null) {
             currentTestSparkActionWindow?.dispose()
         }
-        TestSparkActionWindow(
-            e = e,
-            indicatorController = indicatorController,
-            errorMonitor = errorMonitor,
-            testSparkDisplayManager = testSparkDisplayManager,
-            testsExecutionResultManager = testsExecutionResultManager,
-        )
+        currentTestSparkActionWindow =
+            TestSparkActionWindow(
+                e = e,
+                indicatorController = indicatorController,
+                errorMonitor = errorMonitor,
+                testSparkDisplayManager = testSparkDisplayManager,
+                testsExecutionResultManager = testsExecutionResultManager,
+            )
     }
 
     /**
