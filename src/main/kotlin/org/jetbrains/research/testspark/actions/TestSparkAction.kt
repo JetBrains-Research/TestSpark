@@ -1,13 +1,10 @@
 package org.jetbrains.research.testspark.actions
 
-import com.intellij.notification.NotificationGroupManager
-import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import org.jetbrains.research.testspark.actions.controllers.IndicatorController
-import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.monitor.DefaultErrorMonitor
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
@@ -40,28 +37,17 @@ class TestSparkAction : AnAction() {
      *           This parameter is required.
      */
     override fun actionPerformed(e: AnActionEvent) {
-        if (currentTestSparkActionWindow != null && currentTestSparkActionWindow!!.isVisible) {
-            NotificationGroupManager
-                .getInstance()
-                .getNotificationGroup("UserInterface")
-                .createNotification(
-                    PluginMessagesBundle.get("generationWindowWarningTitle"),
-                    PluginMessagesBundle.get("generationWindowWarningMessage"),
-                    NotificationType.WARNING,
-                ).notify(e.project)
-
-            currentTestSparkActionWindow!!.toFront()
-            currentTestSparkActionWindow!!.requestFocus()
-        } else {
-            currentTestSparkActionWindow =
-                TestSparkActionWindow(
-                    e = e,
-                    indicatorController = indicatorController,
-                    errorMonitor = errorMonitor,
-                    testSparkDisplayManager = TestSparkDisplayManager(),
-                    testsExecutionResultManager = TestsExecutionResultManager(),
-                )
+        if (currentTestSparkActionWindow != null) {
+            currentTestSparkActionWindow?.dispose()
         }
+        currentTestSparkActionWindow =
+            TestSparkActionWindow(
+                e = e,
+                indicatorController = indicatorController,
+                errorMonitor = errorMonitor,
+                testSparkDisplayManager = TestSparkDisplayManager(),
+                testsExecutionResultManager = TestsExecutionResultManager(),
+            )
     }
 
     /**
