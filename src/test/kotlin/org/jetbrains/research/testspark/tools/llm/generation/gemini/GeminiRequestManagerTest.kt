@@ -7,7 +7,7 @@ import org.jetbrains.research.testspark.core.data.TestGenerationData
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
-import org.jetbrains.research.testspark.core.test.TestSuiteParser
+import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.TestsAssembler
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
@@ -47,7 +47,7 @@ class GeminiRequestManagerTest {
             JUnitTestsAssembler(
                 indicator,
                 mock(TestGenerationData::class.java),
-                mock(TestSuiteParser::class.java),
+                mock(JUnitTestSuiteParser::class.java),
                 JUnitVersion.JUnit5,
             )
     }

@@ -57,7 +57,6 @@ import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.services.TestSparkPluginDisposable
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
-import org.jetbrains.research.testspark.testmanager.TestAnalyzerFactory
 import org.jetbrains.research.testspark.tools.GenerationTool
 import org.jetbrains.research.testspark.tools.TestProcessor
 import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
@@ -83,6 +82,7 @@ import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
 import kotlin.collections.HashMap
+import org.jetbrains.research.testspark.testmanager.template.TestAnalyzer
 
 class TestCasePanelBuilder(
     private val project: Project,
@@ -601,7 +601,7 @@ class TestCasePanelBuilder(
         WriteCommandAction.runWriteCommandAction(project) {
             uiContext.errorMonitor.clear()
             val code = testSuitePresenter.toString(testSuite)
-            testCase.testName = TestAnalyzerFactory.create(language).extractFirstTestMethodName(testCase.testName, code)
+            testCase.testName = TestAnalyzer.create(language).extractFirstTestMethodName(testCase.testName, code)
             testCase.testCode = code
 
             // update numbers
@@ -670,7 +670,7 @@ class TestCasePanelBuilder(
     ) {
         indicator.setText("Executing ${testCase.testName}")
 
-        val fileName = TestAnalyzerFactory.create(language).getFileNameFromTestCaseCode(testCase.testCode)
+        val fileName = TestAnalyzer.create(language).getFileNameFromTestCaseCode(testCase.testCode)
         // For LLM JUnit version is taken from settings, while for Kex and EvoSuite only JUnit4 is allowed
         val junitVersion = if (generationTool.toolId == "LLM") llmSettingsState.junitVersion else JUnitVersion.JUnit4
 
@@ -833,7 +833,7 @@ class TestCasePanelBuilder(
      */
     private fun updateTestCaseInformation() {
         testCase.testName =
-            TestAnalyzerFactory
+            TestAnalyzer
                 .create(language)
                 .extractFirstTestMethodName(testCase.testName, languageTextField.document.text)
         testCase.testCode = languageTextField.document.text

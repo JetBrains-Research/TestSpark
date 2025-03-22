@@ -1,8 +1,18 @@
 package org.jetbrains.research.testspark.core.test
 
 import org.jetbrains.research.testspark.core.test.data.TestLine
+import org.jetbrains.research.testspark.core.test.java.JavaTestBodyPrinter
+import org.jetbrains.research.testspark.core.test.kotlin.KotlinTestBodyPrinter
 
 interface TestBodyPrinter {
+    companion object {
+        fun create(language: SupportedLanguage): TestBodyPrinter =
+            when (language) {
+                SupportedLanguage.Kotlin -> KotlinTestBodyPrinter()
+                SupportedLanguage.Java -> JavaTestBodyPrinter()
+            }
+    }
+
     /**
      * Generates a test body as a string based on the provided parameters.
      *

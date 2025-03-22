@@ -34,12 +34,14 @@ import org.jetbrains.research.testspark.tools.TestsExecutionResultManager
 import org.jetbrains.research.testspark.tools.ToolUtils
 import org.jetbrains.research.testspark.tools.error.createNotification
 import org.jetbrains.research.testspark.tools.factories.TestCompilerFactory
-import org.jetbrains.research.testspark.tools.factories.TestsAssemblerFactory
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.nio.file.Path
+import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
+import org.jetbrains.research.testspark.core.test.TestBodyPrinter
+import org.jetbrains.research.testspark.core.test.TestsAssembler
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface
@@ -160,16 +162,16 @@ class LLMProcessManager(
 
         // Creation of JUnit specific parser, printer and assembler
         val jUnitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
-        val testBodyPrinter = TestBodyPrinterFactory.create(language)
+        val testBodyPrinter = TestBodyPrinter.create(language)
         val testSuiteParser =
-            TestSuiteParserFactory.createJUnitTestSuiteParser(
+            JUnitTestSuiteParser.create(
                 jUnitVersion,
                 language,
                 testBodyPrinter,
                 packageName,
             )
         val testsAssembler =
-            TestsAssemblerFactory.create(
+            JUnitTestsAssembler(
                 indicator,
                 generatedTestsData,
                 testSuiteParser,
