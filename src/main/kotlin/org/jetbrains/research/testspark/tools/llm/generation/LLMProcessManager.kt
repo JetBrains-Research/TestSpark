@@ -19,7 +19,9 @@ import org.jetbrains.research.testspark.core.generation.llm.getPackageFromTestSu
 import org.jetbrains.research.testspark.core.generation.llm.prompt.PromptSizeReductionStrategy
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.TestsPersistentStorage
 import org.jetbrains.research.testspark.core.test.TestsPresenter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
@@ -39,9 +41,6 @@ import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
 import org.jetbrains.research.testspark.tools.llm.test.JUnitTestSuitePresenter
 import org.jetbrains.research.testspark.tools.template.generation.ProcessManager
 import java.nio.file.Path
-import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
-import org.jetbrains.research.testspark.core.test.TestBodyPrinter
-import org.jetbrains.research.testspark.core.test.TestsAssembler
 
 /**
  * LLMProcessManager is a class that implements the ProcessManager interface

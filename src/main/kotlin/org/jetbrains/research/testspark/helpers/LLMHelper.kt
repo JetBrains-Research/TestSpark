@@ -15,12 +15,15 @@ import org.jetbrains.research.testspark.core.generation.llm.executeTestCaseModif
 import org.jetbrains.research.testspark.core.generation.llm.network.RequestManager
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.progress.CustomProgressIndicator
+import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
+import org.jetbrains.research.testspark.core.test.TestBodyPrinter
 import org.jetbrains.research.testspark.core.test.data.TestSuiteGeneratedByLLM
 import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.tools.llm.LlmSettingsArguments
 import org.jetbrains.research.testspark.tools.llm.error.LLMErrorManager
+import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 import org.jetbrains.research.testspark.tools.llm.generation.LLMPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.gemini.GeminiPlatform
 import org.jetbrains.research.testspark.tools.llm.generation.grazie.GrazieInfo
@@ -32,10 +35,6 @@ import javax.swing.DefaultComboBoxModel
 import javax.swing.JTextField
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
-import org.jetbrains.research.testspark.core.test.JUnitTestSuiteParser
-import org.jetbrains.research.testspark.core.test.TestBodyPrinter
-import org.jetbrains.research.testspark.core.test.TestsAssembler
-import org.jetbrains.research.testspark.tools.llm.generation.JUnitTestsAssembler
 
 // Implementation of the common LLM functions
 object LLMHelper {

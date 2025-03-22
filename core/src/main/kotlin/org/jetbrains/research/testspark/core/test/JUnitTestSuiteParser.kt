@@ -29,6 +29,7 @@ interface JUnitTestSuiteParser {
                     )
             }
     }
+
     /**
      * Extracts test cases from raw text and generates a test suite.
      *
