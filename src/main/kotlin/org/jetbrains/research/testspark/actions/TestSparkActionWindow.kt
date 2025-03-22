@@ -1,20 +1,16 @@
 package org.jetbrains.research.testspark.actions
 
-import com.intellij.notification.NotificationGroupManager
-import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.research.testspark.actions.controllers.IndicatorController
-import org.jetbrains.research.testspark.actions.controllers.VisibilityController
 import org.jetbrains.research.testspark.actions.evosuite.EvoSuitePanelBuilder
 import org.jetbrains.research.testspark.actions.llm.LLMSampleSelectorBuilder
 import org.jetbrains.research.testspark.actions.llm.LLMSetupPanelBuilder
 import org.jetbrains.research.testspark.actions.template.PanelBuilder
 import org.jetbrains.research.testspark.bundles.plugin.PluginLabelsBundle
-import org.jetbrains.research.testspark.bundles.plugin.PluginMessagesBundle
 import org.jetbrains.research.testspark.core.monitor.ErrorMonitor
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.display.TestSparkDisplayManager
@@ -35,8 +31,6 @@ import java.awt.CardLayout
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Toolkit
-import java.awt.event.WindowAdapter
-import java.awt.event.WindowEvent
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.ButtonGroup
@@ -54,7 +48,6 @@ import javax.swing.SwingConstants
  */
 class TestSparkActionWindow(
     private val e: AnActionEvent,
-    private val visibilityController: VisibilityController,
     private val indicatorController: IndicatorController,
     private val errorMonitor: ErrorMonitor,
     private val testSparkDisplayManager: TestSparkDisplayManager,
@@ -100,45 +93,33 @@ class TestSparkActionWindow(
     private val evoSuitePanelFactory = EvoSuitePanelBuilder(project)
 
     init {
-        if (!visibilityController.isVisible) {
-            visibilityController.isVisible = true
-            isVisible = true
+        isVisible = true
 
-            val panel = JPanel(cardLayout)
+        val panel = JPanel(cardLayout)
 
-            panel.add(getMainPanel(), "1")
-            panel.add(createCardPanel(evoSuitePanelFactory), "2")
-            panel.add(createCardPanel(llmSetupPanelFactory), "3")
+        panel.add(getMainPanel(), "1")
+        panel.add(createCardPanel(evoSuitePanelFactory), "2")
+        panel.add(createCardPanel(llmSetupPanelFactory), "3")
 
-            panel.add(
-                JBScrollPane(
-                    createCardPanel(llmSampleSelectorFactory),
-                    JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                    JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
-                ),
-                "4",
-            )
+        panel.add(
+            JBScrollPane(
+                createCardPanel(llmSampleSelectorFactory),
+                JBScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER,
+            ),
+            "4",
+        )
 
-            addListeners(panel)
+        addListeners(panel)
 
-            add(panel)
+        add(panel)
 
-            pack()
+        pack()
 
-            val dimension: Dimension = Toolkit.getDefaultToolkit().screenSize
-            val x = (dimension.width - size.width) / 2
-            val y = (dimension.height - size.height) / 2
-            setLocation(x, y)
-        } else {
-            NotificationGroupManager
-                .getInstance()
-                .getNotificationGroup("UserInterface")
-                .createNotification(
-                    PluginMessagesBundle.get("generationWindowWarningTitle"),
-                    PluginMessagesBundle.get("generationWindowWarningMessage"),
-                    NotificationType.WARNING,
-                ).notify(e.project)
-        }
+        val dimension: Dimension = Toolkit.getDefaultToolkit().screenSize
+        val x = (dimension.width - size.width) / 2
+        val y = (dimension.height - size.height) / 2
+        setLocation(x, y)
     }
 
     private fun createCardPanel(toolPanelBuilder: PanelBuilder): JPanel {
@@ -227,14 +208,6 @@ class TestSparkActionWindow(
      * @param panel the JPanel to add listeners to
      */
     private fun addListeners(panel: JPanel) {
-        addWindowListener(
-            object : WindowAdapter() {
-                override fun windowClosing(e: WindowEvent?) {
-                    visibilityController.isVisible = false
-                }
-            },
-        )
-
         llmButton.addActionListener {
             updateNextButton()
         }
@@ -375,8 +348,6 @@ class TestSparkActionWindow(
                 }
             }
         }
-
-        visibilityController.isVisible = false
         dispose()
     }
 
