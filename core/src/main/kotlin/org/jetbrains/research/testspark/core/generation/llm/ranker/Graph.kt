@@ -54,7 +54,7 @@ class KuzuGraph(
             "CREATE NODE TABLE Class(name STRING, fqName STRING, isUnitUnderTest BOOLEAN DEFAULT false, isStandardLibrary BOOLEAN DEFAULT false, PRIMARY KEY(fqName))",
         )
         conn.query(
-            "CREATE NODE TABLE Method(name STRING, fqName STRING, isUnitUnderTest BOOLEAN DEFAULT false, isStandardLibrary BOOLEAN DEFAULT false, PRIMARY KEY(fqName))",
+            "CREATE NODE TABLE Method(name STRING, fqName STRING, isUnitUnderTest BOOLEAN DEFAULT false, isStandardLibrary BOOLEAN DEFAULT false, isConstructor BOOLEAN DEFAULT false, PRIMARY KEY(fqName))",
         )
         // Create Edge tables
         conn.query("CREATE REL TABLE INHERITANCE(FROM Class TO Class)")
@@ -67,9 +67,12 @@ class KuzuGraph(
     }
 
     override fun addNode(node: GraphNode) {
-        conn.query(
-            "CREATE (:${node.type.label} {name: \"${node.name}\", fqName: \"${node.fqName}\", isUnitUnderTest: ${node.isUnitUnderTest}, isStandardLibrary: ${node.isStandardLibrary}})",
-        )
+        val isConstructor = node.type == GraphNodeType.METHOD && node.properties.getOrDefault("isConstructor", false) as Boolean
+        val isConstructorProperty = if (isConstructor) ", isConstructor:  true" else ""
+        val queryResult =
+            conn.query(
+                "CREATE (:${node.type.label} {name: \"${node.name}\", fqName: \"${node.fqName}\", isUnitUnderTest: ${node.isUnitUnderTest}, isStandardLibrary: ${node.isStandardLibrary} $isConstructorProperty})",
+            )
     }
 
     override fun addEdge(edge: GraphEdge) {
