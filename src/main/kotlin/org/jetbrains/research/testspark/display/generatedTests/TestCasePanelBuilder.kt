@@ -15,6 +15,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.util.Disposer
 import com.intellij.psi.JavaRecursiveElementVisitor
 import com.intellij.psi.PsiClassInitializer
 import com.intellij.psi.PsiDocumentManager
@@ -54,6 +55,7 @@ import org.jetbrains.research.testspark.display.utils.ModifiedLinesGetter
 import org.jetbrains.research.testspark.display.utils.ReportUpdater
 import org.jetbrains.research.testspark.helpers.LLMHelper
 import org.jetbrains.research.testspark.services.LLMSettingsService
+import org.jetbrains.research.testspark.services.TestSparkPluginDisposable
 import org.jetbrains.research.testspark.settings.llm.LLMSettingsState
 import org.jetbrains.research.testspark.testmanager.TestAnalyzerFactory
 import org.jetbrains.research.testspark.tools.GenerationTool
@@ -264,13 +266,16 @@ class TestCasePanelBuilder(
 
         addLanguageTextFieldListener(languageTextField)
 
+        val disposable = Disposer.newDisposable("MiddlePanelDisposable")
         PsiManager.getInstance(project).addPsiTreeChangeListener(
             object : PsiTreeChangeAdapter() {
                 override fun childAdded(event: PsiTreeChangeEvent) {
                     languageTextField.editor?.foldHelperCode()
                 }
             },
+            disposable,
         )
+        Disposer.register(TestSparkPluginDisposable.getInstance(), disposable)
         return panel
     }
 
