@@ -132,12 +132,15 @@ class JavaPsiExplorer(
         if (methodFqName.startsWith("java.")) return null
         if (methodVisited.contains(methodFqName)) return methodFqName
         methodVisited.add(methodFqName)
+        val properties = mutableMapOf<String, Any>()
+        properties["isConstructor"] = javaMethod.isConstructor
         graph.addNode(
             GraphNode(
                 javaMethod.name,
                 methodFqName,
                 type = GraphNodeType.METHOD,
                 isUnitUnderTest = isUnderTest,
+                properties = properties,
             ),
         )
         // TODO: rework: Need access to psi instance
