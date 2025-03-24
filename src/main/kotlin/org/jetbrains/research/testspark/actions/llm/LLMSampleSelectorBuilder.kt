@@ -130,7 +130,7 @@ class LLMSampleSelectorBuilder(
 
         addButton.addActionListener {
             // Use a future to collect test samples to not block the EDT
-            val collector = executeOnPooledThread { sampleSelector.collectTestSamples(project) }
+            val collector = executeOnPooledThread { sampleSelector.collectTestSamples(project, language) }
             collector.get()
 
             val testSamplePanelBuilder =

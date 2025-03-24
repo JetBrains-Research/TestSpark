@@ -141,12 +141,13 @@ class KotlinPsiClassWrapper(
         return interestingPsiClasses
     }
 
-    override fun getListOfTestingImports(): List<String> = listOf(
-        "org.junit.jupiter.api",
-        "org.hamcrest",
-        "org.assertj",
-        "com.google.common.truth"
-    )
+    override fun getListOfTestingImports(): List<String> =
+        listOf(
+            "org.junit.jupiter.api",
+            "org.hamcrest",
+            "org.assertj",
+            "com.google.common.truth",
+        )
 
     override fun isValidTestClass(): Boolean {
         // Check if the class type is not suitable for testing:
@@ -159,16 +160,18 @@ class KotlinPsiClassWrapper(
             return false
         }
 
-        val importsSet = fullText
-            .replace("\r\n", "\n")
-            .split("\n")
-            .asSequence()
-            .filter { it.contains("^import".toRegex()) }
-            .toMutableSet()
+        val importsSet =
+            fullText
+                .replace("\r\n", "\n")
+                .split("\n")
+                .asSequence()
+                .filter { it.contains("^import".toRegex()) }
+                .toMutableSet()
 
-        val containsImport = importsSet.any { import ->
-            getListOfTestingImports().any { it in import }
-        }
+        val containsImport =
+            importsSet.any { import ->
+                getListOfTestingImports().any { it in import }
+            }
 
         return !containsImport
     }

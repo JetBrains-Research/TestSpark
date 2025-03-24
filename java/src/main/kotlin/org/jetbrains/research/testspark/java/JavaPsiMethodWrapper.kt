@@ -89,7 +89,7 @@ class JavaPsiMethodWrapper(
 
     override fun isTestingMethod(): Boolean {
         // Check if the method is not annotated with @Test
-        return psiMethod.annotations.none { annotation ->
+        return psiMethod.annotations.any { annotation ->
             val qualifiedName = annotation.qualifiedName
             qualifiedName == "org.junit.Test" ||
                 qualifiedName == "org.junit.jupiter.api.Test" ||

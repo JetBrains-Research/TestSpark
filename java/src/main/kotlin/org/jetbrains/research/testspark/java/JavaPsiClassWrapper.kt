@@ -1,16 +1,13 @@
 package org.jetbrains.research.testspark.java
 
-import com.intellij.openapi.fileEditor.impl.waitForFullyCompleted
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiModifier
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
-import com.intellij.psi.util.InheritanceUtil
 import com.intellij.psi.util.PsiTypesUtil
 import org.jetbrains.research.testspark.core.data.ClassType
 import org.jetbrains.research.testspark.core.utils.javaImportPattern
@@ -95,12 +92,13 @@ class JavaPsiClassWrapper(
         return interestingPsiClasses.toMutableSet()
     }
 
-    override fun getListOfTestingImports(): List<String> = listOf(
-        "org.junit.jupiter.api",
-        "org.hamcrest",
-        "org.assertj",
-        "com.google.common.truth"
-    )
+    override fun getListOfTestingImports(): List<String> =
+        listOf(
+            "org.junit.jupiter.api",
+            "org.hamcrest",
+            "org.assertj",
+            "com.google.common.truth",
+        )
 
     override fun isValidTestClass(): Boolean {
         if (psiClass.isInterface ||
@@ -112,16 +110,18 @@ class JavaPsiClassWrapper(
             return false
         }
 
-        val importsSet = fullText
-            .replace("\r\n", "\n")
-            .split("\n")
-            .asSequence()
-            .filter { it.contains("^import".toRegex()) }
-            .toMutableSet()
+        val importsSet =
+            fullText
+                .replace("\r\n", "\n")
+                .split("\n")
+                .asSequence()
+                .filter { it.contains("^import".toRegex()) }
+                .toMutableSet()
 
-        val containsImport = importsSet.any { import ->
-            getListOfTestingImports().any { it in import }
-        }
+        val containsImport =
+            importsSet.any { import ->
+                getListOfTestingImports().any { it in import }
+            }
 
         return !containsImport
     }

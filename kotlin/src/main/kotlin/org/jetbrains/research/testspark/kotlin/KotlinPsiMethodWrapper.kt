@@ -83,7 +83,7 @@ class KotlinPsiMethodWrapper(
     }
 
     override fun isTestingMethod(): Boolean =
-        psiFunction.annotationEntries.none { annotation ->
+        psiFunction.annotationEntries.any { annotation ->
             val text = (annotation.text)
             text == "@org.junit.Test" ||
                 text == "@org.junit.jupiter.api.Test" ||
