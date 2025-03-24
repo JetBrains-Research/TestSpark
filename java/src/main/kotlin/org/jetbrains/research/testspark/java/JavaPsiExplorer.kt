@@ -2,6 +2,8 @@ package org.jetbrains.research.testspark.java
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiMethodCallExpression
+import com.intellij.psi.PsiStatement
 import com.intellij.psi.PsiType
 import com.intellij.psi.PsiTypeParameter
 import com.intellij.psi.impl.source.PsiClassReferenceType
@@ -184,6 +186,18 @@ class JavaPsiExplorer(
                 )
             }
         }
+        // body
+        psiMethod.body?.statements?.forEach { statement ->
+            exploreStatement(statement, depth = depth - 1).forEach { methodCalledFqName ->
+                graph.addEdge(
+                    GraphEdge(
+                        from = methodFqName,
+                        to = methodCalledFqName,
+                        type = GraphEdgeType.CALLS,
+                    ),
+                )
+            }
+        }
         return methodFqName
     }
 
@@ -200,6 +214,24 @@ class JavaPsiExplorer(
                         psiType.parameters.forEach { param ->
                             result.addAll(exploreType(param, depth - 1))
                         }
+                    }
+                }
+            }
+        }
+        return result
+    }
+
+    private fun exploreStatement(
+        psiStatement: PsiStatement,
+        depth: Int = 0,
+    ): List<String> {
+        val result = mutableListOf<String>()
+        PsiTreeUtil.findChildrenOfType<PsiMethodCallExpression>(psiStatement, PsiMethodCallExpression::class.java).forEach { itMethodCall ->
+            {
+                itMethodCall.resolveMethod()?.let {
+                    val psiMethod = JavaPsiMethodWrapper(it)
+                    exploreMethod(psiMethod, depth = depth - 1)?.let { methodFqName ->
+                        result.add(methodFqName)
                     }
                 }
             }
