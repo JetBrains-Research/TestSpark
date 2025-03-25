@@ -92,7 +92,7 @@ class TestsExecutionResultManager {
      * @param code The input string to be hashed.
      * @return The SHA-256 hash of the input string, represented as a hexadecimal string.
      */
-    fun getHash(code: String) =
+    private fun getHash(code: String) =
         Hashing
             .sha256()
             .hashString(code, StandardCharsets.UTF_8)
