@@ -2,8 +2,8 @@ package org.jetbrains.research.testspark.actions.llm
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class LLMSampleSelectorTest {
     private lateinit var sampleSelector: LLMSampleSelector
@@ -45,7 +45,8 @@ class LLMSampleSelectorTest {
         sampleSelector.appendTestSampleCode(0, testCode1)
         sampleSelector.appendTestSampleCode(1, testCode2)
 
-        val expected = """
+        val expected =
+            """
             Test sample number 1
             ```
             $testCode1
