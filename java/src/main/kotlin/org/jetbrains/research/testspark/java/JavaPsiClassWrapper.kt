@@ -110,7 +110,8 @@ class JavaPsiClassWrapper(
                 ?.allImportStatements
                 ?.map {
                     (it as PsiImportStatement).qualifiedName
-                }?.filterNotNull()?.toSet() ?: emptySet()
+                }?.filterNotNull()
+                ?.toSet() ?: emptySet()
 
         val containsImport =
             importsSet.any { import ->
