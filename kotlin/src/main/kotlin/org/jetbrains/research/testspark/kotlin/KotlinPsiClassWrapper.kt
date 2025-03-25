@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.idea.testIntegration.framework.KotlinPsiBasedTestFra
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.allConstructors
 import org.jetbrains.research.testspark.core.data.ClassType
@@ -141,14 +142,6 @@ class KotlinPsiClassWrapper(
         return interestingPsiClasses
     }
 
-    override fun getListOfTestingImports(): List<String> =
-        listOf(
-            "org.junit.jupiter.api",
-            "org.hamcrest",
-            "org.assertj",
-            "com.google.common.truth",
-        )
-
     override fun isValidTestClass(): Boolean {
         // Check if the class type is not suitable for testing:
         if (psiClass.isInterfaceClass() ||
@@ -160,13 +153,7 @@ class KotlinPsiClassWrapper(
             return false
         }
 
-        val importsSet =
-            fullText
-                .replace("\r\n", "\n")
-                .split("\n")
-                .asSequence()
-                .filter { it.contains("^import".toRegex()) }
-                .toMutableSet()
+        val importsSet = (containingFile as KtFile).importDirectives.mapNotNull { it.text }.toSet()
 
         val containsImport =
             importsSet.any { import ->

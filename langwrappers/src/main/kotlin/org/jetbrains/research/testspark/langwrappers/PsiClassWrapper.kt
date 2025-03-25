@@ -56,7 +56,13 @@ interface PsiClassWrapper {
      *
      * @return A list of strings representing the testing-related import statements.
      */
-    fun getListOfTestingImports(): List<String>
+    fun getListOfTestingImports(): List<String> =
+        listOf(
+            "org.junit.jupiter.api",
+            "org.hamcrest",
+            "org.assertj",
+            "com.google.common.truth",
+        )
 
     /**
      * Determines if the class is testable based on specific criteria.

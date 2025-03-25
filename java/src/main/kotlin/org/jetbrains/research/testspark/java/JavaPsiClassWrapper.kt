@@ -5,6 +5,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiImportStatement
+import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiModifier
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
@@ -92,14 +94,6 @@ class JavaPsiClassWrapper(
         return interestingPsiClasses.toMutableSet()
     }
 
-    override fun getListOfTestingImports(): List<String> =
-        listOf(
-            "org.junit.jupiter.api",
-            "org.hamcrest",
-            "org.assertj",
-            "com.google.common.truth",
-        )
-
     override fun isValidTestClass(): Boolean {
         if (psiClass.isInterface ||
             psiClass.isEnum ||
@@ -111,12 +105,12 @@ class JavaPsiClassWrapper(
         }
 
         val importsSet =
-            fullText
-                .replace("\r\n", "\n")
-                .split("\n")
-                .asSequence()
-                .filter { it.contains("^import".toRegex()) }
-                .toMutableSet()
+            (containingFile as PsiJavaFile)
+                .importList
+                ?.allImportStatements
+                ?.map {
+                    (it as PsiImportStatement).qualifiedName
+                }?.filterNotNull()?.toSet() ?: emptySet()
 
         val containsImport =
             importsSet.any { import ->
