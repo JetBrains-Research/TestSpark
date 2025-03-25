@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.core.generation.llm.ranker
 
 import com.kuzudb.Connection
 import com.kuzudb.Database
+import com.kuzudb.Value
 
 enum class GraphNodeType(
     val label: String,
@@ -67,73 +68,127 @@ class KuzuGraph(
     }
 
     override fun addNode(node: GraphNode) {
-        val isConstructor = node.type == GraphNodeType.METHOD && node.properties.getOrDefault("isConstructor", false) as Boolean
-        val isConstructorProperty = if (isConstructor) ", isConstructor:  true" else ""
-        val queryResult =
-            conn.query(
-                "CREATE (:${node.type.label} {name: \"${node.name}\", fqName: \"${node.fqName}\", isUnitUnderTest: ${node.isUnitUnderTest}, isStandardLibrary: ${node.isStandardLibrary} $isConstructorProperty})",
+        val statement =
+            conn.prepare(
+                "CREATE (:${node.type.label} {name: \$name, fqName: \$fqName, isUnitUnderTest: \$isUnitUnderTest, isStandardLibrary: \$isStandardLibrary})",
             )
+        if (!statement.isSuccess) println(statement.errorMessage)
+        val queryResult =
+            conn.execute(
+                statement,
+                mapOf(
+                    "name" to Value(node.name),
+                    "fqName" to Value(node.fqName),
+                    "isUnitUnderTest" to Value(node.isUnitUnderTest),
+                    "isStandardLibrary" to Value(node.isStandardLibrary),
+                ),
+            )
+        if (!queryResult.isSuccess) print(queryResult.errorMessage)
     }
 
     override fun addEdge(edge: GraphEdge) {
-        when (edge.type) {
-            GraphEdgeType.INHERITANCE ->
-                conn.query(
-                    """
+        val result =
+            when (edge.type) {
+                GraphEdgeType.INHERITANCE -> {
+                    val statement =
+                        conn.prepare(
+                            """
                        |MATCH (n1:Class), (n2:Class)
-                       |WHERE n1.fqName = '${edge.from}' AND n2.fqName = '${edge.to}'
+                       |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
                        |MERGE (n1)-[:${edge.type}]->(n2)
-                    """.trimMargin(),
-                )
-            GraphEdgeType.CALLS ->
-                conn.query(
-                    """
+                            """.trimMargin(),
+                        )
+                    conn.execute(
+                        statement,
+                        mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
+                    )
+                }
+                GraphEdgeType.CALLS -> {
+                    val statement =
+                        conn.prepare(
+                            """
                        |MATCH (n1:Method), (n2:Method) 
-                       |WHERE n1.fqName = '${edge.from}' AND n2.fqName = '${edge.to}' 
+                       |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
                        |MERGE (n1)-[:${edge.type}]->(n2)
-                    """.trimMargin(),
-                )
-            GraphEdgeType.HAS_METHOD ->
-                conn.query(
-                    """
+                            """.trimMargin(),
+                        )
+                    conn.execute(
+                        statement,
+                        mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
+                    )
+                }
+                GraphEdgeType.HAS_METHOD -> {
+                    val statement =
+                        conn.prepare(
+                            """
                        |MATCH (n1:Class), (n2:Method) 
-                       |WHERE n1.fqName = '${edge.from}' AND n2.fqName = '${edge.to}'
+                       |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
                        |MERGE (n1)-[:${edge.type}]->(n2)
-                    """.trimMargin(),
-                )
-            GraphEdgeType.HAS_TYPE_PARAMETER ->
-                conn.query(
-                    """
+                            """.trimMargin(),
+                        )
+                    conn.execute(
+                        statement,
+                        mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
+                    )
+                }
+                GraphEdgeType.HAS_TYPE_PARAMETER -> {
+                    val statement =
+                        conn.prepare(
+                            """
                        |MATCH (n1:Method), (n2:Class) 
-                       |WHERE n1.fqName = '${edge.from}' AND n2.fqName = '${edge.to}'
+                       |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
                        |MERGE (n1)-[:${edge.type}]->(n2)
-                    """.trimMargin(),
-                )
-            GraphEdgeType.HAS_RETURN_TYPE ->
-                conn.query(
-                    """
+                            """.trimMargin(),
+                        )
+                    conn.execute(
+                        statement,
+                        mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
+                    )
+                }
+                GraphEdgeType.HAS_RETURN_TYPE -> {
+                    val statement =
+                        conn.prepare(
+                            """
                        |MATCH (n1:Method), (n2:Class)
-                       |WHERE n1.fqName = '${edge.from}' AND n2.fqName = '${edge.to}'
+                       |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
                        |MERGE (n1)-[:${edge.type}]->(n2)
-                    """.trimMargin(),
-                )
-            GraphEdgeType.HAS_TYPE_PROPERTY ->
-                conn.query(
-                    """
+                            """.trimMargin(),
+                        )
+                    conn.execute(
+                        statement,
+                        mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
+                    )
+                }
+                GraphEdgeType.HAS_TYPE_PROPERTY -> {
+                    val statement =
+                        conn.prepare(
+                            """
                        |MATCH (n1:Class), (n2:Class) 
-                       |WHERE n1.fqName = '${edge.from}' AND n2.fqName = '${edge.to}'
+                       |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
                        |MERGE (n1)-[:${edge.type}]->(n2)
-                    """.trimMargin(),
-                )
-            GraphEdgeType.THROWS ->
-                conn.query(
-                    """
-                    |MATCH (n1:Method), (n2:Class)
-                    |WHERE n1.fqName = '${edge.from}' AND n2.fqName = '${edge.to}'
-                    |MERGE (n1)-[:${edge.type}]->(n2)
-                    """.trimIndent(),
-                )
-        }
+                            """.trimMargin(),
+                        )
+                    conn.execute(
+                        statement,
+                        mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
+                    )
+                }
+                GraphEdgeType.THROWS -> {
+                    val statement =
+                        conn.prepare(
+                            """
+                            |MATCH (n1:Method), (n2:Class)
+                            |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
+                            |MERGE (n1)-[:${edge.type}]->(n2)
+                            """.trimIndent(),
+                        )
+                    conn.execute(
+                        statement,
+                        mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
+                    )
+                }
+            }
+        if (!result.isSuccess) print(result.errorMessage)
     }
 
     fun close() {
