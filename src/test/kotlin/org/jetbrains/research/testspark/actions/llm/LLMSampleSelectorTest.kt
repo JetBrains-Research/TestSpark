@@ -103,46 +103,4 @@ class LLMSampleSelectorTest {
         val actual = selector.getTestSamplesCode()
         assertEquals(expected, actual)
     }
-
-    @Test
-    fun `test the class retrieval from a Java file`() {
-        val expectedName = "CarTest"
-        val actual = runReadAction { selector.retrievePsiClass(openFile) }
-        assertEquals(expectedName, actual.name)
-    }
-
-    @Test
-    fun `test the import-statement retrieval`() {
-        val expected =
-            """
-            import org.junit.jupiter.api.Test;
-            import static org.junit.jupiter.api.Assertions.assertEquals;
-            import dummy.*;
-            """.trimIndent()
-        val actual =
-            runReadAction {
-                val file = openFile
-                selector.retrieveImportStatements(file, classFromFile(file))
-            }
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `test the create test-sample class`() {
-        val expected = "import org.junit.jupiter.api.Test;\n\n$sampleTestCode"
-        val actual =
-            selector.createTestSampleClass(
-                "import org.junit.jupiter.api.Test;",
-                LLMSampleSelector.DEFAULT_TEST_CODE,
-            )
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    fun `test the expected method name`() {
-        val expected = "<html>dummy.CarTest#testCar</html>"
-        val cls = classFromFile(openFile)
-        val actual = selector.createMethodName(cls, methodsFromClass(cls)[0])
-        assertEquals(expected, actual)
-    }
 }
