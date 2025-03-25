@@ -1,5 +1,8 @@
 package org.jetbrains.research.testspark.tools
 
+import com.google.common.hash.Hashing
+import java.nio.charset.StandardCharsets
+
 class TestsExecutionResultManager {
     // test case name --> test error
     private val currentTestErrors: MutableMap<Int, String> = mutableMapOf()
@@ -21,7 +24,7 @@ class TestsExecutionResultManager {
     ) {
         val htmlError = "<html>${testError.replace("===", "").replace("\t", "<br/>").trimEnd()}</html>"
         currentTestErrors[testId] = htmlError
-        executionResult[testId]!![testCaseCode.hashCode().toString()] = htmlError
+        executionResult[testId]!![getHash(testCaseCode)] = htmlError
     }
 
     /**
@@ -35,7 +38,7 @@ class TestsExecutionResultManager {
         testCaseCode: String,
     ) {
         if (currentTestErrors.contains(testId)) currentTestErrors.remove(testId)
-        executionResult[testId]!![testCaseCode.hashCode().toString()] = ""
+        executionResult[testId]!![getHash(testCaseCode)] = ""
     }
 
     /**
@@ -81,7 +84,19 @@ class TestsExecutionResultManager {
     fun getError(
         testCaseId: Int,
         testCaseCode: String,
-    ) = executionResult[testCaseId]!![testCaseCode.hashCode().toString()]
+    ) = executionResult[testCaseId]!![getHash(testCaseCode)]
+
+    /**
+     * Generates a SHA-256 hash for the given input string.
+     *
+     * @param code The input string to be hashed.
+     * @return The SHA-256 hash of the input string, represented as a hexadecimal string.
+     */
+    fun getHash(code: String) =
+        Hashing
+            .sha256()
+            .hashString(code, StandardCharsets.UTF_8)
+            .toString()
 
     /**
      * Initializes the execution result for a list of test case names.
