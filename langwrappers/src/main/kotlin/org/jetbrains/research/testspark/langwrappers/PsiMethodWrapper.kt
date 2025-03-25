@@ -38,4 +38,11 @@ interface PsiMethodWrapper {
      * @return A mutable set of `PsiClassWrapper` instances representing non-standard classes.
      */
     fun getInterestingPsiClassesWithQualifiedNames(): MutableSet<PsiClassWrapper>
+
+    /**
+     * Determines if the current method is a testing method.
+     *
+     * @return `true` if the method is identified as a testing method, `false` otherwise.
+     */
+    fun isTestingMethod(): Boolean
 }
