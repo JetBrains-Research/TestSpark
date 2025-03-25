@@ -21,7 +21,7 @@ class TestsExecutionResultManager {
     ) {
         val htmlError = "<html>${testError.replace("===", "").replace("\t", "<br/>").trimEnd()}</html>"
         currentTestErrors[testId] = htmlError
-        executionResult[testId]!![getTrimmedCode(testCaseCode)] = htmlError
+        executionResult[testId]!![testCaseCode.hashCode().toString()] = htmlError
     }
 
     /**
@@ -35,7 +35,7 @@ class TestsExecutionResultManager {
         testCaseCode: String,
     ) {
         if (currentTestErrors.contains(testId)) currentTestErrors.remove(testId)
-        executionResult[testId]!![getTrimmedCode(testCaseCode)] = ""
+        executionResult[testId]!![testCaseCode.hashCode().toString()] = ""
     }
 
     /**
@@ -81,15 +81,7 @@ class TestsExecutionResultManager {
     fun getError(
         testCaseId: Int,
         testCaseCode: String,
-    ) = executionResult[testCaseId]!![getTrimmedCode(testCaseCode)]
-
-    /**
-     * Returns the trimmed code by removing all whitespace characters from the given code.
-     *
-     * @param code The code to be trimmed.
-     * @return The trimmed code.
-     */
-    private fun getTrimmedCode(code: String): String = code.filter { !it.isWhitespace() }
+    ) = executionResult[testCaseId]!![testCaseCode.hashCode().toString()]
 
     /**
      * Initializes the execution result for a list of test case names.
