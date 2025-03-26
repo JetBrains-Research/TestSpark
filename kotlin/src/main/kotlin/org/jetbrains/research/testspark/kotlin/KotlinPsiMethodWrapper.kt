@@ -71,6 +71,9 @@ class KotlinPsiMethodWrapper(
                 containingInterface == true // function is defined within an interface
         }
 
+    override val fqName: String
+        get() = TODO("Not yet implemented")
+
     override fun containsLine(lineNumber: Int): Boolean {
         val psiFile = psiFunction.containingFile
         val document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false
