@@ -5,7 +5,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiAnonymousClass
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiImportStatement
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiModifier
 import com.intellij.psi.search.GlobalSearchScope
@@ -108,9 +107,7 @@ class JavaPsiClassWrapper(
             (containingFile as PsiJavaFile)
                 .importList
                 ?.allImportStatements
-                ?.map {
-                    (it as PsiImportStatement).qualifiedName
-                }?.filterNotNull()
+                ?.mapNotNull { it.text }
                 ?.toSet() ?: emptySet()
 
         val containsImport =
