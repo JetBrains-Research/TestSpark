@@ -128,9 +128,7 @@ class JavaPsiExplorer(
         isUnderTest: Boolean = false,
         depth: Int = 0,
     ): String? {
-        val methodFqName =
-            (javaMethod.containingClass?.qualifiedName ?: javaMethod.containingFile.name) + "#" +
-                javaMethod.name + "#" + javaMethod.parameterList.parameters.joinToString(",") { it.type.canonicalText }
+        val methodFqName = javaMethod.fqName
         if (methodFqName.startsWith("java.")) return null
         if (methodVisited.contains(methodFqName)) return methodFqName
         methodVisited.add(methodFqName)
