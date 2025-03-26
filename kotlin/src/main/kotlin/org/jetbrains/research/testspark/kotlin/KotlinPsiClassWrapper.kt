@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.idea.testIntegration.framework.KotlinPsiBasedTestFra
 import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.allConstructors
 import org.jetbrains.research.testspark.core.data.ClassType
@@ -139,5 +140,26 @@ class KotlinPsiClassWrapper(
 
         interestingPsiClasses.add(this)
         return interestingPsiClasses
+    }
+
+    override fun isValidSubjectUnderTest(): Boolean {
+        // Check if the class type is not suitable for testing:
+        if (psiClass.isInterfaceClass() ||
+            psiClass is KtObjectDeclaration ||
+            psiClass.hasModifier(KtTokens.ABSTRACT_KEYWORD) ||
+            psiClass.isData() ||
+            psiClass.annotationEntries.any { it.text == "@JvmInline" }
+        ) {
+            return false
+        }
+
+        val importsSet = (containingFile as KtFile).importDirectives.mapNotNull { it.text }.toSet()
+
+        val containsImport =
+            importsSet.any { import ->
+                getListOfTestingImports().any { it in import }
+            }
+
+        return !containsImport
     }
 }

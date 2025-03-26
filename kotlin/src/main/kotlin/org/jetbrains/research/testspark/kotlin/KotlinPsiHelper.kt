@@ -39,8 +39,10 @@ class KotlinPsiHelper(
 
         if (cls != null && cls.name != null && cls.fqName != null) {
             val kotlinClassWrapper = KotlinPsiClassWrapper(cls)
-            log.info("Surrounding class for caret in $caretOffset is ${kotlinClassWrapper.qualifiedName}")
-            return kotlinClassWrapper
+            if (kotlinClassWrapper.isValidSubjectUnderTest()) {
+                log.info("Surrounding class for caret in $caretOffset is ${kotlinClassWrapper.qualifiedName}")
+                return kotlinClassWrapper
+            }
         }
 
         log.info("No surrounding class for caret in $caretOffset")
@@ -53,8 +55,10 @@ class KotlinPsiHelper(
 
         if (method != null && method.name != null) {
             val wrappedMethod = KotlinPsiMethodWrapper(method)
-            log.info("Surrounding method for caret at $caretOffset is ${wrappedMethod.methodDescriptor}")
-            return wrappedMethod
+            if (wrappedMethod.isTestingMethod()) {
+                log.info("Surrounding method for caret at $caretOffset is ${wrappedMethod.methodDescriptor}")
+                return wrappedMethod
+            }
         }
 
         log.info("No surrounding method for caret at $caretOffset")

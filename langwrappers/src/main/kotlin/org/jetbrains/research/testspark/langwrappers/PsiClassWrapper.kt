@@ -50,4 +50,24 @@ interface PsiClassWrapper {
      * @return A mutable set of interesting PSI classes.
      */
     fun getInterestingPsiClassesWithQualifiedNames(psiMethod: PsiMethodWrapper): MutableSet<PsiClassWrapper>
+
+    /**
+     * Retrieves a list of import statements required for testing purposes.
+     *
+     * @return A list of strings representing the testing-related import statements.
+     */
+    fun getListOfTestingImports(): List<String> =
+        listOf(
+            "org.junit.jupiter.api",
+            "org.hamcrest",
+            "org.assertj",
+            "com.google.common.truth",
+        )
+
+    /**
+     * Determines if the class is testable based on specific criteria.
+     *
+     * @return true if the class is testable, false otherwise.
+     */
+    fun isValidSubjectUnderTest(): Boolean
 }

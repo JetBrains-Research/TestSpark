@@ -40,7 +40,7 @@ class JavaPsiHelper(
         for (cls in classElements) {
             if (cls.containsOffset(caretOffset)) {
                 val javaClassWrapper = JavaPsiClassWrapper(cls)
-                if (javaClassWrapper.isTestableClass()) {
+                if (javaClassWrapper.isValidSubjectUnderTest()) {
                     surroundingClass = javaClassWrapper
                 }
             }
@@ -56,7 +56,7 @@ class JavaPsiHelper(
                 val surroundingClass =
                     PsiTreeUtil.getParentOfType(method, PsiClass::class.java) ?: continue
                 val surroundingClassWrapper = JavaPsiClassWrapper(surroundingClass)
-                if (surroundingClassWrapper.isTestableClass()) {
+                if (surroundingClassWrapper.isValidSubjectUnderTest()) {
                     val javaMethod = JavaPsiMethodWrapper(method)
                     log.info("Surrounding method for caret in $caretOffset is ${javaMethod.methodDescriptor}")
                     return javaMethod
