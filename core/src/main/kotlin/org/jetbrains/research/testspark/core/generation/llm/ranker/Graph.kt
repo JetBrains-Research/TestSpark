@@ -37,10 +37,10 @@ data class GraphEdge(
     val properties: Map<String, Any> = emptyMap(),
 )
 
-interface Graph {
-    fun addNode(node: GraphNode)
+abstract class Graph {
+    abstract fun addNode(node: GraphNode)
 
-    fun addEdge(edge: GraphEdge)
+    abstract fun addEdge(edge: GraphEdge)
 
     fun graphEdgeTypeWeight(edgeType: GraphEdgeType): Double =
         when (edgeType) {
@@ -137,14 +137,14 @@ interface Graph {
         return results
     }
 
-    fun getAllNodes(): List<GraphNode>
+    abstract fun getAllNodes(): List<GraphNode>
 
-    fun getAllEdges(): List<GraphEdge>
+    abstract fun getAllEdges(): List<GraphEdge>
 }
 
 class KuzuGraph(
     dbPath: String = ":memory:",
-) : Graph {
+) : Graph() {
     private val db = Database(dbPath)
     private val conn = Connection(db)
 
