@@ -142,7 +142,7 @@ class KotlinPsiClassWrapper(
         return interestingPsiClasses
     }
 
-    override fun isValidTestClass(): Boolean {
+    override fun isValidSubjectUnderTest(): Boolean {
         // Check if the class type is not suitable for testing:
         if (psiClass.isInterfaceClass() ||
             psiClass is KtObjectDeclaration ||

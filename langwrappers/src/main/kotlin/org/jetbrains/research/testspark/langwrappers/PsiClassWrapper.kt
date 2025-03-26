@@ -69,5 +69,5 @@ interface PsiClassWrapper {
      *
      * @return true if the class is testable, false otherwise.
      */
-    fun isValidTestClass(): Boolean
+    fun isValidSubjectUnderTest(): Boolean
 }

@@ -93,7 +93,7 @@ class JavaPsiClassWrapper(
         return interestingPsiClasses.toMutableSet()
     }
 
-    override fun isValidTestClass(): Boolean {
+    override fun isValidSubjectUnderTest(): Boolean {
         if (psiClass.isInterface ||
             psiClass.isEnum ||
             psiClass.hasModifierProperty(PsiModifier.ABSTRACT) ||
