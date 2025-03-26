@@ -143,6 +143,8 @@ abstract class Graph {
     abstract fun getAllNodes(): List<GraphNode>
 
     abstract fun getAllEdges(): List<GraphEdge>
+
+    abstract fun saveScores(scores: Map<String, Double>)
 }
 
 class KuzuGraph(
@@ -154,10 +156,10 @@ class KuzuGraph(
     init {
         // Create Node tables
         conn.query(
-            "CREATE NODE TABLE Class(name STRING, fqName STRING, isUnitUnderTest BOOLEAN DEFAULT false, isStandardLibrary BOOLEAN DEFAULT false, PRIMARY KEY(fqName))",
+            "CREATE NODE TABLE Class(name STRING, fqName STRING, isUnitUnderTest BOOLEAN DEFAULT false, isStandardLibrary BOOLEAN DEFAULT false, score DOUBLE DEFAULT 0.0, PRIMARY KEY(fqName))",
         )
         conn.query(
-            "CREATE NODE TABLE Method(name STRING, fqName STRING, isUnitUnderTest BOOLEAN DEFAULT false, isStandardLibrary BOOLEAN DEFAULT false, PRIMARY KEY(fqName))",
+            "CREATE NODE TABLE Method(name STRING, fqName STRING, isUnitUnderTest BOOLEAN DEFAULT false, isStandardLibrary BOOLEAN DEFAULT false, score DOUBLE DEFAULT 0.0, PRIMARY KEY(fqName))",
         )
         // Create Edge tables
         conn.query("CREATE REL TABLE INHERITANCE(FROM Class TO Class)")
@@ -326,6 +328,23 @@ class KuzuGraph(
             )
         }
         return edges
+    }
+
+    override fun saveScores(scores: Map<String, Double>) {
+        val statement = conn.prepare("MATCH (n {fqName: \$fqName}) SET n.score = \$score")
+        for ((fqName, score) in scores) {
+            val queryResult =
+                conn.execute(
+                    statement,
+                    mapOf(
+                        "fqName" to Value(fqName),
+                        "score" to Value(score),
+                    ),
+                )
+            if (!queryResult.isSuccess) {
+                log.warn { "Error saving score: " + queryResult.errorMessage }
+            }
+        }
     }
 
     fun close() {
