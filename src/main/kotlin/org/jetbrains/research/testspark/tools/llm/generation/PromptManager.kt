@@ -129,10 +129,21 @@ class PromptManager(
                                     .toList()
                             val graph = KuzuGraph()
                             psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, psiMethod)
-                            graph.close()
+                            val scores =
+                                graph.score(
+                                    method.qualifiedName,
+                                    interestingClassesFromMethod.flatMap {
+                                        listOf(it.qualifiedName) +
+                                            it.allMethods.map { m ->
+                                                m.qualifiedName
+                                            }
+                                    },
+                                )
+                            graph.close() // ensure all graph data are written to disk when db is not in memory
+                            val interestingClassesFromMethodRanked = rankInterestingClasses(interestingClassesFromMethod, scores)
                             promptGenerator.generatePromptForMethod(
                                 method,
-                                interestingClassesFromMethod,
+                                interestingClassesFromMethodRanked,
                                 testSamplesCode,
                                 psiHelper.getPackageName(),
                             )
@@ -288,5 +299,38 @@ class PromptManager(
         interestingPsiClasses.remove(cut)
 
         return polymorphismRelations.toMutableMap()
+    }
+
+    private fun rankInterestingClasses(
+        interestingClasses: List<ClassRepresentation>,
+        scores: List<Pair<String, Double>>,
+    ): List<ClassRepresentation> {
+        val classScores = mutableMapOf<ClassRepresentation, Double>()
+        val classMethodsScores = mutableMapOf<ClassRepresentation, MutableMap<MethodRepresentation, Double>>()
+        interestingClasses.forEach { itClass ->
+            classScores[itClass] = scores.firstOrNull { s -> s.first == itClass.qualifiedName }?.second ?: 0.0
+            classMethodsScores[itClass] = mutableMapOf<MethodRepresentation, Double>()
+            itClass.allMethods.forEach { itMethod ->
+                {
+                    classMethodsScores[itClass]!![itMethod] = scores.firstOrNull { s -> s.first == itMethod.qualifiedName }?.second ?: 0.0
+                }
+            }
+        }
+        return classScores
+            .toList()
+            .sortedByDescending { it.second }
+            .map { it.first }
+            .map { itClass ->
+                ClassRepresentation(
+                    itClass.qualifiedName,
+                    itClass.fullText,
+                    itClass.constructorSignatures,
+                    itClass.allMethods
+                        .sortedByDescending { itMethods ->
+                            classMethodsScores[itClass]!![itMethods] ?: 0.0
+                        }.toList(),
+                    itClass.classType,
+                )
+            }
     }
 }
