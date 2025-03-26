@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.core.generation.llm.ranker
 import com.kuzudb.Connection
 import com.kuzudb.Database
 import com.kuzudb.Value
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 enum class GraphNodeType(
     val label: String,
@@ -38,6 +39,8 @@ data class GraphEdge(
 )
 
 abstract class Graph {
+    protected val log = KotlinLogging.logger { this::class.java }
+
     abstract fun addNode(node: GraphNode)
 
     abstract fun addEdge(edge: GraphEdge)
@@ -116,7 +119,7 @@ abstract class Graph {
             scores.putAll(newScores)
             iteration++
         } while (!hasConverged && iteration < maxIterations)
-        println("PageRank iteration: $iteration")
+        log.trace { "PageRank iteration: $iteration" }
         // Step 4: Convert result to fqName -> score map
         return scores.mapKeys { (node, _) -> node.fqName }
     }
@@ -171,7 +174,6 @@ class KuzuGraph(
             conn.prepare(
                 "CREATE (:${node.type.label} {name: \$name, fqName: \$fqName, isUnitUnderTest: \$isUnitUnderTest, isStandardLibrary: \$isStandardLibrary})",
             )
-        if (!statement.isSuccess) println(statement.errorMessage)
         val queryResult =
             conn.execute(
                 statement,
@@ -182,11 +184,11 @@ class KuzuGraph(
                     "isStandardLibrary" to Value(node.isStandardLibrary),
                 ),
             )
-        if (!queryResult.isSuccess) println(queryResult.errorMessage)
+        if (!queryResult.isSuccess) log.warn { "Error inserting node: " + queryResult.errorMessage }
     }
 
     override fun addEdge(edge: GraphEdge) {
-        val result =
+        val queryResult =
             when (edge.type) {
                 GraphEdgeType.INHERITANCE -> {
                     val statement =
@@ -287,7 +289,9 @@ class KuzuGraph(
                     )
                 }
             }
-        if (!result.isSuccess) println(result.errorMessage)
+        if (!queryResult.isSuccess) {
+            log.warn { "Error inserting edge: " + queryResult.errorMessage }
+        }
     }
 
     override fun getAllNodes(): List<GraphNode> {
