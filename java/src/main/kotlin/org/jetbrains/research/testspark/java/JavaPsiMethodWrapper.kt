@@ -62,6 +62,10 @@ class JavaPsiMethodWrapper(
 
     val isDefaultConstructor: Boolean get() = psiMethod.isConstructor && (psiMethod.body?.isEmpty ?: false)
 
+    override val fqName: String get() =
+        (containingClass?.qualifiedName ?: containingFile.name) + "#" +
+            name + "#" + parameterList.parameters.joinToString(",") { it.type.canonicalText }
+
     override fun containsLine(lineNumber: Int): Boolean {
         val psiFile = psiMethod.containingFile ?: return false
         val document = PsiDocumentManager.getInstance(psiFile.project).getDocument(psiFile) ?: return false

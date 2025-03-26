@@ -22,6 +22,7 @@ interface PsiMethodWrapper {
     val text: String?
     val containingClass: PsiClassWrapper?
     val containingFile: PsiFile?
+    val fqName: String
 
     /**
      * Checks if the given line number is within the range of the specified PsiMethod.
