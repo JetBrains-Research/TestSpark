@@ -224,8 +224,9 @@ class JavaPsiExplorer(
         depth: Int = 0,
     ): List<String> {
         val result = mutableListOf<String>()
-        PsiTreeUtil.findChildrenOfType<PsiMethodCallExpression>(psiStatement, PsiMethodCallExpression::class.java).forEach { itMethodCall ->
-            {
+        PsiTreeUtil
+            .findChildrenOfType<PsiMethodCallExpression>(psiStatement, PsiMethodCallExpression::class.java)
+            .forEach { itMethodCall ->
                 itMethodCall.resolveMethod()?.let {
                     val psiMethod = JavaPsiMethodWrapper(it)
                     exploreMethod(psiMethod, depth = depth - 1)?.let { methodFqName ->
@@ -233,7 +234,6 @@ class JavaPsiExplorer(
                     }
                 }
             }
-        }
         return result
     }
 }
