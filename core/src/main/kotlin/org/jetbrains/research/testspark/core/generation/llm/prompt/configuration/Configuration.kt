@@ -62,6 +62,7 @@ data class MethodRepresentation(
     val name: String,
     val text: String,
     val containingClassQualifiedName: String,
+    val qualifiedName: String,
 )
 
 /**

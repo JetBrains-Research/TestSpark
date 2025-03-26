@@ -194,6 +194,7 @@ class PromptManager(
             name = psiMethod.name,
             text = psiMethod.text!!,
             containingClassQualifiedName = psiMethod.containingClass?.qualifiedName ?: "",
+            qualifiedName = psiMethod.fqName,
         )
     }
 
