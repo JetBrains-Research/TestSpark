@@ -78,7 +78,7 @@ object JavaTestGenerator : TestGenerator {
         packageString: String,
         annotation: String,
         otherInfo: String,
-        project: Project
+        project: Project,
     ): String {
         var testText = ""
 
