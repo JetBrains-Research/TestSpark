@@ -41,8 +41,9 @@ class JUnitTestSuiteParserStrategy {
                         .map { it.groupValues[0] }
                         .toMutableSet()
 
-                // save RunWith
-                val runWith: String = junitVersion.runWithAnnotationMeta.extract(rawCode) ?: ""
+                // save ExtendWith or RunWith annotation if present
+                val runWithAnnotation: String = JUnitVersion.JUnit4.runWithAnnotationMeta.extract(rawCode) ?: ""
+                val annotation = JUnitVersion.JUnit5.runWithAnnotationMeta.extract(rawCode) ?: runWithAnnotation
 
                 val testSet: MutableList<String> = rawCode.split("@Test").toMutableList()
 
@@ -82,7 +83,7 @@ class JUnitTestSuiteParserStrategy {
                     TestSuiteGeneratedByLLM(
                         imports = imports,
                         packageName = packageName,
-                        runWith = runWith,
+                        annotation = annotation,
                         otherInfo = otherInfo,
                         testCases = testCases,
                     )
