@@ -22,11 +22,11 @@ object JavaTestGenerator : TestGenerator {
         body: String,
         imports: Set<String>,
         packageString: String,
-        runWith: String,
+        annotation: String,
         otherInfo: String,
         testGenerationData: TestGenerationData,
     ): String {
-        var testFullText = printUpperPart(className, imports, packageString, runWith, otherInfo, project)
+        var testFullText = printUpperPart(className, imports, packageString, annotation, otherInfo, project)
 
         // Add each test (exclude expected exception)
         testFullText += body
@@ -76,7 +76,7 @@ object JavaTestGenerator : TestGenerator {
         className: String,
         imports: Set<String>,
         packageString: String,
-        runWith: String,
+        annotation: String,
         otherInfo: String,
         project: Project
     ): String {
@@ -94,10 +94,10 @@ object JavaTestGenerator : TestGenerator {
 
         testText += "\n"
 
-        // add runWith if exists
-        if (runWith.isNotBlank()) {
+        // add RunWith or ExtendWith annotation if exists
+        if (annotation.isNotBlank()) {
             val junitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
-            testText += "@${junitVersion.runWithAnnotationMeta.annotationName}($runWith)\n"
+            testText += "@${junitVersion.runWithAnnotationMeta.annotationName}($annotation)\n"
         }
         // open the test class
         testText += "public class $className {\n\n"

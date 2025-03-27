@@ -52,11 +52,11 @@ class JUnitTestsAssembler(
         val testSuite = testSuiteParser.parseTestSuite(super.getContent())
 
         // save RunWith
-        if (testSuite?.runWith?.isNotBlank() == true) {
-            generationData.runWith = testSuite.runWith
+        if (testSuite?.annotation?.isNotBlank() == true) {
+            generationData.annotation = testSuite.annotation
             generationData.importsCode.add(junitVersion.runWithAnnotationMeta.import)
         } else {
-            generationData.runWith = ""
+            generationData.annotation = ""
             generationData.importsCode.remove(junitVersion.runWithAnnotationMeta.import)
         }
 

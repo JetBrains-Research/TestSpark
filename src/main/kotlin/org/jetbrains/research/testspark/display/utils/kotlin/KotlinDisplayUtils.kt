@@ -144,9 +144,9 @@ class KotlinDisplayUtils : DisplayUtils {
                 val ktPsiFactory = KtPsiFactory(project)
                 ktClass = ktPsiFactory.createClass("class ${className.split(".")[0]} {}")
 
-                if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
+                if (uiContext!!.testGenerationOutput.annotation.isNotEmpty()) {
                     val annotationEntry =
-                        ktPsiFactory.createAnnotationEntry("@RunWith(${uiContext.testGenerationOutput.runWith})")
+                        ktPsiFactory.createAnnotationEntry("@RunWith(${uiContext.testGenerationOutput.annotation})")
                     ktClass!!.addBefore(annotationEntry, ktClass!!.body)
                 }
 

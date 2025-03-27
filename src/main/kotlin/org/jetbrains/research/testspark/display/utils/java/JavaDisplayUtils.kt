@@ -141,8 +141,8 @@ class JavaDisplayUtils : DisplayUtils {
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
 
-                if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${uiContext.testGenerationOutput.runWith})")
+                if (uiContext!!.testGenerationOutput.annotation.isNotEmpty()) {
+                    psiClass!!.modifierList!!.addAnnotation("RunWith(${uiContext.testGenerationOutput.annotation})")
                 }
 
                 psiJavaFile!!.add(psiClass!!)

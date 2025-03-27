@@ -10,7 +10,7 @@ package org.jetbrains.research.testspark.core.test.data
 data class TestSuiteGeneratedByLLM(
     var imports: MutableSet<String> = mutableSetOf(),
     var packageName: String = "",
-    var runWith: String = "",
+    var annotation: String = "",
     var otherInfo: String = "",
     var testCases: MutableList<TestCaseGeneratedByLLM> = mutableListOf(),
 ) {
