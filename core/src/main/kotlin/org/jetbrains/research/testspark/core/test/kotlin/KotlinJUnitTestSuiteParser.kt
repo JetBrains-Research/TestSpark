@@ -22,7 +22,6 @@ class KotlinJUnitTestSuiteParser(
 
         return JUnitTestSuiteParserStrategy.parseJUnitTestSuite(
             rawText,
-            junitVersion,
             kotlinImportPattern,
             packageName,
             testNamePattern = "fun",

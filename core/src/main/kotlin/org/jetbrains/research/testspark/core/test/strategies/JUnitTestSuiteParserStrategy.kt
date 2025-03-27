@@ -21,7 +21,6 @@ class JUnitTestSuiteParserStrategy {
     companion object {
         fun parseJUnitTestSuite(
             rawText: String,
-            junitVersion: JUnitVersion,
             importPattern: Regex,
             packageName: String,
             testNamePattern: String,

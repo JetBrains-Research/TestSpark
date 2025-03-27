@@ -22,7 +22,6 @@ class JavaJUnitTestSuiteParser(
 
         return JUnitTestSuiteParserStrategy.parseJUnitTestSuite(
             rawText,
-            junitVersion,
             javaImportPattern,
             packageName,
             testNamePattern = "void",
