@@ -9,6 +9,7 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.testmanager.template.TestGenerator
 import java.io.File
 
@@ -28,7 +29,7 @@ object KotlinTestGenerator : TestGenerator {
         log.debug("[KotlinClassBuilderHelper] Generate code for $className")
 
         var testFullText =
-            printUpperPart(className, imports, packageString, runWith, otherInfo)
+            printUpperPart(className, imports, packageString, runWith, otherInfo, project)
 
         // Add each test (exclude expected exception)
         testFullText += body
@@ -73,6 +74,7 @@ object KotlinTestGenerator : TestGenerator {
         packageString: String,
         runWith: String,
         otherInfo: String,
+        project: Project,
     ): String {
         var testText = ""
 
@@ -90,7 +92,8 @@ object KotlinTestGenerator : TestGenerator {
 
         // Add runWith if exists
         if (runWith.isNotBlank()) {
-            testText += "@RunWith($runWith::class)\n"
+            val junitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
+            testText += "@${junitVersion.runWithAnnotationMeta.annotationName}($runWith::class)\n"
         }
 
         // Open the test class
