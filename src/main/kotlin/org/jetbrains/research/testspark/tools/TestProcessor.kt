@@ -112,7 +112,7 @@ class TestProcessor(
         val testExecutionResult =
             CommandLineRunner.run(
                 arrayListOf(
-                    javaRunner.absolutePath,
+                    "\"${javaRunner.absolutePath}\"",
                     javaAgentFlag,
                     "-cp",
                     classPaths,
@@ -126,7 +126,7 @@ class TestProcessor(
         // Prepare the command for generating the Jacoco report
         val command =
             mutableListOf(
-                javaRunner.absolutePath,
+                "\"${javaRunner.absolutePath}\"",
                 "-jar",
                 // jacocoCLIDir,
                 jacocoCLILibraryPath,
