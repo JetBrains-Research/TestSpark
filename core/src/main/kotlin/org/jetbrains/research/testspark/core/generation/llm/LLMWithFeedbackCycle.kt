@@ -77,7 +77,7 @@ class LLMWithFeedbackCycle(
     private val log = KotlinLogging.logger { this::class.java }
     private lateinit var generatedTestSuite: TestSuiteGeneratedByLLM
 
-    fun run(onWarningCallback: ((TestSparkError) -> Unit)? = null): Result<FeedbackResponse, TestSparkError> {
+    fun run(onWarningCallback: ((TestSparkError) -> Unit)? = null): Result<FeedbackResponse> {
         var requestsCount = 0
         var generatedTestsArePassing = false
         var nextPromptMessage = initialPromptMessage
@@ -108,7 +108,7 @@ class LLMWithFeedbackCycle(
 
             // clearing test assembler's collected text on the previous attempts
             testsAssembler.clear()
-            val response: Result<TestSuiteGeneratedByLLM, TestSparkError> =
+            val response: Result<TestSuiteGeneratedByLLM> =
                 requestManager.request(
                     language = language,
                     prompt = nextPromptMessage,

@@ -39,7 +39,7 @@ fun Project.createNotification(
     module = exception.module,
     message = exception.displayMessage ?: PluginMessagesBundle.get("unknownErrorMessage"),
     notificationType = notificationType,
-    logMessage = "Hello World exception $exception ${exception.displayMessage?.let { ": $it" } ?: ""}",
+    logMessage = "$exception ${exception.displayMessage?.let { ": $it" } ?: ""}",
 )
 
 val TestSparkException.displayMessage: String?
@@ -67,7 +67,7 @@ fun Project.createNotification(
     logMessage: String,
 ) {
     val log = Logger.getInstance(this::class.java)
-    log.info("Error in $module module: $logMessage")
+    log.warn("Error in $module module: $logMessage")
 
     NotificationGroupManager
         .getInstance()

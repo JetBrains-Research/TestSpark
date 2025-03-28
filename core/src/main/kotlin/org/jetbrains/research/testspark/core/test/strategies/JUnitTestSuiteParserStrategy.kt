@@ -63,7 +63,7 @@ class JUnitTestSuiteParserStrategy {
                     val rawTest = "@Test$it"
 
                     val isLastTestCaseInTestSuite = (testCases.size == testSet.size - 1)
-                    val result: Result<TestCaseGeneratedByLLM, TestSparkError> =
+                    val result: Result<TestCaseGeneratedByLLM> =
                         testCaseParser.parse(rawTest, isLastTestCaseInTestSuite, testNamePattern, printTestBodyStrategy)
 
                     if (result.isFailure()) {
@@ -100,7 +100,7 @@ class JUnitTestSuiteParserStrategy {
             isLastTestCaseInTestSuite: Boolean,
             testNamePattern: String,
             printTestBodyStrategy: TestBodyPrinter,
-        ): Result<TestCaseGeneratedByLLM, TestSparkError> {
+        ): Result<TestCaseGeneratedByLLM> {
             var expectedException = ""
             var throwsException = ""
             val testLines: MutableList<TestLine> = mutableListOf()

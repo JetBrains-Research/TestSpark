@@ -277,7 +277,7 @@ object LLMHelper {
         project: Project,
         testGenerationOutput: TestGenerationData,
         errorMonitor: ErrorMonitor,
-    ): Result<TestSuiteGeneratedByLLM, TestSparkError> {
+    ): Result<TestSuiteGeneratedByLLM> {
         // Update Token information
         if (!updateToken(requestManager, project, errorMonitor)) {
             return Result.Failure(error = LlmError.UnsetTokenError)

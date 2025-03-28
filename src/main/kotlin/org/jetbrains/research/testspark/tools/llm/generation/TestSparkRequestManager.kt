@@ -42,7 +42,7 @@ abstract class TestSparkRequestManager(
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
         errorMonitor: ErrorMonitor,
-    ): Result<Unit, TestSparkError> =
+    ): Result<Unit> =
         try {
             HttpRequests
                 .post(url, "application/json")

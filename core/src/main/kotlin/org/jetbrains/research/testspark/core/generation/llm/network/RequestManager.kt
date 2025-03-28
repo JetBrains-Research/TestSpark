@@ -39,7 +39,7 @@ abstract class RequestManager(
         testsAssembler: TestsAssembler,
         isUserFeedback: Boolean = false,
         errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
-    ): Result<TestSuiteGeneratedByLLM, TestSparkError> {
+    ): Result<TestSuiteGeneratedByLLM> {
         // save the prompt in chat history
         chatHistory.add(ChatUserMessage(prompt))
 
@@ -63,7 +63,7 @@ abstract class RequestManager(
         packageName: String,
         language: SupportedLanguage,
         isUserFeedback: Boolean,
-    ): Result<TestSuiteGeneratedByLLM, TestSparkError> {
+    ): Result<TestSuiteGeneratedByLLM> {
         // save the full response in the chat history
         val response = testsAssembler.getContent()
 
@@ -91,5 +91,5 @@ abstract class RequestManager(
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
         errorMonitor: ErrorMonitor = DefaultErrorMonitor(),
-    ): Result<Unit, TestSparkError>
+    ): Result<Unit>
 }

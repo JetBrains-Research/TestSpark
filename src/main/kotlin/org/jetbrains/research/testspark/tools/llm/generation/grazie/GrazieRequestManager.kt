@@ -25,7 +25,7 @@ class GrazieRequestManager(
         indicator: CustomProgressIndicator,
         testsAssembler: TestsAssembler,
         errorMonitor: ErrorMonitor,
-    ): Result<Unit, TestSparkError> =
+    ): Result<Unit> =
         try {
             val className = "org.jetbrains.research.grazie.Request"
             val request: GrazieRequest = Class.forName(className).getDeclaredConstructor().newInstance() as GrazieRequest
