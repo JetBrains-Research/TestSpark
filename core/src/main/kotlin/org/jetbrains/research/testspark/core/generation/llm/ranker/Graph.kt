@@ -4,6 +4,7 @@ import com.kuzudb.Connection
 import com.kuzudb.Database
 import com.kuzudb.Value
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlin.math.abs
 
 enum class GraphNodeType(
     val label: String,
@@ -110,7 +111,7 @@ abstract class Graph {
                 newScores[node] = newScore
 
                 // Check for convergence (difference between old and new scores)
-                if (Math.abs(newScore - scores[node]!!) > tolerance) {
+                if (abs(newScore - scores[node]!!) > tolerance) {
                     hasConverged = false
                 }
             }
