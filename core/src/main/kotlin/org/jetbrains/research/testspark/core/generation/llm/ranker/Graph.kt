@@ -39,7 +39,7 @@ data class GraphEdge(
 )
 
 abstract class Graph {
-    protected val log = KotlinLogging.logger { this::class.java }
+    private val log = KotlinLogging.logger { this::class.java }
 
     abstract fun addNode(node: GraphNode)
 
@@ -150,6 +150,7 @@ abstract class Graph {
 class KuzuGraph(
     dbPath: String = ":memory:",
 ) : Graph() {
+    private val log = KotlinLogging.logger { this::class.java }
     private val db = Database(dbPath)
     private val conn = Connection(db)
 
