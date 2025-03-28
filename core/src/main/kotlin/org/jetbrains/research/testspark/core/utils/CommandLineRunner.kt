@@ -18,6 +18,7 @@ class CommandLineRunner {
         fun run(cmd: ArrayList<String>): ExecutionResult {
             var executionMsg = ""
 
+            log.info { "Running command: ${cmd.joinToString(" ")}" }
             /**
              * Since Windows does not provide bash, use cmd or simila       r default command line interpreter
              */
@@ -28,7 +29,6 @@ class CommandLineRunner {
                         .redirectErrorStream(true)
                         .start()
                 } else {
-                    log.info { "Running command: ${cmd.joinToString(" ")}" }
                     ProcessBuilder()
                         .command("bash", "-c", cmd.joinToString(" "))
                         .redirectErrorStream(true)
