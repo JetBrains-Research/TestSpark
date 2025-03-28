@@ -42,7 +42,10 @@ class JavaTestCompiler(
         projectBuildPath: String,
         workingDir: String,
     ): ExecutionResult {
-        val classPaths = "\"${getClassPaths(projectBuildPath)}\""
+        val classPathsList = getClassPaths(projectBuildPath)
+        val fileName = DataFilesUtil.makeTmpFile("testSparkCP", classPathsList)
+        val classPaths = "@$fileName"
+
         // compile file
         // See: https://github.com/JetBrains-Research/TestSpark/issues/402
         val javac = if (DataFilesUtil.isWindows()) "\"$javac\"" else "'$javac'"

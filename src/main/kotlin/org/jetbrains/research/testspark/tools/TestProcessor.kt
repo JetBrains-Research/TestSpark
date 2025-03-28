@@ -100,15 +100,22 @@ class TestProcessor(
             } else {
                 "-javaagent:$jacocoAgentLibraryPath=destfile=$dataFileName.exec,append=false"
             }
+
+        // save classpaths to a temp file
+        val classPathsList =
+            testCompiler.getClassPaths(
+                projectBuildPath,
+            ) + "${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath"
+        val fileName = DataFilesUtil.makeTmpFile("testSparkCP", classPathsList)
+        val classPaths = "@$fileName"
+
         val testExecutionResult =
             CommandLineRunner.run(
                 arrayListOf(
                     javaRunner.absolutePath,
                     javaAgentFlag,
                     "-cp",
-                    "\"${testCompiler.getClassPaths(
-                        projectBuildPath,
-                    )}${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath\"",
+                    classPaths,
                     "org.jetbrains.research.SingleJUnitTestRunner${junitVersion.version}",
                     name,
                 ),

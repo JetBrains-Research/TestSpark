@@ -59,7 +59,9 @@ class KotlinTestCompiler(
     ): ExecutionResult {
         logger.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
-        val classPaths = "\"${getClassPaths(projectBuildPath)}\""
+        val classPathsList = getClassPaths(projectBuildPath)
+        val fileName = DataFilesUtil.makeTmpFile("testSparkCP", classPathsList)
+        val classPaths = "@$fileName"
 
         // We need to ensure JAVA is in the path variable
         // See: https://github.com/JetBrains-Research/TestSpark/issues/410
