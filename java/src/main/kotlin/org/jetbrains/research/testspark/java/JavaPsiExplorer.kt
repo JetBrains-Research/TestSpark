@@ -143,6 +143,22 @@ class JavaPsiExplorer(
                 properties = properties,
             ),
         )
+
+        // explore the class if we come from calls
+        if (javaMethod.containingClass is JavaPsiClassWrapper) {
+            exploreClass(javaMethod.containingClass, depth = depth - 1)?.let { classFqName ->
+                if (javaMethod.isConstructor || javaMethod.isDefaultConstructor) {
+                    graph.addEdge(
+                        GraphEdge(
+                            from = methodFqName,
+                            to = classFqName,
+                            type = GraphEdgeType.HAS_RETURN_TYPE,
+                        ),
+                    )
+                }
+            }
+        }
+
         // TODO: rework: Need access to psi instance
         val psiClass = PsiTreeUtil.getChildOfType<PsiClass>(javaMethod.containingFile, PsiClass::class.java)
         val psiMethod = psiClass?.methods?.firstOrNull { it.name == javaMethod.name } ?: return methodFqName
