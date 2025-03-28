@@ -129,7 +129,7 @@ class JavaPsiExplorer(
         depth: Int = 0,
     ): String? {
         val methodFqName = javaMethod.fqName
-        if (methodFqName.startsWith("java.")) return null
+        if (methodFqName.startsWith("java.") || methodFqName.startsWith("javax.")) return null
         if (methodVisited.contains(methodFqName)) return methodFqName
         methodVisited.add(methodFqName)
         val properties = mutableMapOf<String, Any>()
