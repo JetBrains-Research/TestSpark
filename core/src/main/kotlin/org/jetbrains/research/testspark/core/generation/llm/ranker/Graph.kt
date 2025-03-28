@@ -285,7 +285,7 @@ class KuzuGraph(
                             |MATCH (n1:Method), (n2:Class)
                             |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
                             |MERGE (n1)-[:${edge.type}]->(n2)
-                            """.trimIndent(),
+                            """.trimMargin(),
                         )
                     conn.execute(
                         statement,
@@ -318,7 +318,7 @@ class KuzuGraph(
 
     override fun getAllEdges(): List<GraphEdge> {
         val edges = mutableListOf<GraphEdge>()
-        val queryResult = conn.query("MATCH (n)-[r]-(m) RETURN LABEL(r), n.fqName, m.fqName")
+        val queryResult = conn.query("MATCH (n)-[r]->(m) RETURN LABEL(r), n.fqName, m.fqName")
         while (queryResult.hasNext()) {
             val result = queryResult.next
             edges.add(
