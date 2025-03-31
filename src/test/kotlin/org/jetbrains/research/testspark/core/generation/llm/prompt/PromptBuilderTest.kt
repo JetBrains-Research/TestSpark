@@ -179,6 +179,7 @@ class PromptBuilderTest {
                 name = "method1",
                 text = "fun method1(): Boolean { return true }",
                 containingClassQualifiedName = "MyClass",
+                qualifiedName = "MyClass.method1#",
             )
         val method2 =
             MethodRepresentation(
@@ -186,6 +187,7 @@ class PromptBuilderTest {
                 name = "method2",
                 text = "fun method2(): Boolean { return false }",
                 containingClassQualifiedName = "MyClass",
+                qualifiedName = "MyClass.method2#",
             )
         val myClass =
             ClassRepresentation(
