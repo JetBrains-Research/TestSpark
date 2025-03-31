@@ -119,7 +119,21 @@ class PromptManager(
 
                     when (codeType.type!!) {
                         CodeType.CLASS -> {
-                            promptGenerator.generatePromptForClass(interestingClasses, testSamplesCode)
+                            psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, null)
+                            val scores =
+                                graph.score(
+                                    cut!!.qualifiedName,
+                                    interestingClasses.flatMap {
+                                        listOf(it.qualifiedName) +
+                                            it.allMethods.map { m ->
+                                                m.qualifiedName
+                                            }
+                                    },
+                                )
+                            graph.saveScores(scores.toMap())
+                            (graph as KuzuGraph).close() // ensure all graph data are written to disk when db is not in memory
+                            val interestingClassesRanked = rankInterestingClasses(interestingClasses, scores)
+                            promptGenerator.generatePromptForClass(interestingClassesRanked, testSamplesCode)
                         }
 
                         CodeType.METHOD -> {
