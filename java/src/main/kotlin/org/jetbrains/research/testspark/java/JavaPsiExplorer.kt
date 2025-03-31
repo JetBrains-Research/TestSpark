@@ -52,6 +52,8 @@ class JavaPsiExplorer(
         }
         classesToTest.forEach {
             exploreClass(it as JavaPsiClassWrapper, isUnderTest = isUnderTest, depth)
+            // only the first classesToTest is the Class under test.
+            isUnderTest = false
         }
         interestingClasses.forEach { exploreClass(it as JavaPsiClassWrapper, isUnderTest = false, depth) }
         return graph
