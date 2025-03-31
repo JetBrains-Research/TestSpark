@@ -14,6 +14,7 @@ import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptConfiguration
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptGenerationContext
 import org.jetbrains.research.testspark.core.generation.llm.prompt.configuration.PromptTemplates
+import org.jetbrains.research.testspark.core.generation.llm.ranker.Graph
 import org.jetbrains.research.testspark.core.generation.llm.ranker.KuzuGraph
 import org.jetbrains.research.testspark.core.test.data.CodeType
 import org.jetbrains.research.testspark.data.FragmentToTestData
@@ -38,6 +39,8 @@ class PromptManager(
     private val psiHelper: PsiHelper,
     private val caret: Int,
 ) {
+    private val graph: Graph = KuzuGraph()
+
     /**
      * The `classesToTest` is empty when we work with the function outside the class
      */
@@ -139,7 +142,8 @@ class PromptManager(
                                             }
                                     },
                                 )
-                            graph.close() // ensure all graph data are written to disk when db is not in memory
+                            graph.saveScores(scores.toMap())
+                            (graph as KuzuGraph).close() // ensure all graph data are written to disk when db is not in memory
                             val interestingClassesFromMethodRanked = rankInterestingClasses(interestingClassesFromMethod, scores)
                             promptGenerator.generatePromptForMethod(
                                 method,
