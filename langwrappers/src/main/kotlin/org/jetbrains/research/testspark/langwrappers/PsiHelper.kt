@@ -310,6 +310,6 @@ abstract class PsiHelper(
         graph: Graph,
         classesToTest: List<PsiClassWrapper>,
         interestingClasses: Set<PsiClassWrapper>,
-        psiMethod: PsiMethodWrapper?,
+        psiMethod: PsiMethodWrapper? = null,
     ): Graph
 }
