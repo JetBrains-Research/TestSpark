@@ -44,7 +44,10 @@ class GrazieRequestManager(
                             Result.Failure(
                                 error = LlmError.PromptTooLong,
                             )
-
+                        contains("Provided prompt is too big for this model") && contains("invalid: 412 Precondition Failed") ->
+                            Result.Failure(
+                                error = LlmError.PromptTooLong,
+                            )
                         else ->
                             Result.Failure(
                                 error =
