@@ -131,7 +131,6 @@ class PromptManager(
                                     },
                                 )
                             graph.saveScores(scores.toMap())
-                            (graph as KuzuGraph).close() // ensure all graph data are written to disk when db is not in memory
                             val interestingClassesRanked = rankInterestingClasses(interestingClasses, scores)
                             promptGenerator.generatePromptForClass(interestingClassesRanked, testSamplesCode)
                         }
@@ -144,7 +143,7 @@ class PromptManager(
                                     .getInterestingPsiClassesWithQualifiedNames(cut, psiMethod)
                                     .map(this::createClassRepresentation)
                                     .toList()
-                            val graph = KuzuGraph()
+
                             psiHelper.createGraph(graph, classesToTest, interestingPsiClasses, psiMethod)
                             val scores =
                                 graph.score(
@@ -157,7 +156,7 @@ class PromptManager(
                                     },
                                 )
                             graph.saveScores(scores.toMap())
-                            (graph as KuzuGraph).close() // ensure all graph data are written to disk when db is not in memory
+
                             val interestingClassesFromMethodRanked = rankInterestingClasses(interestingClassesFromMethod, scores)
                             promptGenerator.generatePromptForMethod(
                                 method,
@@ -213,6 +212,7 @@ class PromptManager(
                 },
             ) + LLMSettingsBundle.get("commonPromptPart")
         log.info("Prompt is:\n$prompt")
+        (graph as KuzuGraph).close() // ensure all graph data are written to disk when db is not in memory
         return prompt
     }
 
