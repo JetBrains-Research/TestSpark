@@ -72,7 +72,7 @@ abstract class Graph {
         val scores = mutableMapOf<GraphNode, Double>()
 
         nodes.forEach { node ->
-            if (node.fqName === source) {
+            if (node.fqName == source) {
                 scores[node] = 0.5
             }
             scores[node] = 0.5 / (totalNodes - 1)
