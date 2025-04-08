@@ -48,12 +48,12 @@ abstract class Graph {
 
     fun graphEdgeTypeWeight(edgeType: GraphEdgeType): Double =
         when (edgeType) {
-            GraphEdgeType.INHERITANCE -> 5.0
-            GraphEdgeType.CALLS -> 5.0
-            GraphEdgeType.HAS_METHOD -> 1.0
-            GraphEdgeType.HAS_TYPE_PARAMETER -> 10.0
-            GraphEdgeType.HAS_RETURN_TYPE -> 7.0
-            GraphEdgeType.HAS_TYPE_PROPERTY -> 1.0
+            GraphEdgeType.INHERITANCE -> 3.0
+            GraphEdgeType.CALLS -> 1.0
+            GraphEdgeType.HAS_METHOD -> 2.0
+            GraphEdgeType.HAS_TYPE_PARAMETER -> 3.0
+            GraphEdgeType.HAS_RETURN_TYPE -> 3.0
+            GraphEdgeType.HAS_TYPE_PROPERTY -> 3.0
             GraphEdgeType.THROWS -> 1.0
         }
 
