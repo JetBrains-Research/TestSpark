@@ -120,12 +120,12 @@ abstract class Graph {
                     hasConverged = false
                 }
             }
-
+            val normalizationFactor = 1.0 / newScores.values.sum()
             // Update scores with new values
-            scores.putAll(newScores)
+            scores.putAll(newScores.mapValues { (_, value) -> value * normalizationFactor })
             iteration++
         } while (!hasConverged && iteration < maxIterations)
-        log.trace { "PageRank iteration: $iteration" }
+        log.info { "PageRank iteration: $iteration" }
         // Step 4: Convert result to fqName -> score map
         return scores.mapKeys { (node, _) -> node.fqName }
     }
