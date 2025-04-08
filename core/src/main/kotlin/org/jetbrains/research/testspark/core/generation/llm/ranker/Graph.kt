@@ -29,6 +29,7 @@ data class GraphNode(
     val type: GraphNodeType,
     val isUnitUnderTest: Boolean = false,
     val isStandardLibrary: Boolean = false,
+    val score: Double = 0.0,
     val properties: Map<String, Any> = emptyMap(),
 )
 
@@ -300,7 +301,10 @@ class KuzuGraph(
 
     override fun getAllNodes(): List<GraphNode> {
         val nodes = mutableListOf<GraphNode>()
-        val queryResult = conn.query("MATCH (n) RETURN LABEL(n) as label, n.name, n.fqName, n.isUnitUnderTest, n.isStandardLibrary")
+        val queryResult =
+            conn.query(
+                "MATCH (n) RETURN LABEL(n) as label, n.name, n.fqName, n.isUnitUnderTest, n.isStandardLibrary, n.score",
+            )
         while (queryResult.hasNext()) {
             val result = queryResult.next
             nodes.add(
@@ -310,6 +314,7 @@ class KuzuGraph(
                     fqName = result.getValue(2).getValue<String>(),
                     isUnitUnderTest = result.getValue(3).getValue<Boolean>(),
                     isStandardLibrary = result.getValue(4).getValue<Boolean>(),
+                    score = result.getValue(5).getValue<Double>(),
                 ),
             )
         }
