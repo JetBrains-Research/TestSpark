@@ -2,7 +2,9 @@ package org.jetbrains.research.testspark.core.generation.llm.ranker
 
 import com.kuzudb.Connection
 import com.kuzudb.Database
+import com.kuzudb.KuzuList
 import com.kuzudb.Value
+import com.kuzudb.ValueNodeUtil
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.math.abs
 
@@ -31,6 +33,8 @@ data class GraphNode(
     val isStandardLibrary: Boolean = false,
     val score: Double = 0.0,
     val properties: Map<String, Any> = emptyMap(),
+    // use in query mode
+    val children: List<GraphNode> = emptyList(),
 )
 
 data class GraphEdge(
@@ -147,6 +151,8 @@ abstract class Graph {
     abstract fun getAllEdges(): List<GraphEdge>
 
     abstract fun saveScores(scores: Map<String, Double>)
+
+    abstract fun getInterestingNodes(threshold: Double? = null): List<GraphNode>
 }
 
 class KuzuGraph(
@@ -353,6 +359,61 @@ class KuzuGraph(
             }
         }
     }
+
+    override fun getInterestingNodes(threshold: Double?): List<GraphNode> {
+        val nodes = mutableListOf<GraphNode>()
+        val queryResult =
+            conn.query(
+                """MATCH (n)
+                   | WITH COUNT(n.fqName) as totalNodes
+                   | MATCH p=(c:Class)-[r:HAS_METHOD]->(m:Method)
+                   | WHERE c.score > (1/totalNodes) AND m.score > (1/totalNodes)
+                   | WITH c, collect(m) as classMethodsList
+                   | UNWIND classMethodsList as cm
+                   | WITH c, cm
+                   | ORDER BY c.score DESC, cm.score DESC
+                   | LIMIT 20
+                   | RETURN c, collect(cm)
+                """.trimMargin(),
+            )
+        if (!queryResult.isSuccess) {
+            log.warn { "Error getting interesting nodes: " + queryResult.errorMessage }
+            return emptyList()
+        }
+        while (queryResult.hasNext()) {
+            val result = queryResult.next
+            val classNode = kuzuNodeValueToGraphNode(result.getValue(0))
+            val methodsList = KuzuList(result.getValue(1))
+            val methodNodes = mutableListOf<GraphNode>()
+            for (i in 1..methodsList.listSize) {
+                methodsList.getListElement(i)?.let {
+                    methodNodes.add(kuzuNodeValueToGraphNode(it))
+                }
+            }
+            nodes.add(
+                GraphNode(
+                    type = GraphNodeType.CLASS,
+                    name = classNode.name,
+                    fqName = classNode.fqName,
+                    isUnitUnderTest = classNode.isUnitUnderTest,
+                    isStandardLibrary = classNode.isStandardLibrary,
+                    score = classNode.score,
+                    children = methodNodes.sortedByDescending { it.score },
+                ),
+            )
+        }
+        return nodes
+    }
+
+    fun kuzuNodeValueToGraphNode(value: Value): GraphNode =
+        GraphNode(
+            type = GraphNodeType.valueOf(ValueNodeUtil.getLabelName(value).uppercase()),
+            name = ValueNodeUtil.getPropertyValueAt(value, 0).getValue<String>(),
+            fqName = ValueNodeUtil.getPropertyValueAt(value, 1).getValue<String>(),
+            isUnitUnderTest = ValueNodeUtil.getPropertyValueAt(value, 2).getValue<Boolean>(),
+            isStandardLibrary = ValueNodeUtil.getPropertyValueAt(value, 3).getValue<Boolean>(),
+            score = ValueNodeUtil.getPropertyValueAt(value, 4).getValue<Double>(),
+        )
 
     fun close() {
         conn.close()
