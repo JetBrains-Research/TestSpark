@@ -42,22 +42,22 @@ class JavaDisplayUtils : DisplayUtils {
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
                 file.isDirectory ||
-                        (
-                                file.extension?.lowercase(Locale.getDefault()) == "java" &&
-                                        (
-                                                PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
-                                                ).classes
-                                            .stream()
-                                            .map { it.name }
-                                            .toArray()
-                                            .contains(
-                                                (
-                                                        PsiManager
-                                                            .getInstance(project)
-                                                            .findFile(file) as PsiJavaFile
-                                                        ).name.removeSuffix(".java"),
-                                            )
+                    (
+                        file.extension?.lowercase(Locale.getDefault()) == "java" &&
+                            (
+                                PsiManager.getInstance(project).findFile(file!!) as PsiJavaFile
+                            ).classes
+                                .stream()
+                                .map { it.name }
+                                .toArray()
+                                .contains(
+                                    (
+                                        PsiManager
+                                            .getInstance(project)
+                                            .findFile(file) as PsiJavaFile
+                                    ).name.removeSuffix(".java"),
                                 )
+                    )
             }
         }
 
@@ -144,7 +144,9 @@ class JavaDisplayUtils : DisplayUtils {
 
                 if (uiContext!!.testGenerationOutput.annotation.isNotEmpty()) {
                     val junitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
-                    psiClass!!.modifierList!!.addAnnotation("${junitVersion.runWithAnnotationMeta.annotationName}(${uiContext.testGenerationOutput.annotation})")
+                    psiClass!!.modifierList!!.addAnnotation(
+                        "${junitVersion.runWithAnnotationMeta.annotationName}(${uiContext.testGenerationOutput.annotation})",
+                    )
                 }
 
                 psiJavaFile!!.add(psiClass!!)

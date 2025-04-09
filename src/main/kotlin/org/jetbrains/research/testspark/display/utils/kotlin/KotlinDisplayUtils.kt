@@ -43,22 +43,22 @@ class KotlinDisplayUtils : DisplayUtils {
         WriteCommandAction.runWriteCommandAction(project) {
             descriptor.withFileFilter { file ->
                 file.isDirectory ||
-                        (
-                                file.extension?.lowercase(Locale.getDefault()) == "kotlin" &&
-                                        (
-                                                PsiManager.getInstance(project).findFile(file!!) as KtFile
-                                                ).classes
-                                            .stream()
-                                            .map { it.name }
-                                            .toArray()
-                                            .contains(
-                                                (
-                                                        PsiManager
-                                                            .getInstance(project)
-                                                            .findFile(file) as PsiJavaFile
-                                                        ).name.removeSuffix(".kt"),
-                                            )
+                    (
+                        file.extension?.lowercase(Locale.getDefault()) == "kotlin" &&
+                            (
+                                PsiManager.getInstance(project).findFile(file!!) as KtFile
+                            ).classes
+                                .stream()
+                                .map { it.name }
+                                .toArray()
+                                .contains(
+                                    (
+                                        PsiManager
+                                            .getInstance(project)
+                                            .findFile(file) as PsiJavaFile
+                                    ).name.removeSuffix(".kt"),
                                 )
+                    )
             }
         }
 
@@ -148,7 +148,9 @@ class KotlinDisplayUtils : DisplayUtils {
                 if (uiContext!!.testGenerationOutput.annotation.isNotEmpty()) {
                     val junitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
                     val annotationEntry =
-                        ktPsiFactory.createAnnotationEntry("@${junitVersion.runWithAnnotationMeta.annotationName}(${uiContext.testGenerationOutput.annotation})")
+                        ktPsiFactory.createAnnotationEntry(
+                            "@${junitVersion.runWithAnnotationMeta.annotationName}(${uiContext.testGenerationOutput.annotation})",
+                        )
                     ktClass!!.addBefore(annotationEntry, ktClass!!.body)
                 }
 
