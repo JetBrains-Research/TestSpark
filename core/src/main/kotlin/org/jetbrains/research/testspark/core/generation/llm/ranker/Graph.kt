@@ -23,6 +23,7 @@ enum class GraphEdgeType {
     HAS_RETURN_TYPE,
     HAS_TYPE_PROPERTY,
     THROWS,
+    FROM,
 }
 
 data class GraphNode(
@@ -53,13 +54,14 @@ abstract class Graph {
 
     fun graphEdgeTypeWeight(edgeType: GraphEdgeType): Double =
         when (edgeType) {
-            GraphEdgeType.INHERITANCE -> 3.0
-            GraphEdgeType.CALLS -> 1.0
-            GraphEdgeType.HAS_METHOD -> 2.0
-            GraphEdgeType.HAS_TYPE_PARAMETER -> 3.0
-            GraphEdgeType.HAS_RETURN_TYPE -> 3.0
-            GraphEdgeType.HAS_TYPE_PROPERTY -> 3.0
-            GraphEdgeType.THROWS -> 1.0
+            GraphEdgeType.INHERITANCE -> 0.7
+            GraphEdgeType.CALLS -> 0.2
+            GraphEdgeType.HAS_METHOD -> 0.5
+            GraphEdgeType.HAS_TYPE_PARAMETER -> 1.0
+            GraphEdgeType.HAS_RETURN_TYPE -> 1.0
+            GraphEdgeType.HAS_TYPE_PROPERTY -> 1.0
+            GraphEdgeType.THROWS -> 0.7
+            GraphEdgeType.FROM -> 1.0
         }
 
     fun calculatePageRank(
@@ -178,6 +180,7 @@ class KuzuGraph(
         conn.query("CREATE REL TABLE HAS_RETURN_TYPE(FROM Method TO Class)")
         conn.query("CREATE REL TABLE HAS_TYPE_PROPERTY(FROM Class TO Class)")
         conn.query("CREATE REL TABLE THROWS(FROM Method TO Class)")
+        conn.query("CREATE REL TABLE FROM(FROM Method TO Class)")
     }
 
     override fun addNode(node: GraphNode) {
@@ -286,6 +289,20 @@ class KuzuGraph(
                     )
                 }
                 GraphEdgeType.THROWS -> {
+                    val statement =
+                        conn.prepare(
+                            """
+                            |MATCH (n1:Method), (n2:Class)
+                            |WHERE n1.fqName = ${'$'}from AND n2.fqName = ${'$'}to
+                            |MERGE (n1)-[:${edge.type}]->(n2)
+                            """.trimMargin(),
+                        )
+                    conn.execute(
+                        statement,
+                        mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
+                    )
+                }
+                GraphEdgeType.FROM -> {
                     val statement =
                         conn.prepare(
                             """
