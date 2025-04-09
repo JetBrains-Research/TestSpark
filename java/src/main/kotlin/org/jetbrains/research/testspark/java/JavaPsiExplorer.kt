@@ -45,6 +45,13 @@ class JavaPsiExplorer(
                                 type = GraphEdgeType.HAS_METHOD,
                             ),
                         )
+                        graph.addEdge(
+                            GraphEdge(
+                                from = methodFqName,
+                                to = classFqName,
+                                type = GraphEdgeType.FROM,
+                            ),
+                        )
                     }
                 }
             }
