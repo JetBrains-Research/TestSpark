@@ -54,11 +54,12 @@ class TopButtonsPanelBuilder {
 
         val numOfShownTests =
             generatedTestsTabData.testCaseIdToPanel.size - generatedTestsTabData.hiddenTestCases.size
-        testsSelectedLabel.text = String.format(
-            testsSelectedText,
-            generatedTestsTabData.testsSelected,
-            numOfShownTests,
-        )
+        testsSelectedLabel.text =
+            String.format(
+                testsSelectedText,
+                generatedTestsTabData.testsSelected,
+                numOfShownTests,
+            )
         testsPassedLabel.text =
             String.format(
                 testsPassedText,
@@ -86,12 +87,15 @@ class TopButtonsPanelBuilder {
         generatedTestsTabData.testCaseIdToPanel
             .filter { it.key !in generatedTestsTabData.hiddenTestCases }
             .forEach { (_, jPanel) ->
-            val checkBox = jPanel.getComponent(0) as JCheckBox
-            checkBox.isSelected = selected
-        }
-        generatedTestsTabData.testsSelected = if (selected){
-            generatedTestsTabData.testCaseIdToPanel.size - generatedTestsTabData.hiddenTestCases.size
-        } else 0
+                val checkBox = jPanel.getComponent(0) as JCheckBox
+                checkBox.isSelected = selected
+            }
+        generatedTestsTabData.testsSelected =
+            if (selected) {
+                generatedTestsTabData.testCaseIdToPanel.size - generatedTestsTabData.hiddenTestCases.size
+            } else {
+                0
+            }
     }
 
     /**

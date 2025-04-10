@@ -71,11 +71,18 @@ import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
-import java.util.*
-import javax.swing.*
+import java.util.Queue
+import javax.swing.Box
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JCheckBox
+import javax.swing.JLabel
+import javax.swing.JOptionPane
+import javax.swing.JPanel
+import javax.swing.ScrollPaneConstants
+import javax.swing.SwingUtilities
 import javax.swing.border.Border
 import javax.swing.border.MatteBorder
-import kotlin.collections.HashMap
 
 class TestCasePanelBuilder(
     private val project: Project,
@@ -880,6 +887,7 @@ class TestCasePanelBuilder(
      * @return true if the item is removed, false otherwise.
      */
     fun isRemoved() = isRemoved
+
     fun isShown() = isShown
 
     /**

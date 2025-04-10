@@ -43,7 +43,10 @@ object GenerateTestsTabHelper {
         update(generatedTestsTabData)
     }
 
-    fun hideTestCase(testCaseId: Int, generatedTestsTabData: GeneratedTestsTabData) {
+    fun hideTestCase(
+        testCaseId: Int,
+        generatedTestsTabData: GeneratedTestsTabData,
+    ) {
         generatedTestsTabData.hiddenTestCases.add(testCaseId)
         if (generatedTestsTabData.testCaseIdToSelectedCheckbox[testCaseId]!!.isSelected) {
             generatedTestsTabData.testsSelected--
