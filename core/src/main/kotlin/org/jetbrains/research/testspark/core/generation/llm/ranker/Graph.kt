@@ -81,14 +81,16 @@ abstract class Graph {
         nodes.forEach { node ->
             if (node.fqName == source) {
                 scores[node] = 0.5
+            } else {
+                scores[node] = 0.5 / (totalNodes - 1)
             }
-            scores[node] = 0.5 / (totalNodes - 1)
         }
 
         val outWeightedDegreeMap =
             mutableMapOf<GraphNode, Double>().apply {
                 nodes.forEach { node ->
-                    this[node] = edges.filter { edge -> edge.from == node.fqName }.sumOf { graphEdgeTypeWeight(it.type) }
+                    this[node] =
+                        edges.filter { edge -> edge.from == node.fqName }.sumOf { graphEdgeTypeWeight(it.type) }
                 }
             }
 
