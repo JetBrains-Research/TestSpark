@@ -19,6 +19,7 @@ class GeneratedTestsTabData(
     val testCaseIdToEditorTextField: HashMap<Int, EditorTextField> = HashMap()
     var testsSelected: Int = 0
     val unselectedTestCases: HashMap<Int, TestCase> = HashMap()
+    val hiddenTestCases: HashSet<Int> = HashSet()
     val testCasePanelFactories: ArrayList<TestCasePanelBuilder> = arrayListOf()
     var allTestCasePanel: JPanel = JPanel()
     val applyButton: JButton = JButton(PluginLabelsBundle.get("applyButton"))
