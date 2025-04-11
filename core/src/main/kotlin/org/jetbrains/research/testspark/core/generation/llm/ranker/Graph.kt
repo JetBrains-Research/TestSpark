@@ -363,6 +363,7 @@ class KuzuGraph(
     }
 
     override fun saveScores(scores: Map<String, Double>) {
+        conn.query("BEGIN TRANSACTION;")
         val statement = conn.prepare("MATCH (n {fqName: \$fqName}) SET n.score = \$score")
         for ((fqName, score) in scores) {
             val queryResult =
@@ -377,6 +378,7 @@ class KuzuGraph(
                 log.warn { "Error saving score: " + queryResult.errorMessage }
             }
         }
+        conn.query("COMMIT;")
     }
 
     override fun getInterestingNodes(threshold: Double?): List<GraphNode> {
