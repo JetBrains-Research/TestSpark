@@ -6,7 +6,6 @@ import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.kotlin.psi.KtPsiUtil
 import org.jetbrains.research.testspark.core.generation.llm.ranker.Graph
 import org.jetbrains.research.testspark.core.test.SupportedLanguage
 import org.jetbrains.research.testspark.core.test.data.CodeType
@@ -96,7 +95,5 @@ class KotlinPsiHelper(
         classesToTest: List<PsiClassWrapper>,
         interestingClasses: Set<PsiClassWrapper>,
         psiMethod: PsiMethodWrapper?,
-    ): Graph {
-        TODO("Not yet implemented")
-    }
+    ): Graph = KotlinPsiExplorer(graph, psiFile.project).explore(classesToTest, interestingClasses, psiMethod)
 }

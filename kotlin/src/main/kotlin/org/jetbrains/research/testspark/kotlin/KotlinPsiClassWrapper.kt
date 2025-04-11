@@ -3,6 +3,7 @@ package org.jetbrains.research.testspark.kotlin
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiFile
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ClassInheritorsSearch
@@ -162,5 +163,15 @@ class KotlinPsiClassWrapper(
             }
 
         return !containsImport
+    }
+
+    companion object {
+        fun fromPsiClass(psiClass: PsiClass): KotlinPsiClassWrapper? {
+            if (psiClass is org.jetbrains.kotlin.asJava.classes.KtLightClass) {
+                val ktClass = psiClass.kotlinOrigin ?: return null
+                return KotlinPsiClassWrapper(ktClass)
+            }
+            return null
+        }
     }
 }
