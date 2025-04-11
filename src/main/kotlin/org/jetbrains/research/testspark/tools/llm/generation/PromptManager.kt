@@ -277,10 +277,14 @@ class PromptManager(
     private fun showPromptReductionWarning(testGenerationData: TestGenerationData) {
         llmErrorManager.warningProcess(
             LLMMessagesBundle.get("promptReduction") + "\n" +
-                "Maximum depth of polymorphism is ${LlmSettingsArguments(project).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
-                "Maximum depth for input parameters is ${LlmSettingsArguments(
+                "Maximum depth of polymorphism is ${LlmSettingsArguments(
                     project,
-                ).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)}.",
+                ).maxPolyDepth(testGenerationData.polyDepthReducing)}.\n" +
+                "Maximum depth for input parameters is ${
+                    LlmSettingsArguments(
+                        project,
+                    ).maxInputParamsDepth(testGenerationData.inputParamsDepthReducing)
+                }.",
             project,
         )
     }
@@ -330,7 +334,8 @@ class PromptManager(
             classMethodsScores[itClass] = mutableMapOf<MethodRepresentation, Double>()
             itClass.allMethods.forEach { itMethod ->
                 {
-                    classMethodsScores[itClass]!![itMethod] = scores.firstOrNull { s -> s.first == itMethod.qualifiedName }?.second ?: 0.0
+                    classMethodsScores[itClass]!![itMethod] =
+                        scores.firstOrNull { s -> s.first == itMethod.qualifiedName }?.second ?: 0.0
                 }
             }
         }
