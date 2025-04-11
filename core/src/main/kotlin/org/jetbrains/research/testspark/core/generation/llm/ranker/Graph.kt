@@ -230,6 +230,7 @@ class KuzuGraph(
                         mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
                     )
                 }
+
                 GraphEdgeType.CALLS -> {
                     val statement =
                         conn.prepare(
@@ -244,6 +245,7 @@ class KuzuGraph(
                         mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
                     )
                 }
+
                 GraphEdgeType.HAS_METHOD -> {
                     val statement =
                         conn.prepare(
@@ -258,6 +260,7 @@ class KuzuGraph(
                         mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
                     )
                 }
+
                 GraphEdgeType.HAS_TYPE_PARAMETER -> {
                     val statement =
                         conn.prepare(
@@ -272,6 +275,7 @@ class KuzuGraph(
                         mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
                     )
                 }
+
                 GraphEdgeType.HAS_RETURN_TYPE -> {
                     val statement =
                         conn.prepare(
@@ -286,6 +290,7 @@ class KuzuGraph(
                         mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
                     )
                 }
+
                 GraphEdgeType.HAS_TYPE_PROPERTY -> {
                     val statement =
                         conn.prepare(
@@ -300,6 +305,7 @@ class KuzuGraph(
                         mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
                     )
                 }
+
                 GraphEdgeType.THROWS -> {
                     val statement =
                         conn.prepare(
@@ -314,6 +320,7 @@ class KuzuGraph(
                         mapOf("from" to Value(edge.from), "to" to Value(edge.to)),
                     )
                 }
+
                 GraphEdgeType.FROM -> {
                     val statement =
                         conn.prepare(
