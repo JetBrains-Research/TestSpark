@@ -123,15 +123,20 @@ abstract class Graph {
 
                 val newScore = (1 - dampingFactor) / totalNodes + dampingFactor * incomingScoreSum
                 newScores[node] = newScore
-
-                // Check for convergence (difference between old and new scores)
-                if (abs(newScore - scores[node]!!) > tolerance) {
-                    hasConverged = false
-                }
             }
             val normalizationFactor = 1.0 / newScores.values.sum()
             // Update scores with new values
-            scores.putAll(newScores.mapValues { (_, value) -> value * normalizationFactor })
+            val normalizedNewScores = newScores.mapValues { (_, value) -> value * normalizationFactor }
+
+            for ((node, newScore) in normalizedNewScores) {
+                // Check for convergence (difference between old and new scores)
+                if (abs(newScore - scores[node]!!) > tolerance) {
+                    hasConverged = false
+                    break
+                }
+            }
+
+            scores.putAll(normalizedNewScores)
             iteration++
         } while (!hasConverged && iteration < maxIterations)
         log.info { "PageRank iteration: $iteration" }
