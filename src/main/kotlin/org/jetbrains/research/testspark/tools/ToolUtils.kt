@@ -59,7 +59,7 @@ object ToolUtils {
                     code,
                     generatedTestData.importsCode,
                     generatedTestData.packageName,
-                    generatedTestData.runWith,
+                    generatedTestData.annotation,
                     generatedTestData.otherInfo,
                     generatedTestData,
                 )

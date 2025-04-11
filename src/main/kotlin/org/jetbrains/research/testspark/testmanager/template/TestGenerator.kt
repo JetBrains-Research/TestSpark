@@ -15,7 +15,7 @@ interface TestGenerator {
      * @param body the body of the test class
      * @param imports the set of imports needed in the test class
      * @param packageString the package declaration of the test class
-     * @param runWith the runWith annotation for the test class
+     * @param annotation the RunWith or ExtendWith annotation for the test class
      * @param otherInfo any other additional information for the test class
      * @param testGenerationData the data used for test generation
      * @return the generated code as a string
@@ -26,7 +26,7 @@ interface TestGenerator {
         body: String,
         imports: Set<String>,
         packageString: String,
-        runWith: String,
+        annotation: String,
         otherInfo: String,
         testGenerationData: TestGenerationData,
     ): String

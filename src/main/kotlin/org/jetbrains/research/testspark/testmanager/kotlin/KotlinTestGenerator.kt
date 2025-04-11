@@ -9,6 +9,7 @@ import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.codeStyle.CodeStyleManager
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.research.testspark.core.data.TestGenerationData
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.testmanager.template.TestGenerator
 import java.io.File
 
@@ -21,14 +22,14 @@ object KotlinTestGenerator : TestGenerator {
         body: String,
         imports: Set<String>,
         packageString: String,
-        runWith: String,
+        annotation: String,
         otherInfo: String,
         testGenerationData: TestGenerationData,
     ): String {
         log.debug("[KotlinClassBuilderHelper] Generate code for $className")
 
         var testFullText =
-            printUpperPart(className, imports, packageString, runWith, otherInfo)
+            printUpperPart(className, imports, packageString, annotation, otherInfo, project)
 
         // Add each test (exclude expected exception)
         testFullText += body
@@ -71,8 +72,9 @@ object KotlinTestGenerator : TestGenerator {
         className: String,
         imports: Set<String>,
         packageString: String,
-        runWith: String,
+        annotation: String,
         otherInfo: String,
+        project: Project,
     ): String {
         var testText = ""
 
@@ -88,9 +90,10 @@ object KotlinTestGenerator : TestGenerator {
 
         testText += "\n"
 
-        // Add runWith if exists
-        if (runWith.isNotBlank()) {
-            testText += "@RunWith($runWith::class)\n"
+        // Add ExtendWith or RunWith annotation if exists
+        if (annotation.isNotBlank()) {
+            val junitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
+            testText += "@${junitVersion.runWithAnnotationMeta.annotationName}($annotation::class)\n"
         }
 
         // Open the test class

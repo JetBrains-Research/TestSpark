@@ -22,6 +22,7 @@ import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
 import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
 import org.jetbrains.research.testspark.java.JavaPsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.testmanager.java.JavaTestAnalyzer
 import org.jetbrains.research.testspark.testmanager.java.JavaTestGenerator
 import java.io.File
@@ -141,8 +142,11 @@ class JavaDisplayUtils : DisplayUtils {
                 psiJavaFile = (PsiManager.getInstance(project).findFile(virtualFile!!) as PsiJavaFile)
                 psiClass = PsiElementFactory.getInstance(project).createClass(className.split(".")[0])
 
-                if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
-                    psiClass!!.modifierList!!.addAnnotation("RunWith(${uiContext.testGenerationOutput.runWith})")
+                if (uiContext!!.testGenerationOutput.annotation.isNotEmpty()) {
+                    val junitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
+                    psiClass!!.modifierList!!.addAnnotation(
+                        "${junitVersion.runWithAnnotationMeta.annotationName}(${uiContext.testGenerationOutput.annotation})",
+                    )
                 }
 
                 psiJavaFile!!.add(psiClass!!)

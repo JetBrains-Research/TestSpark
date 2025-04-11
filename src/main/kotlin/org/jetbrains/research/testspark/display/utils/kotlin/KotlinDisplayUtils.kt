@@ -24,6 +24,7 @@ import org.jetbrains.research.testspark.display.utils.ErrorMessageManager
 import org.jetbrains.research.testspark.display.utils.template.DisplayUtils
 import org.jetbrains.research.testspark.kotlin.KotlinPsiClassWrapper
 import org.jetbrains.research.testspark.langwrappers.PsiClassWrapper
+import org.jetbrains.research.testspark.services.LLMSettingsService
 import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestAnalyzer
 import org.jetbrains.research.testspark.testmanager.kotlin.KotlinTestGenerator
 import java.io.File
@@ -144,9 +145,12 @@ class KotlinDisplayUtils : DisplayUtils {
                 val ktPsiFactory = KtPsiFactory(project)
                 ktClass = ktPsiFactory.createClass("class ${className.split(".")[0]} {}")
 
-                if (uiContext!!.testGenerationOutput.runWith.isNotEmpty()) {
+                if (uiContext!!.testGenerationOutput.annotation.isNotEmpty()) {
+                    val junitVersion = project.getService(LLMSettingsService::class.java).state.junitVersion
                     val annotationEntry =
-                        ktPsiFactory.createAnnotationEntry("@RunWith(${uiContext.testGenerationOutput.runWith})")
+                        ktPsiFactory.createAnnotationEntry(
+                            "@${junitVersion.runWithAnnotationMeta.annotationName}(${uiContext.testGenerationOutput.annotation})",
+                        )
                     ktClass!!.addBefore(annotationEntry, ktClass!!.body)
                 }
 

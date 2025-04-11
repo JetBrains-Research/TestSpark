@@ -42,7 +42,7 @@ class JUnitTestSuitePresenter(
                 testBody,
                 imports,
                 packageName,
-                runWith,
+                annotation,
                 otherInfo,
                 generatedTestsData,
             )
@@ -65,7 +65,7 @@ class JUnitTestSuitePresenter(
                 testCases[testCaseIndex].toStringWithoutExpectedException() + "\n",
                 imports,
                 packageName,
-                runWith,
+                annotation,
                 otherInfo,
                 generatedTestsData,
             )
@@ -89,7 +89,7 @@ class JUnitTestSuitePresenter(
                 testBody,
                 imports,
                 packageName,
-                runWith,
+                annotation,
                 otherInfo,
                 generatedTestsData,
             )
