@@ -2,6 +2,7 @@ package org.jetbrains.research.testspark.kotlin
 
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.parentOfType
 import org.jetbrains.kotlin.idea.refactoring.isInterfaceClass
@@ -72,7 +73,9 @@ class KotlinPsiMethodWrapper(
         }
 
     override val fqName: String
-        get() = TODO("Not yet implemented")
+        get() =
+            (containingClass?.qualifiedName ?: containingFile.name) + "#" +
+                name + "#" + parameterTypes.joinToString(",")
 
     override fun containsLine(lineNumber: Int): Boolean {
         val psiFile = psiFunction.containingFile
@@ -180,5 +183,13 @@ class KotlinPsiMethodWrapper(
                 val signatureStart = if (this is KtSecondaryConstructor) "constructor".length else 0
                 prefix + text.substring(signatureStart, bodyStart).replace('\n', ' ').trim()
             }
+
+        fun fromPsiMethod(psiMethod: PsiMethod): KotlinPsiMethodWrapper? {
+            if (psiMethod is org.jetbrains.kotlin.asJava.elements.KtLightMethod) {
+                val ktFunction = psiMethod.kotlinOrigin as? KtFunction ?: return null
+                return KotlinPsiMethodWrapper(ktFunction)
+            }
+            return null
+        }
     }
 }
