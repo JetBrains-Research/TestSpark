@@ -52,17 +52,22 @@ abstract class Graph {
 
     abstract fun addEdge(edge: GraphEdge)
 
-    fun graphEdgeTypeWeight(edgeType: GraphEdgeType): Double =
-        when (edgeType) {
+    fun graphEdgeTypeWeight(
+        edgeType: GraphEdgeType,
+        node: GraphNode,
+    ): Double {
+        val modifier = if (node.isUnitUnderTest) 2.0 else 1.0
+        return when (edgeType) {
             GraphEdgeType.INHERITANCE -> 0.7
             GraphEdgeType.CALLS -> 0.2
-            GraphEdgeType.HAS_METHOD -> 0.5
-            GraphEdgeType.HAS_TYPE_PARAMETER -> 1.0
-            GraphEdgeType.HAS_RETURN_TYPE -> 1.0
-            GraphEdgeType.HAS_TYPE_PROPERTY -> 1.0
+            GraphEdgeType.HAS_METHOD -> 0.5 * modifier
+            GraphEdgeType.HAS_TYPE_PARAMETER -> 1.0 * modifier
+            GraphEdgeType.HAS_RETURN_TYPE -> 1.0 * modifier
+            GraphEdgeType.HAS_TYPE_PROPERTY -> 1.0 * modifier
             GraphEdgeType.THROWS -> 0.7
             GraphEdgeType.FROM -> 1.0
         }
+    }
 
     fun calculatePageRank(
         source: String,
@@ -90,7 +95,7 @@ abstract class Graph {
             mutableMapOf<GraphNode, Double>().apply {
                 nodes.forEach { node ->
                     this[node] =
-                        edges.filter { edge -> edge.from == node.fqName }.sumOf { graphEdgeTypeWeight(it.type) }
+                        edges.filter { edge -> edge.from == node.fqName }.sumOf { graphEdgeTypeWeight(it.type, node) }
                 }
             }
 
@@ -113,7 +118,7 @@ abstract class Graph {
                 val incomingScoreSum =
                     incomingEdges.sumOf { edge ->
                         val sourceNode = nodes.find { it.fqName == edge.from } ?: return@sumOf 0.0
-                        scores[sourceNode]!! * (graphEdgeTypeWeight(edge.type) / outWeightedDegreeMap[sourceNode]!!)
+                        scores[sourceNode]!! * (graphEdgeTypeWeight(edge.type, sourceNode) / outWeightedDegreeMap[sourceNode]!!)
                     }
 
                 val newScore = (1 - dampingFactor) / totalNodes + dampingFactor * incomingScoreSum
