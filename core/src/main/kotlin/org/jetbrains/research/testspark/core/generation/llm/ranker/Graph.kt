@@ -156,7 +156,7 @@ abstract class Graph {
 
     abstract fun saveScores(scores: Map<String, Double>)
 
-    abstract fun getInterestingNodes(threshold: Double? = null): List<GraphNode>
+    abstract fun getInterestingNodes(origin: List<String>? = null): List<GraphNode>
 }
 
 class KuzuGraph(
@@ -381,21 +381,27 @@ class KuzuGraph(
         conn.query("COMMIT;")
     }
 
-    override fun getInterestingNodes(threshold: Double?): List<GraphNode> {
+    override fun getInterestingNodes(origin: List<String>?): List<GraphNode> {
         val nodes = mutableListOf<GraphNode>()
-        val queryResult =
-            conn.query(
+        val statement =
+            conn.prepare(
                 """MATCH (n)
                    | WITH COUNT(n.fqName) as totalNodes
                    | MATCH p=(c:Class)-[r:HAS_METHOD]->(m:Method)
-                   | WHERE c.score > (1/totalNodes) AND m.score > (1/totalNodes)
-                   | WITH c, collect(m) as classMethodsList
-                   | UNWIND classMethodsList as cm
-                   | WITH c, cm
-                   | ORDER BY c.score DESC, cm.score DESC
-                   | LIMIT 20
-                   | RETURN c, collect(cm)
+                   | WHERE (${'$'}hasList AND (c.fqName IN ${'$'}originIds OR m.fqName IN ${'$'}originIds)) 
+                   |    AND c.score > (1/totalNodes) AND m.score > (1/totalNodes)
+                   | RETURN c, collect(m)
                 """.trimMargin(),
+            )
+
+        val originIdsValues = KuzuList(((origin ?: emptyList()).map { Value(it) }).toTypedArray()).value
+        val queryResult =
+            conn.execute(
+                statement,
+                mapOf(
+                    "originIds" to originIdsValues,
+                    "hasList" to Value(origin != null),
+                ),
             )
         if (!queryResult.isSuccess) {
             log.warn { "Error getting interesting nodes: " + queryResult.errorMessage }
@@ -411,19 +417,21 @@ class KuzuGraph(
                     methodNodes.add(kuzuNodeValueToGraphNode(it))
                 }
             }
-            nodes.add(
-                GraphNode(
-                    type = GraphNodeType.CLASS,
-                    name = classNode.name,
-                    fqName = classNode.fqName,
-                    isUnitUnderTest = classNode.isUnitUnderTest,
-                    isStandardLibrary = classNode.isStandardLibrary,
-                    score = classNode.score,
-                    children = methodNodes.sortedByDescending { it.score },
-                ),
-            )
+            if (methodNodes.isNotEmpty()) {
+                nodes.add(
+                    GraphNode(
+                        type = GraphNodeType.CLASS,
+                        name = classNode.name,
+                        fqName = classNode.fqName,
+                        isUnitUnderTest = classNode.isUnitUnderTest,
+                        isStandardLibrary = classNode.isStandardLibrary,
+                        score = classNode.score,
+                        children = methodNodes.sortedByDescending { it.score },
+                    ),
+                )
+            }
         }
-        return nodes
+        return nodes.sortedByDescending { it.score }
     }
 
     fun kuzuNodeValueToGraphNode(value: Value): GraphNode =
