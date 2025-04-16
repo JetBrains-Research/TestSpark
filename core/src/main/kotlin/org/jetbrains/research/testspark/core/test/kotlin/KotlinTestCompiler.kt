@@ -59,7 +59,7 @@ class KotlinTestCompiler(
     ): ExecutionResult {
         logger.info { "[KotlinTestCompiler] Compiling ${path.substringAfterLast('/')}" }
 
-        val classPathsList = getClassPaths(projectBuildPath)
+        val classPathsList = "\"${getClassPaths(projectBuildPath)}\""
         val fileName = DataFilesUtil.makeTmpFile("testSparkCP", classPathsList)
         val classPaths = "\"@$fileName\""
 

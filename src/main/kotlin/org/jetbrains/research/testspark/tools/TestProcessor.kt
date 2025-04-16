@@ -105,9 +105,12 @@ class TestProcessor(
 
         // save classpaths to a temp file
         val classPathsList =
-            testCompiler.getClassPaths(
-                projectBuildPath,
-            ) + "${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath"
+            "\"" +
+                testCompiler.getClassPaths(
+                    projectBuildPath,
+                ) +
+                "${DataFilesUtil.classpathSeparator}${junitRunnerLibraryPath}${DataFilesUtil.classpathSeparator}$resultPath" +
+                "\""
         val fileName = DataFilesUtil.makeTmpFile("testSparkCP", classPathsList)
         val classPaths = "\"@$fileName\""
 
