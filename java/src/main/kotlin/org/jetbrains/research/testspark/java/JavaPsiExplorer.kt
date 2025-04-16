@@ -23,8 +23,8 @@ class JavaPsiExplorer(
     val graph: Graph,
     private val project: Project,
 ) {
-    val classVisited = mutableSetOf<String>()
-    val methodVisited = mutableSetOf<String>()
+    val classVisited = mutableMapOf<String, Int>()
+    val methodVisited = mutableMapOf<String, Int>()
 
     fun explore(
         classesToTest: List<PsiClassWrapper>,
@@ -72,10 +72,16 @@ class JavaPsiExplorer(
         depth: Int = 0,
     ): String? {
         val clsFqName = javaCls.qualifiedName
+        if (clsFqName.isEmpty()) return null
+
         val isStdLib = clsFqName.startsWith("java.") || clsFqName.startsWith("javax.")
-        if (clsFqName.isEmpty() || isStdLib) return null
-        if (classVisited.contains(javaCls.qualifiedName)) return clsFqName
-        classVisited.add(clsFqName)
+
+        if (depth <= 0) {
+            return clsFqName
+        }
+        classVisited[javaCls.qualifiedName]?.let { if (it >= depth) return clsFqName }
+        classVisited.put(clsFqName, depth)
+
         graph.addNode(
             GraphNode(
                 javaCls.name,
@@ -86,6 +92,7 @@ class JavaPsiExplorer(
                 properties = mapOf("type" to javaCls.classType.representation),
             ),
         )
+        if (isStdLib) return clsFqName
 
         javaCls.allMethods.forEach {
             exploreMethod(it as JavaPsiMethodWrapper, depth = depth)?.let { methodFqName ->
@@ -99,9 +106,6 @@ class JavaPsiExplorer(
             }
         }
 
-        if (depth <= 0) {
-            return clsFqName
-        }
         // super class
         val superClass = javaCls.superClass
         if (superClass is JavaPsiClassWrapper) {
@@ -140,7 +144,7 @@ class JavaPsiExplorer(
         val methodFqName = javaMethod.fqName
         if (methodFqName.startsWith("java.") || methodFqName.startsWith("javax.")) return null
         if (methodVisited.contains(methodFqName)) return methodFqName
-        methodVisited.add(methodFqName)
+        methodVisited.put(methodFqName, depth)
         val properties = mutableMapOf<String, Any>()
         properties["isConstructor"] = javaMethod.isConstructor
         graph.addNode(
@@ -155,7 +159,7 @@ class JavaPsiExplorer(
 
         // explore the class if we come from calls
         if (javaMethod.containingClass is JavaPsiClassWrapper) {
-            exploreClass(javaMethod.containingClass, depth = depth - 1)?.let { classFqName ->
+            exploreClass(javaMethod.containingClass, depth = depth)?.let { classFqName ->
                 if (javaMethod.isConstructor || javaMethod.isDefaultConstructor) {
                     graph.addEdge(
                         GraphEdge(
@@ -228,11 +232,14 @@ class JavaPsiExplorer(
         psiType: PsiType,
         depth: Int,
     ): List<String> {
+        if (depth < 0) {
+            return emptyList()
+        }
         val result = mutableListOf<String>()
         if (psiType is PsiClassReferenceType) {
             psiType.resolve()?.let {
                 if (it !is PsiTypeParameter) {
-                    exploreClass(JavaPsiClassWrapper(it), depth = depth - 1)?.let { classFqName ->
+                    exploreClass(JavaPsiClassWrapper(it), depth = depth)?.let { classFqName ->
                         result.add(classFqName)
                         psiType.parameters.forEach { param ->
                             result.addAll(exploreType(param, depth - 1))
@@ -254,7 +261,7 @@ class JavaPsiExplorer(
             .forEach { itMethodCall ->
                 itMethodCall.resolveMethod()?.let {
                     val psiMethod = JavaPsiMethodWrapper(it)
-                    exploreMethod(psiMethod, depth = depth - 1)?.let { methodFqName ->
+                    exploreMethod(psiMethod, depth = depth)?.let { methodFqName ->
                         result.add(methodFqName)
                     }
                 }
