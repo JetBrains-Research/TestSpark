@@ -9,6 +9,7 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.concurrency.annotations.RequiresReadLock
 import org.jetbrains.kotlin.analysis.api.analyze
+import org.jetbrains.kotlin.asJava.classes.KtLightClass
 import org.jetbrains.kotlin.asJava.classes.KtUltraLightClass
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
@@ -122,7 +123,7 @@ class KotlinPsiClassWrapper(
             val query = ClassInheritorsSearch.search(lightClass, scope, false)
             query.findAll().filter { it.kotlinFqName != null }.map {
                 // If the sub-class is fetched as an ultra light class, get the KtClass
-                if (it is KtUltraLightClass) {
+                if (it is KtUltraLightClass || it is KtLightClass) {
                     KotlinPsiClassWrapper(it.asKtClassOrObject() as KtClass)
                 } else {
                     KotlinPsiClassWrapper(it as KtClass)
